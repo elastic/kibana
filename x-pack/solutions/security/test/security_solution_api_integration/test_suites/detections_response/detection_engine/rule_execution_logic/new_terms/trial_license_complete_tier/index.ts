@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./new_terms_alert_suppression'));
     loadTestFile(require.resolve('./new_terms_metrics'));
     loadTestFile(require.resolve('./new_terms_esql_edge_cases'));
+    loadTestFile(require.resolve('./new_terms_logged_requests'));
   });
 }

@@ -57,6 +57,12 @@ export default ({ getService }: FtrProviderContext) => {
   const utils = getService('securitySolutionUtils');
   const config = getService('config');
   const isServerless = config.get('serverless');
+  // Alert suppression and entity analytics enrichment (risk score, asset criticality) require at
+  // least a platinum license, so those tests are skipped when this suite runs under a basic license
+  // (the aggregation-path tier reuses these specs on basic).
+  const isBasicLicense = config.get('esTestCluster.license') === 'basic';
+  const platinumOnlyIt = isBasicLicense ? it.skip : it;
+  const platinumOnlyDescribe = isBasicLicense ? describe.skip : describe;
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
   /**
@@ -1046,7 +1052,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(processPids[0]).toEqual([1]);
     });
 
-    describe('alerts should be be enriched', () => {
+    platinumOnlyDescribe('alerts should be be enriched', () => {
       before(async () => {
         // The first new term alert uses auditbeat data (host.id present), so EUID is id-based.
         await entityStoreV2.setup({
@@ -1083,7 +1089,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', () => {
+    platinumOnlyDescribe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -1268,7 +1274,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
-      it('supression per rule execution should work for manual rule runs', async () => {
+      platinumOnlyIt('supression per rule execution should work for manual rule runs', async () => {
         const id = uuidv4();
         const firstTimestamp = moment(new Date()).subtract(3, 'h');
         const firstDocument = {
@@ -1323,179 +1329,80 @@ export default ({ getService }: FtrProviderContext) => {
         expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
-      it('supression with time window should work for manual rule runs and update alert', async () => {
-        const id = uuidv4();
-        const firstTimestamp = moment(new Date()).subtract(3, 'h');
-        const firstDocument = {
-          id,
-          '@timestamp': firstTimestamp.toISOString(),
-          agent: {
-            name: 'agent-1',
-          },
-        };
-
-        await indexListOfDocuments([firstDocument]);
-
-        const rule: NewTermsRuleCreateProps = {
-          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
-          new_terms_fields: ['agent.name'],
-          query: `id: "${id}"`,
-          index: ['ecs_compliant'],
-          history_window_start: 'now-31m',
-          from: 'now-30m',
-          interval: '30m',
-          alert_suppression: {
-            group_by: ['agent.name'],
-            duration: {
-              value: 500,
-              unit: 'm',
+      platinumOnlyIt(
+        'supression with time window should work for manual rule runs and update alert',
+        async () => {
+          const id = uuidv4();
+          const firstTimestamp = moment(new Date()).subtract(3, 'h');
+          const firstDocument = {
+            id,
+            '@timestamp': firstTimestamp.toISOString(),
+            agent: {
+              name: 'agent-1',
             },
-          },
-        };
+          };
 
-        const createdRule = await createRule(supertest, log, rule);
-        const alerts = await getAlerts(supertest, log, es, createdRule);
+          await indexListOfDocuments([firstDocument]);
 
-        expect(alerts.hits.hits).toHaveLength(0);
+          const rule: NewTermsRuleCreateProps = {
+            ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+            new_terms_fields: ['agent.name'],
+            query: `id: "${id}"`,
+            index: ['ecs_compliant'],
+            history_window_start: 'now-31m',
+            from: 'now-30m',
+            interval: '30m',
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: {
+                value: 500,
+                unit: 'm',
+              },
+            },
+          };
 
-        // generate alert in the past
-        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
-          startDate: moment(firstTimestamp).subtract(5, 'm'),
-          endDate: moment(firstTimestamp).add(5, 'm'),
-        });
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
-        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits).toHaveLength(1);
+          expect(alerts.hits.hits).toHaveLength(0);
 
-        // now we will ingest new event, and manual rule run should update original alert
-        const secondDocument = {
-          id,
-          '@timestamp': moment(firstTimestamp).add(40, 'm').toISOString(),
-          agent: {
-            name: 'agent-1',
-          },
-        };
+          // generate alert in the past
+          const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+            startDate: moment(firstTimestamp).subtract(5, 'm'),
+            endDate: moment(firstTimestamp).add(5, 'm'),
+          });
 
-        await indexListOfDocuments([secondDocument]);
+          await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+          const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+          expect(allNewAlerts.hits.hits).toHaveLength(1);
 
-        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
-          startDate: moment(firstTimestamp).add(39, 'm'),
-          endDate: moment(firstTimestamp).add(120, 'm'),
-        });
+          // now we will ingest new event, and manual rule run should update original alert
+          const secondDocument = {
+            id,
+            '@timestamp': moment(firstTimestamp).add(40, 'm').toISOString(),
+            agent: {
+              name: 'agent-1',
+            },
+          };
 
-        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
-        const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(updatedAlerts.hits.hits).toHaveLength(1);
+          await indexListOfDocuments([secondDocument]);
 
-        expect(updatedAlerts.hits.hits).toHaveLength(1);
-        expect(updatedAlerts.hits.hits[0]._source).toEqual({
-          ...updatedAlerts.hits.hits[0]._source,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
-        });
-      });
-    });
+          const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+            startDate: moment(firstTimestamp).add(39, 'm'),
+            endDate: moment(firstTimestamp).add(120, 'm'),
+          });
 
-    describe('preview logged requests', () => {
-      const rule: NewTermsRuleCreateProps = {
-        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
-        index: ['new_terms'],
-        new_terms_fields: ['host.name', 'host.ip'],
-        from: ruleExecutionStart,
-        history_window_start: historicalWindowStart,
-        query: '*',
-      };
+          await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+          const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
+          expect(updatedAlerts.hits.hits).toHaveLength(1);
 
-      it('should not return requests property when not enabled', async () => {
-        const { logs } = await previewRule({
-          supertest,
-          rule,
-        });
-
-        expect(logs[0].requests).toEqual(undefined);
-      });
-
-      it('should return requests property when enable_logged_requests set to true for single new term field', async () => {
-        // historical window documents
-        const historicalDocuments = [
-          {
-            host: { name: 'host-0', ip: '127.0.0.1' },
-          },
-          {
-            host: { name: 'host-1', ip: '127.0.0.2' },
-          },
-        ];
-
-        // rule execution documents
-        const ruleExecutionDocuments = [
-          {
-            host: { name: 'host-0', ip: '127.0.0.2' },
-          },
-          {
-            host: { name: 'host-2', ip: '127.0.0.1' },
-          },
-        ];
-
-        const testId = await newTermsTestExecutionSetup({
-          historicalDocuments,
-          ruleExecutionDocuments,
-        });
-
-        const { logs } = await previewRule({
-          supertest,
-          rule: { ...rule, query: `id: "${testId}"`, new_terms_fields: ['host.name'] },
-          enableLoggedRequests: true,
-        });
-
-        expect(logs[0].requests?.length).toEqual(2);
-        const requests = logs[0].requests ?? [];
-
-        expect(requests[0].description).toBe('ES|QL request to find all matches');
-        expect(requests[0].request_type).toBe('findMatches');
-
-        expect(requests[1].description).toBe('Find documents for 1 new term combinations');
-      });
-
-      it('should return requests property when enable_logged_requests set to true for multiple fields', async () => {
-        // historical window documents
-        const historicalDocuments = [
-          {
-            host: { name: 'host-0', ip: '127.0.0.1' },
-          },
-          {
-            host: { name: 'host-1', ip: '127.0.0.2' },
-          },
-        ];
-
-        // rule execution documents
-        const ruleExecutionDocuments = [
-          {
-            host: { name: 'host-0', ip: '127.0.0.2' },
-          },
-          {
-            host: { name: 'host-1', ip: '127.0.0.1' },
-          },
-        ];
-
-        const testId = await newTermsTestExecutionSetup({
-          historicalDocuments,
-          ruleExecutionDocuments,
-        });
-
-        const { logs } = await previewRule({
-          supertest,
-          rule: { ...rule, query: `id: "${testId}"` },
-          enableLoggedRequests: true,
-        });
-
-        expect(logs[0].requests?.length).toEqual(2);
-        const requests = logs[0].requests ?? [];
-
-        expect(requests[0].description).toBe('ES|QL request to find all matches');
-        expect(requests[0].request_type).toBe('findMatches');
-
-        expect(requests[1].description).toBe('Find documents for 2 new term combinations');
-      });
+          expect(updatedAlerts.hits.hits).toHaveLength(1);
+          expect(updatedAlerts.hits.hits[0]._source).toEqual({
+            ...updatedAlerts.hits.hits[0]._source,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+        }
+      );
     });
 
     describe('with data stream namespace filter', () => {
