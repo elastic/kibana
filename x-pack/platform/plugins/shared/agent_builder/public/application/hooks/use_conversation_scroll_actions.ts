@@ -9,6 +9,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const AT_BOTTOM_THRESHOLD = 50;
 
+const isAtBottom = (el: HTMLElement) =>
+  el.scrollHeight - el.scrollTop - el.clientHeight <= AT_BOTTOM_THRESHOLD;
+
 export const useConversationScrollActions = ({
   conversationId,
   scrollContainer,
@@ -21,16 +24,12 @@ export const useConversationScrollActions = ({
   const pendingSmoothScrollRef = useRef(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  const setAtBottom = useCallback(() => {
-    stuckToBottomRef.current = true;
-    setShowScrollButton(false);
-  }, []);
-
   const stickToBottom = useCallback(() => {
     if (!scrollContainer) return;
     scrollContainer.scrollTop = scrollContainer.scrollHeight;
-    setAtBottom();
-  }, [scrollContainer, setAtBottom]);
+    stuckToBottomRef.current = true;
+    setShowScrollButton(false);
+  }, [scrollContainer]);
 
   const doSmoothScroll = useCallback(() => {
     if (!scrollContainer) return;
@@ -39,25 +38,29 @@ export const useConversationScrollActions = ({
     scrollContainer.addEventListener(
       'scrollend',
       () => {
+        if (!smoothScrollingRef.current) return;
         smoothScrollingRef.current = false;
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-        setAtBottom();
+        if (isAtBottom(scrollContainer)) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          stuckToBottomRef.current = true;
+          setShowScrollButton(false);
+        } else {
+          stuckToBottomRef.current = false;
+          setShowScrollButton(true);
+        }
       },
       { once: true }
     );
-  }, [scrollContainer, setAtBottom]);
+  }, [scrollContainer]);
 
   useEffect(() => {
     smoothScrollingRef.current = false;
     pendingSmoothScrollRef.current = false;
-  }, [scrollContainer]);
-
-  useEffect(() => {
+    stuckToBottomRef.current = true;
     if (!scrollContainer) return;
     const onScroll = () => {
       if (smoothScrollingRef.current) return;
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const atBottom = scrollHeight - scrollTop - clientHeight <= AT_BOTTOM_THRESHOLD;
+      const atBottom = isAtBottom(scrollContainer);
       stuckToBottomRef.current = atBottom;
       setShowScrollButton(!atBottom);
     };
@@ -75,11 +78,9 @@ export const useConversationScrollActions = ({
       }
       if (pendingSmoothScrollRef.current) {
         pendingSmoothScrollRef.current = false;
-        const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-        if (scrollHeight - scrollTop - clientHeight <= AT_BOTTOM_THRESHOLD) {
-          return;
+        if (!isAtBottom(scrollContainer)) {
+          doSmoothScroll();
         }
-        doSmoothScroll();
       } else {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
@@ -97,14 +98,14 @@ export const useConversationScrollActions = ({
   const smoothScrollToBottom = useCallback(() => {
     if (!scrollContainer) return;
     if (smoothScrollingRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-    if (scrollHeight - scrollTop - clientHeight <= AT_BOTTOM_THRESHOLD) {
-      setAtBottom();
+    if (isAtBottom(scrollContainer)) {
+      stuckToBottomRef.current = true;
+      setShowScrollButton(false);
       return;
     }
     setShowScrollButton(false);
     doSmoothScroll();
-  }, [scrollContainer, setAtBottom, doSmoothScroll]);
+  }, [scrollContainer, doSmoothScroll]);
 
   const onMessageSent = useCallback(() => {
     if (!scrollContainer) return;
