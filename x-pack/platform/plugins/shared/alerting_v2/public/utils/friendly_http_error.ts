@@ -31,7 +31,8 @@ export const getFriendlyRuleHttpErrorToastMessage = (error: Error): string => {
       });
     case 403:
       return i18n.translate('xpack.alertingV2.httpError.forbidden', {
-        defaultMessage: "Your role needs additional privileges to save rules. Contact your administrator for help.",
+        defaultMessage:
+          'Your role needs additional privileges to save rules. Contact your administrator for help.',
       });
     case 404:
       return i18n.translate('xpack.alertingV2.httpError.notFound', {

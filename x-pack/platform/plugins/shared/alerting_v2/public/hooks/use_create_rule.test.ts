@@ -107,7 +107,7 @@ describe('useCreateRule', () => {
       expect(enrichedError.message).toBe('metadata.name is required');
       expect(enrichedError.stack).toBe('Error: Bad Request\n    at fetch');
       expect(options).toEqual({
-        title: 'Failed to create rule',
+        title: 'Rule not created',
         toastMessage:
           'The rule could not be saved because some fields are invalid. See the full error for details.',
       });
@@ -126,8 +126,8 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Failed to create rule',
-        toastMessage: "You don't have permission to save this rule.",
+        title: 'Rule not created',
+        toastMessage: "Your role needs additional privileges to save rules. Contact your administrator for help.",
       });
     });
   });
@@ -141,7 +141,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledWith(error, {
-        title: 'Failed to create rule',
+        title: 'Rule not created',
         toastMessage: 'Network down',
       });
     });

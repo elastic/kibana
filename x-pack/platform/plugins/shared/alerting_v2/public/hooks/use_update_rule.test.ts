@@ -99,8 +99,8 @@ describe('useUpdateRule', () => {
       expect(enrichedError.message).toBe('forbidden action');
       expect(enrichedError.stack).toBe('Error: Forbidden\n    at fetch');
       expect(options).toEqual({
-        title: 'Failed to update rule',
-        toastMessage: "You don't have permission to save this rule.",
+        title: 'Edits not saved',
+        toastMessage: "Your role needs additional privileges to save rules. Contact your administrator for help.",
       });
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
@@ -115,7 +115,7 @@ describe('useUpdateRule', () => {
 
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledWith(error, {
-        title: 'Failed to update rule',
+        title: 'Edits not saved',
         toastMessage: 'Network down',
       });
     });
