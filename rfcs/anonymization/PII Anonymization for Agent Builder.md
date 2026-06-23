@@ -163,7 +163,7 @@ Option 2's challenge appears when multiple workflows register to `aroundCompleti
 
 Note that both models share the same limitation for post-LLM response mutations: per-chunk streaming carries only what can be applied inline (token restoration against a known map); any workflow step that mutates the assembled response after the fact can only affect the final `ChatCompletionMessageEvent`, not already-emitted chunks. This is a property of streaming itself, not a differentiator between the two approaches.
 
-Streaming has been confirmed viable for Option 2: a streaming proceed prototype shows `call_site.proceed` streaming de-anonymized chunks to the caller inline while buffering the assembled response as step output for post-proceed YAML steps.
+Streaming can be achieved equivalently in both options: chunks are de-anonymized and forwarded to the caller inline in both models via the same sliding hold-buffer mechanism.
 
 The technical details in the sections below describe **Option 1 as the reference implementation**. The token format, session identity, failure policy, tool call coverage, and streaming de-anonymization mechanism apply equally to both options; the primary difference is where in the YAML the LLM call is wired and how additional workflows access the response.
 
@@ -191,7 +191,7 @@ The token map is call-scoped in-memory state, created at the start of each `chat
 | `afterCompletion` hook runs | Inference plugin passes the token map in the event payload; `transform.pii_restore` step reads it and restores originals in the response |
 | `chatComplete` returns | Token map local variable is released; no PII is persisted |
 
-###  Token Map Transport
+### Token Map Transport
 
 All anonymization state moves through the workflow event and output schemas as plain, JSON-serializable values. No hidden object references are involved.
 
@@ -227,8 +227,8 @@ Tools that make their own LLM calls through the inference plugin (e.g., a summar
 
 Tools that need real values to function (entity lookups, LDAP queries) operate on unmasked data — they execute against Elasticsearch with real values and their results enter the next `chatComplete` prompt, where they are anonymized before the LLM sees them.
 
-**Streaming de-anonymization**  
 `afterCompletion` runs once on the fully assembled response, which is clean and consistent for the hook contract — but streaming responses emit content incrementally, and tokens can straddle chunk boundaries. The solution is a sliding-buffer transform inside the inference pipeline:
+### Streaming de-anonymization
 
 1. A small `holdBuffer` accumulates the tail of already-emitted content.  
 2. After each chunk, the pipeline checks whether the tail looks like a partial token (e.g., `EMAIL_7f3a` cut mid-suffix). If yes, the tail is held; the safe prefix (with any complete tokens already restored inline) is emitted.  
@@ -260,7 +260,7 @@ Admins can add organization-specific regex patterns with a label and entity clas
 
 ### Performance
 
-Regex scanning adds latency to every prompt. With a small rule set (10-20 patterns), benchmarks from the existing inference regex worker show sub-100ms overhead. The workflow engine's 15-second timeout provides a hard cap.
+Regex scanning adds latency to every prompt. Based on the existing regex worker implementation, a small rule set (10-20 patterns) is expected to complete well under 100ms; formal benchmarks have not yet been run. The hook timeout provides a hard cap.
 
 The `ai.pii` step will use the same Piscina worker pool approach as the existing `RegexWorkerService` (`chat_complete/anonymization/`), offloading regex execution to worker threads so it does not block the Node.js event loop. The worker pool is initialized once at plugin setup and shared across all step invocations. The implementation will either reuse the existing service via extraction to a shared package, or maintain its own equivalent pool in the `inference_workflows` plugin.
 
@@ -276,7 +276,7 @@ The second phase adds Named Entity Recognition to catch PII that regex cannot �
 
 NER uses an ML model (deployed via Elasticsearch's inference API) to identify entity spans in text. The model classifies each span as a person, organization, location, or miscellaneous entity. Detected spans are tokenized using the same HMAC mechanism as regex matches, and the token map is extended with the NER-detected entries.
 
-NER runs alongside regex in the same `beforeCompletion` hook — the workflow first runs regex patterns (fast, precise), then runs NER over the remaining text (slower, broader coverage). Overlapping detections are resolved: if regex already tokenized a span, NER skips it.
+NER runs alongside regex in the same hook — the workflow first runs regex patterns (fast, precise), then runs NER over the remaining text (slower, broader coverage). Overlapping detections are resolved: if regex already tokenized a span, NER skips it.
 
 ### Entity Classes
 
@@ -290,7 +290,7 @@ NER runs alongside regex in the same `beforeCompletion` hook — the workflow fi
 ### Considerations
 
 * **Model dependency**: NER requires a deployed ML model. For air-gapped environments, the model must be bundled or pre-installed. This adds operational complexity.  
-* **Latency**: NER inference adds 1-5 seconds depending on text length and model. The 15-second hook timeout accommodates this, but multi-step agent interactions with many tool outputs could approach the cap.  
+* **Latency**: NER inference adds 1-5 seconds depending on text length and model. The hook timeout accommodates this, but multi-step agent interactions with many tool outputs could approach the cap.  
 * **False positives**: NER models occasionally misclassify common words as entities. The entity class prefix in tokens (`PERSON_NAME_...`) helps the LLM understand what was masked, but over-anonymization can reduce response quality.  
 * **Optional**: NER is admin-enabled separately from regex. Customers who only need structured pattern matching can skip NER entirely.
 
@@ -305,7 +305,7 @@ The initial scope focuses on the minimum viable capability. Regex covers the str
 Two things must be true for anonymization to activate:
 
 1. **`xpack.inference.anonymization.experimental_workflow_driven: true`** in `kibana.yml` — off by default so the new code does not affect existing deployments. Removed once stable.  
-2. **Enable the seeded workflow** in the Workflow Management UI for the relevant space. Two default workflows are seeded on startup with `enabled: false`. Toggling them on activates protection for all LLM calls in that space.
+2. **Enable the seeded workflow** in the Workflow Management UI for the relevant space. Default workflow(s) are seeded on startup with `enabled: false` — two for Option 1 (one per hook), one for Option 2. Toggling them on activates protection for all LLM calls in that space.
 
 ### Progressive Disclosure
 
@@ -314,8 +314,6 @@ Three layers of configuration, matching the lifecycle hooks design spec ([\#1670
 * **Simple toggle**: Admin enables anonymization for an agent. Default regex patterns activate. No workflow knowledge required.  
 * **Entity configuration**: Admin selects which entity types to protect (IPs, emails, hostnames, custom). Adds custom regex patterns for org-specific identifiers. Still no workflow authoring.  
 * **Custom workflow**: Advanced users who want full control can view the underlying system workflow ("View workflow" link) and replace it with a custom workflow on the same hook. The system workflow is replaced, not stacked.
-
-### 
 
 ### Space Scoping
 
@@ -349,7 +347,7 @@ Both options are technically viable. Neither is committed to — we are seeking 
 Both options require the same new infrastructure that does not yet exist: synchronous hook invocation, an inline workflow executor, and the `ai.pii` / `transform.pii_restore` step types. That shared base is the bulk of the work.
 
 - **Option 1 (before/after)** — two paired workflows. Multi-workflow composition works out of the box on the shared base. Main downside: two workflows must be kept in sync operationally.  
-- **Option 2 (aroundCompletion)** — single workflow, co-located pre/post logic, better admin experience. Requires the `call_site.proceed` suspend/resume mechanism and additional engine work to handle multi-workflow composition cleanly, on top of the shared base. Streaming proceed has been validated as feasible.
+- **Option 2 (aroundCompletion)** — single workflow, co-located pre/post logic, better admin experience. Requires the `call_site.proceed` suspend/resume mechanism and additional engine work to handle multi-workflow composition cleanly, on top of the shared base.
 
 **Specific questions:**
 
