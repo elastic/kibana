@@ -110,8 +110,7 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   const action: string[] | undefined =
     actionField != null ? (getFieldArray(actionField) as string[]) : undefined;
 
-  const hasGraphData =
-    Boolean(timestamp);// TODO: DISCUSS THIS PART && Boolean(action?.length) && eventIds.length > 0 && hasActor && hasTarget;
+  const hasGraphData = Boolean(timestamp); // TODO: DISCUSS THIS PART && Boolean(action?.length) && eventIds.length > 0 && hasActor && hasTarget;
 
   const hasRequiredLicense = useHasGraphVisualizationLicense();
   // Entity-store availability is detected via two complementary signals because either may be

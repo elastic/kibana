@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const osqueryEvaluations = {
-  integration: "osquery",
-  evaluations: [
-  ],
+  integration: 'osquery',
+  evaluations: [],
 } as const satisfies IntegrationEvaluations;

@@ -30,7 +30,7 @@ export function splitTopLevel(input: string): string[] {
   for (let i = 0; i < input.length; i++) {
     const c = input[i]!;
     if (inString) {
-      if (c === "\\") {
+      if (c === '\\') {
         i++;
         continue;
       }
@@ -43,11 +43,11 @@ export function splitTopLevel(input: string): string[] {
       inString = c;
       continue;
     }
-    if (c === "(") {
+    if (c === '(') {
       depth++;
-    } else if (c === ")") {
+    } else if (c === ')') {
       depth--;
-    } else if (c === "," && depth === 0) {
+    } else if (c === ',' && depth === 0) {
       parts.push(input.slice(start, i).trim());
       start = i + 1;
     }
@@ -67,7 +67,7 @@ function findMatchingParen(input: string, openIdx: number): number {
   for (let i = openIdx; i < input.length; i++) {
     const c = input[i]!;
     if (inString) {
-      if (c === "\\") {
+      if (c === '\\') {
         i++;
         continue;
       }
@@ -80,9 +80,9 @@ function findMatchingParen(input: string, openIdx: number): number {
       inString = c;
       continue;
     }
-    if (c === "(") {
+    if (c === '(') {
       depth++;
-    } else if (c === ")") {
+    } else if (c === ')') {
       depth--;
       if (depth === 0) {
         return i;
@@ -94,7 +94,7 @@ function findMatchingParen(input: string, openIdx: number): number {
 }
 
 export function splitEvalAssignments(evalBody: string): { column: string; caseExpr: string }[] {
-  const body = evalBody.replace(/^\|\s*EVAL\s*\n?/, "").trim();
+  const body = evalBody.replace(/^\|\s*EVAL\s*\n?/, '').trim();
   const assignments: { column: string; caseExpr: string }[] = [];
   let cursor = 0;
 
@@ -106,15 +106,15 @@ export function splitEvalAssignments(evalBody: string): { column: string; caseEx
       break;
     }
 
-    const caseMarker = body.indexOf(" = CASE(", cursor);
+    const caseMarker = body.indexOf(' = CASE(', cursor);
     if (caseMarker === -1) {
       break;
     }
 
     const column = body.slice(cursor, caseMarker).trim();
-    const openParen = caseMarker + " = CASE(".length - 1;
+    const openParen = caseMarker + ' = CASE('.length - 1;
     const closeParen = findMatchingParen(body, openParen);
-    const caseExpr = body.slice(caseMarker + " = ".length, closeParen + 1).trim();
+    const caseExpr = body.slice(caseMarker + ' = '.length, closeParen + 1).trim();
     assignments.push({ column, caseExpr });
     cursor = closeParen + 1;
   }
@@ -123,7 +123,7 @@ export function splitEvalAssignments(evalBody: string): { column: string; caseEx
 }
 
 export function parseCaseExpression(column: string, caseExpr: string): ParsedAssignment {
-  if (!caseExpr.startsWith("CASE(") || !caseExpr.endsWith(")")) {
+  if (!caseExpr.startsWith('CASE(') || !caseExpr.endsWith(')')) {
     throw new Error(`Expected CASE(...) for column ${column}`);
   }
 
@@ -137,7 +137,7 @@ export function parseCaseExpression(column: string, caseExpr: string): ParsedAss
   }
 
   const tail = args.slice(index);
-  let defaultValue = "null";
+  let defaultValue = 'null';
   let branchArgs = tail;
 
   if (tail.length % 2 === 1) {
@@ -158,13 +158,13 @@ export function parseCaseExpression(column: string, caseExpr: string): ParsedAss
 
 export function parseEvalSnippet(esql: string): ParsedAssignment[] {
   return splitEvalAssignments(esql).map(({ column, caseExpr }) =>
-    parseCaseExpression(column, caseExpr),
+    parseCaseExpression(column, caseExpr)
   );
 }
 
 export function mergeAssignments(
   left: ParsedAssignment,
-  right: ParsedAssignment,
+  right: ParsedAssignment
 ): ParsedAssignment {
   if (left.column !== right.column) {
     throw new Error(`Column mismatch: ${left.column} vs ${right.column}`);
@@ -186,7 +186,7 @@ export function mergeAssignments(
     column: left.column,
     hasPreserve: left.hasPreserve || right.hasPreserve,
     branches,
-    defaultValue: left.defaultValue || right.defaultValue || "null",
+    defaultValue: left.defaultValue || right.defaultValue || 'null',
   };
 }
 
@@ -204,9 +204,9 @@ export function formatCaseAssignment(assignment: ParsedAssignment): string {
   parts.push(assignment.defaultValue);
 
   const lines = parts.map((part, idx) => {
-    const suffix = idx < parts.length - 1 ? "," : "";
+    const suffix = idx < parts.length - 1 ? ',' : '';
     return `    ${part}${suffix}`;
   });
 
-  return `  ${assignment.column} = CASE(\n${lines.join("\n")}\n  )`;
+  return `  ${assignment.column} = CASE(\n${lines.join('\n')}\n  )`;
 }

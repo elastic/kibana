@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const infoblox_bloxone_ddiEvaluations = {
-  integration: "infoblox_bloxone_ddi",
+  integration: 'infoblox_bloxone_ddi',
   evaluations: [
     {
-      id: "detection_flags",
-      section: "Detection flags (mandatory \u2014 run first)",
+      id: 'detection_flags',
+      section: 'Detection flags (mandatory \u2014 run first)',
       esql: `| EVAL
   actor_exists = client.user.id IS NOT NULL
     OR host.id IS NOT NULL OR host.ip IS NOT NULL OR host.name IS NOT NULL OR host.hostname IS NOT NULL
@@ -25,8 +25,8 @@ export const infoblox_bloxone_ddiEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: "actor",
-      section: "Combined ES|QL \u2014 actor fields",
+      id: 'actor',
+      section: 'Combined ES|QL \u2014 actor fields',
       esql: `| EVAL
   entity.id = CASE(
     entity.id IS NOT NULL, entity.id,
@@ -52,8 +52,8 @@ export const infoblox_bloxone_ddiEvaluations = {
   )`,
     },
     {
-      id: "target",
-      section: "Combined ES|QL \u2014 target fields",
+      id: 'target',
+      section: 'Combined ES|QL \u2014 target fields',
       esql: `| EVAL
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,

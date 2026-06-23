@@ -12,10 +12,7 @@ import {
   DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import {
-  DOCUMENT_TYPE_ENTITY,
-  INDEX_PATTERN_REGEX,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
@@ -28,8 +25,6 @@ import {
   JSON_OBJECT_START,
   JSON_OBJECT_END,
   JSON_OBJECT_SEPARATOR,
-  concatJsonObjectPropertyEsqlExprAsString,
-  concatJsonObjectPropertyString,
   hashIds,
   rebuildDocData,
 } from './utils';
@@ -159,20 +154,20 @@ const buildDslFilter = (
         bool: {
           should: [
             ...(esQuery?.bool.filter?.length ||
-              esQuery?.bool.must?.length ||
-              esQuery?.bool.should?.length ||
-              esQuery?.bool.must_not?.length
+            esQuery?.bool.must?.length ||
+            esQuery?.bool.should?.length ||
+            esQuery?.bool.must_not?.length
               ? [esQuery]
               : []),
             // we might have no eventIds when opening from entity flyout
             ...(eventIds.length > 0
               ? [
-                {
-                  terms: {
-                    'event.id': eventIds,
+                  {
+                    terms: {
+                      'event.id': eventIds,
+                    },
                   },
-                },
-              ]
+                ]
               : []),
           ],
           minimum_should_match: 1,
@@ -405,8 +400,8 @@ const buildEsqlQuery = ({
 }: BuildEsqlQueryParams): string => {
   const query = `SET unmapped_fields="LOAD";
 FROM ${indexPatterns
-      .filter((indexPattern) => indexPattern.length > 0)
-      .join(',')} METADATA _id, _index
+    .filter((indexPattern) => indexPattern.length > 0)
+    .join(',')} METADATA _id, _index
 | EVAL  __actor_exists = user.id IS NOT NULL OR user.full_name IS NOT NULL OR user.email IS NOT NULL
 | EVAL __target_exists = user.target.id IS NOT NULL OR user.target.name IS NOT NULL OR user.target.email IS NOT NULL
     OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
@@ -423,18 +418,20 @@ ${buildPinnedEsql(pinnedIds)}
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
 // Origin event and alerts allow us to identify the start position of graph traversal
-| EVAL isOrigin = ${originEventIds.length > 0
+| EVAL isOrigin = ${
+    originEventIds.length > 0
       ? `COALESCE(event.id in (${originEventIds
-        .map((_id, idx) => `?og_id${idx}`)
-        .join(', ')}), false)`
+          .map((_id, idx) => `?og_id${idx}`)
+          .join(', ')}), false)`
       : 'false'
-    }
-| EVAL isOriginAlert = ${originAlertIds.length > 0
+  }
+| EVAL isOriginAlert = ${
+    originAlertIds.length > 0
       ? `COALESCE(isOrigin AND event.id in (${originAlertIds
-        .map((_id, idx) => `?og_alrt_id${idx}`)
-        .join(', ')}), false)`
+          .map((_id, idx) => `?og_alrt_id${idx}`)
+          .join(', ')}), false)`
       : 'false'
-    }
+  }
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
 | EVAL action = event.action
 // Aggregate document's data for popover expansion and metadata enhancements
@@ -447,12 +444,12 @@ ${buildPinnedEsql(pinnedIds)}
     ",\\"type\\":\\"", docType, "\\"",
     ",\\"index\\":\\"", _index, "\\"",
     ${
-    // ESQL complains about missing field's mapping when we don't fetch from alerts index
-    alertsMappingsIncluded
-      ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
+      // ESQL complains about missing field's mapping when we don't fetch from alerts index
+      alertsMappingsIncluded
+        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
       "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
     "}"), ""),`
-      : ''
+        : ''
     }
   "}")
 // Per-triple rows. All grouping (action × actor/target type × origin/pinned)
@@ -588,8 +585,8 @@ export const regroupEvents = (
       targetEntityIds.length === 0
         ? null
         : targetEntityIds.length === 1
-          ? targetEntityIds[0]
-          : hashIds(targetEntityIds);
+        ? targetEntityIds[0]
+        : hashIds(targetEntityIds);
 
     const docIds = [...group.docIds];
     const labelNodeId =

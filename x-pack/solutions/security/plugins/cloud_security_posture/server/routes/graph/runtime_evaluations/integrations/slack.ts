@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const slackEvaluations = {
-  integration: "slack",
+  integration: 'slack',
   evaluations: [
     {
-      id: "detection_flags",
-      section: "Detection flags (mandatory \u2014 run first)",
+      id: 'detection_flags',
+      section: 'Detection flags (mandatory \u2014 run first)',
       esql: `| EVAL
   actor_exists = user.id IS NOT NULL OR user.full_name IS NOT NULL OR user.email IS NOT NULL,
   target_exists = user.target.id IS NOT NULL OR user.target.name IS NOT NULL OR user.target.email IS NOT NULL
@@ -22,8 +22,8 @@ export const slackEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: "optional_classification",
-      section: "Optional classification helpers (when needed)",
+      id: 'optional_classification',
+      section: 'Optional classification helpers (when needed)',
       esql: `| EVAL
   entity.target.type = CASE(
     entity.target.type IS NOT NULL, entity.target.type,
@@ -39,8 +39,8 @@ export const slackEvaluations = {
   )`,
     },
     {
-      id: "actor",
-      section: "Combined ES|QL \u2014 actor fields",
+      id: 'actor',
+      section: 'Combined ES|QL \u2014 actor fields',
       esql: `| EVAL
   user.name = CASE(
     user.name IS NOT NULL, user.name,
@@ -49,8 +49,8 @@ export const slackEvaluations = {
   )`,
     },
     {
-      id: "target",
-      section: "Combined ES|QL \u2014 target fields",
+      id: 'target',
+      section: 'Combined ES|QL \u2014 target fields',
       esql: `| EVAL
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,

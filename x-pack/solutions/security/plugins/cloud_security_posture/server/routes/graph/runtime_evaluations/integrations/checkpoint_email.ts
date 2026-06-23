@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const checkpoint_emailEvaluations = {
-  integration: "checkpoint_email",
+  integration: 'checkpoint_email',
   evaluations: [
     {
-      id: "detection_flags",
-      section: "Detection flags (mandatory \u2014 run first)",
+      id: 'detection_flags',
+      section: 'Detection flags (mandatory \u2014 run first)',
       esql: `| EVAL
   actor_exists = user.email IS NOT NULL OR user.name IS NOT NULL OR user.domain IS NOT NULL
     OR source.user.email IS NOT NULL OR source.user.name IS NOT NULL
@@ -25,8 +25,8 @@ export const checkpoint_emailEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: "actor",
-      section: "Combined ES|QL \u2014 actor fields",
+      id: 'actor',
+      section: 'Combined ES|QL \u2014 actor fields',
       esql: `| EVAL
   user.email = CASE(
     user.email IS NOT NULL, user.email,
@@ -48,8 +48,8 @@ export const checkpoint_emailEvaluations = {
   )`,
     },
     {
-      id: "event_action",
-      section: "Combined ES|QL \u2014 event action",
+      id: 'event_action',
+      section: 'Combined ES|QL \u2014 event action',
       esql: `| EVAL
   event.action = CASE(
     event.action IS NOT NULL, event.action,
@@ -58,8 +58,8 @@ export const checkpoint_emailEvaluations = {
   )`,
     },
     {
-      id: "target",
-      section: "Combined ES|QL \u2014 target fields",
+      id: 'target',
+      section: 'Combined ES|QL \u2014 target fields',
       esql: `| EVAL
   user.target.email = CASE(
     user.target.email IS NOT NULL, user.target.email,

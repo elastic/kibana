@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const qualys_vmdrEvaluations = {
-  integration: "qualys_vmdr",
+  integration: 'qualys_vmdr',
   evaluations: [
     {
-      id: "detection_flags",
-      section: "Detection flags (mandatory \u2014 run first)",
+      id: 'detection_flags',
+      section: 'Detection flags (mandatory \u2014 run first)',
       esql: `| EVAL
   actor_exists = user.name IS NOT NULL OR user.roles IS NOT NULL
     OR source.ip IS NOT NULL
@@ -24,8 +24,8 @@ export const qualys_vmdrEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: "optional_classification",
-      section: "Optional classification helpers (when needed)",
+      id: 'optional_classification',
+      section: 'Optional classification helpers (when needed)',
       esql: `| EVAL
   entity.target.type = CASE(
     entity.target.type IS NOT NULL, entity.target.type,
@@ -37,8 +37,8 @@ export const qualys_vmdrEvaluations = {
   )`,
     },
     {
-      id: "actor",
-      section: "Combined ES|QL \u2014 actor fields",
+      id: 'actor',
+      section: 'Combined ES|QL \u2014 actor fields',
       esql: `| EVAL
   user.id = CASE(
     user.id IS NOT NULL, user.id,
@@ -57,8 +57,8 @@ export const qualys_vmdrEvaluations = {
   )`,
     },
     {
-      id: "target",
-      section: "Combined ES|QL \u2014 target fields",
+      id: 'target',
+      section: 'Combined ES|QL \u2014 target fields',
       esql: `| EVAL
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,

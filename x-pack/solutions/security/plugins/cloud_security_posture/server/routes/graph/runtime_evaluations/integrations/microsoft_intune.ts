@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const microsoft_intuneEvaluations = {
-  integration: "microsoft_intune",
+  integration: 'microsoft_intune',
   evaluations: [
     {
-      id: "actor",
-      section: "Combined ES|QL \u2014 actor fields",
+      id: 'actor',
+      section: 'Combined ES|QL \u2014 actor fields',
       esql: `| EVAL
   user.name = CASE(
     user.name IS NOT NULL, user.name,
@@ -21,8 +21,8 @@ export const microsoft_intuneEvaluations = {
   )`,
     },
     {
-      id: "target",
-      section: "Combined ES|QL \u2014 target fields",
+      id: 'target',
+      section: 'Combined ES|QL \u2014 target fields',
       esql: `| EVAL
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
