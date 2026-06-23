@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { trace } from '@opentelemetry/api';
 import { toArray, map, firstValueFrom } from 'rxjs';
 import type {
   ChatCompleteResponse,
@@ -33,6 +34,10 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
           throw createInferenceInternalError('No message event found');
         }
 
+        const messageEventWithTrace = messageEvent as typeof messageEvent & { traceId?: string };
+        const traceId =
+          messageEventWithTrace.traceId ?? trace.getActiveSpan()?.spanContext().traceId;
+
         return {
           content: messageEvent.content,
           refusal: messageEvent.refusal,
@@ -42,6 +47,7 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
           deanonymized_output: messageEvent.deanonymized_output,
           model: tokenEvent?.model,
           metadata: messageEvent.metadata,
+          ...(traceId ? { traceId } : {}),
         };
       })
     )

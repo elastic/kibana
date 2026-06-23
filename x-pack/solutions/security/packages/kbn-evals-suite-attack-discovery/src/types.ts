@@ -57,6 +57,7 @@ export interface AttackDiscoveryTaskOutput {
   insights: AttackDiscovery[] | null;
   errors?: string[];
   raw?: unknown;
+  traceId?: string;
 }
 
 export type AttackDiscoveryDatasetMetadata = Record<string, unknown> & {
