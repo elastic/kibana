@@ -29,6 +29,12 @@ import {
 } from './write_relationship_metadatas';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
+import type {
+  RelationshipMaintainerSourceResult,
+  RelationshipMaintainerTelemetryCollector,
+} from '../types';
+
+export type { RelationshipMaintainerSourceResult, RelationshipMaintainerTelemetryCollector };
 
 interface CompositeAggregations {
   users: {
@@ -172,81 +178,120 @@ async function runIntegration(
   recordsCount: number;
   write: WriteEntityIdsResult;
   metadata: WriteRelationshipMetadatasResult;
+  outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+  iterations: number;
+  truncated: boolean;
 }> {
   let afterKey: CompositeAfterKey | undefined;
   let iterations = 0;
+  let truncated = false;
   let totalBuckets = 0;
   const records: EntityRelationshipRecord[] = [];
   const transportOpts = abortController ? { signal: abortController.signal } : undefined;
+  let outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error' = 'producing';
 
-  do {
-    if (abortController?.signal.aborted) {
-      logger.info(`[${config.id}] Aborted during pagination`);
-      break;
-    }
-    iterations++;
-    if (iterations > MAX_ITERATIONS) {
-      logger.warn(`[${config.id}] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
-      break;
-    }
+  try {
+    do {
+      if (abortController?.signal.aborted) {
+        logger.info(`[${config.id}] Aborted during pagination`);
+        outcome = totalBuckets === 0 ? 'empty' : 'partial';
+        break;
+      }
+      iterations++;
+      if (iterations > MAX_ITERATIONS) {
+        logger.warn(`[${config.id}] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
+        outcome = 'partial';
+        truncated = true;
+        break;
+      }
 
-    const actorPage = await fetchActorPage(
-      config,
-      esClient,
-      logger,
-      namespace,
-      afterKey,
-      transportOpts,
-      abortController
-    );
-    if (actorPage === null) break;
+      const actorPage = await fetchActorPage(
+        config,
+        esClient,
+        logger,
+        namespace,
+        afterKey,
+        transportOpts,
+        abortController
+      );
+      if (actorPage === null) {
+        outcome = abortController?.signal.aborted
+          ? totalBuckets === 0
+            ? 'empty'
+            : 'partial'
+          : 'index_missing';
+        break;
+      }
 
-    const { buckets, newAfterKey } = actorPage;
-    logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
-    totalBuckets += buckets.length;
-    if (buckets.length === 0) break;
+      const { buckets, newAfterKey } = actorPage;
+      logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
+      totalBuckets += buckets.length;
+      if (buckets.length === 0) {
+        if (iterations === 1) outcome = 'empty';
+        break;
+      }
 
-    const esqlResult = await fetchTargetsForActors(
-      config,
-      esClient,
-      logger,
-      namespace,
-      buckets,
-      transportOpts,
-      abortController
-    );
-    if (esqlResult === null) break;
+      const esqlResult = await fetchTargetsForActors(
+        config,
+        esClient,
+        logger,
+        namespace,
+        buckets,
+        transportOpts,
+        abortController
+      );
+      if (esqlResult === null) {
+        outcome = 'partial';
+        break;
+      }
 
-    const { columns, values } = esqlResult;
-    const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
-    records.push(...pageRecords);
-    logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
+      const { columns, values } = esqlResult;
+      const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
+      records.push(...pageRecords);
+      logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
 
-    // Composite agg's documented termination contract is "stop when after_key
-    // is absent." Trust newAfterKey directly rather than inferring termination
-    // from a partial-page heuristic — composite aggs can return a partial last
-    // page with after_key still set in some edge cases (e.g. sub-aggregation
-    // filters that drop bucket candidates).
-    afterKey = newAfterKey;
-  } while (afterKey);
+      // Composite agg's documented termination contract is "stop when after_key
+      // is absent." Trust newAfterKey directly rather than inferring termination
+      // from a partial-page heuristic — composite aggs can return a partial last
+      // page with after_key still set in some edge cases (e.g. sub-aggregation
+      // filters that drop bucket candidates).
+      afterKey = newAfterKey;
+    } while (afterKey);
 
-  // Stream per-integration: write this integration's records before
-  // returning so memory does not accumulate across the outer loop.
-  //
-  // Dual write, latest index first: the metadata append is at-least-once.
-  // If it throws after writeEntityIds succeeds, the whole run propagates and
-  // the next run re-emits these observations under a fresh scan_id, so a
-  // retry can produce duplicate metadata docs (distinguishable by scan_id).
-  // Acceptable for an append-only observation log; readers must not assume
-  // one doc per (entity, kind, target).
-  const write = await writeEntityIds(crudClient, logger, records);
-  const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, records, {
-    scanId: metadataContext.scanId,
-    lookbackWindow: LOOKBACK_WINDOW,
-    entitySource: config.id,
-    observedAt: metadataContext.observedAt,
-  });
-  return { buckets: totalBuckets, recordsCount: records.length, write, metadata };
+    // Stream per-integration: write latest entities first, then metadata.
+    // Both writes are inside the try so any transport failure sets outcome:
+    // 'error' and the outer loop continues to other integrations.
+    const write = await writeEntityIds(crudClient, logger, records);
+    const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, records, {
+      scanId: metadataContext.scanId,
+      lookbackWindow: LOOKBACK_WINDOW,
+      entitySource: config.id,
+      observedAt: metadataContext.observedAt,
+    });
+    // When truncated, the final loop pass incremented `iterations` before
+    // breaking without fetching a page — clamp to actual pages completed.
+    const completedIterations = truncated ? MAX_ITERATIONS : iterations;
+    return {
+      buckets: totalBuckets,
+      recordsCount: records.length,
+      write,
+      metadata,
+      outcome,
+      iterations: completedIterations,
+      truncated,
+    };
+  } catch (err) {
+    logger.error(`[${config.id}] Integration failed: ${errMsg(err)}`);
+    return {
+      buckets: totalBuckets,
+      recordsCount: records.length,
+      write: { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} },
+      metadata: { docsAttempted: 0, docsApplied: 0 },
+      outcome: 'error',
+      iterations,
+      truncated: false,
+    };
+  }
 }
 
 /**
@@ -273,6 +318,7 @@ export const runRelationshipMaintainer = async ({
   entityMetadataClient,
   integrations,
   abortController,
+  telemetryCollector,
 }: {
   esClient: ElasticsearchClient;
   cpsEsClient?: ElasticsearchClient;
@@ -282,6 +328,12 @@ export const runRelationshipMaintainer = async ({
   entityMetadataClient: EntityMetadataClient;
   integrations: RelationshipIntegrationConfig[];
   abortController?: AbortController;
+  /**
+   * Optional. Engine populates one entry per integration into `sources` and
+   * accumulates per-rel-type applied counts in `relationshipTypeApplied` for callers
+   * that want full-fidelity run telemetry.
+   */
+  telemetryCollector?: RelationshipMaintainerTelemetryCollector;
 }): Promise<{
   totalBuckets: number;
   totalRecords: number;
@@ -298,6 +350,10 @@ export const runRelationshipMaintainer = async ({
   totalWriteErrors: number;
   /** Count of relationship metadata docs successfully appended to the metadata datastream. */
   totalMetadataDocsApplied: number;
+  /** Total composite-agg pagination passes across all integrations. */
+  totalIterations: number;
+  /** True if any integration hit MAX_ITERATIONS and stopped early. */
+  truncated: boolean;
   lastRunTimestamp: string;
 }> => {
   // Defense-in-depth: namespace flows raw into eight `indexPattern(namespace)`
@@ -321,6 +377,8 @@ export const runRelationshipMaintainer = async ({
   let totalNotFound = 0;
   let totalWriteErrors = 0;
   let totalMetadataDocsApplied = 0;
+  let totalIterations = 0;
+  let truncated = false;
 
   for (const config of integrations) {
     if (abortController?.signal.aborted) {
@@ -328,7 +386,15 @@ export const runRelationshipMaintainer = async ({
       break;
     }
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
-    const { buckets, recordsCount, write, metadata } = await runIntegration(
+    const {
+      buckets,
+      recordsCount,
+      write,
+      metadata,
+      outcome,
+      iterations,
+      truncated: integrationTruncated,
+    } = await runIntegration(
       config,
       readClient,
       logger,
@@ -338,12 +404,33 @@ export const runRelationshipMaintainer = async ({
       abortController,
       metadataContext
     );
-    totalBuckets += buckets;
-    totalRecords += recordsCount;
-    totalWritten += write.updated;
-    totalNotFound += write.notFound;
-    totalWriteErrors += write.errors;
-    totalMetadataDocsApplied += metadata.docsApplied;
+
+    totalIterations += iterations;
+    if (integrationTruncated) truncated = true;
+
+    if (outcome === 'error') {
+      logger.warn(`[${config.id}] Integration failed; skipping totals accumulation for this run`);
+    } else {
+      totalBuckets += buckets;
+      totalRecords += recordsCount;
+      totalWritten += write.updated;
+      totalNotFound += write.notFound;
+      totalWriteErrors += write.errors;
+      totalMetadataDocsApplied += metadata.docsApplied;
+    }
+
+    if (telemetryCollector) {
+      telemetryCollector.sources.push({
+        id: config.id,
+        scanned: buckets,
+        qualified: recordsCount,
+        outcome,
+      });
+      for (const [relType, count] of Object.entries(write.relationshipTypeApplied)) {
+        telemetryCollector.relationshipTypeApplied[relType] =
+          (telemetryCollector.relationshipTypeApplied[relType] ?? 0) + count;
+      }
+    }
   }
 
   return {
@@ -353,6 +440,8 @@ export const runRelationshipMaintainer = async ({
     totalNotFound,
     totalWriteErrors,
     totalMetadataDocsApplied,
+    totalIterations,
+    truncated,
     lastRunTimestamp: new Date().toISOString(),
   };
 };

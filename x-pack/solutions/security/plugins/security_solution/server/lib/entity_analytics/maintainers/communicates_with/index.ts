@@ -8,6 +8,7 @@
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 
 import { runRelationshipMaintainer } from '../engine/run_relationship_maintainer';
+import type { RelationshipMaintainerTelemetryCollector } from '../types';
 import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from './configs';
 
 export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
@@ -27,6 +28,12 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
   }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting communicates_with maintainer run');
+
+    const collector: RelationshipMaintainerTelemetryCollector = {
+      sources: [],
+      relationshipTypeApplied: {},
+    };
+
     const result = await runRelationshipMaintainer({
       esClient,
       cpsEsClient,
@@ -36,7 +43,24 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       entityMetadataClient,
       integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
       abortController,
+      telemetryCollector: collector,
     });
+
+    telemetry.report({
+      iterations: result.totalIterations,
+      truncated: result.truncated,
+      funnel: {
+        scanned: result.totalBuckets,
+        qualified: result.totalRecords,
+        proposed: result.totalRecords, // engine has no distinct proposal phase; echo qualified
+        applied: result.totalWritten,
+        droppedNotInStore: result.totalNotFound,
+        failed: result.totalWriteErrors,
+      },
+      sources: collector.sources,
+      // no breakdown — communicates_with is a single relationship type
+    });
+
     logger.info(
       `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
