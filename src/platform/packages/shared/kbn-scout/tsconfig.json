@@ -30,6 +30,5 @@
     "@kbn/axe-config",
     "@kbn/peggy",
     "@kbn/test-docker-servers",
-    "@kbn/data-grid-in-table-search",
   ]
 }

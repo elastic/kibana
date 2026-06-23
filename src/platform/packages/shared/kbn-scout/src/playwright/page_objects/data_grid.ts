@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BUTTON_NEXT_TEST_SUBJ,
-  BUTTON_TEST_SUBJ,
-  COUNTER_TEST_SUBJ,
-  HIGHLIGHT_CLASS_NAME,
-  INPUT_TEST_SUBJ,
-} from '@kbn/data-grid-in-table-search';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
+
+const IN_TABLE_SEARCH_BUTTON_TEST_SUBJ = 'startInTableSearchButton';
+const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
+const IN_TABLE_SEARCH_COUNTER_TEST_SUBJ = 'inTableSearchMatchesCounter';
+const IN_TABLE_SEARCH_NEXT_BUTTON_TEST_SUBJ = 'inTableSearchButtonNext';
+const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
 
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
@@ -100,7 +99,7 @@ export class DataGrid {
     await input.press('Escape');
 
     await expect(input).toBeHidden();
-    await expect(this.page.testSubj.locator(BUTTON_TEST_SUBJ)).toBeVisible();
+    await expect(this.page.testSubj.locator(IN_TABLE_SEARCH_BUTTON_TEST_SUBJ)).toBeVisible();
   }
 
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
@@ -227,15 +226,15 @@ export class DataGrid {
   }
 
   getInTableSearchCellMatches(rowIndex: number, columnId: string): Locator {
-    return this.getCell(rowIndex, columnId).locator(`.${HIGHLIGHT_CLASS_NAME}`);
+    return this.getCell(rowIndex, columnId).locator(`.${IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME}`);
   }
 
   getInTableSearchInput(): Locator {
-    return this.page.testSubj.locator(INPUT_TEST_SUBJ);
+    return this.page.testSubj.locator(IN_TABLE_SEARCH_INPUT_TEST_SUBJ);
   }
 
   getInTableSearchMatchesCounter(): Locator {
-    return this.page.testSubj.locator(COUNTER_TEST_SUBJ);
+    return this.page.testSubj.locator(IN_TABLE_SEARCH_COUNTER_TEST_SUBJ);
   }
 
   async getNumberOfSelectedRows(): Promise<number> {
@@ -269,7 +268,7 @@ export class DataGrid {
     const counter = this.getInTableSearchMatchesCounter();
     const previousCounter = (await counter.textContent()) ?? '';
 
-    await this.page.testSubj.locator(BUTTON_NEXT_TEST_SUBJ).click();
+    await this.page.testSubj.locator(IN_TABLE_SEARCH_NEXT_BUTTON_TEST_SUBJ).click();
 
     await expect(counter).not.toHaveText(previousCounter);
   }
@@ -317,7 +316,7 @@ export class DataGrid {
 
     if (await input.isVisible()) return;
 
-    await this.page.testSubj.locator(BUTTON_TEST_SUBJ).click();
+    await this.page.testSubj.locator(IN_TABLE_SEARCH_BUTTON_TEST_SUBJ).click();
     await expect(input).toBeVisible();
   }
 
