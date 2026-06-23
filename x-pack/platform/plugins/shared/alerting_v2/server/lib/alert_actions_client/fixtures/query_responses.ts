@@ -6,29 +6,46 @@
  */
 
 import type { EsqlQueryResponse, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AlertEpisodeStatus,
+  AlertEventSeverity,
+  AlertEventStatus,
+} from '../../../resources/datastreams/alert_events';
 
 export function getAlertEventESQLResponse(overrides?: {
   '@timestamp'?: string;
   group_hash?: string;
   episode_id?: string;
+  episode_status?: AlertEpisodeStatus | null;
   rule_id?: string;
+  rule_version?: number;
   space_id?: string;
+  data_json?: string | null;
+  severity?: AlertEventSeverity | null;
 }): EsqlQueryResponse {
   return {
     columns: [
       { name: '@timestamp', type: 'date' },
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
+      { name: 'episode_status', type: 'keyword' },
       { name: 'rule_id', type: 'keyword' },
+      { name: 'rule_version', type: 'long' },
       { name: 'space_id', type: 'keyword' },
+      { name: 'data_json', type: 'keyword' },
+      { name: 'severity', type: 'keyword' },
     ],
     values: [
       [
         overrides?.['@timestamp'] ?? '2025-01-01T00:00:00.000Z',
         overrides?.group_hash ?? 'test-group-hash',
         overrides?.episode_id ?? 'episode-1',
+        overrides?.episode_status === undefined ? 'active' : overrides.episode_status,
         overrides?.rule_id ?? 'test-rule-id',
+        overrides?.rule_version ?? 1,
         overrides?.space_id ?? 'default',
+        overrides?.data_json === undefined ? null : overrides.data_json,
+        overrides?.severity === undefined ? null : overrides.severity,
       ],
     ],
   };
@@ -38,6 +55,60 @@ export function getEmptyESQLResponse(): EsqlQueryResponse {
   return {
     columns: [],
     values: [],
+  };
+}
+
+export function getPreDeactivateAlertEventESQLResponse(overrides?: {
+  '@timestamp'?: string;
+  group_hash?: string;
+  episode_id?: string;
+  episode_status?: 'active' | 'recovering';
+  episode_status_count?: number | null;
+  rule_id?: string;
+  rule_version?: number;
+  space_id?: string;
+  status?: AlertEventStatus;
+  data_json?: string | null;
+  severity?: AlertEventSeverity | null;
+}): EsqlQueryResponse {
+  return {
+    columns: [
+      { name: '@timestamp', type: 'date' },
+      { name: 'group_hash', type: 'keyword' },
+      { name: 'episode_id', type: 'keyword' },
+      { name: 'episode_status', type: 'keyword' },
+      { name: 'episode_status_count', type: 'long' },
+      { name: 'rule_id', type: 'keyword' },
+      { name: 'rule_version', type: 'long' },
+      { name: 'space_id', type: 'keyword' },
+      { name: 'status', type: 'keyword' },
+      { name: 'data_json', type: 'keyword' },
+      { name: 'severity', type: 'keyword' },
+    ],
+    values: [
+      [
+        overrides?.['@timestamp'] ?? '2025-01-01T00:00:00.000Z',
+        overrides?.group_hash ?? 'test-group-hash',
+        overrides?.episode_id ?? 'episode-1',
+        overrides?.episode_status ?? 'active',
+        overrides?.episode_status_count === undefined ? null : overrides.episode_status_count,
+        overrides?.rule_id ?? 'test-rule-id',
+        overrides?.rule_version ?? 1,
+        overrides?.space_id ?? 'default',
+        overrides?.status ?? 'breached',
+        overrides?.data_json === undefined ? null : overrides.data_json,
+        overrides?.severity === undefined ? null : overrides.severity,
+      ],
+    ],
+  };
+}
+
+export function getLastEpisodeActionESQLResponse(overrides?: {
+  action_type: string;
+}): EsqlQueryResponse {
+  return {
+    columns: [{ name: 'action_type', type: 'keyword' }],
+    values: [[overrides?.action_type ?? 'deactivate']],
   };
 }
 

@@ -73,6 +73,58 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
     }
   );
 
+  apiTest(
+    'deactivate: writes a synthetic recovered/inactive rule event carrying the prior event data',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'deactivate-rule-event-rule';
+      const groupHash = 'deactivate-rule-event-group';
+      const episodeId = 'deactivate-rule-event-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 7 },
+          group_hash: groupHash,
+          episode: { id: episodeId, status: 'active' },
+          data: { 'host.name': 'host-a' },
+          severity: 'high',
+          status: 'breached',
+          type: 'alert',
+        }),
+      ]);
+
+      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'manual close' },
+      });
+
+      expect(response).toHaveStatusCode(204);
+
+      const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId, {
+        status: 'recovered',
+        type: 'alert',
+        episodeStatus: 'inactive',
+      });
+
+      expect(ruleEvents).toHaveLength(1);
+      expect(ruleEvents[0]).toMatchObject({
+        rule: { id: ruleId, version: 7 },
+        group_hash: groupHash,
+        status: 'recovered',
+        type: 'alert',
+        episode: { id: episodeId, status: 'inactive' },
+        data: { 'host.name': 'host-a' },
+        severity: 'high',
+        space_id: 'default',
+      });
+
+      // The synthetic inactive event is the latest state, so a re-breach starts a new episode.
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'inactive' },
+      });
+    }
+  );
+
   apiTest('schema: rejects body missing reason with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getDeactivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
@@ -126,6 +178,115 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
 
     expect(response).toHaveStatusCode(404);
   });
+
+  apiTest(
+    'precondition: rejects deactivate of an already-inactive episode with INVALID_EPISODE_STATE_TRANSITION (400)',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'deactivate-already-inactive-rule';
+      const groupHash = 'deactivate-already-inactive-group';
+      const episodeId = 'deactivate-already-inactive-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'recovered',
+          type: 'alert',
+          episode: { id: episodeId, status: 'inactive' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'valid reason' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body).toMatchObject({
+        code: 'INVALID_EPISODE_STATE_TRANSITION',
+        details: {
+          group_hash: groupHash,
+          episode_id: episodeId,
+          episode_status: 'inactive',
+          action_type: 'deactivate',
+        },
+      });
+
+      const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
+      expect(ruleEvents).toHaveLength(1);
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['deactivate'],
+      });
+      expect(actions).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'precondition: rejects deactivate of a pending episode with INVALID_EPISODE_STATE_TRANSITION (400)',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'deactivate-pending-rule';
+      const groupHash = 'deactivate-pending-group';
+      const episodeId = 'deactivate-pending-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'breached',
+          type: 'alert',
+          episode: { id: episodeId, status: 'pending' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'valid reason' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body).toMatchObject({
+        code: 'INVALID_EPISODE_STATE_TRANSITION',
+        details: {
+          group_hash: groupHash,
+          episode_id: episodeId,
+          episode_status: 'pending',
+          action_type: 'deactivate',
+        },
+      });
+    }
+  );
+
+  apiTest(
+    'precondition: allows deactivate of a recovering episode',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'deactivate-recovering-rule';
+      const groupHash = 'deactivate-recovering-group';
+      const episodeId = 'deactivate-recovering-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'recovered',
+          type: 'alert',
+          episode: { id: episodeId, status: 'recovering' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { reason: 'valid reason' },
+      });
+
+      expect(response).toHaveStatusCode(204);
+
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'inactive' },
+      });
+    }
+  );
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
