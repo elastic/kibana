@@ -33,6 +33,7 @@ import { registerGetCaptureConfigRoute } from './routes/get_capture_config';
 import { registerInstallRoutes } from './routes/install';
 import { registerRunCaptureRoute } from './routes/run_capture';
 import { registerRunIntrospectRoute } from './routes/run_introspect';
+import { registerGetExportRoute } from './routes/get_export';
 
 export interface ErrorSentryServerPluginSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -117,6 +118,7 @@ export class ErrorSentryServerPlugin
       return this.workflowsManagementApi;
     });
     registerGetCaptureConfigRoute(router);
+    registerGetExportRoute(router);
   }
 
   async start(_core: CoreStart, plugins: ErrorSentryServerPluginStartDeps): Promise<void> {

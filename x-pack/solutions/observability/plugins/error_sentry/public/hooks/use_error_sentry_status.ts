@@ -8,7 +8,7 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import type { ComponentStatus } from '../../common/constants';
+import type { CaptureConfig, ComponentStatus } from '../../common/constants';
 import { CAPTURE_LOG_INDEX_DEFAULT } from '../../common/constants';
 
 const STATUS_QUERY_KEY = ['errorSentry', 'status'] as const;
@@ -26,7 +26,10 @@ export const useErrorSentryStatus = (http: HttpSetup, discover?: DiscoverStart) 
   const queryClient = useQueryClient();
 
   const { isLoading, data, error, refetch } = useQuery(STATUS_QUERY_KEY, ({ signal }) =>
-    http.get<{ components: ComponentStatus[] }>('/internal/error_sentry/status', { signal })
+    http.get<{ components: ComponentStatus[]; captureConfig: CaptureConfig | null }>(
+      '/internal/error_sentry/status',
+      { signal }
+    )
   );
 
   const { mutateAsync: install, isLoading: isInstalling } = useMutation(
@@ -62,6 +65,24 @@ export const useErrorSentryStatus = (http: HttpSetup, discover?: DiscoverStart) 
     }
   );
 
+  const { mutateAsync: exportConfig } = useMutation(
+    ['errorSentry', 'export'],
+    async () => {
+      const response = await window.fetch(
+        http.basePath.prepend('/internal/error_sentry/export'),
+        { credentials: 'same-origin', headers: { 'x-elastic-internal-origin': 'kibana' } }
+      );
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'error-sentry-export.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  );
+
   const discoverLogSourceUrl = buildDiscoverEsqlUrl(discover, CAPTURE_LOG_INDEX_DEFAULT);
 
   return {
@@ -83,12 +104,14 @@ export const useErrorSentryStatus = (http: HttpSetup, discover?: DiscoverStart) 
             (error instanceof Error ? error.message : error)
         )
       : null,
+    captureConfig: data?.captureConfig ?? null,
     install,
     repair,
     runCapture,
     isRunningCapture,
     runIntrospect,
     isRunningIntrospect,
+    exportConfig,
     refetch,
   };
 };

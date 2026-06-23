@@ -25,7 +25,7 @@ const ERROR_SENTRY_WORKFLOW_MANAGEMENT = {
 export const ERROR_SENTRY_CAPTURE_WORKFLOW = {
   id: ERROR_SENTRY_CAPTURE_WORKFLOW_ID,
   pluginId: 'errorSentry',
-  version: 9,
+  version: 12,
   yaml: `version: "1"
 name: Error Sentry - Capture log error patterns
 enabled: true
@@ -35,26 +35,64 @@ triggers:
       every: 24h
 steps:
   - name: read_config
-    type: error-sentry.readCaptureConfig
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /.error-sentry-config/_doc/capture-config
   - name: collect
     type: error-sentry.collectLogPatterns
     with:
-      index: "{{ steps.read_config.output.index }}"
+      index: "{{ steps.read_config.output._source.index }}"
       lookbackDays: 7
-      categoryField: "{{ steps.read_config.output.categoryField }}"
-      logLevels: "{{ steps.read_config.output.logLevels }}"
+      categoryField: "{{ steps.read_config.output._source.categoryField }}"
+      logLevels: "{{ steps.read_config.output._source.logLevels }}"
       timestampField: "@timestamp"
       minDocCount: 10
       size: 20
+  - name: filter_patterns
+    type: data.set
+    with:
+      patterns: |
+        {%- liquid
+          assign strategy = steps.read_config.output._source.severityStrategy
+          assign all_patterns = steps.collect.output.patterns
+          if strategy == "text"
+            assign filtered = ""
+            assign filtered = filtered | split: ","
+            for p in all_patterns
+              assign key_lc = p.key | downcase
+              assign match = false
+              if key_lc contains "error"
+                assign match = true
+              elsif key_lc contains "exception"
+                assign match = true
+              elsif key_lc contains "fatal"
+                assign match = true
+              elsif key_lc contains "fail"
+                assign match = true
+              elsif key_lc contains "panic"
+                assign match = true
+              elsif key_lc contains "traceback"
+                assign match = true
+              endif
+              if match
+                assign filtered = filtered | push: p
+              endif
+            endfor
+            echo filtered | json
+          else
+            echo all_patterns | json
+          endif
+        -%}
   - name: process_patterns
     type: foreach
-    foreach: "{{ steps.collect.output.patterns }}"
+    foreach: "{{ steps.filter_patterns.output.patterns }}"
     steps:
       - name: fetch_sample
         type: elasticsearch.request
         with:
           method: POST
-          path: /{{ steps.read_config.output.index }}/_search
+          path: /{{ steps.read_config.output._source.index }}/_search
           body:
             size: 1
             sort:
@@ -62,7 +100,7 @@ steps:
             query:
               simple_query_string:
                 fields:
-                  - "{{ steps.read_config.output.categoryField }}"
+                  - "{{ steps.read_config.output._source.categoryField }}"
                 query: "{{ foreach.item.key }}"
                 default_operator: AND
                 flags: NONE
@@ -73,9 +111,9 @@ steps:
           params:
             - "{{ foreach.item.key }}"
           query: |
-            FROM {{ steps.read_config.output.index }}
+            FROM {{ steps.read_config.output._source.index }}
             | WHERE @timestamp >= NOW() - 7 days
-            | WHERE MATCH({{ steps.read_config.output.categoryField }}, ?, {"operator": "AND"})
+            | WHERE MATCH({{ steps.read_config.output._source.categoryField }}, ?, {"operator": "AND"})
             | STATS first_seen = MIN(@timestamp), last_seen = MAX(@timestamp)
           format: json
       - name: find_existing
@@ -119,16 +157,39 @@ steps:
             with:
               description: |
                 {%- liquid
+                  assign cfg = steps.read_config.output._source
+                  assign k8s = cfg.k8s
+                  assign deploymentKey = k8s.deploymentKey | default: ""
+                  assign namespaceKey = k8s.namespaceKey | default: ""
+                  assign podKey = k8s.podKey | default: ""
+                  assign hostKey = k8s.hostKey | default: ""
+                  assign serviceKey = k8s.serviceKey | default: ""
                   assign src = steps.fetch_sample.output.hits.hits[0]._source
                   assign attrs = src.resource.attributes
-                  assign deployment = attrs["k8s.deployment.name"] | default: ""
-                  assign namespace = attrs["k8s.namespace.name"] | default: ""
-                  assign pod = attrs["k8s.pod.name"] | default: ""
-                  assign host_name = attrs["host.name"] | default: ""
+
+                  assign deployment = ""
+                  if deploymentKey != ""
+                    assign deployment = attrs[deploymentKey] | default: ""
+                  endif
+                  assign namespace = ""
+                  if namespaceKey != ""
+                    assign namespace = attrs[namespaceKey] | default: ""
+                  endif
+                  assign pod = ""
+                  if podKey != ""
+                    assign pod = attrs[podKey] | default: ""
+                  endif
+                  assign host_name = ""
+                  if hostKey != ""
+                    assign host_name = attrs[hostKey] | default: ""
+                  endif
+
                   assign sample_time = src["@timestamp"] | default: ""
                   assign sample_body = src.body.text | default: ""
                   assign severity_text_sample = src.severity_text | default: ""
                   assign trace_id_sample = src.trace.id | default: ""
+                  assign strategy = cfg.severityStrategy | default: ""
+                  assign textFilter = cfg.textFilter | default: ""
                 -%}
                 **Pattern signature:** \`{{ foreach.item.key }}\`
                 **Category hash:** \`{{ foreach.item.hash }}\`
@@ -139,9 +200,10 @@ steps:
                 | 📶 **Occurrence level** | {{ foreach.item.occurrenceLevel }} | |
                 | 🕒 **First seen** | {{ steps.fetch_stats.output.values[0][0] }} | |
                 | 🕓 **Last seen** | {{ steps.fetch_stats.output.values[0][1] }} | |
+                | 🧭 **Detection mode** | \`{{ strategy }}\`{% if strategy == "text" and textFilter != "" %} — filter: \`{{ textFilter }}\`{% endif %} | |
                 | 🖥️ **Service (most recent)** | {% if deployment != "" %}{% if namespace != "" %}\`{{ namespace }}/{{ deployment }}\`{% else %}\`{{ deployment }}\`{% endif %}{% else %}_(unknown)_{% endif %} | {% if deployment != "" %}[APM](/kbn/app/apm/services/{{ deployment }}/overview?rangeFrom=now-7d&rangeTo=now) · [Metrics Hosts](/kbn/app/metrics/hosts?_a=(dateRange:(from:now-7d,to:now),filters:!(),limit:100,panelFilters:!((meta:(controlledBy:service.name,index:%27metrics-*,metricbeat-*%27,key:service.name),query:(match_phrase:(service.name:{{ deployment | replace: " ", "%20" }})))),preferredSchema:semconv,query:(language:kuery,query:%27%27))&controlPanels=(os.type:(exclude:!f,existsSelected:!f,fieldName:os.type,grow:!t,id:os.type,ignore_validations:!f,order:0,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!(),single_select:!f,sort:(by:_count,direction:desc),title:%27Operating%20System%27,type:options_list_control,use_global_filters:!t,width:small),service.name:(exclude:!f,existsSelected:!f,fieldName:service.name,grow:!t,id:service.name,ignore_validations:!f,order:2,run_past_timeout:!f,search_technique:wildcard,selectedOptions:!({{ deployment | replace: " ", "%20" }}),single_select:!f,sort:(by:_count,direction:desc),title:%27Service%20Name%27,type:options_list_control,use_global_filters:!t,width:small))){% endif %} |
-                | 🧊 **Pod (most recent)** | {% if pod != "" %}\`{{ pod }}\`{% else %}_(unknown)_{% endif %} | {% if pod != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20resource.attributes.k8s.pod.name%20==%20%22{{ pod | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
-                | 🏠 **Collector host** | {% if host_name != "" %}\`{{ host_name }}\`{% else %}_(unknown)_{% endif %} | {% if host_name != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20host.name%20==%20%22{{ host_name | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                | 🧊 **Pod (most recent)** | {% if pod != "" %}\`{{ pod }}\`{% else %}_(unknown)_{% endif %} | {% if pod != "" and podKey != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output._source.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20resource.attributes.{{ podKey }}%20==%20%22{{ pod | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
+                | 🏠 **Collector host** | {% if host_name != "" %}\`{{ host_name }}\`{% else %}_(unknown)_{% endif %} | {% if host_name != "" %}[Logs in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output._source.index }}%20%7C%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20%7C%20WHERE%20host.name%20==%20%22{{ host_name | replace: " ", "%20" }}%22%20%7C%20SORT%20@timestamp%20DESC%20%7C%20LIMIT%20500'))){% endif %} |
                 {% if severity_text_sample != "" %}| 🔖 **Severity text** | \`{{ severity_text_sample }}\` | |
                 {% endif %}{% if trace_id_sample != "" %}| 🧵 **Trace ID** | \`{{ trace_id_sample }}\` | |
                 {% endif %}
@@ -152,11 +214,10 @@ steps:
                 {{ sample_body }}
                 \`\`\`
 
-                [🔎 Open in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output.index }}%20|%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20|%20WHERE%20MATCH({{ steps.read_config.output.categoryField }},%20%22{{ foreach.item.key | replace: " ", "%20" }}%22)%20|%20SORT%20@timestamp%20DESC%20|%20LIMIT%20500')))
+                [🔎 Open in Discover](/kbn/app/discover#/?_g=(time:(from:now-7d,to:now))&_a=(dataSource:(type:esql),query:(esql:'FROM%20{{ steps.read_config.output._source.index }}%20|%20WHERE%20@timestamp%20>=%20NOW()%20-%207%20days%20|%20WHERE%20MATCH({{ steps.read_config.output._source.categoryField }},%20%22{{ foreach.item.key | replace: " ", "%20" }}%22)%20|%20SORT%20@timestamp%20DESC%20|%20LIMIT%20500')))
 
                 <!-- lpit-category-hash: {{ foreach.item.hash }} -->
               owner: observability
-              severity: low
               tags:
                 - error-sentry
                 - error-category
@@ -171,7 +232,7 @@ steps:
 export const ERROR_SENTRY_RALPH_INVESTIGATION_WORKFLOW = {
   id: ERROR_SENTRY_RALPH_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'errorSentry',
-  version: 6,
+  version: 7,
   yaml: `version: "1"
 name: Error Sentry - Detective Ralph investigation
 description: Runs an AI investigation (Detective Ralph) on each Error Sentry case when it is created, then posts the findings back as a comment on the case.
@@ -216,11 +277,8 @@ steps:
                   type: string
               severity:
                 type: string
-                description: >
-                  The true business-impact severity of this error. Base this on what the error actually means —
-                  error type (crash, OOM, data corruption, auth failure → higher), affected service criticality,
-                  blast radius, and whether it is persistent or intermittent. Do NOT derive severity solely from
-                  occurrence count: a rare crash can be critical while a frequent harmless warning is low.
+                description: |
+                  The true business-impact severity of this error. Base this on what the error actually means — error type (crash, OOM, data corruption, auth failure → higher), affected service criticality, blast radius, and whether it is persistent or intermittent. Do NOT derive severity solely from occurrence count: a rare crash can be critical while a frequent harmless warning is low.
                 enum:
                   - low
                   - medium
@@ -249,6 +307,11 @@ steps:
             {{ steps.get_case.output.case.description }}
         agent-id: detective-ralph
         create-conversation: true
+      - name: refresh_case
+        type: cases.getCase
+        with:
+          case_id: "{{ event.caseId }}"
+          include_comments: false
       - name: update_severity
         type: kibana.request
         with:
@@ -257,8 +320,13 @@ steps:
           body:
             cases:
               - id: "{{ event.caseId }}"
-                version: "{{ steps.get_case.output.case.version }}"
+                version: "{{ steps.refresh_case.output.case.version }}"
                 severity: "{{ steps.detective_ralph.output.structured_output.severity }}"
+        if: steps.detective_ralph.output.structured_output.severity != steps.refresh_case.output.case.severity
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 2s
       - name: post_investigation
         type: cases.addComment
         with:
@@ -293,10 +361,10 @@ steps:
 export const ERROR_SENTRY_INTROSPECT_WORKFLOW = {
   id: ERROR_SENTRY_INTROSPECT_WORKFLOW_ID,
   pluginId: 'errorSentry',
-  version: 1,
+  version: 4,
   yaml: `version: "1"
 name: Error Sentry - Introspect log configuration
-description: Discovers the best log index and categorization field for the capture workflow, then writes the result to Elasticsearch.
+description: Discovers the best log index, category field, severity strategy, and k8s attributes, then writes the full enriched capture configuration to Elasticsearch.
 enabled: true
 triggers:
   - type: manual
@@ -314,6 +382,9 @@ steps:
         - message
         - log.message
         - event.original
+      lookbackDays: 7
+      configIndex: .error-sentry-config
+      configDocId: capture-config
 `,
   management: ERROR_SENTRY_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

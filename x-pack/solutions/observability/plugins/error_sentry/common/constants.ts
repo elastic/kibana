@@ -34,6 +34,7 @@ export const GITHUB_CONNECTOR_ID = 'github' as const;
 
 export type ComponentId =
   | 'step'
+  | 'step_introspect'
   | 'workflow_capture'
   | 'workflow_escalate_github'
   | 'workflow_ask_ralph'
@@ -61,4 +62,25 @@ export interface ComponentStatus {
   detail?: string;
   repairable: boolean;
   actionLink?: string;
+}
+
+export interface CaptureConfigK8s {
+  podKey?: string;
+  namespaceKey?: string;
+  deploymentKey?: string;
+  hostKey?: string;
+  serviceKey?: string;
+}
+
+export interface CaptureConfig {
+  index: string;
+  categoryField: string;
+  severityStrategy?: 'severity' | 'text';
+  severityField?: string;
+  logLevels?: string[];
+  textFilter?: string;
+  k8s?: CaptureConfigK8s;
+  totalDocs7d?: number;
+  errorMatchingDocs7d?: number;
+  updatedAt?: string;
 }

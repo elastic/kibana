@@ -42,6 +42,34 @@ export const IntrospectLogsOutputSchema = z.object({
   index: z.string().describe('The chosen log index or pattern.'),
   categoryField: z.string().describe('The chosen field for categorize_text.'),
   docsCount: z.number().describe('Approximate number of recent log documents in the chosen index.'),
+  severityStrategy: z
+    .enum(['severity', 'text'])
+    .describe('How to filter logs: by severity field value, or by text keyword matching.'),
+  severityField: z
+    .string()
+    .optional()
+    .describe('The severity field used when strategy is "severity" (e.g. log.level, severity_text).'),
+  logLevels: z
+    .array(z.string())
+    .describe('Log level values to pass to the collect step when strategy is "severity".'),
+  textFilter: z
+    .string()
+    .optional()
+    .describe('Error vocabulary query string used when strategy is "text".'),
+  k8s: z
+    .object({
+      podKey: z.string().optional(),
+      namespaceKey: z.string().optional(),
+      deploymentKey: z.string().optional(),
+      hostKey: z.string().optional(),
+      serviceKey: z.string().optional(),
+    })
+    .optional()
+    .describe('Detected Kubernetes attribute keys found in a sampled document.'),
+  totalDocs7d: z.number().describe('Total documents in the chosen index in the lookback window.'),
+  errorMatchingDocs7d: z
+    .number()
+    .describe('Documents matching the error vocabulary query in the lookback window.'),
 });
 
 export type IntrospectLogsInputSchemaType = typeof IntrospectLogsInputSchema;
@@ -58,12 +86,12 @@ export const introspectLogsCommonDefinition: CommonStepDefinition<
   }),
   description: i18n.translate('xpack.errorSentry.introspectLogs.description', {
     defaultMessage:
-      'Discovers the best log index and categorization field for Error Sentry, then saves the result to Elasticsearch.',
+      'Discovers the best log index, category field, severity strategy, and k8s attributes for Error Sentry, then writes the full enriched configuration to Elasticsearch.',
   }),
   documentation: {
     details: i18n.translate('xpack.errorSentry.introspectLogs.documentation.details', {
       defaultMessage:
-        'Probes each entry in {candidateIndexPatterns} in order, picks the first with recent data, inspects its field mappings to find a suitable {text} field, and writes the result to {configIndex}.',
+        'Probes each entry in {candidateIndexPatterns} for recent data, picks the best index, inspects mappings for a {text} field, probes severity field coverage via ESQL, samples a recent document for Kubernetes attribute keys, and writes the full enriched config to {configIndex}.',
       values: {
         candidateIndexPatterns: '`candidateIndexPatterns`',
         text: '`text`-type',

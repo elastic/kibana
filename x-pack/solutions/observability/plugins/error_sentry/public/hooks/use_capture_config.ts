@@ -7,13 +7,8 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
+import type { CaptureConfig } from '../../common/constants';
 import { CAPTURE_LOG_INDEX_DEFAULT, CAPTURE_LOG_LEVELS_DEFAULT } from '../../common/constants';
-
-interface CaptureConfig {
-  index: string;
-  categoryField: string;
-  logLevels: string[];
-}
 
 export const useCaptureConfig = (http: HttpSetup) => {
   const { data } = useQuery(['errorSentry', 'captureConfig'], ({ signal }) =>

@@ -10,7 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { collectLogPatternsCommonDefinition } from '../../common/step_types/collect_log_patterns';
 
-const LOG_LEVEL_FIELDS = ['log.level.keyword', 'log.level'] as const;
+// OTel uses severity_text; ECS uses log.level / log.level.keyword
+const LOG_LEVEL_FIELDS = ['severity_text', 'log.level.keyword', 'log.level'] as const;
 
 const occurrenceLevelForCount = (docCount: number): 'low' | 'medium' | 'high' | 'critical' => {
   if (docCount >= 10000) return 'critical';

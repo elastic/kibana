@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { CaptureConfig } from '../../common/constants';
 import {
   CAPTURE_CONFIG_DOC_ID,
   CAPTURE_CONFIG_INDEX,
@@ -13,12 +14,6 @@ import {
   CAPTURE_LOG_INDEX_DEFAULT,
   CAPTURE_LOG_LEVELS_DEFAULT,
 } from '../../common/constants';
-
-interface CaptureConfigDoc {
-  index: string;
-  categoryField: string;
-  logLevels?: string[];
-}
 
 export const registerGetCaptureConfigRoute = (router: IRouter) => {
   router.get(
@@ -33,7 +28,7 @@ export const registerGetCaptureConfigRoute = (router: IRouter) => {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
       try {
-        const resp = await esClient.get<CaptureConfigDoc>({
+        const resp = await esClient.get<CaptureConfig>({
           index: CAPTURE_CONFIG_INDEX,
           id: CAPTURE_CONFIG_DOC_ID,
         });

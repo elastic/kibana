@@ -8,23 +8,28 @@
 import React from 'react';
 import type { UseMutateAsyncFunction } from '@kbn/react-query';
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
+  EuiCode,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ComponentStatus } from '../../../common/constants';
+import type { CaptureConfig, ComponentStatus } from '../../../common/constants';
 import { ComponentRow } from './component_row';
 
 export function Setup({
   components,
+  captureConfig,
   needsInstall,
   isInstalling,
   notifications,
@@ -33,8 +38,10 @@ export function Setup({
   repairingId,
   runIntrospect,
   isRunningIntrospect,
+  onExport,
 }: {
   components: ComponentStatus[];
+  captureConfig: CaptureConfig | null;
   needsInstall: boolean;
   isInstalling: boolean;
   notifications: NotificationsStart;
@@ -43,6 +50,7 @@ export function Setup({
   repairingId: string | null;
   runIntrospect: () => Promise<unknown>;
   isRunningIntrospect: boolean;
+  onExport: () => void;
 }) {
   const handleRepair = async (componentId: string) => {
     try {
@@ -108,6 +116,19 @@ export function Setup({
                   />
                 </EuiLink>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  iconType="download"
+                  onClick={onExport}
+                  data-test-subj="errorSentryExport"
+                >
+                  <FormattedMessage
+                    id="xpack.errorSentry.setup.exportLabel"
+                    defaultMessage="Export"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiCallOut>
           <EuiSpacer />
@@ -156,6 +177,13 @@ export function Setup({
                   />
                 </React.Fragment>
               ))}
+
+              {category === 'log_sources' && (
+                <>
+                  <EuiSpacer size="m" />
+                  <CaptureConfigPanel captureConfig={captureConfig} />
+                </>
+              )}
             </React.Fragment>
           );
         })}
@@ -173,11 +201,12 @@ const CATEGORY_LABELS: Record<CategoryKey, string> = {
   connectors: 'Connectors',
   agents: 'Agents',
   scs: 'Semantic Code Search',
-  log_sources: 'Log sources',
+  log_sources: 'Observed system',
 };
 
 const COMPONENT_CATEGORY: Record<string, CategoryKey> = {
   step: 'workflows',
+  step_introspect: 'workflows',
   workflow_capture: 'workflows',
   workflow_escalate_github: 'workflows',
   workflow_ask_ralph: 'workflows',
@@ -188,4 +217,167 @@ const COMPONENT_CATEGORY: Record<string, CategoryKey> = {
   scs_repos: 'scs',
   scs_tools: 'scs',
   log_source: 'log_sources',
+};
+
+function CaptureConfigPanel({ captureConfig }: { captureConfig: CaptureConfig | null }) {
+  if (!captureConfig) {
+    return (
+      <EuiText size="xs" color="subdued">
+        <p>
+          <FormattedMessage
+            id="xpack.errorSentry.setup.introspectNotRun"
+            defaultMessage="Run Introspection to detect your log source configuration."
+          />
+        </p>
+      </EuiText>
+    );
+  }
+
+  const {
+    index,
+    categoryField,
+    severityStrategy,
+    severityField,
+    logLevels,
+    textFilter,
+    k8s,
+    totalDocs7d,
+    errorMatchingDocs7d,
+    updatedAt,
+  } = captureConfig;
+
+  const detectionMode =
+    severityStrategy === 'severity'
+      ? i18n.translate('xpack.errorSentry.setup.strategyFieldValue', {
+          defaultMessage: 'Severity field',
+        })
+      : i18n.translate('xpack.errorSentry.setup.strategyText', {
+          defaultMessage: 'Text keyword matching',
+        });
+
+  const detectedK8sKeys = Object.entries(k8s ?? {})
+    .filter(([, v]) => v)
+    .map(([k, v]) => ({ label: K8S_KEY_LABELS[k] ?? k, value: v as string }));
+
+  const listItems = [
+    {
+      title: i18n.translate('xpack.errorSentry.setup.configIndex', { defaultMessage: 'Index' }),
+      description: <EuiCode>{index}</EuiCode>,
+    },
+    {
+      title: i18n.translate('xpack.errorSentry.setup.configCategoryField', {
+        defaultMessage: 'Category field',
+      }),
+      description: <EuiCode>{categoryField}</EuiCode>,
+    },
+    {
+      title: i18n.translate('xpack.errorSentry.setup.configSeverityField', {
+        defaultMessage: 'Severity field',
+      }),
+      description: severityField ? (
+        <EuiCode>{severityField}</EuiCode>
+      ) : (
+        <FormattedMessage
+          id="xpack.errorSentry.setup.configSeverityFieldNotDetected"
+          defaultMessage="Not detected in log data, using text filter instead"
+        />
+      ),
+    },
+    {
+      title: i18n.translate('xpack.errorSentry.setup.configDetectionMode', {
+        defaultMessage: 'Detection mode',
+      }),
+      description: detectionMode,
+    },
+    ...(severityStrategy === 'severity' && logLevels && logLevels.length > 0
+      ? [
+          {
+            title: i18n.translate('xpack.errorSentry.setup.configLogLevels', {
+              defaultMessage: 'Log levels',
+            }),
+            description: (
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                {logLevels.map((level) => (
+                  <EuiFlexItem key={level} grow={false}>
+                    <EuiBadge color="hollow">{level}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ),
+          },
+        ]
+      : []),
+    ...(severityStrategy === 'text' && textFilter
+      ? [
+          {
+            title: i18n.translate('xpack.errorSentry.setup.configTextFilter', {
+              defaultMessage: 'Text filter',
+            }),
+            description: <EuiCode>{textFilter}</EuiCode>,
+          },
+        ]
+      : []),
+    ...(detectedK8sKeys.length > 0
+      ? [
+          {
+            title: i18n.translate('xpack.errorSentry.setup.configK8s', {
+              defaultMessage: 'K8s attributes',
+            }),
+            description: (
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                {detectedK8sKeys.map(({ label, value }) => (
+                  <EuiFlexItem key={value} grow={false}>
+                    <EuiBadge color="hollow" title={value}>
+                      {label}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ),
+          },
+        ]
+      : []),
+    {
+      title: i18n.translate('xpack.errorSentry.setup.configTotalDocs', {
+        defaultMessage: 'Docs (7d)',
+      }),
+      description: totalDocs7d != null ? totalDocs7d.toLocaleString() : '—',
+    },
+    {
+      title: i18n.translate('xpack.errorSentry.setup.configErrorDocs', {
+        defaultMessage: 'Error docs (7d)',
+      }),
+      description: errorMatchingDocs7d != null ? errorMatchingDocs7d.toLocaleString() : '—',
+    },
+  ];
+
+  return (
+    <EuiPanel paddingSize="m" color="subdued" hasShadow={false} hasBorder>
+      <EuiTitle size="xxs">
+        <h4>
+          <FormattedMessage
+            id="xpack.errorSentry.setup.introspectResultsTitle"
+            defaultMessage="Introspection results"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList
+        type="column"
+        columnWidths={['200px', 'auto']}
+        listItems={listItems.map(({ title, description }) => ({
+          title: <EuiText size="s">{title}</EuiText>,
+          description,
+        }))}
+      />
+    </EuiPanel>
+  );
+}
+
+const K8S_KEY_LABELS: Record<string, string> = {
+  podKey: 'Pod',
+  namespaceKey: 'Namespace',
+  deploymentKey: 'Deployment',
+  hostKey: 'Host',
+  serviceKey: 'Service',
 };

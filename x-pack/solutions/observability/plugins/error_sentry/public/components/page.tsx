@@ -44,15 +44,16 @@ export const Page = ({
     isLoading,
     isInstalling,
     components,
+    captureConfig,
     error,
     install,
     runCapture,
     isRunningCapture,
     runIntrospect,
-    isRunningIntrospect,
     repair,
     refetch,
     repairingId,
+    exportConfig,
   } = useErrorSentryStatus(http, discover);
 
   const needsInstall = components.length === 0 || isActionRequired(components);
@@ -121,12 +122,13 @@ export const Page = ({
     if (!isPollingIntrospect || !introspectJustCompleted) return;
     setIsPollingIntrospect(false);
     clearTimeout(introspectTimerRef.current);
+    refetch();
     notifications.toasts.addSuccess(
       i18n.translate('xpack.errorSentry.setup.introspectComplete', {
         defaultMessage: 'Log source detection complete.',
       })
     );
-  }, [isPollingIntrospect, introspectJustCompleted, notifications.toasts]);
+  }, [isPollingIntrospect, introspectJustCompleted, notifications.toasts, refetch]);
 
   const handleInstall = async () => {
     try {
@@ -167,6 +169,18 @@ export const Page = ({
     }
   };
 
+  const handleExport = async () => {
+    try {
+      await exportConfig();
+    } catch {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.errorSentry.setup.exportFailed', {
+          defaultMessage: 'Export failed. Please try again.',
+        })
+      );
+    }
+  };
+
   const handleRunIntrospect = async () => {
     try {
       await runIntrospect();
@@ -194,7 +208,7 @@ export const Page = ({
         pageTitle={<>{ERROR_SENTRY_APP_TITLE}</>}
         description={i18n.translate('xpack.errorSentry.overview.description', {
           defaultMessage:
-            'Use Kibana Error Sentry to monitor and automatically investigate errors in your observed system.',
+            'Use Error Sentry to monitor and automatically investigate errors in your observed system.',
         })}
         rightSideItems={
           components.length === 0
@@ -319,11 +333,13 @@ export const Page = ({
                 isInstalling={isInstalling}
                 notifications={notifications}
                 components={components}
+                captureConfig={captureConfig}
                 repair={repair}
                 refetch={refetch}
                 repairingId={repairingId}
                 runIntrospect={handleRunIntrospect}
                 isRunningIntrospect={isPollingIntrospect}
+                onExport={handleExport}
               />
             )}
           </>

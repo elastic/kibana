@@ -48,7 +48,7 @@ export const Overview = ({
   isPolling: boolean;
   isSetupComplete: boolean;
 }) => {
-  const { isLoading, stats, refetch } = useCasesStats(http, isPolling);
+  const { isLoading, stats } = useCasesStats(http, isPolling);
   const { lastRun, nextRun } = useCaptureTiming(http, isPolling);
   const { index } = useCaptureConfig(http);
 
