@@ -47,9 +47,12 @@ const makeGeneratedQuery = (
   ...overrides,
 });
 
+const MOCK_DEFAULT_EXPIRES_AT = '2099-01-01T00:00:00.000Z';
+
 const createMocks = (existingLinks: QueryLink[] = []) => {
   const kiClient = {
     getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': existingLinks }),
+    getDefaultExpiresAt: jest.fn().mockReturnValue(MOCK_DEFAULT_EXPIRES_AT),
     bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     syncQueries: jest.fn().mockResolvedValue(undefined),
     replaceStreamQueries: jest.fn(

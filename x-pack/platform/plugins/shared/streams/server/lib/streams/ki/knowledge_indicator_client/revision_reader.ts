@@ -10,8 +10,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   KNOWLEDGE_INDICATORS_DATA_STREAM,
   isStoredFeatureKnowledgeIndicator,
+  isStoredQueryKnowledgeIndicator,
   type StoredFeatureKnowledgeIndicator,
   type StoredKnowledgeIndicator,
+  type StoredQueryKnowledgeIndicator,
 } from '../data_stream';
 import { combineWhere, inPredicate, IS_NOT_DELETED } from '../esql_helpers';
 import {
@@ -21,7 +23,7 @@ import {
   withWhere,
   type LatestSourceWhereCondition,
 } from '../../../sig_events/latest_source_query';
-import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
+import { ID, KI_TYPE_FEATURE, KI_TYPE_QUERY, STREAM_NAME, TYPE } from '../fields';
 
 const REVISION_SIZE_LIMIT = 10_000;
 
@@ -64,5 +66,19 @@ export class RevisionReader {
     );
     const docs = await this.fetchLatestRevisions(where, IS_NOT_DELETED);
     return docs.filter(isStoredFeatureKnowledgeIndicator);
+  }
+
+  async fetchLatestQueries(
+    stream: string,
+    ids: string[]
+  ): Promise<StoredQueryKnowledgeIndicator[]> {
+    if (ids.length === 0) return [];
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_QUERY]),
+      inPredicate(STREAM_NAME, [stream]),
+      inPredicate(ID, ids)
+    );
+    const docs = await this.fetchLatestRevisions(where, IS_NOT_DELETED);
+    return docs.filter(isStoredQueryKnowledgeIndicator);
   }
 }
