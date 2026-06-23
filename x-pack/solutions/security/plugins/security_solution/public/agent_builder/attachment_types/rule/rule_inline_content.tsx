@@ -56,22 +56,17 @@ const TagsBadgeList: React.FC<{ tags: string[] }> = ({ tags }) => (
 );
 
 const MitreMappings: React.FC<{ threat: ThreatArray }> = ({ threat }) => (
-  <EuiFlexGroup responsive={false} gutterSize="s" wrap>
-    {threat.map((entry) => (
-      <EuiFlexItem grow={false} key={entry.tactic.id}>
-        <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{entry.tactic.name}</EuiBadge>
-          </EuiFlexItem>
-          {entry.technique &&
-            entry.technique.map((technique) => (
-              <EuiFlexItem grow={false} key={technique.id}>
-                <EuiBadge color="hollow">{technique.name}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    ))}
+  <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+    {threat.flatMap((entry) => [
+      <EuiFlexItem grow={false} key={`tactic-${entry.tactic.id}`}>
+        <EuiBadge color="hollow">{entry.tactic.name}</EuiBadge>
+      </EuiFlexItem>,
+      ...(entry.technique ?? []).map((technique) => (
+        <EuiFlexItem grow={false} key={`technique-${technique.id}`}>
+          <EuiBadge color="hollow">{technique.name}</EuiBadge>
+        </EuiFlexItem>
+      )),
+    ])}
   </EuiFlexGroup>
 );
 
@@ -232,8 +227,19 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      <EuiSpacer size="s" />
-      <RuleTypeDetails rule={rule} />
+      {[
+        'threshold',
+        'threat_match',
+        'machine_learning',
+        'new_terms',
+        'saved_query',
+        'eql',
+      ].includes(rule.type) && (
+        <>
+          <EuiSpacer size="s" />
+          <RuleTypeDetails rule={rule} />
+        </>
+      )}
 
       {rule.tags && rule.tags.length > 0 && (
         <>
