@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiPageHeaderProps } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
@@ -43,6 +44,13 @@ type TabbedTableListViewProps = Pick<
   getBreadcrumbs?: TableListTabParentProps['getBreadcrumbs'];
   showCreateButton?: boolean;
   hideTabs?: boolean;
+  /**
+   * Action node(s) rendered on the page title row, forwarded to
+   * {@link KibanaPageTemplate.Header}'s `rightSideItems`. The shell renders one
+   * shared header across tabs, so callers must gate tab-specific actions on
+   * `activeTabId` themselves.
+   */
+  rightSideItems?: EuiPageHeaderProps['rightSideItems'];
 };
 
 export const TabbedTableListView = ({
@@ -56,6 +64,7 @@ export const TabbedTableListView = ({
   getBreadcrumbs,
   showCreateButton,
   hideTabs,
+  rightSideItems,
 }: TabbedTableListViewProps) => {
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
@@ -93,6 +102,7 @@ export const TabbedTableListView = ({
         <KibanaPageTemplate.Header
           pageTitle={title ? <span id={headingId}>{title}</span> : undefined}
           description={description}
+          rightSideItems={rightSideItems}
           data-test-subj="top-nav"
           tabs={
             hideTabs

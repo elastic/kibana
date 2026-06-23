@@ -24,6 +24,7 @@ export {
 
 // Column components.
 export {
+  createColumn,
   NameColumn,
   NameCell,
   NameCellTags,
