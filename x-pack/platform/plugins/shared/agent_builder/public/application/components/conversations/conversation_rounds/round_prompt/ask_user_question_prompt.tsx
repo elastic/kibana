@@ -214,7 +214,9 @@ export const AskUserQuestionPrompt = ({
         direction="column"
         gutterSize="xs"
         responsive={false}
-        css={css`margin-top: ${euiTheme.size.s};`}
+        css={css`
+          margin-top: ${euiTheme.size.s};
+        `}
       >
         {currentQuestion.options.map((option, optionIndex) => {
           const inputId = `${baseId}-q${currentIndex}-opt${optionIndex}`;
@@ -304,7 +306,9 @@ export const AskUserQuestionPrompt = ({
         justifyContent="spaceBetween"
         alignItems="center"
         responsive={false}
-        css={css`margin-top: ${euiTheme.size.base};`}
+        css={css`
+          margin-top: ${euiTheme.size.base};
+        `}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

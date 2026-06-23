@@ -124,7 +124,12 @@ export const AuthorizationPrompt = ({
         />
       </EuiText>
 
-      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false} css={buttonsRowStyles}>
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="flexEnd"
+        responsive={false}
+        css={buttonsRowStyles}
+      >
         <EuiButton
           onClick={handleCancel}
           disabled={isInteractionDisabled}
