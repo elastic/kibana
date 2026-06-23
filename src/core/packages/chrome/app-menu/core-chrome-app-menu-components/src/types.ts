@@ -120,11 +120,6 @@ interface AppMenuItemBase {
    * Hides the item at the specified responsive breakpoints.
    * */
   hidden?: EuiHideForProps['sizes'];
-  /**
-   * Marks the item as destructive (e.g. delete) by rendering in danger/red color
-   * Not available for primary action items.
-   */
-  isDestructive?: boolean;
 }
 
 type AppMenuLinkItem = AppMenuItemBase & {
@@ -215,24 +210,40 @@ type AppMenuItemWithPopover = AppMenuItemBase & {
 
 export type AppMenuItemCommon = AppMenuButtonItem | AppMenuItemWithPopover | AppMenuLinkItem;
 
-/**
- * Full item type for use in `config.items` arrays.
- */
-export type AppMenuItemType = AppMenuItemCommon & {
+type AppMenuItemTypeBase = AppMenuItemCommon & {
   /**
    * Order of the item in the menu. Lower numbers appear first.
    */
   order: number;
-  /**
-   * If `true`, the item will be moved to the "More" menu. Only used in top-level items, not in popover items.
-   */
-  overflow?: boolean;
   /**
    * Adds a separator line above or below the item when rendered inside a popover menu.
    * Ignored for top-level, non-popover items.
    */
   separator?: 'above' | 'below';
 };
+
+type AppMenuItemTopLevel = AppMenuItemTypeBase & {
+  overflow?: boolean;
+  isDestructive?: never;
+};
+
+type AppMenuItemOverflow = AppMenuItemTypeBase & {
+  /**
+   * The item will be moved to the "More" menu. Only used in top-level items, not in popover items.
+   */
+  overflow: true;
+  /**
+   * Marks the item as destructive (e.g. delete) by rendering in danger/red color.
+   */
+  isDestructive?: boolean;
+};
+
+/**
+ * Full item type for use in `config.items` arrays.
+ * Can be a top-level item or an overflow item.
+ *
+ */
+export type AppMenuItemType = AppMenuItemTopLevel | AppMenuItemOverflow;
 
 export type AppMenuStaticItem = AppMenuItemType & {
   /**
@@ -270,7 +281,7 @@ export interface AppMenuSwitch {
   'data-test-subj'?: string;
 }
 
-interface AppMenuPrimaryActionBase extends Omit<AppMenuItemBase, 'isDestructive'> {
+interface AppMenuPrimaryActionBase extends AppMenuItemBase {
   /**
    * Width of the popover in pixels. Used when `items` or `splitButtonProps.items` is provided.
    */
