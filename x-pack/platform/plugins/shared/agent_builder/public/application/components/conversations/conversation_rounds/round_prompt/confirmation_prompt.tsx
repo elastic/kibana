@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMarkdownFormat,
@@ -95,14 +94,14 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
 
       {/* Body */}
       <EuiFlexItem grow={false}>
-        <EuiMarkdownFormat textSize="s">{body}</EuiMarkdownFormat>
+        <EuiMarkdownFormat textSize="s" css={css`color: ${euiTheme.colors.textSubdued};`}>{body}</EuiMarkdownFormat>
       </EuiFlexItem>
 
       {/* Action buttons */}
       <EuiFlexItem grow={false} css={footerStyles}>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiButton
               onClick={onCancel}
               disabled={isDisabled || isLoading || isAnswered}
               size="s"
@@ -116,7 +115,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
               })}
             >
               {cancelText}
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

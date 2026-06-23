@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -98,7 +98,7 @@ export const AuthorizationPrompt = ({
       <EuiText component="span" css={titleStyles}>
         <FormattedMessage
           id="xpack.agentBuilder.authorizationPrompt.title"
-          defaultMessage="Authorize {connectorIcon} {connectorName}?"
+          defaultMessage="Reauthorize {connectorIcon} {connectorName}?"
           values={{
             connectorIcon: <ConnectorTypeIcon actionTypeId={prompt.connector_type} size="s" />,
             connectorName: prompt.connector_name,
@@ -106,7 +106,7 @@ export const AuthorizationPrompt = ({
         />
       </EuiText>
 
-      <EuiText component="p" size="s">
+      <EuiText component="p" size="s" color="subdued">
         <FormattedMessage
           id="xpack.agentBuilder.authorizationPrompt.message"
           defaultMessage="The agent paused because it needs access to {connectorName} to continue."
@@ -117,7 +117,7 @@ export const AuthorizationPrompt = ({
       </EuiText>
 
       <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
-        <EuiButtonEmpty
+        <EuiButton
           onClick={handleCancel}
           disabled={isInteractionDisabled}
           size="s"
@@ -131,7 +131,7 @@ export const AuthorizationPrompt = ({
           })}
         >
           {isAnswered && answeredValue === false ? labels.declined : labels.deny}
-        </EuiButtonEmpty>
+        </EuiButton>
         <EuiButton
           onClick={handleAuthorize}
           isLoading={isLoading || isConnecting}
