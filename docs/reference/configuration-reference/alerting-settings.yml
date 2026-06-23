@@ -1226,8 +1226,8 @@ groups:
         default: 2800
         applies_to:
           stack: ga 9.4.3
-          ech: ga 9.4.3
-          self: ga 9.4.3
+          ech: ga
+          self: ga
 
       - setting: xpack.alerting.cancelAlertsOnRuleTimeout
         description: |
