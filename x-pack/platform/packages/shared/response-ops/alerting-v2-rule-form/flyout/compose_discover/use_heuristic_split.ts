@@ -192,6 +192,32 @@ export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult 
 }
 
 /**
+ * After a create-mode unified-editor Apply, merges heuristic split output with
+ * any recovery block from the sandbox when the query format is unchanged.
+ * A format change (e.g. standalone no_where → composed after adding WHERE) drops recovery.
+ */
+export function resolveUnifiedAlertApplyQuery(
+  sandboxQuery: RuleQuery,
+  splitResult: RuleQuery
+): RuleQuery {
+  if (
+    splitResult.format === 'composed' &&
+    sandboxQuery.format === 'composed' &&
+    sandboxQuery.recovery
+  ) {
+    return { ...splitResult, recovery: sandboxQuery.recovery };
+  }
+  if (
+    splitResult.format === 'standalone' &&
+    sandboxQuery.format === 'standalone' &&
+    sandboxQuery.recovery
+  ) {
+    return { ...splitResult, recovery: sandboxQuery.recovery };
+  }
+  return splitResult;
+}
+
+/**
  * Produces a candidate recovery block from an alert block by performing a
  * naive per-operator flip of comparison operators (`>` ↔ `<`, `>=` ↔ `<=`).
  * Uses a single-pass regex substitution to avoid the double-replacement bug

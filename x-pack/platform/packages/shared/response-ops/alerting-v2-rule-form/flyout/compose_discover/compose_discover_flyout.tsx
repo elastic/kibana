@@ -48,6 +48,7 @@ import { useEsqlAutocomplete } from './use_esql_providers';
 import {
   guessRecoveryBlock,
   discoverQueryToComposed,
+  resolveUnifiedAlertApplyQuery,
   splitResultToRuleQuery,
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
@@ -663,27 +664,7 @@ export function ComposeDiscoverFlyout({
     let queryToCommit: RuleQuery = sandboxQuery;
     if (isUnifiedAlertApply) {
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
-      /*
-       * Carry over any recovery block from the recovery step when the format is
-       * unchanged. A format change (e.g. adding an alert condition turns a
-       * standalone no_where query into a composed one) cannot carry recovery over.
-       */
-      // two identical branches for composed and standalone queries
-      if (
-        split.format === 'composed' &&
-        sandboxQuery.format === 'composed' &&
-        sandboxQuery.recovery
-      ) {
-        queryToCommit = { ...split, recovery: sandboxQuery.recovery };
-      } else if (
-        split.format === 'standalone' &&
-        sandboxQuery.format === 'standalone' &&
-        sandboxQuery.recovery
-      ) {
-        queryToCommit = { ...split, recovery: sandboxQuery.recovery };
-      } else {
-        queryToCommit = split;
-      }
+      queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
       setSandboxQuery(queryToCommit);
     }
 
