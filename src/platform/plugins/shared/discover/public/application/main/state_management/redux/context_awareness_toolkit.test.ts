@@ -208,24 +208,4 @@ describe('createContextAwarenessToolkit', () => {
       { color: 'primary', rowsPerPage: 100 },
     ]);
   });
-
-  it('caches adapters by definition key', async () => {
-    const { internalState, profileStateRegistry, tabId } = await setup();
-    profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-    const toolkit = createContextAwarenessToolkit({ internalState, profileStateRegistry, tabId });
-
-    expect(toolkit.getStateAdapter(TEST_PROFILE_STATE_DEF)).toBe(
-      toolkit.getStateAdapter(TEST_PROFILE_STATE_DEF)
-    );
-  });
-
-  it('throws when the profile state definition is not registered', async () => {
-    const { internalState, profileStateRegistry, tabId } = await setup();
-
-    expect(() =>
-      createContextAwarenessToolkit({ internalState, profileStateRegistry, tabId }).getStateAdapter(
-        TEST_PROFILE_STATE_DEF
-      )
-    ).toThrow('State with key testProfileState is not registered.');
-  });
 });

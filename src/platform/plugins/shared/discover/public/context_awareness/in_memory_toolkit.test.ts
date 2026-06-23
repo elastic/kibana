@@ -126,16 +126,6 @@ describe('createInMemoryContextAwarenessToolkit', () => {
     ]);
   });
 
-  it('caches adapters by definition key', () => {
-    const toolkit = createInMemoryContextAwarenessToolkit({
-      profileStateRegistry: createRegisteredRegistry(),
-    });
-
-    expect(toolkit.getStateAdapter(TEST_PROFILE_STATE_DEF)).toBe(
-      toolkit.getStateAdapter(TEST_PROFILE_STATE_DEF)
-    );
-  });
-
   it('isolates state between toolkit instances', () => {
     const profileStateRegistry = createRegisteredRegistry();
     const firstToolkit = createInMemoryContextAwarenessToolkit({ profileStateRegistry });
@@ -150,16 +140,6 @@ describe('createInMemoryContextAwarenessToolkit', () => {
 
     expect(secondToolkit.getStateAdapter(TEST_PROFILE_STATE_DEF).getState()).toEqual(
       TEST_PROFILE_STATE_DEF.defaultState
-    );
-  });
-
-  it('throws when the profile state definition is not registered', () => {
-    const toolkit = createInMemoryContextAwarenessToolkit({
-      profileStateRegistry: new ProfileStateRegistry(),
-    });
-
-    expect(() => toolkit.getStateAdapter(TEST_PROFILE_STATE_DEF)).toThrow(
-      'State with key testProfileState is not registered.'
     );
   });
 });

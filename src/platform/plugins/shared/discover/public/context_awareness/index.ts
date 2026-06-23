@@ -12,6 +12,7 @@ export type * from './toolkit';
 export { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from './toolkit';
 export { createInMemoryContextAwarenessToolkit } from './in_memory_toolkit';
 export {
+  createProfileStateAdapterFactory,
   type ProfileStateAdapter,
   type ProfileStateDefinition,
   type ProfileStateDescriptor,

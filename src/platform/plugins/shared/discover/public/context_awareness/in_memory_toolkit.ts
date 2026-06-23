@@ -10,10 +10,11 @@
 import { isEqual } from 'lodash';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from './toolkit';
-import type {
-  ProfileStateAdapter,
-  ProfileStateDefinition,
-  ProfileStateRegistry,
+import {
+  createProfileStateAdapterFactory,
+  type ProfileStateAdapter,
+  type ProfileStateDefinition,
+  type ProfileStateRegistry,
 } from './profile_state';
 
 /**
@@ -27,39 +28,28 @@ export const createInMemoryContextAwarenessToolkit = ({
   actions?: ContextAwarenessToolkitActions;
   profileStateRegistry: ProfileStateRegistry;
 }): ContextAwarenessToolkit => {
-  const stateAdapters = new Map<string, ProfileStateAdapter<Record<string, unknown>>>();
-
   return {
     actions,
-    getStateAdapter: <TState extends object>(definition: ProfileStateDefinition<TState>) => {
-      if (!profileStateRegistry.hasDefinition(definition)) {
-        throw new Error(`State with key ${definition.key} is not registered.`);
-      }
+    getStateAdapter: createProfileStateAdapterFactory({
+      profileStateRegistry,
+      createAdapter: <TState extends object>(
+        definition: ProfileStateDefinition<TState>
+      ): ProfileStateAdapter<TState> => {
+        const stateSubject = new BehaviorSubject<TState>(definition.defaultState);
+        const state$ = stateSubject.pipe(distinctUntilChanged(isEqual));
+        const getState = () => stateSubject.getValue();
 
-      const existingAdapter = stateAdapters.get(definition.key);
-
-      if (existingAdapter) {
-        return existingAdapter as ProfileStateAdapter<TState>;
-      }
-
-      const stateSubject = new BehaviorSubject<TState>(definition.defaultState);
-      const state$ = stateSubject.pipe(distinctUntilChanged(isEqual));
-      const getState = () => stateSubject.getValue();
-
-      const adapter: ProfileStateAdapter<TState> = {
-        getState,
-        getState$: () => state$,
-        setState: (profileState) => {
-          stateSubject.next(profileState);
-        },
-        updateState: (stateUpdate) => {
-          stateSubject.next({ ...getState(), ...stateUpdate });
-        },
-      };
-
-      stateAdapters.set(definition.key, adapter as ProfileStateAdapter<Record<string, unknown>>);
-
-      return adapter;
-    },
+        return {
+          getState,
+          getState$: () => state$,
+          setState: (profileState) => {
+            stateSubject.next(profileState);
+          },
+          updateState: (stateUpdate) => {
+            stateSubject.next({ ...getState(), ...stateUpdate });
+          },
+        };
+      },
+    }),
   };
 };

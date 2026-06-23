@@ -10,10 +10,11 @@
 import { isEqual } from 'lodash';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
-import type {
-  ProfileStateAdapter,
-  ProfileStateDefinition,
-  ProfileStateRegistry,
+import {
+  createProfileStateAdapterFactory,
+  type ProfileStateAdapter,
+  type ProfileStateDefinition,
+  type ProfileStateRegistry,
 } from '../../../../context_awareness';
 import type { InternalStateStore } from './internal_state';
 import { internalStateActions } from '.';
@@ -28,8 +29,6 @@ export const createContextAwarenessToolkit = ({
   profileStateRegistry: ProfileStateRegistry;
   tabId: string;
 }): ContextAwarenessToolkit => {
-  const stateAdapters = new Map<string, ProfileStateAdapter<Record<string, unknown>>>();
-
   return {
     actions: {
       openInNewTab: async (params) => {
@@ -57,51 +56,42 @@ export const createContextAwarenessToolkit = ({
         );
       },
     },
-    getStateAdapter: <TState extends object>(definition: ProfileStateDefinition<TState>) => {
-      if (!profileStateRegistry.hasDefinition(definition)) {
-        throw new Error(`State with key ${definition.key} is not registered.`);
-      }
+    getStateAdapter: createProfileStateAdapterFactory({
+      profileStateRegistry,
+      createAdapter: <TState extends object>(
+        definition: ProfileStateDefinition<TState>
+      ): ProfileStateAdapter<TState> => {
+        const getState = () => {
+          const tabState = selectTab(internalState.getState(), tabId);
 
-      const existingAdapter = stateAdapters.get(definition.key);
+          return (tabState.profileState[definition.key] ?? definition.defaultState) as TState;
+        };
 
-      if (existingAdapter) {
-        return existingAdapter as ProfileStateAdapter<TState>;
-      }
+        const state$ = from(internalState).pipe(map(getState), distinctUntilChanged(isEqual));
 
-      const getState = () => {
-        const tabState = selectTab(internalState.getState(), tabId);
-
-        return (tabState.profileState[definition.key] ?? definition.defaultState) as TState;
-      };
-
-      const state$ = from(internalState).pipe(map(getState), distinctUntilChanged(isEqual));
-
-      const adapter: ProfileStateAdapter<TState> = {
-        getState,
-        getState$: () => state$,
-        setState: (profileState) => {
-          internalState.dispatch(
-            internalStateActions.setProfileState({
-              tabId,
-              key: definition.key,
-              profileState,
-            })
-          );
-        },
-        updateState: (stateUpdate) => {
-          internalState.dispatch(
-            internalStateActions.setProfileState({
-              tabId,
-              key: definition.key,
-              profileState: { ...getState(), ...stateUpdate },
-            })
-          );
-        },
-      };
-
-      stateAdapters.set(definition.key, adapter as ProfileStateAdapter<Record<string, unknown>>);
-
-      return adapter;
-    },
+        return {
+          getState,
+          getState$: () => state$,
+          setState: (profileState) => {
+            internalState.dispatch(
+              internalStateActions.setProfileState({
+                tabId,
+                key: definition.key,
+                profileState,
+              })
+            );
+          },
+          updateState: (stateUpdate) => {
+            internalState.dispatch(
+              internalStateActions.setProfileState({
+                tabId,
+                key: definition.key,
+                profileState: { ...getState(), ...stateUpdate },
+              })
+            );
+          },
+        };
+      },
+    }),
   };
 };

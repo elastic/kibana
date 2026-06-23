@@ -157,3 +157,35 @@ export class ProfileStateRegistry {
     return filteredProfileState;
   }
 }
+
+/**
+ * Creates a definition-validated, cached adapter factory for host-specific state adapters.
+ */
+export const createProfileStateAdapterFactory = ({
+  createAdapter,
+  profileStateRegistry,
+}: {
+  createAdapter: <TState extends object>(
+    definition: ProfileStateDefinition<TState>
+  ) => ProfileStateAdapter<TState>;
+  profileStateRegistry: ProfileStateRegistry;
+}) => {
+  const stateAdapters = new Map<string, ProfileStateAdapter<Record<string, unknown>>>();
+
+  return <TState extends object>(definition: ProfileStateDefinition<TState>) => {
+    if (!profileStateRegistry.hasDefinition(definition)) {
+      throw new Error(`State with key ${definition.key} is not registered.`);
+    }
+
+    const existingAdapter = stateAdapters.get(definition.key);
+
+    if (existingAdapter) {
+      return existingAdapter as ProfileStateAdapter<TState>;
+    }
+
+    const adapter = createAdapter(definition);
+    stateAdapters.set(definition.key, adapter as ProfileStateAdapter<Record<string, unknown>>);
+
+    return adapter;
+  };
+};
