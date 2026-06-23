@@ -37,10 +37,10 @@ apiTest.describe('content management - created_by', { tag: tags.deploymentAgnost
     // API key auth = authenticated, but no SAML user profile → created_by must not be set.
     const response = await apiClient.post(DASHBOARD_API_PATH, {
       headers: { ...DASHBOARD_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: { title: 'Sample dashboard' },
+      body: { data: { title: 'Sample dashboard' } },
     });
 
-    expect(response).toHaveStatusCode(201);
+    expect(response).toHaveStatusCode(200);
     createdDashboardIds.add(response.body.id);
     expect(response.body.data).toBeDefined();
     expect(response.body.meta.created_by).toBeUndefined();
@@ -62,10 +62,10 @@ apiTest.describe('content management - created_by', { tag: tags.deploymentAgnost
 
       const response = await apiClient.post(DASHBOARD_API_PATH, {
         headers: { ...DASHBOARD_HEADERS, ...cookieHeader },
-        body: { title: 'Sample dashboard' },
+        body: { data: { title: 'Sample dashboard' } },
       });
 
-      expect(response).toHaveStatusCode(201);
+      expect(response).toHaveStatusCode(200);
       createdDashboardIds.add(response.body.id);
       expect(response.body.data).toBeDefined();
       expect(response.body.meta.created_by).toBe(profileUid);

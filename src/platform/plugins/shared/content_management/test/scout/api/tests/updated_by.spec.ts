@@ -62,9 +62,9 @@ apiTest.describe('content management - updated_by', { tag: tags.deploymentAgnost
   apiTest.beforeEach(async ({ apiClient }) => {
     const response = await apiClient.post(DASHBOARD_API_PATH, {
       headers: { ...DASHBOARD_HEADERS, ...user1CookieHeader },
-      body: { title: 'Sample dashboard' },
+      body: { data: { title: 'Sample dashboard' } },
     });
-    expect(response).toHaveStatusCode(201);
+    expect(response).toHaveStatusCode(200);
     dashboardId = response.body.id;
     dashboardMeta = response.body.meta;
     createdDashboardIds.add(dashboardId);
@@ -83,15 +83,15 @@ apiTest.describe('content management - updated_by', { tag: tags.deploymentAgnost
   apiTest('updated_by is absent for non-interactive user', async ({ apiClient }) => {
     const createResponse = await apiClient.post(DASHBOARD_API_PATH, {
       headers: { ...DASHBOARD_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: { title: 'Sample dashboard' },
+      body: { data: { title: 'Sample dashboard' } },
     });
-    expect(createResponse).toHaveStatusCode(201);
+    expect(createResponse).toHaveStatusCode(200);
     createdDashboardIds.add(createResponse.body.id);
     expect(createResponse.body.meta.updated_by).toBeUndefined();
 
     const updateResponse = await apiClient.put(`${DASHBOARD_API_PATH}/${createResponse.body.id}`, {
       headers: { ...DASHBOARD_HEADERS, ...adminCredentials.apiKeyHeader },
-      body: { title: 'updated title' },
+      body: { data: { title: 'updated title' } },
     });
     expect(updateResponse).toHaveStatusCode(200);
     expect(updateResponse.body.meta.updated_by).toBeUndefined();
@@ -111,7 +111,7 @@ apiTest.describe('content management - updated_by', { tag: tags.deploymentAgnost
     async ({ apiClient }) => {
       const updateResponse = await apiClient.put(`${DASHBOARD_API_PATH}/${dashboardId}`, {
         headers: { ...DASHBOARD_HEADERS, ...adminCredentials.apiKeyHeader },
-        body: { title: 'updated title' },
+        body: { data: { title: 'updated title' } },
       });
       expect(updateResponse).toHaveStatusCode(200);
 
@@ -136,7 +136,7 @@ apiTest.describe('content management - updated_by', { tag: tags.deploymentAgnost
     async ({ apiClient }) => {
       const updateResponse = await apiClient.put(`${DASHBOARD_API_PATH}/${dashboardId}`, {
         headers: { ...DASHBOARD_HEADERS, ...user2CookieHeader },
-        body: { title: 'updated title' },
+        body: { data: { title: 'updated title' } },
       });
       expect(updateResponse).toHaveStatusCode(200);
 

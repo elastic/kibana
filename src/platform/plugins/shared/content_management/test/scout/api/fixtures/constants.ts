@@ -9,7 +9,10 @@
 
 /** Dashboard API base path (no leading slash — for use with apiClient). */
 export const DASHBOARD_API_PATH = 'api/dashboards';
-export const DASHBOARD_API_VERSION = '2023-10-31';
+// In 9.3 the public Dashboard API is still internal and pinned to version '1'
+// (see INTERNAL_API_VERSION in the dashboard plugin). The '2023-10-31' public
+// version only exists on later branches.
+export const DASHBOARD_API_VERSION = '1';
 
 /** Favorites API base path (no leading slash — for use with apiClient). */
 export const FAVORITES_API_PATH = 'internal/content_management/favorites';
