@@ -12,6 +12,7 @@ import { ChangeHistoryEmptyPrompt } from '../timeline/change_history_empty_promp
 import { ChangeHistoryListErrorPrompt } from '../timeline/change_history_list_error_prompt';
 import { ChangeHistoryTimeline } from '../timeline/change_history_timeline';
 import { useChangeHistoryList } from '../../hooks/use_change_history_list';
+import { ChangeHistoryListItemsContext } from '../../provider/change_history_list_items_context';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
 import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
@@ -157,28 +158,31 @@ export function ChangeHistoryModal(): JSX.Element | null {
   };
 
   return (
-    <EuiModal
-      onClose={closeModal}
-      maxWidth={false}
-      css={styles.modal}
-      data-test-subj="changeHistoryModal"
-    >
-      <EuiModalBody css={styles.modalBody}>
-        <div css={styles.splitLayout}>
-          <ChangeHistoryPreviewShell
-            backLabel={labels.previewBackLabel}
-            title={labels.previewTitle}
-            onBack={closeModal}
-            footer={previewFooter}
-          >
-            <ChangeHistoryPreviewPanel />
-          </ChangeHistoryPreviewShell>
+    // List order is provided by ChangeHistoryListItemsContext (newest-first for workflows).
+    <ChangeHistoryListItemsContext.Provider value={items}>
+      <EuiModal
+        onClose={closeModal}
+        maxWidth={false}
+        css={styles.modal}
+        data-test-subj="changeHistoryModal"
+      >
+        <EuiModalBody css={styles.modalBody}>
+          <div css={styles.splitLayout}>
+            <ChangeHistoryPreviewShell
+              backLabel={labels.previewBackLabel}
+              title={labels.previewTitle}
+              onBack={closeModal}
+              footer={previewFooter}
+            >
+              <ChangeHistoryPreviewPanel />
+            </ChangeHistoryPreviewShell>
 
-          <ChangeHistorySidebarPanel title={labels.timelinePanelTitle} onClose={closeModal}>
-            {renderSidebarContent()}
-          </ChangeHistorySidebarPanel>
-        </div>
-      </EuiModalBody>
-    </EuiModal>
+            <ChangeHistorySidebarPanel title={labels.timelinePanelTitle} onClose={closeModal}>
+              {renderSidebarContent()}
+            </ChangeHistorySidebarPanel>
+          </div>
+        </EuiModalBody>
+      </EuiModal>
+    </ChangeHistoryListItemsContext.Provider>
   );
 }

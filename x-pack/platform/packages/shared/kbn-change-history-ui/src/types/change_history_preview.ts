@@ -12,4 +12,6 @@ import type { ChangeHistoryDetail } from './change_history_detail';
 export type ChangeHistoryPreviewRenderFn = (props: {
   change: ChangeHistoryDetail;
   objectId: string;
+  /** Optional prior version to compare against (e.g. previous workflow YAML). */
+  compareChange?: ChangeHistoryDetail;
 }) => ReactNode;

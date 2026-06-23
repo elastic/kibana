@@ -33,6 +33,8 @@ export type {
 } from './src/components/modal';
 export { ChangeHistoryProvider, useChangeHistoryConfig } from './src/provider';
 export type { ChangeHistoryProviderProps } from './src/provider';
+export { useChangeHistoryListItems } from './src/provider/change_history_list_items_context';
+export { getPreviousChangeId } from './src/utils/get_previous_change_id';
 export { useChangeHistoryList, useChangeHistoryDetail } from './src/hooks';
 export type {
   UseChangeHistoryListArgs,

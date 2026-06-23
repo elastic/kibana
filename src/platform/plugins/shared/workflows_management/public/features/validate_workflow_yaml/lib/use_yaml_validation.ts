@@ -9,22 +9,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
-import { collectAllVariables } from './collect_all_variables';
+import { createMarkersAndDecorations } from './create_yaml_validation_markers_and_decorations';
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
+import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
 import { validateConnectorIds } from './validate_connector_ids';
-import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
-import { validateIfConditions } from './validate_if_conditions';
-import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
-import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
-import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateStepProperties } from './validate_step_properties';
-import { validateTriggerConditions } from './validate_trigger_conditions';
-import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
-import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
   selectConnectors,
@@ -37,18 +30,11 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
 import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
-import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import {
   BATCHED_CUSTOM_MARKER_OWNER,
   validationResultFingerprint,
   type YamlValidationResult,
 } from '../model/types';
-
-const SEVERITY_MAP = {
-  error: MarkerSeverity.Error,
-  warning: MarkerSeverity.Warning,
-  info: MarkerSeverity.Info,
-};
 
 function buildResultsFingerprint(results: YamlValidationResult[]): string {
   if (results.length === 0) {
@@ -151,59 +137,36 @@ export function useYamlValidation(
       // so that connector-id, step-name, liquid-template, step-property, and
       // workflow-inputs validation still provide feedback.
       const yamlString = model.getValue();
-      const liquidScalarResults =
-        workflowGraph && workflowDefinition
-          ? validateLiquidYamlScalars(
-              yamlString,
-              yamlDocument,
-              model,
-              workflowGraph,
-              workflowDefinition
-            )
-          : validateLiquidYamlScalars(yamlString, yamlDocument, null);
-      const results: YamlValidationResult[] = [
-        ...(lineCounter ? validateStepNameUniqueness(yamlDocument, lineCounter) : []),
-        ...liquidScalarResults.filter((result) => result.owner === 'liquid-template-validation'),
-        ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
-        ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
-        ...(stepPropertyItems ? await validateStepProperties(stepPropertyItems) : []),
-        // Lookup-backed validators run sequentially (each await blocks the next).
-        // ES|QL runs after step-property validation so property errors surface first
-        // and we avoid overlapping cluster calls from validateQuery with property handlers.
-        ...(workflowLookup && lineCounter
-          ? [
-              ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
-              ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
-              ...validateIfConditions(workflowLookup, lineCounter),
-              ...(await validateEsqlSteps(
-                workflowLookup,
-                lineCounter,
-                model,
-                esqlCallbacksRef.current,
-                esqlAbortController.signal
-              ).catch(() => [])),
-            ]
-          : []),
-      ];
-
-      // Variable and JSON-schema-default validations require a fully parsed
-      // workflowGraph and workflowDefinition. When those are unavailable
-      // (e.g. YAML has structural issues that prevent graph construction),
-      // these validations are skipped gracefully; the remaining validators
-      // above still provide feedback.
-      if (workflowGraph && workflowDefinition) {
-        const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
-        results.push(
-          ...validateTriggerConditions(workflowDefinition, yamlDocument),
-          ...validateVariablesInternal(
-            variableItems,
-            workflowGraph,
-            workflowDefinition,
+      const results: YamlValidationResult[] = lineCounter
+        ? runWorkflowYamlValidations({
+            yamlString,
+            model,
             yamlDocument,
-            model
-          ),
-          ...liquidScalarResults.filter((result) => result.owner === 'variable-validation'),
-          ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
+            lineCounter,
+            workflowLookup: workflowLookup ?? undefined,
+            workflowGraph: workflowGraph ?? undefined,
+            workflowDefinition: workflowDefinition ?? undefined,
+          })
+        : [];
+
+      results.push(
+        ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl)
+      );
+
+      if (stepPropertyItems.length > 0) {
+        results.push(...(await validateStepProperties(stepPropertyItems)));
+      }
+
+      if (workflowLookup && lineCounter) {
+        results.push(
+          ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
+          ...(await validateEsqlSteps(
+            workflowLookup,
+            lineCounter,
+            model,
+            esqlCallbacksRef.current,
+            esqlAbortController.signal
+          ).catch(() => []))
         );
       }
 
@@ -245,200 +208,4 @@ export function useYamlValidation(
     isLoading,
     validationResults,
   };
-}
-
-// create markers and decorations for the validation results
-// eslint-disable-next-line complexity
-function createMarkersAndDecorations(validationResults: YamlValidationResult[]): {
-  markers: monaco.editor.IMarkerData[];
-  decorations: monaco.editor.IModelDeltaDecoration[];
-} {
-  const markers: monaco.editor.IMarkerData[] = [];
-  const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-  for (const validationResult of validationResults) {
-    const marker = {
-      startLineNumber: validationResult.startLineNumber,
-      startColumn: validationResult.startColumn,
-      endLineNumber: validationResult.endLineNumber,
-      endColumn: validationResult.endColumn,
-    };
-    if (validationResult.owner === 'variable-validation') {
-      if (validationResult.severity !== null) {
-        markers.push({
-          ...marker,
-          severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message,
-          source: 'variable-validation',
-        });
-      }
-      // handle valid variables
-      decorations.push({
-        range: createRange(validationResult),
-        options: {
-          inlineClassName: `template-variable-${validationResult.severity ?? 'valid'}`,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-        },
-      });
-    } else if (validationResult.owner === 'json-schema-default-validation') {
-      if (validationResult.severity !== null) {
-        markers.push({
-          ...marker,
-          severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message,
-          source: 'json-schema-default-validation',
-        });
-      }
-    } else if (validationResult.owner === 'liquid-template-validation') {
-      markers.push({
-        ...marker,
-        severity: SEVERITY_MAP[validationResult.severity],
-        message: validationResult.message,
-        source: 'liquid-template-validation',
-      });
-      decorations.push({
-        range: createRange(validationResult),
-        options: {
-          inlineClassName: `liquid-template-${validationResult.severity ?? 'valid'}`,
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
-        },
-      });
-    } else if (validationResult.owner === 'step-name-validation') {
-      markers.push({
-        ...marker,
-        severity: SEVERITY_MAP[validationResult.severity],
-        message: validationResult.message,
-        source: 'step-name-validation',
-      });
-      decorations.push({
-        range: new monaco.Range(
-          validationResult.startLineNumber,
-          1,
-          validationResult.startLineNumber,
-          validationResult.endColumn
-        ),
-        options: {
-          className: 'duplicate-step-name-error',
-          marginClassName: 'duplicate-step-name-error-margin',
-          isWholeLine: true,
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-        },
-      });
-    } else if (validationResult.owner === 'connector-id-validation') {
-      if (validationResult.severity !== null) {
-        markers.push({
-          ...marker,
-          severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message ?? '',
-          source: 'connector-id-validation',
-        });
-      }
-      decorations.push({
-        range: createRange(validationResult),
-        options: createSelectionDecoration(validationResult),
-      });
-    } else if (validationResult.owner === 'step-property-validation') {
-      if (validationResult.severity !== null) {
-        markers.push({
-          ...marker,
-          severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message,
-          source: 'step-property-validation',
-        });
-      }
-      decorations.push({
-        range: createRange(validationResult),
-        options: createSelectionDecoration(validationResult),
-      });
-    } else if (validationResult.owner === 'workflow-output-validation') {
-      markers.push({
-        ...marker,
-        severity: SEVERITY_MAP[validationResult.severity],
-        message: validationResult.message,
-        source: 'workflow-output-validation',
-      });
-      decorations.push({
-        range: createRange(validationResult),
-        options: {
-          inlineClassName: `workflow-output-validation-${validationResult.severity}`,
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
-        },
-      });
-    } else {
-      if (validationResult.severity !== null) {
-        markers.push({
-          ...marker,
-          severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message,
-          source: validationResult.owner,
-        });
-      }
-      decorations.push({
-        range: createRange(validationResult),
-        options: {
-          inlineClassName: `${validationResult.owner}-${validationResult.severity ?? 'valid'}`,
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          hoverMessage: validationResult.hoverMessage
-            ? createMarkdownContent(validationResult.hoverMessage)
-            : null,
-          after: validationResult.afterMessage
-            ? {
-                content: validationResult.afterMessage,
-                cursorStops: monaco.editor.InjectedTextCursorStops.None,
-                inlineClassName: `after-text`,
-              }
-            : null,
-        },
-      });
-    }
-  }
-  return { markers, decorations };
-}
-
-function createRange(validationResult: YamlValidationResult): monaco.Range {
-  return new monaco.Range(
-    validationResult.startLineNumber,
-    validationResult.startColumn,
-    validationResult.endLineNumber,
-    validationResult.endColumn
-  );
-}
-
-function createMarkdownContent(content: string): monaco.IMarkdownString {
-  return {
-    value: content,
-    isTrusted: true,
-    supportHtml: true,
-  };
-}
-
-function createSelectionDecoration(
-  validationResult: YamlValidationResult
-): monaco.editor.IModelDecorationOptions {
-  const decorationOptions: monaco.editor.IModelDecorationOptions = {
-    stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-    hoverMessage: validationResult.hoverMessage
-      ? createMarkdownContent(validationResult.hoverMessage)
-      : null,
-    before: validationResult.beforeMessage
-      ? {
-          content: validationResult.beforeMessage,
-          cursorStops: monaco.editor.InjectedTextCursorStops.None,
-          inlineClassName: `connector-name-badge`,
-        }
-      : null,
-  };
-  // Only add inlineClassName for errors, not for valid connectors
-  if (validationResult.severity !== null) {
-    decorationOptions.inlineClassName = `template-variable-${validationResult.severity}`;
-  }
-  return decorationOptions;
 }

@@ -44,6 +44,7 @@ export function ChangeHistoryPreviewShell({
         display: flex;
         flex-direction: column;
         background: ${euiTheme.colors.backgroundBasePlain};
+        border: ${euiTheme.border.thin};
         border-radius: ${euiTheme.border.radius.small};
         ${euiShadowXSmall(euiThemeContext, { border: 'none' })}
         overflow: hidden;
