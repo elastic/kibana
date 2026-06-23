@@ -554,6 +554,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const isNlToEsqlEnabled = useNlToEsqlCheck();
 
+  const onUpdateAndSubmitQueryRef = useRef(onUpdateAndSubmitQuery);
+  onUpdateAndSubmitQueryRef.current = onUpdateAndSubmitQuery;
+
   // Forward-declared so the comment-to-esql hook can hide an already-visible
   // ghost hint when generation starts; populated below by useGhostLineHint.
   const clearGhostHintRef = useRef<() => void>(() => {});
@@ -579,6 +582,25 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
   onGenerateFromCommentRef.current = onGenerateFromComment;
+
+  const [shouldAutoTrigger, setShouldAutoTrigger] = useState(false);
+  useEffect(() => {
+    if (!shouldAutoTrigger || !isNlToEsqlEnabled) return;
+    setShouldAutoTrigger(false);
+    const model = editorModel.current;
+    const editor = editorRef.current;
+    if (!model || !editor) return;
+    const lines = model
+      .getValue()
+      .split('\n')
+      .filter((l) => l.trim());
+    if (!lines.length || !lines.every((l) => l.trim().startsWith('//'))) return;
+    editor.setPosition({ lineNumber: 1, column: 1 });
+    autoAcceptCommentCallbackRef.current = (generatedQuery) => {
+      onUpdateAndSubmitQueryRef.current(generatedQuery, QuerySource.QUICK_SEARCH);
+    };
+    onGenerateFromCommentRef.current();
+  }, [isNlToEsqlEnabled, shouldAutoTrigger]);
 
   const { ghostLineHintStyle, setupGhostLineHint } = useGhostLineHint({
     editorRef,
@@ -808,21 +830,15 @@ const ESQLEditorInternal = function ESQLEditor({
                       addSourcesDecorator();
                     }
 
-                    if (isNlToEsqlEnabled) {
-                      const initialLines = model
-                        .getValue()
-                        .split('\n')
-                        .filter((l) => l.trim());
-                      const isAllComments =
-                        initialLines.length > 0 &&
-                        initialLines.every((l) => l.trim().startsWith('//'));
-                      if (isAllComments) {
-                        editor.setPosition({ lineNumber: 1, column: 1 });
-                        autoAcceptCommentCallbackRef.current = (generatedQuery) => {
-                          onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH);
-                        };
-                        onGenerateFromCommentRef.current();
-                      }
+                    const initialLines = model
+                      .getValue()
+                      .split('\n')
+                      .filter((l) => l.trim());
+                    const isAllComments =
+                      initialLines.length > 0 &&
+                      initialLines.every((l) => l.trim().startsWith('//'));
+                    if (isAllComments) {
+                      setShouldAutoTrigger(true);
                     }
                   }
 

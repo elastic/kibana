@@ -96,6 +96,8 @@ export function fetchAll(
         .filter((l) => l.trim())
         .every((l) => l.trim().startsWith('//'))
     ) {
+      sendResetMsg(dataSubjects, FetchStatus.UNINITIALIZED);
+      sendCompleteMsg(dataSubjects.main$, true);
       return Promise.resolve();
     }
 

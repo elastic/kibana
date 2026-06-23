@@ -348,7 +348,7 @@ export const DiscoverTopNav = ({
   const kqlFooterOption = useMemo(() => {
     if (isEsqlMode || !hasAiConnector || !draftKqlText.trim()) return undefined;
     return {
-      label: i18n.translate('discover.dslToEsql.askAiLabel', { defaultMessage: 'Ask AI' }),
+      label: i18n.translate('discover.dslToEsql.askAiLabel', { defaultMessage: 'or ask using AI' }),
       iconType: 'productAgent' as const,
       onClick: () => {
         onOpenQueryInNewTab(
