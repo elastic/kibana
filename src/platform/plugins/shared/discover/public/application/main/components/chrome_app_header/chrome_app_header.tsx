@@ -76,7 +76,7 @@ export const ChromeAppHeader = ({
         back={back}
         menu={appMenu}
         sticky={false}
-        padding="m"
+        padding="s"
         titleAppend={titleAppend}
         borderless={hasTabs}
       />
