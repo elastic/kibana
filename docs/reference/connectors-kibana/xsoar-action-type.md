@@ -1,7 +1,7 @@
 ---
 navigation_title: "{{xsoar}}"
 type: reference
-description: "Use the XSOAR connector to create Cortex XSOAR incidents from Elastic rules and workflows."
+description: "Use the XSOAR connector to create Cortex XSOAR incidents from Elastic rules and Workflows."
 applies_to:
   stack: ga 9.1
   serverless: ga
