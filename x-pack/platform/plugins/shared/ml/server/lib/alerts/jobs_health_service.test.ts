@@ -13,7 +13,13 @@ import type { DeepPartial } from '@kbn/utility-types';
 import type { MlClient } from '../ml_client';
 import type { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import type { AnnotationService } from '../../models/annotation_service/annotation';
-import type { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
+import type { MlGetBucketsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AnomalyDetectionJobHealthAlertPayload,
+  DelayedDataPayloadResponse,
+  JobsHealthExecutorOptions,
+} from './register_jobs_monitoring_rule_type';
+import { ALERT_DELAYED_DATA_RESULTS } from '../../../common/constants/alerts';
 import type { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 
@@ -46,8 +52,37 @@ function getDefaultExecutorOptions(
   } as unknown as JobsHealthExecutorOptions;
 }
 
+const createBucketsResponse = (jobId: string, eventCount: number): MlGetBucketsResponse => ({
+  count: 1,
+  buckets: [
+    {
+      anomaly_score: 0,
+      bucket_influencers: [],
+      bucket_span: 3600,
+      event_count: eventCount,
+      initial_anomaly_score: 0,
+      is_interim: false,
+      job_id: jobId,
+      processing_time_ms: 0,
+      result_type: 'bucket',
+      timestamp: 0,
+    },
+  ],
+});
+
+const getDelayedDataPayloadResults = (
+  payload: AnomalyDetectionJobHealthAlertPayload
+): DelayedDataPayloadResponse[] => {
+  if (!(ALERT_DELAYED_DATA_RESULTS in payload)) {
+    throw new Error('Expected delayed data alert payload');
+  }
+
+  return payload[ALERT_DELAYED_DATA_RESULTS];
+};
+
 describe('JobsHealthService', () => {
   const mlClient = {
+    getBuckets: jest.fn().mockResolvedValue({ count: 0, buckets: [] }),
     getJobs: jest.fn().mockImplementation(({ job_id: jobIds = [] }) => {
       let jobs: MlJob[] = [];
 
@@ -138,6 +173,7 @@ describe('JobsHealthService', () => {
               jobId === 'test_job_01' ? 11 : 8
             } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
             modified_time: 1627660295141,
+            timestamp: 1627653000000,
             end_timestamp: 1627653300000,
           };
         })
@@ -329,6 +365,100 @@ describe('JobsHealthService', () => {
         },
       },
     ]);
+  });
+
+  test('percentage mode: alerts when missed docs exceed the percentage threshold', async () => {
+    // test_job_01 exceeds the 10% threshold, test_job_02 does not
+    mlClient.getBuckets.mockImplementation(async ({ job_id: jobId }) => {
+      const eventCount = jobId === 'test_job_01' ? 89 : 92;
+      return createBucketsResponse(jobId, eventCount);
+    });
+
+    const executionResult = await jobHealthService.getTestsResults(
+      getDefaultExecutorOptions({
+        rule: { name: 'testRule_pct' },
+        params: {
+          testsConfig: {
+            delayedData: {
+              enabled: true,
+              thresholdType: 'percentage',
+              docsCountPercentage: 10,
+              docsCount: null,
+              timeInterval: '4h',
+            },
+            behindRealtime: { enabled: false, timeInterval: null },
+            mml: { enabled: false },
+            datafeed: { enabled: false },
+            errorMessages: { enabled: false },
+          },
+          includeJobs: { jobIds: [], groupIds: ['test_group'] },
+          excludeJobs: { jobIds: ['test_job_03'], groupIds: [] },
+        },
+      })
+    );
+
+    expect(executionResult).toHaveLength(1);
+    const [delayedResult] = executionResult;
+
+    expect(delayedResult.isHealthy).toBe(false);
+    expect(delayedResult.name).toBe('Data delay has occurred');
+
+    const payloadResults = getDelayedDataPayloadResults(delayedResult.payload);
+    expect(payloadResults).toHaveLength(1);
+    expect(payloadResults[0].job_id).toBe('test_job_01');
+    expect(payloadResults[0].missed_docs_percentage).toBeCloseTo(11, 1);
+
+    const contextResults = delayedResult.context.results as Array<{
+      job_id: string;
+      missed_docs_percentage?: number;
+    }>;
+    expect(contextResults).toHaveLength(1);
+    expect(contextResults[0].job_id).toBe('test_job_01');
+    expect(contextResults[0].missed_docs_percentage).toBeCloseTo(11, 1);
+  });
+
+  test('percentage mode: healthy when all jobs are below the threshold', async () => {
+    // Both jobs miss fewer docs than the 20% threshold.
+    mlClient.getBuckets.mockImplementation(async ({ job_id: jobId }) => {
+      const eventCount = jobId === 'test_job_01' ? 89 : 92;
+      return createBucketsResponse(jobId, eventCount);
+    });
+
+    const executionResult = await jobHealthService.getTestsResults(
+      getDefaultExecutorOptions({
+        rule: { name: 'testRule_pct_healthy' },
+        params: {
+          testsConfig: {
+            delayedData: {
+              enabled: true,
+              thresholdType: 'percentage',
+              docsCountPercentage: 20,
+              docsCount: null,
+              timeInterval: '4h',
+            },
+            behindRealtime: { enabled: false, timeInterval: null },
+            mml: { enabled: false },
+            datafeed: { enabled: false },
+            errorMessages: { enabled: false },
+          },
+          includeJobs: { jobIds: [], groupIds: ['test_group'] },
+          excludeJobs: { jobIds: ['test_job_03'], groupIds: [] },
+        },
+      })
+    );
+
+    expect(executionResult).toHaveLength(1);
+    expect(executionResult[0].isHealthy).toBe(true);
+    expect(executionResult[0].name).toBe('Data delay has occurred');
+
+    const payloadResults = getDelayedDataPayloadResults(executionResult[0].payload);
+    expect(payloadResults).toHaveLength(2);
+    expect(
+      payloadResults.find((r) => r.job_id === 'test_job_01')?.missed_docs_percentage
+    ).toBeCloseTo(11, 1);
+    expect(
+      payloadResults.find((r) => r.job_id === 'test_job_02')?.missed_docs_percentage
+    ).toBeCloseTo(8, 1);
   });
 
   test('returns results based on provided selection', async () => {

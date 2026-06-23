@@ -80,6 +80,8 @@ export interface DelayedDataResponse {
   missed_docs_count: number;
   /** Timestamp of the latest finalized bucket with missing docs */
   end_timestamp: string;
+  /** Percentage of total docs that were missed (only present in percentage threshold mode) */
+  missed_docs_percentage?: number;
 }
 
 export interface DelayedDataPayloadResponse {
@@ -89,6 +91,8 @@ export interface DelayedDataPayloadResponse {
   /** Number of missed documents */
   missed_docs_count: number;
   end_timestamp: DateTime;
+  /** Percentage of total docs that were missed (only present in percentage threshold mode) */
+  missed_docs_percentage?: number;
 }
 
 export interface JobsErrorsResponse {
@@ -179,6 +183,7 @@ export const ANOMALY_DETECTION_HEALTH_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetec
           annotation: { type: ES_FIELD_TYPES.TEXT },
           missed_docs_count: { type: ES_FIELD_TYPES.LONG },
           end_timestamp: { type: ES_FIELD_TYPES.DATE },
+          missed_docs_percentage: { type: ES_FIELD_TYPES.FLOAT },
         },
       },
       [ALERT_JOB_ERRORS_RESULTS]: {

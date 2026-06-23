@@ -60,6 +60,25 @@ export interface TestResult {
 
 type TestsResults = TestResult[];
 
+interface DelayedDataAnnotation {
+  job_id: string;
+  annotation: string;
+  end_timestamp: number;
+  timestamp: number;
+  missed_docs_count: number;
+}
+
+interface DelayedDataConfig {
+  thresholdType: 'count' | 'percentage';
+  docsCount: number | null;
+  docsCountPercentage: number | null;
+}
+
+interface DelayedDataThreshold {
+  effectiveDocsThreshold: number;
+  missedDocsPercentage?: number;
+}
+
 export function jobsHealthServiceProvider(
   mlClient: MlClient,
   datafeedsService: DatafeedsService,
@@ -99,6 +118,9 @@ export function jobsHealthServiceProvider(
           annotation: payload.annotation,
           missed_docs_count: payload.missed_docs_count,
           end_timestamp: dateFormatter(payload.end_timestamp),
+          ...(payload.missed_docs_percentage !== undefined
+            ? { missed_docs_percentage: payload.missed_docs_percentage }
+            : {}),
         };
       },
     };
@@ -186,6 +208,53 @@ export function jobsHealthServiceProvider(
     };
   };
 
+/**
+ * Resolves the missed-docs threshold for each delayed-data annotation.
+ * Count mode reuses the configured doc count. Percentage mode derives the
+ * threshold from the annotation range's analyzed event count.
+ */
+  const resolveDelayedDataThresholds = async (
+    annotations: DelayedDataAnnotation[],
+    delayedDataConfig: DelayedDataConfig
+  ): Promise<DelayedDataThreshold[]> => {
+    if (delayedDataConfig.thresholdType !== 'percentage') {
+      const docsCountThreshold = delayedDataConfig.docsCount ?? 0;
+      return annotations.map(() => ({ effectiveDocsThreshold: docsCountThreshold }));
+    }
+
+// Use the full annotation range as the denominator; it may include clean buckets,
+    const pct = delayedDataConfig.docsCountPercentage ?? 0;
+    const bucketsPageSize = 1000;
+    return Promise.all(
+      annotations.map(async (v) => {
+        try {
+          const bucketsResp = await mlClient.getBuckets({
+            job_id: v.job_id,
+            start: String(v.timestamp),
+            end: String(v.end_timestamp),
+            page: { from: 0, size: bucketsPageSize },
+          });
+          const eventCountSum = (bucketsResp.buckets ?? []).reduce(
+            (sum: number, bucket) => sum + (Number(bucket.event_count) || 0),
+            0
+          );
+          const total = eventCountSum + v.missed_docs_count;
+          if (total > 0) {
+            return {
+              effectiveDocsThreshold: (pct / 100) * total,
+              missedDocsPercentage: (v.missed_docs_count / total) * 100,
+            };
+          }
+        } catch (err) {
+          logger.warn(
+            `Failed to fetch buckets for job ${v.job_id} during delayed data percentage check: ${err?.message}`
+          );
+        }
+        return { effectiveDocsThreshold: 0 };
+      })
+    );
+  };
+
   return {
     /**
      * Gets not started datafeeds for opened jobs.
@@ -246,14 +315,14 @@ export function jobsHealthServiceProvider(
      *
      * @param jobs
      * @param timeInterval - Custom time interval provided by the user.
-     * @param docsCount - The threshold for a number of missing documents to alert upon.
+     * @param delayedDataConfig - Full delayed-data threshold configuration.
      *
-     * @return {Promise<[DelayedDataResponse[], DelayedDataResponse[]]>} - Collections of annotations exceeded and not exceeded the docs threshold.
+     * @return {Promise<[DelayedDataPayloadResponse[], DelayedDataPayloadResponse[]]>} - Collections of annotations exceeded and not exceeded the docs threshold.
      */
     async getDelayedDataReport(
       jobs: MlJob[],
       timeInterval: string | null,
-      docsCount: number | null
+      delayedDataConfig: DelayedDataConfig
     ): Promise<[DelayedDataPayloadResponse[], DelayedDataPayloadResponse[]]> {
       const jobIds = getJobIds(jobs);
       const datafeeds = await getDatafeeds(jobIds);
@@ -282,6 +351,8 @@ export function jobsHealthServiceProvider(
             annotation: v.annotation,
             // end_timestamp is always defined for delayed_data annotation
             end_timestamp: v.end_timestamp!,
+            // timestamp is the start of the first bad bucket; needed for percentage mode
+            timestamp: v.timestamp,
             missed_docs_count: missedDocsCount,
             job_id: v.job_id,
           };
@@ -301,10 +372,35 @@ export function jobsHealthServiceProvider(
           return isEndTimestampWithinRange;
         });
 
-      return partition(annotationsData, (v) => {
-        const isDocCountExceededThreshold = docsCount ? v.missed_docs_count >= docsCount : true;
-        return isDocCountExceededThreshold;
+      const thresholds = await resolveDelayedDataThresholds(annotationsData, delayedDataConfig);
+
+      const enriched = annotationsData.map((record, i) => ({
+        record,
+        ...thresholds[i],
+      }));
+
+      const [exceeded, withinThreshold] = partition(
+        enriched,
+        ({ record, effectiveDocsThreshold }) => record.missed_docs_count >= effectiveDocsThreshold
+      );
+
+      const toPayload = ({
+        record,
+        missedDocsPercentage,
+      }: {
+        record: DelayedDataAnnotation;
+        missedDocsPercentage?: number;
+      }): DelayedDataPayloadResponse => ({
+        job_id: record.job_id,
+        annotation: record.annotation,
+        missed_docs_count: record.missed_docs_count,
+        end_timestamp: record.end_timestamp,
+        ...(missedDocsPercentage !== undefined
+          ? { missed_docs_percentage: missedDocsPercentage }
+          : {}),
       });
+
+      return [exceeded.map(toPayload), withinThreshold.map(toPayload)];
     },
     /**
      * Retrieves a list of the latest errors per jobs.
@@ -472,11 +568,11 @@ export function jobsHealthServiceProvider(
 
       if (config.delayedData.enabled) {
         const [exceededThresholdAnnotations, withinThresholdAnnotations] =
-          await this.getDelayedDataReport(
-            jobs,
-            config.delayedData.timeInterval,
-            config.delayedData.docsCount
-          );
+          await this.getDelayedDataReport(jobs, config.delayedData.timeInterval, {
+            thresholdType: config.delayedData.thresholdType,
+            docsCount: config.delayedData.docsCount,
+            docsCountPercentage: config.delayedData.docsCountPercentage,
+          });
 
         const isHealthy = exceededThresholdAnnotations.length === 0;
         const { count, jobsString } = getJobsAlertingMessageValues(exceededThresholdAnnotations);
