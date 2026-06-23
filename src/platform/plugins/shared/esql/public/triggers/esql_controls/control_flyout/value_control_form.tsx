@@ -230,13 +230,8 @@ export function ValueControlForm({
           setSelectedValues(options);
           setAvailableValuesOptions(options);
           setIsValid(true);
-        } else if (columns.length > 1) {
-          updatePreviewOptionsAndColumns([], columns);
-          setPreviewError(undefined);
-          setEsqlQueryErrors([]);
-          setIsValid(false);
         } else {
-          updatePreviewOptionsAndColumns([], []);
+          updatePreviewOptionsAndColumns([], columns);
           setPreviewError(undefined);
           setEsqlQueryErrors([]);
           setIsValid(false);
