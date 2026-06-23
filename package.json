@@ -152,7 +152,7 @@
     "@elastic/opentelemetry-node": "1.14.0",
     "@elastic/react-search-ui": "1.24.2",
     "@elastic/react-search-ui-views": "1.24.2",
-    "@elastic/request-converter": "9.4.0",
+    "@elastic/request-converter": "9.5.0",
     "@elastic/request-crypto": "2.0.3",
     "@elastic/search-ui": "1.24.2",
     "@elastic/search-ui-app-search-connector": "1.24.1",
