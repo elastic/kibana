@@ -95,8 +95,12 @@ const extractRetrieverFilter = (retriever: Record<string, unknown>): Record<stri
   const rrf = retriever.rrf as { filter?: Record<string, unknown> } | undefined;
   if (rrf?.filter) return rrf.filter;
 
-  type InnerStandard = { retriever?: { standard?: { filter?: Record<string, unknown> } } };
-  type LinearRetriever = { retrievers?: InnerStandard[] };
+  interface InnerStandard {
+    retriever?: { standard?: { filter?: Record<string, unknown> } };
+  }
+  interface LinearRetriever {
+    retrievers?: InnerStandard[];
+  }
   const linear = retriever.linear as LinearRetriever | undefined;
   const innerFilter = linear?.retrievers?.[0]?.retriever?.standard?.filter;
   if (innerFilter) return innerFilter;
