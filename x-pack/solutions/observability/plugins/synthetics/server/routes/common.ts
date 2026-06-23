@@ -37,6 +37,11 @@ const CommonQuerySchema = {
   locations: StringOrArraySchema,
   projects: StringOrArraySchema,
   schedules: StringOrArraySchema,
+  // Remote cluster aliases. Only honoured by the overview status route, where
+  // it scopes pings to documents whose `_index` is prefixed by one of the
+  // selected aliases (CCS pattern `<alias>:<index>`). Saved-object-backed
+  // routes ignore it because remote monitors have no local saved object.
+  remoteNames: StringOrArraySchema,
   status: StringOrArraySchema,
   monitorQueryIds: StringOrArraySchema,
   configIds: StringOrArraySchema,
@@ -282,6 +287,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     filter,
     projects,
     schedules,
+    remoteNames,
     monitorQueryIds,
     configIds,
   } = monitorQuery;
@@ -295,6 +301,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!status?.length ||
     !!projects?.length ||
     !!schedules?.length ||
+    !!remoteNames?.length ||
     !!monitorQueryIds?.length ||
     !!configIds?.length
   );
