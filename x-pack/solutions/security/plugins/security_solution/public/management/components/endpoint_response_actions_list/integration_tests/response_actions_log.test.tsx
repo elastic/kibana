@@ -2141,5 +2141,24 @@ describe('Response actions history', () => {
         expect(updatedButtons[1]).toBeDisabled();
       });
     });
+
+    it('should not display the actions column when `responseActionsEndpointCancel` feature flag is disabled', async () => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointCancel: false });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const columnHeaders = Array.from(
+        renderResult.getByTestId(testPrefix).querySelectorAll('thead th')
+      ).map((col) => col.textContent);
+      expect(columnHeaders).not.toContain(TABLE_COLUMN_NAMES.actions);
+      expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
   });
 });
