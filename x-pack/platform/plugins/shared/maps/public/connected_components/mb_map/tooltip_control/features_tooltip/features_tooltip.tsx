@@ -11,7 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiContextMenuItem, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 // @ts-ignore file exists, but ts def doesn't
-import { euiContextMenuPanelStyles } from '@elastic/eui/lib/components/context_menu/context_menu_panel.styles';
+import { euiContextMenuPanelStyles } from '@elastic/eui/es/components/context_menu/context_menu_panel.styles';
 import { i18n } from '@kbn/i18n';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import type { GeoJsonProperties } from 'geojson';

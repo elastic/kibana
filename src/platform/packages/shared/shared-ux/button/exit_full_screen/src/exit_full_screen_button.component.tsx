@@ -20,9 +20,9 @@ import {
 } from '@elastic/eui';
 // EUI allows reaching into internal folders for component-specific exports, but they aren't typed in Kibana
 // @ts-ignore
-import { useEuiButtonFocusCSS } from '@elastic/eui/lib/global_styling/mixins/_button';
+import { useEuiButtonFocusCSS } from '@elastic/eui/es/global_styling/mixins/_button';
 // @ts-ignore
-import { euiButtonDisplayStyles } from '@elastic/eui/lib/components/button/button_display/_button_display.styles';
+import { euiButtonDisplayStyles } from '@elastic/eui/es/components/button/button_display/_button_display.styles';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import cx from 'classnames';

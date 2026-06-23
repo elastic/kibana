@@ -17,7 +17,7 @@ import {
   euiBreakpoint,
 } from '@elastic/eui';
 // @ts-expect-error style types not defined
-import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
+import { euiToolTipStyles } from '@elastic/eui/es/components/tool_tip/tool_tip.styles';
 
 // Style tooltip popup (gets created dynamically at the top level if dashboard has a Vega vis)
 // Adapted from https://github.com/vega/vega-tooltip

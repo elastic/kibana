@@ -20,9 +20,9 @@ import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
-import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
+import { useIsNestedEuiProvider } from '@elastic/eui/es/components/provider/nested';
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
-import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning';
+import { emitEuiProviderWarning } from '@elastic/eui/es/services/theme/warning';
 
 import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 
