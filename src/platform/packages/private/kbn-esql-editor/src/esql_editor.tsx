@@ -583,25 +583,6 @@ const ESQLEditorInternal = function ESQLEditor({
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
   onGenerateFromCommentRef.current = onGenerateFromComment;
 
-  const [shouldAutoTrigger, setShouldAutoTrigger] = useState(false);
-  useEffect(() => {
-    if (!shouldAutoTrigger || !isNlToEsqlEnabled) return;
-    setShouldAutoTrigger(false);
-    const model = editorModel.current;
-    const editor = editorRef.current;
-    if (!model || !editor) return;
-    const lines = model
-      .getValue()
-      .split('\n')
-      .filter((l) => l.trim());
-    if (!lines.length || !lines.every((l) => l.trim().startsWith('//'))) return;
-    editor.setPosition({ lineNumber: 1, column: 1 });
-    autoAcceptCommentCallbackRef.current = (generatedQuery) => {
-      onUpdateAndSubmitQueryRef.current(generatedQuery, QuerySource.QUICK_SEARCH);
-    };
-    onGenerateFromCommentRef.current();
-  }, [isNlToEsqlEnabled, shouldAutoTrigger]);
-
   const { ghostLineHintStyle, setupGhostLineHint } = useGhostLineHint({
     editorRef,
     editorModel,
@@ -828,17 +809,6 @@ const ESQLEditorInternal = function ESQLEditor({
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
-                    }
-
-                    const initialLines = model
-                      .getValue()
-                      .split('\n')
-                      .filter((l) => l.trim());
-                    const isAllComments =
-                      initialLines.length > 0 &&
-                      initialLines.every((l) => l.trim().startsWith('//'));
-                    if (isAllComments) {
-                      setShouldAutoTrigger(true);
                     }
                   }
 

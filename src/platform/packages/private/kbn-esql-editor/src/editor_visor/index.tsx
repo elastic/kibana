@@ -41,6 +41,10 @@ export interface QuickSearchVisorProps {
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
+  // When set, auto-triggers AI generation on mount using this prompt (bypasses diff review)
+  initialPrompt?: string;
+  // Called after auto-generation completes (success, error, or abort)
+  onAutoGenerationComplete?: () => void;
 }
 
 export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
@@ -74,6 +78,8 @@ export function QuickSearchVisor({
   onNlResult,
   onUpdateAndSubmitQuery,
   telemetryService,
+  initialPrompt,
+  onAutoGenerationComplete,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
@@ -83,11 +89,16 @@ export function QuickSearchVisor({
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
+  const isNlLoadingRef = useRef(isNlLoading);
+  isNlLoadingRef.current = isNlLoading;
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
+  const hasAutoTriggeredRef = useRef(false);
+  const onNlResultRef = useRef(onNlResult);
+  onNlResultRef.current = onNlResult;
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
@@ -130,6 +141,77 @@ export function QuickSearchVisor({
       }),
     [telemetryService]
   );
+
+  const autoGenerateFromPrompt = useCallback(
+    async (prompt: string) => {
+      if (isNlLoadingRef.current) return;
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+      setIsNlLoading(true);
+      setSearchValue(prompt);
+      const startTime = Date.now();
+      try {
+        const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
+          body: JSON.stringify({ nlInstruction: prompt, currentQuery: query }),
+          signal: abortController.signal,
+        });
+        if (result.content) {
+          trackNlResult(
+            prompt.length,
+            query.length,
+            startTime,
+            true,
+            undefined,
+            result.content.length
+          );
+          if (onNlResultRef.current) {
+            onNlResultRef.current(result.content);
+          } else {
+            onUpdateAndSubmitQuery(result.content);
+          }
+        }
+      } catch (error) {
+        if (abortController.signal.aborted) return;
+        reportEsqlError(error, { errorType: 'NlToEsql' });
+        const errorCode = String(
+          (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
+        );
+        trackNlResult(prompt.length, query.length, startTime, false, errorCode || undefined);
+        const message =
+          (error as { body?: { message?: string } })?.body?.message ??
+          i18n.translate('esqlEditor.visor.nlError', {
+            defaultMessage: 'Failed to generate ES|QL query',
+          });
+        core.notifications.toasts.addDanger({ title: message });
+      } finally {
+        setSearchValue('');
+        if (!abortController.signal.aborted) {
+          setIsNlLoading(false);
+        }
+        onAutoGenerationComplete?.();
+      }
+    },
+    [
+      query,
+      core.http,
+      core.notifications.toasts,
+      onUpdateAndSubmitQuery,
+      onAutoGenerationComplete,
+      trackNlResult,
+    ]
+  );
+
+  useEffect(() => {
+    if (!initialPrompt || hasAutoTriggeredRef.current) return;
+    setSearchValue(initialPrompt);
+  }, [initialPrompt]);
+
+  useEffect(() => {
+    if (!initialPrompt || hasAutoTriggeredRef.current) return;
+    if (!isNlToEsqlEnabled || hasConnector !== true) return;
+    hasAutoTriggeredRef.current = true;
+    autoGenerateFromPrompt(initialPrompt);
+  }, [initialPrompt, isNlToEsqlEnabled, hasConnector, autoGenerateFromPrompt]);
 
   const onAskAiClick = useCallback(async () => {
     if (isNlLoading) return;
@@ -215,14 +297,16 @@ export function QuickSearchVisor({
       if (sources.length > 0) {
         setSelectedSources(sources);
       }
-      setSearchValue('');
+      if (!initialPrompt) {
+        setSearchValue('');
+      }
       initializedRef.current = true;
     } else if (sources.length > 0 && !userSelectedSourceRef.current) {
       if (!isEqual(selectedSources, sources)) {
         setSelectedSources(sources);
       }
     }
-  }, [query, selectedSources]);
+  }, [query, selectedSources, initialPrompt]);
 
   const sourcesKey = useMemo(
     () => selectedSources.map((source) => source.label).join(', '),

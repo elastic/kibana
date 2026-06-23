@@ -9,6 +9,7 @@
 
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import {
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,
@@ -129,15 +130,16 @@ export const DiscoverTopNav = ({
   });
 
   const onOpenQueryInNewTab = useCallback(
-    async (tabName: string, esqlQuery: string) => {
+    async (tabName: string, nlPrompt: string) => {
       await dispatch(
         internalStateActions.openInNewTab({
           tabLabel: tabName,
-          appState: { query: { esql: esqlQuery } },
+          appState: { query: { esql: getInitialESQLQuery(dataView) } },
+          uiState: { esqlEditor: { visorPrompt: nlPrompt } },
         })
       );
     },
-    [dispatch]
+    [dispatch, dataView]
   );
 
   const [hasAiConnector, setHasAiConnector] = useState(false);
@@ -353,7 +355,7 @@ export const DiscoverTopNav = ({
       onClick: () => {
         onOpenQueryInNewTab(
           i18n.translate('discover.dslToEsql.newTabLabel', { defaultMessage: 'AI Query' }),
-          `// ${draftKqlText.trim()}`
+          draftKqlText.trim()
         );
       },
     };
