@@ -56,13 +56,6 @@ export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolea
   const { monitor } = useSelectedMonitor();
 
   if (isRemote) {
-    // Three-state pattern modeled on SLO's `header_control.tsx`:
-    //   1. `kibanaUrl` known   → render as enabled, target=_blank, popout icon.
-    //   2. `kibanaUrl` missing → render disabled with the "undefined kibanaUrl"
-    //      tooltip so the user understands why we cannot deep-link.
-    // The synthesized `monitor.remote.kibanaUrl` already bakes in the
-    // `latestPing.kibanaUrl` fallback (see `use_remote_monitor.ts`), so it is
-    // the single source of truth for the deep link.
     const remoteKibanaUrl = isRemoteSyntheticsMonitor(monitor)
       ? monitor.remote.kibanaUrl
       : undefined;
@@ -77,8 +70,7 @@ export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolea
       : undefined;
     const hasUndefinedRemoteKibanaUrl = !remoteEditUrl;
 
-    // `EuiContextMenuItem` already renders a popout indicator automatically
-    // when `target="_blank"` is set, so we don't append our own icon.
+    // `EuiContextMenuItem` auto-renders a popout icon for `target="_blank"`.
     return (
       <EuiContextMenuItem
         icon="pencil"
