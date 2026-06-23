@@ -10,6 +10,7 @@ import { type ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import hash from 'object-hash';
 import React from 'react';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
@@ -80,8 +81,14 @@ export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
       [nonHighlightingFilters, logsSource.indexName]
     );
 
+    const savedSearchKey = React.useMemo(
+      () => hash({ documentFilters, nonHighlightingFilters, indexName: logsSource.indexName }),
+      [documentFilters, nonHighlightingFilters, logsSource.indexName]
+    );
+
     return (
       <LazySavedSearchComponent
+        key={savedSearchKey}
         dependencies={savedSearchDependencies}
         index={logsSource.indexName}
         timestampField={logsSource.timestampField}
