@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -75,8 +75,8 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 }) => {
   const { state: thresholdValues, setState: onThresholdValuesChange } =
     useBuilderState<ThresholdFormValues>();
-  const { setValue, watch } = useFormContext<ComposeFormValues>();
-  const isAlert = watch('kind') === 'alert';
+  const { setValue, control } = useFormContext<ComposeFormValues>();
+  const isAlert = useWatch({ control, name: 'kind' }) === 'alert';
 
   const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
     http: services.http,

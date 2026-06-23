@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -49,12 +49,13 @@ export function AlertConditionStep({
   onKindChange,
   isEditing,
 }: AlertConditionStepProps) {
-  const { setValue, watch } = useFormContext<ComposeFormValues>();
-  const isAlert = watch('kind') === 'alert';
-  const timeField = watch('timeField') ?? '@timestamp';
-  const grouping = watch('grouping');
+  const { setValue, control } = useFormContext<ComposeFormValues>();
+  const kind = useWatch({ control, name: 'kind' });
+  const isAlert = kind === 'alert';
+  const timeField = useWatch({ control, name: 'timeField' }) ?? '@timestamp';
+  const grouping = useWatch({ control, name: 'grouping' });
   const groupFields = grouping?.fields ?? [];
-  const query = watch('query');
+  const query = useWatch({ control, name: 'query' });
 
   const baseQuery = query.format === 'composed' ? query.base : '';
   const alertBlock = query.format === 'composed' ? query.breach.segment : '';
