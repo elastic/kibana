@@ -474,7 +474,7 @@ const NonIlmLifecycleSummary = ({
     ) : null;
 
   const addDeletePhaseButton =
-    addDeletePhaseButtonElement && isAddDeletePhaseAlreadyInUse ? (
+    addDeletePhaseButtonElement && isAddDeletePhaseAlreadyInUse && !isAddDeletePhaseDisabled ? (
       <EuiToolTip position="top" content={deletePhaseAlreadyInUseTooltip}>
         {addDeletePhaseButtonElement}
       </EuiToolTip>
