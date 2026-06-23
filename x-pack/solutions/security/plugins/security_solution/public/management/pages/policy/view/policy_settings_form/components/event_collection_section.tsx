@@ -9,8 +9,7 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiSwitchProps} from '@elastic/eui';
+import type { EuiSwitchProps } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
