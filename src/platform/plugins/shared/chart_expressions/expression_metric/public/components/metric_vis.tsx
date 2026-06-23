@@ -97,8 +97,8 @@ function buildTrendConfig(
   };
 }
 
-const DEFAULT_SINGLE_TILE_WIDTH = 260;
-const DEFAULT_SINGLE_TILE_HEIGHT = 130;
+const DEFAULT_SINGLE_TILE_WIDTH = 300;
+const DEFAULT_SINGLE_TILE_HEIGHT = 160;
 const DEFAULT_MULTI_TILE_SIDE_LENGTH = 200;
 
 export const MetricVis = ({
@@ -134,7 +134,9 @@ export const MetricVis = ({
       data: {
         maxDimensions: {
           y: {
-            value: hasMultipleTiles ? rows * DEFAULT_MULTI_TILE_SIDE_LENGTH : DEFAULT_SINGLE_TILE_HEIGHT,
+            value: hasMultipleTiles
+              ? rows * DEFAULT_MULTI_TILE_SIDE_LENGTH
+              : DEFAULT_SINGLE_TILE_HEIGHT,
             unit: 'pixels',
           },
           x: {
