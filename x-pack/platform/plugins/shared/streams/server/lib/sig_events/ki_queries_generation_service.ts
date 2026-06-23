@@ -131,6 +131,7 @@ export async function generateKIQueries(
 
   telemetry.trackSignificantEventsQueriesGenerated({
     count: result.queries.length,
+    connector_id: connectorId,
     stream_name: definition.name,
     stream_type: getStreamTypeFromDefinition(definition),
     input_tokens_used: result.tokensUsed.prompt,
