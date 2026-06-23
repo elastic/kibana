@@ -85,6 +85,30 @@ export class RetryService extends FtrService {
     });
   }
 
+  /**
+   * Like `waitForWithTimeout`, but returns `false` on timeout instead of throwing.
+   * Use when the condition is expected to succeed *if* it occurs, but its
+   * occurrence within the timeout window is not required for correctness.
+   * @returns `true` if the block returned truthy before timeout, `false` otherwise
+   */
+  public async waitForOptional(
+    description: string,
+    timeout: number,
+    block: () => Promise<boolean>
+  ): Promise<boolean> {
+    try {
+      await retryForTruthy(this.log, {
+        timeout,
+        methodName: 'retry.waitForOptional',
+        description,
+        block,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   public async waitFor(
     description: string,
     block: () => Promise<boolean>,

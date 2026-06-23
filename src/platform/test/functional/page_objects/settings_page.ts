@@ -730,6 +730,18 @@ export class SettingsPageObject extends FtrService {
     const currentName = await field.getAttribute('value');
     this.log.debug(`setIndexPatternField set to ${currentName}`);
     expect(currentName).to.eql(indexPatternName);
+
+    // Observe the full validation cycle to avoid a race where `data-is-validating`
+    // still reads its pre-typing "0" value while React is scheduling the re-render
+    // triggered by the last keystroke. We first give validation a chance to start
+    // (transition to "1"); if it never does — either because it completed faster
+    // than we could observe it or because no validation fires for this value —
+    // that's fine and we fall through to the definitive completion wait.
+    await this.retry.waitForOptional(
+      'index pattern validation to start',
+      2000,
+      async () => (await field.getAttribute('data-is-validating')) === '1'
+    );
     await this.retry.waitFor('validating the given index pattern should be finished', async () => {
       const isValidating = await field.getAttribute('data-is-validating');
       return isValidating === '0';
