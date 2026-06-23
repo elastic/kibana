@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiInMemoryTable,
@@ -41,6 +41,10 @@ export interface SavedObjectAttachmentsTableProps {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const PAGINATION_PROP = {
+  pageSizeOptions: PAGE_SIZE_OPTIONS,
+  initialPageSize: PAGE_SIZE_OPTIONS[0],
+} as const;
 
 const formatCreatedBy = (createdBy: AttachmentUIV2['createdBy'] | undefined): string => {
   if (!createdBy) {
@@ -55,18 +59,18 @@ const formatCreatedBy = (createdBy: AttachmentUIV2['createdBy'] | undefined): st
  * and only layers on the table-display fields (comment id, createdAt/By,
  * title fallback) that the helper doesn't carry.
  */
-const extractRow = (comment: AttachmentUIV2): SavedObjectAttachmentRow | null => {
-  const attributes = getSavedObjectAttachmentAttributes(comment);
+const extractRow = (attachment: AttachmentUIV2): SavedObjectAttachmentRow | null => {
+  const attributes = getSavedObjectAttachmentAttributes(attachment);
   if (!attributes) {
     return null;
   }
 
   return {
-    id: comment.id,
+    id: attachment.id,
     title: attributes.title || attributes.attachmentId,
     attachmentId: attributes.attachmentId,
-    createdAt: comment.createdAt,
-    createdBy: formatCreatedBy(comment.createdBy),
+    createdAt: attachment.createdAt,
+    createdBy: formatCreatedBy(attachment.createdBy),
   };
 };
 
@@ -87,11 +91,11 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
 }) => {
   const allRows = useMemo<SavedObjectAttachmentRow[]>(
     () =>
-      caseData.comments.reduce<SavedObjectAttachmentRow[]>((rows, comment) => {
-        if (comment.type !== attachmentTypeId) {
+      caseData.comments.reduce<SavedObjectAttachmentRow[]>((rows, attachment) => {
+        if (attachment.type !== attachmentTypeId) {
           return rows;
         }
-        const row = extractRow(comment);
+        const row = extractRow(attachment);
         if (row) {
           rows.push(row);
         }
@@ -124,14 +128,16 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
           <SavedObjectLink
             title={title}
             href={pathById[row.attachmentId]}
+            // Open the SO in a new tab so users keep their place in the case view.
+            target="_blank"
             data-test-subj={`cases-so-attachments-table-link-${row.id}`}
           />
         ),
       },
       {
-        name: i18n.DATE_ATTACHED,
+        name: i18n.DATE_ADDED,
         field: 'createdAt',
-        'data-test-subj': 'cases-so-attachments-table-created-at',
+        'data-test-subj': 'cases-so-attachments-table-date-added',
         render: (createdAt: string) => <FormattedRelativePreferenceDate value={createdAt} />,
       },
       {
@@ -141,6 +147,13 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
       },
     ],
     [pathById]
+  );
+
+  const rowProps = useCallback(
+    (row: SavedObjectAttachmentRow) => ({
+      'data-test-subj': `cases-so-attachments-table-row-${row.id}`,
+    }),
+    []
   );
 
   if (filteredRows.length === 0) {
@@ -163,8 +176,8 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
         tableCaption={i18n.TABLE_CAPTION}
         items={filteredRows}
         columns={columns}
-        pagination={{ pageSizeOptions: PAGE_SIZE_OPTIONS, initialPageSize: PAGE_SIZE_OPTIONS[0] }}
-        rowProps={(row) => ({ 'data-test-subj': `cases-so-attachments-table-row-${row.id}` })}
+        pagination={PAGINATION_PROP}
+        rowProps={rowProps}
         data-test-subj={`cases-so-attachments-table-${attachmentTypeId}`}
       />
     </>

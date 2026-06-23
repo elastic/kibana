@@ -10,7 +10,10 @@ import {
   DiscoverSessionAttachmentPayloadSchema,
   type SavedObjectReferenceMetadata,
 } from '../../../../common/types/domain_zod/attachment/saved_object/v2';
-import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import {
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
+} from '../../../../common/constants/attachments';
 import {
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,
@@ -18,8 +21,6 @@ import {
 import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 import * as i18n from './translations';
-
-const DISCOVER_SESSION_SO_TYPE = 'search';
 
 const DiscoverSessionEvent: React.FC<
   UnifiedReferenceAttachmentViewProps<SavedObjectReferenceMetadata, string>

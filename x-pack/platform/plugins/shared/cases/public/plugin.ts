@@ -144,8 +144,8 @@ export class CasesUiPlugin
     const config = this.initializerContext.config.get<CasesUiConfigType>();
 
     registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
-      hasDashboard: Boolean(plugins.dashboard),
-      hasMaps: Boolean(plugins.maps),
+      hasDashboardPluginEnabled: Boolean(plugins.dashboard),
+      hasMapsPluginEnabled: Boolean(plugins.maps),
     });
 
     KibanaServices.init({

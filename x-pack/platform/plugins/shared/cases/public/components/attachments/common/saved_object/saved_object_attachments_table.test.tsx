@@ -22,7 +22,7 @@ jest.mock('./use_saved_object_in_app_url');
 
 const useSavedObjectInAppUrlsMock = useSavedObjectInAppUrls as jest.Mock;
 
-const soComment = (
+const soAttachment = (
   id: string,
   type: string,
   attachmentId: string,
@@ -61,9 +61,9 @@ describe('SavedObjectAttachmentsTable', () => {
 
   it('renders only rows matching the requested attachment type', () => {
     const data = caseWith([
-      soComment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1'),
-      soComment('c2', MAP_ATTACHMENT_TYPE, 'map-1', 'M1'),
-      soComment('c3', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'D2'),
+      soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1'),
+      soAttachment('c2', MAP_ATTACHMENT_TYPE, 'map-1', 'M1'),
+      soAttachment('c3', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'D2'),
     ]);
     renderWithTestingProviders(
       <SavedObjectAttachmentsTable
@@ -81,7 +81,7 @@ describe('SavedObjectAttachmentsTable', () => {
     useSavedObjectInAppUrlsMock.mockReturnValue({
       'dash-1': '/base/app/dashboards#/view/dash-1',
     });
-    const data = caseWith([soComment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1')]);
+    const data = caseWith([soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1')]);
     renderWithTestingProviders(
       <SavedObjectAttachmentsTable
         caseData={data}
@@ -94,7 +94,7 @@ describe('SavedObjectAttachmentsTable', () => {
   });
 
   it('renders the title as a disabled link when no URL is resolved', () => {
-    const data = caseWith([soComment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1')]);
+    const data = caseWith([soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'D1')]);
     renderWithTestingProviders(
       <SavedObjectAttachmentsTable
         caseData={data}
@@ -107,8 +107,8 @@ describe('SavedObjectAttachmentsTable', () => {
 
   it('filters rows by searchTerm against title and attachmentId', () => {
     const data = caseWith([
-      soComment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'Sales overview'),
-      soComment('c2', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'Inventory'),
+      soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'Sales overview'),
+      soAttachment('c2', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'Inventory'),
     ]);
 
     const { rerender } = renderWithTestingProviders(
@@ -136,7 +136,7 @@ describe('SavedObjectAttachmentsTable', () => {
 
   it('paginates and lets the user advance pages', async () => {
     const comments = Array.from({ length: 12 }, (_, i) =>
-      soComment(`c${i}`, DASHBOARD_ATTACHMENT_TYPE, `dash-${i}`, `D${i}`)
+      soAttachment(`c${i}`, DASHBOARD_ATTACHMENT_TYPE, `dash-${i}`, `D${i}`)
     );
     renderWithTestingProviders(
       <SavedObjectAttachmentsTable
@@ -160,7 +160,7 @@ describe('SavedObjectAttachmentsTable', () => {
 
   it('clamps the page when filteredRows shrinks past the current page', async () => {
     const comments = Array.from({ length: 12 }, (_, i) =>
-      soComment(`c${i}`, DASHBOARD_ATTACHMENT_TYPE, `dash-${i}`, `D${i}`)
+      soAttachment(`c${i}`, DASHBOARD_ATTACHMENT_TYPE, `dash-${i}`, `D${i}`)
     );
     const data = caseWith(comments);
     const { rerender } = renderWithTestingProviders(

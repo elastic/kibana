@@ -63,7 +63,10 @@ describe('AttachSavedObjectModal', () => {
 
   // Opt in to dashboard/map registrations so the type filter exposes them.
   const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
-  registerInternalAttachments(unifiedAttachmentTypeRegistry, { hasDashboard: true, hasMaps: true });
+  registerInternalAttachments(unifiedAttachmentTypeRegistry, {
+    hasDashboardPluginEnabled: true,
+    hasMapsPluginEnabled: true,
+  });
 
   const renderModal = (caseData: CaseUI = basicCase) =>
     renderWithTestingProviders(<AttachSavedObjectModal caseData={caseData} onClose={onClose} />, {

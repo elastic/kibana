@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../../../constants/attachments';
+import {
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
+} from '../../../../constants/attachments';
+import { MAX_TITLE_LENGTH } from '../../../../constants';
 
 export interface SavedObjectReferenceMetadata {
   title: string;
@@ -18,7 +22,7 @@ export const TimeRangeSchema = z.object({ from: z.string(), to: z.string() }).st
 export const buildSavedObjectMetadataSchema = <SoType extends string>(soType: SoType) =>
   z
     .object({
-      title: z.string(),
+      title: z.string().max(MAX_TITLE_LENGTH),
       soType: z.literal(soType),
     })
     .strict();
@@ -43,7 +47,7 @@ export const buildSavedObjectPayloadSchema = <AttachmentType extends string, SoT
 
 export const DiscoverSessionAttachmentPayloadSchema = buildSavedObjectPayloadSchema(
   DISCOVER_SESSION_ATTACHMENT_TYPE,
-  'search'
+  DISCOVER_SESSION_SO_TYPE
 );
 export type DiscoverSessionAttachmentPayload = z.infer<
   typeof DiscoverSessionAttachmentPayloadSchema

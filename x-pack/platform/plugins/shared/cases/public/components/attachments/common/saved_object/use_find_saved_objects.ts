@@ -27,6 +27,7 @@ export interface UseFindSavedObjectsArgs {
 export interface UseFindSavedObjectsResult {
   items: FoundSavedObject[];
   total: number;
+  pageCount: number;
   isLoading: boolean;
 }
 
@@ -61,6 +62,8 @@ export const useFindSavedObjects = ({
       http.get<SavedObjectFindResponse>(FIND_URL, {
         query: {
           type: types,
+          // Suffix wildcard only — mirrors Saved Objects Management
+          // (`findObjects` in saved_objects_management/public).
           search: query ? `${query}*` : undefined,
           page: page + 1,
           perPage,
@@ -83,6 +86,7 @@ export const useFindSavedObjects = ({
   return {
     items: response.saved_objects,
     total: response.total,
+    pageCount: Math.max(1, Math.ceil(response.total / perPage)),
     isLoading,
   };
 };

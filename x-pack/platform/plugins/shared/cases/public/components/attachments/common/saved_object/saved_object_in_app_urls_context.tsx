@@ -6,6 +6,11 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import {
+  DASHBOARD_SO_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
+  MAP_SO_TYPE,
+} from '../../../../../common/constants/attachments';
 import type { CaseUI } from '../../../../../common/ui/types';
 import { useSavedObjectInAppUrlsQuery } from './use_saved_object_in_app_url';
 import { getSavedObjectAttachmentAttributes, type SupportedSavedObjectType } from './helpers';
@@ -37,31 +42,35 @@ export const SavedObjectInAppUrlsProvider: React.FC<SavedObjectInAppUrlsProvider
     const dashboardIds = new Set<string>();
     const mapIds = new Set<string>();
     const searchIds = new Set<string>();
-    for (const comment of caseData.comments) {
-      const attributes = getSavedObjectAttachmentAttributes(comment);
+    for (const attachment of caseData.comments) {
+      const attributes = getSavedObjectAttachmentAttributes(attachment);
       if (attributes) {
-        if (attributes.soType === 'dashboard') {
+        if (attributes.soType === DASHBOARD_SO_TYPE) {
           dashboardIds.add(attributes.attachmentId);
-        } else if (attributes.soType === 'map') {
+        } else if (attributes.soType === MAP_SO_TYPE) {
           mapIds.add(attributes.attachmentId);
-        } else if (attributes.soType === 'search') {
+        } else if (attributes.soType === DISCOVER_SESSION_SO_TYPE) {
           searchIds.add(attributes.attachmentId);
         }
       }
     }
     return {
-      dashboard: Array.from(dashboardIds),
-      map: Array.from(mapIds),
-      search: Array.from(searchIds),
+      [DASHBOARD_SO_TYPE]: Array.from(dashboardIds),
+      [MAP_SO_TYPE]: Array.from(mapIds),
+      [DISCOVER_SESSION_SO_TYPE]: Array.from(searchIds),
     };
   }, [caseData.comments]);
 
-  const dashboardUrls = useSavedObjectInAppUrlsQuery('dashboard', idsBySoType.dashboard);
-  const mapUrls = useSavedObjectInAppUrlsQuery('map', idsBySoType.map);
-  const searchUrls = useSavedObjectInAppUrlsQuery('search', idsBySoType.search);
+  const dashboardUrls = useSavedObjectInAppUrlsQuery(DASHBOARD_SO_TYPE, idsBySoType.dashboard);
+  const mapUrls = useSavedObjectInAppUrlsQuery(MAP_SO_TYPE, idsBySoType.map);
+  const searchUrls = useSavedObjectInAppUrlsQuery(DISCOVER_SESSION_SO_TYPE, idsBySoType.search);
 
   const value = useMemo<UrlsBySoType>(
-    () => ({ dashboard: dashboardUrls, map: mapUrls, search: searchUrls }),
+    () => ({
+      [DASHBOARD_SO_TYPE]: dashboardUrls,
+      [MAP_SO_TYPE]: mapUrls,
+      [DISCOVER_SESSION_SO_TYPE]: searchUrls,
+    }),
     [dashboardUrls, mapUrls, searchUrls]
   );
 

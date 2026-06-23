@@ -15,23 +15,26 @@ import { getVisualizationAttachmentType } from './lens';
 import { getStackAlertAttachmentType } from './alert';
 
 export interface RegisterInternalAttachmentsOptions {
-  hasDashboard?: boolean;
-  hasMaps?: boolean;
+  hasDashboardPluginEnabled?: boolean;
+  hasMapsPluginEnabled?: boolean;
 }
 
 export const registerInternalAttachments = (
   unifiedRegistry: UnifiedAttachmentTypeRegistry,
-  { hasDashboard = false, hasMaps = false }: RegisterInternalAttachmentsOptions = {}
+  {
+    hasDashboardPluginEnabled = false,
+    hasMapsPluginEnabled = false,
+  }: RegisterInternalAttachmentsOptions = {}
 ) => {
   unifiedRegistry.register(getFileAttachmentType());
   unifiedRegistry.register(getVisualizationAttachmentType());
   unifiedRegistry.register(getCommentAttachmentType());
   unifiedRegistry.register(getStackAlertAttachmentType());
   unifiedRegistry.register(getDiscoverSessionAttachmentType());
-  if (hasDashboard) {
+  if (hasDashboardPluginEnabled) {
     unifiedRegistry.register(getDashboardAttachmentType());
   }
-  if (hasMaps) {
+  if (hasMapsPluginEnabled) {
     unifiedRegistry.register(getMapAttachmentType());
   }
 };

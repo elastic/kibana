@@ -12,8 +12,11 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_SO_TYPE,
   DISCOVER_SESSION_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
   MAP_ATTACHMENT_TYPE,
+  MAP_SO_TYPE,
 } from '../../../../../common/constants/attachments';
 import type {
   MapAttributesSnapshot,
@@ -35,6 +38,23 @@ import * as i18n from './translations';
 type DashboardAttachmentRequest = Omit<DashboardAttachmentPayload, 'owner'>;
 type MapAttachmentRequest = Omit<MapAttachmentPayload, 'owner'>;
 type DiscoverSessionAttachmentRequest = Omit<DiscoverSessionAttachmentPayload, 'owner'>;
+
+/**
+ * Hard ceiling on the serialized size (bytes) of a dashboard/map snapshot we
+ * embed in the cases-attachment SO. Beyond this we drop the snapshot and
+ * degrade to a title-only attachment — the SO is still attached, just without
+ * the inline embed. Lifted high enough to accommodate typical dashboards
+ * (dozens of panels) but well below ES per-document limits.
+ */
+const MAX_SNAPSHOT_BYTES = 200_000;
+
+const fitsSnapshotBudget = (snapshot: unknown): boolean => {
+  try {
+    return JSON.stringify(snapshot).length <= MAX_SNAPSHOT_BYTES;
+  } catch {
+    return false;
+  }
+};
 
 export interface UseAttachSavedObjectArgs {
   caseId: string;
@@ -84,7 +104,9 @@ export const useAttachSavedObject = ({
         if (result.status !== 'success') {
           return undefined;
         }
-        return dashboardStateToAttachmentData(result.attributes);
+        const config = dashboardStateToAttachmentData(result.attributes);
+        // Drop oversize snapshots; the attachment still gets created (title-only).
+        return fitsSnapshotBudget(config) ? config : undefined;
       } catch {
         return undefined;
       }
@@ -102,10 +124,12 @@ export const useAttachSavedObject = ({
     async (id: string): Promise<MapAttributesSnapshot | undefined> => {
       try {
         const result = (await contentManagement.client.get({
-          contentTypeId: 'map',
+          contentTypeId: MAP_SO_TYPE,
           id,
         })) as { item?: { attributes?: MapAttributesSnapshot } } | undefined;
-        return result?.item?.attributes ?? undefined;
+        const attributes = result?.item?.attributes ?? undefined;
+        // Drop oversize snapshots; the attachment still gets created (title-only).
+        return attributes && fitsSnapshotBudget(attributes) ? attributes : undefined;
       } catch {
         return undefined;
       }
@@ -128,27 +152,27 @@ export const useAttachSavedObject = ({
           | DashboardAttachmentRequest
           | MapAttachmentRequest
           | DiscoverSessionAttachmentRequest;
-        if (supportedType === 'map') {
+        if (supportedType === MAP_SO_TYPE) {
           const attributes = await fetchMapAttributes(object.id);
           attachment = {
             type: MAP_ATTACHMENT_TYPE,
             attachmentId: object.id,
-            metadata: { title, soType: 'map' },
+            metadata: { title, soType: MAP_SO_TYPE },
             ...(attributes ? { data: { attributes } } : {}),
           };
-        } else if (supportedType === 'dashboard') {
+        } else if (supportedType === DASHBOARD_SO_TYPE) {
           const config = await fetchDashboardConfig(object.id);
           attachment = {
             type: DASHBOARD_ATTACHMENT_TYPE,
             attachmentId: object.id,
-            metadata: { title, soType: 'dashboard' },
+            metadata: { title, soType: DASHBOARD_SO_TYPE },
             ...(config ? { data: { config } } : {}),
           };
         } else {
           attachment = {
             type: DISCOVER_SESSION_ATTACHMENT_TYPE,
             attachmentId: object.id,
-            metadata: { title, soType: 'search' },
+            metadata: { title, soType: DISCOVER_SESSION_SO_TYPE },
           };
         }
 

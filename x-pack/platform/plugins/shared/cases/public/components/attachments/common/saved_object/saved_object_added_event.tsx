@@ -35,7 +35,7 @@ const SavedObjectAddedEventComponent: React.FC<SavedObjectAddedEventProps> = ({
   const href = useSavedObjectInAppUrl(soType, attachmentId);
   const display = title && title.length > 0 ? title : UNTITLED;
   const link = href ? (
-    <EuiLink href={href} data-test-subj={dataTestSubj}>
+    <EuiLink href={href} data-test-subj={dataTestSubj} target="_blank">
       {display}
     </EuiLink>
   ) : (

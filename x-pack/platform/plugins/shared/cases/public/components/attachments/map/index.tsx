@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MAP_ATTACHMENT_TYPE } from '../../../../common/constants';
+import { MAP_ATTACHMENT_TYPE, MAP_SO_TYPE } from '../../../../common/constants';
 import {
   MapAttachmentPayloadSchema,
   type MapAttachmentData,
@@ -25,8 +25,6 @@ type MapViewProps = UnifiedReferenceAttachmentViewProps<
   string,
   MapAttachmentData
 >;
-
-const MAP_SO_TYPE = 'map';
 
 const MapEmbedAttachmentLazy = React.lazy(async () => {
   const { MapEmbedAttachment } = await import('./map_embed_attachment');

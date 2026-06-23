@@ -109,7 +109,7 @@ describe('saved_object/helpers', () => {
   });
 
   describe('getAttachedSavedObjectIds', () => {
-    const soComment = (id: string, type: string, attachmentId: string, soType: string) =>
+    const soAttachment = (id: string, type: string, attachmentId: string, soType: string) =>
       ({
         ...baseComment,
         id,
@@ -124,16 +124,16 @@ describe('saved_object/helpers', () => {
 
     it('collects ids from every SO-typed comment', () => {
       const ids = getAttachedSavedObjectIds([
-        soComment('a', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
-        soComment('b', MAP_ATTACHMENT_TYPE, 'map-1', 'map'),
-        soComment('c', DISCOVER_SESSION_ATTACHMENT_TYPE, 'search-1', 'search'),
+        soAttachment('a', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
+        soAttachment('b', MAP_ATTACHMENT_TYPE, 'map-1', 'map'),
+        soAttachment('c', DISCOVER_SESSION_ATTACHMENT_TYPE, 'search-1', 'search'),
       ]);
       expect(ids).toEqual(new Set(['dash-1', 'map-1', 'search-1']));
     });
 
     it('ignores non-SO attachment types', () => {
       const ids = getAttachedSavedObjectIds([
-        soComment('a', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
+        soAttachment('a', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
         { ...baseComment, id: 'x', type: 'user' } as unknown as AttachmentUIV2,
       ]);
       expect(ids).toEqual(new Set(['dash-1']));

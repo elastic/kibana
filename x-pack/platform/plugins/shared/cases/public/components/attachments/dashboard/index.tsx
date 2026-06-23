@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { DASHBOARD_ATTACHMENT_TYPE } from '../../../../common/constants';
+import { DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_SO_TYPE } from '../../../../common/constants';
 import {
   DashboardAttachmentPayloadSchema,
   type DashboardAttachmentData,
@@ -25,8 +25,6 @@ type DashboardViewProps = UnifiedReferenceAttachmentViewProps<
   string,
   DashboardAttachmentData
 >;
-
-const DASHBOARD_SO_TYPE = 'dashboard';
 
 const DashboardEmbedAttachmentLazy = React.lazy(async () => {
   const { DashboardEmbedAttachment } = await import('./dashboard_embed_attachment');

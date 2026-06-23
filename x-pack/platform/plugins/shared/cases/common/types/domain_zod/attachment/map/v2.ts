@@ -6,10 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAP_ATTACHMENT_TYPE } from '../../../../constants/attachments';
+import { MAP_ATTACHMENT_TYPE, MAP_SO_TYPE } from '../../../../constants/attachments';
+import { MAX_TITLE_LENGTH } from '../../../../constants';
 import { buildSavedObjectMetadataSchema, TimeRangeSchema } from '../saved_object/v2';
 
-export const MapAttachmentMetadataSchema = buildSavedObjectMetadataSchema(MAP_ATTACHMENT_TYPE);
+export const MapAttachmentMetadataSchema = buildSavedObjectMetadataSchema(MAP_SO_TYPE);
 
 /**
  * Structural subset of `MapAttributes` (the CM/REST format the maps content
@@ -33,7 +34,7 @@ export const MapAttachmentMetadataSchema = buildSavedObjectMetadataSchema(MAP_AT
  */
 export const MapAttributesSnapshotSchema = z
   .object({
-    title: z.string().optional(),
+    title: z.string().max(MAX_TITLE_LENGTH).optional(),
     layers: z.array(z.unknown()).optional(),
     center: z.object({ lat: z.number(), lon: z.number() }).strict().optional(),
     zoom: z.number().optional(),

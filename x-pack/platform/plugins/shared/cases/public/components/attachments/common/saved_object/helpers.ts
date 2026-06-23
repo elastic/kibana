@@ -8,8 +8,11 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_SO_TYPE,
   DISCOVER_SESSION_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
   MAP_ATTACHMENT_TYPE,
+  MAP_SO_TYPE,
 } from '../../../../../common/constants/attachments';
 import type { AttachmentUIV2 } from '../../../../../common/ui/types';
 import type { FoundSavedObject, SavedObjectAttachmentAttributes } from './types';
@@ -21,9 +24,9 @@ import type { FoundSavedObject, SavedObjectAttachmentAttributes } from './types'
  * SO type does it point at?".
  */
 export const ATTACHMENT_TYPE_TO_SO_TYPE = {
-  [DASHBOARD_ATTACHMENT_TYPE]: 'dashboard',
-  [DISCOVER_SESSION_ATTACHMENT_TYPE]: 'search',
-  [MAP_ATTACHMENT_TYPE]: 'map',
+  [DASHBOARD_ATTACHMENT_TYPE]: DASHBOARD_SO_TYPE,
+  [DISCOVER_SESSION_ATTACHMENT_TYPE]: DISCOVER_SESSION_SO_TYPE,
+  [MAP_ATTACHMENT_TYPE]: MAP_SO_TYPE,
 } as const satisfies Record<string, string>;
 
 export type SavedObjectAttachmentType = keyof typeof ATTACHMENT_TYPE_TO_SO_TYPE;
@@ -49,19 +52,28 @@ export const SO_TYPE_TO_ATTACHMENT_TYPE = Object.fromEntries(
 ) as Record<SupportedSavedObjectType, SavedObjectAttachmentType>;
 
 /**
+ * Type guard: narrows an `AttachmentUIV2` to a saved-object unified attachment.
+ * Reads the SO-backed shape (`attachmentId`, `metadata.title`, `metadata.soType`)
+ * after the type check, replacing the previous `as unknown as` cast.
+ */
+const isSavedObjectAttachment = (
+  attachment: AttachmentUIV2
+): attachment is AttachmentUIV2 & {
+  attachmentId: string;
+  metadata: { title: string; soType: SupportedSavedObjectType };
+} => SAVED_OBJECT_ATTACHMENT_TYPES.has(attachment.type);
+
+/**
  * Extracts the SO-attachment attributes (foreign SO id, soType, cached title)
  * from any SO-backed unified attachment.
  */
 export const getSavedObjectAttachmentAttributes = (
-  comment: AttachmentUIV2
+  attachment: AttachmentUIV2
 ): SavedObjectAttachmentAttributes | null => {
-  if (!SAVED_OBJECT_ATTACHMENT_TYPES.has(comment.type)) {
+  if (!isSavedObjectAttachment(attachment)) {
     return null;
   }
-  const { attachmentId, metadata } = comment as unknown as {
-    attachmentId: string;
-    metadata: { title: string; soType: SupportedSavedObjectType };
-  };
+  const { attachmentId, metadata } = attachment;
   return { attachmentId, soType: metadata.soType, title: metadata.title };
 };
 
@@ -69,9 +81,9 @@ export const getSavedObjectAttachmentAttributes = (
  * Walks `caseData.comments` once to collect the foreign SO ids of every
  * SO-typed attachment on the case.
  */
-export const getAttachedSavedObjectIds = (comments: AttachmentUIV2[]): Set<string> =>
-  comments.reduce<Set<string>>((ids, comment) => {
-    const attributes = getSavedObjectAttachmentAttributes(comment);
+export const getAttachedSavedObjectIds = (attachments: AttachmentUIV2[]): Set<string> =>
+  attachments.reduce<Set<string>>((ids, attachment) => {
+    const attributes = getSavedObjectAttachmentAttributes(attachment);
     if (attributes) {
       ids.add(attributes.attachmentId);
     }

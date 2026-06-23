@@ -32,7 +32,7 @@ const buildHttp = (post: jest.Mock) => ({
   },
 });
 
-const soComment = (
+const soAttachment = (
   id: string,
   type: string,
   attachmentId: string,
@@ -66,10 +66,10 @@ describe('SavedObjectInAppUrlsProvider', () => {
     useKibanaMock.mockReturnValue(buildHttp(post));
 
     const data = caseWith([
-      soComment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
-      soComment('c2', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'dashboard'),
-      soComment('c3', MAP_ATTACHMENT_TYPE, 'map-1', 'map'),
-      soComment('c4', DISCOVER_SESSION_ATTACHMENT_TYPE, 'search-1', 'search'),
+      soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
+      soAttachment('c2', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'dashboard'),
+      soAttachment('c3', MAP_ATTACHMENT_TYPE, 'map-1', 'map'),
+      soAttachment('c4', DISCOVER_SESSION_ATTACHMENT_TYPE, 'search-1', 'search'),
     ]);
 
     const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (

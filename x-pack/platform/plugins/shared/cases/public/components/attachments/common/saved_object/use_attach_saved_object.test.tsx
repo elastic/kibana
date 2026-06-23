@@ -121,6 +121,48 @@ describe('useAttachSavedObject', () => {
     expect(mutateAsync.mock.calls[0][0].attachments[0]).not.toHaveProperty('data');
   });
 
+  it('degrades a dashboard to title-only when the snapshot is too large to embed', async () => {
+    // Build a config large enough to exceed MAX_SNAPSHOT_BYTES (200_000) once
+    // serialized — a string field that survives the converter passes through.
+    const oversizePanel = { id: 'big', payload: 'x'.repeat(250_000) };
+    findById.mockResolvedValue({
+      status: 'success',
+      attributes: { panels: [oversizePanel] },
+    });
+    const { result } = render();
+    await act(async () => {
+      await result.current.attach(buildSO({ id: 'dash-1', type: 'dashboard' }));
+    });
+    const sent = mutateAsync.mock.calls[0][0].attachments[0];
+    expect(sent).not.toHaveProperty('data');
+    expect(sent).toMatchObject({
+      attachmentId: 'dash-1',
+      metadata: { title: 'My title', soType: 'dashboard' },
+    });
+    // Success toast still fires — degradation is silent.
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith(expect.objectContaining({ text: 'My title' }))
+    );
+  });
+
+  it('degrades a map to title-only when the snapshot is too large to embed', async () => {
+    const oversizeLayer = { id: 'big', payload: 'x'.repeat(250_000) };
+    cmGet.mockResolvedValue({ item: { attributes: { layers: [oversizeLayer] } } });
+    const { result } = render();
+    await act(async () => {
+      await result.current.attach(buildSO({ id: 'map-1', type: 'map' }));
+    });
+    const sent = mutateAsync.mock.calls[0][0].attachments[0];
+    expect(sent).not.toHaveProperty('data');
+    expect(sent).toMatchObject({
+      attachmentId: 'map-1',
+      metadata: { title: 'My title', soType: 'map' },
+    });
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith(expect.objectContaining({ text: 'My title' }))
+    );
+  });
+
   it('snapshots map attributes into the payload', async () => {
     cmGet.mockResolvedValue({ item: { attributes: { layers: [{ id: 'l1' }] } } });
     const { result } = render();

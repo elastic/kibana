@@ -11,12 +11,9 @@ export const TITLE = i18n.translate('xpack.cases.savedObjectAttachmentsTable.tit
   defaultMessage: 'Title',
 });
 
-export const DATE_ATTACHED = i18n.translate(
-  'xpack.cases.savedObjectAttachmentsTable.dateAttached',
-  {
-    defaultMessage: 'Attached at',
-  }
-);
+export const DATE_ADDED = i18n.translate('xpack.cases.savedObjectAttachmentsTable.dateAdded', {
+  defaultMessage: 'Date added',
+});
 
 export const ATTACHED_BY = i18n.translate('xpack.cases.savedObjectAttachmentsTable.attachedBy', {
   defaultMessage: 'Attached by',

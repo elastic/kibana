@@ -6,10 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DASHBOARD_ATTACHMENT_TYPE } from '../../../../constants/attachments';
+import { DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_SO_TYPE } from '../../../../constants/attachments';
+import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '../../../../constants';
 import { buildSavedObjectMetadataSchema, TimeRangeSchema } from '../saved_object/v2';
 
-export const DashboardAttachmentMetadataSchema = buildSavedObjectMetadataSchema('dashboard');
+export const DashboardAttachmentMetadataSchema = buildSavedObjectMetadataSchema(DASHBOARD_SO_TYPE);
 
 /**
  * Structural subset of the `DashboardAttachmentData` API shape from
@@ -32,8 +33,8 @@ export const DashboardAttachmentMetadataSchema = buildSavedObjectMetadataSchema(
  */
 export const DashboardConfigSchema = z
   .object({
-    title: z.string(),
-    description: z.string().optional(),
+    title: z.string().max(MAX_TITLE_LENGTH),
+    description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
     panels: z.array(z.unknown()),
     query: z.record(z.string(), z.unknown()).optional(),
     time_range: z.record(z.string(), z.unknown()).optional(),

@@ -34,6 +34,14 @@ export const DASHBOARD_ATTACHMENT_TYPE = 'dashboard';
 export const DISCOVER_SESSION_ATTACHMENT_TYPE = 'discoverSession';
 export const MAP_ATTACHMENT_TYPE = 'map';
 
+/**
+ * Saved-object type identifiers as understood by core saved-objects and the
+ * management `_find` API.
+ */
+export const DASHBOARD_SO_TYPE = 'dashboard';
+export const MAP_SO_TYPE = 'map';
+export const DISCOVER_SESSION_SO_TYPE = 'search';
+
 // ----------------Legacy attachment types-------------------------
 export const LEGACY_ACTIONS_TYPE = 'actions';
 export const LEGACY_ALERT_TYPE = 'alert';
