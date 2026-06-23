@@ -606,22 +606,13 @@ export class WorkflowCrudService {
 
       await this.indexWorkflowDocument(id, finalData);
 
-      const taskScheduler = this.deps.getTaskScheduler();
-      const shouldRefreshScheduledTaskCredentials =
-        Boolean(finalData.definition) &&
-        finalData.valid &&
-        finalData.enabled &&
-        hasScheduledTriggers(finalData.definition?.triggers ?? []);
-      if ((shouldUpdateScheduler || shouldRefreshScheduledTaskCredentials) && taskScheduler) {
-        await syncSchedulerAfterSave({
-          workflowId: id,
-          spaceId,
-          request,
-          getWorkflow: (wfId, sp) => this.getEsWorkflowForScheduler(wfId, sp),
-          taskScheduler,
-          logger: this.deps.logger,
-        });
-      }
+      await this.syncSchedulerAfterWorkflowUpdate({
+        id,
+        spaceId,
+        request,
+        finalData,
+        shouldUpdateScheduler,
+      });
 
       return {
         id,
@@ -700,6 +691,38 @@ export class WorkflowCrudService {
       createdAt: new Date(source.created_at),
       lastUpdatedAt: new Date(source.updated_at),
     };
+  }
+
+  private async syncSchedulerAfterWorkflowUpdate(params: {
+    id: string;
+    spaceId: string;
+    request: KibanaRequest;
+    finalData: WorkflowProperties;
+    shouldUpdateScheduler: boolean;
+  }): Promise<void> {
+    const { id, spaceId, request, finalData, shouldUpdateScheduler } = params;
+    const taskScheduler = this.deps.getTaskScheduler();
+    if (!taskScheduler) {
+      return;
+    }
+
+    const shouldRefreshScheduledTaskCredentials =
+      Boolean(finalData.definition) &&
+      finalData.valid &&
+      finalData.enabled &&
+      hasScheduledTriggers(finalData.definition?.triggers ?? []);
+    if (!shouldUpdateScheduler && !shouldRefreshScheduledTaskCredentials) {
+      return;
+    }
+
+    await syncSchedulerAfterSave({
+      workflowId: id,
+      spaceId,
+      request,
+      getWorkflow: (wfId, sp) => this.getEsWorkflowForScheduler(wfId, sp),
+      taskScheduler,
+      logger: this.deps.logger,
+    });
   }
 
   private async getExistingWorkflowDocument(

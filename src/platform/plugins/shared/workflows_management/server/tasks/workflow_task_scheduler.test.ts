@@ -219,6 +219,10 @@ describe('WorkflowTaskScheduler', () => {
       conflictError.statusCode = 409;
       const mockTm = makeMockTaskManager();
       mockTm.schedule.mockRejectedValueOnce(conflictError);
+      mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
+        tasks: [makeTaskInstance('workflow:test-workflow:scheduled')],
+        errors: [],
+      });
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
       const result = await scheduler.scheduleWorkflowTasks(makeWorkflow(), 'default', mockRequest);
@@ -231,6 +235,36 @@ describe('WorkflowTaskScheduler', () => {
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Updated existing scheduled task')
+      );
+    });
+
+    it('recreates the task when bulkUpdateSchedules skips it', async () => {
+      const conflictError = new Error('Conflict') as Error & { statusCode: number };
+      conflictError.statusCode = 409;
+      const mockTm = makeMockTaskManager();
+      mockTm.schedule
+        .mockRejectedValueOnce(conflictError)
+        .mockResolvedValueOnce(makeTaskInstance('workflow:test-workflow:scheduled'));
+      mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
+        tasks: [],
+        errors: [],
+      });
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      const result = await scheduler.scheduleWorkflowTasks(makeWorkflow(), 'default', mockRequest);
+
+      expect(result).toEqual(['workflow:test-workflow:scheduled']);
+      expect(mockTm.removeIfExists).toHaveBeenCalledWith('workflow:test-workflow:scheduled');
+      expect(mockTm.schedule).toHaveBeenCalledTimes(2);
+      expect(mockTm.schedule).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          id: 'workflow:test-workflow:scheduled',
+          schedule: expect.objectContaining({ interval: '30s' }),
+        }),
+        { request: mockRequest }
+      );
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Recreated scheduled task')
       );
     });
 
@@ -247,11 +281,13 @@ describe('WorkflowTaskScheduler', () => {
       expect(mockTm.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
 
-    it('swallows 409 error from bulkUpdateSchedules (concurrent update)', async () => {
+    it('recreates the task after a 409 error from bulkUpdateSchedules', async () => {
       const conflictError = new Error('Conflict') as Error & { statusCode: number };
       conflictError.statusCode = 409;
       const mockTm = makeMockTaskManager();
-      mockTm.schedule.mockRejectedValueOnce(conflictError);
+      mockTm.schedule
+        .mockRejectedValueOnce(conflictError)
+        .mockResolvedValueOnce(makeTaskInstance('workflow:test-workflow:scheduled'));
       mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
         tasks: [],
         errors: [makeBulkError('task-1', 409, 'conflict')],
@@ -261,13 +297,16 @@ describe('WorkflowTaskScheduler', () => {
       const result = await scheduler.scheduleWorkflowTasks(makeWorkflow(), 'default', mockRequest);
 
       expect(result).toEqual(['workflow:test-workflow:scheduled']);
+      expect(mockTm.removeIfExists).toHaveBeenCalledWith('workflow:test-workflow:scheduled');
     });
 
-    it('swallows 404 error from bulkUpdateSchedules (task just removed)', async () => {
+    it('recreates the task after a 404 error from bulkUpdateSchedules', async () => {
       const conflictError = new Error('Conflict') as Error & { statusCode: number };
       conflictError.statusCode = 409;
       const mockTm = makeMockTaskManager();
-      mockTm.schedule.mockRejectedValueOnce(conflictError);
+      mockTm.schedule
+        .mockRejectedValueOnce(conflictError)
+        .mockResolvedValueOnce(makeTaskInstance('workflow:test-workflow:scheduled'));
       mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
         tasks: [],
         errors: [makeBulkError('task-1', 404, 'not found')],
@@ -277,6 +316,7 @@ describe('WorkflowTaskScheduler', () => {
       const result = await scheduler.scheduleWorkflowTasks(makeWorkflow(), 'default', mockRequest);
 
       expect(result).toEqual(['workflow:test-workflow:scheduled']);
+      expect(mockTm.removeIfExists).toHaveBeenCalledWith('workflow:test-workflow:scheduled');
     });
 
     it('throws on non-retriable error from bulkUpdateSchedules', async () => {

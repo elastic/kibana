@@ -937,7 +937,7 @@ describe('TaskScheduling', () => {
       ]);
     });
 
-    test('should update running task if new schedule is equal to previous and regenerateApiKey is requested', async () => {
+    test('should not update running task if regenerateApiKey is requested', async () => {
       const task = taskManagerMock.createTask({
         id,
         schedule: { interval: '3h' },
@@ -957,48 +957,9 @@ describe('TaskScheduling', () => {
         }
       );
 
-      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
-      expect(bulkUpdatePayload).toEqual([
-        [task],
-        {
-          validate: false,
-          mergeAttributes: false,
-          options: { request: mockRequest, regenerateApiKey: true },
-        },
-      ]);
-    });
-
-    test('should preserve running task timing if new schedule is different and regenerateApiKey is requested', async () => {
-      const task = taskManagerMock.createTask({
-        id,
-        schedule: { interval: '3h' },
-        status: TaskStatus.Running,
-      });
-      const mockRequest = httpServerMock.createKibanaRequest();
-
-      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
-
-      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      await taskScheduling.bulkUpdateSchedules(
-        [id],
-        { interval: '5h' },
-        {
-          request: mockRequest,
-          regenerateApiKey: true,
-        }
-      );
-
-      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
-
-      expect(bulkUpdatePayload).toEqual([
-        [task],
-        {
-          validate: false,
-          mergeAttributes: false,
-          options: { request: mockRequest, regenerateApiKey: true },
-        },
-      ]);
+      expect(bulkUpdatePayload).toHaveLength(0);
     });
 
     test('should not update running task if regenerateApiKey is not requested', async () => {

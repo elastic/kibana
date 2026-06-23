@@ -64,7 +64,8 @@ export class WorkflowTaskScheduler {
   /**
    * Schedules a single workflow task for a specific trigger.
    * Idempotent: if the task already exists (409 conflict), updates the schedule in place
-   * via bulkUpdateSchedules instead of failing. This handles both interval and RRule schedules.
+   * via bulkUpdateSchedules instead of failing. If Task Manager skips the update, recreates
+   * the deterministic task with the latest schedule and execution credentials.
    */
   async scheduleWorkflowTask(
     workflowId: string,
@@ -128,6 +129,17 @@ export class WorkflowTaskScheduler {
               `Failed to update schedule for workflow task "${taskId}": ${firstError.message}`
             );
           }
+        }
+        // Task Manager intentionally skips running tasks when updating schedules, and skipped tasks
+        // are not returned in either `tasks` or `errors`. Recreate the deterministic workflow task
+        // so it picks up the latest schedule interval and refreshed execution credentials.
+        if (!result.tasks.some((task) => task.id === taskId)) {
+          await this.taskManager.removeIfExists(taskId);
+          const scheduledTask = await this.taskManager.schedule(taskInstance, { request });
+          this.logger.debug(
+            `Recreated scheduled task for workflow ${workflowId} after in-place update was skipped`
+          );
+          return scheduledTask.id;
         }
         this.logger.debug(
           `Updated existing scheduled task for workflow ${workflowId} (schedule updated in place)`
