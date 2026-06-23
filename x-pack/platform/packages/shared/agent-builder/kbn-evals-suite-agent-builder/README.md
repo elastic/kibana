@@ -99,7 +99,7 @@ KNOWLEDGE BASE OPTIONS
 4. Healthcare survey domain: `hcahps_patient_survey_kb`
 5. Elasticsearch customer support knowledge articles: `elastic_customer_support_kb`
 
-**Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Sign up with your `@elastic.co` email address.
+**Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Contact an admin to get Okta SSO access to HuggingFace. (@josh, @Gregoire on Slack)
 
 **Note**: First download of the datasets may take a while, because of the embedding generation for `semantic_text` fields in some of the datasets.
 Once done, documents with embeddings will be cached and re-used on subsequent data loads.
