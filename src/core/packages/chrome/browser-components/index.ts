@@ -19,6 +19,12 @@ export {
 } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { AgentSlotPlaceholder } from './src/agent/agent_slot_placeholder';
+export { AgentWorkspaceSlot } from './src/agent/agent_workspace_slot';
+export {
+  registerAgentWorkspaceContent,
+  unregisterAgentWorkspaceContent,
+} from './src/agent/agent_slot_registry';
+export { ApplicationWorkspaceBootstrap } from './src/application/application_workspace_bootstrap';
 export { AgentWorkspacePanel } from './src/agent/agent_workspace_panel';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';

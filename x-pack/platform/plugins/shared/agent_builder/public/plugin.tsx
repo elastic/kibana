@@ -72,6 +72,10 @@ import {
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 import { storageKeys } from './application/storage_keys';
+import {
+  registerAgentWorkspaceSlot,
+  unregisterAgentWorkspaceSlot,
+} from './agent_workspace/register_agent_workspace';
 
 export class AgentBuilderPlugin
   implements
@@ -357,6 +361,12 @@ export class AgentBuilderPlugin
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
     };
 
+    registerAgentWorkspaceSlot({
+      core,
+      plugins: startDependencies,
+      getServices: () => internalServices,
+    });
+
     if (hasAgentBuilder) {
       core.chrome.navControls.registerRight({
         mount: (element) => {
@@ -416,6 +426,7 @@ export class AgentBuilderPlugin
   }
 
   stop() {
+    unregisterAgentWorkspaceSlot();
     this.experimentalDeepLinksSubscription?.unsubscribe();
   }
 }
