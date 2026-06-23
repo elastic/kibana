@@ -1219,11 +1219,7 @@ describe('dimension editor', () => {
           });
           await clickOnSupportingVis('none');
 
-          expect(mockSetState).toHaveBeenCalledWith({
-            ...stateWOTrend,
-            showBar: false,
-            applyColorTo: 'background',
-          });
+          expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.removeLayer).not.toHaveBeenCalled();
         });
 
@@ -1233,11 +1229,7 @@ describe('dimension editor', () => {
           });
           await clickOnSupportingVis('none');
 
-          expect(mockSetState).toHaveBeenCalledWith({
-            ...metricAccessorState,
-            showBar: false,
-            applyColorTo: 'background',
-          });
+          expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
 
           expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
