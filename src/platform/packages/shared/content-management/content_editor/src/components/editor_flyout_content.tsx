@@ -142,12 +142,17 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
         {isReadonly === false && (
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
+              {/* Stay disabled through the debounced validation window: `onClickSave`
+                  bails while a field is changing, so an enabled-but-no-op save would
+                  otherwise just swallow the click. */}
               <EuiButton
                 color="primary"
                 onClick={onClickSave}
                 data-test-subj="saveButton"
                 fill
-                disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
+                disabled={
+                  (isSubmitted && !form.isValid) || hasNoChanges() || form.getIsChangingValue()
+                }
                 isLoading={isSubmitting}
               >
                 {i18nTexts.saveButtonLabel}
