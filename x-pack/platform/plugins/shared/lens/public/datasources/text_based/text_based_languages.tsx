@@ -577,13 +577,8 @@ export function getTextBasedDatasource({
     },
 
     removeLayer(state: TextBasedPrivateState, layerId: string) {
-      const newLayers = {
-        ...state.layers,
-        [layerId]: {
-          ...state.layers[layerId],
-          columns: [],
-        },
-      };
+      const newLayers = { ...state.layers };
+      delete newLayers[layerId];
 
       return {
         removedLayerIds: [layerId],

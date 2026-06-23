@@ -437,15 +437,51 @@ describe('Textbased Data Source', () => {
         removedLayerIds: ['a'],
         newState: {
           ...baseState,
-          layers: {
-            a: {
-              columns: [],
-              query: { esql: 'FROM foo' },
-              index: 'foo',
-            },
-          },
+          layers: {},
         },
       });
+    });
+
+    it('should not accumulate orphaned layers on repeated add/remove cycles', () => {
+      // Simulate toggling a trendline on/off/on: each cycle adds a new layer
+      // and removes the previous one. Removed layers must be fully deleted.
+      const stateAfterFirstAdd: TextBasedPrivateState = {
+        ...baseState,
+        layers: {
+          ...baseState.layers,
+          trendline1: {
+            columns: [{ columnId: 't1', fieldName: 'metric', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: 'foo',
+          },
+        },
+      };
+
+      // Remove the trendline layer
+      const { newState: stateAfterRemove } = TextBasedDatasource.removeLayer(
+        stateAfterFirstAdd,
+        'trendline1'
+      );
+
+      // The removed layer should be completely gone, not just emptied
+      expect(stateAfterRemove.layers).not.toHaveProperty('trendline1');
+      expect(Object.keys(stateAfterRemove.layers)).toEqual(['a']);
+
+      // Add a second trendline layer
+      const stateAfterSecondAdd: TextBasedPrivateState = {
+        ...stateAfterRemove,
+        layers: {
+          ...stateAfterRemove.layers,
+          trendline2: {
+            columns: [{ columnId: 't2', fieldName: 'metric', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: 'foo',
+          },
+        },
+      };
+
+      // Only the primary layer and the new trendline should exist
+      expect(Object.keys(stateAfterSecondAdd.layers)).toEqual(['a', 'trendline2']);
     });
   });
 
