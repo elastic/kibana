@@ -292,6 +292,7 @@ export function AlertConditionStep({
         fullWidth
       >
         <EuiSelect
+          compressed
           fullWidth
           options={timeFieldOptions}
           value={timeField}
@@ -308,6 +309,7 @@ export function AlertConditionStep({
         fullWidth
       >
         <EuiComboBox
+          compressed
           fullWidth
           options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}

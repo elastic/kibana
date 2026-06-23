@@ -14,6 +14,7 @@ import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_manag
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { sigEventsManagementSkill } from './sig_events_management';
 import { createSigEventsOnboardingSkill } from './sigevents_onboarding_skill';
+import { createGapDetectionSkill } from './memory';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
@@ -38,6 +39,7 @@ export const registerAgentBuilderSkills = ({
       ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
       : []),
     createSigEventsOnboardingSkill(memoryToolsOptions),
+    createGapDetectionSkill(memoryToolsOptions),
   ];
 
   for (const skill of streamsSkills) {
