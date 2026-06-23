@@ -94,12 +94,32 @@ export class DataGrid {
   async closeInTableSearch() {
     const input = this.getInTableSearchInput();
 
-    if (!(await input.isVisible())) return;
-
     await input.press('Escape');
 
-    await expect(input).toBeHidden();
-    await expect(this.page.testSubj.locator(IN_TABLE_SEARCH_BUTTON_TEST_SUBJ)).toBeVisible();
+    await input.waitFor({ state: 'hidden' });
+    await this.page.testSubj
+      .locator(IN_TABLE_SEARCH_BUTTON_TEST_SUBJ)
+      .waitFor({ state: 'visible' });
+  }
+
+  async clickFieldActionInDocViewer(fieldName: string, actionTestSubj: string) {
+    await this.openDocViewerTab('doc_view_table');
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+
+    await expect(async () => {
+      const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+      await nameCell.waitFor({ state: 'visible' });
+      await nameCell.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await nameCell.hover();
+
+      const action = flyout.locator(`[data-test-subj="${actionTestSubj}-${fieldName}"]`);
+      await action.waitFor({ state: 'visible' });
+      await action.scrollIntoViewIfNeeded();
+      await action.click();
+    }).toPass({ timeout: 15_000 });
   }
 
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
@@ -114,6 +134,7 @@ export class DataGrid {
     const metaFieldsButton = metaFieldsSection.getByRole('button', { name: /Meta fields/ });
 
     await metaFieldsButton.click();
+    await metaFieldsButton.waitFor({ state: 'visible' });
     await expect(metaFieldsButton).toHaveAttribute('aria-expanded', 'true');
   }
 
@@ -129,7 +150,7 @@ export class DataGrid {
 
   async getColumnWidth(field: string): Promise<number> {
     const header = this.getColumnHeader(field);
-    await expect(header).toBeVisible();
+    await header.waitFor({ state: 'visible' });
 
     const headerBox = await header.boundingBox();
     if (!headerBox) {
@@ -141,10 +162,10 @@ export class DataGrid {
 
   async getCurrentDensityValue(): Promise<DataGridDensity> {
     const buttonGroup = this.page.testSubj.locator('densityButtonGroup');
-    await expect(buttonGroup).toBeVisible();
+    await buttonGroup.waitFor({ state: 'visible' });
 
     const selectedButton = buttonGroup.locator('[aria-pressed="true"]');
-    await expect(selectedButton).toBeVisible();
+    await selectedButton.waitFor({ state: 'visible' });
 
     return (await selectedButton.innerText()).trim() as DataGridDensity;
   }
@@ -157,10 +178,10 @@ export class DataGrid {
     const buttonGroup = this.page.testSubj.locator(
       `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
     );
-    await expect(buttonGroup).toBeVisible();
+    await buttonGroup.waitFor({ state: 'visible' });
 
     const selectedButton = buttonGroup.locator('.euiButtonGroupButton-isSelected');
-    await expect(selectedButton).toBeVisible();
+    await selectedButton.waitFor({ state: 'visible' });
 
     return (await selectedButton.innerText()).trim() as DataGridRowHeight;
   }
@@ -297,7 +318,7 @@ export class DataGrid {
       `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
     );
 
-    await expect(expandButton).toBeVisible();
+    await expandButton.waitFor({ state: 'visible' });
     await expandButton.scrollIntoViewIfNeeded();
     await expandButton.hover();
     await expandButton.click({ delay: 50 });
@@ -314,10 +335,8 @@ export class DataGrid {
   async openInTableSearch() {
     const input = this.getInTableSearchInput();
 
-    if (await input.isVisible()) return;
-
     await this.page.testSubj.locator(IN_TABLE_SEARCH_BUTTON_TEST_SUBJ).click();
-    await expect(input).toBeVisible();
+    await input.waitFor({ state: 'visible' });
   }
 
   async openSelectedRowsMenu() {
@@ -376,6 +395,10 @@ export class DataGrid {
   async runInTableSearch(searchTerm: string) {
     await this.openInTableSearch();
 
+    await this.setInTableSearchTerm(searchTerm);
+  }
+
+  async setInTableSearchTerm(searchTerm: string) {
     const counter = this.getInTableSearchMatchesCounter();
     const previousCounter = (await counter.textContent()) ?? '';
 
@@ -391,7 +414,7 @@ export class DataGrid {
   async setDensityValue(newValue: DataGridDensity) {
     const buttonGroup = this.page.testSubj.locator('densityButtonGroup');
 
-    await expect(buttonGroup).toBeVisible();
+    await buttonGroup.waitFor({ state: 'visible' });
     await buttonGroup.locator(`[data-text="${newValue}"]`).click();
   }
 
@@ -400,7 +423,7 @@ export class DataGrid {
       `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
     );
 
-    await expect(buttonGroup).toBeVisible();
+    await buttonGroup.waitFor({ state: 'visible' });
     await buttonGroup.locator(`[data-text="${newValue}"]`).click();
   }
 
@@ -416,20 +439,7 @@ export class DataGrid {
   }
 
   async toggleColumnInDocViewer(fieldName: string) {
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
-
-    await expect(async () => {
-      const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
-      await nameElement.evaluate((el) => {
-        el.scrollIntoView({ block: 'center', inline: 'nearest' });
-      });
-      await nameElement.hover();
-
-      const toggle = flyout.locator(`[data-test-subj="toggleColumnButton-${fieldName}"]`);
-      await toggle.waitFor({ state: 'visible' });
-      await toggle.scrollIntoViewIfNeeded();
-      await toggle.click();
-    }).toPass({ timeout: 15_000 });
+    await this.clickFieldActionInDocViewer(fieldName, 'toggleColumnButton');
   }
 
   async waitForDocTableRendered() {
@@ -438,7 +448,7 @@ export class DataGrid {
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
 
-    await expect(table).toBeVisible({ timeout: totalTimeoutMs });
+    await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 
     let stableSince: number | null = null;
 
@@ -469,7 +479,7 @@ export class DataGrid {
 
   async waitForDocViewerFlyoutOpen() {
     const docViewer = this.page.testSubj.locator('kbnDocViewer');
-    await expect(docViewer).toBeVisible({ timeout: 30_000 });
+    await docViewer.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async waitUntilSearchingHasFinished() {

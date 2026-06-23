@@ -50,7 +50,7 @@ spaceTest.describe('Discover data grid in-table search', { tag: '@local-stateful
     await expect(dataGrid.getInTableSearchCellMatches(2, '_source')).toHaveCount(0);
     await expect(dataGrid.getCurrentPageButton()).toHaveText('3');
 
-    await dataGrid.runInTableSearch('http');
+    await dataGrid.setInTableSearchTerm('http');
     await expect(dataGrid.getInTableSearchMatchesCounter()).toHaveText('1/6386');
     await expect(dataGrid.getInTableSearchCellMatches(0, '@timestamp')).toHaveCount(0);
     await expect(dataGrid.getInTableSearchCellMatches(0, '_source')).toHaveCount(13);

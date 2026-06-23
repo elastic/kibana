@@ -11,28 +11,13 @@
  * Sample-size persistence across saved searches and dashboard saved-search panels.
  */
 
-import type { ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
+import { expectSampleSizeFooter } from '../../../fixtures/common/helpers';
 import { testData } from '../../../fixtures/common';
 
-const DEFAULT_ROWS_PER_PAGE = 100;
-const DEFAULT_SAMPLE_SIZE = 500;
 const CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH = 150;
 const CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL = 10;
-
-const expectSampleSizeFooter = async ({
-  pageObjects,
-  sampleSize,
-}: {
-  pageObjects: ScoutTestFixtures['pageObjects'];
-  sampleSize: number;
-}) => {
-  const { dataGrid } = pageObjects;
-
-  await dataGrid.goToLastSamplePage(sampleSize, DEFAULT_ROWS_PER_PAGE);
-  await expect.poll(() => dataGrid.getDataGridFooterText()).toContain(String(sampleSize));
-};
 
 spaceTest.describe(
   'Discover data grid sample size - saved search and Dashboard',
@@ -48,9 +33,9 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.setQueryMode('classic');
       await scoutSpace.uiSettings.set({
-        'discover:sampleSize': DEFAULT_SAMPLE_SIZE,
+        'discover:sampleSize': testData.DEFAULT_SAMPLE_SIZE,
         'discover:rowHeightOption': 0,
-        'discover:sampleRowsPerPage': DEFAULT_ROWS_PER_PAGE,
+        'discover:sampleRowsPerPage': testData.DEFAULT_ROWS_PER_PAGE,
       });
     });
 
@@ -74,7 +59,7 @@ spaceTest.describe(
         await dataGrid.waitUntilSearchingHasFinished();
         await dataGrid.waitForDocTableRendered();
         await dataGrid.openGridDisplaySettings();
-        expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+        expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
 
         await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
         await discover.saveSearch(savedSearchName);
@@ -93,8 +78,8 @@ spaceTest.describe(
         await dataGrid.waitForDocTableRendered();
         await dataGrid.openGridDisplaySettings();
 
-        expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
-        await expectSampleSizeFooter({ pageObjects, sampleSize: DEFAULT_SAMPLE_SIZE });
+        expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
+        await expectSampleSizeFooter({ pageObjects, sampleSize: testData.DEFAULT_SAMPLE_SIZE });
       });
 
       await spaceTest.step('loading the saved search restores the custom sample size', async () => {
@@ -118,8 +103,8 @@ spaceTest.describe(
           await dataGrid.waitForDocTableRendered();
           await dataGrid.openGridDisplaySettings();
 
-          expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
-          await expectSampleSizeFooter({ pageObjects, sampleSize: DEFAULT_SAMPLE_SIZE });
+          expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
+          await expectSampleSizeFooter({ pageObjects, sampleSize: testData.DEFAULT_SAMPLE_SIZE });
         }
       );
     });
@@ -133,8 +118,8 @@ spaceTest.describe(
       await dataGrid.waitForDocTableRendered();
 
       await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
-      await expectSampleSizeFooter({ pageObjects, sampleSize: DEFAULT_SAMPLE_SIZE });
+      expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
+      await expectSampleSizeFooter({ pageObjects, sampleSize: testData.DEFAULT_SAMPLE_SIZE });
     });
 
     spaceTest(

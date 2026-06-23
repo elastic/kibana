@@ -38,3 +38,7 @@ export const DEFAULT_TIME_RANGE_DISPLAY = {
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
 };
+
+export const DEFAULT_ROWS_PER_PAGE = 100;
+
+export const DEFAULT_SAMPLE_SIZE = 500;

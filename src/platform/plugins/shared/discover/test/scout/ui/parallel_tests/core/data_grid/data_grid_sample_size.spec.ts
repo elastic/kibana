@@ -11,27 +11,12 @@
  * Discover data-grid sample-size defaults, changes, and reload behavior.
  */
 
-import type { ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
+import { expectSampleSizeFooter } from '../../../fixtures/common/helpers';
 import { testData } from '../../../fixtures/common';
 
-const DEFAULT_ROWS_PER_PAGE = 100;
-const DEFAULT_SAMPLE_SIZE = 500;
 const CUSTOM_SAMPLE_SIZE = 250;
-
-const expectSampleSizeFooter = async ({
-  pageObjects,
-  sampleSize,
-}: {
-  pageObjects: ScoutTestFixtures['pageObjects'];
-  sampleSize: number;
-}) => {
-  const { dataGrid } = pageObjects;
-
-  await dataGrid.goToLastSamplePage(sampleSize, DEFAULT_ROWS_PER_PAGE);
-  await expect.poll(() => dataGrid.getDataGridFooterText()).toContain(String(sampleSize));
-};
 
 spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -44,9 +29,9 @@ spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-cla
     await browserAuth.loginAsViewer();
     await pageObjects.discover.setQueryMode('classic');
     await scoutSpace.uiSettings.set({
-      'discover:sampleSize': DEFAULT_SAMPLE_SIZE,
+      'discover:sampleSize': testData.DEFAULT_SAMPLE_SIZE,
       'discover:rowHeightOption': 0,
-      'discover:sampleRowsPerPage': DEFAULT_ROWS_PER_PAGE,
+      'discover:sampleRowsPerPage': testData.DEFAULT_ROWS_PER_PAGE,
     });
     await pageObjects.discover.goto();
     await pageObjects.dataGrid.waitUntilSearchingHasFinished();
@@ -68,15 +53,15 @@ spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-cla
     const { dataGrid } = pageObjects;
 
     await dataGrid.openGridDisplaySettings();
-    expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
-    await expectSampleSizeFooter({ pageObjects, sampleSize: DEFAULT_SAMPLE_SIZE });
+    expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
+    await expectSampleSizeFooter({ pageObjects, sampleSize: testData.DEFAULT_SAMPLE_SIZE });
   });
 
   spaceTest('allows changing the sample size', async ({ pageObjects }) => {
     const { dataGrid } = pageObjects;
 
     await dataGrid.openGridDisplaySettings();
-    expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+    expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
 
     await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE);
 
@@ -89,7 +74,7 @@ spaceTest.describe('Discover data grid sample size', { tag: '@local-stateful-cla
     const { dataGrid } = pageObjects;
 
     await dataGrid.openGridDisplaySettings();
-    expect(await dataGrid.getCurrentSampleSize()).toBe(DEFAULT_SAMPLE_SIZE);
+    expect(await dataGrid.getCurrentSampleSize()).toBe(testData.DEFAULT_SAMPLE_SIZE);
 
     await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE);
     await dataGrid.openGridDisplaySettings();

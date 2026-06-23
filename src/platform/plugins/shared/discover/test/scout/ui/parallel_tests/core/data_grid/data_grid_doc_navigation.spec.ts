@@ -11,34 +11,9 @@
  * Discover data-grid document-viewer navigation and field actions.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '@kbn/scout';
 import { testData } from '../../../fixtures/common';
-
-const clickFieldActionInDocViewer = async (
-  page: ScoutPage,
-  fieldName: string,
-  actionName: string
-) => {
-  await page.testSubj.click('docViewerTab-doc_view_table');
-
-  const actionTestSubj = `${actionName}-${fieldName}`;
-
-  await expect(async () => {
-    const nameCell = page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
-    await nameCell.evaluate((el) => {
-      el.scrollIntoView({ block: 'center', inline: 'nearest' });
-    });
-    await nameCell.hover();
-
-    const action = page.testSubj.locator(actionTestSubj);
-    await expect(action).toBeVisible();
-    await action.scrollIntoViewIfNeeded();
-    await action.hover();
-    await action.click();
-  }).toPass({ timeout: 15_000 });
-};
 
 spaceTest.describe(
   'Discover data grid - document navigation',
@@ -79,9 +54,12 @@ spaceTest.describe(
 
     spaceTest(
       'creates an exists filter from the selected document flyout',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-        await clickFieldActionInDocViewer(page, '@timestamp', 'addExistsFilterButton');
+        await pageObjects.dataGrid.clickFieldActionInDocViewer(
+          '@timestamp',
+          'addExistsFilterButton'
+        );
         await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
         expect(
