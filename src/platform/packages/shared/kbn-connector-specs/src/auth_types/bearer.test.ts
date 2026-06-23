@@ -21,7 +21,9 @@ const mockAuthContext: AuthContext = {
 describe('BearerAuth', () => {
   describe('getAuthHeaders', () => {
     it('returns Authorization header with bearer token', async () => {
-      await expect(BearerAuth.getAuthHeaders!(mockAuthContext, { token: 'tok' })).resolves.toEqual({
+      const { getAuthHeaders } = BearerAuth;
+      if (!getAuthHeaders) throw new Error('BearerAuth.getAuthHeaders is not defined');
+      await expect(getAuthHeaders(mockAuthContext, { token: 'tok' })).resolves.toEqual({
         Authorization: 'Bearer tok',
       });
     });

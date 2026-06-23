@@ -121,7 +121,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch!;
+      const guardedFetch = options.fetch;
 
       fakeNetwork.ensureUriAllowed.mockClear();
       await guardedFetch('http://mcp.example.com/mcp', { method: 'POST' });
@@ -144,7 +144,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch!;
+      const guardedFetch = options.fetch;
 
       fakeNetwork.ensureUriAllowed.mockClear();
       fakeGetAuthHeaders.mockClear();
@@ -163,7 +163,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch!;
+      const guardedFetch = options.fetch;
 
       fakeNetwork.ensureUriAllowed.mockClear();
       const urlObj = new URL('http://mcp.example.com/mcp');
@@ -177,7 +177,7 @@ describe('mcpClientType', () => {
       await mcpClientType.build(ctx);
 
       const [, , options] = MockMcpClient.mock.calls[0] as [unknown, unknown, { fetch: FetchLike }];
-      const guardedFetch = options.fetch!;
+      const guardedFetch = options.fetch;
 
       fakeNetwork.ensureUriAllowed.mockImplementation(() => {
         throw new Error('URI not allowed');

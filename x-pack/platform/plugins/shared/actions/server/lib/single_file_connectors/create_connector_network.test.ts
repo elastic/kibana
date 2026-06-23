@@ -40,9 +40,7 @@ describe('createConnectorNetwork', () => {
       throw new Error('URI not allowed');
     });
     const network = createConnectorNetwork(mockConfigUtils);
-    expect(() => network.ensureUriAllowed('https://denied.example.com')).toThrow(
-      'URI not allowed'
-    );
+    expect(() => network.ensureUriAllowed('https://denied.example.com')).toThrow('URI not allowed');
   });
 
   it('propagates errors from ensureHostnameAllowed', () => {

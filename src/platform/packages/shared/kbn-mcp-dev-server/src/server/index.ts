@@ -66,7 +66,11 @@ run(
         } catch {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(
-            JSON.stringify({ jsonrpc: '2.0', error: { code: -32700, message: 'Parse error' }, id: null })
+            JSON.stringify({
+              jsonrpc: '2.0',
+              error: { code: -32700, message: 'Parse error' },
+              id: null,
+            })
           );
         }
       });
