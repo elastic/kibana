@@ -106,11 +106,11 @@ const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => 
 };
 
 const selectComboBoxOption = async (page: ScoutPage, testSubj: string, value: string) => {
-  const searchInput = page.testSubj.locator(`${testSubj} > comboBoxSearchInput`);
-  // The combobox input starts disabled while the filter builder fetches field
-  // options from the server. Wait for it to become enabled before opening.
-  await expect(searchInput).toBeEnabled({ timeout: 30_000 });
   await page.testSubj.click(`${testSubj} > comboBoxInput`);
+  const searchInput = page.testSubj.locator(`${testSubj} > comboBoxSearchInput`);
+  // Clicking opens the dropdown and triggers the async field-options fetch.
+  // The search input stays disabled until that fetch completes; wait for it.
+  await expect(searchInput).toBeEnabled({ timeout: 30_000 });
   await searchInput.fill(value);
   await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
 };
@@ -123,9 +123,9 @@ const selectComboBoxOptionIn = async (
 ) => {
   const container = page.testSubj.locator(containerTestSubj);
   const combo = container.locator(`[data-test-subj="${testSubj}"]`);
+  await combo.locator('[data-test-subj="comboBoxInput"]').click();
   const searchInput = combo.locator('[data-test-subj="comboBoxSearchInput"]');
   await expect(searchInput).toBeEnabled({ timeout: 30_000 });
-  await combo.locator('[data-test-subj="comboBoxInput"]').click();
   await searchInput.fill(value);
   await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
 };
