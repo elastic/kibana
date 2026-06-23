@@ -32,7 +32,7 @@ export const FrozenDefaultRepositoryRequiredCallout = ({
       color="warning"
       announceOnMount={false}
       title={i18n.translate(
-        'xpack.streams.streamDetailLifecycle.frozen.defaultRepositoryRequiredCallout.title',
+        'xpack.dataLifecyclePhases.frozen.defaultRepositoryRequiredCallout.title',
         {
           defaultMessage: 'Default snapshot repository required',
         }
@@ -40,26 +40,23 @@ export const FrozenDefaultRepositoryRequiredCallout = ({
       data-test-subj={calloutTestSubj}
     >
       <EuiText size="s" color="subdued">
-        {i18n.translate(
-          'xpack.streams.streamDetailLifecycle.frozen.defaultRepositoryRequiredCallout.body',
-          {
-            defaultMessage:
-              'The previously assigned default searchable snapshot repository is no longer available. This phase will be ignored until you assign a new default repository, then refresh this panel.',
-          }
-        )}
+        {i18n.translate('xpack.dataLifecyclePhases.frozen.defaultRepositoryRequiredCallout.body', {
+          defaultMessage:
+            'The previously assigned default searchable snapshot repository is no longer available. This phase will be ignored until you assign a new default repository, then refresh this panel.',
+        })}
       </EuiText>
 
       {(onCreateDefaultRepository || onRefresh) && (
         <>
           <EuiSpacer size="m" />
-          <EuiSplitButton fill size="s" color="warning">
+          <EuiSplitButton size="s" color="warning">
             <EuiSplitButton.ActionPrimary
               data-test-subj={createButtonTestSubj}
               isDisabled={!onCreateDefaultRepository}
               onClick={onCreateDefaultRepository}
             >
               {i18n.translate(
-                'xpack.streams.streamDetailLifecycle.frozen.defaultRepositoryRequiredCallout.createButton',
+                'xpack.dataLifecyclePhases.frozen.defaultRepositoryRequiredCallout.createButton',
                 { defaultMessage: 'Create default repository' }
               )}
             </EuiSplitButton.ActionPrimary>
@@ -68,7 +65,7 @@ export const FrozenDefaultRepositoryRequiredCallout = ({
               isLoading={Boolean(isRefreshing)}
               disabled={Boolean(isRefreshing) || !onRefresh}
               aria-label={i18n.translate(
-                'xpack.streams.streamDetailLifecycle.frozen.defaultRepositoryRequiredCallout.refreshButtonAriaLabel',
+                'xpack.dataLifecyclePhases.frozen.defaultRepositoryRequiredCallout.refreshButtonAriaLabel',
                 { defaultMessage: 'Refresh panel' }
               )}
               data-test-subj={refreshButtonTestSubj}
