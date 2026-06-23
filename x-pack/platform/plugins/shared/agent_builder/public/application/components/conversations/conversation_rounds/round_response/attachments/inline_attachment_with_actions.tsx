@@ -17,6 +17,10 @@ import type { AttachmentsService } from '../../../../../../services/attachments/
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import {
+  shouldOfferSidebarConversation,
+  useIsAgentWorkspaceMount,
+} from '../../../../../hooks/use_navigation';
 import { AttachmentHeader } from './attachment_header';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
@@ -67,7 +71,13 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   } = useCanvasContext();
   const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
+
+  const offerSidebarConversation = shouldOfferSidebarConversation(
+    isSidebar,
+    isAgentWorkspaceMount
+  );
 
   const openCanvas = useCallback(() => {
     openCanvasContext(attachment, isSidebar);
@@ -108,7 +118,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         agentId,
         updateOrigin,
         openCanvas,
-        openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+        openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
         isCanvas: false,
         setPreviewBadgeState: (nextPreviewState) => {
           setPreviewedAttachmentKey(
@@ -119,7 +129,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     [
       uiDefinition,
       attachment,
-      isSidebar,
+      offerSidebarConversation,
       agentId,
       updateOrigin,
       openCanvas,
@@ -175,7 +185,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
             attachment,
             isSidebar,
             screenContext,
-            openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+            openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
           },
           {
             registerActionButtons,

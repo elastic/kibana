@@ -20,6 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { isAgentFirst, isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -184,6 +185,19 @@ export class AgentBuilderPlugin
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
 
     const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
+      // Agent-first chrome: AB lives in the agent workspace column; skip sidebar embeddable.
+      if (isAgentFirst(core.featureFlags) && isNextChrome(core.featureFlags)) {
+        if (this.activeSidebarRef) {
+          return { chatRef: this.activeSidebarRef };
+        }
+
+        return {
+          chatRef: {
+            close: () => {},
+          },
+        };
+      }
+
       const { conversationId, ...openOptions } = options ?? {};
       const config =
         Object.keys(openOptions).length > 0 ? openOptions : this.conversationActiveConfig;

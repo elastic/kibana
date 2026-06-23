@@ -15,6 +15,10 @@ import { useConversationId } from '../../../../../context/conversation/use_conve
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import {
+  shouldOfferSidebarConversation,
+  useIsAgentWorkspaceMount,
+} from '../../../../../hooks/use_navigation';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
@@ -40,8 +44,14 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
   const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
+
+  const offerSidebarConversation = shouldOfferSidebarConversation(
+    canvasState?.isSidebar ?? false,
+    isAgentWorkspaceMount
+  );
 
   const openSidebarConversation = useCallback(() => {
     openSidebarConversationInternal({ conversationId });
@@ -106,11 +116,19 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         isSidebar: canvasState.isSidebar,
         agentId,
         updateOrigin,
-        openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
+        openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
         isCanvas: true,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
-  }, [canvasState, uiDefinition, agentId, updateOrigin, openSidebarConversation, dynamicButtons]);
+  }, [
+    canvasState,
+    uiDefinition,
+    agentId,
+    updateOrigin,
+    offerSidebarConversation,
+    openSidebarConversation,
+    dynamicButtons,
+  ]);
 
   if (!canvasState || !uiDefinition?.renderCanvasContent) {
     return null;
@@ -165,7 +183,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
             {
               attachment,
               isSidebar,
-              openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+              openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
             },
             {
               registerActionButtons,
