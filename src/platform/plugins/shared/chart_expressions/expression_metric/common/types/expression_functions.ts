@@ -57,6 +57,7 @@ export interface MetricArguments {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
+  spacing: MetricStyle['spacing'];
   primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;

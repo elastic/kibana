@@ -16,6 +16,7 @@ import {
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_SIZING,
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_SPACING,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
@@ -156,6 +157,18 @@ const metricConfigBackgroundChartSchemaESQL = {
 
 const metricStylingSchema = schema.object(
   {
+    /**
+     * Overall spacing preset for metric elements.
+     * Possible values:
+     * - 'small': Current compact spacing
+     * - 'large': Increased spacing and paddings
+     */
+    spacing: schema.maybe(
+      schema.oneOf([schema.literal('small'), schema.literal('large')], {
+        meta: { description: 'Spacing preset for metric chart layout' },
+        defaultValue: DEFAULT_SPACING,
+      })
+    ),
     /**
      * Icon configuration
      */

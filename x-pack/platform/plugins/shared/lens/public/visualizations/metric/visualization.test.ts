@@ -103,6 +103,7 @@ describe('metric visualization', () => {
     primaryPosition: 'bottom',
     iconAlign: 'right',
     valueFontMode: 'default',
+    spacing: 'small',
     secondaryTrend: { type: 'none' },
     secondaryLabelPosition: 'before',
     applyColorTo: 'background',
@@ -587,6 +588,9 @@ describe('metric visualization', () => {
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
+                "spacing": Array [
+                  "small",
+                ],
                 "subtitle": Array [
                   "subtitle",
                 ],
@@ -674,6 +678,9 @@ describe('metric visualization', () => {
                 ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
+                ],
+                "spacing": Array [
+                  "small",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -993,6 +1000,9 @@ describe('metric visualization', () => {
               "secondaryLabelPosition": Array [
                 "before",
               ],
+              "spacing": Array [
+                "small",
+              ],
               "subtitle": Array [
                 "subtitle",
               ],
@@ -1239,6 +1249,7 @@ describe('metric visualization', () => {
         "primaryAlign": "right",
         "primaryPosition": "bottom",
         "secondaryAlign": "right",
+        "spacing": "small",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
       }

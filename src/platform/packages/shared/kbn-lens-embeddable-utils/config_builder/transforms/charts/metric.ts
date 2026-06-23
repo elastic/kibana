@@ -24,6 +24,7 @@ import {
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_SPACING,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
@@ -157,11 +158,12 @@ function convertStylingToStateFormat(
   const primaryStyling = styling.primary;
   const secondaryStyling = styling.secondary;
 
-  if (!primaryStyling && !secondaryStyling) {
+  if (!primaryStyling && !secondaryStyling && styling.spacing == null) {
     return {};
   }
 
   return stripUndefined({
+    spacing: styling.spacing,
     valueFontMode:
       primaryStyling?.value?.sizing != null
         ? primaryStyling.value.sizing === 'fill'
@@ -188,6 +190,7 @@ function convertStylingToAPIFormat(
   hasSecondary: boolean
 ): MetricStyling {
   return stripUndefined({
+    spacing: visualization.spacing ?? DEFAULT_SPACING,
     icon: visualization.icon
       ? {
           name: iconCompat.toAPI(visualization.icon),

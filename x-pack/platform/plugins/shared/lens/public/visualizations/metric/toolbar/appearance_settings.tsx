@@ -30,6 +30,7 @@ import {
   fontSizeOptions,
   iconPositionOptions,
   primaryMetricPositionOptions,
+  spacingOptions,
 } from './option_configs';
 import { StyleTemplateSelector } from './style_template_selector';
 
@@ -42,10 +43,12 @@ const getTemplateAppearanceDefaults = (
   | 'primaryAlign'
   | 'secondaryAlign'
   | 'valueFontMode'
+  | 'spacing'
   | 'iconAlign'
 > => ({
   ...LENS_METRIC_STYLE_TEMPLATE[primaryMetricPosition],
   valueFontMode: LENS_METRIC_STATE_DEFAULTS.valueFontMode,
+  spacing: LENS_METRIC_STATE_DEFAULTS.spacing,
   iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
 });
 
@@ -265,6 +268,18 @@ export function MetricAppearanceSettings({
               }}
               isDisabled={disabledStates.iconAlign}
               dataTestSubj="lens-metric-appearance-other-icon-position-btn"
+            />
+            <AppearanceOption
+              label={i18n.translate('xpack.lens.metric.appearancePopover.spacing', {
+                defaultMessage: 'Spacing & size',
+              })}
+              value={state.spacing ?? LENS_METRIC_STATE_DEFAULTS.spacing}
+              options={spacingOptions}
+              onChange={(id) => {
+                setIsCustomStyle(false);
+                setState({ ...state, spacing: id });
+              }}
+              dataTestSubj="lens-metric-appearance-other-spacing-btn"
             />
           </AppearanceOptionGroup>
         </div>

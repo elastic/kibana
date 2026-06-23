@@ -11,6 +11,7 @@ import type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
+  MetricSpacing,
 } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 
@@ -53,6 +54,21 @@ export const fontSizeOptions: Array<EuiButtonGroupOptionProps & { id: PrimaryMet
   {
     id: 'fit',
     label: i18n.translate('xpack.lens.metric.appearancePopover.fit', { defaultMessage: 'Fit' }),
+  },
+];
+
+export const spacingOptions: Array<EuiButtonGroupOptionProps & { id: MetricSpacing }> = [
+  {
+    id: 'small',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.spacing.small', {
+      defaultMessage: 'Small',
+    }),
+  },
+  {
+    id: 'large',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.spacing.large', {
+      defaultMessage: 'Large',
+    }),
   },
 ];
 
