@@ -42,7 +42,9 @@ apiTest.describe(
         const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
         apiTest.skip(!rule, `${spec.ruleTypeId} is not registered on this deployment`);
         const response = await apiClient.post(
-          `api/alerting/rule/${rule!.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+          `api/alerting/rule/${
+            rule!.ruleId
+          }/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
           { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(403);
@@ -52,7 +54,9 @@ apiTest.describe(
         const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
         apiTest.skip(!rule, `${spec.ruleTypeId} is not registered on this deployment`);
         const response = await apiClient.post(
-          `api/alerting/rule/${rule!.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
+          `api/alerting/rule/${
+            rule!.ruleId
+          }/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
           { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(403);
