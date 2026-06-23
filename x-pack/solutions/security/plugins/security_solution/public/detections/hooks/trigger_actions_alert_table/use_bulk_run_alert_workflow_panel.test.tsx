@@ -9,6 +9,7 @@ import React from 'react';
 import { render, renderHook, screen } from '@testing-library/react';
 import type { RenderContentPanelProps, TimelineItem } from '@kbn/response-ops-alerts-table/types';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { useBulkRunAlertWorkflowPanel } from './use_bulk_run_alert_workflow_panel';
 import { RUN_WORKFLOW_BULK_PANEL_ID } from '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { TestProviders } from '../../../common/mock';
@@ -36,15 +37,8 @@ const createCapabilities = (
   const { canExecuteWorkflow = true } = overrides;
 
   return {
-    canCreateWorkflow: true,
-    canReadWorkflow: true,
-    canUpdateWorkflow: true,
-    canDeleteWorkflow: true,
+    ...createMockWorkflowsCapabilities(),
     canExecuteWorkflow,
-    canReadWorkflowExecution: true,
-    canReadManagedWorkflow: true,
-    canReadManagedWorkflowExecution: true,
-    canCancelWorkflowExecution: true,
   };
 };
 
