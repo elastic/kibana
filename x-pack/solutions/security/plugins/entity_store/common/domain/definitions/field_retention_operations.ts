@@ -9,7 +9,7 @@ import type { EntityField } from './entity_schema';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/field_utils.ts
 
-type Operation = Omit<EntityField, 'retention' | 'destination'> & {
+type Operation = Omit<EntityField, 'retention' | 'destination' | 'skipExtraction'> & {
   destination?: string;
   skipExtraction?: boolean;
 };
