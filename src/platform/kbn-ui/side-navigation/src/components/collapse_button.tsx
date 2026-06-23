@@ -13,7 +13,6 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SIDE_PANEL_ID } from '../constants';
-import { PinFilledGlyphIcon } from './icons/pin_filled_glyph';
 
 interface Props {
   excludeFromRovingFocus?: boolean;
@@ -37,24 +36,23 @@ const sideNavCollapseButtonStyles = () => {
 };
 
 /**
- * Pin/unpin button for the secondary navigation side panel.
+ * Collapse button for the secondary navigation side panel.
  */
 export const SideNavCollapseButton: FC<Props> = ({
   excludeFromRovingFocus = false,
   isCollapsed,
   toggle,
 }) => {
-  const isPinned = !isCollapsed;
-  const iconType = isPinned ? PinFilledGlyphIcon : 'pin';
+  const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
   const styles = useMemo(() => sideNavCollapseButtonStyles(), []);
 
-  const pinLabel = i18n.translate('kbnUI.sideNavigation.pinButtonLabel', {
-    defaultMessage: 'Pin navigation menu',
+  const expandLabel = i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
+    defaultMessage: 'Expand navigation menu',
   });
-  const unpinLabel = i18n.translate('kbnUI.sideNavigation.unpinButtonLabel', {
-    defaultMessage: 'Unpin navigation menu',
+  const collapseLabel = i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
+    defaultMessage: 'Collapse navigation menu',
   });
-  const buttonLabel = isPinned ? unpinLabel : pinLabel;
+  const buttonLabel = isCollapsed ? expandLabel : collapseLabel;
 
   return (
     <div className="sideNavCollapseButtonWrapper" css={styles.sideNavCollapseButtonWrapper}>
@@ -68,8 +66,8 @@ export const SideNavCollapseButton: FC<Props> = ({
           iconType={iconType}
           tabIndex={excludeFromRovingFocus ? -1 : undefined}
           aria-label={buttonLabel}
-          aria-pressed={isPinned}
-          aria-expanded={isPinned}
+          aria-pressed={!isCollapsed}
+          aria-expanded={!isCollapsed}
           aria-controls={SIDE_PANEL_ID}
           onClick={() => toggle(!isCollapsed)}
         />
