@@ -32,7 +32,7 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
 };
 
 // TODO: Delete this file after asCode.useGaSchemas feature flag is flipped to true and the legacy search endpoint schemas are no longer used
-apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('dashboards - search - LEGACY', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
