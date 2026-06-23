@@ -21,7 +21,7 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { ManagedWorkflowsService } from './managed_workflows_service';
-import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type { VersionedWorkflowDocument, WorkflowCrudService } from './workflow_crud_service';
 import type {
   ReadModifyWriteWorkflowDocumentParams,

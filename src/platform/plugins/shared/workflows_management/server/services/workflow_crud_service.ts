@@ -34,7 +34,7 @@ import type { WorkflowCrudDeps } from './types';
 import {
   WorkflowChangeHistoryAction,
   type WorkflowChangeHistoryActionType,
-} from './workflow_change_history_constants';
+} from '../../common/lib/workflow_change_history/constants';
 import type {
   IndexWorkflowDocumentOptions,
   ReadModifyWriteWorkflowDocumentParams,

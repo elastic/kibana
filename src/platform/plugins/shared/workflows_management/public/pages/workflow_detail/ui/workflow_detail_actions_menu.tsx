@@ -14,18 +14,9 @@ import { i18n } from '@kbn/i18n';
 import {
   useWorkflowChangeHistoryEnabled,
   WorkflowChangeHistoryListItem,
-  WorkflowChangeHistoryProvider,
 } from '../../../features/change_history';
 
-export interface WorkflowDetailActionsMenuProps {
-  workflowId: string;
-  workflowName?: string;
-}
-
-export const WorkflowDetailActionsMenu = ({
-  workflowId,
-  workflowName,
-}: WorkflowDetailActionsMenuProps): JSX.Element | null => {
+export const WorkflowDetailActionsMenu = (): JSX.Element | null => {
   const isChangeHistoryEnabled = useWorkflowChangeHistoryEnabled();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -50,32 +41,30 @@ export const WorkflowDetailActionsMenu = ({
   );
 
   return (
-    <WorkflowChangeHistoryProvider workflowId={workflowId} workflowName={workflowName}>
-      <EuiPopover
-        aria-label={i18n.translate('workflows.workflowDetailHeader.actionsMenuAriaLabel', {
-          defaultMessage: 'Workflow actions',
-        })}
-        button={
-          <EuiToolTip content={actionsMenuAriaLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              display="base"
-              iconType="boxesVertical"
-              size="s"
-              aria-label={actionsMenuAriaLabel}
-              data-test-subj="workflowDetailActionsMenuButton"
-              onClick={togglePopover}
-            />
-          </EuiToolTip>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="s"
-        anchorPosition="downRight"
-      >
-        <EuiListGroup maxWidth={false}>
-          <WorkflowChangeHistoryListItem onClick={closePopover} />
-        </EuiListGroup>
-      </EuiPopover>
-    </WorkflowChangeHistoryProvider>
+    <EuiPopover
+      aria-label={i18n.translate('workflows.workflowDetailHeader.actionsMenuAriaLabel', {
+        defaultMessage: 'Workflow actions',
+      })}
+      button={
+        <EuiToolTip content={actionsMenuAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            display="base"
+            iconType="boxesVertical"
+            size="s"
+            aria-label={actionsMenuAriaLabel}
+            data-test-subj="workflowDetailActionsMenuButton"
+            onClick={togglePopover}
+          />
+        </EuiToolTip>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="s"
+      anchorPosition="downRight"
+    >
+      <EuiListGroup maxWidth={false}>
+        <WorkflowChangeHistoryListItem onClick={closePopover} />
+      </EuiListGroup>
+    </EuiPopover>
   );
 };

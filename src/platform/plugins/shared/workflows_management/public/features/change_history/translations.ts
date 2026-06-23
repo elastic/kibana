@@ -9,9 +9,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_WORKFLOW = i18n.translate(
-  'xpack.workflowsManagement.changeHistory.backToWorkflow',
+export const BACK_TO_WORKFLOW = i18n.translate('workflows.changeHistory.backToWorkflow', {
+  defaultMessage: 'Back to workflow',
+});
+
+export const CURRENT_VERSION_BADGE = (version: number): string =>
+  i18n.translate('workflows.changeHistory.currentVersionBadge', {
+    defaultMessage: 'Current version • v{version}',
+    values: { version },
+  });
+
+export const CURRENT_VERSION_ONLY_BADGE = i18n.translate(
+  'workflows.changeHistory.currentVersionOnlyBadge',
   {
-    defaultMessage: 'Back to workflow',
+    defaultMessage: 'Current version',
   }
 );
+
+export const VERSION_BADGE = (version: number): string =>
+  i18n.translate('workflows.changeHistory.versionBadge', {
+    defaultMessage: 'v{version}',
+    values: { version },
+  });

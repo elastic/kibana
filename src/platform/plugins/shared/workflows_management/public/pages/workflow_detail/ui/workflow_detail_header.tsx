@@ -429,10 +429,7 @@ export const WorkflowDetailHeader = React.memo(
                 </EuiToolTip>
                 {workflowId && !isExecutionsTab ? (
                   <EuiFlexItem grow={false}>
-                    <WorkflowDetailActionsMenu
-                      workflowId={workflowId}
-                      workflowName={workflow?.name}
-                    />
+                    <WorkflowDetailActionsMenu />
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>

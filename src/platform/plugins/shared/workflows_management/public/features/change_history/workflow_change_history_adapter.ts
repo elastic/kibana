@@ -20,13 +20,26 @@ import type { WorkflowChangesHistoryResponse } from '../../../common/lib/workflo
 
 const toCacheKey = (objectId: string, changeId: string): string => `${objectId}:${changeId}`;
 
+const clearObjectCache = (
+  changeCache: Map<string, ChangeHistoryDetail>,
+  objectId: string
+): void => {
+  const prefix = `${objectId}:`;
+
+  for (const key of changeCache.keys()) {
+    if (key.startsWith(prefix)) {
+      changeCache.delete(key);
+    }
+  }
+};
+
 export const createWorkflowChangeHistoryAdapter = (http: HttpSetup): ChangeHistoryAdapter => {
   const changeCache = new Map<string, ChangeHistoryDetail>();
 
   return {
     listChanges: async ({ objectId, page, signal }) => {
       if (page.index === 0) {
-        changeCache.clear();
+        clearObjectCache(changeCache, objectId);
       }
 
       const response = await http.get<WorkflowChangesHistoryResponse>(
@@ -57,7 +70,9 @@ export const createWorkflowChangeHistoryAdapter = (http: HttpSetup): ChangeHisto
       };
     },
 
-    getChange: async ({ objectId, changeId }) => {
+    getChange: async ({ objectId, changeId, signal }) => {
+      signal?.throwIfAborted();
+
       const cached = changeCache.get(toCacheKey(objectId, changeId));
 
       if (!cached) {

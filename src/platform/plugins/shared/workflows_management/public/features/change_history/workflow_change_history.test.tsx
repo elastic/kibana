@@ -112,7 +112,7 @@ describe('WorkflowChangeHistoryListItem', () => {
       </TestWrapper>
     );
 
-    fireEvent.click(screen.getByTestId('changeHistoryTrigger'));
+    fireEvent.click(screen.getByTestId('changeHistoryListGroupItem'));
 
     await waitFor(() => {
       expect(screen.getByTestId('changeHistoryModal')).toBeInTheDocument();

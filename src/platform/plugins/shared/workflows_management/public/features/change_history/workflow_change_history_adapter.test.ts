@@ -174,6 +174,48 @@ describe('createWorkflowChangeHistoryAdapter', () => {
     });
   });
 
+  it('clears only the current workflow cache on page-0 refetch', async () => {
+    const http = createHttpMock(
+      jest.fn().mockImplementation((_url, options) => {
+        const page = options?.query?.page;
+
+        if (page === 1) {
+          return Promise.resolve({
+            page: 1,
+            perPage: 20,
+            total: 1,
+            items: [currentHistoryItem],
+          });
+        }
+
+        return Promise.resolve({
+          page: 1,
+          perPage: 20,
+          total: 1,
+          items: [{ ...previousHistoryItem, id: 'evt-other-workflow' }],
+        });
+      })
+    );
+    const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
+
+    await adapter.listChanges({
+      objectId: 'workflow-a',
+      page: { index: 0, size: 20 },
+    });
+
+    await adapter.listChanges({
+      objectId: 'workflow-b',
+      page: { index: 0, size: 20 },
+    });
+
+    await expect(
+      adapter.getChange({
+        objectId: 'workflow-a',
+        changeId: 'evt-current',
+      })
+    ).resolves.toMatchObject({ id: 'evt-current' });
+  });
+
   it('throws when getChange is called before the row was loaded', async () => {
     const adapter = createWorkflowChangeHistoryAdapter(createHttpMock(jest.fn()) as HttpSetup);
 

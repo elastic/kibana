@@ -10,42 +10,23 @@
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import type { ChangeHistoryBadgeRenderFn } from '@kbn/change-history-ui';
-import { i18n } from '@kbn/i18n';
+
+import { CURRENT_VERSION_BADGE, CURRENT_VERSION_ONLY_BADGE, VERSION_BADGE } from './translations';
 
 export const renderWorkflowChangeHistoryBadge: ChangeHistoryBadgeRenderFn = ({ item }) => {
   const version = item.metadata?.version;
 
   if (item.isCurrent) {
     if (typeof version === 'number') {
-      return (
-        <EuiBadge color="hollow">
-          {i18n.translate('xpack.workflowsManagement.changeHistory.currentVersionBadge', {
-            defaultMessage: 'Current version • v{version}',
-            values: { version },
-          })}
-        </EuiBadge>
-      );
+      return <EuiBadge color="hollow">{CURRENT_VERSION_BADGE(version)}</EuiBadge>;
     }
 
-    return (
-      <EuiBadge color="hollow">
-        {i18n.translate('xpack.workflowsManagement.changeHistory.currentVersionOnlyBadge', {
-          defaultMessage: 'Current version',
-        })}
-      </EuiBadge>
-    );
+    return <EuiBadge color="hollow">{CURRENT_VERSION_ONLY_BADGE}</EuiBadge>;
   }
 
   if (typeof version !== 'number') {
     return null;
   }
 
-  return (
-    <EuiBadge color="hollow">
-      {i18n.translate('xpack.workflowsManagement.changeHistory.versionBadge', {
-        defaultMessage: 'v{version}',
-        values: { version },
-      })}
-    </EuiBadge>
-  );
+  return <EuiBadge color="hollow">{VERSION_BADGE(version)}</EuiBadge>;
 };

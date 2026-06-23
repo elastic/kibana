@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
@@ -35,10 +35,13 @@ export const ChangeHistoryProvider = ({
 }: ChangeHistoryProviderProps): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
+  const [prevObjectId, setPrevObjectId] = useState(objectId);
 
-  useEffect(() => {
+  if (objectId !== prevObjectId) {
+    setPrevObjectId(objectId);
     setSelectedChangeId(undefined);
-  }, [objectId]);
+    setIsModalOpen(false);
+  }
 
   const openModal = useCallback(() => {
     setIsModalOpen(true);

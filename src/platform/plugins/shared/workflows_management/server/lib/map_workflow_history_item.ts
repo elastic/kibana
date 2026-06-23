@@ -10,7 +10,7 @@
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 
 import { WORKFLOW_CHANGE_HISTORY_SYSTEM_USER } from '../../common/lib/workflow_change_history/constants';
-import type { WorkflowHistoryItem } from '../types/workflow_change_history';
+import type { WorkflowHistoryItem } from '../../common/lib/workflow_change_history/types';
 
 export const mapWorkflowHistoryItem = (document: ChangeHistoryDocument): WorkflowHistoryItem => ({
   timestamp: document['@timestamp'],
