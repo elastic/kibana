@@ -166,10 +166,7 @@ export const AWS_SERVICE_PROVIDER_PERMISSIONS: Readonly<Record<string, ProviderP
     'dynamodb:ListTables',
     'dynamodb:DescribeTimeToLive',
   ]),
-  rds: actions(AWS_METRICS_PACKAGE_ACTIONS, [
-    'rds:DescribeDBInstances',
-    'rds:ListTagsForResource',
-  ]),
+  rds: actions(AWS_METRICS_PACKAGE_ACTIONS, ['rds:DescribeDBInstances', 'rds:ListTagsForResource']),
   redshift: actions(AWS_METRICS_PACKAGE_ACTIONS, [
     'redshift:DescribeClusters',
     'redshift:DescribeLoggingStatus',
@@ -180,10 +177,7 @@ export const AWS_SERVICE_PROVIDER_PERMISSIONS: Readonly<Record<string, ProviderP
     'kafka:ListClusters',
     'kafka:DescribeCluster',
   ]),
-  kinesis: actions(AWS_METRICS_PACKAGE_ACTIONS, [
-    'kinesis:ListStreams',
-    'kinesis:DescribeStream',
-  ]),
+  kinesis: actions(AWS_METRICS_PACKAGE_ACTIONS, ['kinesis:ListStreams', 'kinesis:DescribeStream']),
   sns: actions(AWS_METRICS_PACKAGE_ACTIONS, ['sns:ListTopics', 'sns:GetTopicAttributes']),
   sqs: actions(AWS_METRICS_PACKAGE_ACTIONS, ['sqs:ListQueues', 'sqs:GetQueueAttributes']),
 

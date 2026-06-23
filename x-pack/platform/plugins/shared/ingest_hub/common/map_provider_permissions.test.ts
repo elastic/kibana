@@ -88,7 +88,9 @@ describe('mapProviderPermissions', () => {
               type: 'aws-s3',
               title: 'S3',
               description: '',
-              provider_permissions: [{ provider: 'aws', permissions: ['s3:GetObject', 's3:ListBucket'] }],
+              provider_permissions: [
+                { provider: 'aws', permissions: ['s3:GetObject', 's3:ListBucket'] },
+              ],
             },
             {
               type: 'aws-cloudwatch',
