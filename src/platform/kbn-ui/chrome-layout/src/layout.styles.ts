@@ -32,8 +32,14 @@ const cssProp = css`
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
-  const { navigationWidth, agentWidth, sidebarWidth, bannerHeight, headerHeight, footerHeight } =
-    layoutState;
+  const {
+    navigationWidth,
+    agentWidth,
+    sidebarWidth,
+    bannerHeight,
+    headerHeight,
+    footerHeight,
+  } = layoutState;
 
   const style = {
     gridTemplateColumns: `

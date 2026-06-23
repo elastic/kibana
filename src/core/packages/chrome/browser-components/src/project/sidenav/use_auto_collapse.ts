@@ -8,9 +8,11 @@
  */
 
 import { useState, useLayoutEffect } from 'react';
+import { useLayoutConfig } from '@kbn/ui-chrome-layout';
+import { DEFAULT_AGENT_WIDTH } from '@kbn/ui-chrome-layout-constants';
 import { EXPANDED_WIDTH } from '@kbn/ui-side-navigation';
 
-// Thresholds for how wide the main app column is (px). Layout: nav | app | sidebar.
+// Thresholds for how wide the main app column is (px). Layout: nav | agent | app | sidebar.
 // `window.innerWidth` does not change when the nav collapses, so measuring it does not
 // create a feedback loop with auto-collapse.
 const APP_COLLAPSE_AT_WIDTH = 1000;
@@ -21,21 +23,24 @@ const APP_EXPAND_AT_WIDTH = 1100;
 /**
  * Whether the sidenav should be auto-collapsed for the current window size.
  *
- * Main app width is approximated as viewport width minus expanded nav width and
- * `sidebarWidth`. Below the collapse threshold we collapse; above the expand
- * threshold we expand. Between the two thresholds we leave the nav unchanged so
- * small resizes near the edge do not keep toggling it.
+ * Main app width is approximated as viewport width minus expanded nav width,
+ * agent width, and `sidebarWidth`. Below the collapse threshold we collapse; above
+ * the expand threshold we expand. Between the two thresholds we leave the nav
+ * unchanged so small resizes near the edge do not keep toggling it.
  */
 export const useAutoCollapse = (sidebarWidth: number): boolean => {
+  const { agentWidth } = useLayoutConfig();
+  const agentColumnWidth = agentWidth ?? DEFAULT_AGENT_WIDTH;
+
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    const appWidth = window.innerWidth - EXPANDED_WIDTH - sidebarWidth;
+    const appWidth = window.innerWidth - EXPANDED_WIDTH - sidebarWidth - agentColumnWidth;
     return appWidth <= APP_COLLAPSE_AT_WIDTH;
   });
 
   useLayoutEffect(() => {
     const check = () =>
       setIsCollapsed((current) => {
-        const appWidth = window.innerWidth - EXPANDED_WIDTH - sidebarWidth;
+        const appWidth = window.innerWidth - EXPANDED_WIDTH - sidebarWidth - agentColumnWidth;
         if (appWidth <= APP_COLLAPSE_AT_WIDTH) return true;
         if (appWidth >= APP_EXPAND_AT_WIDTH) return false;
         // Between collapse and expand thresholds: keep current state (see constants above).
@@ -45,7 +50,7 @@ export const useAutoCollapse = (sidebarWidth: number): boolean => {
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
-  }, [sidebarWidth]);
+  }, [agentColumnWidth, sidebarWidth]);
 
   return isCollapsed;
 };

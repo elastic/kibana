@@ -21,6 +21,7 @@ export interface LayoutDimensions {
   headerHeight: number;
   navigationWidth: number;
   agentWidth: number;
+  applicationWorkspaceWidth: number;
   sidebarWidth: number;
   applicationTopBarHeight: number;
   applicationBottomBarHeight: number;
