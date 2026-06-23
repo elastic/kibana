@@ -75,7 +75,7 @@ const ACCESS_LEVEL_OPTIONS = [
   {
     value: DeviceControlAccessLevelEnum.deny_all,
     text: i18n.translate('xpack.securitySolution.endpoint.policy.details.deviceControl.blockAll', {
-      defaultMessage: 'Block',
+      defaultMessage: 'Block all',
     }),
   },
 ];
