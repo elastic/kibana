@@ -22,7 +22,7 @@ import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
-import { EXAMPLE_PROFILE_STATE_DEFAULTS, EXAMPLE_PROFILE_STATE_DEF } from '../profile_state';
+import { EXAMPLE_PROFILE_STATE_DEF } from '../profile_state';
 
 const timestampColorOptions = [
   {
@@ -162,8 +162,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               order: 2,
               render: function ProfileStateExample() {
                 const profileState = useObservable(profileState$, stateAdapter.getState());
-                const timestampColor =
-                  profileState.timestampColor ?? EXAMPLE_PROFILE_STATE_DEFAULTS.timestampColor;
+                const timestampColor = profileState.timestampColor;
 
                 return (
                   <>

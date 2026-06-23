@@ -14,12 +14,8 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getPersistedTabMock } from './__mocks__/internal_state.mocks';
 import { createContextAwarenessToolkit } from './context_awareness_toolkit';
-import { internalStateActions, selectTab, type InternalStateStore, type TabState } from '.';
-import {
-  type ProfileStateDefinition,
-  type ProfileStateRegistry,
-  ProfileStateType,
-} from '../../../../context_awareness';
+import { internalStateActions, selectTab, type TabState } from '.';
+import { type ProfileStateDefinition, ProfileStateType } from '../../../../context_awareness';
 
 interface TestProfileState {
   color: string;
@@ -33,21 +29,6 @@ const TEST_PROFILE_STATE_DEF: ProfileStateDefinition<TestProfileState> = {
     rowsPerPage: { type: ProfileStateType.Ui },
   },
 };
-
-const createToolkit = ({
-  internalState,
-  profileStateRegistry,
-  tabId,
-}: {
-  internalState: InternalStateStore;
-  profileStateRegistry: ProfileStateRegistry;
-  tabId: string;
-}) =>
-  createContextAwarenessToolkit({
-    internalState,
-    profileStateRegistry,
-    tabId,
-  });
 
 describe('createContextAwarenessToolkit', () => {
   const setup = async () => {
@@ -89,9 +70,11 @@ describe('createContextAwarenessToolkit', () => {
     const updateEsqlQuerySpy = jest.spyOn(internalStateActions, 'updateESQLQuery');
     const queryOrUpdater = 'FROM logs-*';
 
-    createToolkit({ internalState, profileStateRegistry, tabId }).actions.updateESQLQuery?.(
-      queryOrUpdater
-    );
+    createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).actions.updateESQLQuery?.(queryOrUpdater);
 
     expect(updateEsqlQuerySpy).toHaveBeenCalledWith({ tabId, queryOrUpdater });
   });
@@ -100,11 +83,11 @@ describe('createContextAwarenessToolkit', () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
     const addFilterSpy = jest.spyOn(internalStateActions, 'addFilter');
 
-    createToolkit({ internalState, profileStateRegistry, tabId }).actions.addFilter?.(
-      'status',
-      200,
-      '+'
-    );
+    createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).actions.addFilter?.('status', 200, '+');
 
     expect(addFilterSpy).toHaveBeenCalledWith({
       tabId,
@@ -118,12 +101,13 @@ describe('createContextAwarenessToolkit', () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
     const setExpandedDocSpy = jest.spyOn(internalStateActions, 'setExpandedDoc');
 
-    createToolkit({ internalState, profileStateRegistry, tabId }).actions.setExpandedDoc?.(
-      undefined,
-      {
-        initialTabId: 'overview',
-      }
-    );
+    createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).actions.setExpandedDoc?.(undefined, {
+      initialTabId: 'overview',
+    });
 
     expect(setExpandedDocSpy).toHaveBeenCalledWith({
       tabId,
@@ -141,7 +125,11 @@ describe('createContextAwarenessToolkit', () => {
       tabLabel: 'Logs',
     };
 
-    createToolkit({ internalState, profileStateRegistry, tabId }).actions.openInNewTab?.(params);
+    createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).actions.openInNewTab?.(params);
 
     expect(openInNewTabSpy).toHaveBeenCalledWith(params);
   });
@@ -150,7 +138,11 @@ describe('createContextAwarenessToolkit', () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
     const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
 
-    createToolkit({ internalState, profileStateRegistry, tabId }).actions.refreshData?.();
+    createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).actions.refreshData?.();
 
     expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
   });
@@ -160,7 +152,7 @@ describe('createContextAwarenessToolkit', () => {
     const updateAdHocDataViewsSpy = jest.spyOn(internalStateActions, 'updateAdHocDataViews');
     const adHocDataViews = [dataViewMockWithTimeField];
 
-    await createToolkit({
+    await createContextAwarenessToolkit({
       internalState,
       profileStateRegistry,
       tabId,
@@ -173,7 +165,7 @@ describe('createContextAwarenessToolkit', () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
     profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
 
-    const stateAdapter = createToolkit({
+    const stateAdapter = createContextAwarenessToolkit({
       internalState,
       profileStateRegistry,
       tabId,
@@ -194,7 +186,7 @@ describe('createContextAwarenessToolkit', () => {
   it('emits profile state updates', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
     profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-    const stateAdapter = createToolkit({
+    const stateAdapter = createContextAwarenessToolkit({
       internalState,
       profileStateRegistry,
       tabId,
@@ -216,7 +208,7 @@ describe('createContextAwarenessToolkit', () => {
   it('caches adapters by definition key', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
     profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-    const toolkit = createToolkit({ internalState, profileStateRegistry, tabId });
+    const toolkit = createContextAwarenessToolkit({ internalState, profileStateRegistry, tabId });
 
     expect(toolkit.getStateAdapter(TEST_PROFILE_STATE_DEF)).toBe(
       toolkit.getStateAdapter(TEST_PROFILE_STATE_DEF)
@@ -227,7 +219,7 @@ describe('createContextAwarenessToolkit', () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
 
     expect(() =>
-      createToolkit({ internalState, profileStateRegistry, tabId }).getStateAdapter(
+      createContextAwarenessToolkit({ internalState, profileStateRegistry, tabId }).getStateAdapter(
         TEST_PROFILE_STATE_DEF
       )
     ).toThrow('State with key testProfileState is not registered.');

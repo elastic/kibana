@@ -14,7 +14,7 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
-import { EXAMPLE_PROFILE_STATE_DEFAULTS, EXAMPLE_PROFILE_STATE_DEF } from '../profile_state';
+import { EXAMPLE_PROFILE_STATE_DEF } from '../profile_state';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
@@ -29,8 +29,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
       const Timestamp = (props: DataGridCellValueElementProps) => {
         const timestamp = getFieldValue(props.row, '@timestamp') as string;
         const profileState = useObservable(profileState$, stateAdapter.getState());
-        const timestampColor =
-          profileState.timestampColor ?? EXAMPLE_PROFILE_STATE_DEFAULTS.timestampColor;
+        const timestampColor = profileState.timestampColor;
 
         return (
           <EuiBadge
