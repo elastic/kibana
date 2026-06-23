@@ -136,7 +136,17 @@ export const showsAuthenticationCredentialFields = (
 
 export const createDataSourceFlyoutAuthenticationLabel = (): string =>
   i18n.translate('dataSets.createFlyout.authentication.label', {
+    defaultMessage: 'Preferred method',
+  });
+
+export const createDataSourceFlyoutAuthenticationTitle = (): string =>
+  i18n.translate('dataSets.createFlyout.authentication.title', {
     defaultMessage: 'Authentication',
+  });
+
+export const createDataSourceFlyoutAuthenticationHelpAriaLabel = (): string =>
+  i18n.translate('dataSets.createFlyout.authentication.helpAriaLabel', {
+    defaultMessage: 'Open Cloud security documentation',
   });
 
 /** Applies UI authentication mode to the payload submitted to the API. */

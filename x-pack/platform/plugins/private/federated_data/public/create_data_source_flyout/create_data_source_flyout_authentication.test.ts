@@ -24,18 +24,21 @@ describe('create_data_source_flyout_authentication', () => {
 
   describe('getCreateDataSourceAuthenticationOptions', () => {
     it('includes Federated Identity for s3/gcs/azure', () => {
-      expect(getCreateDataSourceAuthenticationOptions('s3').map((o) => o.value)).toEqual([
-        'access_and_secret_keys',
-        'federated_identity',
-      ]);
-      expect(getCreateDataSourceAuthenticationOptions('gcs').map((o) => o.value)).toEqual([
-        'access_and_secret_keys',
-        'federated_identity',
-      ]);
-      expect(getCreateDataSourceAuthenticationOptions('azure').map((o) => o.value)).toEqual([
-        'credentials',
-        'federated_identity',
-      ]);
+      expect(
+        getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: true }).map(
+          (o) => o.value
+        )
+      ).toEqual(['access_and_secret_keys', 'federated_identity']);
+      expect(
+        getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: true }).map(
+          (o) => o.value
+        )
+      ).toEqual(['access_and_secret_keys', 'federated_identity']);
+      expect(
+        getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: true }).map(
+          (o) => o.value
+        )
+      ).toEqual(['credentials', 'federated_identity']);
     });
 
     it('omits Federated Identity when disabled', () => {
