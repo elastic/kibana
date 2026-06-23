@@ -11,6 +11,10 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
+import {
+  getNavigationNodeIcon,
+  NAVIGATION_NODE_ICON_FALLBACK,
+} from '@kbn/core-chrome-browser-navigation-utils';
 import classnames from 'classnames';
 import type {
   MenuItem,
@@ -22,7 +26,6 @@ import type {
 import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
 import { i18n } from '@kbn/i18n';
-import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 import type { PanelStateManager } from './panel_state_manager';
 import { isActiveFromUrl } from './utils/is_active_from_url';
 
@@ -64,6 +67,7 @@ export interface NavigationItems {
 export const toNavigationItems = (
   navigationTree: NavigationTreeDefinitionUI,
   activeNodes: ChromeProjectNavigationNode[][],
+  overflowItemIds: string[] = [],
   panelStateManager: PanelStateManager,
   isNextChrome: boolean = false
 ): NavigationItems => {
@@ -72,6 +76,7 @@ export const toNavigationItems = (
 
   let deepestActiveItemId: string | undefined;
   let currentActiveItemIdLevel = -1;
+  const urlActiveSecondaryByPanel = new Map<string, string[]>();
 
   const isActive = (navNode: ChromeProjectNavigationNode) =>
     isActiveFromUrl(navNode.path, activeNodes, false);
@@ -81,14 +86,42 @@ export const toNavigationItems = (
     level: number,
     parentNode?: ChromeProjectNavigationNode
   ) => {
-    if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
-      if (isActive(navNode)) {
-        deepestActiveItemId = navNode.id;
-        currentActiveItemIdLevel = level;
+    if (!isActive(navNode)) {
+      return;
+    }
 
-        if (parentNode?.id) {
-          panelStateManager.setPanelLastActive(parentNode.id, navNode.id);
-        }
+    if (level === 2 && parentNode?.id) {
+      const candidates = urlActiveSecondaryByPanel.get(parentNode.id) ?? [];
+      candidates.push(navNode.id);
+      urlActiveSecondaryByPanel.set(parentNode.id, candidates);
+      return;
+    }
+
+    if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
+      deepestActiveItemId = navNode.id;
+      currentActiveItemIdLevel = level;
+
+      if (parentNode?.id) {
+        panelStateManager.setPanelLastActive(parentNode.id, navNode.id);
+      }
+    }
+  };
+
+  const resolveSecondaryActiveItems = () => {
+    for (const [panelId, candidateIds] of urlActiveSecondaryByPanel) {
+      if (candidateIds.length === 0) {
+        continue;
+      }
+
+      const lastActiveItemId = panelStateManager.getPanelLastActive(panelId);
+      const activeItemId =
+        lastActiveItemId && candidateIds.includes(lastActiveItemId)
+          ? lastActiveItemId
+          : candidateIds[0];
+
+      if (deepestActiveItemId == null || currentActiveItemIdLevel <= 2) {
+        deepestActiveItemId = activeItemId;
+        currentActiveItemIdLevel = 2;
       }
     }
   };
@@ -123,7 +156,7 @@ export const toNavigationItems = (
       primaryNodes = primaryNodes.filter((_, i) => i !== homeNodeIndex);
       logoItem = {
         href: warnIfMissing(homeNode, 'href', '/missing-href-😭'),
-        iconType: getIcon(homeNode),
+        iconType: getNavigationNodeIcon(homeNode),
         id: warnIfMissing(homeNode, 'id', 'kibana'),
         label: warnIfMissing(homeNode, 'title', 'Kibana'),
         'data-test-subj': getTestSubj(homeNode, ['nav-item-home']),
@@ -135,6 +168,10 @@ export const toNavigationItems = (
     );
   }
 
+  // TODO: The visibility checks below (sideNavStatus === 'hidden', empty panel-opener pruning,
+  // section-header flattening) duplicate logic already handled by `getRenderableNodes` in
+  // `@kbn/core-chrome-browser-internal`. Once `getNavigation$()` passes a pre-pruned tree, this
+  // function can be simplified to a pure shape-transformer with no visibility decisions.
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;
 
@@ -169,6 +206,18 @@ export const toNavigationItems = (
     // Helper function to convert a node to a secondary menu item
     const createSecondaryMenuItem = (child: ChromeProjectNavigationNode): SecondaryMenuItem => {
       maybeMarkActive(child, 2, navNode);
+      const itemActions = child.itemActions?.map((action) => ({
+        id: action.id,
+        iconType: action.iconType,
+        'aria-label': action.ariaLabel,
+        'data-test-subj': getTestSubj(child, [`item-action-${action.id}`]),
+        ...(action.opensNestedPanel ? { opensNestedPanel: action.opensNestedPanel } : {}),
+        ...(action.opensItemActionMenu ? { opensItemActionMenu: action.opensItemActionMenu } : {}),
+        ...(action.itemActionMenuContext
+          ? { itemActionMenuContext: action.itemActionMenuContext }
+          : {}),
+      }));
+
       return {
         id: child.id,
         label: toSentenceCase(warnIfMissing(child, 'title', 'Missing Title 😭')),
@@ -176,6 +225,7 @@ export const toNavigationItems = (
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
         badgeType: child.badgeType,
+        ...(itemActions?.length ? { itemActions } : {}),
       };
     };
 
@@ -209,9 +259,9 @@ export const toNavigationItems = (
         secondarySections = filterEmpty(
           navNode.children.map((child) => {
             if (child.sideNavStatus === 'hidden') return null;
-            if (!child.children?.length) return null;
+            if (!child.children?.length && !child.emptyState) return null;
 
-            const validChildren = filterValidSecondaryChildren(child.children);
+            const validChildren = filterValidSecondaryChildren(child.children ?? []);
             const secondaryItems = validChildren.map(createSecondaryMenuItem);
 
             if (child.href) {
@@ -224,9 +274,13 @@ export const toNavigationItems = (
               id: child.id,
               label: child.title && toSentenceCase(child.title),
               items: secondaryItems,
+              ...(child.animateItemReorder ? { animateItemReorder: true } : {}),
+              ...(child.emptyState && secondaryItems.length === 0
+                ? { emptyState: child.emptyState }
+                : {}),
             };
           })
-        ).filter((section) => section.items.length > 0); // Filter out empty sections;
+        ).filter((section) => section.items.length > 0 || section.emptyState);
       }
 
       // If after all filtering there are no sections, we skip this menu item
@@ -244,19 +298,48 @@ export const toNavigationItems = (
 
     maybeMarkActive(navNode, 1);
 
+    const panelHeaderActions = navNode.panelHeaderActions?.map((action) => ({
+      id: action.id,
+      iconType: action.iconType,
+      'aria-label': action.ariaLabel,
+      'data-test-subj': getTestSubj(navNode, [`panel-header-action-${action.id}`]),
+      ...(action.opensNestedPanel ? { opensNestedPanel: action.opensNestedPanel } : {}),
+    }));
+
+    const panelNestedPanels = navNode.panelNestedPanels?.map((panel) => ({
+      id: panel.id,
+      title: panel.title,
+    }));
+
+    const panelFooterActions = navNode.panelFooterActions?.map((action) => ({
+      id: action.id,
+      label: action.label,
+      href: action.href,
+      iconType: action.iconType,
+      'data-test-subj': getTestSubj(navNode, [`panel-footer-action-${action.id}`]),
+    }));
+
     return {
       id: navNode.id,
       label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
-      iconType: getIcon(navNode),
+      iconType: getNavigationNodeIcon(navNode),
       href: itemHref,
       sections: secondarySections,
+      ...(panelHeaderActions ? { panelHeaderActions } : {}),
+      ...(panelNestedPanels ? { panelNestedPanels } : {}),
+      ...(panelFooterActions ? { panelFooterActions } : {}),
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
     } as MenuItem;
   };
 
-  const primaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
+  const overflowIdSet = new Set(overflowItemIds);
+  const allPrimaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
+  const primaryItems = allPrimaryItems.filter((item) => !overflowIdSet.has(item.id));
+  const overflowItems = allPrimaryItems.filter((item) => overflowIdSet.has(item.id));
   const footerItems = filterEmpty(footerNodes.flatMap(toMenuItem));
+
+  resolveSecondaryActiveItems();
 
   if (footerItems.length > 5) {
     warnOnce(
@@ -277,7 +360,7 @@ export const toNavigationItems = (
 
   return {
     logoItem,
-    navItems: { primaryItems, footerItems },
+    navItems: { primaryItems, overflowItems, footerItems },
     activeItemId: deepestActiveItemId,
   };
 };
@@ -377,7 +460,9 @@ function warnAboutDuplicateIcons(
   const icons = [...(logoItem ? [logoItem] : []), ...primaryItems, ...footerItems]
     .filter(
       (item) =>
-        item.iconType && item.iconType !== FALLBACK_ICON && typeof item.iconType === 'string'
+        item.iconType &&
+        item.iconType !== NAVIGATION_NODE_ICON_FALLBACK &&
+        typeof item.iconType === 'string'
     )
     .map((item) => String(item.iconType));
 
@@ -477,7 +562,6 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
   });
 }
 
-const FALLBACK_ICON = 'broom' as const;
 /**
  * Finds an item href based on the last active item history for a panel opener.
  * @param panelId - The panel opener node id
@@ -529,6 +613,10 @@ const getPanelOpenerHref = (
   secondarySections: SecondaryMenuSection[],
   panelStateManager: PanelStateManager
 ): string => {
+  if (navNode.href) {
+    return navNode.href;
+  }
+
   // Try to use last active item first
   const lastActiveHref = findItemByLastActive(navNode.id, secondarySections, panelStateManager);
   if (lastActiveHref) return lastActiveHref;
@@ -536,40 +624,5 @@ const getPanelOpenerHref = (
   // Fall back to first available href
   const firstAvailableHref = findFirstAvailableHref(secondarySections);
 
-  // Warn if panel opener has its own href (which it shouldn't)
-  if (navNode.href) {
-    warnOnce(
-      `Panel opener node "${navNode.id}" has a href "${
-        navNode.href
-      }", but it should not. We're using it as a panel opener that contains sections with links and we use the first link inside the section as the href ${
-        firstAvailableHref ?? 'missing-href-😭'
-      }.`
-    );
-  }
-
   return firstAvailableHref ?? 'missing-href-😭';
-};
-
-const getIcon = (node: ChromeProjectNavigationNode | null): string => {
-  if (node?.icon) {
-    return node.icon as string;
-  }
-
-  if (node && AppDeepLinkIdToIcon[node.id]) {
-    return AppDeepLinkIdToIcon[node.id];
-  }
-
-  if (node?.deepLink?.euiIconType) {
-    return node.deepLink.euiIconType;
-  }
-
-  if (node?.deepLink?.icon) {
-    return node.deepLink.icon;
-  }
-
-  warnOnce(
-    `No icon found for node "${node?.id}". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon "broom".`
-  );
-
-  return FALLBACK_ICON;
 };

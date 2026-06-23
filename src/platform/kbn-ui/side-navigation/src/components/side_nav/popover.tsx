@@ -46,12 +46,20 @@ export type PopoverChildren =
   | ReactNode
   | ((closePopover: () => void, ids?: PopoverIds) => ReactNode);
 
+export type PopoverFooter = ReactNode | ((closePopover: () => void) => ReactNode);
+
 export interface PopoverProps {
   children?: PopoverChildren;
   container?: HTMLElement;
+  footer?: PopoverFooter;
   hasContent: boolean;
   isSidePanelOpen: boolean;
   isAnyPopoverLocked?: boolean;
+  /**
+   * When true, keeps the popover open so collapsed secondary navigation remains
+   * reachable via the popover header (e.g. expand button) instead of the footer.
+   */
+  openWhenCollapsed?: boolean;
   setIsLocked?: (isLocked: boolean) => void;
   label: string;
   persistent?: boolean;
@@ -77,9 +85,11 @@ export interface PopoverProps {
 export const Popover = ({
   children,
   container,
+  footer,
   hasContent,
   isSidePanelOpen,
   isAnyPopoverLocked = false,
+  openWhenCollapsed = false,
   setIsLocked = () => {},
   label,
   persistent = false,
@@ -106,6 +116,17 @@ export const Popover = ({
       setIsLocked(isOpenedByClick && isOpen);
     }
   }, [persistent, isOpenedByClick, isOpen, setIsLocked]);
+
+  useEffect(() => {
+    if (openWhenCollapsed && hasContent && !isSidePanelOpen) {
+      setIsOpen(true);
+      return;
+    }
+
+    if (!openWhenCollapsed && !isOpenedByClick) {
+      setIsOpen(false);
+    }
+  }, [openWhenCollapsed, hasContent, isSidePanelOpen, isOpenedByClick]);
 
   const setOpenedByClick = useCallback(() => setIsOpenedByClick(true), []);
 
@@ -146,10 +167,14 @@ export const Popover = ({
   ]);
 
   const handleMouseLeave = useCallback(() => {
+    if (openWhenCollapsed) {
+      return;
+    }
+
     if (!persistent || !isOpenedByClick) {
       setHoverTimeout(handleClose, POPOVER_HOVER_DELAY);
     }
-  }, [persistent, isOpenedByClick, setHoverTimeout, handleClose]);
+  }, [openWhenCollapsed, persistent, isOpenedByClick, setHoverTimeout, handleClose]);
 
   const scrollStyles = useScroll(true);
 
@@ -215,11 +240,15 @@ export const Popover = ({
           triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused)
         );
 
+      if (openWhenCollapsed) {
+        return;
+      }
+
       if (isStayingInComponent === false) {
         handleClose();
       }
     },
-    [clearHoverTimeout, handleClose]
+    [clearHoverTimeout, handleClose, openWhenCollapsed]
   );
 
   // Clean up on unmount
@@ -261,12 +290,21 @@ export const Popover = ({
     width: 100%;
   `;
 
-  const popoverContentStyles = css`
+  const popoverPanelStyles = css`
     --popover-max-height: 37.5rem;
-    width: ${SIDE_PANEL_WIDTH}px;
+    display: flex;
+    flex-direction: column;
     max-height: var(--popover-max-height);
+    width: ${SIDE_PANEL_WIDTH}px;
+  `;
+
+  const popoverContentStyles = css`
+    flex: 1 1 auto;
+    min-height: 0;
     ${scrollStyles};
   `;
+
+  const footerContent = typeof footer === 'function' ? footer(handleClose) : footer;
 
   const maskStyles = css`
     position: fixed;
@@ -310,37 +348,38 @@ export const Popover = ({
           'data-test-subj': `side-nav-popover-${label}`,
         }}
       >
-        <div
-          ref={(ref) => {
-            popoverRef.current = ref;
+        <div css={popoverPanelStyles} ref={popoverRef}>
+          <div
+            ref={(ref) => {
+              if (ref) {
+                const elements = getFocusableElements(ref);
+                updateTabIndices(elements);
 
-            if (ref) {
-              const elements = getFocusableElements(ref);
-              updateTabIndices(elements);
-
-              if (shouldFocusOnOpen) {
-                focusFirstElement(popoverRef);
-                setShouldFocusOnOpen(false);
+                if (shouldFocusOnOpen) {
+                  focusFirstElement({ current: ref });
+                  setShouldFocusOnOpen(false);
+                }
               }
-            }
-          }}
-          onKeyDown={handlePopoverKeyDown}
-          css={popoverContentStyles}
-        >
-          <EuiScreenReaderOnly>
-            <p id={popoverNavigationInstructionsId}>
-              {i18n.translate('kbnUI.sideNavigation.popoverNavigationInstructions', {
-                defaultMessage:
-                  'You are in the {label} secondary menu dialog. Use Up and Down arrow keys to navigate the menu. Press Escape to exit to the menu trigger.',
-                values: {
-                  label,
-                },
-              })}
-            </p>
-          </EuiScreenReaderOnly>
-          {typeof children === 'function'
-            ? children(handleClose, { popoverNavigationInstructionsId })
-            : children}
+            }}
+            onKeyDown={handlePopoverKeyDown}
+            css={popoverContentStyles}
+          >
+            <EuiScreenReaderOnly>
+              <p id={popoverNavigationInstructionsId}>
+                {i18n.translate('kbnUI.sideNavigation.popoverNavigationInstructions', {
+                  defaultMessage:
+                    'You are in the {label} secondary menu dialog. Use Up and Down arrow keys to navigate the menu. Press Escape to exit to the menu trigger.',
+                  values: {
+                    label,
+                  },
+                })}
+              </p>
+            </EuiScreenReaderOnly>
+            {typeof children === 'function'
+              ? children(handleClose, { popoverNavigationInstructionsId })
+              : children}
+          </div>
+          {footerContent}
         </div>
       </EuiPopover>
       {persistent && isOpenedByClick && isOpen && (

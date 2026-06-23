@@ -15,14 +15,11 @@ import {
   TableListViewKibanaProvider,
 } from '@kbn/content-management-table-list-view-table';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { FavoritesClient } from '@kbn/content-management-favorites-public';
-import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { createDashboardFavoritesClient } from '../dashboard_navigation/fetch_starred_dashboards';
 import {
   coreServices,
   savedObjectsTaggingService,
   serverlessService,
-  usageCollectionService,
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
@@ -70,13 +67,7 @@ const DashboardsTabContent = ({
     showCreateDashboardButton: parentProps.showCreateButton,
   });
 
-  const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
-      http: coreServices.http,
-      usageCollection: usageCollectionService,
-      userProfile: coreServices.userProfile,
-    });
-  }, []);
+  const dashboardFavoritesClient = useMemo(() => createDashboardFavoritesClient(coreServices), []);
 
   return (
     <TableListViewKibanaProvider

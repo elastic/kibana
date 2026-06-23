@@ -24,7 +24,7 @@ interface NavigationState {
 /**
  * Hook for managing the main navigation state.
  *
- * @param isCollapsed - whether the side nav is collapsed.
+ * @param isCollapsed - whether the secondary navigation side panel is collapsed.
  * @param items - the navigation structure including primary, secondary, and footer items.
  * @param logoId - the logo ID, used for highlighting the logo.
  * @param activeItemId - the active item ID, used for highlighting the active item.
@@ -33,7 +33,7 @@ interface NavigationState {
  * - `visuallyActivePageId` - the visually active page ID. The link does not have to be `aria-current=page`, it can be a parent of an active page.
  * - `visuallyActiveSubpageId` - the visually active subpage ID.
  * - `openerNode` - the primary menu item whose submenu is shown in the side panel.
- * - `isCollapsed` - whether the side nav is collapsed.
+ * - `isCollapsed` - whether the secondary navigation side panel is collapsed.
  * - `isSidePanelOpen` - whether the side panel is open.
  */
 export const useNavigation = (

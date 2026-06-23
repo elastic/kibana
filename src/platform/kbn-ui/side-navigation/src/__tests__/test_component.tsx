@@ -16,6 +16,7 @@ import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
 
 interface TestComponentProps {
   isCollapsed?: boolean;
+  hidePrimaryLabels?: boolean;
   initialActiveItemId?: string;
   items: NavigationStructure;
   logo: SideNavLogo;
@@ -23,6 +24,7 @@ interface TestComponentProps {
 
 export const TestComponent = ({
   isCollapsed: isCollapsedProp = false,
+  hidePrimaryLabels: hidePrimaryLabelsProp = false,
   initialActiveItemId,
   items,
   logo,
@@ -41,6 +43,7 @@ export const TestComponent = ({
       <Navigation
         activeItemId={activeItemId}
         isCollapsed={isCollapsed}
+        hidePrimaryLabels={hidePrimaryLabelsProp}
         items={items}
         logo={logo}
         onItemClick={handleItemClick}

@@ -61,8 +61,17 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
+  PanelNestedPanelDefinition,
+  SidePanelNestedPanelItemClickParams,
+  SidePanelNestedPanelRenderProps,
+  SidePanelNestedPanelRenderer,
+  SideNavItemActionMenuContext,
+  SideNavItemActionMenuRenderProps,
+  SideNavItemActionMenuRenderer,
   SolutionId,
   SidebarApp,
   SidebarAppConfig,
@@ -70,4 +79,15 @@ export type {
   SidebarSetup,
   SidebarStart,
   GlobalSearchConfig,
+} from './src';
+
+export {
+  getSidePanelNestedPanelRenderer,
+  registerSidePanelNestedPanelRenderer,
+  renderSidePanelNestedPanel,
+  subscribeSidePanelNestedPanelRenderers,
+  getSideNavItemActionMenuRenderer,
+  registerSideNavItemActionMenuRenderer,
+  renderSideNavItemActionMenu,
+  subscribeSideNavItemActionMenuRenderers,
 } from './src';

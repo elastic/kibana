@@ -24,6 +24,7 @@ import { coreServices, dataService, embeddableService } from '../services/kibana
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
 import { DashboardApp } from './dashboard_app';
+import { resetDashboardSideNavAutoCollapsePreference } from './hooks/use_collapse_side_nav';
 import { DashboardMountContext } from './hooks/dashboard_mount_context';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { DashboardNoMatch } from './listing_page/dashboard_no_match';
@@ -207,6 +208,7 @@ export async function mountApp({
   }
   render(app, element);
   return () => {
+    resetDashboardSideNavAutoCollapsePreference();
     dataService.search.session.clear();
     unlistenParentHistory();
     unmountComponentAtNode(element);

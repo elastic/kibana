@@ -38,6 +38,7 @@ import { createVisibilityState, type VisibilityState } from './visibility_state'
 import { createChromeStyleState, type ChromeStyleState } from './chrome_style_state';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
+const HIDE_SIDENAV_PRIMARY_LABELS_KEY = 'core.chrome.hideSideNavPrimaryLabels';
 const INITIAL_SIDENAV_WIDTH = 0;
 
 export interface ChromeState {
@@ -50,6 +51,7 @@ export interface ChromeState {
   /** Side navigation state */
   sideNav: {
     collapsed: State<boolean>;
+    hidePrimaryLabels: State<boolean>;
     width: State<number>;
   };
 
@@ -106,6 +108,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
+  const sideNavHidePrimaryLabels = createPersistedState(HIDE_SIDENAV_PRIMARY_LABELS_KEY, false);
   const sideNavWidth = createState<number>(INITIAL_SIDENAV_WIDTH);
 
   // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
@@ -148,6 +151,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     style,
     sideNav: {
       collapsed: sideNavCollapsed,
+      hidePrimaryLabels: sideNavHidePrimaryLabels,
       width: sideNavWidth,
     },
     breadcrumbs: {

@@ -10,6 +10,7 @@
 export const NAVIGATION_SELECTOR_PREFIX = 'kbnChromeNav';
 export const NAVIGATION_ROOT_SELECTOR = `${NAVIGATION_SELECTOR_PREFIX}-root`;
 export const PRIMARY_NAVIGATION_ID = `${NAVIGATION_SELECTOR_PREFIX}-primaryNavigation`;
+export const SIDE_PANEL_ID = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 export const MORE_MENU_ID = `${NAVIGATION_SELECTOR_PREFIX}-moreMenu`;
 export const MAIN_PANEL_ID = `${NAVIGATION_SELECTOR_PREFIX}-mainPanel`;
 export const MAX_MENU_ITEMS = 12;
@@ -22,4 +23,5 @@ export const POPOVER_OFFSET = 5;
 export const TOOLTIP_OFFSET = 4;
 export const ITEM_HORIZONTAL_SPACING_OFFSET = 32;
 export const SUB_MENU_ICON_SPACING_OFFSET = 48;
+export const ITEM_ACTION_SPACING_OFFSET = 28;
 export const BADGE_SPACING_OFFSET = 60;

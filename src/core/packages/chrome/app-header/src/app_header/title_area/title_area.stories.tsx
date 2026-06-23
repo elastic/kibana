@@ -107,8 +107,9 @@ const meta: Meta<AppHeaderEditableTitleStoryProps> = {
     docs: {
       description: {
         component:
-          'Editable app header title shown in the full header context. Click the title to ' +
-          'edit; Enter or blur saves, and Escape cancels.',
+          'Editable app header title shown in the full header context. Hover the title to ' +
+          'reveal the favorite and edit actions over the trailing text; click the pencil to ' +
+          'edit. Enter or blur saves, and Escape cancels.',
       },
     },
   },

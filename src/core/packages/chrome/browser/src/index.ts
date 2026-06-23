@@ -64,9 +64,38 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
+  PanelNestedPanelDefinition,
 } from './project_navigation';
+
+export type {
+  SidePanelNestedPanelItemClickParams,
+  SidePanelNestedPanelRenderProps,
+  SidePanelNestedPanelRenderer,
+} from './side_panel_nested_panels';
+
+export type {
+  SideNavItemActionMenuContext,
+  SideNavItemActionMenuRenderProps,
+  SideNavItemActionMenuRenderer,
+} from './side_nav_item_action_menus';
+
+export {
+  getSidePanelNestedPanelRenderer,
+  registerSidePanelNestedPanelRenderer,
+  renderSidePanelNestedPanel,
+  subscribeSidePanelNestedPanelRenderers,
+} from './side_panel_nested_panels';
+
+export {
+  getSideNavItemActionMenuRenderer,
+  registerSideNavItemActionMenuRenderer,
+  renderSideNavItemActionMenu,
+  subscribeSideNavItemActionMenuRenderers,
+} from './side_nav_item_action_menus';
 
 export type {
   SidebarApp,

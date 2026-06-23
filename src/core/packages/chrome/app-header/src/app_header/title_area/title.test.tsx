@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { createRef } from 'react';
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { AppHeaderEditableTitle } from '../../types';
-import { Title } from './title';
+import { Title, type TitleHandle } from './title';
 
 const editableTitle = (
   overrides: Partial<AppHeaderEditableTitle> = {}
@@ -21,8 +21,10 @@ const editableTitle = (
   ...overrides,
 });
 
-const enterEditMode = (name = 'My dashboard') => {
-  fireEvent.click(screen.getByRole('button', { name }));
+const enterEditMode = (ref: React.RefObject<TitleHandle | null>) => {
+  act(() => {
+    ref.current?.startEditing();
+  });
   return screen.getByRole('textbox');
 };
 
@@ -37,43 +39,46 @@ describe('Title', () => {
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
 
-    it('renders an editable title as a button with screen-reader edit instructions', () => {
+    it('renders an editable title as a heading without an inline edit trigger', () => {
       render(<Title title={editableTitle()} />);
 
-      expect(screen.getByRole('button', { name: 'My dashboard' })).toBeInTheDocument();
-      expect(screen.getByText('Editable title. Press Enter to edit.')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'My dashboard' })).toBeInTheDocument();
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
 
     it('renders the placeholder when an editable title is empty', () => {
       render(<Title title={editableTitle({ text: '', placeholder: 'Untitled dashboard' })} />);
 
-      expect(screen.getByRole('button', { name: 'Untitled dashboard' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Untitled dashboard' })).toBeInTheDocument();
     });
   });
 
   describe('entering edit mode', () => {
     it('opens an input pre-filled with the current text and a custom aria-label', () => {
-      render(<Title title={editableTitle({ ariaLabel: 'Edit dashboard name' })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ ariaLabel: 'Edit dashboard name' })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
 
       expect(input).toHaveValue('My dashboard');
       expect(input).toHaveAttribute('aria-label', 'Edit dashboard name');
     });
 
     it('falls back to a generic aria-label when none is provided', () => {
-      render(<Title title={editableTitle()} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle()} />);
 
-      expect(enterEditMode()).toHaveAttribute('aria-label', 'Edit title');
+      expect(enterEditMode(ref)).toHaveAttribute('aria-label', 'Edit title');
     });
   });
 
   describe('saving', () => {
     it('trims the value and calls onSave once, then exits edit mode', async () => {
       const onSave = jest.fn().mockResolvedValue(undefined);
-      render(<Title title={editableTitle({ onSave })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ onSave })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
       type(input, '  New title  ');
       fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -84,9 +89,10 @@ describe('Title', () => {
 
     it('does not call onSave when the value is unchanged but still exits edit mode', async () => {
       const onSave = jest.fn();
-      render(<Title title={editableTitle({ onSave })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ onSave })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
       type(input, '  My dashboard  ');
       fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -96,9 +102,10 @@ describe('Title', () => {
 
     it('commits via onSave when the input is blurred (click away)', async () => {
       const onSave = jest.fn().mockResolvedValue(undefined);
-      render(<Title title={editableTitle({ onSave })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ onSave })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
       type(input, 'Blurred title');
       fireEvent.blur(input);
 
@@ -112,9 +119,10 @@ describe('Title', () => {
           resolveSave = resolve;
         })
       );
-      render(<Title title={editableTitle({ onSave })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ onSave })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
       type(input, 'Renamed');
       fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -136,9 +144,10 @@ describe('Title', () => {
   describe('validation and errors', () => {
     it('shows the empty-title error and does not call onSave', async () => {
       const onSave = jest.fn();
-      render(<Title title={editableTitle({ onSave })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ onSave })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
       type(input, '');
       fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -149,9 +158,10 @@ describe('Title', () => {
 
     it('surfaces an error string returned by onSave and keeps the editor open', async () => {
       const onSave = jest.fn().mockResolvedValue('Name already taken');
-      render(<Title title={editableTitle({ onSave })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ onSave })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
       type(input, 'Duplicate');
       fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -161,9 +171,10 @@ describe('Title', () => {
 
     it('surfaces a generic error when onSave rejects and keeps the editor open', async () => {
       const onSave = jest.fn().mockRejectedValue(new Error('boom'));
-      render(<Title title={editableTitle({ onSave })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ onSave })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
       type(input, 'Will fail');
       fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -175,15 +186,20 @@ describe('Title', () => {
   describe('cancelling', () => {
     it('discards the draft on Escape without calling onSave', async () => {
       const onSave = jest.fn();
-      render(<Title title={editableTitle({ onSave })} />);
+      const ref = createRef<TitleHandle>();
+      render(<Title ref={ref} title={editableTitle({ onSave })} />);
 
-      const input = enterEditMode();
+      const input = enterEditMode(ref);
       type(input, 'Discarded edit');
       fireEvent.keyDown(input, { key: 'Escape' });
 
       await waitFor(() => expect(screen.queryByRole('textbox')).not.toBeInTheDocument());
       expect(onSave).not.toHaveBeenCalled();
-      expect(enterEditMode()).toHaveValue('My dashboard');
+
+      act(() => {
+        ref.current?.startEditing();
+      });
+      expect(screen.getByRole('textbox')).toHaveValue('My dashboard');
     });
   });
 });

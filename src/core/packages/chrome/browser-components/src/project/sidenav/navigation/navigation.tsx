@@ -7,11 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { map } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import {
+  renderSidePanelNestedPanel as renderRegisteredSidePanelNestedPanel,
+  subscribeSidePanelNestedPanelRenderers,
+  type SidePanelNestedPanelItemClickParams,
+  type SidePanelNestedPanelRenderProps,
+} from '@kbn/core-chrome-browser';
+import type {
+  MenuItem,
+  NavigationStructure,
+  SecondaryMenuItem,
+  SideNavLogo,
+} from '@kbn/ui-side-navigation/types';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
@@ -23,6 +35,7 @@ import { PanelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
+  hidePrimaryLabels: boolean;
   setWidth: (width: number) => void;
   onToggleCollapsed?: (isCollapsed: boolean) => void;
 }
@@ -30,6 +43,59 @@ export interface ChromeNavigationProps {
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
   const isNextChrome = useIsNextChrome();
+  const [clickedActiveItemId, setClickedActiveItemId] = useState<string | undefined>();
+  const [, rerenderNestedPanels] = useState(0);
+  const onCustomizeNavigation = useCustomizeNavigation();
+
+  useEffect(() => {
+    return subscribeSidePanelNestedPanelRenderers(() => {
+      rerenderNestedPanels((version) => version + 1);
+    });
+  }, []);
+
+  useEffect(() => {
+    setClickedActiveItemId(undefined);
+  }, [state?.activeItemId]);
+
+  const handleItemClick = useCallback(
+    (item: MenuItem | SecondaryMenuItem | SideNavLogo | SidePanelNestedPanelItemClickParams) => {
+      setClickedActiveItemId(item.id);
+
+      const navItems = state?.navItemsRef.current;
+      if (!navItems) {
+        return;
+      }
+
+      const panels = [...navItems.primaryItems, ...navItems.footerItems];
+      for (const panel of panels) {
+        if (
+          !panel.sections?.some((section) =>
+            section.items.some((navItem) => navItem.id === item.id)
+          )
+        ) {
+          continue;
+        }
+
+        state.panelStateManager.setPanelLastActive(panel.id, item.id);
+        return;
+      }
+
+      if ('panelId' in item && item.panelId) {
+        state.panelStateManager.setPanelLastActive(item.panelId, item.id);
+      }
+    },
+    [state]
+  );
+
+  const renderSidePanelNestedPanel = useCallback(
+    (panelId: string, options?: Pick<SidePanelNestedPanelRenderProps, 'onGoBack'>) =>
+      renderRegisteredSidePanelNestedPanel(panelId, {
+        onItemClick: (nestedPanelItem: SidePanelNestedPanelItemClickParams) =>
+          handleItemClick(nestedPanelItem),
+        ...options,
+      }),
+    [handleItemClick]
+  );
 
   if (!state) {
     return null;
@@ -43,9 +109,13 @@ export const Navigation = (props: ChromeNavigationProps) => {
         items={navItems}
         logo={logoItem}
         isCollapsed={props.isCollapsed}
+        hidePrimaryLabels={props.hidePrimaryLabels}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
-        activeItemId={activeItemId}
+        activeItemId={clickedActiveItemId ?? activeItemId}
+        onItemClick={handleItemClick}
+        renderSidePanelNestedPanel={renderSidePanelNestedPanel}
+        onCustomizeNavigation={onCustomizeNavigation}
         showTopSeparator={isNextChrome}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
@@ -57,20 +127,47 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
+const useNavigationItems = ():
+  | (NavigationItems & {
+      solutionId: SolutionId;
+      panelStateManager: PanelStateManager;
+      navItemsRef: React.MutableRefObject<NavigationStructure | null>;
+    })
+  | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
   const isNextChrome = useIsNextChrome();
+  const panelStateManager = useMemo(() => new PanelStateManager(basePath.get()), [basePath]);
+  const navItemsRef = useRef<NavigationStructure | null>(null);
 
   const items$ = useMemo(() => {
-    const panelStateManager = new PanelStateManager(basePath.get());
     return chrome.project.getNavigation$().pipe(
-      map((nav) => ({
-        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager, isNextChrome),
-        solutionId: nav.solutionId,
-      }))
+      map((nav) => {
+        const navigationItems = toNavigationItems(
+          nav.navigationTree,
+          nav.activeNodes,
+          nav.overflowItemIds,
+          panelStateManager,
+          isNextChrome
+        );
+        navItemsRef.current = navigationItems.navItems;
+
+        return {
+          ...navigationItems,
+          solutionId: nav.solutionId,
+          panelStateManager,
+          navItemsRef,
+        };
+      })
     );
-  }, [chrome, basePath, isNextChrome]);
+  }, [chrome, isNextChrome, panelStateManager]);
 
   return useObservable(items$, null);
+};
+
+const useCustomizeNavigation = (): (() => void) | undefined => {
+  const chrome = useChromeService();
+  const handler$ = useMemo(() => chrome.project.getCustomizeNavigationHandler$(), [chrome]);
+  const handler = useObservable(handler$, null);
+  return handler ?? undefined;
 };

@@ -6,6 +6,7 @@
  */
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { createDashboardsNavigationNode } from '@kbn/dashboard-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
@@ -24,13 +25,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       {
         link: 'workflows',
       },
-      {
-        link: 'dashboards',
-        icon: 'productDashboard',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-        },
-      },
+      createDashboardsNavigationNode(),
       {
         link: 'discover',
         icon: 'productDiscover',

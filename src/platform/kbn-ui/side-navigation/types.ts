@@ -12,6 +12,88 @@ import type { IconType } from '@elastic/eui';
 export type BadgeType = 'beta' | 'techPreview' | 'new';
 
 /**
+ * A nested side panel opened from a side panel header action.
+ */
+export interface PanelNestedPanel {
+  /**
+   * The unique identifier of the nested panel.
+   */
+  id: string;
+  /**
+   * The title to display in the nested panel header.
+   */
+  title: string;
+}
+
+/**
+ * An icon button rendered in a side panel header next to the panel title.
+ */
+export interface PanelHeaderAction {
+  /**
+   * Accessible label for the header action button.
+   */
+  'aria-label': string;
+  /**
+   * (optional) `data-test-subj` attribute for testing and tracking purposes.
+   */
+  'data-test-subj'?: string;
+  /**
+   * The EUI icon to display on the button.
+   */
+  iconType: IconType;
+  /**
+   * The unique identifier of the header action.
+   */
+  id: string;
+  /**
+   * (optional) Click handler for the header action button.
+   */
+  onClick?: () => void;
+  /**
+   * (optional) When set, clicking the header action opens the nested side panel with this id.
+   */
+  opensNestedPanel?: string;
+  /**
+   * (optional) When set, clicking the action opens a registered item action menu popover.
+   */
+  opensItemActionMenu?: string;
+  /**
+   * (optional) Context passed to the registered item action menu renderer.
+   */
+  itemActionMenuContext?: Record<string, string>;
+}
+
+/**
+ * A text button rendered at the bottom of a side panel for panel opener nodes.
+ */
+export interface PanelFooterAction {
+  /**
+   * (optional) `data-test-subj` attribute for testing and tracking purposes.
+   */
+  'data-test-subj'?: string;
+  /**
+   * The URL for the footer action link.
+   */
+  href: string;
+  /**
+   * The EUI icon to display on the button.
+   */
+  iconType: IconType;
+  /**
+   * The unique identifier of the footer action.
+   */
+  id: string;
+  /**
+   * The label to display for the footer action.
+   */
+  label: string;
+  /**
+   * (optional) Click handler for the footer action button.
+   */
+  onClick?: () => void;
+}
+
+/**
  * A navigation item within a secondary/nested menu.
  * Secondary items appear when a primary menu item with sections is clicked or hovered.
  */
@@ -40,6 +122,18 @@ export interface SecondaryMenuItem {
    * (optional) Whether the link opens in a new tab.
    */
   isExternal?: boolean;
+  /**
+   * (optional) Icon buttons rendered on the trailing edge of this menu item row.
+   */
+  itemActions?: PanelHeaderAction[];
+}
+
+/**
+ * Placeholder content shown when a secondary menu section has no items.
+ */
+export interface SecondaryMenuSectionEmptyState {
+  iconType: IconType;
+  message: string;
 }
 
 /**
@@ -59,6 +153,14 @@ export interface SecondaryMenuSection {
    * (optional) The label to display for the secondary menu section.
    */
   label?: string;
+  /**
+   * (optional) Animate list item reordering within this section.
+   */
+  animateItemReorder?: boolean;
+  /**
+   * (optional) Placeholder shown when the section has no items.
+   */
+  emptyState?: SecondaryMenuSectionEmptyState;
 }
 
 /**
@@ -91,13 +193,25 @@ export interface MenuItem {
    */
   badgeType?: BadgeType;
   /**
+   * (optional) Icon buttons rendered in the side panel header next to the panel title.
+   */
+  panelHeaderActions?: PanelHeaderAction[];
+  /**
+   * (optional) Nested side panels opened from panel header actions.
+   */
+  panelNestedPanels?: PanelNestedPanel[];
+  /**
+   * (optional) Text buttons rendered at the bottom of the side panel.
+   */
+  panelFooterActions?: PanelFooterAction[];
+  /**
    * (optional) The secondary menu sections belonging to the menu item.
    */
   sections?: SecondaryMenuSection[];
 }
 
 /**
- * The complete navigation structure containing primary and footer menu items.
+ * The complete navigation structure containing primary, overflow, and footer menu items.
  * This is the main data structure passed to the Navigation component.
  */
 export interface NavigationStructure {
@@ -105,6 +219,10 @@ export interface NavigationStructure {
    * The items to be displayed in the navigation footer.
    */
   footerItems: MenuItem[];
+  /**
+   * Items that are always placed in the overflow ("More") menu.
+   */
+  overflowItems?: MenuItem[];
   /**
    * The primary navigation items displayed in the navigation main menu.
    */

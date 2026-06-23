@@ -10,23 +10,18 @@
 import React, { useMemo } from 'react';
 import {
   FavoriteButton,
-  FavoritesClient,
   FavoritesContextProvider,
 } from '@kbn/content-management-favorites-public';
 import { QueryClientProvider } from '@kbn/react-query';
-import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { coreServices, usageCollectionService } from '../services/kibana_services';
+import { createDashboardFavoritesClient } from '../dashboard_navigation/fetch_starred_dashboards';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
+import { coreServices } from '../services/kibana_services';
 
 export const DashboardFavoriteButton = ({ dashboardId }: { dashboardId?: string }) => {
-  const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
-      http: coreServices.http,
-      userProfile: coreServices.userProfile,
-      usageCollection: usageCollectionService,
-    });
-  }, []);
+  const dashboardFavoritesClient = useMemo(
+    () => createDashboardFavoritesClient(coreServices),
+    []
+  );
 
   return (
     <QueryClientProvider client={dashboardQueryClient}>

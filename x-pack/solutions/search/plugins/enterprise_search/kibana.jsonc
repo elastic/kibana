@@ -38,6 +38,7 @@
       "contentConnectors",
       "searchPlayground",
       "embeddable",
+      "dashboard",
       "discover",
       "charts",
       "cloud",
@@ -45,6 +46,6 @@
       "share",
       "fleet"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "dashboard"]
   }
 }

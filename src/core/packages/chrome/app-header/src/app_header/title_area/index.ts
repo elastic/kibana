@@ -8,4 +8,5 @@
  */
 
 export { TitleArea } from './title_area';
-export type { TitleAreaProps } from './title_area';
+export type { TitleAreaHandle, TitleAreaProps } from './title_area';
+export { isEditableTitle, type TitleHandle } from './title';

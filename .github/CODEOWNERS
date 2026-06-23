@@ -151,6 +151,8 @@ src/core/packages/chrome/feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
+src/core/packages/chrome/navigation-customization @elastic/appex-sharedux
+src/core/packages/chrome/navigation-utils @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-components @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-context @elastic/appex-sharedux
@@ -732,6 +734,7 @@ src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
+src/platform/packages/shared/navigation-customization-components @elastic/appex-sharedux
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_publishing_schemas @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_util @elastic/kibana-presentation

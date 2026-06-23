@@ -9,22 +9,28 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { SIDE_PANEL_CONTENT_GAP } from '@kbn/ui-chrome-layout-constants';
 import type { SecondaryMenuItem } from '../../../types';
+import { useSidePanelWidthValue } from '../../context/side_panel_width_context';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
+import { useNestedPanelActions } from '../../hooks/use_panel_header_actions';
+import { SecondaryMenuItemActionMenuButton } from './item_action_menu_button';
 import {
   BADGE_SPACING_OFFSET,
+  ITEM_ACTION_SPACING_OFFSET,
   ITEM_HORIZONTAL_SPACING_OFFSET,
   NAVIGATION_SELECTOR_PREFIX,
   SUB_MENU_ICON_SPACING_OFFSET,
 } from '../../constants';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
+
+const HOVER_ITEM_ACTION_CLASS = 'sideNavHoverItemAction';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
@@ -53,13 +59,23 @@ export const SecondaryMenuItemComponent = ({
   isExternal,
   isHighlighted,
   isNew = false,
+  itemActions,
   testSubjPrefix,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
+  const sidePanelWidth = useSidePanelWidthValue();
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
+  const resolvedItemActions = useNestedPanelActions(itemActions);
+  const hasItemActions = Boolean(resolvedItemActions?.length);
+  const alwaysVisibleItemActions =
+    resolvedItemActions?.filter((action) => !action.opensItemActionMenu) ?? [];
+  const hasAlwaysVisibleItemActions = alwaysVisibleItemActions.length > 0;
+  const hasHoverItemActions = resolvedItemActions?.some(
+    (action) => Boolean(action.opensItemActionMenu)
+  );
 
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
@@ -68,10 +84,16 @@ export const SecondaryMenuItemComponent = ({
     ...(isExternal && { target: '_blank' }),
   };
 
+  const buttonPaddingInline = euiTheme.size.s;
+
   const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     // 6px comes from Figma, no token
-    padding: 6px ${euiTheme.size.s};
+    padding-block: 6px;
+    padding-inline: ${buttonPaddingInline};
+    ${hasAlwaysVisibleItemActions
+      ? `padding-inline-end: calc(${buttonPaddingInline} + ${ITEM_ACTION_SPACING_OFFSET}px);`
+      : ''}
     width: 100%;
 
     > span {
@@ -88,21 +110,63 @@ export const SecondaryMenuItemComponent = ({
     ${highContrastModeStyles};
   `;
 
+  const itemWrapperStyles = css`
+    position: relative;
+    width: 100%;
+
+    ${hasHoverItemActions
+      ? `
+      .${HOVER_ITEM_ACTION_CLASS} {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity ${euiTheme.animation.fast} ease-in;
+      }
+
+      &:hover .${HOVER_ITEM_ACTION_CLASS},
+      &:focus-within .${HOVER_ITEM_ACTION_CLASS},
+      &:has(.${HOVER_ITEM_ACTION_CLASS} [aria-expanded="true"]) .${HOVER_ITEM_ACTION_CLASS} {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    `
+      : ''}
+  `;
+
+  const itemActionsInsideStyles = css`
+    align-items: center;
+    display: flex;
+    gap: ${euiTheme.size.xxs};
+    position: absolute;
+    right: ${euiTheme.size.xs};
+    top: 50%;
+    transform: translateY(-50%);
+  `;
+
   const labelAndBadgeStyles = css`
     align-items: center;
     display: flex;
     gap: ${euiTheme.size.xs};
   `;
 
+  const getSizeInPixels = (size: string) => parseInt(size, 10) || 0;
+
   const getMaxWidth = () => {
+    const buttonHorizontalPadding = getSizeInPixels(buttonPaddingInline) * 2;
     const isInSidePanel = testSubjPrefix?.includes('sidePanel');
-    let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
+    let maxWidth =
+      (isInSidePanel ? sidePanelWidth : SIDE_PANEL_WIDTH) -
+      ITEM_HORIZONTAL_SPACING_OFFSET -
+      buttonHorizontalPadding;
     // Secondary item label inside side panel (narrower)
     if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
     // Secondary item label + badge
     if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
     // Secondary item label + right arrow (More menu)
     if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
+    // Secondary item label + always-visible trailing item actions
+    if (hasAlwaysVisibleItemActions) {
+      maxWidth -= ITEM_ACTION_SPACING_OFFSET * alwaysVisibleItemActions.length;
+    }
     return maxWidth;
   };
 
@@ -130,40 +194,78 @@ export const SecondaryMenuItemComponent = ({
     </div>
   );
 
+  const linkButton = isHighlighted ? (
+    <EuiButton
+      id={id}
+      aria-current={isCurrent ? 'page' : undefined}
+      css={buttonStyles}
+      data-highlighted="true"
+      data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
+      fullWidth
+      href={hasSubmenu ? undefined : href}
+      size="s"
+      textProps={false}
+      {...iconProps}
+      {...props}
+    >
+      {content}
+    </EuiButton>
+  ) : (
+    <EuiButtonEmpty
+      id={id}
+      aria-current={isCurrent ? 'page' : undefined}
+      color="text"
+      css={buttonStyles}
+      data-highlighted="false"
+      data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
+      fullWidth
+      href={hasSubmenu ? undefined : href}
+      size="s"
+      textProps={false}
+      {...iconProps}
+      {...props}
+    >
+      {content}
+    </EuiButtonEmpty>
+  );
+
   return (
     <li ref={activeItemRef} role="none">
-      {isHighlighted ? (
-        <EuiButton
-          id={id}
-          aria-current={isCurrent ? 'page' : undefined}
-          css={buttonStyles}
-          data-highlighted="true"
-          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
-          fullWidth
-          href={hasSubmenu ? undefined : href}
-          size="s"
-          textProps={false}
-          {...iconProps}
-          {...props}
-        >
-          {content}
-        </EuiButton>
+      {hasItemActions ? (
+        <div css={itemWrapperStyles}>
+          {linkButton}
+          <div css={itemActionsInsideStyles}>
+            {resolvedItemActions?.map((action) =>
+              action.opensItemActionMenu ? (
+                <span key={action.id} className={HOVER_ITEM_ACTION_CLASS}>
+                  <SecondaryMenuItemActionMenuButton
+                    aria-label={action['aria-label']}
+                    data-test-subj={action['data-test-subj']}
+                    iconType={action.iconType}
+                    id={action.id}
+                    isHighlighted={isHighlighted}
+                    itemActionMenuContext={action.itemActionMenuContext}
+                    opensItemActionMenu={action.opensItemActionMenu}
+                  />
+                </span>
+              ) : (
+                <EuiButtonIcon
+                  key={action.id}
+                  id={action.id}
+                  aria-label={action['aria-label']}
+                  color={isHighlighted ? 'primary' : 'text'}
+                  data-test-subj={action['data-test-subj']}
+                  display={isHighlighted ? 'base' : 'empty'}
+                  iconType={action.iconType}
+                  onClick={action.onClick}
+                  size="xs"
+                />
+              )
+            )}
+          </div>
+        </div>
       ) : (
-        <EuiButtonEmpty
-          id={id}
-          aria-current={isCurrent ? 'page' : undefined}
-          color="text"
-          css={buttonStyles}
-          data-highlighted="false"
-          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
-          href={hasSubmenu ? undefined : href}
-          size="s"
-          textProps={false}
-          {...iconProps}
-          {...props}
-        >
-          {content}
-        </EuiButtonEmpty>
+        linkButton
       )}
     </li>
   );

@@ -8,6 +8,7 @@
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { createDashboardsNavigationNode } from '@kbn/dashboard-plugin/common';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 
@@ -28,6 +29,11 @@ export const createNavigationTree = ({
   genAiSettingsAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
+  dashboardsNavigationNode = createDashboardsNavigationNode({
+    title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
+      defaultMessage: 'Dashboards',
+    }),
+  }),
 }: {
   core: CoreStart;
   streamsAvailable?: boolean;
@@ -35,6 +41,7 @@ export const createNavigationTree = ({
   genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
+  dashboardsNavigationNode?: NodeDefinition;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -57,14 +64,10 @@ export const createNavigationTree = ({
         icon: 'productDiscover',
       },
       {
+        ...dashboardsNavigationNode,
         title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
           defaultMessage: 'Dashboards',
         }),
-        link: 'dashboards',
-        icon: 'productDashboard',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-        },
       },
       {
         link: 'workflows',

@@ -49,3 +49,5 @@ export const useNestedMenu = () => {
   }
   return context;
 };
+
+export const useOptionalNestedMenu = () => useContext(NestedMenuContext);

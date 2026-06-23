@@ -7,26 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PRIMARY_NAVIGATION_ID } from '../constants';
+import { SIDE_PANEL_ID } from '../constants';
 
 interface Props {
+  excludeFromRovingFocus?: boolean;
   isCollapsed: boolean;
   toggle: (isCollapsed: boolean) => void;
 }
 
-const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
+const sideNavCollapseButtonStyles = () => {
   return {
     sideNavCollapseButtonWrapper: css`
       display: flex;
       align-items: center;
-      justify-content: center;
-      min-width: ${euiTheme.size.xxl};
+      flex-shrink: 0;
     `,
     sideNavCollapseButton: css`
       &.euiButtonIcon:hover {
@@ -37,45 +36,39 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
 };
 
 /**
- * Collapse button for the side navigation
+ * Collapse button for the secondary navigation side panel.
  */
-export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
+export const SideNavCollapseButton: FC<Props> = ({
+  excludeFromRovingFocus = false,
+  isCollapsed,
+  toggle,
+}) => {
   const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
-  const { euiTheme } = useEuiTheme();
-  const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
+  const styles = useMemo(() => sideNavCollapseButtonStyles(), []);
+
+  const expandLabel = i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
+    defaultMessage: 'Expand navigation menu',
+  });
+  const collapseLabel = i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
+    defaultMessage: 'Collapse navigation menu',
+  });
+  const buttonLabel = isCollapsed ? expandLabel : collapseLabel;
 
   return (
     <div className="sideNavCollapseButtonWrapper" css={styles.sideNavCollapseButtonWrapper}>
-      <EuiToolTip
-        content={
-          isCollapsed
-            ? i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
-                defaultMessage: 'Expand navigation menu',
-              })
-            : i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
-                defaultMessage: 'Collapse navigation menu',
-              })
-        }
-        disableScreenReaderOutput
-      >
+      <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
         <EuiButtonIcon
+          data-side-nav-roving-exempt={excludeFromRovingFocus ? true : undefined}
           data-test-subj="sideNavCollapseButton"
           css={styles.sideNavCollapseButton}
-          size="s"
+          size="xs"
           color="text"
           iconType={iconType}
-          aria-label={
-            isCollapsed
-              ? i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
-                  defaultMessage: 'Expand navigation menu',
-                })
-              : i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
-                  defaultMessage: 'Collapse navigation menu',
-                })
-          }
+          tabIndex={excludeFromRovingFocus ? -1 : undefined}
+          aria-label={buttonLabel}
           aria-pressed={!isCollapsed}
           aria-expanded={!isCollapsed}
-          aria-controls={PRIMARY_NAVIGATION_ID}
+          aria-controls={SIDE_PANEL_ID}
           onClick={() => toggle(!isCollapsed)}
         />
       </EuiToolTip>

@@ -18,7 +18,6 @@ import { QueryClientProvider } from '@kbn/react-query';
 import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderTab } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
@@ -58,23 +57,9 @@ export const DashboardListing = ({
     return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
   }, [tabs, activeTabParam]);
 
-  const changeActiveTab = useCallback(
-    (tabId: string) => {
-      history.push(`/list/${tabId}`);
-    },
-    [history]
-  );
-
-  const headerTabs = useMemo<AppHeaderTab[]>(
-    () =>
-      tabs.map((tab) => ({
-        id: tab.id,
-        label: tab.title,
-        isSelected: tab.id === activeTabId,
-        onClick: () => changeActiveTab(tab.id),
-      })),
-    [tabs, activeTabId, changeActiveTab]
-  );
+  const changeActiveTab = (tabId: string) => {
+    history.push(`/list/${tabId}`);
+  };
 
   const getBreadcrumbs = useCallback(
     (appId: string): EmbeddableEditorBreadcrumb[] => {
@@ -174,7 +159,6 @@ export const DashboardListing = ({
           title={i18n.translate('dashboard.listing.title', {
             defaultMessage: 'Dashboards',
           })}
-          tabs={headerTabs}
           menu={appMenu}
         />
         <TabbedTableListView
@@ -184,7 +168,6 @@ export const DashboardListing = ({
           activeTabId={activeTabId}
           changeActiveTab={changeActiveTab}
           showCreateButton={false}
-          hideTabs
         />
       </QueryClientProvider>
     </I18nProvider>

@@ -8,7 +8,6 @@
  */
 
 import {
-  ControlValuesSource,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
   DEFAULT_RANGE_SLIDER_STATE,
@@ -113,7 +112,6 @@ describe('pinned panels', () => {
       width: 'small',
       config: {
         ...DEFAULT_RANGE_SLIDER_STATE,
-        values_source: ControlValuesSource.FIELD,
         data_view_id: 'dataViewId',
         field_name: 'fieldName',
         step: 2,

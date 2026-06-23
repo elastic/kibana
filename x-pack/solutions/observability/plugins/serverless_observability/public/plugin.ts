@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import type { Subscription } from 'rxjs';
 import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
+import { createDashboardsNavigationNode } from '@kbn/dashboard-plugin/common';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { createNavigationTree } from './navigation_tree';
@@ -52,8 +53,16 @@ export class ServerlessObservabilityPlugin
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       chatExperience$,
+      setupDeps.dashboard?.dashboardsNavigationNode$ ||
+        of(
+          createDashboardsNavigationNode({
+            title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
+              defaultMessage: 'Dashboards',
+            }),
+          })
+        ),
     ]).pipe(
-      map(([{ status }, chatExperience]) => {
+      map(([{ status }, chatExperience, dashboardsNavigationNode]) => {
         return createNavigationTree({
           core,
           streamsAvailable: status === 'enabled',
@@ -61,6 +70,7 @@ export class ServerlessObservabilityPlugin
           genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          dashboardsNavigationNode,
         });
       })
     );
