@@ -15,7 +15,7 @@ interface EntityTableProps<T extends BasicEntityData> {
   scopeId: string;
   data: T;
   entityFields: EntityTableRows<T>;
-  linkRenderer?: EntityTableLinkRenderer;
+  entityLink?: EntityTableLinkRenderer;
 }
 
 export const EntityTable = <T extends BasicEntityData>({
@@ -23,7 +23,7 @@ export const EntityTable = <T extends BasicEntityData>({
   scopeId,
   data,
   entityFields,
-  linkRenderer,
+  entityLink,
 }: EntityTableProps<T>) => {
   const items = useMemo(
     () => entityFields.filter(({ isVisible }) => (isVisible ? isVisible(data) : true)),
@@ -31,8 +31,8 @@ export const EntityTable = <T extends BasicEntityData>({
   );
 
   const entityTableColumns = useMemo(
-    () => getEntityTableColumns<T>(contextID, scopeId, data, linkRenderer),
-    [contextID, scopeId, data, linkRenderer]
+    () => getEntityTableColumns<T>(contextID, scopeId, data, entityLink),
+    [contextID, scopeId, data, entityLink]
   );
   return (
     <BasicTable

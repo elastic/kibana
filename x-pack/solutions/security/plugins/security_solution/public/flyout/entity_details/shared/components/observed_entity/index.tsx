@@ -18,13 +18,13 @@ export const ObservedEntity = <T,>({
   contextID,
   scopeId,
   observedFields,
-  linkRenderer,
+  entityLink,
 }: {
   observedData: ObservedEntityData<T>;
   contextID: string;
   scopeId: string;
   observedFields: EntityTableRows<ObservedEntityData<T>>;
-  linkRenderer?: EntityTableLinkRenderer;
+  entityLink?: EntityTableLinkRenderer;
 }) => {
   return (
     <InspectButtonContainer>
@@ -34,7 +34,7 @@ export const ObservedEntity = <T,>({
         scopeId={scopeId}
         data={observedData}
         entityFields={observedFields}
-        linkRenderer={linkRenderer}
+        entityLink={entityLink}
       />
     </InspectButtonContainer>
   );

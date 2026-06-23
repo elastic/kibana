@@ -22,9 +22,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
   scopeId: string,
   data: T,
-  // Used only by the flyout_v2 host flyout; v2 components own the rendering contract
-  // but thread it here rather than duplicating the column config.
-  linkRenderer?: EntityTableLinkRenderer
+  entityLink?: EntityTableLinkRenderer
 ): EntityTableColumns<T> => [
   {
     name: (
@@ -58,20 +56,20 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
       const values = getValues && getValues(data);
 
       if (field) {
-        let renderLink: ((value: string) => JSX.Element) | undefined;
-        if (linkRenderer) {
-          const LinkRenderer = linkRenderer;
-          renderLink = (value: string) => (
-            <LinkRenderer field={field} value={value}>
+        let renderValue: ((value: string) => JSX.Element) | undefined;
+        if (entityLink) {
+          const EntityLink = entityLink;
+          renderValue = (value: string) => (
+            <EntityLink field={field} value={value}>
               {value}
-            </LinkRenderer>
+            </EntityLink>
           );
         } else if (values && isFlyoutLink({ field, scopeId })) {
-          renderLink = (value: string) => (
+          renderValue = (value: string) => (
             <PreviewLink field={field} value={value} entityId={data.entityId} scopeId={scopeId} />
           );
         } else {
-          renderLink = renderField;
+          renderValue = renderField;
         }
         return (
           <DefaultFieldRenderer
@@ -79,7 +77,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
             attrName={field}
             idPrefix={contextID ? `entityTable-${contextID}` : 'entityTable'}
             scopeId={scopeId}
-            render={renderLink}
+            render={renderValue}
             data-test-subj="entity-table-value"
           />
         );
