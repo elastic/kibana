@@ -975,10 +975,7 @@ describe('Agent policy', () => {
           index: AGENT_POLICY_INDEX,
           query: {
             bool: {
-              should: [
-                { term: { policy_id: 'mocked' } },
-                { prefix: { policy_id: 'mocked#' } },
-              ],
+              should: [{ term: { policy_id: 'mocked' } }, { prefix: { policy_id: 'mocked#' } }],
               minimum_should_match: 1,
             },
           },
