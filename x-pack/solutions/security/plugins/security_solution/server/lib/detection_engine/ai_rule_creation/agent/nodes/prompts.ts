@@ -126,31 +126,130 @@ Based on the above, provide the schedule in the following JSON format:
   ],
 ]);
 
-export const MITRE_MAPPING_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
+export const SEVERITY_INFERENCE_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `Your role is to analyze user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
+    `Your role is to analyze a security detection scenario and determine the appropriate severity level and risk score for an Elastic Detection rule.
 
-Your task is to:
-1. Understand the intent and context of the user's security detection rule request
-2. Analyze the ES|QL query to identify what attack patterns it detects
-3. Consider the rule tags as additional context about the security domain, attack techniques, data sources, and threat types
-4. Select the most relevant MITRE ATT&CK tactics and techniques that match the detection scenario using your knowledge of the MITRE ATT&CK framework
-5. For each technique, include relevant subtechniques if applicable
+Severity Levels and Risk Scores:
+- critical (99): Active exploitation of a vulnerability, remote code execution, authentication bypass, or immediate system compromise.
+- high (73): Credential access attempts, OAuth phishing, stolen session usage, threat intel indicator matches, or multi-datasource correlation of compromise.
+- medium (47): Privilege escalation (UAC bypass), persistence mechanisms, defense evasion (log deletion, sink deletion), ransomware activity, email route hijacking, container escapes, suspicious network traffic, or policy violations requiring investigation.
+- low (21): Script obfuscation, reconnaissance, ML anomaly detection, buffer overflow/segfault detection, benign account creation events, or audit events with limited immediate security impact.
 
-Guidelines:
-- Select 1-3 most relevant tactics (use tactic IDs like TA0001, TA0002, etc.)
-- For each tactic, select 1-5 relevant techniques (use technique IDs like T1078, T1059, etc.)
-- Include subtechniques when they are specifically relevant to the detection (use subtechnique IDs like T1078.001, T1059.001, etc.)
-- Focus on the primary attack patterns being detected
-- Consider the data sources and query logic when making selections
-- Use the provided tags to better understand the security context and threat landscape
-- Only select tactics and techniques that are directly relevant to what the rule detects
-- Use your knowledge of MITRE ATT&CK to select appropriate IDs
+EXACT MAPPING RULES — apply these in order:
+1. If the request involves credential dumping, credential access, or theft of credentials → severity: high, risk_score: 73
+2. If the request involves OAuth phishing, device registration abuse, or stolen sessions → severity: high, risk_score: 73
+3. If the request involves threat intel indicator matching or multi-datasource alert correlation → severity: high, risk_score: 73
+4. If the request involves active exploitation, RCE, or authentication bypass (CVE exploitation) → severity: critical, risk_score: 99
+5. If the request involves UAC bypass, privilege escalation attempts, or container escapes → severity: medium, risk_score: 47
+6. If the request involves persistence (plist modification, login hooks, scheduled tasks) → severity: medium, risk_score: 47
+7. If the request involves defense evasion (log deletion, sink deletion, DNS config deletion) → severity: medium, risk_score: 47
+8. If the request involves ransomware, email route hijacking, or data collection abuse → severity: medium, risk_score: 47
+9. If the request involves suspicious network traffic (VNC, C2, unusual ports) → severity: medium, risk_score: 47
+10. If the request involves multiple sessions, unusual user behavior, or policy violations → severity: medium, risk_score: 47
+11. If the request involves script obfuscation, PowerShell encoding, or payload concealment → severity: low, risk_score: 21
+12. If the request involves ML anomaly detection, reconnaissance, or benign audit events → severity: low, risk_score: 21
+13. If the request involves account creation (service principals, users) without explicit compromise → severity: low, risk_score: 21
+14. If the request involves crash/segfault detection or vulnerability scanning → severity: low, risk_score: 21
 
-Respond with a JSON object containing only the IDs:
+Respond with ONLY a JSON object in this exact format:
+{{
+  "severity": "medium",
+  "risk_score": 47
+}}`,
+  ],
+  [
+    'human',
+    `
+    <query>
+      User request: {user_request}
+      ES|QL query: {esql_query}
+    </query>`,
+  ],
+]);
+
+export const getMitreMappingPrompt = (mitreCatalog: string) =>
+  ChatPromptTemplate.fromMessages([
+    [
+      'system',
+      `Your role is to analyze user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
+
+AVAILABLE MITRE ATT&CK TECHNIQUES — select ONLY from this list. Do NOT invent IDs.
+
+${mitreCatalog}
+
+RULES for selection:
+1. Pick 1-3 relevant tactics from the TA codes above
+2. For each tactic, pick 1-3 techniques that belong to that tactic from the list above
+3. Include subtechniques ONLY when they are explicitly listed above
+4. Match the detection logic to the most specific technique available
+5. NEVER invent technique IDs. If unsure, select the closest parent technique from the list.
+
+Examples:
+User query: UAC bypass via Windows Firewall snap-in hijack
+ES|QL query: FROM logs-endpoint.events.* | WHERE process.parent.name == "mmc.exe" AND process.parent.args == "WF.msc"
+Expected output: {{
+  "tactics": ["TA0004", "TA0005"],
+  "techniques": [
+    {{"id": "T1548", "subtechnique": ["T1548.002"]}},
+    {{"id": "T1218"}}
+  ]
+}}
+
+User query: Detect when PowerShell scripts are obfuscated or encoded using unusual character sets
+ES|QL query: FROM logs-endpoint.events.* | WHERE process.name LIKE "powershell*" AND process.command_line RLIKE ".*(FromBase64String|enc|encodedcommand).*"
+Expected output: {{
+  "tactics": ["TA0005", "TA0002"],
+  "techniques": [
+    {{"id": "T1027"}},
+    {{"id": "T1059", "subtechnique": ["T1059.001"]}},
+    {{"id": "T1140"}}
+  ]
+}}
+
+User query: AWS API call from an unusual user context indicating compromised credentials
+ES|QL query: FROM logs-aws.cloudtrail* | WHERE event.action LIKE "*" AND user.name != user.name_history
+Expected output: {{
+  "tactics": ["TA0004"],
+  "techniques": [
+    {{"id": "T1078", "subtechnique": ["T1078.004"]}},
+    {{"id": "T1550"}}
+  ]
+}}
+
+User query: Detects suspicious network utilities or reconnaissance commands executed by descendant processes of GenAI coding assistants
+ES|QL query: FROM logs-endpoint.events.* | WHERE process.name IN ("nmap", "nc", "ncat", "netcat") AND process.parent.name LIKE "%cursor%"
+Expected output: {{
+  "tactics": ["TA0002", "TA0011"],
+  "techniques": [
+    {{"id": "T1059"}},
+    {{"id": "T1071"}}
+  ]
+}}
+
+User query: AWS S3 bucket policy changes made by an unusual identity
+ES|QL query: FROM logs-aws.cloudtrail-* | WHERE event.action == "PutBucketPolicy" AND user.name NOT IN (known_admin_users)
+Expected output: {{
+  "tactics": ["TA0001", "TA0005"],
+  "techniques": [
+    {{"id": "T1078"}},
+    {{"id": "T1562"}}
+  ]
+}}
+
+User query: Identifies suspicious access to LSASS handle via the MalSecLogon attack technique. This may indicate an attempt to dump credentials.
+ES|QL query: FROM logs-endpoint.events.* | WHERE process.name == "lsass.exe" AND event.action == "open_handle"
+Expected output: {{
+  "tactics": ["TA0006"],
+  "techniques": [
+    {{"id": "T1003", "subtechnique": ["T1003.001"]}}
+  ]
+}}
+
+Respond with ONLY a JSON object containing:
 - "tactics": array of tactic IDs (strings like "TA0001", "TA0002")
-- "techniques": array of objects with "id" field and optional "subtechnique" array (subtechniques also only need "id")
+- "techniques": array of objects with "id" field and optional "subtechnique" array
 
 Format:
 {{
@@ -165,14 +264,14 @@ Format:
     }}
   ]
 }}`,
-  ],
-  [
-    'human',
-    `
+    ],
+    [
+      'human',
+      `
     <query>
       User request: {user_request}
       ES|QL query: {esql_query}
       Rule tags: {rule_tags}
     </query>`,
-  ],
-]);
+    ],
+  ]);

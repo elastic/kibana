@@ -17,7 +17,28 @@ This package evaluates the quality of AI-generated detection rules against known
 
 ## API Flow
 
-The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/converse`) and extracts tool results from the `security.create_detection_rule` tool call steps, matching the pattern used by the agent-builder eval suite.
+The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/converse`) with agent id `elastic-ai-agent` and extracts tool results from the `security.create_detection_rule` tool call steps.
+
+## Test data seeding
+
+Playwright `global.setup.ts` runs before the suite and restores pre-seeded Elasticsearch indices so rule generation has realistic field coverage:
+
+1. **Primary path (CI / Scout / weekly evals):** restore the pinned GCS snapshot via `@kbn/security-evals-rule-data-snapshot` (`rule-data/2026-06-16`, snapshot `security-ai-rules-v1`). Requires `GCS_CREDENTIALS` (wired automatically when using `node scripts/evals` with vault profiles).
+2. **Fallback path (local dev without GCS):** seed integration samples from `.cache/integration-samples/` plus endpoint episode NDJSON when present under `security_solution/scripts/data/episodes/attacks/`.
+
+Disable snapshot restore for local-only seeding:
+
+```bash
+SECURITY_AI_RULES_DISABLE=true node scripts/evals run --suite security-ai-rules
+```
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `SECURITY_AI_RULES_DISABLE` | Skip GCS snapshot restore | (unset) |
+| `SECURITY_AI_RULES_BUCKET` | GCS bucket | `security-ai-datasets` |
+| `SECURITY_AI_RULES_BASE_PATH` | Snapshot base path | `rule-data/2026-06-16` |
+| `SECURITY_AI_RULES_NAME` | Snapshot name | `security-ai-rules-v1` |
+| `GCS_CREDENTIALS` | Service account JSON for repository-gcs | (required for restore) |
 
 ## Package Structure
 
@@ -25,6 +46,8 @@ The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/conver
 kbn-evals-suite-security-ai-rules/
 ├── playwright.config.ts          # Playwright evals configuration
 ├── evals/
+│   ├── global.setup.ts           # Playwright global setup — snapshot restore + fallback seed
+│   ├── seed_data_from_scratch.ts # Integration + endpoint episode seed helpers
 │   └── rule_generation.spec.ts   # Evaluation scenarios (baseline + edge + negative cases)
 ├── datasets/
 │   ├── sample_rules.ts           # 8 canonical reference detection rules with ES|QL translations
@@ -38,6 +61,73 @@ kbn-evals-suite-security-ai-rules/
     ├── evaluate_dataset.ts       # Experiment runner + all evaluator definitions
     ├── helpers.ts                # Utility functions (MITRE extraction, syntax check, etc.)
     └── helpers.test.ts           # Unit tests for helpers
+```
+
+## Quick Start for Reviewers
+
+Follow these steps to run the eval suite locally and validate the PR changes end-to-end.
+
+### 1. Start Elasticsearch and Kibana
+
+```bash
+# Terminal 1: start ES
+yarn es snapshot
+
+# Terminal 2: start Kibana with feature flag
+yarn start --no-base-path
+```
+
+Make sure `config/kibana.dev.yml` contains:
+
+```yaml
+xpack.securitySolution.enableExperimental:
+  - aiRuleCreationEnabled
+```
+
+### 2. Configure an AI connector
+
+Add a connector in `config/kibana.dev.yml` (or create one in the UI at **Stack Management > Connectors**). Example for OpenAI:
+
+```yaml
+xpack.actions.preconfigured:
+  gpt-4o:
+    name: 'GPT-4o'
+    actionTypeId: .gen-ai
+    config:
+      apiProvider: OpenAI
+      apiUrl: https://api.openai.com/v1/chat/completions
+      defaultModel: gpt-4o
+    secrets:
+      apiKey: ${OPENAI_API_KEY}
+```
+
+### 3. Enable AI Agent chat experience
+
+Navigate to **Stack Management > AI > GenAI Settings** (`app/management/ai/genAiSettings`) and select **AI agent (Beta)** in Chat Experience. This enables the Agent Builder API (`POST /api/agent_builder/converse`) used by the suite.
+
+### 4. Run the eval suite
+
+```bash
+EVALUATION_CONNECTOR_ID=gpt-4o \
+  node scripts/evals run --suite security-ai-rules
+```
+
+That's it. Results are stored in Elasticsearch and a summary table is printed at the end.
+
+### 5. Run unit tests for product code changes
+
+```bash
+# infer_severity
+yarn test:jest x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_rule_creation/agent/nodes/infer_severity.test.ts
+
+# mitre_catalog_builder
+yarn test:jest x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_rule_creation/agent/nodes/mitre_catalog_builder.test.ts
+
+# generate_esql_query
+yarn test:jest x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_rule_creation/agent/sub_graphs/esql_with_tool/nodes/generate_esql_query.test.ts
+
+# eval suite helpers
+yarn test:jest x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/src/helpers.test.ts
 ```
 
 ## Prerequisites
@@ -71,6 +161,8 @@ EVALUATION_CONNECTOR_ID=gpt-4o \
 ```
 
 Replace `<KBN_URL>` and `<API_KEY>` with the Kibana endpoint and API key for the target environment where the evals plugin is enabled.
+
+At the end of a run the suite prints a **positive/negative success summary** per dataset (structural pass rate split by `category: 'negative'` examples vs positive cases). Use this table when comparing models — not only per-evaluator means.
 
 ### Environment variables
 

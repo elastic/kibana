@@ -42,6 +42,11 @@ export const generateEsqlQueryNode = async ({
       const connector = await inferenceClient.getConnectorById(connectorId);
 
       // Build security-specific instructions for ES|QL query generation
+      const hasExplicitQualifier = /\busing\s+only\b/i.test(state.userQuery);
+      const refusalInstruction = hasExplicitQualifier
+        ? `\n- CRITICAL: The user has explicitly restricted this detection request to a specific data source using "using only". If that data source does not support the requested detection type, you MUST refuse to generate a query. Respond with exactly: ERROR: UNSUPPORTED_DETECTION — <brief explanation>. Do NOT wrap the refusal in ES|QL triple-backtick blocks.`
+        : '';
+
       const additionalInstructions = `
 Your role to is to help in creating Elastic Detection (SIEM) rules of ES|QL type, based on provided user request by understanding the intent of the user query and generating a concise and relevant ES|QL query that aligns with the user's intent.
 
@@ -51,10 +56,11 @@ Guidelines for ES|QL query generation:
 - If generated query does not have any aggregations (using STATS..BY command), make sure you add operator metadata _id, _index, _version after source index in FROM command
 - Do not use any date range filters in the query (like WHERE @timestamp > NOW() - 5 minutes) or bucket aggregation limited by time (COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), unless explicitly told to include them in query. The system will handle time range filtering separately.
 - Never include bucket aggregation limited by time (like this example COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), to avoid clash with scheduling of the detection rule.
-- If you use KEEP command, after METADATA operator, make sure to include _id field.
+- If you use KEEP command, after METADATA operator, make sure to include _id field.${refusalInstruction}
+- Keep queries concise. Do not include unnecessary fields in KEEP or METADATA. Only select fields that are actually used in WHERE, EVAL, STATS, or SORT. If a query would require selecting a large number of fields, use KEEP with explicit field names rather than METADATA _id, _index, _version on aggregations.
 - If there is no relevant data in provided index patterns context to fulfil user request, use the best effort to create query based on your knowledge of ES|QL and security detection use cases.
 - Ensure the query is syntactically correct and adheres to ES|QL standards.
-- Do not include any explanations, only provide the ES|QL query string.
+- Do not include any explanations outside of ES|QL code blocks, only provide the ES|QL query string inside a single triple-backtick block.
 - When referring to fields take into account their data types as well. For example, do not use text field in arithmetic operations.
 - Use only full name of the fields in referred index patterns context. Name should contain all parent nodes separated by dot. For example use "host.name" instead of just "name".
 
@@ -67,17 +73,48 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         sendUiEvent: () => {},
       };
 
-      // Generate ES|QL query using agent_builder tool
-      const esqlResponse = await generateEsql({
+      // First attempt: generate ES|QL query with NO retries to preserve refusal responses
+      const esqlResponseFirst = await generateEsql({
         nlQuery: state.userQuery,
         additionalInstructions,
         executeQuery: false,
-        maxRetries: 3,
+        maxRetries: 0,
         model: { chatModel: model as ScopedModel['chatModel'], inferenceClient, connector },
         esClient,
         logger,
         events: toolEvents,
       });
+
+      // Detect explicit refusal before any retry loop can override it
+      const refusalPattern = /ERROR:\s*UNSUPPORTED_DETECTION/i;
+      if (esqlResponseFirst.answer && refusalPattern.test(esqlResponseFirst.answer)) {
+        events?.reportProgress(
+          'The requested detection is not supported by the available data sources'
+        );
+        return {
+          ...state,
+          errors: [
+            `The requested detection is not supported by the available data sources: ${esqlResponseFirst.answer}`,
+          ],
+        };
+      }
+
+      // If first attempt produced a valid query, use it directly
+      let esqlResponse = esqlResponseFirst;
+
+      // If first attempt failed without refusal, retry up to 3 times for syntax corrections
+      if (!esqlResponse.query || esqlResponse.error) {
+        esqlResponse = await generateEsql({
+          nlQuery: state.userQuery,
+          additionalInstructions,
+          executeQuery: false,
+          maxRetries: 3,
+          model: { chatModel: model as ScopedModel['chatModel'], inferenceClient, connector },
+          esClient,
+          logger,
+          events: toolEvents,
+        });
+      }
 
       if (esqlResponse.error) {
         events?.reportProgress(`Failed to generate ES|QL query: ${esqlResponse.error}`);

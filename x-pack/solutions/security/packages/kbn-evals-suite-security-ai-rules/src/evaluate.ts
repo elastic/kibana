@@ -54,6 +54,10 @@ function formatEvalSummary(summaries: DatasetSkipSummary[]): string {
 
   const grandTotal = summaries.reduce((sum, s) => sum + s.totalExamples, 0);
   const grandSucceeded = summaries.reduce((sum, s) => sum + s.succeeded, 0);
+  const grandPositiveTotal = summaries.reduce((sum, s) => sum + s.positiveTotal, 0);
+  const grandPositiveSucceeded = summaries.reduce((sum, s) => sum + s.positiveSucceeded, 0);
+  const grandNegativeTotal = summaries.reduce((sum, s) => sum + s.negativeTotal, 0);
+  const grandNegativeSucceeded = summaries.reduce((sum, s) => sum + s.negativeSucceeded, 0);
   const totalMissing = summaries.reduce((sum, s) => sum + s.missingIndexSkips, 0);
   const totalErrors = summaries.reduce((sum, s) => sum + s.otherFailures, 0);
 
@@ -66,7 +70,14 @@ function formatEvalSummary(summaries: DatasetSkipSummary[]): string {
   ];
 
   const pct = grandTotal > 0 ? Math.round((grandSucceeded / grandTotal) * 100) : 0;
+  const posPct =
+    grandPositiveTotal > 0 ? Math.round((grandPositiveSucceeded / grandPositiveTotal) * 100) : 0;
+  const negPct =
+    grandNegativeTotal > 0 ? Math.round((grandNegativeSucceeded / grandNegativeTotal) * 100) : 0;
   lines.push('', `Rule generation success rate: ${grandSucceeded}/${grandTotal} (${pct}%)`);
+  lines.push(
+    `  Positive cases: ${grandPositiveSucceeded}/${grandPositiveTotal} (${posPct}%) | Negative cases: ${grandNegativeSucceeded}/${grandNegativeTotal} (${negPct}%)`
+  );
 
   if (totalMissing > 0) {
     lines.push(
