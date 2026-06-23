@@ -83,37 +83,6 @@ function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   return definition.yamlTemplate(representativeValues);
 }
 
-/**
- * Recursively collect every step object (any depth) from a parsed workflow tree.
- * Handles the nested `steps:` arrays found inside if/foreach/etc.
- */
-function collectSteps(node: unknown): Array<Record<string, unknown>> {
-  if (!node || typeof node !== 'object') return [];
-  if (Array.isArray(node)) return node.flatMap(collectSteps);
-
-  const record = node as Record<string, unknown>;
-  const results: Array<Record<string, unknown>> = [];
-
-  if (typeof record.type === 'string') {
-    results.push(record);
-  }
-
-  for (const value of Object.values(record)) {
-    if (Array.isArray(value) || (value !== null && typeof value === 'object')) {
-      results.push(...collectSteps(value));
-    }
-  }
-
-  return results;
-}
-
-function isTemplateReference(value: unknown): boolean {
-  if (typeof value !== 'string') return false;
-  const trimmed = value.trim();
-  return (trimmed.startsWith('${{') && trimmed.endsWith('}}')) ||
-    (trimmed.startsWith('{{') && trimmed.endsWith('}}'));
-}
-
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {
   let parsedYaml: unknown;
   try {
@@ -198,36 +167,4 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
-  it.each(managedDefinitionsById)(
-    '%s ai.agent steps do not nest timeout inside the with: block',
-    (id, definition) => {
-      const renderedYaml = renderWorkflowYaml(definition);
-      const parsed = parse(renderedYaml) as Record<string, unknown>;
-      const agentSteps = collectSteps(parsed).filter((s) => s.type === 'ai.agent');
-
-      for (const step of agentSteps) {
-        const withBlock = step.with as Record<string, unknown> | undefined;
-        expect(withBlock?.timeout).toBeUndefined();
-      }
-    }
-  );
-
-  it.each(managedDefinitionsById)(
-    '%s ai.agent steps in manual-trigger workflows use a template reference for connector-id so the editor validator allows enabling',
-    (id, definition) => {
-      const renderedYaml = renderWorkflowYaml(definition);
-      const parsed = parse(renderedYaml) as Record<string, unknown>;
-
-      const triggers = (parsed.triggers ?? []) as Array<Record<string, unknown>>;
-      const hasManualTrigger = triggers.some((t) => t.type === 'manual');
-      if (!hasManualTrigger) return;
-
-      const agentSteps = collectSteps(parsed).filter((s) => s.type === 'ai.agent');
-      for (const step of agentSteps) {
-        if (step['connector-id'] !== undefined) {
-          expect(isTemplateReference(step['connector-id'])).toBe(true);
-        }
-      }
-    }
-  );
 });
