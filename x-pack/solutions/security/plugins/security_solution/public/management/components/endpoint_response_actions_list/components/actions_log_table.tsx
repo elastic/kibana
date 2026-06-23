@@ -8,11 +8,9 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   type CriteriaWithPagination,
-  EuiAvatar,
   EuiBasicTable,
   type EuiBasicTableColumn,
   EuiButtonIcon,
-  EuiFacetButton,
   EuiHorizontalRule,
   EuiI18nNumber,
   EuiScreenReaderOnly,
@@ -22,17 +20,14 @@ import {
   CENTER_ALIGNMENT,
   type HorizontalAlignment,
 } from '@elastic/eui';
-import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ActionCreatedBy } from './action_created_by';
 import { canUserCancelCommand } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { CancelActionModal } from './cancel_action_modal';
 import { isResponseActionCancelable } from '../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
-import { SecurityPageName } from '../../../../../common/constants';
-import { getRuleDetailsUrl } from '../../../../common/components/link_to';
-import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import type { ActionDetails, ActionListApiResponse } from '../../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../../common/api/endpoint';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -45,17 +40,6 @@ import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 
 const emptyValue = getEmptyValue();
-
-// Truncated usernames
-const StyledFacetButtonBase = styled(EuiFacetButton)`
-  .euiText {
-    margin-top: 0.38rem;
-    overflow-y: visible !important;
-  }
-`;
-const StyledFacetButton = (props: React.ComponentProps<typeof EuiFacetButton>) => (
-  <StyledFacetButtonBase {...props} title={undefined} />
-);
 
 interface ExpandedRowMapType {
   [k: string]: React.ReactNode;
@@ -285,55 +269,8 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           name: TABLE_COLUMN_NAMES.user,
           width: !showHostNames ? '21%' : '14%',
           truncateText: true,
-          render: ({ createdBy, ruleId }: ActionListApiResponse['data'][number]) => {
-            if (createdBy === 'unknown' && ruleId) {
-              return (
-                <EuiToolTip
-                  content={UX_MESSAGES.triggeredByRule}
-                  anchorClassName="eui-textTruncate"
-                >
-                  <SecuritySolutionLinkAnchor
-                    data-test-subj="ruleName"
-                    deepLinkId={SecurityPageName.rules}
-                    path={getRuleDetailsUrl(ruleId)}
-                  >
-                    <EuiText
-                      size="s"
-                      className="eui-textTruncate eui-fullWidth"
-                      data-test-subj={getTestId('column-user-name')}
-                    >
-                      {UX_MESSAGES.triggeredByRule}
-                    </EuiText>
-                  </SecuritySolutionLinkAnchor>
-                </EuiToolTip>
-              );
-            }
-            return (
-              <StyledFacetButton
-                icon={
-                  <EuiAvatar
-                    // We've a EuiTooltip that shows for createdBy below,
-                    // Thus we don't need to add a title tooltip as well.
-                    aria-hidden={true}
-                    title=""
-                    name={createdBy}
-                    data-test-subj={getTestId('column-user-avatar')}
-                    size="s"
-                  />
-                }
-              >
-                <EuiToolTip content={createdBy} anchorClassName="eui-textTruncate">
-                  <EuiText
-                    size="s"
-                    className="eui-textTruncate eui-fullWidth"
-                    data-test-subj={getTestId('column-user-name')}
-                    tabIndex={0}
-                  >
-                    {createdBy}
-                  </EuiText>
-                </EuiToolTip>
-              </StyledFacetButton>
-            );
+          render: (action: ActionListApiResponse['data'][number]) => {
+            return <ActionCreatedBy action={action} data-test-subj={getTestId('column')} />;
           },
         },
         // conditional hostnames column
@@ -388,7 +325,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           field: 'status',
           name: TABLE_COLUMN_NAMES.status,
           width: !showHostNames ? '15%' : '10%',
-      render: (status: ActionListApiResponse['data'][number]['status']) => {
+          render: (status: ActionListApiResponse['data'][number]['status']) => {
             return (
               <EuiToolTip content={status} anchorClassName="eui-textTruncate">
                 <ResponseActionStatusBadge

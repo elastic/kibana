@@ -18,7 +18,7 @@ import type { ActionDetails } from '../../../../../common/endpoint/types';
 // Truncated usernames
 const StyledFacetButtonBase = styled(EuiFacetButton)`
   padding-left: 0;
-  pointer-events: none;
+  cursor: default;
 
   .euiText {
     margin-top: 0.38rem;
@@ -34,6 +34,9 @@ export interface ActionCreatedByProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * Display for who created the response action - either a user or as a result of a rule execution
+ */
 export const ActionCreatedBy = memo<ActionCreatedByProps>(
   ({ action: { createdBy, ruleId }, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
