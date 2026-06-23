@@ -1,4 +1,13 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * Copyright Elasticsearch B.V. and contributors
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,20 +29,19 @@
  * that made per-endpoint isolation possible.
  */
 
-import type { EsApiDefinition } from './types'
-import { apiManifest } from './api-manifest'
-import type { EsApiMeta } from './api-manifest'
+import type { EsApiDefinition } from './types';
+import type { EsApiMeta } from './api-manifest';
 
-export { apiManifest } from './api-manifest'
-export type { EsApiMeta } from './api-manifest'
+export { apiManifest } from './api-manifest';
+export type { EsApiMeta } from './api-manifest';
 
 /** Camel-case a snake_case file stem, matching the generator's export naming rule. */
-function toCamelCase (stem: string): string {
-  return stem.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase())
+function toCamelCase(stem: string): string {
+  return stem.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase());
 }
 
 /** Memoised module cache so repeated calls don't re-import the same namespace file. */
-const moduleCache = new Map<string, Promise<EsApiDefinition[]>>()
+const moduleCache = new Map<string, Promise<EsApiDefinition[]>>();
 
 /**
  * Dynamic-imports the namespace file identified by `namespaceFile` and returns
@@ -42,53 +50,31 @@ const moduleCache = new Map<string, Promise<EsApiDefinition[]>>()
  *
  * Triggers loading of every per-endpoint Zod schema referenced by the file.
  */
-export async function loadEsApisInFile (namespaceFile: string): Promise<EsApiDefinition[]> {
-  let cached = moduleCache.get(namespaceFile)
-  if (cached != null) return cached
+export async function loadEsApisInFile(namespaceFile: string): Promise<EsApiDefinition[]> {
+  let cached = moduleCache.get(namespaceFile);
+  if (cached != null) return cached;
   cached = (async (): Promise<EsApiDefinition[]> => {
-    const mod = await import(`./apis/${namespaceFile}.ts`) as Record<string, EsApiDefinition[]>
-    const exportName = `${toCamelCase(namespaceFile)}Apis`
-    const arr = mod[exportName]
+    const mod = (await import(`./apis/${namespaceFile}.ts`)) as Record<string, EsApiDefinition[]>;
+    const exportName = `${toCamelCase(namespaceFile)}Apis`;
+    const arr = mod[exportName];
     if (!Array.isArray(arr)) {
-      throw new Error(`internal error: ./apis/${namespaceFile}.ts did not export ${exportName}`)
+      throw new Error(`internal error: ./apis/${namespaceFile}.ts did not export ${exportName}`);
     }
-    return arr
-  })()
-  moduleCache.set(namespaceFile, cached)
-  return cached
+    return arr;
+  })();
+  moduleCache.set(namespaceFile, cached);
+  return cached;
 }
 
 /** Locates a single `EsApiDefinition` by its manifest entry. */
-export async function loadEsApi (meta: EsApiMeta): Promise<EsApiDefinition> {
-  const defs = await loadEsApisInFile(meta.namespaceFile)
-  const found = defs.find(
-    (d) => d.name === meta.name && (d.namespace ?? null) === meta.namespace
-  )
+export async function loadEsApi(meta: EsApiMeta): Promise<EsApiDefinition> {
+  const defs = await loadEsApisInFile(meta.namespaceFile);
+  const found = defs.find((d) => d.name === meta.name && (d.namespace ?? null) === meta.namespace);
   if (found == null) {
-    const label = meta.namespace != null ? `${meta.namespace} ${meta.name}` : meta.name
-    throw new Error(`internal error: manifest entry "${label}" has no match in ./apis/${meta.namespaceFile}.ts`)
+    const label = meta.namespace != null ? `${meta.namespace} ${meta.name}` : meta.name;
+    throw new Error(
+      `internal error: manifest entry "${label}" has no match in ./apis/${meta.namespaceFile}.ts`
+    );
   }
-  return found
-}
-
-/**
- * Eagerly loads every API definition, triggering every schema module. ONLY use
- * this from tests or scripts that really need the full set - the typical CLI
- * startup path stays on the manifest + `loadEsApi()`.
- *
- * Files are loaded sequentially rather than with Promise.all to keep peak heap
- * manageable. Each namespace file carries multi-MB Zod type closures; loading
- * all 500+ simultaneously can exhaust the V8 heap before GC has a chance to
- * reclaim compile-time allocations from earlier modules.
- */
-export async function loadAllEsApis (): Promise<EsApiDefinition[]> {
-  // Load namespace files sequentially rather than concurrently to keep peak heap
-  // usage bounded. Concurrent loading via Promise.all compiles all ~40 modules at
-  // once, which can exceed 4 GB on tight heap environments (e.g. V8 on Apple Silicon).
-  const files = [...new Set(apiManifest.map((m) => m.namespaceFile))]
-  const results: EsApiDefinition[][] = []
-  for (const file of files) {
-    results.push(await loadEsApisInFile(file))
-  }
-  return results.flat()
+  return found;
 }

@@ -1,15 +1,24 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * Copyright Elasticsearch B.V. and contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { TransportRequestParams } from '@elastic/transport'
-import type { EsApiDefinition } from './types'
-import type { SchemaArgDefinition } from '../lib/schema-args'
+import type { TransportRequestParams } from '@elastic/transport';
+import type { EsApiDefinition } from './types';
+import type { SchemaArgDefinition } from '../lib/schema-args';
 
 /** Minimal shape of a raw JSON value passed through from the CLI. */
 interface RawJsonValue {
-  raw: string
+  raw: string;
 }
 
 /**
@@ -29,39 +38,39 @@ interface RawJsonValue {
  * @param rawBody - optional map of pre-serialized JSON values (from CLI JSON parsing)
  * @returns `TransportRequestParams` ready to pass to `transport.request()`
  */
-export function buildRequestParams (
+export function buildRequestParams(
   def: EsApiDefinition,
   input: Record<string, unknown>,
   schemaArgs: SchemaArgDefinition[],
   rawBody: Record<string, RawJsonValue> = {}
 ): TransportRequestParams {
-  const path = interpolatePath(def.path, schemaArgs, input)
-  const querystring = buildQuerystring(schemaArgs, input)
-  const body = collectBody(schemaArgs, input, rawBody, def.path, def.bodyFormat)
+  const path = interpolatePath(def.path, schemaArgs, input);
+  const querystring = buildQuerystring(schemaArgs, input);
+  const body = collectBody(schemaArgs, input, rawBody, def.path, def.bodyFormat);
 
   // The index API uses PUT with {id} but POST without (auto-ID generation).
   // Only switch PUT→POST for paths containing /{id} when id is omitted.
-  let method = def.method
+  let method = def.method;
   if (method === 'PUT' && def.path.includes('/{id}')) {
     const idArg = schemaArgs.find(
       (a) => a.schemaKey === 'id' && a.foundIn === 'path' && !a.required
-    )
-    if (idArg != null && input[idArg.schemaKey] === undefined) method = 'POST'
+    );
+    if (idArg != null && input[idArg.schemaKey] === undefined) method = 'POST';
   }
 
-  const params: TransportRequestParams = { method, path }
-  if (Object.keys(querystring).length > 0) params.querystring = querystring
+  const params: TransportRequestParams = { method, path };
+  if (Object.keys(querystring).length > 0) params.querystring = querystring;
 
   if (body !== undefined) {
     if (typeof body === 'string') {
-      params.body = body
+      params.body = body;
     } else if (def.bodyFormat === 'ndjson') {
-      params.bulkBody = toNdjson(body)
+      params.bulkBody = toNdjson(body);
     } else {
-      params.body = body as NonNullable<TransportRequestParams['body']>
+      params.body = body as NonNullable<TransportRequestParams['body']>;
     }
   }
-  return params
+  return params;
 }
 
 /**
@@ -76,45 +85,48 @@ export function buildRequestParams (
  * syntax (e.g. "idx1,idx2") is preserved, while special characters like `/`,
  * `?`, and `#` are percent-encoded to prevent path traversal (#106).
  */
-function encodePathParam (value: string): string {
-  return value.split(',').map((s) => encodeURIComponent(s.trim())).join(',')
+function encodePathParam(value: string): string {
+  return value
+    .split(',')
+    .map((s) => encodeURIComponent(s.trim()))
+    .join(',');
 }
 
-function interpolatePath (
+function interpolatePath(
   path: string,
   schemaArgs: SchemaArgDefinition[],
   input: Record<string, unknown>
 ): string {
   for (const arg of schemaArgs.filter((a) => a.foundIn === 'path')) {
-    const value = input[arg.schemaKey]
+    const value = input[arg.schemaKey];
     if (value !== undefined) {
-      path = path.replace(`{${arg.schemaKey}}`, encodePathParam(String(value)))
+      path = path.replace(`{${arg.schemaKey}}`, encodePathParam(String(value)));
     } else if (!arg.required) {
       // Strip the optional segment with its leading slash so the rest of the
       // path remains valid. E.g.:
       //   "/_inference/{task_type}/{inference_id}" (task_type absent)
       //   → "/_inference/{inference_id}"   (not "/_inference{inference_id}")
-      path = path.replace(new RegExp(`/\\{${arg.schemaKey}\\}`), '')
-      path = path.replace(/\/$/, '') || '/'
+      path = path.replace(new RegExp(`/\\{${arg.schemaKey}\\}`), '');
+      path = path.replace(/\/$/, '') || '/';
     }
   }
-  return path
+  return path;
 }
 
 /**
  * Builds the querystring record from `SchemaArgDefinition` entries with `foundIn === "query"`.
  * The schema key is used as the ES-native querystring param name.
  */
-function buildQuerystring (
+function buildQuerystring(
   schemaArgs: SchemaArgDefinition[],
   input: Record<string, unknown>
 ): Record<string, unknown> {
-  const qs: Record<string, unknown> = {}
+  const qs: Record<string, unknown> = {};
   for (const arg of schemaArgs.filter((a) => a.foundIn === 'query')) {
-    const value = input[arg.schemaKey]
-    if (value !== undefined) qs[arg.schemaKey] = value
+    const value = input[arg.schemaKey];
+    if (value !== undefined) qs[arg.schemaKey] = value;
   }
-  return qs
+  return qs;
 }
 
 /**
@@ -125,13 +137,13 @@ function buildQuerystring (
  * serialized as a single JSON line. The result always ends with a trailing
  * newline as required by Elasticsearch.
  */
-function toNdjson (body: Record<string, unknown>): string {
+function toNdjson(body: Record<string, unknown>): string {
   for (const value of Object.values(body)) {
     if (Array.isArray(value)) {
-      return value.map((item) => JSON.stringify(item)).join('\n') + '\n'
+      return value.map((item) => JSON.stringify(item)).join('\n') + '\n';
     }
   }
-  return JSON.stringify(body) + '\n'
+  return JSON.stringify(body) + '\n';
 }
 
 // Fields whose value should replace the entire request body (not nested under the key).
@@ -141,8 +153,8 @@ const BODY_ROOT_FIELDS: Record<string, Set<string> | '*'> = {
   inference_config: '*',
   mappings: new Set(['/_data_stream/{name}/_mappings']),
   settings: new Set(['/_data_stream/{name}/_settings']),
-  pipeline: new Set(['/_logstash/pipeline/{id}'])
-}
+  pipeline: new Set(['/_logstash/pipeline/{id}']),
+};
 
 /**
  * Collects request body fields from entries with `foundIn === "body"` or no `foundIn`.
@@ -155,45 +167,44 @@ const BODY_ROOT_FIELDS: Record<string, Set<string> | '*'> = {
  * Special case: when the only body field with a value is in `BODY_ROOT_FIELDS`
  * (e.g. `document`), its value is promoted to be the entire body (#95).
  */
-function collectBody (
+function collectBody(
   schemaArgs: SchemaArgDefinition[],
   input: Record<string, unknown>,
   rawBody: Record<string, RawJsonValue>,
   apiPath: string,
   bodyFormat?: string
 ): Record<string, unknown> | string | undefined {
-  const bodyArgs = schemaArgs.filter((a) => a.foundIn === 'body' || a.foundIn === undefined)
-  const body: Record<string, unknown> = {}
+  const bodyArgs = schemaArgs.filter((a) => a.foundIn === 'body' || a.foundIn === undefined);
+  const body: Record<string, unknown> = {};
 
   for (const arg of bodyArgs) {
-    const value = input[arg.schemaKey]
-    if (value !== undefined) body[arg.schemaKey] = value
+    const value = input[arg.schemaKey];
+    if (value !== undefined) body[arg.schemaKey] = value;
   }
 
-  if (Object.keys(body).length === 0) return undefined
+  if (Object.keys(body).length === 0) return undefined;
 
-  const keys = Object.keys(body)
+  const keys = Object.keys(body);
   if (keys.length === 1) {
-    const key = keys[0]!
-    const rule = BODY_ROOT_FIELDS[key]
+    const key = keys[0]!;
+    const rule = BODY_ROOT_FIELDS[key];
     if (rule === '*' || (rule instanceof Set && rule.has(apiPath))) {
-      if (key in rawBody) return rawBody[key]!.raw
-      return body[key] as Record<string, unknown>
+      if (key in rawBody) return rawBody[key]!.raw;
+      return body[key] as Record<string, unknown>;
     }
   }
 
   // If any body value has a raw JSON string, build a pre-serialized JSON body
   // so the transport sends it as-is (preserving number formatting like 100.0).
   // Skip for NDJSON bodies which must go through toNdjson().
-  const hasRaw = bodyFormat !== 'ndjson' &&
-    bodyArgs.some((a) => a.schemaKey in rawBody)
+  const hasRaw = bodyFormat !== 'ndjson' && bodyArgs.some((a) => a.schemaKey in rawBody);
   if (hasRaw) {
     const parts = keys.map((k) => {
-      if (k in rawBody) return `${JSON.stringify(k)}:${rawBody[k]!.raw}`
-      return `${JSON.stringify(k)}:${JSON.stringify(body[k])}`
-    })
-    return `{${parts.join(',')}}`
+      if (k in rawBody) return `${JSON.stringify(k)}:${rawBody[k]!.raw}`;
+      return `${JSON.stringify(k)}:${JSON.stringify(body[k])}`;
+    });
+    return `{${parts.join(',')}}`;
   }
 
-  return body
+  return body;
 }

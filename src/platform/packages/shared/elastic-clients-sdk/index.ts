@@ -12,12 +12,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 
-export function resolveInput (
- input: z.ZodObject<z.ZodRawShape> | (() => z.ZodObject<z.ZodRawShape>)
+export function resolveInput(
+  input: z.ZodObject<z.ZodRawShape> | (() => z.ZodObject<z.ZodRawShape>)
 ): z.ZodObject<z.ZodRawShape> {
- return typeof input === 'function' ? input() : input
+  return typeof input === 'function' ? input() : input;
 }
 
 export { extractSchemaArgs } from './lib/schema-args';

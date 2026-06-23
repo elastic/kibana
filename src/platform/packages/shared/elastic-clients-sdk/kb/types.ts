@@ -1,18 +1,39 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * Copyright Elasticsearch B.V. and contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /** Valid HTTP methods for Kibana API requests. */
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD'
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD';
+
+/**
+ * Parameters for a single Kibana API request.
+ */
+export interface KibanaRequestParams {
+  method: HttpMethod;
+  path: string;
+  querystring?: Record<string, unknown>;
+  body?: unknown;
+  /** When set, the request is sent as multipart/form-data. Keys map to form field names; string values that resolve to an existing file path are sent as file uploads. */
+  multipartFields?: Record<string, string>;
+}
 
 /**
  * Describes a path parameter that gets interpolated into the URL template.
  */
 export interface KbPathParam {
-  name: string
-  description: string
-  required: boolean
+  name: string;
+  description: string;
+  required: boolean;
 }
 
 /**
@@ -22,22 +43,22 @@ export interface KbPathParam {
  * the `cliFlag` (kebab-case) is what users type on the command line.
  */
 export interface KbQueryParam {
-  name: string
-  cliFlag?: string
-  type: 'string' | 'number' | 'boolean'
-  description: string
-  required?: boolean
+  name: string;
+  cliFlag?: string;
+  type: 'string' | 'number' | 'boolean';
+  description: string;
+  required?: boolean;
 }
 
 /**
  * Describes a request body parameter for a Kibana API request.
  */
 export interface KbBodyParam {
-  name: string
-  cliFlag?: string
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array'
-  description: string
-  required?: boolean
+  name: string;
+  cliFlag?: string;
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  description: string;
+  required?: boolean;
 }
 
 /**
@@ -62,59 +83,16 @@ export interface KbBodyParam {
  * ```
  */
 export interface KbApiDefinition {
-  name: string
-  namespace: string
-  description: string
-  method: HttpMethod
-  path: string
-  pathParams?: KbPathParam[]
-  queryParams?: KbQueryParam[]
-  bodyParams?: KbBodyParam[]
+  name: string;
+  namespace: string;
+  description: string;
+  method: HttpMethod;
+  path: string;
+  pathParams?: KbPathParam[];
+  queryParams?: KbQueryParam[];
+  bodyParams?: KbBodyParam[];
   /** When 'multipart', the request body must be sent as multipart/form-data. */
-  requestType?: 'multipart'
+  requestType?: 'multipart';
   /** When 'ndjson', the success response is newline-delimited JSON (parsed into an array). */
-  responseType?: 'ndjson'
-}
-
-const VALID_NAME = /^[a-z0-9][a-z0-9-]*$/
-const VALID_NAMESPACE = /^[a-z][a-z0-9-]*$/
-
-function extractPathTokens (path: string): string[] {
-  return [...path.matchAll(/\{([^}]+)\}/g)].map((m) => m[1] as string)
-}
-
-/**
- * Validates a `KbApiDefinition` against the data-model rules.
- *
- * @throws {Error} if any validation rule is violated
- */
-export function validateKbApiDefinition (def: KbApiDefinition): void {
-  if (!VALID_NAME.test(def.name)) {
-    throw new Error(
-      `invalid name ${JSON.stringify(def.name)}: ` +
-      'names must start with a lowercase letter or digit and contain only lowercase letters, digits, and hyphens'
-    )
-  }
-
-  if (!VALID_NAMESPACE.test(def.namespace)) {
-    throw new Error(
-      `invalid namespace ${JSON.stringify(def.namespace)}: ` +
-      'namespaces must start with a lowercase letter and contain only lowercase letters, digits, and hyphens'
-    )
-  }
-
-  if (!def.path.startsWith('/')) {
-    throw new Error(`path must start with "/" — got ${JSON.stringify(def.path)}`)
-  }
-
-  const tokens = extractPathTokens(def.path)
-  const paramNames = new Set((def.pathParams ?? []).map((p) => p.name))
-
-  for (const token of tokens) {
-    if (!paramNames.has(token)) {
-      throw new Error(
-        `path param {${token}} is not defined in pathParams for definition ${JSON.stringify(def.name)}`
-      )
-    }
-  }
+  responseType?: 'ndjson';
 }

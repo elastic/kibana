@@ -1,4 +1,13 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * Copyright Elasticsearch B.V. and contributors
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,60 +24,48 @@
  * See elastic/cli#251 for the memory context.
  */
 
-import type { KbApiDefinition } from './types'
-import { kbApiManifest } from './api-manifest'
-import type { KbApiMeta } from './api-manifest'
+import type { KbApiDefinition } from './types';
+import type { KbApiMeta } from './api-manifest';
 
-export { kbApiManifest } from './api-manifest'
-export type { KbApiMeta } from './api-manifest'
+export { kbApiManifest } from './api-manifest';
+export type { KbApiMeta } from './api-manifest';
 
 /** Memoised module cache so repeated calls do not re-import the same namespace file. */
-const moduleCache = new Map<string, Promise<KbApiDefinition[]>>()
+const moduleCache = new Map<string, Promise<KbApiDefinition[]>>();
 
 /** Converts a kebab-case file stem to the camelCase export name used in namespace files. */
-function toCamelCase (stem: string): string {
-  return stem.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase())
+function toCamelCase(stem: string): string {
+  return stem.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase());
 }
 
 /**
  * Dynamic-imports the namespace file identified by `namespaceFile` and returns
  * all `KbApiDefinition`s it exports.
  */
-export async function loadKbApisInFile (namespaceFile: string): Promise<KbApiDefinition[]> {
-  let cached = moduleCache.get(namespaceFile)
-  if (cached != null) return cached
+export async function loadKbApisInFile(namespaceFile: string): Promise<KbApiDefinition[]> {
+  let cached = moduleCache.get(namespaceFile);
+  if (cached != null) return cached;
   cached = (async (): Promise<KbApiDefinition[]> => {
-    const mod = await import(`./apis/${namespaceFile}.ts`) as Record<string, KbApiDefinition[]>
-    const exportName = `${toCamelCase(namespaceFile)}Apis`
-    const arr = mod[exportName]
+    const mod = (await import(`./apis/${namespaceFile}.ts`)) as Record<string, KbApiDefinition[]>;
+    const exportName = `${toCamelCase(namespaceFile)}Apis`;
+    const arr = mod[exportName];
     if (!Array.isArray(arr)) {
-      throw new Error(`internal error: ./apis/${namespaceFile}.ts did not export ${exportName}`)
+      throw new Error(`internal error: ./apis/${namespaceFile}.ts did not export ${exportName}`);
     }
-    return arr
-  })()
-  moduleCache.set(namespaceFile, cached)
-  return cached
+    return arr;
+  })();
+  moduleCache.set(namespaceFile, cached);
+  return cached;
 }
 
 /** Locates a single `KbApiDefinition` by its manifest entry. */
-export async function loadKbApi (meta: KbApiMeta): Promise<KbApiDefinition> {
-  const defs = await loadKbApisInFile(meta.namespaceFile)
-  const found = defs.find(
-    (d) => d.name === meta.name && d.namespace === meta.namespace
-  )
+export async function loadKbApi(meta: KbApiMeta): Promise<KbApiDefinition> {
+  const defs = await loadKbApisInFile(meta.namespaceFile);
+  const found = defs.find((d) => d.name === meta.name && d.namespace === meta.namespace);
   if (found == null) {
-    throw new Error(`internal error: manifest entry "${meta.namespace} ${meta.name}" has no match in ./apis/${meta.namespaceFile}.ts`)
+    throw new Error(
+      `internal error: manifest entry "${meta.namespace} ${meta.name}" has no match in ./apis/${meta.namespaceFile}.ts`
+    );
   }
-  return found
-}
-
-/** Loads all KB API definitions eagerly (for tests and scripts). */
-export async function loadAllKbApis (): Promise<KbApiDefinition[]> {
-  const files = new Set(kbApiManifest.map(m => m.namespaceFile))
-  const all: KbApiDefinition[] = []
-  for (const file of files) {
-    const defs = await loadKbApisInFile(file)
-    all.push(...defs)
-  }
-  return all
+  return found;
 }
