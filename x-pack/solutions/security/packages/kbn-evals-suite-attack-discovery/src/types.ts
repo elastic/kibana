@@ -51,6 +51,7 @@ export type AttackDiscoveryTaskInput =
 
 export interface AttackDiscoveryTaskExpectedOutput {
   attackDiscoveries: AttackDiscovery[];
+  criteria?: string[];
 }
 
 export interface AttackDiscoveryTaskOutput {
@@ -63,6 +64,8 @@ export interface AttackDiscoveryTaskOutput {
 export type AttackDiscoveryDatasetMetadata = Record<string, unknown> & {
   Title?: string;
   dataset_split?: unknown;
+  is_distractor?: boolean;
+  criteria?: string[];
 };
 
 export type AttackDiscoveryDatasetExample = Example<

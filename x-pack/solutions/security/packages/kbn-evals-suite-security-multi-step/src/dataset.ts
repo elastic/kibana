@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export type MultiStepScenarioId = 'full_chain_triage_investigate_rule' | 'distractor_general';
+export type MultiStepScenarioId =
+  | 'full_chain_triage_investigate_rule'
+  | 'alert_investigate_rules_recommend'
+  | 'entity_risk_alerts_correlation'
+  | 'alert_triage_summary_report'
+  | 'find_rules_mitre_coverage'
+  | 'distractor_general';
 
 export interface MultiStepExample {
   input: {

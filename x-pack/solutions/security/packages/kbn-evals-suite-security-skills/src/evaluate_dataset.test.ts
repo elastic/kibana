@@ -8,11 +8,9 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  buildMultiStepEvaluators,
-  toDatasetExample,
-} from './evaluate_dataset';
-import type { MultiStepExample } from './dataset';
+import { buildSecuritySkillsEvaluators, toDatasetExample } from './evaluate_dataset';
+import type { SecuritySkillsExample } from './dataset';
+import { securitySkillsExamples } from './datasets';
 
 const stubTraceEvaluator = (name: string): Evaluator => ({
   name,
@@ -45,7 +43,7 @@ const buildBuildArgs = () => ({
   } as unknown as ToolingLog,
 });
 
-describe('buildMultiStepEvaluators', () => {
+describe('buildSecuritySkillsEvaluators', () => {
   const expectedNames = [
     'Factuality',
     'Relevance',
@@ -56,28 +54,39 @@ describe('buildMultiStepEvaluators', () => {
     'Output Tokens',
     'Cached Tokens',
     'Skill Invoked',
-    'Trajectory',
   ];
 
   it('pins the baseline L1–L5 evaluator stack', () => {
-    const stack = buildMultiStepEvaluators(buildBuildArgs());
+    const stack = buildSecuritySkillsEvaluators(buildBuildArgs());
     expect(stack.map((e) => e.name)).toEqual(expectedNames);
   });
 });
 
 describe('toDatasetExample', () => {
-  it('wraps multi-turn input and tool_sequence', () => {
-    const ex: MultiStepExample = {
-      input: { turns: ['hello', 'follow up'] },
+  it('wraps question input and expectedSkill metadata', () => {
+    const ex: SecuritySkillsExample = {
+      input: { question: 'List MITRE rules' },
       expected: {
-        reference: 'ref',
-        tool_sequence: ['security.alerts'],
-        primary_skill: 'alert-analysis',
+        reference: 'Uses find_rules',
+        expectedSkill: 'find-security-rules',
       },
-      metadata: { scenario: 'full_chain_triage_investigate_rule', dataset_split: ['base'] },
+      metadata: {
+        category: 'find-rules',
+        query_intent: 'Rule Discovery',
+        dataset_split: ['base'],
+      },
     };
     const wrapped = toDatasetExample(ex);
-    expect(wrapped.input?.turns).toHaveLength(2);
-    expect(wrapped.output?.tool_sequence).toEqual(['security.alerts']);
+    expect(wrapped.input?.question).toBe('List MITRE rules');
+    expect(wrapped.output?.expectedSkill).toBe('find-security-rules');
+  });
+});
+
+describe('securitySkillsExamples', () => {
+  it('includes happy-path and distractor splits', () => {
+    const distractors = securitySkillsExamples.filter((ex) => ex.metadata.is_distractor);
+    const happy = securitySkillsExamples.filter((ex) => !ex.metadata.is_distractor);
+    expect(happy.length).toBeGreaterThanOrEqual(3);
+    expect(distractors.length).toBeGreaterThanOrEqual(1);
   });
 });

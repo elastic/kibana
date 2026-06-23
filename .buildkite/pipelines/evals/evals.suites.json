@@ -178,7 +178,8 @@
       ],
       "ciLabels": [
         "evals:attack-discovery"
-      ]
+      ],
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "lead-generation",
@@ -277,7 +278,17 @@
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-multi-step/playwright.config.ts",
       "tags": ["security", "multi-step"],
-      "ciLabels": ["evals:security-multi-step"]
+      "ciLabels": ["evals:security-multi-step"],
+      "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "security-skills",
+      "name": "Security Skills",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-skills/playwright.config.ts",
+      "tags": ["security", "security-skills"],
+      "ciLabels": ["evals:security-skills"],
+      "serverConfigSet": "evals_tracing"
     }
   ]
 }

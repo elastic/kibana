@@ -19,6 +19,7 @@ import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '.
 import { runAttackDiscovery } from './task/run_attack_discovery';
 import { createAttackDiscoveryBasicEvaluator } from './evaluators/attack_discovery_basic_evaluator';
 import { createAttackDiscoveryRubricEvaluator } from './evaluators/attack_discovery_rubric_evaluator';
+import { createAttackDiscoveryCriteriaEvaluator } from './evaluators/attack_discovery_criteria_evaluator';
 
 const resolveConcurrency = (): number | undefined => {
   const raw = process.env.ATTACK_DISCOVERY_EVAL_CONCURRENCY;
@@ -73,6 +74,7 @@ const configureExperiment = ({
     },
     evaluators: [
       createAttackDiscoveryBasicEvaluator(),
+      createAttackDiscoveryCriteriaEvaluator({ evaluators }),
       createAttackDiscoveryRubricEvaluator({ inferenceClient: evaluationInferenceClient, log }),
       toolCalls as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
       latency as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,

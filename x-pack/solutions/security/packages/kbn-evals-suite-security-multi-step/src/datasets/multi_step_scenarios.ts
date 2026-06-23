@@ -10,6 +10,8 @@ import type { MultiStepExample } from '../dataset';
 const SECURITY_ALERTS = 'security.alerts';
 const SECURITY_GET_ENTITY = 'security.get_entity';
 const SECURITY_CREATE_RULE = 'security.create_detection_rule';
+const SECURITY_FIND_RULES = 'security.find_rules';
+const SECURITY_ENTITY_RISK = 'security.entity_risk_score';
 
 export const multiStepScenarios: MultiStepExample[] = [
   {
@@ -28,6 +30,79 @@ export const multiStepScenarios: MultiStepExample[] = [
     },
     metadata: {
       scenario: 'full_chain_triage_investigate_rule',
+      dataset_split: ['base'],
+    },
+  },
+  {
+    input: {
+      turns: [
+        'Investigate critical alert id alert-ps-001 about suspicious PowerShell on host win-dc-01.',
+        'Find detection rules related to PowerShell execution and MITRE T1059.',
+        'Based on what you learned, suggest improvements to our PowerShell detection coverage.',
+      ],
+    },
+    expected: {
+      reference:
+        'The agent should triage the alert, query rules with find_rules (PowerShell / T1059), then recommend detection improvements grounded in alert and rule inventory data.',
+      tool_sequence: [SECURITY_ALERTS, SECURITY_FIND_RULES],
+      primary_skill: 'alert-analysis',
+    },
+    metadata: {
+      scenario: 'alert_investigate_rules_recommend',
+      dataset_split: ['base'],
+    },
+  },
+  {
+    input: {
+      turns: [
+        'What is the current risk score for host srv-finance-01?',
+        'Show me high and critical alerts involving srv-finance-01 in the last 48 hours.',
+      ],
+    },
+    expected: {
+      reference:
+        'The agent should look up entity risk for srv-finance-01, then search related alerts and correlate findings — entity analytics plus alert analysis.',
+      tool_sequence: [SECURITY_ENTITY_RISK, SECURITY_ALERTS],
+      primary_skill: 'entity-analytics',
+    },
+    metadata: {
+      scenario: 'entity_risk_alerts_correlation',
+      dataset_split: ['base'],
+    },
+  },
+  {
+    input: {
+      turns: [
+        'Triage my top 5 critical alerts from the last 24 hours.',
+        'Summarize the common themes, affected hosts, and recommended next steps for leadership.',
+      ],
+    },
+    expected: {
+      reference:
+        'The agent should retrieve critical alerts, prioritize them, then produce a concise executive summary with hosts, techniques, and next steps.',
+      tool_sequence: [SECURITY_ALERTS],
+      primary_skill: 'alert-analysis',
+    },
+    metadata: {
+      scenario: 'alert_triage_summary_report',
+      dataset_split: ['base'],
+    },
+  },
+  {
+    input: {
+      turns: [
+        'Find all enabled detection rules mapped to MITRE technique T1055 (Process Injection).',
+        'Assess whether our T1055 coverage is adequate and call out any gaps.',
+      ],
+    },
+    expected: {
+      reference:
+        'The agent should use find_rules with mitreTechnique T1055, list matching rules, and assess coverage gaps with actionable recommendations.',
+      tool_sequence: [SECURITY_FIND_RULES],
+      primary_skill: 'find-security-rules',
+    },
+    metadata: {
+      scenario: 'find_rules_mitre_coverage',
       dataset_split: ['base'],
     },
   },

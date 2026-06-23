@@ -27,6 +27,56 @@ import type { MultiStepAgentBuilderChatClient } from './chat_client';
 const DEFAULT_PRIMARY_SKILL = 'alert-analysis';
 const FILESTORE_READ_TOOL_ID = 'filestore.read';
 
+const createDynamicSkillInvocationEvaluator = ({
+  traceEsClient,
+  log,
+}: {
+  traceEsClient: EsClient;
+  log: ToolingLog;
+}): Evaluator<MultiStepDatasetExample, TaskOutput> => {
+  return {
+    name: 'Skill Invoked',
+    kind: 'CODE',
+    evaluate: async ({ output, expected, metadata }) => {
+      const exp = expected as MultiStepDatasetExpected | undefined;
+      const skillName = exp?.primary_skill ?? DEFAULT_PRIMARY_SKILL;
+
+      if (metadata?.is_distractor) {
+        const inner = createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName,
+        });
+        const result = await inner.evaluate({
+          output,
+          expected,
+          metadata,
+        } as unknown as Parameters<typeof inner.evaluate>[0]);
+        const invoked = result.score === 1;
+        return {
+          ...result,
+          score: invoked ? 0 : 1,
+          explanation: invoked
+            ? `Skill ${skillName} was invoked for a distractor prompt.`
+            : `Skill ${skillName} correctly not invoked for distractor.`,
+        };
+      }
+
+      return createSkillInvocationEvaluator({
+        traceEsClient,
+        log,
+        skillName,
+      }).evaluate({
+        output,
+        expected,
+        metadata,
+      } as unknown as Parameters<
+        ReturnType<typeof createSkillInvocationEvaluator>['evaluate']
+      >[0]);
+    },
+  };
+};
+
 export interface MultiStepDatasetInput extends Record<string, unknown> {
   turns: string[];
 }
@@ -128,11 +178,7 @@ export const buildMultiStepEvaluators = ({
     inputTokens as Evaluator<MultiStepDatasetExample, TaskOutput>,
     outputTokens as Evaluator<MultiStepDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<MultiStepDatasetExample, TaskOutput>,
-    createSkillInvocationEvaluator({
-      traceEsClient,
-      log,
-      skillName: DEFAULT_PRIMARY_SKILL,
-    }) as Evaluator<MultiStepDatasetExample, TaskOutput>,
+    createDynamicSkillInvocationEvaluator({ traceEsClient, log }),
     createMultiStepTrajectoryEvaluator(),
   ];
 };
