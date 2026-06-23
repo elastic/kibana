@@ -9,14 +9,10 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { AddToExistingCase } from './add_to_existing_case';
-import { useEntityCasePermissions } from '../hooks/use_case_permission';
 import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
 import type { EntityToAttach } from '..';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../hooks/use_case_permission');
-
-const mockUseEntityCasePermissions = useEntityCasePermissions as jest.Mock;
 
 const ENTITY: EntityToAttach = {
   id: 'entity-store-id-abc',
@@ -30,7 +26,6 @@ describe('AddToExistingCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseEntityCasePermissions.mockReturnValue({ canAddToExistingCase: true });
     mockUseKibana().services.cases.hooks.useCasesAddToExistingCaseModal = jest
       .fn()
       .mockReturnValue({ open: mockOpen });
@@ -44,38 +39,6 @@ describe('AddToExistingCase', () => {
     );
 
     expect(screen.getByText('Add to existing case')).toBeInTheDocument();
-  });
-
-  it('is enabled when the user has update and createComment permissions', () => {
-    render(
-      <TestProvidersComponent>
-        <AddToExistingCase entity={ENTITY} onClick={mockOnClick} />
-      </TestProvidersComponent>
-    );
-
-    expect(screen.getByRole('button', { name: /add to existing case/i })).not.toBeDisabled();
-  });
-
-  it('is disabled when canAddToExistingCase is false', () => {
-    mockUseEntityCasePermissions.mockReturnValue({ canAddToExistingCase: false });
-
-    render(
-      <TestProvidersComponent>
-        <AddToExistingCase entity={ENTITY} onClick={mockOnClick} />
-      </TestProvidersComponent>
-    );
-
-    expect(screen.getByRole('button', { name: /add to existing case/i })).toBeDisabled();
-  });
-
-  it('is disabled when entityName is empty', () => {
-    render(
-      <TestProvidersComponent>
-        <AddToExistingCase entity={{ ...ENTITY, name: '' }} onClick={mockOnClick} />
-      </TestProvidersComponent>
-    );
-
-    expect(screen.getByRole('button', { name: /add to existing case/i })).toBeDisabled();
   });
 
   it('calls onClick and opens the existing-case modal on click', () => {

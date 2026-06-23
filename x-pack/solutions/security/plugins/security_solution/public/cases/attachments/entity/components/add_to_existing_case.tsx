@@ -10,7 +10,6 @@ import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { useEntityCasePermissions } from '../hooks/use_case_permission';
 import type { EntityToAttach } from '..';
 import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -35,6 +34,9 @@ export interface AddToExistingCaseProps {
  * Once a case is selected, an entity attachment is added to it and a confirmation
  * snackbar presents a link to view the case.
  *
+ * Visibility is gated by the caller (see {@link useEntityCaseTakeActionItems}), which
+ * only renders this item when the user has the required Cases permissions.
+ *
  * Renders an {@link EuiContextMenuItem}.
  */
 export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
@@ -46,17 +48,14 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   const attachments: CaseAttachmentsWithoutOwner = generateEntityAttachmentsWithoutOwner(entity);
-  const { canAddToExistingCase } = useEntityCasePermissions();
 
   const menuItemClicked = useCallback(() => {
     onClick();
     selectCaseModal.open({ getAttachments: () => attachments });
   }, [attachments, onClick, selectCaseModal]);
 
-  const disabled: boolean = !entity.name || !canAddToExistingCase;
-
   return (
-    <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj} disabled={disabled}>
+    <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj}>
       <FormattedMessage
         defaultMessage="Add to existing case"
         id="xpack.securitySolution.entityAnalytics.cases.addToExistingCase"

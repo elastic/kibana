@@ -12,6 +12,7 @@ import type { EntityToAttach } from '..';
 import { AddToNewCase } from '../components/add_to_new_case';
 import { AddToExistingCase } from '../components/add_to_existing_case';
 import { ADD_TO_NEW_CASE_TEST_ID, ADD_TO_EXISTING_CASE_TEST_ID } from '../components/test_ids';
+import { useEntityCasePermissions } from './use_case_permission';
 
 /**
  * Builds the "add to case" menu items for an entity's flyout "Take action" popover.
@@ -30,6 +31,7 @@ export const useEntityCaseTakeActionItems = (
   const entityAttachmentsEnabled = useIsExperimentalFeatureEnabled('entityAttachmentsEnabled');
   const { cases } = useKibana().services;
   const attachmentsEnabled = cases.config.attachmentsEnabled;
+  const { canAddToNewCase, canAddToExistingCase } = useEntityCasePermissions();
 
   return useCallback(
     (closePopover: () => void) => {
@@ -37,21 +39,31 @@ export const useEntityCaseTakeActionItems = (
         return [];
       }
 
+      // Only surface the actions the user can actually perform; the rest are hidden
+      // rather than shown disabled, matching the alerts "add to case" convention.
       return [
-        <AddToNewCase
-          key="addToNewCase"
-          entity={entity}
-          onClick={closePopover}
-          data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
-        />,
-        <AddToExistingCase
-          key="addToExistingCase"
-          entity={entity}
-          onClick={closePopover}
-          data-test-subj={ADD_TO_EXISTING_CASE_TEST_ID}
-        />,
+        ...(canAddToNewCase
+          ? [
+              <AddToNewCase
+                key="addToNewCase"
+                entity={entity}
+                onClick={closePopover}
+                data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
+              />,
+            ]
+          : []),
+        ...(canAddToExistingCase
+          ? [
+              <AddToExistingCase
+                key="addToExistingCase"
+                entity={entity}
+                onClick={closePopover}
+                data-test-subj={ADD_TO_EXISTING_CASE_TEST_ID}
+              />,
+            ]
+          : []),
       ];
     },
-    [entityAttachmentsEnabled, attachmentsEnabled, entity]
+    [entityAttachmentsEnabled, attachmentsEnabled, entity, canAddToNewCase, canAddToExistingCase]
   );
 };

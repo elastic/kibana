@@ -10,7 +10,6 @@ import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { useEntityCasePermissions } from '../hooks/use_case_permission';
 import type { EntityToAttach } from '..';
 import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -35,6 +34,9 @@ export interface AddToNewCaseProps {
  * Once a case is created, an entity attachment is added to it and a confirmation
  * snackbar presents a link to view the case.
  *
+ * Visibility is gated by the caller (see {@link useEntityCaseTakeActionItems}), which
+ * only renders this item when the user has the required Cases permissions.
+ *
  * Renders an {@link EuiContextMenuItem}.
  */
 export const AddToNewCase: FC<AddToNewCaseProps> = ({
@@ -46,17 +48,14 @@ export const AddToNewCase: FC<AddToNewCaseProps> = ({
   const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
 
   const attachments: CaseAttachmentsWithoutOwner = generateEntityAttachmentsWithoutOwner(entity);
-  const { canAddToNewCase } = useEntityCasePermissions();
 
   const menuItemClicked = useCallback(() => {
     onClick();
     createCaseFlyout.open({ attachments });
   }, [attachments, createCaseFlyout, onClick]);
 
-  const disabled: boolean = !entity.name || !canAddToNewCase;
-
   return (
-    <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj} disabled={disabled}>
+    <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj}>
       <FormattedMessage
         defaultMessage="Add to new case"
         id="xpack.securitySolution.entityAnalytics.cases.addToNewCase"
