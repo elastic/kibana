@@ -206,7 +206,11 @@ export const YamlRuleForm = ({
         onSubmit={handleSubmit}
         css={fullHeight ? fullHeightFlexColumnCss : undefined}
       >
-        <EuiFlexGroup direction="column" gutterSize="none" css={fullHeight ? fullHeightFlexColumnCss : undefined}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={fullHeight ? fullHeightFlexColumnCss : undefined}
+        >
           <EuiFlexItem grow>
             <EuiFormRow
               label={yamlRuleFormLabelWithHelp}
