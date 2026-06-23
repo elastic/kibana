@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +31,7 @@ import { ConfirmRuleClose } from '../confirm_rule_close';
 import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/types';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
+import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
@@ -84,6 +86,14 @@ const CREATE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.cre
 const EDIT_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.editTitleLabel', {
   defaultMessage: 'Edit alert rule',
 });
+
+const YAML_ONLY_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.editMode.yamlOnlyTooltip',
+  {
+    defaultMessage:
+      'The current YAML configuration contains features that cannot be represented in the GUI.',
+  }
+);
 
 const EDIT_MODE_OPTIONS = [
   { id: 'form', label: FORM_VIEW_LABEL, iconType: 'tableDensityNormal' },
@@ -184,6 +194,8 @@ export function ComposeDiscoverFlyout({
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
 
+  const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
+
   const inlineResult = useMemo(
     () =>
       initialQuery !== undefined
@@ -205,6 +217,7 @@ export function ComposeDiscoverFlyout({
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
     isBuilderMode,
     isQueryPrePopulated: isDiscoverQueryComplete,
+    forceYamlMode,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -554,8 +567,18 @@ export function ComposeDiscoverFlyout({
   const isLastStep = uiState.step === steps.length - 1;
 
   // ── YAML mode state ──────────────────────────────────────────────────────
-  const [yamlText, setYamlText] = useState('');
+  const [yamlText, setYamlText] = useState(() => {
+    if (forceYamlMode) {
+      const serialized = serializeFormToYaml(defaultValues);
+      yamlBaselineRef.current = serialized;
+      return serialized;
+    }
+    return '';
+  });
   yamlTextRef.current = yamlText;
+  // Reflects Monaco markers set by the YAML editor's schema validator. Used to
+  // disable the Save button while the buffer is invalid.
+  const [yamlHasErrors, setYamlHasErrors] = useState(false);
 
   // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF
   // and mirrors the composed query into the sandbox editing buffer.
@@ -584,6 +607,8 @@ export function ComposeDiscoverFlyout({
 
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
+      if (forceYamlMode) return;
+
       if (enabled) {
         const serialized = serializeFormToYaml(methods.getValues());
         setYamlText(serialized);
@@ -614,7 +639,7 @@ export function ComposeDiscoverFlyout({
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch]
+    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch, forceYamlMode]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -657,17 +682,20 @@ export function ComposeDiscoverFlyout({
   // YAML "Save" — flush any pending debounce into RHF, then run the shared
   // handleSubmit path so validation + submission use a single pipeline.
   const handleYamlSave = useCallback(() => {
-    if (hasValidationErrors) {
+    if (hasValidationErrors || yamlHasErrors) {
       return;
     }
     cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
-    if (result.values) {
-      applyYamlValuesToFormAndSandbox(result.values);
-      // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
-      // we're about to submit. On success the flyout closes; on failure the user is still
-      // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
+    if (result.error !== null) {
+      // YAML syntax or shape errors are surfaced inline by the editor's Monaco
+      // markers; abort submission so we don't post stale RHF state to the API.
+      return;
     }
+    applyYamlValuesToFormAndSandbox(result.values);
+    // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
+    // we're about to submit. On success the flyout closes; on failure the user is still
+    // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     handleSubmit();
   }, [
     cancelYamlParse,
@@ -675,6 +703,7 @@ export function ComposeDiscoverFlyout({
     applyYamlValuesToFormAndSandbox,
     handleSubmit,
     hasValidationErrors,
+    yamlHasErrors,
   ]);
 
   const handleNext = useCallback(async () => {
@@ -743,13 +772,14 @@ export function ComposeDiscoverFlyout({
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
   // field on RuleQuery itself, gate this on query shape instead.
   const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
-    if (uiState.yamlMode && sandboxQuery.format === 'composed') {
-      return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+    if (!uiState.yamlMode) {
+      return getSandboxTabs(isAlert, {
+        step: uiState.step,
+        recoveryType: uiState.recoveryType,
+      });
     }
-    return getSandboxTabs(isAlert, {
-      step: uiState.step,
-      recoveryType: uiState.recoveryType,
-    });
+    if (sandboxQuery.format === 'standalone') return undefined;
+    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
   }, [uiState.yamlMode, uiState.recoveryType, uiState.step, sandboxQuery.format, isAlert]);
 
   const handleSandboxTabChange = useCallback(
@@ -809,15 +839,18 @@ export function ComposeDiscoverFlyout({
                 )}
                 {!isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={EDIT_MODE_LEGEND}
-                      options={EDIT_MODE_OPTIONS}
-                      idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                      onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                      isIconOnly
-                      buttonSize="compressed"
-                      data-test-subj="composeDiscoverEditModeToggle"
-                    />
+                    <EuiToolTip content={forceYamlMode ? YAML_ONLY_TOOLTIP : undefined}>
+                      <EuiButtonGroup
+                        legend={EDIT_MODE_LEGEND}
+                        options={EDIT_MODE_OPTIONS}
+                        idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                        onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                        isIconOnly
+                        isDisabled={forceYamlMode}
+                        buttonSize="compressed"
+                        data-test-subj="composeDiscoverEditModeToggle"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -832,6 +865,7 @@ export function ComposeDiscoverFlyout({
                     yamlText={yamlText}
                     setYamlText={handleSetYamlText}
                     onBlurSync={handleBlurSync}
+                    onValidate={setYamlHasErrors}
                     isSubmitting={isSaving}
                   />
                 </React.Suspense>
@@ -858,6 +892,7 @@ export function ComposeDiscoverFlyout({
               isLastStep={isLastStep}
               isCreate={isCreate}
               hasValidationErrors={hasValidationErrors}
+              yamlHasErrors={yamlHasErrors}
               isSaving={isSaving}
               onNext={handleNext}
               onFinalSubmit={handleFinalSubmit}
