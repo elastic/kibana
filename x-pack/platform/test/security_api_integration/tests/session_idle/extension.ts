@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         // Make sure that the session time has somewhat elapsed to ensure
         // there is a noticable difference after extending the session
         await setTimeoutAsync(200);
-        const { body } = await getSessionInfo();
+        await getSessionInfo();
         await extendSession();
         const afterExtend = Date.now();
         const { body: body2 } = await getSessionInfo();
