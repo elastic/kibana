@@ -7,6 +7,7 @@
 
 import {
   elasticsearchServiceMock,
+  httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
@@ -29,6 +30,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
 const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 const soClient = savedObjectsClientMock.create();
 const logger = loggingSystemMock.createLogger();
+const request = httpServerMock.createKibanaRequest();
+
 
 const makeEntity = (opts: { id?: string; type?: string }): Entity => {
   const base = {
@@ -107,6 +110,7 @@ const makeUiSettingsClient = (anomalyScore = 50) => ({
 const baseOptions = {
   esClient,
   logger,
+  request,
   soClient,
   fromDate: 0,
   toDate: 1_700_000_000_000,
@@ -341,6 +345,21 @@ describe('getAnomalyData', () => {
       });
 
       expect(result[0][0].job?.name).toBe('security-job-1');
+    });
+
+    it('returns empty arrays per entity when getAnomaliesTableData throws', async () => {
+      const ml = makeMl([{ id: 'security-job-1' }]);
+      ml._getAnomaliesTableData.mockRejectedValue(new Error('anomaly fetch failed'));
+
+      const result = await getAnomalyData({
+        ...baseOptions,
+        entities: [makeEntity({ id: 'user:alice', type: 'user' })],
+        experimentalFeatures: experimentalFeaturesApiOff,
+        ml: ml as never,
+        uiSettingsClient: makeUiSettingsClient() as never,
+      });
+
+      expect(result).toEqual([[]]);
     });
   });
 });

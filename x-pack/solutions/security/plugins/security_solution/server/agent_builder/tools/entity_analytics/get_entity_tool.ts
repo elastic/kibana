@@ -16,7 +16,7 @@ import {
   ENTITY_LATEST,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
 import type { AnomalyRecord } from '../../../lib/entity_analytics/enriched_entity/service/utils/get_anomaly_data';
 import { EnrichEntityService } from '../../../lib/entity_analytics/enriched_entity';
@@ -460,6 +460,7 @@ interface EnrichEntityResultParams {
   query: string;
   date?: string;
   interval?: string;
+  logger: Logger;
   spaceId: string;
   esClient: ElasticsearchClient;
   enrichedEntityService: EnrichEntityService;
@@ -471,6 +472,7 @@ const enrichEntityResult = async ({
   query,
   date,
   interval,
+  logger,
   spaceId,
   esClient,
   enrichedEntityService,
@@ -511,7 +513,6 @@ const enrichEntityResult = async ({
       size: 1,
       anomalyFromDate: fromDate,
       anomalyToDate: toDate,
-      getResolutionRiskScore: true,
     });
 
     if (enrichedEntities.length > 0) {
@@ -537,6 +538,7 @@ const enrichEntityResult = async ({
     }
   } catch (errors) {
     // Swallow enrichment errors and continue to return the base entity data.
+    logger.debug(`Failed to enrich entity ${rowEntityId}: ${errors instanceof Error ? errors.message : String(errors)}`);
   }
 
   if (interval) {
@@ -639,6 +641,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           experimentalFeatures,
           logger,
           ml,
+          request: {} as KibanaRequest,
           soClient: savedObjectsClient,
           spaceId,
           uiSettingsClient,
@@ -766,6 +769,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
                 date,
                 interval,
                 spaceId,
+                logger,
                 esClient: client,
                 enrichedEntityService,
               })

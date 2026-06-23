@@ -8,6 +8,7 @@
 import type {
   ElasticsearchClient,
   IUiSettingsClient,
+  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -32,7 +33,6 @@ interface GetEnrichedEntitiesParams {
   size?: number;
   searchAfter?: Array<string | number>;
   getAlertInputsForRiskScore?: boolean;
-  getResolutionRiskScore?: boolean;
 }
 
 export interface EnrichedEntity {
@@ -55,6 +55,7 @@ interface EnrichedEntityServiceOpts {
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
   ml: EntityAnalyticsRoutesDeps['ml'];
+  request: KibanaRequest;
   soClient: SavedObjectsClientContract;
   spaceId: string;
   uiSettingsClient: IUiSettingsClient;
@@ -88,11 +89,11 @@ export class EnrichEntityService {
       entities,
       esClient: this.opts.esClient,
       logger: this.opts.logger,
-      spaceId: this.opts.spaceId,
     };
 
     const riskScoreData = await getRiskScoreData({
       ...sharedOpts,
+      spaceId: this.opts.spaceId,
       getAlerts: getAlertInputsForRiskScore,
     });
 
@@ -102,6 +103,7 @@ export class EnrichEntityService {
       fromDate: anomalyFromDate,
       toDate: anomalyToDate,
       ml: this.opts.ml,
+      request: this.opts.request,
       soClient: this.opts.soClient,
       uiSettingsClient: this.opts.uiSettingsClient,
     });

@@ -66,6 +66,7 @@ interface EntityDetailsHighlightsServiceFactoryOptions {
   experimentalFeatures: EntityAnalyticsRoutesDeps['config']['experimentalFeatures'];
   spaceId: string;
   logger: Logger;
+  request: KibanaRequest;
   assetCriticalityClient: AssetCriticalityDataClient;
   soClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
@@ -86,6 +87,7 @@ export const entityDetailsHighlightsServiceFactory = ({
   riskEngineClient,
   entityStoreClient,
   experimentalFeatures,
+  request,
   spaceId,
   esClient,
   assetCriticalityClient,
@@ -435,6 +437,7 @@ export const entityDetailsHighlightsServiceFactory = ({
       experimentalFeatures,
       logger,
       ml,
+      request,
       soClient,
       spaceId,
       uiSettingsClient,

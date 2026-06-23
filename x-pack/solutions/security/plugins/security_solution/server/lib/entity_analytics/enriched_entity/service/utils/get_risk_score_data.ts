@@ -70,17 +70,17 @@ export const getRiskScoreData = async ({
       docs: allInputs.map(({ id, index }) => ({ _id: id, _index: index })),
     });
 
-    const alertById = new Map<string, Record<string, unknown>>();
+    const alertByKey = new Map<string, Record<string, unknown>>();
     for (const doc of mgetResponse.docs) {
       if ('found' in doc && doc.found && doc._source) {
-        alertById.set(doc._id, doc._source as Record<string, unknown>);
+        alertByKey.set(`${doc._index}:${doc._id}`, doc._source as Record<string, unknown>);
       }
     }
 
     return riskScores.map((riskScore) => ({
       riskScore,
       alertDocuments: (riskScore?.inputs ?? [])
-        .map(({ id }) => alertById.get(id))
+        .map(({ id, index }) => alertByKey.get(`${index}:${id}`))
         .filter((doc): doc is Record<string, unknown> => doc !== undefined),
     }));
   } catch (err) {

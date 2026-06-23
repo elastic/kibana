@@ -46,8 +46,13 @@ const makeSearchResponse = (riskScore: EntityRiskScoreRecord | undefined, entity
     },
   } as unknown as SearchResponse<Record<string, { risk: EntityRiskScoreRecord }>>);
 
-const makeFoundDoc = (_id: string, source: Record<string, unknown> = {}) => ({
+const makeFoundDoc = (
+  _id: string,
+  source: Record<string, unknown> = {},
+  _index = '.alerts-security.alerts-default'
+) => ({
   _id,
+  _index,
   found: true,
   _source: { kibana: { alert: { rule: { name: 'test' } } }, ...source },
 });
@@ -238,6 +243,38 @@ describe('getRiskScoreData', () => {
       expect(result[0].alertDocuments).toHaveLength(1);
       expect(result[1].riskScore?.id_value).toBe('user:bob');
       expect(result[1].alertDocuments).toHaveLength(1);
+    });
+
+    it('does not mis-assign alerts when the same _id exists in multiple indices', async () => {
+      const riskScoreA = makeRiskScore({
+        id_value: 'user:alice',
+        inputs: [makeInput('shared-id', '.alerts-security.alerts-default')],
+      });
+      const riskScoreB = makeRiskScore({
+        id_value: 'user:bob',
+        inputs: [makeInput('shared-id', '.alerts-security.alerts-space2')],
+      });
+      jest
+        .mocked(esClient.search)
+        .mockResolvedValueOnce(makeSearchResponse(riskScoreA))
+        .mockResolvedValueOnce(makeSearchResponse(riskScoreB));
+
+      const sourceA = { entity: 'alice-alert' };
+      const sourceB = { entity: 'bob-alert' };
+      jest.mocked(esClient.mget).mockResolvedValue({
+        docs: [
+          makeFoundDoc('shared-id', sourceA, '.alerts-security.alerts-default'),
+          makeFoundDoc('shared-id', sourceB, '.alerts-security.alerts-space2'),
+        ],
+      } as MgetResponse);
+
+      const result = await getRiskScoreData({
+        ...baseOptions,
+        entities: [makeEntity('alice', 'user'), makeEntity('bob', 'user')],
+      });
+
+      expect(result[0].alertDocuments[0]).toMatchObject(sourceA);
+      expect(result[1].alertDocuments[0]).toMatchObject(sourceB);
     });
 
     it('correctly assigns alert documents to each entity when inputs share the same index', async () => {

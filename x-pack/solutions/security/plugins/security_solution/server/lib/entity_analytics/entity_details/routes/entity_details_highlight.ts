@@ -90,6 +90,7 @@ export const entityDetailsHighlightsRoute = ({
                 spaceId,
                 logger,
                 esClient,
+                request,
                 assetCriticalityClient,
                 soClient,
                 uiSettingsClient: coreContext.uiSettings.client,

@@ -41,18 +41,19 @@ interface GetAnomalyDataOptions {
   toDate: number;
   logger: Logger;
   ml: Ml;
+  request: KibanaRequest;
   soClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
 }
 
 const getSecurityJobIds = async (
   ml: MlPluginSetup,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  request: KibanaRequest
 ): Promise<{
   securityJobIds: string[];
   jobMetaById: Record<string, { name: string; description: string }>;
 }> => {
-  const request = {} as KibanaRequest;
   const jobs: MlSummaryJob[] = await ml.jobServiceProvider(request, soClient).jobsSummary();
   const securityJobIds = jobs.filter(isSecurityJob).map((j) => j.id);
 
@@ -80,6 +81,7 @@ const getAnomalyDataFromApi = async ({
   fromDate,
   logger,
   ml,
+  request,
   soClient,
   toDate,
 }: GetAnomalyDataFromApiOpts): Promise<AnomalyRecord[][]> => {
@@ -87,7 +89,7 @@ const getAnomalyDataFromApi = async ({
     return entities.map(() => []);
   }
 
-  const { jobMetaById } = await getSecurityJobIds(ml, soClient);
+  const { jobMetaById } = await getSecurityJobIds(ml, soClient, request);
 
   return Promise.all(
     entities.map(async ({ entity }) => {
@@ -124,6 +126,7 @@ const getAnomalyDataFromMl = async ({
   entities,
   fromDate,
   ml,
+  request,
   soClient,
   toDate,
   uiSettingsClient,
@@ -132,8 +135,7 @@ const getAnomalyDataFromMl = async ({
     return entities.map(() => []);
   }
 
-  const { securityJobIds, jobMetaById } = await getSecurityJobIds(ml, soClient);
-  const request = {} as KibanaRequest;
+  const { securityJobIds, jobMetaById } = await getSecurityJobIds(ml, soClient, request);
   const { getAnomaliesTableData } = ml.resultsServiceProvider(request, soClient);
   const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
 
@@ -180,6 +182,7 @@ export const getAnomalyData = async ({
   toDate,
   logger,
   ml,
+  request,
   soClient,
   uiSettingsClient,
 }: GetAnomalyDataOptions): Promise<AnomalyRecord[][]> => {
@@ -187,22 +190,29 @@ export const getAnomalyData = async ({
     return [];
   }
 
-  return experimentalFeatures.entityAnalyticsAnomalyDetails
-    ? getAnomalyDataFromApi({
-        entities,
-        esClient,
-        fromDate,
-        logger,
-        ml,
-        soClient,
-        toDate,
-      })
-    : getAnomalyDataFromMl({
-        entities,
-        fromDate,
-        ml,
-        soClient,
-        toDate,
-        uiSettingsClient,
-      });
+  try {
+    return await (experimentalFeatures.entityAnalyticsAnomalyDetails
+      ? getAnomalyDataFromApi({
+          entities,
+          esClient,
+          fromDate,
+          logger,
+          ml,
+          request,
+          soClient,
+          toDate,
+        })
+      : getAnomalyDataFromMl({
+          entities,
+          fromDate,
+          ml,
+          request,
+          soClient,
+          toDate,
+          uiSettingsClient,
+        }));
+  } catch (error) {
+      logger.error(`Failed to get anomaly data: ${error instanceof Error ? error.message : String(error)}`);
+      return entities.map(() => []);
+    }
 };
