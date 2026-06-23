@@ -15,6 +15,7 @@ import {
   LENS_DATATABLE_ID,
   LENS_HEATMAP_CHART_SHAPES,
   LENS_METRIC_ID,
+  LENS_TAGCLOUD_ID,
   PARTITION_CHART_TYPES,
   SeriesTypes,
 } from '@kbn/lens-common';
@@ -4028,7 +4029,7 @@ describe('IndexPattern Data Source', () => {
         [PARTITION_CHART_TYPES.MOSAIC, false],
         [PARTITION_CHART_TYPES.WAFFLE, false],
         [LENS_METRIC_ID, false],
-        ['lnsTagcloud', false],
+        [LENS_TAGCLOUD_ID, false],
       ])(
         'defaults includeEmptyRows to false for visualization type "%s"',
         (visualizationTypeId, expected) => {

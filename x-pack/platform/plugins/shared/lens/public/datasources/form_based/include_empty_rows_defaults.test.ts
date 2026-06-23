@@ -11,6 +11,7 @@ import {
   LENS_GAUGE_ID,
   LENS_HEATMAP_CHART_SHAPES,
   LENS_METRIC_ID,
+  LENS_TAGCLOUD_ID,
   PARTITION_CHART_TYPES,
   SeriesTypes,
   type FormBasedPrivateState,
@@ -31,7 +32,7 @@ describe('getDefaultIncludeEmptyRows', () => {
     [PARTITION_CHART_TYPES.MOSAIC, false],
     [PARTITION_CHART_TYPES.WAFFLE, false],
     [LENS_METRIC_ID, false],
-    ['lnsTagcloud', false],
+    [LENS_TAGCLOUD_ID, false],
   ])('OFF-by-default visualization type %s', (visualizationTypeId, expected) => {
     it(`returns ${expected}`, () => {
       expect(getDefaultIncludeEmptyRows(visualizationTypeId)).toBe(expected);
