@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument, isScalar, stringify } from 'yaml';
+import { isScalar, parseDocument, stringify } from 'yaml';
 
 /**
  * Updates a field in YAML by `fieldPath` (e.g. `enabled`, `metadata.author`).
