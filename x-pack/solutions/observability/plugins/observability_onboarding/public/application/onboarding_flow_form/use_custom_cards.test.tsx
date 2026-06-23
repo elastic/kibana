@@ -39,6 +39,10 @@ const CardsProbe: React.FC = () => {
       {cards.map((card: IntegrationCardItem) => (
         <React.Fragment key={card.id}>
           <dt>{card.id}</dt>
+          <dd data-test-subj={`card-name-${card.id}`}>{card.name}</dd>
+          <dd data-test-subj={`card-title-${card.id}`}>{card.title}</dd>
+          <dd data-test-subj={`card-description-${card.id}`}>{card.description}</dd>
+          <dd data-test-subj={`card-icon-${card.id}`}>{card.icons?.[0]?.src}</dd>
           <dd data-test-subj={`card-url-${card.id}`}>{card.url}</dd>
         </React.Fragment>
       ))}
@@ -91,5 +95,28 @@ describe('useCustomCards', () => {
     );
 
     expect(screen.getByTestId('card-url-otel-kubernetes')).toHaveTextContent(/^\/kubernetes$/);
+  });
+
+  it('exposes the AWS CloudWatch OTel quickstart card with expected metadata', () => {
+    render(
+      <MemoryRouter>
+        <CompatRouter>
+          <CardsProbe />
+        </CompatRouter>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('aws-cloudwatch-otel-virtual')).toBeInTheDocument();
+    expect(screen.getByTestId('card-name-aws-cloudwatch-otel-virtual')).toHaveTextContent(
+      'aws-cloudwatch-otel'
+    );
+    expect(screen.getByTestId('card-title-aws-cloudwatch-otel-virtual')).toHaveTextContent('AWS');
+    expect(screen.getByTestId('card-description-aws-cloudwatch-otel-virtual')).toHaveTextContent(
+      'Collect signals from AWS with OpenTelemetry'
+    );
+    expect(screen.getByTestId('card-icon-aws-cloudwatch-otel-virtual')).toHaveTextContent(
+      'logoAWS'
+    );
+    expect(screen.getByTestId('card-url-aws-cloudwatch-otel-virtual')).toHaveTextContent(/^\/aws$/);
   });
 });
