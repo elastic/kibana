@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ObservablePost } from '../../../common/types/api';
+import type { ObservablePost } from '../types/api';
 import { getIPType, getObservablesFromEcs, processObservable } from './get_observables_from_ecs';
 
 describe('getIPType', () => {
@@ -138,6 +138,7 @@ describe('getObservablesFromEcsDataArray', () => {
       },
     ]);
   });
+
   it('should not include observables with no value', () => {
     expect(
       getObservablesFromEcs([
