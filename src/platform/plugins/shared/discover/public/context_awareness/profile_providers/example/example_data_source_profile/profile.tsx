@@ -154,44 +154,46 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               render: (props) => <RestorableStateDocView {...props} />,
             });
 
+            function ProfileStateExample() {
+              const profileState = useObservable(profileState$, stateAdapter.getState());
+              const timestampColor = profileState.timestampColor;
+
+              return (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="discover.exampleProfile.timestampColorLabel"
+                        defaultMessage="Timestamp color"
+                      />
+                    }
+                  >
+                    <EuiSelect
+                      aria-label={i18n.translate(
+                        'discover.exampleProfile.timestampColorAriaLabel',
+                        {
+                          defaultMessage: 'Select timestamp color',
+                        }
+                      )}
+                      options={timestampColorOptions}
+                      value={timestampColor}
+                      onChange={(event) => {
+                        stateAdapter.updateState({ timestampColor: event.target.value });
+                      }}
+                    />
+                  </EuiFormRow>
+                </>
+              );
+            }
+
             registry.add({
               id: 'doc_view_profile_state_example',
               title: i18n.translate('discover.exampleProfile.profileStateDocViewTitle', {
                 defaultMessage: 'Profile state',
               }),
               order: 2,
-              render: function ProfileStateExample() {
-                const profileState = useObservable(profileState$, stateAdapter.getState());
-                const timestampColor = profileState.timestampColor;
-
-                return (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="discover.exampleProfile.timestampColorLabel"
-                          defaultMessage="Timestamp color"
-                        />
-                      }
-                    >
-                      <EuiSelect
-                        aria-label={i18n.translate(
-                          'discover.exampleProfile.timestampColorAriaLabel',
-                          {
-                            defaultMessage: 'Select timestamp color',
-                          }
-                        )}
-                        options={timestampColorOptions}
-                        value={timestampColor}
-                        onChange={(event) => {
-                          stateAdapter.updateState({ timestampColor: event.target.value });
-                        }}
-                      />
-                    </EuiFormRow>
-                  </>
-                );
-              },
+              render: () => <ProfileStateExample />,
             });
 
             return prevValue.docViewsRegistry(registry);
