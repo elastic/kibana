@@ -232,9 +232,16 @@ spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () 
 
     expect(parentExecution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(childExecution?.status).toBe(ExecutionStatus.COMPLETED);
-    expect(parentExecution?.traceId).toBeDefined();
-    expect(childExecution?.traceId).toBe(parentExecution?.traceId);
-    expect(childExecution?.entryTransactionId).toBe(parentExecution?.entryTransactionId);
+    expect(parentExecution).toBeDefined();
+    expect(childExecution).toBeDefined();
+
+    const parent = parentExecution as WorkflowExecutionDto;
+    const child = childExecution as WorkflowExecutionDto;
+    const { traceId, entryTransactionId } = parent;
+    expect(traceId).toBeDefined();
+    expect(entryTransactionId).toBeDefined();
+    expect(child.traceId).toBe(traceId);
+    expect(child.entryTransactionId).toBe(entryTransactionId);
   });
 
   spaceTest('sync: fails when child workflow fails', async () => {
