@@ -23,11 +23,15 @@ export const NoDataCard = ({ href: srcHref, ...props }: Props) => {
       return srcHref;
     }
 
+    if (props.onClick) {
+      return undefined;
+    }
+
     // TODO: get this URL from a locator
     const prefix = '/app/integrations/browse';
 
     return addBasePath(prefix);
-  }, [addBasePath, srcHref]);
+  }, [addBasePath, srcHref, props.onClick]);
 
   return (
     <Component

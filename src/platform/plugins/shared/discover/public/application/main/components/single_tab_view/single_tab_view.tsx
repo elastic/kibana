@@ -13,6 +13,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import useLatest from 'react-use/lib/useLatest';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -77,6 +78,11 @@ export const SingleTabView = ({
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
+
+  const onTryESQL = useOnTryESQL({
+    locatorClient: services.share?.url.locators,
+    navigateToApp: services.application.navigateToApp,
+  });
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
   const initializeTab = useLatest(
@@ -165,6 +171,7 @@ export const SingleTabView = ({
           onESQLNavigationComplete={() => {
             initializeTab.current();
           }}
+          onTryESQL={onTryESQL}
         />
       </HideTabsBar>
     );

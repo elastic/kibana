@@ -29,6 +29,7 @@ export const NoDataPage = ({
   hasUserDataView,
   onDataViewCreated,
   onESQLNavigationComplete,
+  onTryESQL,
 }: DiscoverInternalState['initializationState'] & AnalyticsNoDataPageProps) => {
   const services = useDiscoverServices();
   const noDataDependencies = useMemo<AnalyticsNoDataPageKibanaDependencies>(
@@ -54,6 +55,7 @@ export const NoDataPage = ({
       <AnalyticsNoDataPage
         onDataViewCreated={onDataViewCreated}
         onESQLNavigationComplete={onESQLNavigationComplete}
+        onTryESQL={onTryESQL}
       />
     </AnalyticsNoDataPageKibanaProvider>
   );
