@@ -8,35 +8,41 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  AgentVisibility,
-  VISIBILITY_ICON,
-  VISIBILITY_BADGE_COLOR,
+  AgentAccessControlMode,
+  ACCESS_CONTROL_MODE_ICON,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import React from 'react';
-import { VISIBILITY_LABELS, VISIBILITY_TOOLTIPS } from '../../../utils/visibility_i18n';
+import {
+  ACCESS_CONTROL_MODE_LABELS,
+  ACCESS_CONTROL_MODE_TOOLTIPS,
+} from '../../../utils/access_control_mode_i18n';
 import { accessFlyoutCustomBadge, accessFlyoutCustomBadgeWithCount } from '../access/access_i18n';
 
-export interface AgentVisibilityBadgeProps {
+export interface AgentAccessControlModeBadgeProps {
   agent: AgentDefinition;
 }
 
-const aclEntryCount = (agent: AgentDefinition): number => agent.acl?.entries?.length ?? 0;
+const accessControlEntryCount = (agent: AgentDefinition): number =>
+  agent.access_control?.entries?.length ?? 0;
 
-export const AgentVisibilityBadge: React.FC<AgentVisibilityBadgeProps> = ({ agent }) => {
+export const AgentAccessControlModeBadge: React.FC<AgentAccessControlModeBadgeProps> = ({
+  agent,
+}) => {
   if (agent.readonly) {
     return (
       <EuiToolTip
-        content={i18n.translate('xpack.agentBuilder.agents.visibility.readOnlyTooltip', {
+        content={i18n.translate('xpack.agentBuilder.agents.accessControlMode.readOnlyTooltip', {
           defaultMessage: 'Built-in agents are read-only.',
         })}
       >
         <EuiBadge
           tabIndex={0}
           color="accent"
-          data-test-subj="agentBuilderAgentsListVisibilityBuiltInBadge"
+          data-test-subj="agentBuilderAgentsListAccessControlModeBuiltInBadge"
         >
-          {i18n.translate('xpack.agentBuilder.agents.visibility.builtIn', {
+          {i18n.translate('xpack.agentBuilder.agents.accessControlMode.builtIn', {
             defaultMessage: 'Read-only',
           })}
         </EuiBadge>
@@ -44,12 +50,14 @@ export const AgentVisibilityBadge: React.FC<AgentVisibilityBadgeProps> = ({ agen
     );
   }
 
-  const visibility = agent.visibility ?? AgentVisibility.Public;
-  const aclCount = aclEntryCount(agent);
+  const accessControlMode = agent.access_control?.access_mode ?? AgentAccessControlMode.Public;
+  const accessControlCount = accessControlEntryCount(agent);
   const tooltip =
-    aclCount > 0
-      ? `${VISIBILITY_TOOLTIPS[visibility]} ${accessFlyoutCustomBadgeWithCount(aclCount)}`
-      : VISIBILITY_TOOLTIPS[visibility];
+    accessControlCount > 0
+      ? `${ACCESS_CONTROL_MODE_TOOLTIPS[accessControlMode]} ${accessFlyoutCustomBadgeWithCount(
+          accessControlCount
+        )}`
+      : ACCESS_CONTROL_MODE_TOOLTIPS[accessControlMode];
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -57,15 +65,15 @@ export const AgentVisibilityBadge: React.FC<AgentVisibilityBadgeProps> = ({ agen
         <EuiToolTip content={tooltip}>
           <EuiBadge
             tabIndex={0}
-            iconType={VISIBILITY_ICON[visibility]}
-            color={VISIBILITY_BADGE_COLOR[visibility]}
-            data-test-subj={`agentBuilderAgentsListVisibility-${visibility}`}
+            iconType={ACCESS_CONTROL_MODE_ICON[accessControlMode]}
+            color={ACCESS_CONTROL_MODE_BADGE_COLOR[accessControlMode]}
+            data-test-subj={`agentBuilderAgentsListAccessControlMode-${accessControlMode}`}
           >
-            {VISIBILITY_LABELS[visibility]}
+            {ACCESS_CONTROL_MODE_LABELS[accessControlMode]}
           </EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
-      {aclCount > 0 && (
+      {accessControlCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={accessFlyoutCustomBadge}>
             <EuiBadge
@@ -74,7 +82,7 @@ export const AgentVisibilityBadge: React.FC<AgentVisibilityBadgeProps> = ({ agen
               iconType="users"
               data-test-subj="agentBuilderAgentsListCustomAccess"
             >
-              +{aclCount}
+              +{accessControlCount}
             </EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>

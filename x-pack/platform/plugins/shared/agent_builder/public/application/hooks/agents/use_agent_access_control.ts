@@ -10,15 +10,17 @@ import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 
 /**
- * Fetches the ACL for an agent. Callers without ACL-management rights will receive an
- * empty `entries` list and `canManage: false` from the server.
+ * Fetches access control for an agent. Callers without management rights receive redacted entries.
  */
-export const useAgentAcl = (agentId: string, { enabled = true }: { enabled?: boolean } = {}) => {
+export const useAgentAccessControl = (
+  agentId: string,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
   const { agentService } = useAgentBuilderServices();
 
   return useQuery({
-    queryKey: queryKeys.agentProfiles.acl(agentId),
-    queryFn: () => agentService.getAcl(agentId),
+    queryKey: queryKeys.agentProfiles.accessControl(agentId),
+    queryFn: () => agentService.getAccessControl(agentId),
     enabled: enabled && Boolean(agentId),
   });
 };
