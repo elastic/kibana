@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { UnifiedDataTable } from '@kbn/unified-data-table';
+import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
@@ -30,6 +30,7 @@ jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
   ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
   UnifiedDataTable: jest.fn(() => null),
+  getRenderCustomToolbarWithElements: jest.fn(() => jest.fn(() => null)),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
@@ -269,6 +270,19 @@ describe('AlertEpisodesListPage', () => {
     }) => React.ReactNode;
     const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
     expect(node).toBeTruthy();
+  });
+
+  it('passes a renderCustomToolbar to UnifiedDataTable', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    expect(typeof lastCall?.renderCustomToolbar).toBe('function');
+  });
+
+  it('builds the toolbar with the loaded episode count on the left side', () => {
+    // mockEpisodes has 3 entries; getRenderCustomToolbarWithElements receives the leftSide element
+    const mockGetRenderCustomToolbarWithElements = jest.mocked(getRenderCustomToolbarWithElements);
+    const lastArgs = mockGetRenderCustomToolbarWithElements.mock.calls.at(-1)?.[0];
+    expect(lastArgs?.leftSide).toBeDefined();
+    expect((lastArgs?.leftSide as React.ReactElement).props.count).toBe(mockEpisodes.length);
   });
 });
 

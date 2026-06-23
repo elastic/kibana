@@ -27,6 +27,7 @@ import {
   DataLoadingState,
   ROWS_HEIGHT_OPTIONS,
   UnifiedDataTable,
+  getRenderCustomToolbarWithElements,
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
@@ -56,6 +57,7 @@ import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
+import { EpisodesCount } from './components/episodes_count';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
@@ -226,6 +228,14 @@ export const AlertEpisodesListPage = () => {
   );
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
+
+  const renderCustomToolbar = useMemo(
+    () =>
+      getRenderCustomToolbarWithElements({
+        leftSide: <EpisodesCount count={episodesData?.length ?? 0} />,
+      }),
+    [episodesData?.length]
+  );
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
@@ -464,55 +474,53 @@ export const AlertEpisodesListPage = () => {
               `}
             >
               <CellActionsProvider
-                getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
-              >
-                <EuiScreenReaderOnly>
-                  <span id="alertingEpisodesTableAriaLabel">
-                    {i18n.EPISODES_LIST_TABLE_ARIA_LABEL}
-                  </span>
-                </EuiScreenReaderOnly>
-                {!dataView ? (
-                  <EuiLoadingSpinner />
-                ) : (
-                  <UnifiedDataTable
-                    ariaLabelledBy="alertingEpisodesTableAriaLabel"
-                    settings={ALERT_EPISODES_TABLE_SETTINGS}
-                    css={getTableCss(euiTheme)}
-                    gridStyleOverride={{
-                      stripes: false,
-                      cellPadding: 'l',
-                    }}
-                    dataView={dataView}
-                    columns={columns}
-                    onSetColumns={onSetColumns}
-                    canDragAndDropColumns
-                    showTimeCol={!!dataView.timeFieldName}
-                    customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
-                    externalCustomRenderers={externalCustomRenderers}
-                    rows={rows}
-                    totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
-                    loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-                    isPaginationEnabled
-                    paginationMode="singlePage"
-                    sampleSizeState={PAGE_SIZE}
-                    isSortEnabled
-                    sort={sort}
-                    onSort={onSort}
-                    rowHeightState={rowHeight}
-                    onUpdateRowHeight={setRowHeight}
-                    configRowHeight={rowHeight}
-                    customBulkActions={customBulkActions}
-                    rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-                    visibleRowLeadingControls={3}
-                    enableComparisonMode={false}
-                    services={services}
-                    expandedDoc={expandedDoc}
-                    setExpandedDoc={setExpandedDoc}
-                    renderDocumentView={renderDocumentView}
-                  />
-                )}
-              </CellActionsProvider>
-            </EuiFlexItem>
+            getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
+          >
+            <EuiScreenReaderOnly>
+              <span id="alertingEpisodesTableAriaLabel">{i18n.EPISODES_LIST_TABLE_ARIA_LABEL}</span>
+            </EuiScreenReaderOnly>
+            {!dataView ? (
+              <EuiLoadingSpinner />
+            ) : (
+              <UnifiedDataTable
+                ariaLabelledBy="alertingEpisodesTableAriaLabel"
+                settings={ALERT_EPISODES_TABLE_SETTINGS}
+                css={getTableCss(euiTheme)}
+                gridStyleOverride={{
+                  stripes: false,
+                  cellPadding: 'l',
+                }}
+                dataView={dataView}
+                columns={columns}
+                onSetColumns={onSetColumns}
+                canDragAndDropColumns
+                showTimeCol={!!dataView.timeFieldName}
+                customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
+                externalCustomRenderers={externalCustomRenderers}
+                rows={rows}
+                totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
+                loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+                isPaginationEnabled
+                paginationMode="singlePage"
+                sampleSizeState={PAGE_SIZE}
+                isSortEnabled
+                sort={sort}
+                onSort={onSort}
+                rowHeightState={rowHeight}
+                onUpdateRowHeight={setRowHeight}
+                configRowHeight={rowHeight}
+                customBulkActions={customBulkActions}
+                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                visibleRowLeadingControls={3}
+                enableComparisonMode={false}
+                services={services}
+                expandedDoc={expandedDoc}
+                setExpandedDoc={setExpandedDoc}
+                renderDocumentView={renderDocumentView}
+                renderCustomToolbar={renderCustomToolbar}
+              />
+            )}
+          </CellActionsProvider></EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
