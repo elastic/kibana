@@ -11,7 +11,8 @@ import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/packag
 import type { AgentlessPolicyResponseSchema } from '../models/agentless_policy_schema';
 
 export const CreateAgentlessPolicyRequestSchema = {
-  body: SimplifiedCreatePackagePolicyRequestBodySchema.extends({
+  body: SimplifiedCreatePackagePolicyRequestBodySchema.extends(
+    {
       // Remove all properties that are not relevant for agentless policies
       policy_id: undefined,
       policy_ids: undefined,
