@@ -35,7 +35,9 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
           {ind > 0 && ', '}
           <EuiToolTip
             content={mon.url}
-            title={mon.remote?.remoteName ? getRemoteClusterLabel(mon.remote.remoteName) : undefined}
+            title={
+              mon.remote?.remoteName ? getRemoteClusterLabel(mon.remote.remoteName) : undefined
+            }
           >
             <MonitorPageLink configId={mon.configId!} remote={mon.remote}>
               {mon.name || mon.id}
