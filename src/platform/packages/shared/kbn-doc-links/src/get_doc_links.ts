@@ -461,6 +461,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
+      attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attacks-page`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
