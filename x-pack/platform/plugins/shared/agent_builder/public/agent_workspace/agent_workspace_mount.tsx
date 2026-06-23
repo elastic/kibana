@@ -76,6 +76,7 @@ export function AgentWorkspaceMount() {
         services: getServices(),
         element,
         history,
+        isAgentWorkspaceMount: true,
         onAppLeave: (handler) => {
           appLeaveHandlerRef.current = handler;
         },
