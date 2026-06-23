@@ -15,7 +15,7 @@ import {
   GROUP_BETA,
   GROUP_SEARCH,
   GROUP_TAGGED_DELETE,
-  getSampleTagId,
+  SAMPLE_TAG_NAME,
 } from '../fixtures/constants';
 import { cleanupAnnotationListing, seedAnnotationListing } from '../fixtures/seed_fixtures';
 
@@ -82,9 +82,9 @@ spaceTest.describe('Event Annotation listing page', { tag: tags.stateful.classic
 
   spaceTest(
     'tag filter narrows the listing to tagged groups',
-    async ({ pageObjects, scoutSpace }) => {
+    async ({ pageObjects }) => {
       await pageObjects.annotationListing.goto();
-      await pageObjects.annotationListing.selectTag(getSampleTagId(scoutSpace.id));
+      await pageObjects.annotationListing.selectTag(SAMPLE_TAG_NAME);
 
       await expect(pageObjects.annotationListing.contentList.itemLinks).toHaveCount(1);
       await expect(
