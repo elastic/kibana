@@ -80,20 +80,17 @@ spaceTest.describe('Event Annotation listing page', { tag: tags.stateful.classic
     await expect(pageObjects.annotationListing.contentList.itemLinks).toHaveCount(1);
   });
 
-  spaceTest(
-    'tag filter narrows the listing to tagged groups',
-    async ({ pageObjects }) => {
-      await pageObjects.annotationListing.goto();
-      await pageObjects.annotationListing.selectTag(SAMPLE_TAG_NAME);
+  spaceTest('tag filter narrows the listing to tagged groups', async ({ pageObjects }) => {
+    await pageObjects.annotationListing.goto();
+    await pageObjects.annotationListing.selectTag(SAMPLE_TAG_NAME);
 
-      await expect(pageObjects.annotationListing.contentList.itemLinks).toHaveCount(1);
-      await expect(
-        pageObjects.annotationListing.contentList.itemLinks.filter({
-          hasText: GROUP_TAGGED_DELETE.title,
-        })
-      ).toHaveCount(1);
-    }
-  );
+    await expect(pageObjects.annotationListing.contentList.itemLinks).toHaveCount(1);
+    await expect(
+      pageObjects.annotationListing.contentList.itemLinks.filter({
+        hasText: GROUP_TAGGED_DELETE.title,
+      })
+    ).toHaveCount(1);
+  });
 
   spaceTest('shows a no-results message when nothing matches', async ({ pageObjects }) => {
     await pageObjects.annotationListing.goto();
