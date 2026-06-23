@@ -8,10 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  buildMultiStepEvaluators,
-  toDatasetExample,
-} from './evaluate_dataset';
+import { buildMultiStepEvaluators, toDatasetExample } from './evaluate_dataset';
 import type { MultiStepExample } from './dataset';
 
 const stubTraceEvaluator = (name: string): Evaluator => ({

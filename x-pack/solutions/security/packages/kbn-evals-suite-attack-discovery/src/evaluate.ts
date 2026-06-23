@@ -24,7 +24,17 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ attackDiscoveryClient, executorClient, inferenceClient, evaluators, evaluationConnector, log }, use) => {
+    (
+      {
+        attackDiscoveryClient,
+        executorClient,
+        inferenceClient,
+        evaluators,
+        evaluationConnector,
+        log,
+      },
+      use
+    ) => {
       use(
         createEvaluateAttackDiscoveryDataset({
           evaluators,

@@ -134,7 +134,11 @@ export const runAttackDiscovery = async ({
         alerts: toAlertStrings(alerts),
       });
 
-      return { insights: res.insights, raw: { fetchedAlerts: alerts.length }, traceId: res.traceId };
+      return {
+        insights: res.insights,
+        raw: { fetchedAlerts: alerts.length },
+        traceId: res.traceId,
+      };
     }
 
     const prompt = input.prompt ?? (await loadDefaultPrompt());

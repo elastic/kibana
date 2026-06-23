@@ -73,27 +73,27 @@ const configureExperiment = ({
     evaluators.traceBasedEvaluators;
 
   return {
-  task: async ({ input }) => {
-    if (!input) {
-      return { leads: null, errors: ['Missing input'] };
-    }
+    task: async ({ input }) => {
+      if (!input) {
+        return { leads: null, errors: ['Missing input'] };
+      }
 
-    return runLeadGeneration({
-      leadGenerationClient,
-      connectorId,
-      input,
-      log,
-    });
-  },
-  evaluators: [
-    createLeadGenerationBasicEvaluator(),
-    createLeadGenerationRubricEvaluator({ inferenceClient: evaluationInferenceClient, log }),
-    toolCalls as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
-    latency as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
-    inputTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
-    outputTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
-    cachedTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
-  ],
+      return runLeadGeneration({
+        leadGenerationClient,
+        connectorId,
+        input,
+        log,
+      });
+    },
+    evaluators: [
+      createLeadGenerationBasicEvaluator(),
+      createLeadGenerationRubricEvaluator({ inferenceClient: evaluationInferenceClient, log }),
+      toolCalls as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+      latency as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+      inputTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+      outputTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+      cachedTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+    ],
   };
 };
 

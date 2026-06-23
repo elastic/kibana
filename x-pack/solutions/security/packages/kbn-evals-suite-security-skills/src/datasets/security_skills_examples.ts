@@ -118,8 +118,7 @@ export const securitySkillsExamples: SecuritySkillsExample[] = [
   },
   {
     input: {
-      question:
-        'Why did alert abc123 fire? Help me triage it and check related activity.',
+      question: 'Why did alert abc123 fire? Help me triage it and check related activity.',
     },
     expected: {
       reference:

@@ -70,9 +70,7 @@ const createDynamicSkillInvocationEvaluator = ({
         output,
         expected,
         metadata,
-      } as unknown as Parameters<
-        ReturnType<typeof createSkillInvocationEvaluator>['evaluate']
-      >[0]);
+      } as unknown as Parameters<ReturnType<typeof createSkillInvocationEvaluator>['evaluate']>[0]);
     },
   };
 };

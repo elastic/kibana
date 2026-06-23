@@ -25,15 +25,18 @@ const parseJsonlLine = (line: string, lineNumber: number): AttackDiscoveryDatase
   const parsed = JSON.parse(line) as {
     inputs?: { anonymizedAlerts?: AnonymizedAlert[] };
     outputs?: { attackDiscoveries?: unknown };
-    metadata?: { Title?: string; dataset_split?: unknown; is_distractor?: boolean; criteria?: string[] };
+    metadata?: {
+      Title?: string;
+      dataset_split?: unknown;
+      is_distractor?: boolean;
+      criteria?: string[];
+    };
   };
 
   const anonymizedAlerts = parsed.inputs?.anonymizedAlerts ?? [];
   const attackDiscoveries = (parsed.outputs?.attackDiscoveries ?? []) as AttackDiscovery[];
   const metadata = parsed.metadata ?? { Title: `Line ${lineNumber}` };
-  const criteria = Array.isArray(metadata.criteria)
-    ? (metadata.criteria as string[])
-    : undefined;
+  const criteria = Array.isArray(metadata.criteria) ? (metadata.criteria as string[]) : undefined;
 
   return {
     input: {

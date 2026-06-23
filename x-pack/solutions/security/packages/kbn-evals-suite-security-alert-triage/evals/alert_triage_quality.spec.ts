@@ -142,7 +142,16 @@ type EvaluateTriageQuality = ReturnType<typeof createEvaluateTriageQuality>;
 const evaluate = base.extend<{ evaluateTriageQuality: EvaluateTriageQuality }, {}>({
   evaluateTriageQuality: [
     ({ fetch, connector, evaluators, executorClient, traceEsClient, log }, use) => {
-      use(createEvaluateTriageQuality({ fetch, connector, evaluators, executorClient, traceEsClient, log }));
+      use(
+        createEvaluateTriageQuality({
+          fetch,
+          connector,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        })
+      );
     },
     { scope: 'test' },
   ],

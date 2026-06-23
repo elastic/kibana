@@ -266,8 +266,13 @@ export function createEvaluateDataset({
   }: EvaluateDatasetOpts) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
-    const { inputTokens, outputTokens, cachedTokens, toolCalls: traceToolCalls, latency } =
-      evaluators.traceBasedEvaluators;
+    const {
+      inputTokens,
+      outputTokens,
+      cachedTokens,
+      toolCalls: traceToolCalls,
+      latency,
+    } = evaluators.traceBasedEvaluators;
 
     await executorClient.runExperiment(
       {

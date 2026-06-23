@@ -89,8 +89,7 @@ export function resolveEvaluationTraceId(
   const output = taskOutput as Record<string, unknown> | null | undefined;
   if (output) {
     const serverTrace =
-      normalizeTraceIdCandidate(output.traceId) ??
-      normalizeTraceIdCandidate(output.serverTraceId);
+      normalizeTraceIdCandidate(output.traceId) ?? normalizeTraceIdCandidate(output.serverTraceId);
     if (serverTrace) {
       return serverTrace;
     }
