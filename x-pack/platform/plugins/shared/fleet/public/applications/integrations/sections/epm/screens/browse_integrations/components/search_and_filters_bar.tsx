@@ -643,10 +643,15 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
 
   return (
     <StickyFlexItem>
-      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={true}>
           <SearchBar categories={categories} availableSubCategories={availableSubCategories} />
         </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup compressed>
             <SetupMethodFilter
