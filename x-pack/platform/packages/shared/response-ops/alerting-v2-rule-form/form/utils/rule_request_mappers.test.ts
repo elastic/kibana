@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import {
-  mapFormValuesToRuleRequest,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
   mapRuleResponseToFormValues,
 } from './rule_request_mappers';
-import type { RuleRequestCommon } from './rule_request_mappers';
 
 describe('rule_request_mappers', () => {
   const baseFormValues: FormValues = {
@@ -35,12 +33,18 @@ describe('rule_request_mappers', () => {
     stateTransitionRecoveryDelayMode: 'immediate',
   };
 
-  describe('mapFormValuesToRuleRequest', () => {
-    it('maps basic form values to the common API shape', () => {
-      const result = mapFormValuesToRuleRequest(baseFormValues);
+  describe('mapFormValuesToCreateRequest', () => {
+    it('maps basic form values to the create API shape', () => {
+      const result = mapFormValuesToCreateRequest(baseFormValues);
 
       expect(result).toEqual({
-        metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1', 'tag2'] },
+        kind: 'signal',
+        metadata: {
+          name: 'Test Rule',
+          description: undefined,
+          owner: 'test-owner',
+          tags: ['tag1', 'tag2'],
+        },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
         query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
@@ -49,19 +53,13 @@ describe('rule_request_mappers', () => {
       });
     });
 
-    it('does not include kind in the common shape', () => {
-      const result = mapFormValuesToRuleRequest(baseFormValues);
-
-      expect(result).not.toHaveProperty('kind');
-    });
-
     it('maps grouping fields when present', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         grouping: { fields: ['host.name', 'service.name'] },
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.grouping).toEqual({ fields: ['host.name', 'service.name'] });
     });
@@ -72,151 +70,77 @@ describe('rule_request_mappers', () => {
         grouping: { fields: [] },
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.grouping).toBeUndefined();
     });
 
-    it('maps state_transition for alert kind with pending count and timeframe', () => {
+    it('passes through state_transition fields as snake_case', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'duration',
-        stateTransitionRecoveryDelayMode: 'immediate',
-        stateTransition: { pendingCount: 3, pendingTimeframe: '10m' },
+        stateTransition: {
+          pendingCount: 3,
+          pendingTimeframe: '10m',
+          recoveringCount: 4,
+          recoveringTimeframe: '15m',
+        },
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
-        recovering_count: 0,
+        recovering_count: 4,
+        recovering_timeframe: '15m',
       });
     });
 
-    it('maps state_transition with only pending count (no timeframe)', () => {
+    it('omits null state_transition fields', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'breaches',
-        stateTransitionRecoveryDelayMode: 'immediate',
-        stateTransition: { pendingCount: 5 },
+        stateTransition: {
+          pendingCount: 5,
+          pendingTimeframe: null,
+          recoveringCount: null,
+          recoveringTimeframe: null,
+        },
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
-      expect(result.state_transition).toEqual({ pending_count: 5, recovering_count: 0 });
-      expect(result.state_transition).not.toHaveProperty('pending_timeframe');
+      expect(result.state_transition).toEqual({ pending_count: 5 });
     });
 
-    it('returns undefined state_transition for signal kind even with stateTransition data', () => {
+    it('returns undefined state_transition when stateTransition is undefined', () => {
+      const result = mapFormValuesToCreateRequest(baseFormValues);
+
+      expect(result.state_transition).toBeUndefined();
+    });
+
+    it('returns undefined state_transition when stateTransition is empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        stateTransition: {},
+      };
+
+      const result = mapFormValuesToCreateRequest(formValues);
+
+      expect(result.state_transition).toBeUndefined();
+    });
+
+    it('does not filter state_transition by kind (API handles validation)', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         kind: 'signal',
         stateTransition: { pendingCount: 3, pendingTimeframe: '10m' },
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toBeUndefined();
-    });
-
-    it('emits pending_count: 0 and recovering_count: 0 for alert kind when both modes are immediate', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransition: {},
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
-    });
-
-    it('emits pending_count: 0 and recovering_count: 0 for alert kind when stateTransition is undefined', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
-    });
-
-    it('emits pending_count: 0 when alert delay mode is immediate even if pendingCount is stale', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'recoveries',
-        stateTransition: {
-          pendingCount: 2,
-          pendingTimeframe: null,
-          recoveringCount: 3,
-          recoveringTimeframe: null,
-        },
-      };
-
-      expect(mapFormValuesToUpdateRequest(formValues).state_transition).toEqual({
-        pending_count: 0,
-        recovering_count: 3,
-      });
-    });
-
-    it('maps state_transition with recovering count and timeframe', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'duration',
-        stateTransition: { recoveringCount: 4, recoveringTimeframe: '15m' },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.state_transition).toEqual({
-        pending_count: 0,
-        recovering_count: 4,
-        recovering_timeframe: '15m',
-      });
-    });
-
-    it('maps state_transition with only recovering count (no timeframe)', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'recoveries',
-        stateTransition: { recoveringCount: 3 },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 3 });
-      expect(result.state_transition).not.toHaveProperty('recovering_timeframe');
-    });
-
-    it('maps state_transition with both pending and recovering fields', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'alert',
-        stateTransitionAlertDelayMode: 'breaches',
-        stateTransitionRecoveryDelayMode: 'duration',
-        stateTransition: {
-          pendingCount: 2,
-          recoveringCount: 5,
-          recoveringTimeframe: '10m',
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.state_transition).toEqual({
-        pending_count: 2,
-        recovering_count: 5,
-        recovering_timeframe: '10m',
+        pending_count: 3,
+        pending_timeframe: '10m',
       });
     });
 
@@ -232,7 +156,7 @@ describe('rule_request_mappers', () => {
         },
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.metadata).toEqual({
         name: 'My Rule',
@@ -249,7 +173,7 @@ describe('rule_request_mappers', () => {
         artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
     });
@@ -266,7 +190,7 @@ describe('rule_request_mappers', () => {
         ],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
@@ -284,7 +208,7 @@ describe('rule_request_mappers', () => {
         ],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
@@ -301,7 +225,7 @@ describe('rule_request_mappers', () => {
         ],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
     });
@@ -312,7 +236,7 @@ describe('rule_request_mappers', () => {
         artifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toBeUndefined();
     });
@@ -323,13 +247,13 @@ describe('rule_request_mappers', () => {
         artifacts: [],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toBeUndefined();
     });
 
     it('omits artifacts when artifacts are undefined', () => {
-      const result = mapFormValuesToRuleRequest(baseFormValues);
+      const result = mapFormValuesToCreateRequest(baseFormValues);
 
       expect(result.artifacts).toBeUndefined();
     });
@@ -344,7 +268,7 @@ describe('rule_request_mappers', () => {
         },
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.query).toEqual({
         format: 'standalone',
@@ -355,7 +279,7 @@ describe('rule_request_mappers', () => {
     });
 
     it('omits recovery_strategy when query.recovery is absent', () => {
-      const result = mapFormValuesToRuleRequest(baseFormValues);
+      const result = mapFormValuesToCreateRequest(baseFormValues);
 
       expect(result.recovery_strategy).toBeUndefined();
     });
@@ -369,7 +293,7 @@ describe('rule_request_mappers', () => {
         ],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
@@ -383,7 +307,7 @@ describe('rule_request_mappers', () => {
         artifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook with missing id' }],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toHaveLength(1);
       expect(result.artifacts?.[0]).toEqual({
@@ -402,7 +326,7 @@ describe('rule_request_mappers', () => {
         ],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
@@ -419,7 +343,7 @@ describe('rule_request_mappers', () => {
         ],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
     });
@@ -430,7 +354,7 @@ describe('rule_request_mappers', () => {
         artifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
       };
 
-      const result = mapFormValuesToRuleRequest(formValues);
+      const result = mapFormValuesToCreateRequest(formValues);
 
       expect(result.artifacts).toHaveLength(1);
       expect(result.artifacts?.[0]).toEqual({
@@ -439,22 +363,7 @@ describe('rule_request_mappers', () => {
         value: 'dashboard-123',
       });
     });
-  });
-
-  describe('mapFormValuesToCreateRequest', () => {
-    it('includes kind along with the common request shape', () => {
-      const result = mapFormValuesToCreateRequest(baseFormValues);
-
-      expect(result.kind).toBe('signal');
-      expect(result.metadata).toEqual({
-        name: 'Test Rule',
-        owner: 'test-owner',
-        tags: ['tag1', 'tag2'],
-      });
-      expect(result.time_field).toBe('@timestamp');
-    });
-
-    it('includes description in the create request when provided', () => {
+    it('includes description when provided', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         metadata: {
@@ -467,26 +376,13 @@ describe('rule_request_mappers', () => {
 
       expect(result.metadata.description).toBe('Create rule description');
     });
-
-    it('produces a superset of mapFormValuesToRuleRequest', () => {
-      const common = mapFormValuesToRuleRequest(baseFormValues);
-      const create = mapFormValuesToCreateRequest(baseFormValues);
-      const createRequest = create as typeof create & {
-        artifacts?: RuleRequestCommon['artifacts'];
-      };
-
-      // Every key in common should be present in create with the same value
-      for (const key of Object.keys(common) as Array<keyof typeof common>) {
-        expect(createRequest[key]).toEqual(common[key]);
-      }
-    });
   });
 
   describe('mapFormValuesToUpdateRequest', () => {
     it('coerces undefined optional fields to null for explicit removal', () => {
       const result = mapFormValuesToUpdateRequest(baseFormValues);
       const updateRequest = result as typeof result & {
-        artifacts?: RuleRequestCommon['artifacts'] | null;
+        artifacts?: CreateRuleData['artifacts'] | null;
       };
 
       expect(updateRequest.grouping).toBeNull();
@@ -505,8 +401,6 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         kind: 'alert',
         grouping: { fields: ['host.name'] },
-        stateTransitionAlertDelayMode: 'duration',
-        stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 2, pendingTimeframe: '5m' },
       };
 
@@ -516,7 +410,6 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toEqual({
         pending_count: 2,
         pending_timeframe: '5m',
-        recovering_count: 0,
       });
     });
 
@@ -539,6 +432,7 @@ describe('rule_request_mappers', () => {
         name: 'Test Rule',
         owner: 'test-owner',
         tags: ['tag1', 'tag2'],
+        builder_type: null,
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
@@ -804,7 +698,6 @@ describe('rule_request_mappers', () => {
       expect(createPayload.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
-        recovering_count: 0,
       });
     });
   });

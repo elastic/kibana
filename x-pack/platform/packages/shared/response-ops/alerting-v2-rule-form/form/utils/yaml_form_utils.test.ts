@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
+import { dump, load } from 'js-yaml';
 import {
   formValuesToYamlObject,
   parseYamlToFormValues,
@@ -527,6 +527,26 @@ describe('yaml_form_utils', () => {
       expect(yaml).toContain('kind: alert');
       expect(yaml).toContain('name: Test');
       expect(yaml).toContain("time_field: '@timestamp'");
+    });
+
+    it('serialized YAML contains no null or undefined values for omitted optional fields', () => {
+      const yaml = serializeFormToYaml({
+        kind: 'alert',
+        metadata: { name: 'r', enabled: true },
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransitionRecoveryDelayMode: 'immediate',
+      });
+
+      expect(yaml).not.toContain(': null');
+      expect(yaml).not.toContain(': undefined');
+
+      const parsed = load(yaml) as Record<string, unknown>;
+      const metadata = parsed.metadata as Record<string, unknown>;
+      expect(metadata).not.toHaveProperty('description');
+      expect(metadata).not.toHaveProperty('owner');
     });
   });
 

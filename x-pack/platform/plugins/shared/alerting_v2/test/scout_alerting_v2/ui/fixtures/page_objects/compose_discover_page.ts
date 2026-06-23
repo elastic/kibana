@@ -7,6 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
@@ -140,5 +141,91 @@ export class ComposeDiscoverPage {
     const runbookModal = this.page.getByRole('dialog', { name: 'Add Runbook' });
     await runbookModal.getByLabel('Runbook').fill(text);
     await runbookModal.getByRole('button', { name: 'Add Runbook' }).click();
+  }
+
+  /**
+   * Returns the raw YAML string from the YAML-mode Monaco editor.
+   *
+   * The sandbox query editors may also be mounted, so the YAML model is
+   * identified by looking for the model whose content starts with "kind:".
+   */
+  async getYamlEditorValue(): Promise<string> {
+    const yamlEditor = this.page.testSubj.locator('ruleV2FormYamlEditor');
+    await expect(yamlEditor).toBeVisible({ timeout: 30_000 });
+
+    let result = '';
+    await expect(async () => {
+      result = await this.page.evaluate(() => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const models = monacoEnv.monaco.editor.getModels() as Array<{ getValue(): string }>;
+        const yamlModel = models.find((m) => m.getValue().trimStart().startsWith('kind:'));
+        if (!yamlModel) {
+          throw new Error('YAML model not found among Monaco models');
+        }
+        return yamlModel.getValue();
+      });
+    }).toPass({ timeout: 30_000 });
+
+    return result;
+  }
+
+  /**
+   * Switches the edit-mode toggle from Form view to YAML view and waits for
+   * the YAML badge to appear.
+   */
+  async switchToYamlMode(): Promise<void> {
+    const editModeToggle = this.page.testSubj.locator('composeDiscoverEditModeToggle');
+    await editModeToggle.getByRole('button', { name: 'YAML view' }).click();
+    await expect(this.page.testSubj.locator('composeDiscoverYamlBadge')).toBeVisible();
+  }
+
+  /**
+   * Replaces the full content of the YAML-mode Monaco editor via executeEdits,
+   * focuses the editor beforehand and fires blur afterward so the form
+   * re-parses the new YAML content through its `onBlurSync` handler.
+   */
+  async setYamlEditorValue(value: string): Promise<void> {
+    const yamlEditor = this.page.testSubj.locator('ruleV2FormYamlEditor');
+    await expect(yamlEditor).toBeVisible({ timeout: 30_000 });
+
+    await this.page.evaluate((newValue) => {
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      const models = monacoEnv.monaco.editor.getModels() as Array<{
+        getValue(): string;
+        getFullModelRange(): any;
+        uri: { toString(): string };
+      }>;
+      const yamlModel = models.find((m) => m.getValue().trimStart().startsWith('kind:'));
+      if (!yamlModel) {
+        throw new Error('YAML model not found among Monaco models');
+      }
+
+      const editors = monacoEnv.monaco.editor.getEditors() as Array<{
+        getModel(): { uri: { toString(): string } } | null;
+        executeEdits(source: string, edits: any[]): void;
+        focus(): void;
+      }>;
+      const editor = editors.find(
+        (e) => e.getModel()?.uri?.toString() === yamlModel.uri.toString()
+      );
+      if (!editor) {
+        throw new Error('YAML editor instance not found');
+      }
+
+      editor.focus();
+      const fullRange = yamlModel.getFullModelRange();
+      editor.executeEdits('scout-test', [{ range: fullRange, text: newValue }]);
+
+      document
+        .querySelector('[data-test-subj="ruleV2FormYamlEditor"] textarea.inputarea')
+        ?.dispatchEvent(new Event('blur', { bubbles: true }));
+    }, value);
   }
 }

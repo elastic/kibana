@@ -23,12 +23,10 @@ export {
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
 export {
-  mapFormValuesToRuleRequest,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
   mapRuleResponseToFormValues,
 } from './utils/rule_request_mappers';
-export type { RuleRequestCommon } from './utils/rule_request_mappers';
 
 // Field groups — for composing custom form layouts
 export { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
