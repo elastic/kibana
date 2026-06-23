@@ -72,10 +72,10 @@ describe('createInitialState', () => {
     expect(withSignal.recoveryType).toBe('default');
   });
 
-  it('keeps the query preview closed in builder create mode', () => {
+  it('opens the query preview in builder create mode', () => {
     const state = createInitialState({ mode: 'create', isBuilderMode: true });
 
-    expect(state.childOpen).toBe(false);
+    expect(state.childOpen).toBe(true);
     expect(state.queryCommitted).toBe(false);
   });
 

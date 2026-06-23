@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from './types';
+import { isAlertConditionStepId } from './types';
 import type { ComposeFormValues } from './compose_form_types';
 import { getBreachQuery } from './compose_form_types';
 import { getEsqlSummaryState } from './compose_discover_form/esql_query_summary_section';
@@ -76,6 +77,7 @@ export interface ComposeDiscoverFooterProps {
   isLastStep: boolean;
   isCreate: boolean;
   hasValidationErrors: boolean;
+  yamlHasErrors: boolean;
   isSaving: boolean;
   onNext: () => void;
   onFinalSubmit: () => void;
@@ -91,6 +93,7 @@ export const ComposeDiscoverFooter = ({
   isLastStep,
   isCreate,
   hasValidationErrors,
+  yamlHasErrors,
   isSaving,
   onNext,
   onFinalSubmit,
@@ -101,8 +104,7 @@ export const ComposeDiscoverFooter = ({
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const watchedQuery = useWatch<ComposeFormValues, 'query'>({ name: 'query' });
 
-  const isConditionStep =
-    currentStep?.id === 'alertCondition' || currentStep?.id === 'builderCondition';
+  const isConditionStep = currentStep ? isAlertConditionStepId(currentStep.id) : false;
 
   /*
    * Per #621/#623: when authoring an alert via the heuristic-split flow, step 1
@@ -152,19 +154,27 @@ export const ComposeDiscoverFooter = ({
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {
+    const yamlSaveDisabled = submitDisabled || yamlHasErrors;
+    const yamlSaveDisabledTooltip = yamlHasErrors
+      ? i18n.translate('xpack.alertingV2.composeDiscover.flyout.yamlSaveDisabledTooltip', {
+          defaultMessage: 'Fix the errors highlighted in the YAML editor, then save the rule.',
+        })
+      : undefined;
     return (
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={onYamlSave}
-              isLoading={isSaving}
-              isDisabled={submitDisabled}
-              data-test-subj="composeDiscoverYamlSubmit"
-            >
-              {submitLabel}
-            </EuiButton>
+            <EuiToolTip content={yamlSaveDisabledTooltip}>
+              <EuiButton
+                fill
+                onClick={onYamlSave}
+                isLoading={isSaving}
+                isDisabled={yamlSaveDisabled}
+                data-test-subj="composeDiscoverYamlSubmit"
+              >
+                {submitLabel}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
