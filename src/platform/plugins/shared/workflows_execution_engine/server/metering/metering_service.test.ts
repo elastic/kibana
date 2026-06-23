@@ -102,6 +102,7 @@ describe('WorkflowsMeteringService', () => {
       expect(record.usage.quantity).toBe(1);
       expect(record.source.id).toBe(METERING_SOURCE_ID);
       expect(record.source.instance_group_id).toBe('test-project-id');
+      expect(record.source.instance_group_type).toBe('serverless_project');
     });
 
     it('should use deploymentId when projectId is not available (ECH)', async () => {
@@ -115,6 +116,7 @@ describe('WorkflowsMeteringService', () => {
 
       const sentRecords: UsageRecord[] = mockUsageReportingService.reportUsage.mock.calls[0][0];
       expect(sentRecords[0].source.instance_group_id).toBe('deploy-789');
+      expect(sentRecords[0].source.instance_group_type).toBe('stateful_deployment');
     });
 
     it('should not send usage record when no instanceGroupId (self-managed)', async () => {
@@ -344,11 +346,12 @@ describe('WorkflowsMeteringService', () => {
 
       const record: UsageRecord = mockUsageReportingService.reportUsage.mock.calls[0][0][0];
       expect(record.source.instance_group_id).toBe('proj-123');
+      expect(record.source.instance_group_type).toBe('serverless_project');
     });
   });
 
   describe('provider and region in source', () => {
-    it('should include provider and region when available on cloudSetup', async () => {
+    it('should omit provider and region for serverless projects', async () => {
       const execution = createMockExecution();
       const cloudSetup = createMockCloudSetup({
         csp: 'aws',
@@ -358,8 +361,8 @@ describe('WorkflowsMeteringService', () => {
       await meteringService.reportWorkflowExecution(execution, cloudSetup);
 
       const record: UsageRecord = mockUsageReportingService.reportUsage.mock.calls[0][0][0];
-      expect(record.source.provider).toBe('aws');
-      expect(record.source.region).toBe('us-east-1');
+      expect(record.source).not.toHaveProperty('provider');
+      expect(record.source).not.toHaveProperty('region');
     });
 
     it('should include provider and region for ECH deployments', async () => {
@@ -375,19 +378,9 @@ describe('WorkflowsMeteringService', () => {
 
       const record: UsageRecord = mockUsageReportingService.reportUsage.mock.calls[0][0][0];
       expect(record.source.instance_group_id).toBe('deploy-789');
+      expect(record.source.instance_group_type).toBe('stateful_deployment');
       expect(record.source.provider).toBe('gcp');
       expect(record.source.region).toBe('europe-west1');
-    });
-
-    it('should leave provider and region undefined when not set on cloudSetup', async () => {
-      const execution = createMockExecution();
-      const cloudSetup = createMockCloudSetup();
-
-      await meteringService.reportWorkflowExecution(execution, cloudSetup);
-
-      const record: UsageRecord = mockUsageReportingService.reportUsage.mock.calls[0][0][0];
-      expect(record.source.provider).toBeUndefined();
-      expect(record.source.region).toBeUndefined();
     });
   });
 });
