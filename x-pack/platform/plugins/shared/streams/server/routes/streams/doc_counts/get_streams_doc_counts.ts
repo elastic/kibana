@@ -256,19 +256,17 @@ export async function getIngestionDocCountsForStreams(options: {
     items: streamNames,
     processChunk: (chunk) => streamsClient.getPrivilegesPerStream(chunk),
   });
-  const readFailureStoreByStream = new Map<string, boolean>();
-  for (const chunk of privilegeChunks) {
-    for (const [name, privileges] of Object.entries(chunk)) {
-      readFailureStoreByStream.set(name, privileges.read_failure_store);
-    }
-  }
+  const readFailureStoreByStream: Record<string, { read_failure_store: boolean }> = Object.assign(
+    {},
+    ...privilegeChunks
+  );
 
   const indexToStream = new Map<string, string>();
   for (const stream of streams) {
     for (const index of stream.indices ?? []) {
       indexToStream.set(index.index_name, stream.name);
     }
-    if (readFailureStoreByStream.get(stream.name)) {
+    if (readFailureStoreByStream[stream.name]?.read_failure_store) {
       for (const index of stream.failure_store?.indices ?? []) {
         indexToStream.set(index.index_name, stream.name);
       }
