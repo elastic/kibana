@@ -424,13 +424,8 @@ export function ActionsPopover({
         </NoPermissionsTooltip>
       ),
       icon: 'contrast',
-      // The remote Synthetics monitor details page has no Enable/Disable
-      // UI element and no `?enable=true`/`?disable=true` URL handler (unlike
-      // SLOs, which read those params via `useGetQueryParams` and trigger
-      // the action), so a deep link to the origin would land on a page that
-      // can't act on the request. Until a destination handler is added,
-      // mirror the other "no remote equivalent" actions and keep this item
-      // disabled for remote monitors with the standard tooltip.
+      // No remote equivalent yet: there's no deep link or destination handler
+      // on the remote cluster that can act on an enable/disable request.
       disabled: isRemote || !canEditSynthetics || !canUsePublicLocations,
       toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
       onClick: isRemote

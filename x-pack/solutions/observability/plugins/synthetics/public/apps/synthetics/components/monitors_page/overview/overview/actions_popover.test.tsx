@@ -282,12 +282,9 @@ describe('ActionsPopover', () => {
         expect(cloneLink).toHaveAttribute('target', '_blank');
       });
 
-      // The Synthetics monitor details page has no Enable/Disable UI element
-      // and no `?enable=true`/`?disable=true` URL handler, so a deep link to
-      // the origin would land on a page that can't act on the request.
-      // Until a destination handler is added, this action stays disabled
-      // for remote monitors with the standard tooltip — same pattern as the
-      // other "no remote equivalent" actions.
+      // No deep link or destination handler exists yet for remote
+      // enable/disable, so the action stays disabled with the standard
+      // "no remote equivalent" tooltip.
       it('keeps Enable/Disable disabled because the destination has no URL handler', () => {
         const { getByTestId } = render(
           <ActionsPopover
