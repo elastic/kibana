@@ -1392,6 +1392,7 @@ For the Elastic Security 9.2.6 release information, refer to [Elastic Security S
 
 **Dashboards and Visualizations**:
 * Fixes an issue with dashboard PDF/PNG reports being cut off at the end when the dashboard has a markdown panel [#249644]({{kib-pull}}249644).
+* Fixes color contrast for links in Lens [#247721]({{kib-pull}}247721).
 
 **Discover**:
 * Fixes an issue with the "Search entire time range" option that could exclude some results if the time field was set to date nanos [#248495]({{kib-pull}}248495).
