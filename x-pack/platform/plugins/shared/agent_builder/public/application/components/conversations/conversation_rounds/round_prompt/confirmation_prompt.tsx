@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiMarkdownFormat,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
@@ -94,7 +88,14 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
 
       {/* Body */}
       <EuiFlexItem grow={false}>
-        <EuiMarkdownFormat textSize="s" css={css`color: ${euiTheme.colors.textSubdued};`}>{body}</EuiMarkdownFormat>
+        <EuiMarkdownFormat
+          textSize="s"
+          css={css`
+            color: ${euiTheme.colors.textSubdued};
+          `}
+        >
+          {body}
+        </EuiMarkdownFormat>
       </EuiFlexItem>
 
       {/* Action buttons */}
