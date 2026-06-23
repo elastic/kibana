@@ -56,20 +56,40 @@ export class EsqlService {
     }
 
     // It doesn't return hidden indices
-    const sources = (await client.indices.resolveIndex({
-      name: sourcesToQuery,
-      expand_wildcards: 'open',
-      mode,
-    })) as ResolveIndexResponse;
+    const [openSources, closedSources] = (await Promise.all([
+      client.indices.resolveIndex({
+        name: sourcesToQuery,
+        expand_wildcards: 'open',
+        mode,
+      }),
+      client.indices.resolveIndex({
+        name: sourcesToQuery,
+        expand_wildcards: 'closed',
+        mode,
+      }),
+    ])) as [ResolveIndexResponse, ResolveIndexResponse];
 
     const mappedMode = this.getIndexSourceType(mode);
 
-    sources.indices?.forEach((index) => {
+    openSources.indices?.forEach((index) => {
       indices.push({ name: index.name, mode: mappedMode, aliases: index.aliases ?? [] });
     });
 
-    sources.data_streams?.forEach((dataStream) => {
+    openSources.data_streams?.forEach((dataStream) => {
       indices.push({ name: dataStream.name, mode: mappedMode, aliases: dataStream.aliases ?? [] });
+    });
+
+    const openIndexNames = new Set(indices.map((i) => i.name));
+
+    closedSources.indices?.forEach((index) => {
+      if (!openIndexNames.has(index.name)) {
+        indices.push({
+          name: index.name,
+          mode: mappedMode,
+          aliases: index.aliases ?? [],
+          status: 'closed',
+        });
+      }
     });
 
     const crossClusterCommonIndices = remoteClusters
