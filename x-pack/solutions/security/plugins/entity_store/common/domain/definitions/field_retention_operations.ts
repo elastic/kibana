@@ -11,6 +11,7 @@ import type { EntityField } from './entity_schema';
 
 type Operation = Omit<EntityField, 'retention' | 'destination'> & {
   destination?: string;
+  skipExtraction?: boolean;
 };
 
 export const collectValues = ({
