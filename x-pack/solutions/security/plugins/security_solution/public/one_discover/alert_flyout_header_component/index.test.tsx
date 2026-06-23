@@ -63,6 +63,13 @@ jest.mock('../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: jest.fn(),
 }));
 
+// EntityStoreEuidApiProvider uses a dynamic import('./euid_browser') in a useEffect.
+// That async import causes react-test-renderer's act() to wait indefinitely when
+// the component tree is inspected via TestRenderer. Mock it out to avoid the hang.
+jest.mock('@kbn/entity-store/public', () => ({
+  EntityStoreEuidApiProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 describe('AlertFlyoutHeader', () => {
   const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
 
@@ -92,12 +99,8 @@ describe('AlertFlyoutHeader', () => {
     } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const storePromise = Promise.resolve(store as never);
+    const servicesPromise = Promise.resolve(servicesMock);
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
-
-    let resolveServices: (services: StartServices) => void;
-    const servicesPromise = new Promise<StartServices>((resolve) => {
-      resolveServices = resolve;
-    });
 
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
@@ -114,7 +117,6 @@ describe('AlertFlyoutHeader', () => {
     });
 
     await act(async () => {
-      resolveServices(servicesMock);
       await servicesPromise;
       await storePromise;
     });
