@@ -93,11 +93,14 @@ const PackagePolicyStreamsSchema = {
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
   condition: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Agent condition expression to evaluate whether to apply this stream.',
-      },
-    })
+    schema.nullable(
+      schema.string({
+        maxLength: 10000,
+        meta: {
+          description: 'Agent condition expression to evaluate whether to apply this stream.',
+        },
+      })
+    )
   ),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
@@ -115,11 +118,14 @@ export const PackagePolicyInputsSchema = {
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
   condition: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Agent condition expression to evaluate whether to apply this input.',
-      },
-    })
+    schema.nullable(
+      schema.string({
+        maxLength: 10000,
+        meta: {
+          description: 'Agent condition expression to evaluate whether to apply this input.',
+        },
+      })
+    )
   ),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
@@ -286,12 +292,15 @@ export const PackagePolicyBaseSchema = {
   ),
   package_agent_version_condition: schema.maybe(schema.string()),
   condition: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'Agent condition expression to evaluate whether to apply this integration to its inputs.',
-      },
-    })
+    schema.nullable(
+      schema.string({
+        maxLength: 10000,
+        meta: {
+          description:
+            'Agent condition expression to evaluate whether to apply this integration to its inputs.',
+        },
+      })
+    )
   ),
   // Only available for agentless integration policies.
   // On standard package policies this field is rejected by server-side validation.
@@ -345,6 +354,14 @@ export const CreatePackagePolicyRequestBodySchema = schema.object(
       schema.string({
         meta: {
           description: 'Package policy unique identifier',
+        },
+      })
+    ),
+    create_dataset_templates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.',
         },
       })
     ),
@@ -411,11 +428,14 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
       deprecated: schema.maybe(DeprecationInfoSchema),
       vars: schema.maybe(SimplifiedVarsSchema),
       condition: schema.maybe(
-        schema.string({
-          meta: {
-            description: 'Agent condition expression to evaluate whether to apply this input.',
-          },
-        })
+        schema.nullable(
+          schema.string({
+            maxLength: 10000,
+            meta: {
+              description: 'Agent condition expression to evaluate whether to apply this input.',
+            },
+          })
+        )
       ),
       streams: schema.maybe(
         schema.recordOf(
@@ -432,12 +452,15 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
             var_group_selections: VarGroupSelectionsSchema,
             deprecated: schema.maybe(DeprecationInfoSchema),
             condition: schema.maybe(
-              schema.string({
-                meta: {
-                  description:
-                    'Agent condition expression to evaluate whether to apply this stream.',
-                },
-              })
+              schema.nullable(
+                schema.string({
+                  maxLength: 10000,
+                  meta: {
+                    description:
+                      'Agent condition expression to evaluate whether to apply this stream.',
+                  },
+                })
+              )
             ),
           }),
           {
@@ -459,12 +482,12 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
 );
 
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
 
 function validateAdditionalDatastreamsPermissions(values: string[]) {
   for (const val of values) {
     if (!val.match(VALIDATE_DATASTREAMS_PERMISSION_REGEX)) {
-      return `${val} is not a valid datastream permissions, it should match logs|metrics|traces|synthetics|profiling)-*`;
+      return `${val} is not a valid datastream permissions, it should match logs|metrics|traces|synthetics|profiles)-*`;
     }
   }
 }
@@ -527,12 +550,15 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object(
       ])
     ),
     condition: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'Agent condition expression to evaluate whether to apply this integration to its inputs.',
-        },
-      })
+      schema.nullable(
+        schema.string({
+          maxLength: 10000,
+          meta: {
+            description:
+              'Agent condition expression to evaluate whether to apply this integration to its inputs.',
+          },
+        })
+      )
     ),
   },
   { meta: { id: 'simplified_package_policy_base' } }
@@ -588,6 +614,14 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
             },
           })
         )
+      ),
+      create_dataset_templates: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.',
+          },
+        })
       ),
     },
     { meta: { id: 'simplified_create_package_policy_request' } }

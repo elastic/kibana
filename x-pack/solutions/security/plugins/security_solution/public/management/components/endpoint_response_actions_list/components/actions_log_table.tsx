@@ -22,7 +22,7 @@ import {
   CENTER_ALIGNMENT,
   type HorizontalAlignment,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { canUserCancelCommand } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
@@ -37,7 +37,6 @@ import type { ActionDetails, ActionListApiResponse } from '../../../../../common
 import type { EndpointActionListRequestQuery } from '../../../../../common/api/endpoint';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
-import { getActionStatus } from './hooks';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { ActionsLogExpandedTray } from './action_log_expanded_tray';
@@ -48,12 +47,15 @@ import { useUrlPagination } from '../../../hooks/use_url_pagination';
 const emptyValue = getEmptyValue();
 
 // Truncated usernames
-const StyledFacetButton = euiStyled(EuiFacetButton).attrs({ title: undefined })`
+const StyledFacetButtonBase = styled(EuiFacetButton)`
   .euiText {
     margin-top: 0.38rem;
     overflow-y: visible !important;
   }
 `;
+const StyledFacetButton = (props: React.ComponentProps<typeof EuiFacetButton>) => (
+  <StyledFacetButtonBase {...props} title={undefined} />
+);
 
 interface ExpandedRowMapType {
   [k: string]: React.ReactNode;
@@ -386,19 +388,10 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           field: 'status',
           name: TABLE_COLUMN_NAMES.status,
           width: !showHostNames ? '15%' : '10%',
-          render: (_status: ActionListApiResponse['data'][number]['status']) => {
-            const status = getActionStatus(_status);
-
+      render: (status: ActionListApiResponse['data'][number]['status']) => {
             return (
               <EuiToolTip content={status} anchorClassName="eui-textTruncate">
                 <ResponseActionStatusBadge
-                  color={
-                    _status === 'failed'
-                      ? 'danger'
-                      : _status === 'successful'
-                      ? 'success'
-                      : 'warning'
-                  }
                   data-test-subj={getTestId('column-status')}
                   status={status}
                   tabIndex={0}

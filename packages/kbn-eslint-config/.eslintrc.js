@@ -74,6 +74,7 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
+    '@kbn/eslint-plugin-alerting-v2',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -403,6 +404,7 @@ module.exports = {
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
     '@elastic/eui/badge-accessibility-rules': 'error',
     '@elastic/eui/consistent-is-invalid-props': 'error',
+    '@elastic/eui/tooltip-no-interactive-content': 'error',
   },
 
   overrides: [

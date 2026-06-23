@@ -159,6 +159,12 @@ export const UX_MESSAGES = Object.freeze({
     pending: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.pending', {
       defaultMessage: 'Pending',
     }),
+    canceled: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.badge.canceled',
+      {
+        defaultMessage: 'Canceled',
+      }
+    ),
   },
   unenrolled: {
     hosts: i18n.translate(
