@@ -127,7 +127,8 @@ export const Navigation = ({
 
   const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
     isCollapsed,
-    items.primaryItems
+    items.primaryItems,
+    (items.overflowItems?.length ?? 0) > 0
   );
 
   const allOverflowItems = [...overflowMenuItems, ...(items.overflowItems ?? [])];
