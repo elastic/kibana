@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest, tags, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -139,21 +139,12 @@ spaceTest.describe(
         await spaceTest.step(
           'change the ES|QL query and verify trendline still renders',
           async () => {
-            const esqlEditor = page.getByTestId('InlineEditingESQLEditor');
-            await expect(esqlEditor).toBeVisible();
-
-            // Focus the editor and replace the query
-            const monacoEditor = esqlEditor.locator('.monaco-editor');
-            await monacoEditor.click();
-
-            // Select all text and type the new query
-            await monacoEditor.press('ControlOrMeta+a');
-            await page.keyboard.type(
+            const codeEditor = new KibanaCodeEditorWrapper(page);
+            await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+            await codeEditor.setCodeEditorValue(
               'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_bytes = MAX(bytes)'
             );
 
-            // Dismiss any autocomplete popup and submit via the run query button
-            await page.keyboard.press('Escape');
             await page.getByTestId('ESQLEditor-run-query-button').click();
 
             // Wait for the trendline to re-render with the new data
