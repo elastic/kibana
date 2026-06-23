@@ -47,7 +47,10 @@ export {
 } from './external_resume/external_creds_constants';
 export type { WorkflowExternalCredPurpose } from './external_resume/external_creds_constants';
 export { WORKFLOWS_EXTERNAL_CREDS_INDEX_MAPPINGS } from './external_resume/external_creds_mappings';
-export { WorkflowExternalCredsStore } from './external_resume/workflow_external_creds_store';
+export {
+  WorkflowExternalCredsStore,
+  type WorkflowExternalCredsStoreContract,
+} from './external_resume/workflow_external_creds_store';
 export {
   createExternalResumeTokenPayload,
   ExternalResumeTokenVerificationError,

@@ -19,7 +19,21 @@ interface WorkflowExternalCredDocument {
   expiresAt: string;
 }
 
-export class WorkflowExternalCredsStore {
+export interface WorkflowExternalCredsStoreContract {
+  put(params: {
+    id: string;
+    purpose: WorkflowExternalCredPurpose;
+    secret: string;
+    expiresAt: string;
+  }): Promise<void>;
+  get(params: {
+    id: string;
+    expectedPurpose: WorkflowExternalCredPurpose;
+  }): Promise<string | undefined>;
+  delete(id: string): Promise<void>;
+}
+
+export class WorkflowExternalCredsStore implements WorkflowExternalCredsStoreContract {
   constructor(private readonly esClient: ElasticsearchClient) {}
 
   async put({

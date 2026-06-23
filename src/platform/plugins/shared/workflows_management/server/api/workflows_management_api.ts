@@ -61,7 +61,6 @@ import {
 import type { z } from '@kbn/zod/v4';
 import {
   type ExternalResumeWorkflowExecutionParams,
-  parseApprovedQueryParam,
   resumeWorkflowExecutionExternally,
 } from './external_resume/external_resume_service';
 import type { StepExecutionListResult } from './lib/search_step_executions';
@@ -886,13 +885,10 @@ export class WorkflowsManagementApi {
   }
 
   public async resumeWorkflowExecutionExternally(
-    params: Omit<ExternalResumeWorkflowExecutionParams, 'signingKey'> & {
-      approved: boolean | 'true' | 'false';
-    }
+    params: Omit<ExternalResumeWorkflowExecutionParams, 'signingKey'>
   ): Promise<ResumeWorkflowExecutionResponseDto> {
     return resumeWorkflowExecutionExternally(this.workflowsService, {
       ...params,
-      approved: parseApprovedQueryParam(params.approved),
       signingKey: this.externalResumeSigningKey,
     });
   }

@@ -37,5 +37,6 @@ export const mockContextDependencies = () => ({
       minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
     },
     collectQueueMetrics: false,
+    externalResume: {},
   },
 });

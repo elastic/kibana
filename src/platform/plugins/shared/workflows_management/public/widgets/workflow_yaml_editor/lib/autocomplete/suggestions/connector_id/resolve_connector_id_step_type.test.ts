@@ -15,6 +15,9 @@ describe('resolveConnectorIdStepType', () => {
     stepType: 'waitForApproval',
     stepId: 'request-approval',
     propInfos: {},
+    stepYamlNode: {} as StepInfo['stepYamlNode'],
+    lineStart: 1,
+    lineEnd: 5,
   };
 
   it('returns null when focused step info is missing', () => {

@@ -32,6 +32,7 @@ describe('resumeWorkflowExecutionExternally', () => {
     get: jest.fn(),
     delete: jest.fn(),
   };
+  const invalidateApiKey = jest.fn();
 
   const workflowsService = {
     getCoreStart: jest.fn(),
@@ -58,6 +59,7 @@ describe('resumeWorkflowExecutionExternally', () => {
     workflowsService.getExternalCredsStore.mockResolvedValue(externalCredsStore as never);
 
     const coreStart = coreMock.createStart();
+    invalidateApiKey.mockResolvedValue({});
     coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
       asCurrentUser: {
         security: {
@@ -67,11 +69,13 @@ describe('resumeWorkflowExecutionExternally', () => {
         },
       },
     });
-    coreStart.elasticsearch.client.asInternalUser = {
-      security: {
-        invalidateApiKey: jest.fn().mockResolvedValue({}),
+    Object.assign(coreStart.elasticsearch.client, {
+      asInternalUser: {
+        security: {
+          invalidateApiKey,
+        },
       },
-    } as never;
+    });
     workflowsService.getCoreStart.mockResolvedValue(coreStart);
     workflowsService.getWorkflowExecution.mockResolvedValue({
       id: 'exec-1',
@@ -104,7 +108,6 @@ describe('resumeWorkflowExecutionExternally', () => {
       expectedPurpose: WORKFLOW_EXTERNAL_CRED_PURPOSE.EXTERNAL_RESUME,
     });
 
-    const coreStart = await workflowsService.getCoreStart();
     const engine = await workflowsService.getWorkflowsExecutionEngine();
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
@@ -116,9 +119,7 @@ describe('resumeWorkflowExecutionExternally', () => {
       { resumedBy: 'api_key:api-key-id' }
     );
 
-    expect(
-      coreStart.elasticsearch.client.asInternalUser.security.invalidateApiKey
-    ).toHaveBeenCalledWith({ ids: ['api-key-id'] });
+    expect(invalidateApiKey).toHaveBeenCalledWith({ ids: ['api-key-id'] });
     expect(externalCredsStore.delete).toHaveBeenCalledWith('api-key-id');
   });
 

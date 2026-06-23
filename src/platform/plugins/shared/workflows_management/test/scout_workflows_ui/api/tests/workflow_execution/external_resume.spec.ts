@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EsClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -93,20 +94,10 @@ async function waitForApprovalStepWaiting(
 }
 
 async function getExternalResumeApiKeyId(
-  esClient: {
-    security: {
-      queryApiKey: (params: {
-        query: {
-          bool: {
-            filter: Array<{ term: Record<string, string> }>;
-          };
-        };
-      }) => Promise<{ api_keys?: Array<{ id?: string }> }>;
-    };
-  },
+  esClient: EsClient,
   workflowExecutionId: string
 ): Promise<string> {
-  const response = await esClient.security.queryApiKey({
+  const response = await esClient.security.queryApiKeys({
     query: {
       bool: {
         filter: [
@@ -151,7 +142,8 @@ apiTest.describe('External resume API', { tag: tags.deploymentAgnostic }, () => 
         (stepExecution) => stepExecution.stepId === APPROVAL_STEP_ID
       );
 
-      expect(approvalStep?.input).not.toHaveProperty('externalResumeEncodedApiKey');
+      const input = approvalStep?.input as Record<string, unknown> | undefined;
+      expect(input?.externalResumeEncodedApiKey).toBeUndefined();
 
       const apiKeyId = await getExternalResumeApiKeyId(esClient, workflowExecutionId);
       const token = buildExternalResumeToken({

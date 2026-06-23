@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import { EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
+import { parseApprovedQueryParam } from '../../external_resume/external_resume_service';
 import {
   renderExternalResumeErrorPage,
   renderExternalResumeSuccessPage,
@@ -78,7 +79,7 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
           const { token, approved } = request.query;
           const { resumedBy } = await api.resumeWorkflowExecutionExternally({
             token,
-            approved,
+            approved: parseApprovedQueryParam(approved),
             executionId,
             spaceId: spaces.getSpaceId(request),
           });
