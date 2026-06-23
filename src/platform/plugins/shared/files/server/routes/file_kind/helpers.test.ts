@@ -45,7 +45,6 @@ describe('helpers', () => {
     });
   });
 
-
   describe('validateMimeType', () => {
     const createFileKind = (allowedMimeTypes?: string[]): FileKind => ({
       id: 'test-file-kind',
