@@ -80,7 +80,7 @@ spaceTest.describe(
         await openInlineEditorAndWaitVisible(pageObjects, panelId);
 
         const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-        await openDimensionEditorAndWaitForFlyout({ lens }, page, metricDimensionPanel);
+        await openDimensionEditorAndWaitForFlyout(pageObjects, page, metricDimensionPanel);
 
         await spaceTest.step('verify initial Color is set to None', async () => {
           const colorButtons = page.getByTestId('lnsMetric_apply_color_to_buttons');
@@ -128,7 +128,7 @@ spaceTest.describe(
 
         await spaceTest.step('enable trendline', async () => {
           const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-          await openDimensionEditorAndWaitForFlyout({ lens }, page, metricDimensionPanel);
+          await openDimensionEditorAndWaitForFlyout(pageObjects, page, metricDimensionPanel);
 
           await page.getByTestId('lnsMetric_background_chart_line').click();
           await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
