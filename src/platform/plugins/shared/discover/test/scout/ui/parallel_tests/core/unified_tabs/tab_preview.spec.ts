@@ -9,7 +9,7 @@
 
 import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../fixtures/common';
+import { spaceTest } from '../../../fixtures/common';
 
 const DISCOVER_SESSION_NAME = 'tab preview test';
 const ESQL_QUERY = 'FROM logstash-* | WHERE extension.raw == "png" and bytes > 10000';

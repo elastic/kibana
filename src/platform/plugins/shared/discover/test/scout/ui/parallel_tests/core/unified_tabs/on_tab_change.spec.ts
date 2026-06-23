@@ -9,7 +9,7 @@
 
 import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures/common';
+import { spaceTest, testData } from '../../../fixtures/common';
 
 const DOC_VIEWER_TABLE_TAB_ID = 'doc_view_table';
 const DOC_VIEWER_JSON_TAB_ID = 'doc_view_source';

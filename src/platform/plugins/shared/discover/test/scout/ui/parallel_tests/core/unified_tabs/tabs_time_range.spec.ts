@@ -9,7 +9,7 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures/common';
+import { spaceTest, testData } from '../../../fixtures/common';
 
 const UPDATED_TIME_RANGE = {
   from: 'Sep 19, 2015 @ 06:31:44.000',

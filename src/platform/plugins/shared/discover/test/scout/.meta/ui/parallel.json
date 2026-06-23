@@ -329,7 +329,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unified_tabs/new_tab.spec.ts",
         "line": 35,
         "column": 12
       }
@@ -342,7 +342,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unified_tabs/new_tab.spec.ts",
         "line": 93,
         "column": 12
       }
@@ -355,7 +355,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/new_tab.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unified_tabs/new_tab.spec.ts",
         "line": 129,
         "column": 12
       }
@@ -840,7 +840,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/tab_duplication.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unified_tabs/tab_duplication.spec.ts",
         "line": 36,
         "column": 12
       }
