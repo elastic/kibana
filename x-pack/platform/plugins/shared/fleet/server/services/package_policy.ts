@@ -46,6 +46,7 @@ import {
   getNormalizedInputs,
   isRootPrivilegesRequired,
   varsReducer,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -236,6 +237,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
+    validateFleetSavedObjectId(options?.id);
+
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
 

@@ -25,6 +25,10 @@ import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
+import { getErrorDetailsUrl } from './error_details_url';
+
+export { getErrorDetailsUrl };
 
 function isErrorActive(lastError: PingState, currentError: PingState, latestPing?: Ping) {
   return (
@@ -64,6 +68,7 @@ export const ErrorsList = ({
 
   const formatter = useDateFormat();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   const { latestPing } = useMonitorLatestPing({
     monitorId: configId,
@@ -176,11 +181,12 @@ export const ErrorsList = ({
   const getRowProps = (item: Ping) => {
     const { state } = item;
     if (state?.id) {
+      const spaceIdQuery = spaceId ? `&spaceId=${encodeURIComponent(spaceId)}` : '';
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
           history.push(
-            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}`
+            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}${spaceIdQuery}`
           );
         },
       };
@@ -208,20 +214,6 @@ export const ErrorsList = ({
       />
     </div>
   );
-};
-
-export const getErrorDetailsUrl = ({
-  basePath,
-  configId,
-  stateId,
-  locationId,
-}: {
-  stateId: string;
-  basePath: string;
-  configId: string;
-  locationId?: string;
-}) => {
-  return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}`;
 };
 
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {

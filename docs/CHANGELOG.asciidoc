@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.17>>
+* <<release-notes-8.19.16>>
 * <<release-notes-8.19.15>>
 * <<release-notes-8.19.14>>
 * <<release-notes-8.19.13>>
@@ -121,6 +123,55 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.17]]
+== {kib} 8.19.17
+
+The 8.19.17 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.17]]
+=== Fixes
+Alerting::
+* Fixes the **Alerts** page fetching alerts twice on initial load, which briefly showed all alerts before the filtered set ({kibana-pull}271441[#271441]).
+Dashboards and Visualizations::
+* Fixes the autoplay timer in **Canvas** jumping to the wrong page when pages are added or removed ({kibana-pull}268398[#268398]).
+Data ingestion and Fleet::
+* Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call ({kibana-pull}273848[#273848]).
+* Fixes data stream selectors in input packages with multiple policy templates incorrectly sharing or duplicating variables between templates ({kibana-pull}273364[#273364]).
+* Improves response time of the agent policies list by computing counts in a single aggregation instead of multiple queries per policy ({kibana-pull}272429[#272429]).
+* Fixes missing security rule names in the **Integrations → Assets** tab ({kibana-pull}272089[#272089]).
+Developer tools::
+* Fixes autocomplete so `GET` is shown before `DELETE` when suggesting HTTP methods on an empty request line in **Console** ({kibana-pull}270787[#270787]).
+* Marks invalid HTTP methods (for example, `GETT` and `POSTS`) as errors in **Console** ({kibana-pull}270479[#270479]).
+Discover::
+* Fixes slow parsing when KQL queries contain long runs of whitespace ({kibana-pull}266512[#266512]).
+Elastic Observability solution::
+* Fixes overlapping messages in the **Logs → Anomalies** table by restoring single-line truncation with an ellipsis ({kibana-pull}273221[#273221]).
+* Fixes status tiles in the SLO Overview so that newly created SLOs are counted consistently with the per-row **No Data** badge ({kibana-pull}266315[#266315]).
+Elastic Security solution::
+For the Elastic Security 8.19.17 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[[release-notes-8.19.16]]
+== {kib} 8.19.16
+
+The 8.19.16 release includes the following fixes.
+
+IMPORTANT: The 8.19.16 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[fixes-v8.19.16]]
+=== Fixes
+Alerting::
+* Fixes alert index template updates failing when auto-increasing `total_fields.limit` due to system-managed read-only fields ({kibana-pull}262534[#262534]).
+Data ingestion and Fleet::
+* Fixes integration package `elasticsearch` settings (`index_mode`, `source_mode`, `dynamic_namespace`, and `dynamic_dataset`) changing unexpectedly on package upgrade or reinstall ({kibana-pull}269080[#269080]).
+* Fixes Fleet background tasks failing when paginating agent policies sorted on the non-existent `created_at` field ({kibana-pull}267285[#267285]).
+* Fixes the **IP Location** processor in **Ingest pipelines** selecting the wrong database when a local `.mmdb` filename matches a managed database display name ({kibana-pull}265740[#265740]).
+Elastic Security solution::
+For the Elastic Security 8.19.16 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Elasticsearch solution::
+* Fixes behavioral analytics APIs to reject collection names longer than 1024 characters ({kibana-pull}266225[#266225]).
 
 [[release-notes-8.19.15]]
 == {kib} 8.19.15

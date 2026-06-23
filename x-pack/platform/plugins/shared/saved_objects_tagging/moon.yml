@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/ui-theme'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-lifecycle-browser'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

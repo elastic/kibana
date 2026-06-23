@@ -184,7 +184,7 @@ proxy in tunneling mode, and display some of the interaction between the client 
 +
 [source,sh]
 --
-curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
+curl --verbose --proxytunnel --proxy http://localhost:8080 <EXAMPLE_URL>
 --
 
 `xpack.actions.proxyBypassHosts` {ess-icon}::

@@ -19,6 +19,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...xpackFunctionalConfig.getAll(),
     pageObjects,
     testFiles: [resolve(__dirname, './data_views')],
+    security: {
+      ...xpackFunctionalConfig.get('security'),
+      cookieLogin: false,
+    },
     junit: {
       reportName: 'X-Pack Cloud Security Posture Functional Tests',
     },

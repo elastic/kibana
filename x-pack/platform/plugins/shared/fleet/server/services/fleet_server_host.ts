@@ -11,7 +11,7 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 
-import { normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -49,6 +49,7 @@ export async function createFleetServerHost(
   options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
 ): Promise<FleetServerHost> {
   const logger = appContextService.getLogger();
+  validateFleetSavedObjectId(options?.id);
   if (data.is_default) {
     const defaultItem = await getDefaultFleetServerHost(soClient);
     if (defaultItem && defaultItem.id !== options?.id) {

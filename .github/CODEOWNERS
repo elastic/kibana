@@ -2773,6 +2773,10 @@ x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/flee
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
 
+# FTR config manifests have no single owner — touched by all solutions.
+# Leaving this unowned avoids routing every edit through Kibana Operations.
+/.buildkite/ftr-manifests/
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####

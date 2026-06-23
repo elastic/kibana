@@ -229,7 +229,7 @@ You can build drilldown URLs dynamically with your visualization data.
 
 Do this by adding the `{{key}}` placeholder to your URL
 
-For example `https://example.org/{{key}}`
+For example `https://<example-url>/{{key}}`
 
 This instructs TSVB to substitute the value from your visualization wherever it sees `{{key}}`.
 

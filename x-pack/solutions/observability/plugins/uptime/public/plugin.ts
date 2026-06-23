@@ -127,7 +127,9 @@ export class UptimePlugin
       this.initContext.config.get().experimental || this.experimentalFeatures;
   }
 
-  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({
+    status: AppStatus.inaccessible,
+  }));
   private experimentalFeatures: UptimeConfig['experimental'] = {
     ruleFormV2Enabled: false,
   };
@@ -310,16 +312,24 @@ function setUptimeAppStatus(
     const hasUptimePrivileges = coreStart.application.capabilities.uptime?.show;
     if (hasUptimePrivileges) {
       const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d/d', 'now/d');
-      indexStatusPromise.then((indexStatus) => {
-        if (indexStatus.indexExists) {
-          registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-          updater.next(() => ({ status: AppStatus.accessible }));
-          registerAlertRules(coreStart, pluginsStart, stackVersion, false);
-        } else {
+      indexStatusPromise
+        .then((indexStatus) => {
+          if (indexStatus.indexExists) {
+            registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+            updater.next(() => ({ status: AppStatus.accessible }));
+            registerAlertRules(coreStart, pluginsStart, stackVersion, false);
+          } else {
+            updater.next(() => ({ status: AppStatus.inaccessible }));
+            registerAlertRules(coreStart, pluginsStart, stackVersion, true);
+          }
+        })
+        .catch(() => {
+          // The index-status check runs as the current user, so feature visibility
+          // without ES index read privileges returns a 403 (not a 404). Keep the app
+          // hidden on any failure instead of leaving the promise rejection unhandled.
           updater.next(() => ({ status: AppStatus.inaccessible }));
           registerAlertRules(coreStart, pluginsStart, stackVersion, true);
-        }
-      });
+        });
     }
   }
 }

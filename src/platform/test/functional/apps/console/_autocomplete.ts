@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('HTTP methods', async () => {
         const suggestions = {
           G: ['GET'],
-          P: ['PATCH', 'POST', 'PUT'],
+          P: ['POST', 'PUT', 'PATCH'],
           D: ['DELETE'],
           H: ['HEAD'],
         };

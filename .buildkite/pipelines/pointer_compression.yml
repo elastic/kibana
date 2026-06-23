@@ -409,8 +409,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-standard-4
-      diskSizeGb: 120
+      machineType: n2-highmem-4
+      diskSizeGb: 125
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -427,8 +427,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-standard-4
-      diskSizeGb: 120
+      machineType: n2-highmem-4
+      diskSizeGb: 125
     depends_on:
       - build
     timeout_in_minutes: 75

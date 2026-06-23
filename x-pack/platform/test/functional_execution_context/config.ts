@@ -24,6 +24,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     rootTags: ['skipCloud'],
     testFiles: [require.resolve('./tests')],
+    security: {
+      ...functionalConfig.get('security'),
+      cookieLogin: false,
+    },
     junit: {
       reportName: 'Execution Context Functional Tests',
     },

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import type { BuildkiteAgentTargetingRule } from './buildkite';
 import { BuildkiteClient } from './buildkite';
 import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels';
@@ -74,7 +74,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   }
 
   if (returnYaml) {
-    return dump({ agents: config });
+    return stringify({ agents: config });
   }
 
   return config;
