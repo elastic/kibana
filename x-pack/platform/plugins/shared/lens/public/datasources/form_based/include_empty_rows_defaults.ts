@@ -9,8 +9,10 @@ import {
   LENS_DATASOURCE_ID,
   LENS_HEATMAP_CHART_SHAPES,
   LENS_METRIC_ID,
+  LENS_TAGCLOUD_ID,
   PARTITION_CHART_TYPES,
   SeriesTypes,
+  type DateHistogramIndexPatternColumn,
   type FormBasedPersistedState,
   type FormBasedPrivateState,
   type FormBasedLayer,
@@ -47,7 +49,7 @@ const VIS_TYPES_WITH_EMPTY_ROWS_OFF_BY_DEFAULT: ReadonlySet<string> = new Set<st
   PARTITION_CHART_TYPES.MOSAIC,
   PARTITION_CHART_TYPES.WAFFLE,
   LENS_METRIC_ID,
-  'lnsTagcloud', // Mirrors `getTagcloudVisualization().id`.
+  LENS_TAGCLOUD_ID,
 ]);
 
 /**
@@ -62,6 +64,11 @@ export function getDefaultIncludeEmptyRows(visualizationTypeId?: string): boolea
   return !VIS_TYPES_WITH_EMPTY_ROWS_OFF_BY_DEFAULT.has(visualizationTypeId);
 }
 
+/** `buildColumn` param overrides owned by this module for a new bucket column. */
+type NewBucketColumnParams = Required<
+  Pick<DateHistogramIndexPatternColumn['params'], 'includeEmptyRows'>
+>;
+
 /**
  * Per-visualization `buildColumn` param overrides for a new column, or
  * `undefined` when the operation owns no opinionated default.
@@ -69,7 +76,7 @@ export function getDefaultIncludeEmptyRows(visualizationTypeId?: string): boolea
 export function getColumnParamsForNewBucket(
   operationType: string,
   activeVisualizationTypeId?: string
-): Record<string, unknown> | undefined {
+): NewBucketColumnParams | undefined {
   if (operationType !== 'date_histogram' && operationType !== 'range') {
     return undefined;
   }
