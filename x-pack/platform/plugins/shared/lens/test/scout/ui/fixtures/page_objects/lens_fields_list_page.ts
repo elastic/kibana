@@ -37,8 +37,14 @@ export class LensFieldsListPage {
     this.fieldSearchInput = page.testSubj.locator('lnsIndexPatternFieldSearch');
   }
 
-  getLastTopValuesBucket(): Locator {
-    return this.topValuesBuckets.last();
+  getOtherTopValuesBucket(): Locator {
+    return this.topValuesBuckets.filter({
+      has: this.page
+        .locator(
+          '.euiProgress__label [data-test-subj="lnsFieldListPanel-topValues-formattedFieldValue"]'
+        )
+        .getByText('Other', { exact: true }),
+    });
   }
 
   /**
@@ -47,9 +53,9 @@ export class LensFieldsListPage {
    * duplicate emitted by EuiProgress.
    */
   getBucketLabel(bucket: Locator): Locator {
-    return bucket
-      .locator('[data-test-subj="lnsFieldListPanel-topValues-formattedFieldValue"]')
-      .first();
+    return bucket.locator(
+      '.euiProgress__label [data-test-subj="lnsFieldListPanel-topValues-formattedFieldValue"]'
+    );
   }
 
   /**
@@ -58,9 +64,9 @@ export class LensFieldsListPage {
    * EuiProgress.
    */
   getBucketPercentage(bucket: Locator): Locator {
-    return bucket
-      .locator('[data-test-subj="lnsFieldListPanel-topValues-formattedPercentage"]')
-      .first();
+    return bucket.locator(
+      '.euiProgress__valueText [data-test-subj="lnsFieldListPanel-topValues-formattedPercentage"]'
+    );
   }
 
   getFieldLocator(fieldName: string): Locator {
@@ -77,7 +83,15 @@ export class LensFieldsListPage {
     const fields = this.page.locator(selector);
 
     try {
-      await fields.first().waitFor({ state: 'visible' });
+      await this.page.waitForFunction((fieldSelector) => {
+        return Array.from(document.querySelectorAll(fieldSelector)).some((element) => {
+          const { height, width } = element.getBoundingClientRect();
+          const style = window.getComputedStyle(element);
+          return (
+            width > 0 && height > 0 && style.visibility !== 'hidden' && style.display !== 'none'
+          );
+        });
+      }, selector);
     } catch {
       throw new Error(`No ${type} fields found in the ${group} fields list.`);
     }

@@ -65,7 +65,7 @@ spaceTest.describe(
         await expect(lensFieldsList.popoverTitle).toBeVisible();
         await expect(lensFieldsList.topValuesChart).toBeVisible();
         await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-        const otherBucket = lensFieldsList.getLastTopValuesBucket();
+        const otherBucket = lensFieldsList.getOtherTopValuesBucket();
         await expect(lensFieldsList.getBucketLabel(otherBucket)).toHaveText('Other');
         await expect(lensFieldsList.getBucketPercentage(otherBucket)).toHaveText('96.7%');
 
@@ -82,7 +82,7 @@ spaceTest.describe(
       await expect(lensFieldsList.popoverTitle).toBeVisible();
       await expect(lensFieldsList.topValuesChart).toBeVisible();
       await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-      const otherBucket = lensFieldsList.getLastTopValuesBucket();
+      const otherBucket = lensFieldsList.getOtherTopValuesBucket();
       await expect(lensFieldsList.getBucketLabel(otherBucket)).toHaveText('Other');
       await expect(lensFieldsList.getBucketPercentage(otherBucket)).toHaveText('99.9%');
       await expect(lensFieldsList.getPopoverChart()).toBeHidden();
@@ -121,7 +121,7 @@ spaceTest.describe(
           await expect(lensFieldsList.popoverTitle).toBeVisible();
           await expect(lensFieldsList.topValuesChart).toBeVisible();
           await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-          const runtimeOtherBucket = lensFieldsList.getLastTopValuesBucket();
+          const runtimeOtherBucket = lensFieldsList.getOtherTopValuesBucket();
           await expect(lensFieldsList.getBucketLabel(runtimeOtherBucket)).toHaveText('Other');
           await expect(lensFieldsList.getBucketPercentage(runtimeOtherBucket)).toHaveText('96.7%');
           await lensFieldsList.distributionButton.click();

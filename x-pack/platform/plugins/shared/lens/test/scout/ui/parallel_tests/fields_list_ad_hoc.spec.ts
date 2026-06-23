@@ -54,7 +54,7 @@ spaceTest.describe('Lens fields list - ad-hoc datasource', { tag: tags.stateful.
       await expect(lensFieldsList.popoverTitle).toBeVisible();
       await expect(lensFieldsList.topValuesChart).toBeVisible();
       await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-      const otherBucket = await lensFieldsList.getLastTopValuesBucket();
+      const otherBucket = lensFieldsList.getOtherTopValuesBucket();
       await expect(otherBucket).toHaveText('Other\n96.7%');
 
       await lensFieldsList.distributionButton.click();
@@ -70,7 +70,7 @@ spaceTest.describe('Lens fields list - ad-hoc datasource', { tag: tags.stateful.
     await expect(lensFieldsList.popoverTitle).toBeVisible();
     await expect(lensFieldsList.topValuesChart).toBeVisible();
     await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-    const otherBucket = await lensFieldsList.getLastTopValuesBucket();
+    const otherBucket = lensFieldsList.getOtherTopValuesBucket();
     await expect(otherBucket).toHaveText('Other\n99.9%');
     await expect(lensFieldsList.getPopoverChart()).toBeHidden();
   });
@@ -109,7 +109,7 @@ spaceTest.describe('Lens fields list - ad-hoc datasource', { tag: tags.stateful.
         await expect(lensFieldsList.popoverTitle).toBeVisible();
         await expect(lensFieldsList.topValuesChart).toBeVisible();
         await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
-        const otherBucket = await lensFieldsList.getLastTopValuesBucket();
+        const otherBucket = lensFieldsList.getOtherTopValuesBucket();
         await expect(otherBucket).toHaveText('Other\n96.7%');
         await lensFieldsList.distributionButton.click();
         await expect(lensFieldsList.getPopoverChart()).toBeVisible();
