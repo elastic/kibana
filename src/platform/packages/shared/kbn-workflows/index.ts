@@ -57,6 +57,7 @@ export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './server/constants';
 export * from './server/repositories/workflow_repository';
+export * from './managed';
 
 // Trigger schemas
 export {

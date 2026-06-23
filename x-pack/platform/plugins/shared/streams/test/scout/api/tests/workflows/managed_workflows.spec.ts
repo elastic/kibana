@@ -11,7 +11,7 @@ import {
   STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+} from '@kbn/workflows';
 import { streamsApiTest as apiTest } from '../../fixtures';
 import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 
