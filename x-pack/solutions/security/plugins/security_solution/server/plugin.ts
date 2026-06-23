@@ -277,6 +277,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       logger,
       experimentalFeatures,
+      plugins.ml,
       {
         config: this.config,
         ml: plugins.ml,

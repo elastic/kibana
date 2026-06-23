@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { registerAnomalySummaryRoutes } from './route';
-export { getEntityAnomalies } from './get_anomaly_details';
+export { EnrichEntityService } from './service/enrich_entity_service';
+export type { EnrichedEntity } from './service/enrich_entity_service';
