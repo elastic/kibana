@@ -83,24 +83,13 @@ interface Props {
   iconSize?: 's' | 'xs';
   locationId: string;
   renderButton?: (onClick: () => void) => NonNullable<React.ReactNode>;
-  // Optional override for the remote monitor's `kibanaUrl`. Callers that
-  // already fetch the latest ping (e.g. the overview flyout via
-  // `useMonitorDetail`) can supply it here so the popover doesn't need to
-  // run its own fallback query. When omitted, the popover lazily fetches
-  // the latest remote ping on first open if `monitor.remote.kibanaUrl` is
-  // missing.
   kibanaUrl?: string;
 }
 
 /**
- * The overview-status `top_metrics` aggregation cannot collect text-mapped
- * fields like `kibanaUrl`, so the metadata threaded into each row may carry
- * `remote.remoteName` without a `remote.kibanaUrl`. The latest ping document
- * does carry `kibanaUrl` (and `remote.kibanaUrl`) on its `_source`, so we
- * fetch a single ping via CCS to fill the gap — mirroring the fallback the
- * overview flyout and details-page callout already use. Gated on `enabled`
- * (typically `isPopoverOpen`) so the fetch only happens once the user opens
- * the menu, never per row on initial render.
+ * `top_metrics` can't aggregate text-mapped `kibanaUrl`, so row metadata may
+ * omit it. Fall back to the latest ping over CCS, gated on `enabled` so the
+ * cost only happens when the user opens the menu, never per row at render.
  */
 const useRemoteKibanaUrlFallback = ({
   enabled,
@@ -175,10 +164,7 @@ export function ActionsPopover({
   const isRemote = Boolean(monitor.remote);
   const { space } = useKibanaSpace();
 
-  // Resolve the remote `kibanaUrl` with the same precedence the flyout uses:
-  //   1. an explicit value supplied by the parent (e.g. flyout),
-  //   2. the value baked into the overview-status metadata,
-  //   3. a lazy fetch of the latest ping when the popover opens.
+  // Precedence mirrors the flyout: prop → overview metadata → lazy CCS fetch.
   const monitorRemoteKibanaUrl = monitor.remote?.kibanaUrl;
   const fallbackKibanaUrl = useRemoteKibanaUrlFallback({
     enabled: isPopoverOpen && isRemote && !kibanaUrlProp && !monitorRemoteKibanaUrl,
@@ -194,10 +180,6 @@ export function ActionsPopover({
     configId: monitor.configId,
     locationId: locationId || monitor.locations[0]?.id || '',
     spaces: monitor.spaces,
-    // The local Synthetics details page reads remote data via CCS when
-    // `?remoteName=<alias>` is in the URL (see `useGetUrlParams` /
-    // `useSelectedMonitor`), so "Go to monitor" stays an in-app navigation
-    // for remote monitors instead of redirecting to the origin cluster.
     remoteName: monitor.remote?.remoteName,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
@@ -283,21 +265,6 @@ export function ActionsPopover({
     }),
   });
 
-  // For remote (CCS) monitors we mirror SLO's three-state pattern (see
-  // `slo_item_actions.tsx`) for actions that *must* run on the origin
-  // cluster (Edit, Clone, Enable/Disable):
-  //   1. `monitor.remote.kibanaUrl` known   → action is enabled and opens the
-  //      corresponding deep link on the origin cluster in a new tab.
-  //   2. `monitor.remote.kibanaUrl` missing → action is disabled with a
-  //      tooltip explaining the kibanaUrl gap, replacing the previous
-  //      "hide actions for remote" behavior.
-  //   3. The action has no remote equivalent (e.g. `Run test manually`,
-  //      `Create SLO`, status alerts) → always disabled with a remote tooltip.
-  //
-  // "Go to monitor" is intentionally outside the pattern: the local details
-  // page renders remote monitors via CCS when the URL carries
-  // `?remoteName=<alias>`, so we keep the in-app navigation (`detailUrl`)
-  // for both local and remote.
   const remoteEditUrl = useMemo(
     () =>
       isRemote
@@ -320,12 +287,6 @@ export function ActionsPopover({
     {
       name: actionsMenuGoToMonitorName,
       icon: 'sortRight',
-      // The local details page renders remote monitors via CCS when the URL
-      // carries `?remoteName=<alias>`, so this stays an in-app navigation
-      // for both local and remote monitors — no redirect to the origin
-      // cluster's Kibana, no `target="_blank"`. The 3-state remote pattern
-      // (with `remoteMonitorUrl` / popout) only applies to actions that
-      // *must* run on the origin (Edit, Clone, Enable/Disable).
       href: detailUrl,
       'data-test-subj': 'actionsPopoverGoToMonitor',
     },
@@ -422,8 +383,6 @@ export function ActionsPopover({
         </NoPermissionsTooltip>
       ),
       icon: 'contrast',
-      // No remote equivalent yet: there's no deep link or destination handler
-      // on the remote cluster that can act on an enable/disable request.
       disabled: isRemote || !canEditSynthetics || !canUsePublicLocations,
       toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
       onClick: isRemote
@@ -480,15 +439,6 @@ export function ActionsPopover({
     {
       name: addMonitorToDashboardLabel,
       icon: 'dashboardApp',
-      // The Synthetics overview embeddable filter schema (`monitorFiltersSchema`)
-      // can only narrow by `monitor_ids` (saved-object IDs); the dashboard's
-      // overview-status query has no remote-cluster filter and doesn't narrow
-      // pings by `monitor.id`. For a remote monitor that means the embeddable
-      // cannot isolate the single configId — `SingleMonitorView` then violates
-      // its "exactly one monitor" invariant and throws. Until the embeddable
-      // schema/query learn about remote clusters, mirror the other local-only
-      // actions and disable this one for remote monitors with the standard
-      // tooltip (was previously hidden, see PR #267516).
       disabled: isRemote,
       toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
       onClick: isRemote
