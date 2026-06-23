@@ -56,7 +56,7 @@ export const updateBasicSoAttributes = async (
   newAttributes: {
     title: string;
     description: string;
-    tags: string[];
+    tags?: string[];
   },
   dependencies: UpdateBasicSoAttributesDependencies
 ) => {
@@ -74,14 +74,14 @@ export const updateBasicSoAttributes = async (
   });
 
   let { references } = extractedReferences;
-
+  console.log({ references, newAttributes });
   const attributes = {
     ...extractedReferences.attributes,
     title: newAttributes.title,
     description: newAttributes.description,
   };
 
-  if (dependencies.savedObjectsTagging && newAttributes.tags.length) {
+  if (dependencies.savedObjectsTagging && newAttributes.tags) {
     references = dependencies.savedObjectsTagging.ui.updateTagsReferences(
       references,
       newAttributes.tags

@@ -159,10 +159,10 @@ export const VisualizationTableList = ({
     async (args: { id: string; title: string; description?: string; tags: string[] }) => {
       const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
       if (content) {
+        // Note: the visualize listing table does not currently support tag editing
         await visualizations.updateVisualizationLibraryItem(content.id, content.type, {
           title: args.title,
           description: args.description ?? '',
-          tags: args.tags,
         });
       }
     },

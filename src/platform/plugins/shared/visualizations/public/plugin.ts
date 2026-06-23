@@ -150,7 +150,6 @@ export interface VisualizationsStart extends TypesStart {
     newAttributes: {
       title: string;
       description: string;
-      tags: string[];
     }
   ) => ReturnType<typeof updateBasicSoAttributes>;
 }
