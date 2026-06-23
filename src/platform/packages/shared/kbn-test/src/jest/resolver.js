@@ -56,6 +56,24 @@ module.exports = (request, options) => {
     return module.exports(request.replace('@elastic/eui/lib/', '@elastic/eui/test-env/'), options);
   }
 
+  if (request.startsWith('@elastic/eui/es/')) {
+    return module.exports(request.replace('@elastic/eui/es/', '@elastic/eui/test-env/'), options);
+  }
+
+  if (request === '@elastic/eui-theme-common') {
+    return resolve.sync('@elastic/eui-theme-common/lib/cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
+  if (request === '@elastic/eui-theme-borealis') {
+    return resolve.sync('@elastic/eui-theme-borealis/lib/cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === 'axios') {
     return resolve.sync('axios/dist/node/axios.cjs', {
       basedir: options.basedir,
