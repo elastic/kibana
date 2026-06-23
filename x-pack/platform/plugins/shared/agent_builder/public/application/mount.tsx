@@ -22,6 +22,7 @@ import { ActiveSpaceProvider } from './context/active_space_context';
 import { PageWrapper } from './page_wrapper';
 import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
 import { StreamingProvider } from './context/streaming/streaming_context';
+import { AgentWorkspaceLinkInterceptor } from './context/agent_workspace_link_interceptor';
 
 export const mountApp = async ({
   core,
@@ -30,6 +31,7 @@ export const mountApp = async ({
   history,
   services,
   onAppLeave,
+  isAgentWorkspaceMount = false,
 }: {
   core: CoreStart;
   plugins: AgentBuilderStartDependencies;
@@ -37,10 +39,15 @@ export const mountApp = async ({
   history: ScopedHistory;
   services: AgentBuilderInternalService;
   onAppLeave: OnAppLeave;
+  isAgentWorkspaceMount?: boolean;
 }) => {
   const ApplicationUsageTrackingProvider =
     services.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-  const kibanaServices = { ...core, plugins, appParams: { history } };
+  const kibanaServices = {
+    ...core,
+    plugins,
+    appParams: { history, isAgentWorkspaceMount },
+  };
   const queryClient = new QueryClient();
   await services.accessChecker.initAccess();
   const activeSpaceId = (await plugins.spaces?.getActiveSpace())?.id ?? DEFAULT_SPACE_ID;
@@ -58,7 +65,13 @@ export const mountApp = async ({
                       <PageWrapper>
                         <Router history={history}>
                           <StreamingProvider>
-                            <AgentBuilderRoutes />
+                            {isAgentWorkspaceMount ? (
+                              <AgentWorkspaceLinkInterceptor history={history}>
+                                <AgentBuilderRoutes />
+                              </AgentWorkspaceLinkInterceptor>
+                            ) : (
+                              <AgentBuilderRoutes />
+                            )}
                           </StreamingProvider>
                         </Router>
                       </PageWrapper>

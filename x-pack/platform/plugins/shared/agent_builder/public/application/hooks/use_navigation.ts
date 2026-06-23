@@ -27,6 +27,16 @@ export const INFERENCE_MANAGEMENT_APP_ID = 'management';
 
 export const INFERENCE_MANAGEMENT_PATH = '/modelManagement/model_settings';
 
+const buildAgentBuilderPath = (path: string, params?: Record<string, string>): string => {
+  const queryParams = new URLSearchParams(params);
+  return queryParams.size ? `${path}?${queryParams}` : path;
+};
+
+export const useIsAgentWorkspaceMount = (): boolean => {
+  const { services } = useKibana();
+  return services.appParams.isAgentWorkspaceMount === true;
+};
+
 export const useIsOnManagementLlmConnectorsPage = (): boolean => {
   const {
     services: { application },
@@ -48,28 +58,42 @@ export const useIsOnManagementLlmConnectorsPage = (): boolean => {
 
 export const useNavigation = () => {
   const {
-    services: { application },
+    services: { application, appParams },
   } = useKibana();
+
+  const isAgentWorkspaceMount = appParams.isAgentWorkspaceMount === true;
+  const scopedHistory = appParams.history;
 
   const navigateToAgentBuilderUrl = useCallback(
     (path: string, params?: Record<string, string>, state?: LocationState) => {
-      const queryParams = new URLSearchParams(params);
+      const agentBuilderPath = buildAgentBuilderPath(path, params);
+
+      if (isAgentWorkspaceMount) {
+        scopedHistory.push(agentBuilderPath, state);
+        return;
+      }
+
       application.navigateToApp(AGENTBUILDER_APP_ID, {
-        path: queryParams.size ? `${path}?${queryParams}` : path,
+        path: agentBuilderPath,
         state,
       });
     },
-    [application]
+    [application, isAgentWorkspaceMount, scopedHistory]
   );
 
   const createAgentBuilderUrl = useCallback(
     (path: string, params?: Record<string, string>) => {
-      const queryParams = new URLSearchParams(params);
+      const agentBuilderPath = buildAgentBuilderPath(path, params);
+
+      if (isAgentWorkspaceMount) {
+        return scopedHistory.createHref({ pathname: agentBuilderPath });
+      }
+
       return application.getUrlForApp(AGENTBUILDER_APP_ID, {
-        path: queryParams.size ? `${path}?${queryParams}` : path,
+        path: agentBuilderPath,
       });
     },
-    [application]
+    [application, isAgentWorkspaceMount, scopedHistory]
   );
 
   const navigateToManageConnectors = useCallback(
