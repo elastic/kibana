@@ -46,6 +46,6 @@
       "share",
       "fleet"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "dashboard"]
   }
 }

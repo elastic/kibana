@@ -10,7 +10,7 @@
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, { useMemo } from 'react';
 import type { ShareAction } from './hooks';
 
@@ -33,31 +33,18 @@ const useTitleActionsStyles = () => {
       color: ${euiTheme.colors.textSubdued};
     `;
 
-    const favoriteSlot = css`
-      display: flex;
-      flex-shrink: 0;
-      align-items: center;
-
-      .euiButtonIcon {
-        color: ${euiTheme.colors.textSubdued};
-        block-size: 24px;
-        inline-size: 24px;
-      }
-    `;
-
-    return { root, iconButton, favoriteSlot };
+    return { root, iconButton };
   }, [euiTheme]);
 };
 
 export interface TitleActionsProps {
   shareAction?: ShareAction;
-  favorite?: ReactNode;
 }
 
-export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favorite }) => {
+export const TitleActions = React.memo<TitleActionsProps>(({ shareAction }) => {
   const styles = useTitleActionsStyles();
 
-  if (!shareAction && !favorite) {
+  if (!shareAction) {
     return null;
   }
 
@@ -66,35 +53,25 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
 
   return (
     <div css={styles.root} data-test-subj="appHeaderTitleActions">
-      {shareAction ? (
-        <EuiToolTip
-          content={shareTooltipContent}
-          title={shareAction.tooltipTitle}
-          {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
-        >
-          <EuiButtonIcon
-            iconType="share"
-            color="text"
-            display="empty"
-            size="xs"
-            css={styles.iconButton}
-            aria-label={SHARE_ARIA_LABEL}
-            isDisabled={shareAction.isDisabled}
-            data-test-subj={`appHeaderShare ${shareAction.testId ?? ''}`.trim()}
-            onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
-              shareAction.onClick(event.currentTarget)
-            }
-          />
-        </EuiToolTip>
-      ) : null}
-      {favorite ? (
-        // Temporary slot: favorite is still a caller-owned React node.
-        // Replace with a typed app-header action before treating it as a stable API.
-        // https://github.com/elastic/kibana/issues/271402
-        <div css={styles.favoriteSlot} data-test-subj="appHeaderFavorite">
-          {favorite}
-        </div>
-      ) : null}
+      <EuiToolTip
+        content={shareTooltipContent}
+        title={shareAction.tooltipTitle}
+        {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
+      >
+        <EuiButtonIcon
+          iconType="share"
+          color="text"
+          display="empty"
+          size="xs"
+          css={styles.iconButton}
+          aria-label={SHARE_ARIA_LABEL}
+          isDisabled={shareAction.isDisabled}
+          data-test-subj={`appHeaderShare ${shareAction.testId ?? ''}`.trim()}
+          onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
+            shareAction.onClick(event.currentTarget)
+          }
+        />
+      </EuiToolTip>
     </div>
   );
 });

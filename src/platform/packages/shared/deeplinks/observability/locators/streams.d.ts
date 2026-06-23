@@ -1,0 +1,1 @@
+export declare const STREAMS_APP_LOCATOR_ID = "STREAMS_APP_LOCATOR";

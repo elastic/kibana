@@ -1,0 +1,14 @@
+export declare const ENTERPRISE_SEARCH_APP_ID = "enterpriseSearch";
+export declare const ENTERPRISE_SEARCH_CONTENT_APP_ID = "enterpriseSearchContent";
+export declare const ENTERPRISE_SEARCH_CONNECTORS_ID = "enterpriseSearchContent:connectors";
+export declare const ENTERPRISE_SEARCH_WEB_CRAWLERS_ID = "enterpriseSearchContent:webCrawlers";
+export declare const ENTERPRISE_SEARCH_APPLICATIONS_APP_ID = "enterpriseSearchApplications";
+export declare const ENTERPRISE_SEARCH_ANALYTICS_APP_ID = "enterpriseSearchAnalytics";
+export declare const SERVERLESS_ES_CONNECTORS_ID = "serverlessConnectors";
+export declare const SERVERLESS_ES_WEB_CRAWLERS_ID = "serverlessWebCrawlers";
+export declare const ES_SEARCH_PLAYGROUND_ID = "searchPlayground";
+export declare const ES_SEARCH_SYNONYMS_ID = "searchSynonyms";
+export declare const SEARCH_QUERY_RULES_ID = "searchQueryRules";
+export declare const SEARCH_HOMEPAGE = "searchHomepage";
+export declare const SEARCH_INDEX_MANAGEMENT = "elasticsearchIndexManagement";
+export declare const SEARCH_GETTING_STARTED = "searchGettingStarted";

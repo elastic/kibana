@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import type {
@@ -23,7 +23,7 @@ import { useHasLegacyActionMenu } from './hooks/chrome';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
 import { AppTabs } from './app_tabs';
-import { TitleArea } from './title_area';
+import { TitleArea, isEditableTitle, type TitleAreaHandle } from './title_area';
 import { TitleActions } from './title_actions';
 import { AppMenu } from './app_menu';
 import { AppHeaderMetadata } from './app_header_metadata';
@@ -68,6 +68,9 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
+    const titleAreaRef = useRef<TitleAreaHandle>(null);
+    const isEditable = title !== undefined && isEditableTitle(title);
+    const onEditTitle = isEditable ? () => titleAreaRef.current?.startEditing() : undefined;
 
     // A second row (tabs or metadata) makes a taller, multi-line header where an `xs` title looks
     // too small, so bump the title to `s` there; single-row headers stay `xs`.
@@ -94,9 +97,18 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea title={title} back={back} size={titleSize} />}
+        title={
+          <TitleArea
+            ref={titleAreaRef}
+            title={title}
+            back={back}
+            size={titleSize}
+            favorite={favorite}
+            onEditTitle={onEditTitle}
+          />
+        }
         badges={<AppBadges badges={resolvedBadges} />}
-        titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
+        titleActions={<TitleActions shareAction={shareAction} />}
         titleAppend={titleAppend}
         trailing={
           <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
