@@ -76,63 +76,6 @@ const createTabsWithStoredTimeDifference = async (pageObjects: PageObjects) => {
   await discover.waitUntilTabIsLoaded();
 };
 
-const createTabsWithUpdatedTimeOnLastTab = async (page: ScoutPage, pageObjects: PageObjects) => {
-  const { discover, unifiedTabs } = pageObjects;
-
-  await expect(async () => {
-    expect(await getCurrentTimeConfiguration(page, pageObjects)).toStrictEqual(
-      INITIAL_TIME_CONFIGURATION
-    );
-  }).toPass();
-
-  await unifiedTabs.createNewTab();
-  await discover.waitUntilTabIsLoaded();
-  await expect(async () => {
-    expect(await getCurrentTimeConfiguration(page, pageObjects)).toStrictEqual(
-      INITIAL_TIME_CONFIGURATION
-    );
-  }).toPass();
-
-  await unifiedTabs.createNewTab();
-  await discover.waitUntilTabIsLoaded();
-  await expect(async () => {
-    expect(await getCurrentTimeConfiguration(page, pageObjects)).toStrictEqual(
-      INITIAL_TIME_CONFIGURATION
-    );
-  }).toPass();
-
-  await configureUpdatedTime(pageObjects);
-  await expect(async () => {
-    expect(await getCurrentTimeConfiguration(page, pageObjects)).toStrictEqual(
-      UPDATED_TIME_CONFIGURATION
-    );
-  }).toPass();
-
-  await unifiedTabs.selectTab(1);
-  await discover.waitUntilTabIsLoaded();
-  await expect(async () => {
-    expect(await getCurrentTimeConfiguration(page, pageObjects)).toStrictEqual(
-      INITIAL_TIME_CONFIGURATION
-    );
-  }).toPass();
-
-  await unifiedTabs.selectTab(2);
-  await discover.waitUntilTabIsLoaded();
-  await expect(async () => {
-    expect(await getCurrentTimeConfiguration(page, pageObjects)).toStrictEqual(
-      UPDATED_TIME_CONFIGURATION
-    );
-  }).toPass();
-
-  await unifiedTabs.selectTab(0);
-  await discover.waitUntilTabIsLoaded();
-  await expect(async () => {
-    expect(await getCurrentTimeConfiguration(page, pageObjects)).toStrictEqual(
-      INITIAL_TIME_CONFIGURATION
-    );
-  }).toPass();
-};
-
 spaceTest.describe('Discover tabs - time range', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -158,7 +101,7 @@ spaceTest.describe('Discover tabs - time range', { tag: '@local-stateful-classic
       const { discover, unifiedTabs } = pageObjects;
       const sessionName = 'tabs time range without stored time';
 
-      await createTabsWithUpdatedTimeOnLastTab(page, pageObjects);
+      await createTabsWithStoredTimeDifference(pageObjects);
       await discover.saveSearch(sessionName, { storeTimeRange: false });
       await discover.waitUntilTabIsLoaded();
       expect(await discover.hasUnsavedChangesIndicator()).toBe(false);
