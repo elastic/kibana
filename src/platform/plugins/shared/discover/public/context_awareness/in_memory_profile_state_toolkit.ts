@@ -23,7 +23,7 @@ export const createInMemoryContextAwarenessToolkit = ({
   actions?: ContextAwarenessToolkitActions;
   profileStateRegistry: ProfileStateRegistry;
 }): ContextAwarenessToolkit => {
-  const stateAdapters = new Map<string, ProfileStateAdapter<object>>();
+  const stateAdapters = new Map<string, ProfileStateAdapter<Record<string, unknown>>>();
 
   return {
     actions,
@@ -35,7 +35,7 @@ export const createInMemoryContextAwarenessToolkit = ({
       const existingAdapter = stateAdapters.get(definition.key);
 
       if (existingAdapter) {
-        return existingAdapter as unknown as ProfileStateAdapter<TState>;
+        return existingAdapter as ProfileStateAdapter<TState>;
       }
 
       const stateSubject = new BehaviorSubject<TState>(definition.defaultState);
@@ -53,7 +53,7 @@ export const createInMemoryContextAwarenessToolkit = ({
         },
       };
 
-      stateAdapters.set(definition.key, adapter as unknown as ProfileStateAdapter<object>);
+      stateAdapters.set(definition.key, adapter as ProfileStateAdapter<Record<string, unknown>>);
 
       return adapter;
     },

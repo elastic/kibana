@@ -28,7 +28,7 @@ export const createContextAwarenessToolkit = ({
   profileStateRegistry: ProfileStateRegistry;
   tabId: string;
 }): ContextAwarenessToolkit => {
-  const stateAdapters = new Map<string, ProfileStateAdapter<object>>();
+  const stateAdapters = new Map<string, ProfileStateAdapter<Record<string, unknown>>>();
 
   return {
     actions: {
@@ -65,7 +65,7 @@ export const createContextAwarenessToolkit = ({
       const existingAdapter = stateAdapters.get(definition.key);
 
       if (existingAdapter) {
-        return existingAdapter as unknown as ProfileStateAdapter<TState>;
+        return existingAdapter as ProfileStateAdapter<TState>;
       }
 
       const getState = () => {
@@ -99,7 +99,7 @@ export const createContextAwarenessToolkit = ({
         },
       };
 
-      stateAdapters.set(definition.key, adapter as unknown as ProfileStateAdapter<object>);
+      stateAdapters.set(definition.key, adapter as ProfileStateAdapter<Record<string, unknown>>);
 
       return adapter;
     },
