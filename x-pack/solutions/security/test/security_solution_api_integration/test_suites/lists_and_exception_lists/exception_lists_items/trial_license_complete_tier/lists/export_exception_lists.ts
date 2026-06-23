@@ -134,6 +134,55 @@ export default ({ getService }: FtrProviderContext) => {
       expect(exportedItems).toHaveLength(6); // 3 lists * 2 items
     });
 
+    describe('with a list-attribute filter', () => {
+      // Regression test for a bug where the user-supplied filter (which selects
+      // lists) was also applied to the items query, silently dropping items
+      // whose attributes did not match a list-shaped filter. See
+      // https://github.com/elastic/kibana/pull/228524#discussion_r3459698892
+      const listName = 'Filter By Name List';
+
+      before(async () => {
+        await createExceptionList(supertest, log, {
+          ...getCreateExceptionListMinimalSchemaMock({
+            list_id: 'filter-by-name-list',
+            type: DETECTION_TYPE,
+          }),
+          name: listName,
+        });
+        await createExceptionListItem(supertest, log, {
+          ...getCreateExceptionListItemMinimalSchemaMock({
+            item_id: 'filter-by-name-item',
+            list_id: 'filter-by-name-list',
+          }),
+        });
+      });
+
+      after(async () => {
+        await deleteExceptionListItem(supertest, log, 'filter-by-name-item');
+        await deleteExceptionList(supertest, log, 'filter-by-name-list');
+      });
+
+      it('exports the items of lists selected by a non-item attribute', async () => {
+        const { body } = await supertest
+          .post(
+            `${EXCEPTION_LIST_URL}/_bulk_export?filter=${encodeURIComponent(
+              `exception-list.attributes.name:"${listName}"`
+            )}`
+          )
+          .set('kbn-xsrf', 'true')
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRows: Array<{ type: string; list_id?: string }> = parseRows(body);
+        const exportedLists = exportedRows.filter((row) => row?.type === DETECTION_TYPE);
+        const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
+
+        expect(exportedLists).toHaveLength(1); // only the uniquely-named list
+        expect(exportedItems).toHaveLength(1); // its item, despite not matching the name filter
+        expect(exportedItems.map((row) => row.list_id)).toEqual(['filter-by-name-list']);
+      });
+    });
+
     describe('with an expired exception', () => {
       before(async () => {
         await createExceptionListItem(supertest, log, {

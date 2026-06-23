@@ -110,16 +110,17 @@ export const exportExceptionListsAndItems = async ({
   const appendExceptionItem = (response: FoundExceptionListItemSchema): void => {
     exceptionItems.push(...response.data);
   };
-  let filter = dataFilter;
+
+  // The user-supplied `dataFilter` selects which lists to export; it is applied
+  // to the lists query only. Items are retrieved by their parent list_ids (see
+  // `listIds` below), so threading the list filter into the items query would
+  // incorrectly drop items whose attributes don't match a list-shaped filter
+  // (e.g. `exception-list.attributes.name: "..."`). The only constraint we add
+  // to the items query is the optional expired-exceptions clause.
+  let filter: string | undefined;
 
   if (!includeExpiredExceptions) {
-    const noExpiredItemsFilter = `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`;
-
-    if (filter) {
-      filter = `(${filter}) AND ${noExpiredItemsFilter}`;
-    } else {
-      filter = noExpiredItemsFilter;
-    }
+    filter = `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`;
   }
 
   // Cap items at the remaining budget, again with +1 so we can detect overflow.

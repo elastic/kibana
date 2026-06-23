@@ -168,6 +168,44 @@ describe('export_exception_lists_and_items', () => {
       );
     });
 
+    it('does not apply the user-supplied filter to the items query', async () => {
+      // The filter selects which lists to export; items are retrieved by their
+      // parent list_ids. Applying a list-shaped filter (e.g. on `name`) to the
+      // items query would incorrectly drop the lists' items.
+      mockListsFinder([getExceptionListSchemaMock()]);
+      mockItemsFinder([]);
+
+      await exportExceptionListsAndItems({
+        ...baseOptions,
+        filter: 'exception-list.attributes.name: "Shared list"',
+      });
+
+      expect(findExceptionListsItemsPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: undefined,
+        })
+      );
+    });
+
+    it('applies only the expiration clause to the items query when the user supplies a filter', async () => {
+      mockListsFinder([getExceptionListSchemaMock()]);
+      mockItemsFinder([]);
+
+      await exportExceptionListsAndItems({
+        ...baseOptions,
+        filter: 'exception-list.attributes.name: "Shared list"',
+        includeExpiredExceptions: false,
+      });
+
+      expect(findExceptionListsItemsPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringMatching(
+            /^\(exception-list\.attributes\.expire_time > "[^"]+" OR NOT exception-list\.attributes\.expire_time: \*\)$/
+          ),
+        })
+      );
+    });
+
     describe('when exception list count exceeds the default export size limit', () => {
       const overflowingLists = Array.from({ length: EXPORT_SIZE_LIMIT + 1 }, () =>
         getExceptionListSchemaMock()
