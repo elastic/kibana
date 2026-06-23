@@ -38,6 +38,9 @@ export function Actions() {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
+      aria-label={i18n.translate('xpack.synthetics.monitorDetails.actions.popoverAriaLabel', {
+        defaultMessage: 'Monitor actions menu',
+      })}
     >
       <EuiContextMenuPanel
         items={[
