@@ -26,7 +26,7 @@ const fieldSchema = z.object({
   destination: z.string(),
   mapping: z.optional(mappingSchema),
   retention: retentionOperationSchema,
-  skipExtraction: z.optional(z.boolean()).default(false),
+  skipExtraction: z.boolean().optional(),
   source: z.string(),
 });
 
