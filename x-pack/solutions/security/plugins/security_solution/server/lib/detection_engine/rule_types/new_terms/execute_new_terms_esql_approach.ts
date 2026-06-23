@@ -45,7 +45,7 @@ type NewTermsExecutorOptions = SecurityExecutorOptions<
   { isLoggedRequestsEnabled?: boolean }
 >;
 
-type NewTermsCombination = Record<string, string | number>;
+type NewTermsCombination = Record<string, string | number | boolean>;
 
 interface BuildNewTermsEsqlQueryParams {
   inputIndex: string[];
@@ -110,9 +110,7 @@ const parseNewTermsCombinationsFromEsqlResponse = (
       const fieldIndex = newTermsFieldIndices[i];
       const fieldValue = fieldIndex >= 0 ? row[fieldIndex] : null;
       if (fieldValue != null) {
-        // Coerce booleans to strings since the alert schema only supports string | number
-        combination[newTermsFields[i]] =
-          typeof fieldValue === 'boolean' ? String(fieldValue) : (fieldValue as string | number);
+        combination[newTermsFields[i]] = fieldValue as string | number | boolean;
       }
     }
     if (Object.keys(combination).length === newTermsFields.length) {

@@ -504,7 +504,7 @@ export default ({ getService }: FtrProviderContext) => {
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
       expect(previewAlerts.length).toEqual(1);
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['user-0', 'false']);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['user-0', false]);
     });
 
     it('should generate alerts for every term when history window is small', async () => {
