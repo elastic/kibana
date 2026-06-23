@@ -35,7 +35,7 @@ import {
   type EvalsExecutorClient,
   type Example,
 } from '@kbn/evals';
-import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { Client as TraceEsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
@@ -89,7 +89,7 @@ function createEvaluateTriageQuality({
   connector: { id: string };
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
-  traceEsClient: EsClient;
+  traceEsClient: TraceEsClient;
   log: ToolingLog;
 }) {
   return async function evaluateTriageQuality({
