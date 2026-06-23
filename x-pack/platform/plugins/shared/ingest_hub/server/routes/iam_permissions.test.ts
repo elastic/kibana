@@ -60,7 +60,7 @@ describe('registerIamPermissionsRoute', () => {
 
   it('registers a GET route at the correct path', () => {
     const [config] = router.get.mock.calls[0];
-    expect(config.path).toBe('/internal/ingest_hub/iam_permissions');
+    expect(config.path).toBe('/internal/onboarding/iam_permissions');
     expect(config.security?.authz).toMatchObject({ enabled: false });
   });
 

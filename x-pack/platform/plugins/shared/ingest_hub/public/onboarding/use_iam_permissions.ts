@@ -19,7 +19,7 @@ export interface UseIamPermissionsResult {
 }
 
 /**
- * Fetches IAM permissions from `GET /internal/ingest_hub/iam_permissions?services=...`.
+ * Fetches IAM permissions from `GET /internal/onboarding/iam_permissions?services=...`.
  * Re-fetches whenever `serviceIds` changes (by identity of the sorted comma-joined string).
  */
 export const useIamPermissions = (serviceIds: string[]): UseIamPermissionsResult => {
