@@ -15,15 +15,15 @@ import {
 
 describe('resolveTypeCheckConcurrency', () => {
   it('defaults builders to floor(cores/checkers) so total workers equal core count', () => {
-    expect(resolveTypeCheckConcurrency({}, 8)).toEqual({
-      builders: 4, // floor(8 / 2)
-      checkers: 2,
+    expect(resolveTypeCheckConcurrency({}, 12)).toEqual({
+      builders: 4, // floor(12 / 3)
+      checkers: 3,
       stopOnErrors: false,
     });
   });
 
   it('scales builders with core count on many-core machines', () => {
-    expect(resolveTypeCheckConcurrency({}, 64).builders).toBe(32); // floor(64 / 2)
+    expect(resolveTypeCheckConcurrency({}, 32).builders).toBe(10); // floor(32 / 3)
   });
 
   it('honors env overrides', () => {
@@ -42,10 +42,10 @@ describe('resolveTypeCheckConcurrency', () => {
   it('ignores invalid/non-positive env values and falls back to defaults', () => {
     const resolved = resolveTypeCheckConcurrency(
       { KBN_TYPE_CHECK_BUILDERS: '0', KBN_TYPE_CHECK_CHECKERS: 'nope' },
-      8
+      12
     );
-    expect(resolved.builders).toBe(4); // floor(8 / 2)
-    expect(resolved.checkers).toBe(2);
+    expect(resolved.builders).toBe(4); // floor(12 / 3)
+    expect(resolved.checkers).toBe(3);
   });
 });
 

@@ -28,7 +28,7 @@ export const ENV_CHECKERS = 'KBN_TYPE_CHECK_CHECKERS';
 export const ENV_STOP_ON_ERRORS = 'KBN_TYPE_CHECK_STOP_ON_ERRORS';
 export const ENV_MAX_OLD_SPACE = 'KBN_TYPE_CHECK_MAX_OLD_SPACE_MB';
 
-const DEFAULT_CHECKERS = 2;
+const DEFAULT_CHECKERS = 3;
 const DEFAULT_MAX_OLD_SPACE_MB = 12288;
 
 export interface TypeCheckConcurrency {
