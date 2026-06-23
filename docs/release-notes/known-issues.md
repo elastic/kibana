@@ -8,7 +8,7 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
-::::{dropdown} Upgrading to versions 9.4.0-9.4.2 might cause instability with Kibana on deployments with many rules
+::::{dropdown} Upgrading to versions 9.4.0-9.4.2 on deployments with many rules might cause {{kib}} instability
 
 Applies to: {{stack}} 9.4.0-9.4.2
 
