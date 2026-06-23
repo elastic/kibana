@@ -4,37 +4,48 @@ Anonymization \- One Pager
 
 ## Comparing the options
 
-We evaluated two approaches for wiring PII anonymization into the **inference pipeline**. Here's the breakdown.
+We evaluated two approaches for wiring PII anonymization into the **inference pipeline**. The options share a large common foundation; the comparison below focuses on what actually differs.
 
-## Option 1: beforeCompletion & afterCompletion hooks added to the Inference plugin
+## Both options
 
-Two separate YAML workflows. The key architectural point: the LLM call is made directly by the **Inference plugin** in TypeScript \- it never passes through the YAML expression engine. This is what makes streaming possible: the expression engine can only resolve inputs from fully materialized values (an expression like `${{ steps.llm.output.response }}` cannot be fed a chunk at a time), so any workflow step that owns the LLM call is forced to buffer the entire response.
+Both options add **synchronous lifecycle hooks at the `inference` plugin's `chatComplete` boundary** — the single point every LLM call in Kibana passes through. They share the same underlying architecture, behavior, and constraints.
 
-By keeping the connector call in TypeScript, the Inference plugin de-anonymizes each chunk as it arrives and forwards it to the caller immediately. The `afterCompletion` workflow is only invoked once the full response is assembled.
+**Pros**
+
+- Streaming with inline TTFT \- chunks are de-anonymized and forwarded to the caller immediately via a sliding hold-buffer; no full-response buffering in either model  
+- Per-space configuration \- each space independently enables, disables, and customizes detection rules  
+- Fail-closed by default \- if hooks error or time out, the call is blocked rather than leaking PII; admins can opt into fail-open (`allow_unsafe`) per space  
+- Text-level, ESQL-safe \- hooks operate on the assembled prompt text; no field lineage required
+
+**Cons**
+
+- Run synchronously on the LLM call path \- workflow complexity directly increases user-perceived latency  
+- Phase 1 is regex-only (IPs, emails, hostnames, usernames, custom patterns); NER is a Phase 2 addition
+
+---
+
+## Option 1: beforeCompletion & afterCompletion
+
+Two separate YAML workflows. The key architectural point: the LLM call is made directly by the **Inference plugin** in TypeScript \- it never passes through the YAML expression engine. The Inference plugin de-anonymizes each chunk as it arrives and forwards it to the caller immediately. The `afterCompletion` workflow is only invoked once the full response is assembled. The token map is transported as a plain TypeScript local variable between the two hooks and injected into the `afterCompletion` event payload — it never passes through YAML context.
 
 | ![][image1] |
 | :---- |
 
 **Pros**
 
-- Streaming to caller starts immediately \- Time To First Token (TTFT) is unaffected  
-- Per-space configuration \- each space can independently enable, disable, and customize detection rules  
-- Each workflow is simple and single-purpose  
-- Fail-closed by default \- if either hook errors or times out, the call is blocked rather than leaking PII; admins can opt into fail-open (`allow_unsafe`) per space if availability matters more than strict protection
+- Multi-workflow composition is clean \- no workflow owns the LLM call; additional workflows on the same hook (telemetry, guards) compose without engine changes  
+- Simple mental model \- before/after are plain event handlers with no suspend/resume mechanism
 
 **Cons**
 
-- Hooks run synchronously on the LLM call path \- each hook has a hard per-workflow timeout (default 15s); a slow or complex workflow directly increases user-perceived latency  
-- Initial detection is regex-only (IP, email, hostname, custom patterns); NER (ML-based named entity recognition) is a potential later addition  
-- Two workflows must both be enabled \- operational footgun if one is orphaned  
-- Token map lives in-memory between the two hooks; no shared context within one YAML file  
-- Post-LLM YAML logic must live in `afterCompletion`, physically separate from the pre-LLM logic
+- Two workflows must both be enabled \- operational risk if one is orphaned while the other is active  
+- Pre- and post-LLM logic live in separate YAML files \- post steps cannot reference pre step outputs via template expressions; token map transport is handled by the Inference plugin in TypeScript, not via YAML context
 
 ---
 
-## Option 2: `aroundCompletion` hook with `call_site.proceed` 
+## Option 2: `aroundCompletion` hook with `call_site.proceed`
 
-A single YAML workflow owns the full pipeline. It anonymizes the prompt, then signals the Inference plugin to make the LLM call via a `call_site.proceed` step. The Inference plugin streams de-anonymized chunks to the caller in real time while simultaneously buffering the assembled response as step output, allowing the workflow to continue with post-LLM steps such as token restoration.
+A single YAML workflow owns the full pipeline. It anonymizes the prompt, then triggers the LLM call via a `call_site.proceed` step. The Inference plugin forwards de-anonymized chunks to the caller immediately as they arrive, while the workflow continues with post-LLM steps using the assembled response.
 
 | ![][image2] |
 | :---- |
@@ -42,31 +53,26 @@ A single YAML workflow owns the full pipeline. It anonymizes the prompt, then si
 **Pros**
 
 - Single workflow \= single unit to deploy, enable, and reason about  
-- Pre- and post-LLM logic co-located in one YAML file  
-- Per-space configuration \- each space can independently enable, disable, and customize detection rules  
-- Simpler admin experience (one thing to toggle)  
-- Post-LLM steps can directly reference pre-LLM step outputs via template expressions
+- Pre- and post-LLM logic co-located in one YAML file \- post steps can directly reference pre step outputs via template expressions  
+- Simpler admin experience (one thing to toggle)
 
 **Cons**
 
-- After some earlier concerns on how to handle streaming within the around hook we have confirmed streaming is still viable \- a streaming proceed prototype shows `call_site.proceed` can stream de-anonymized chunks to the caller inline while buffering the assembled response as step output. The open question is how additional workflows on the same hook (telemetry, output transforms) access the LLM response without triggering a second call. Solution paths exist (first-call-wins caching, phased execution, sequential result forwarding) but each adds engine complexity and affects the mental model for workflow authors reasoning about proceed ownership  
-- Runs synchronously on the LLM call path \- hard per-workflow timeout (default 30s) applies; workflow complexity directly increases latency  
-- Requires `call_site.proceed` step support in the workflow engine  
-- `proceedFn` capability adds a more complex mental model than simple before/after
+- Multi-workflow composition is unsolved \- additional workflows on the same hook (telemetry, guards) have no clean path to the LLM response without triggering a second call; candidate solutions exist (first-call-wins caching, phased execution, sequential result forwarding) but each adds engine complexity  
+- Requires `call_site.proceed` \- introduces a suspend/resume mechanism with a more complex mental model than plain event handlers
 
 Read more about other options we explored [here](#other-technical-options-we-explored).
 
 # User Problems
 
-# PII Anonymization for Agent Builder \[draft\]
+# PII Anonymization for Agent Builder
 
 | Reviewer | Comment | Status |
 | :---- | :---- | :---- |
-| [James Spiteri](mailto:james.spiteri@elastic.co) |  | In progress |
+| [James Spiteri](mailto:james.spiteri@elastic.co) |  | Approved |
 | [Yuliia Naumenko](mailto:yuliia.naumenko@elastic.co) |  | Approved |
 | [Anish Mathur](mailto:anish.mathur@elastic.co) |  | Approved |
 | [Tinsae Erkailo](mailto:tin@elastic.co) |  | Not started |
-| [Snehal Adlinge](mailto:snehal.adlinge@elastic.co) |  | Not started |
 
 ## User problems
 
@@ -121,10 +127,12 @@ The fundamental problem the global solution ran into was that field-level anonym
 * **Admin-customizable.** Configuration is workflow YAML, not code. Admins add custom patterns, enable or disable rules, and adjust per-space without a code deployment.  
 * **Extensible.** Any team can subscribe custom anonymization logic via workflow steps. While any LLM traffic from other plugins (Cases, Dashboards, etc.) is automatically protected by this inference-layer integration, adding specialized lifecycle hooks to those plugins' internal operations (e.g., `cases.beforeSave` or `dashboards.onView`) is out of scope for this phase.
 
+Critically, the existing O11y implementation at `chat_complete/anonymization/` already establishes one key technical pattern this proposal builds directly on: a **Piscina worker pool** (`RegexWorkerService`) for off-event-loop regex execution, ensuring regex scanning never blocks the Node.js event loop. The `ai.pii` workflow step will use the same pattern, either by extracting `RegexWorkerService` to a shared package or initializing an equivalent pool at plugin setup. The proposed solution extends this foundation — making it per-space, workflow-configurable, and available to all solutions — rather than reinventing it. (The per-chunk sliding-buffer de-anonymization and the lifecycle hook wiring at the `chatComplete` boundary are new work in this proposal; the existing implementation buffers the full response and emits a single synthetic de-anonymized chunk at the end.)
 
 ## How It Works
 
-![][image3]
+| inference.beforeCompletion / inference.afterCompletion hook![][image3] | inference.aroundCompletion hook![][image4] |
+| :---- | :---- |
 
 ### Hook Models
 
@@ -253,6 +261,8 @@ Admins can add organization-specific regex patterns with a label and entity clas
 ### Performance
 
 Regex scanning adds latency to every prompt. With a small rule set (10-20 patterns), benchmarks from the existing inference regex worker show sub-100ms overhead. The workflow engine's 15-second timeout provides a hard cap.
+
+The `ai.pii` step will use the same Piscina worker pool approach as the existing `RegexWorkerService` (`chat_complete/anonymization/`), offloading regex execution to worker threads so it does not block the Node.js event loop. The worker pool is initialized once at plugin setup and shared across all step invocations. The implementation will either reuse the existing service via extraction to a shared package, or maintain its own equivalent pool in the `inference_workflows` plugin.
 
 ### Legacy Settings Migration
 
@@ -394,3 +404,5 @@ The inference plugin already has a full anonymization implementation (`chat_comp
 [image2]: <data:image/png;base64,>
 
 [image3]: <data:image/png;base64,>
+
+[image4]: <data:image/png;base64,>
