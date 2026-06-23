@@ -2494,7 +2494,7 @@
     },
     {
       "groupName": "@swc",
-      "matchDepNames": ["@swc/core", "@swc/helpers"],
+      "matchDepNames": ["@swc/core", "@swc/helpers", "@swc/plugin-emotion"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
