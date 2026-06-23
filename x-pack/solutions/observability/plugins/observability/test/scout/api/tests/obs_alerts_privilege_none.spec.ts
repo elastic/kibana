@@ -37,57 +37,51 @@ apiTest.describe(
       await teardownObsAlertsPrivilegeRules(apiClient, state.adminCreds, state.createdRules);
     });
 
-    apiTest.describe('per-alert mute/unmute denial', () => {
-      for (const spec of RULE_SPECS) {
-        apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
-            { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
-          );
-          expect(response).toHaveStatusCode(403);
-        });
-
-        apiTest(`cannot unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
-            { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
-          );
-          expect(response).toHaveStatusCode(403);
-        });
-      }
-    });
-
-    apiTest.describe('alert read denial', () => {
-      apiTest('cannot find alerts via RAC', async ({ apiClient }) => {
-        const response = await apiClient.post('internal/rac/alerts/find', {
-          headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
-          body: {
-            rule_type_ids: ['.es-query'],
-            consumers: ['logs'],
-            query: { match_all: {} },
-            size: 10,
-          },
-          responseType: 'json',
-        });
+    for (const spec of RULE_SPECS) {
+      apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const response = await apiClient.post(
+          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+          { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
+        );
         expect(response).toHaveStatusCode(403);
       });
-    });
 
-    apiTest.describe('alert acknowledge denial', () => {
-      apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
-        const response = await apiClient.post('internal/rac/alerts/bulk_update', {
-          headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
-          body: {
-            status: 'acknowledged',
-            ids: [state.realAlertId],
-            index: '.alerts-stack.alerts-default',
-          },
-          responseType: 'json',
-        });
+      apiTest(`cannot unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const response = await apiClient.post(
+          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
+          { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
+        );
         expect(response).toHaveStatusCode(403);
       });
+    }
+
+    apiTest('cannot find alerts via RAC', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/rac/alerts/find', {
+        headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
+        body: {
+          rule_type_ids: ['.es-query'],
+          consumers: ['logs'],
+          query: { match_all: {} },
+          size: 10,
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(403);
+    });
+
+    apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/rac/alerts/bulk_update', {
+        headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
+        body: {
+          status: 'acknowledged',
+          ids: [state.realAlertId],
+          index: '.alerts-stack.alerts-default',
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(403);
     });
   }
 );

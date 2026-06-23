@@ -37,78 +37,70 @@ apiTest.describe(
       await teardownObsAlertsPrivilegeRules(apiClient, state.adminCreds, state.createdRules);
     });
 
-    apiTest.describe('alert read', () => {
-      apiTest('can find alerts via RAC', async ({ apiClient }) => {
-        const response = await apiClient.post('internal/rac/alerts/find', {
-          headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
-          body: {
-            rule_type_ids: ['.es-query'],
-            consumers: ['logs'],
-            query: { match_all: {} },
-            size: 10,
-          },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-
-        const body = response.body as {
-          hits?: {
-            total?: { value?: number };
-            hits?: Array<{ _source: Record<string, unknown> }>;
-          };
-        };
-        expect(body.hits?.total?.value).toBeGreaterThan(0);
+    apiTest('can find alerts via RAC', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/rac/alerts/find', {
+        headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+        body: {
+          rule_type_ids: ['.es-query'],
+          consumers: ['logs'],
+          query: { match_all: {} },
+          size: 10,
+        },
+        responseType: 'json',
       });
+      expect(response).toHaveStatusCode(200);
+
+      const body = response.body as {
+        hits?: {
+          total?: { value?: number };
+          hits?: Array<{ _source: Record<string, unknown> }>;
+        };
+      };
+      expect(body.hits?.total?.value).toBeGreaterThan(0);
     });
 
-    apiTest.describe('per-alert mute/unmute denial', () => {
-      for (const spec of RULE_SPECS) {
-        apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
-            { headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader } }
-          );
-          expect(response).toHaveStatusCode(403);
-        });
-      }
+    for (const spec of RULE_SPECS) {
+      apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const response = await apiClient.post(
+          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+          { headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader } }
+        );
+        expect(response).toHaveStatusCode(403);
+      });
+    }
+
+    apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/rac/alerts/bulk_update', {
+        headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+        body: {
+          status: 'acknowledged',
+          ids: [state.realAlertId],
+          index: '.alerts-stack.alerts-default',
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(403);
     });
 
-    apiTest.describe('alert acknowledge denial', () => {
-      apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
-        const response = await apiClient.post('internal/rac/alerts/bulk_update', {
+    for (const spec of RULE_SPECS) {
+      apiTest(`cannot create a ${spec.ruleTypeId} rule`, async ({ apiClient }) => {
+        const response = await apiClient.post('api/alerting/rule', {
           headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
           body: {
-            status: 'acknowledged',
-            ids: [state.realAlertId],
-            index: '.alerts-stack.alerts-default',
+            name: 'Should fail',
+            rule_type_id: spec.ruleTypeId,
+            consumer: spec.consumer,
+            schedule: { interval: '1m' },
+            enabled: false,
+            params: spec.params,
+            actions: [],
+            tags: [],
           },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(403);
       });
-    });
-
-    apiTest.describe('rule CRUD denial', () => {
-      for (const spec of RULE_SPECS) {
-        apiTest(`cannot create a ${spec.ruleTypeId} rule`, async ({ apiClient }) => {
-          const response = await apiClient.post('api/alerting/rule', {
-            headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
-            body: {
-              name: 'Should fail',
-              rule_type_id: spec.ruleTypeId,
-              consumer: spec.consumer,
-              schedule: { interval: '1m' },
-              enabled: false,
-              params: spec.params,
-              actions: [],
-              tags: [],
-            },
-            responseType: 'json',
-          });
-          expect(response).toHaveStatusCode(403);
-        });
-      }
-    });
+    }
   }
 );

@@ -37,35 +37,16 @@ apiTest.describe(
       await teardownObsAlertsPrivilegeRules(apiClient, state.adminCreds, state.createdRules);
     });
 
-    apiTest.describe('rule CRUD denial', () => {
-      for (const spec of RULE_SPECS) {
-        apiTest(`cannot create a ${spec.ruleTypeId} rule`, async ({ apiClient }) => {
-          const response = await apiClient.post('api/alerting/rule', {
-            headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
-            body: {
-              name: 'Should fail',
-              rule_type_id: spec.ruleTypeId,
-              consumer: spec.consumer,
-              schedule: { interval: '1m' },
-              enabled: false,
-              params: spec.params,
-              actions: [],
-              tags: [],
-            },
-            responseType: 'json',
-          });
-          expect(response).toHaveStatusCode(403);
-        });
-      }
-
-      apiTest('cannot update a rule', async ({ apiClient }) => {
-        const { ruleId, ruleTypeId } = state.createdRules[0];
-        const spec = RULE_SPECS.find((s) => s.ruleTypeId === ruleTypeId)!;
-        const response = await apiClient.put(`api/alerting/rule/${ruleId}`, {
+    for (const spec of RULE_SPECS) {
+      apiTest(`cannot create a ${spec.ruleTypeId} rule`, async ({ apiClient }) => {
+        const response = await apiClient.post('api/alerting/rule', {
           headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
           body: {
-            name: 'Updated name',
-            schedule: { interval: '2m' },
+            name: 'Should fail',
+            rule_type_id: spec.ruleTypeId,
+            consumer: spec.consumer,
+            schedule: { interval: '1m' },
+            enabled: false,
             params: spec.params,
             actions: [],
             tags: [],
@@ -74,107 +55,118 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(403);
       });
+    }
 
-      apiTest('cannot delete a rule', async ({ apiClient }) => {
-        const { ruleId } = state.createdRules[0];
-        const response = await apiClient.delete(`api/alerting/rule/${ruleId}`, {
-          headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(403);
+    apiTest('cannot update a rule', async ({ apiClient }) => {
+      const { ruleId, ruleTypeId } = state.createdRules[0];
+      const spec = RULE_SPECS.find((s) => s.ruleTypeId === ruleTypeId)!;
+      const response = await apiClient.put(`api/alerting/rule/${ruleId}`, {
+        headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        body: {
+          name: 'Updated name',
+          schedule: { interval: '2m' },
+          params: spec.params,
+          actions: [],
+          tags: [],
+        },
+        responseType: 'json',
       });
+      expect(response).toHaveStatusCode(403);
+    });
 
-      apiTest('cannot mute all alerts on a rule', async ({ apiClient }) => {
-        const { ruleId } = state.createdRules[0];
-        const response = await apiClient.post(`api/alerting/rule/${ruleId}/_mute_all`, {
-          headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
-        });
-        expect(response).toHaveStatusCode(403);
+    apiTest('cannot delete a rule', async ({ apiClient }) => {
+      const { ruleId } = state.createdRules[0];
+      const response = await apiClient.delete(`api/alerting/rule/${ruleId}`, {
+        headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        responseType: 'json',
       });
+      expect(response).toHaveStatusCode(403);
+    });
 
-      apiTest('cannot snooze a rule', async ({ apiClient }) => {
-        const { ruleId } = state.createdRules[0];
-        const response = await apiClient.post(`internal/alerting/rule/${ruleId}/_snooze`, {
-          headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
-          body: {
-            snooze_schedule: {
-              duration: 3600000,
-              rRule: {
-                dtstart: new Date().toISOString(),
-                tzid: 'UTC',
-                count: 1,
-              },
+    apiTest('cannot mute all alerts on a rule', async ({ apiClient }) => {
+      const { ruleId } = state.createdRules[0];
+      const response = await apiClient.post(`api/alerting/rule/${ruleId}/_mute_all`, {
+        headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+      });
+      expect(response).toHaveStatusCode(403);
+    });
+
+    apiTest('cannot snooze a rule', async ({ apiClient }) => {
+      const { ruleId } = state.createdRules[0];
+      const response = await apiClient.post(`internal/alerting/rule/${ruleId}/_snooze`, {
+        headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        body: {
+          snooze_schedule: {
+            duration: 3600000,
+            rRule: {
+              dtstart: new Date().toISOString(),
+              tzid: 'UTC',
+              count: 1,
             },
           },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(403);
+        },
+        responseType: 'json',
       });
+      expect(response).toHaveStatusCode(403);
     });
 
-    apiTest.describe('per-alert mute/unmute', () => {
-      for (const spec of RULE_SPECS) {
-        apiTest(`can mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
-            { headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
-          );
-          expect(response).toHaveStatusCode(204);
-        });
+    for (const spec of RULE_SPECS) {
+      apiTest(`can mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const response = await apiClient.post(
+          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+          { headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
+        );
+        expect(response).toHaveStatusCode(204);
+      });
 
-        apiTest(`can unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
-            { headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
-          );
-          expect(response).toHaveStatusCode(204);
-        });
-      }
-    });
+      apiTest(`can unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
+        const response = await apiClient.post(
+          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
+          { headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader } }
+        );
+        expect(response).toHaveStatusCode(204);
+      });
+    }
 
-    apiTest.describe('alert read', () => {
-      apiTest('can find alerts via RAC', async ({ apiClient }) => {
-        const response = await apiClient.post('internal/rac/alerts/find', {
-          headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
-          body: {
-            rule_type_ids: ['.es-query'],
-            consumers: ['logs'],
-            query: { match_all: {} },
-            size: 10,
-          },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
+    apiTest('can find alerts via RAC', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/rac/alerts/find', {
+        headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        body: {
+          rule_type_ids: ['.es-query'],
+          consumers: ['logs'],
+          query: { match_all: {} },
+          size: 10,
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
 
-        const body = response.body as {
-          hits?: {
-            total?: { value?: number };
-            hits?: Array<{ _source: Record<string, unknown> }>;
-          };
+      const body = response.body as {
+        hits?: {
+          total?: { value?: number };
+          hits?: Array<{ _source: Record<string, unknown> }>;
         };
-        expect(body.hits?.total?.value).toBeGreaterThan(0);
+      };
+      expect(body.hits?.total?.value).toBeGreaterThan(0);
 
-        const alert = body.hits!.hits![0]._source;
-        expect(alert['kibana.alert.rule.rule_type_id']).toBe('.es-query');
-        expect(alert['kibana.alert.status']).toBeDefined();
-      });
+      const alert = body.hits!.hits![0]._source;
+      expect(alert['kibana.alert.rule.rule_type_id']).toBe('.es-query');
+      expect(alert['kibana.alert.status']).toBeDefined();
     });
 
-    apiTest.describe('alert acknowledge', () => {
-      apiTest('can acknowledge a real alert via bulk update', async ({ apiClient }) => {
-        const response = await apiClient.post('internal/rac/alerts/bulk_update', {
-          headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
-          body: {
-            status: 'acknowledged',
-            ids: [state.realAlertId],
-            index: '.alerts-stack.alerts-default',
-          },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
+    apiTest('can acknowledge a real alert via bulk update', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/rac/alerts/bulk_update', {
+        headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        body: {
+          status: 'acknowledged',
+          ids: [state.realAlertId],
+          index: '.alerts-stack.alerts-default',
+        },
+        responseType: 'json',
       });
+      expect(response).toHaveStatusCode(200);
     });
   }
 );
