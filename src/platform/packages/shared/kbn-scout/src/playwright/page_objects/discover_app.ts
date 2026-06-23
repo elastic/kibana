@@ -449,6 +449,18 @@ export class DiscoverApp {
     await this.waitForDocViewerFlyoutOpen();
   }
 
+  async openDocViewerTab(tabId: string) {
+    await this.page.testSubj.click(`docViewerTab-${tabId}`);
+  }
+
+  async isDocViewerTabSelected(tabId: string): Promise<boolean> {
+    const selected = await this.page.testSubj
+      .locator(`docViewerTab-${tabId}`)
+      .getAttribute('aria-selected');
+
+    return selected === 'true';
+  }
+
   /**
    * Close the Discover document-viewer flyout and wait for it to disappear.
    */
@@ -675,6 +687,32 @@ export class DiscoverApp {
 
   async navigateToLensEditor() {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
+  }
+
+  async openLensEditFlyout() {
+    const hitCount = this.page.testSubj.locator('discoverQueryTotalHits');
+    await hitCount.waitFor({ state: 'visible', timeout: 30_000 });
+    await hitCount.click();
+
+    const editFlyoutButton = this.page.testSubj.locator('unifiedHistogramEditFlyoutVisualization');
+    const isEditFlyoutButtonVisible = await editFlyoutButton
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+    const editButton = isEditFlyoutButtonVisible
+      ? editFlyoutButton
+      : this.page.testSubj.locator('unifiedHistogramEditVisualization');
+    await editButton.waitFor({ state: 'visible', timeout: 30_000 });
+    await editButton.click();
+    await this.page.testSubj.locator('lnsChartSwitchPopover').waitFor({ state: 'visible' });
+  }
+
+  async isLensEditFlyoutOpen(): Promise<boolean> {
+    return await this.page.testSubj
+      .locator('lnsChartSwitchPopover')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
   }
 
   async getTheColumnFromGrid(): Promise<string[]> {
@@ -917,11 +955,9 @@ export class DiscoverApp {
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
   }
 
-  async isShowingDocViewer(): Promise<boolean> {
+  async isShowingDocViewer({ timeout = 30_000 }: { timeout?: number } = {}): Promise<boolean> {
     try {
-      await this.page.testSubj
-        .locator('kbnDocViewer')
-        .waitFor({ state: 'visible', timeout: 30_000 });
+      await this.page.testSubj.locator('kbnDocViewer').waitFor({ state: 'visible', timeout });
       return true;
     } catch {
       return false;

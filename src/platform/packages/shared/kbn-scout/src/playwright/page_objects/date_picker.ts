@@ -486,4 +486,12 @@ export class DatePicker {
       .then(() => true)
       .catch(() => false);
   }
+
+  async hasDisabledDatePickerIndicator(): Promise<boolean> {
+    return await this.page.testSubj
+      .locator('kbnQueryBar-datePicker-disabled')
+      .waitFor({ state: 'attached', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
 }

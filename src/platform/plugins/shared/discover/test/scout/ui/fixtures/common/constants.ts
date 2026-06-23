@@ -13,7 +13,12 @@
  */
 export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
 
+export const FLIGHTS_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
+
 export const DEFAULT_DATA_VIEW = 'logstash-*';
+
+export const FLIGHTS_DATA_VIEW = 'kibana_sample_data_flights';
 
 /**
  * Default time range that covers the `logstash_functional` fixture data.
