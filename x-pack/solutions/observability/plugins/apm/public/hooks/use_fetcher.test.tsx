@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
 import { useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
+import * as reportFetchErrorModule from '../services/rest/report_fetch_error';
 
 // Wrap the hook with a provider so it can useKibana
 const KibanaReactContext = createKibanaReactContext({
@@ -130,6 +131,57 @@ describe('useFetcher', () => {
         refetch: expect.any(Function),
         status: 'failure',
       });
+    });
+  });
+
+  describe('APM error capture on failure', () => {
+    let reportFetchErrorSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      reportFetchErrorSpy = jest
+        .spyOn(reportFetchErrorModule, 'reportFetchError')
+        .mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      reportFetchErrorSpy.mockRestore();
+    });
+
+    async function failingFn(): Promise<string> {
+      await delay(500);
+      throw new Error('Something went wrong');
+    }
+
+    it('captures the error with the operationId label when operationId is provided', async () => {
+      const hook = renderHook(() => useFetcher(failingFn, [], { operationId: 'my-op' }), {
+        wrapper,
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      await waitFor(() => expect(hook.result.current.status).toBe('failure'));
+
+      expect(reportFetchErrorSpy).toHaveBeenCalledTimes(1);
+      expect(reportFetchErrorSpy).toHaveBeenCalledWith({
+        error: expect.any(Error),
+        operationId: 'my-op',
+      });
+    });
+
+    it('does not capture the error when no operationId is provided', async () => {
+      const hook = renderHook(() => useFetcher(failingFn, []), { wrapper });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      await waitFor(() => expect(hook.result.current.status).toBe('failure'));
+
+      expect(reportFetchErrorSpy).not.toHaveBeenCalled();
     });
   });
 
