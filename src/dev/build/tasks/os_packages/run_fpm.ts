@@ -60,6 +60,8 @@ export async function runFpm(
     'Explore and visualize your Elasticsearch data',
     '--version',
     version,
+    '--iteration',
+    '2',
     '--url',
     'https://www.elastic.co',
     '--vendor',
