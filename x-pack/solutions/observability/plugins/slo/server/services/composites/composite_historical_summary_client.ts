@@ -22,7 +22,10 @@ import type { SLODefinitionRepository } from '../slo_definition_repository';
 import { HistoricalSummaryClient } from '../historical_summary_client';
 
 export interface HistoricalSummaryProvider {
-  fetch(params: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse>;
+  fetch(
+    params: FetchHistoricalSummaryParams,
+    deps: { spaceId: string }
+  ): Promise<FetchHistoricalSummaryResponse>;
 }
 
 export class CompositeHistoricalSummaryClient {
@@ -39,8 +42,10 @@ export class CompositeHistoricalSummaryClient {
   }
 
   async fetch(
-    params: FetchCompositeHistoricalSummaryParams
+    params: FetchCompositeHistoricalSummaryParams,
+    deps: { spaceId: string }
   ): Promise<FetchCompositeHistoricalSummaryResponse> {
+    const { spaceId } = deps;
     const compositeDefinitions = await this.compositeSloRepository.findAllByIds(params.list);
 
     const allMemberSloIds = [
@@ -51,7 +56,11 @@ export class CompositeHistoricalSummaryClient {
 
     const results = await Promise.all(
       compositeDefinitions.map(async (composite) => {
-        const memberHistoricalData = await this.fetchMemberHistoricalData(composite, memberDefMap);
+        const memberHistoricalData = await this.fetchMemberHistoricalData(
+          composite,
+          memberDefMap,
+          spaceId
+        );
         const data = this.computeWeightedHistorical(composite, memberHistoricalData);
         return { compositeId: composite.id, data };
       })
@@ -62,7 +71,8 @@ export class CompositeHistoricalSummaryClient {
 
   private async fetchMemberHistoricalData(
     composite: CompositeSLODefinition,
-    memberDefMap: Map<string, SLODefinition>
+    memberDefMap: Map<string, SLODefinition>,
+    spaceId: string
   ) {
     const activeMembers = composite.members.filter((m) => memberDefMap.has(m.sloId));
     if (activeMembers.length === 0) return [];
@@ -82,7 +92,7 @@ export class CompositeHistoricalSummaryClient {
       };
     });
 
-    const historicalData = await this.historicalSummaryProvider.fetch({ list });
+    const historicalData = await this.historicalSummaryProvider.fetch({ list }, { spaceId });
 
     return activeMembers.map((member, idx) => ({
       member,
