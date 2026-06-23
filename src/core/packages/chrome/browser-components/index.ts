@@ -19,6 +19,7 @@ export {
 } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { AgentSlotPlaceholder } from './src/agent/agent_slot_placeholder';
+export { AgentWorkspacePanel } from './src/agent/agent_workspace_panel';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';

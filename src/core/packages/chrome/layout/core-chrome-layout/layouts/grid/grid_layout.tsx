@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
 import {
@@ -23,6 +23,7 @@ import {
   AppMenuBar,
   Sidebar,
   AgentSlotPlaceholder,
+  AgentWorkspacePanel,
   useHasAppMenu,
   useHasChromeAppHeaderContent,
   useHasInlineAppHeader,
@@ -38,7 +39,10 @@ import {
 import { isAgentFirst } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from '@kbn/ui-chrome-layout';
-import { DEFAULT_AGENT_WIDTH } from '@kbn/ui-chrome-layout-constants';
+import {
+  clampAgentWorkspaceWidth,
+  DEFAULT_AGENT_WIDTH,
+} from '@kbn/ui-chrome-layout-constants';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
@@ -124,15 +128,44 @@ export class GridLayout implements LayoutService {
         chromeVisible &&
         chromeStyle === 'project';
 
+      const [agentWorkspaceWidth, setAgentWorkspaceWidth] = useState(DEFAULT_AGENT_WIDTH);
+
+      const setAgentWorkspaceWidthClamped = useCallback(
+        (width: number) => {
+          setAgentWorkspaceWidth(clampAgentWorkspaceWidth(width, navigationWidth, sidebarWidth));
+        },
+        [navigationWidth, sidebarWidth]
+      );
+
+      useLayoutEffect(() => {
+        if (!showAgentWorkspace) {
+          return;
+        }
+
+        setAgentWorkspaceWidth((current) =>
+          clampAgentWorkspaceWidth(current, navigationWidth, sidebarWidth)
+        );
+      }, [navigationWidth, showAgentWorkspace, sidebarWidth]);
+
       const layoutConfigKey =
         chromeStyle === 'classic' ? 'classic' : isNextChromeEnabled ? 'projectNext' : 'project';
 
-      const layoutConfig = {
-        ...layoutConfigs[layoutConfigKey],
-        sidebarWidth,
-        navigationWidth,
-        agentWidth: showAgentWorkspace ? DEFAULT_AGENT_WIDTH : 0,
-      };
+      const layoutConfig = useMemo(
+        () => ({
+          ...layoutConfigs[layoutConfigKey],
+          sidebarWidth,
+          navigationWidth,
+          agentWidth: showAgentWorkspace ? agentWorkspaceWidth : 0,
+          applicationWorkspaceWidth: 0,
+        }),
+        [
+          agentWorkspaceWidth,
+          layoutConfigKey,
+          navigationWidth,
+          showAgentWorkspace,
+          sidebarWidth,
+        ]
+      );
 
       // Assign main layout parts first
       let header: ReactNode;
@@ -163,7 +196,16 @@ export class GridLayout implements LayoutService {
       }
 
       if (showAgentWorkspace) {
-        agent = <AgentSlotPlaceholder />;
+        agent = (
+          <AgentWorkspacePanel
+            width={agentWorkspaceWidth}
+            navigationWidth={navigationWidth}
+            sidebarWidth={sidebarWidth}
+            onWidthChange={setAgentWorkspaceWidthClamped}
+          >
+            <AgentSlotPlaceholder />
+          </AgentWorkspacePanel>
+        );
       }
 
       return (

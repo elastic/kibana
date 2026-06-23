@@ -23,6 +23,31 @@ export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 /** Default width of the agent workspace column in agent-first chrome (POC). */
 export const DEFAULT_AGENT_WIDTH = 480;
 
+/** Minimum width of the agent workspace column when agent-first (matches sidebar min). */
+export const MIN_AGENT_WIDTH = 320;
+
+/** Minimum width reserved for the application workspace when agent-first (matches sidebar min). */
+export const MIN_APPLICATION_WORKSPACE_WIDTH = 320;
+
+export const getMaxAgentWorkspaceWidth = (
+  navigationWidth: number,
+  sidebarWidth: number
+): number =>
+  Math.max(
+    MIN_AGENT_WIDTH,
+    window.innerWidth - navigationWidth - MIN_APPLICATION_WORKSPACE_WIDTH - sidebarWidth
+  );
+
+export const clampAgentWorkspaceWidth = (
+  width: number,
+  navigationWidth: number,
+  sidebarWidth: number
+): number =>
+  Math.max(
+    MIN_AGENT_WIDTH,
+    Math.min(getMaxAgentWorkspaceWidth(navigationWidth, sidebarWidth), Math.floor(width))
+  );
+
 export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
 
 export const FLYOUT_SELECTOR = '.euiFlyout[role="dialog"]';
