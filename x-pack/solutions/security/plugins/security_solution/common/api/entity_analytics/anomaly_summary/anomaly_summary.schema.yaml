@@ -39,6 +39,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnomalyOverviewResponse'
+              example:
+                entityId: admin
+                entityType: user
+                anomalyByTimeBucket:
+                  - timestamp: '2024-01-15T00:00:00.000Z'
+                    maxScore: 87.4
+                    threatTactics:
+                      - Discovery
+                      - Lateral Movement
+                  - timestamp: '2024-01-16T00:00:00.000Z'
+                    maxScore: 42.1
+                    threatTactics:
+                      - Discovery
+                recentAnomalies:
+                  - jobId: security-ml-rare-process-by-host
+                    jobName: Rare Process by Host
+                    timestamp: '2024-01-16T14:23:00.000Z'
+                    anomalousValue: cmd.exe
+                  - jobId: security-ml-high-count-network-events
+                    jobName: High Count Network Events
+                    timestamp: '2024-01-15T09:11:00.000Z'
+                    anomalousValue: '1423'
+                tacticCounts:
+                  Discovery: 8
+                  Lateral Movement: 3
+                totalAnomaliesCount: 11
+                from: 1705276800000
+                to: 1705622400000
 
   /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary:
     post:
@@ -75,6 +103,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnomalySummaryResponse'
+              example:
+                entity_id: admin
+                entity_type: user
+                total: 2
+                page: 1
+                page_size: 100
+                anomalies:
+                  - jobId: security-ml-rare-process-by-host
+                    jobName: Rare Process by Host
+                    threatTactics:
+                      - Discovery
+                    threatTechniques:
+                      - T1057
+                    detectorIndex: 0
+                    detectorFunction: rare
+                    fieldName: process.name
+                    byFieldName: null
+                    byFieldValue: null
+                    overFieldName: host.name
+                    overFieldValue: web-server-01
+                    partitionFieldName: null
+                    partitionFieldValue: null
+                    recordScore: 87.4
+                    timestamp: '2024-01-15T14:00:00.000Z'
+                    actual: [1]
+                    typical: [0.002]
+                    baselineValues:
+                      - bash
+                      - sh
+                      - python3
+                    anomalousValue: cmd.exe
+                    anomalousValueCount: 1
+                  - jobId: security-ml-high-count-network-events
+                    jobName: High Count Network Events
+                    threatTactics:
+                      - Lateral Movement
+                    threatTechniques: []
+                    detectorIndex: 0
+                    detectorFunction: high_count
+                    fieldName: null
+                    byFieldName: null
+                    byFieldValue: null
+                    overFieldName: user.name
+                    overFieldValue: admin
+                    partitionFieldName: null
+                    partitionFieldValue: null
+                    recordScore: 42.1
+                    timestamp: '2024-01-16T09:00:00.000Z'
+                    actual: [1423]
+                    typical: [12.5]
+                    baselineValues:
+                      - '10'
+                      - '11'
+                      - '14'
+                    anomalousValue: '1423'
+                    anomalousValueCount: 1423
 
 components:
   schemas:
