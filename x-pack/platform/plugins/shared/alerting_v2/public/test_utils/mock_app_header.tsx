@@ -44,6 +44,15 @@ interface MockTab {
   toolTipContent?: string;
 }
 
+interface MockSwitch {
+  id: string;
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  'data-test-subj'?: string;
+}
+
 interface MockAppHeaderProps {
   title: string | { text: string };
   back?: { href?: string; label?: string };
@@ -54,6 +63,7 @@ interface MockAppHeaderProps {
       splitButtonProps?: { items?: MockMenuItem[] };
     };
     items?: MockMenuItem[];
+    switch?: MockSwitch;
   };
 }
 
@@ -116,6 +126,19 @@ export const AppHeader = ({ title, back, badges, tabs, menu }: MockAppHeaderProp
             </>
           )}
         </>
+      )}
+      {menu?.switch && (
+        <label>
+          <input
+            type="checkbox"
+            role="switch"
+            data-test-subj={menu.switch['data-test-subj']}
+            checked={menu.switch.checked}
+            disabled={menu.switch.disabled}
+            onChange={(e) => menu.switch!.onChange(e.target.checked)}
+          />
+          {menu.switch.label}
+        </label>
       )}
       {menu?.items?.map((item) => (
         <button
