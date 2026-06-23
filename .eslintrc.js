@@ -1941,6 +1941,15 @@ module.exports = {
       ],
     },
     /**
+     * Alerting V2 rule form — require compressed prop on EUI form controls
+     */
+    {
+      files: ['x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/**/*.{ts,tsx}'],
+      rules: {
+        '@kbn/alerting-v2/require_eui_form_compressed': 'error',
+      },
+    },
+    /**
      * Stack Connectors Specs package
      * This package contains common code for public and server side
      */

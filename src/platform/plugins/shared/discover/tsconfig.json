@@ -141,6 +141,8 @@
     "@kbn/presentation-util-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/as-code-filters-constants",
+    "@kbn/data-service-server",
+    "@kbn/es-query-server",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/reporting-public",

@@ -320,7 +320,6 @@ enabled:
   - x-pack/platform/test/reporting_functional/reporting_without_security.config.ts
   - x-pack/platform/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/platform/test/rule_registry/security_and_spaces/config_trial.ts
-  - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
@@ -408,7 +407,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/cloud/saml.config.ts
   - x-pack/platform/test/api_integration/apis/console/config.ts
   - x-pack/platform/test/api_integration/apis/anonymization/config.ts
-  - x-pack/platform/test/api_integration/apis/content_management/config.ts
   - x-pack/platform/test/api_integration/apis/features/config.ts
   - x-pack/platform/test/api_integration/apis/entity_manager/config.ts
   - x-pack/platform/test/api_integration/apis/es/config.ts

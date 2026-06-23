@@ -6825,6 +6825,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-plugin-alerting-v2@link:packages/kbn-eslint-plugin-alerting-v2":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eslint-plugin-disable@link:packages/kbn-eslint-plugin-disable":
   version "0.0.0"
   uid ""
@@ -6986,6 +6990,10 @@
   uid ""
 
 "@kbn/evals-suite-security-esql-generation-regression@link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-siem-readiness@link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness":
   version "0.0.0"
   uid ""
 
