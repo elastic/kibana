@@ -16,6 +16,7 @@ project:
   sourceRoot: src/platform/test
 dependsOn:
   - '@kbn/core'
+  - '@kbn/content-list-common'
   - '@kbn/expressions-plugin'
   - '@kbn/saved-objects-management-plugin'
   - '@kbn/telemetry-plugin'
@@ -72,6 +73,7 @@ dependsOn:
   - '@kbn/session-notifications-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/unified-tabs'
 tags:
   - test-helper
   - package
