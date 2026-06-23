@@ -117,11 +117,7 @@ export const DetectionsTab = () => {
           defaultMessage: 'Rule',
         }),
         render: (_: unknown, detection: Detection) => (
-          <EuiButtonEmpty
-            size="s"
-            flush="both"
-            onClick={() => toggleSelectedDetection(detection)}
-          >
+          <EuiButtonEmpty size="s" flush="both" onClick={() => toggleSelectedDetection(detection)}>
             {detection.rule_name}
           </EuiButtonEmpty>
         ),
