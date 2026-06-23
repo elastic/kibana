@@ -43,7 +43,15 @@ export const registerListRoute = ({
           }),
           type: schema.maybe(schema.string({ minLength: 1 })),
           origin_uri: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
-          tags: schema.maybe(schema.string({ maxLength: 2000 })),
+          tags: schema.maybe(
+            schema.string({
+              maxLength: 2000,
+              meta: {
+                description:
+                  'Comma-delimited list of tags to filter by (OR semantics — returns documents matching any supplied tag). Tag values must be lowercase alphanumeric with optional hyphens or underscores. Example: `?tags=otel,my-tag`.',
+              },
+            })
+          ),
         }),
       },
       options: { access: 'internal' },
