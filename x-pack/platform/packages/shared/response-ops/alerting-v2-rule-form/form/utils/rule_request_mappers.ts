@@ -89,7 +89,6 @@ export const mapFormValuesToCreateRequest = (
   };
 };
 
-
 export const mapFormValuesToUpdateRequest = (
   formValues: FormValues,
   builderType?: string
