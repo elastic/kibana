@@ -23,6 +23,8 @@ import { LogoIcon } from '../shared/logo_icon';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 
+export const AWS_CLOUDWATCH_OTEL_CARD_ID = 'aws-cloudwatch-otel-virtual';
+
 export function useCustomCards(
   createCollectionCardHandler: (query: string) => () => void
 ): IntegrationCardItem[] {
@@ -61,6 +63,7 @@ export function useCustomCards(
     history,
     `/cloudforwarder/${location.search}`
   );
+  const { href: awsCloudwatchOtelUrl } = reactRouterNavigate(history, `/aws${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
@@ -380,6 +383,32 @@ export function useCustomCards(
       isCollectionCard: true,
       onCardClick: createCollectionCardHandler('azure'),
     },
+    {
+      id: AWS_CLOUDWATCH_OTEL_CARD_ID,
+      name: 'aws-cloudwatch-otel',
+      type: 'virtual',
+      title: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelTitle',
+        { defaultMessage: 'AWS' }
+      ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelDescription',
+        {
+          defaultMessage: 'Collect signals from AWS with OpenTelemetry',
+        }
+      ),
+      categories: ['observability'],
+      icons: [
+        {
+          type: 'eui',
+          src: 'logoAWS',
+        },
+      ],
+      url: awsCloudwatchOtelUrl,
+      version: '',
+      integration: '',
+      isQuickstart: true,
+    },
     ...(isIngestHubOnboardingEnabled
       ? [
           {
@@ -405,7 +434,7 @@ export function useCustomCards(
             type: 'virtual',
             title: i18n.translate(
               'xpack.observability_onboarding.useCustomCardsForCategory.awsTitle',
-              { defaultMessage: 'AWS' }
+              { defaultMessage: 'AWS collection' }
             ),
             description: i18n.translate(
               'xpack.observability_onboarding.useCustomCardsForCategory.awsDescription',
