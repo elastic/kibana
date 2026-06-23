@@ -6,12 +6,13 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import type { EuiSwitchEvent } from '@elastic/eui';
+import type { EuiSelectableOption, EuiSwitchEvent } from '@elastic/eui';
 import {
+  EuiFormRow,
+  EuiSelectable,
   EuiSpacer,
   EuiButton,
   EuiCallOut,
-  EuiFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -52,6 +53,7 @@ export const CancelActionModal = memo<CancelActionModalProps>(
     const [cancelApiBody, setCancelApiBody] = useState<
       CancelActionRequestBody & { parameters: { force?: boolean } }
     >({
+      // FIXME:PT need proper initializer
       endpoint_ids: !isMultiAgentAction ? [action.agents[0]] : [],
       agent_type: action.agentType,
       parameters: {
@@ -92,9 +94,62 @@ export const CancelActionModal = memo<CancelActionModalProps>(
       setCancelApiBody((prevState) => ({ ...prevState, comment: ev.target.value }));
     }, []);
 
-    const setEndpointIdHandler = useCallback((ev) => {
-      // TODO: implemmnet
-    }, []);
+    const agentSelector = useMemo(() => {
+      if (!isMultiAgentAction) {
+        return <></>;
+      }
+
+      const selectionOptions = action.agents.reduce<EuiSelectableOption[]>((acc, agentId) => {
+        if (action.agentState[agentId].isCompleted) {
+          return acc;
+        }
+
+        acc.push({
+          label: action.hosts[agentId].name || agentId,
+          key: agentId,
+          checked: cancelApiBody.endpoint_ids.includes(agentId) ? 'on' : undefined,
+        });
+
+        return acc;
+      }, []);
+
+      return (
+        <EuiFormRow
+          fullWidth
+          label={UX_MESSAGES.cancelActionModalHostSelectorLabel}
+          labelAppend={UX_MESSAGES.cancelActionModalHostSelectorCounter(
+            cancelApiBody.endpoint_ids.length,
+            selectionOptions.length
+          )}
+        >
+          <EuiSelectable
+            aria-label={UX_MESSAGES.cancelActionModalAgentSelectorLabel}
+            options={selectionOptions}
+            listProps={{ bordered: true }}
+            onChange={(newOptions) => {
+              setCancelApiBody((prevState) => ({
+                ...prevState,
+                endpoint_ids: newOptions.reduce<string[]>((acc, option) => {
+                  if (option.checked === 'on' && option.key) {
+                    acc.push(option.key);
+                  }
+
+                  return acc;
+                }, []),
+              }));
+            }}
+          >
+            {(list) => list}
+          </EuiSelectable>
+        </EuiFormRow>
+      );
+    }, [
+      action.agentState,
+      action.agents,
+      action.hosts,
+      cancelApiBody.endpoint_ids,
+      isMultiAgentAction,
+    ]);
 
     const setForceFlag = useCallback((ev: EuiSwitchEvent) => {
       setCancelApiBody((prevState) => ({
@@ -136,12 +191,12 @@ export const CancelActionModal = memo<CancelActionModalProps>(
             <>
               {/* FIXME:PT Show info. about action/host */}
 
-              {/* FIXME:PT show list of hosts when action was sent to multiple hosts */}
+              {agentSelector}
 
-              <EuiFormRow fullWidth>
+              <EuiFormRow fullWidth label={UX_MESSAGES.cancelActionModalCommentLabel}>
                 <EuiTextArea
                   placeholder={UX_MESSAGES.cancelActionModalCommentFieldPlaceholder}
-                  aria-label={UX_MESSAGES.cancelActionModalCommentFieldPlaceholder}
+                  aria-label={UX_MESSAGES.cancelActionModalCommentLabel}
                   value={cancelApiBody.comment}
                   onChange={setCommentHandler}
                   fullWidth

@@ -233,9 +233,32 @@ export const UX_MESSAGES = Object.freeze({
   cancelActionModalCommentFieldPlaceholder: i18n.translate(
     'xpack.securitySolution.responseActionsList.action.cancelActionModalCommentFieldPlaceholder',
     {
-      defaultMessage: 'Optional comment',
+      defaultMessage: 'Optional',
     }
   ),
+  cancelActionModalAgentSelectorLabel: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalAgentSelectorLabel',
+    {
+      defaultMessage: 'Select agents',
+    }
+  ),
+  cancelActionModalHostSelectorLabel: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalHostSelectorLabel',
+    {
+      defaultMessage: 'Select hosts',
+    }
+  ),
+  cancelActionModalCommentLabel: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalCommentLabel',
+    {
+      defaultMessage: 'Comment',
+    }
+  ),
+  cancelActionModalHostSelectorCounter: (selected: number, total: number) =>
+    i18n.translate(
+      'xpack.securitySolution.responseActionsList.action.cancelActionModalHostSelectorCounter',
+      { defaultMessage: '{selected} of {total}', values: { selected, total } }
+    ),
 });
 
 export const FILTER_NAMES = Object.freeze({
