@@ -14,6 +14,8 @@ import { CASES_PATH, ONBOARDING_PATH } from '../../common/constants';
 import { NotFoundPage } from './404';
 import type { StartServices } from '../types';
 import { hasAccessToCases, hasAccessToSecuritySolution } from '../helpers_access';
+// DEV ONLY — remove before merging
+import { DevGraphPage } from './dev_graph_page';
 
 export interface AppRoutesProps {
   services: StartServices;
@@ -22,6 +24,8 @@ export interface AppRoutesProps {
 
 export const AppRoutes: React.FC<AppRoutesProps> = React.memo(({ services, subPluginRoutes }) => (
   <Routes>
+    {/* DEV ONLY — remove before merging */}
+    <Route path="/dev-graph" component={DevGraphPage} />
     {subPluginRoutes.map((route, index) => {
       return <Route key={`route-${index}`} {...route} />;
     })}
