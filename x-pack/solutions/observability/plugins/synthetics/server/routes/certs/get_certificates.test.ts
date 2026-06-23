@@ -115,6 +115,52 @@ describe('getSyntheticsCertsRoute', () => {
     expect(result).toEqual({ data: { ...getCertsResult } });
   });
 
+  it('returns 400 when remoteNames exceeds the maximum allowed count', async () => {
+    const route = getSyntheticsCertsRoute();
+    const tooManyNames = Array.from({ length: 51 }, (_, i) => `cluster${i}`).join(',');
+    const badRequest = jest.fn().mockReturnValue({ status: 400 });
+    const result = await route.handler({
+      // @ts-expect-error partial implementation for testing
+      request: { query: { remoteNames: tooManyNames } },
+      response: { badRequest },
+      // @ts-expect-error partial implementation for testing
+      syntheticsEsClient: jest.fn(),
+      monitorConfigRepository: mockMonitorConfigRepository,
+      server: buildServer(true),
+      spaceId: 'default',
+    });
+    expect(badRequest).toHaveBeenCalledTimes(1);
+    expect(badRequest).toHaveBeenCalledWith({
+      body: { message: 'remoteNames must not exceed 50 entries' },
+    });
+    expect(result).toEqual({ status: 400 });
+  });
+
+  it('deduplicates remoteNames before passing them to the cert query', async () => {
+    jest.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
+      // @ts-expect-error partial implementation for testing
+      enabledMonitorQueryIds: [],
+    });
+    const getSyntheticsCertsSpy = jest
+      .spyOn(getCerts, 'getSyntheticsCerts')
+      // @ts-expect-error partial implementation for testing
+      .mockReturnValue({ total: 0, certs: [] });
+    const route = getSyntheticsCertsRoute();
+    await route.handler({
+      // @ts-expect-error partial implementation for testing
+      request: { query: { remoteNames: 'cluster1,cluster1,cluster2' } },
+      // @ts-expect-error partial implementation for testing
+      response: { badRequest: jest.fn() },
+      // @ts-expect-error partial implementation for testing
+      syntheticsEsClient: jest.fn(),
+      monitorConfigRepository: { getAll: jest.fn().mockReturnValue([]) },
+      server: buildServer(true),
+      spaceId: 'default',
+    });
+    const passed = getSyntheticsCertsSpy.mock.calls[0][0];
+    expect(passed.remoteNames).toEqual(['cluster1', 'cluster2']);
+  });
+
   it('runs the cert search even with no local monitors when CCS is enabled', async () => {
     // Remote-only monitors have no local saved object, so the route must not
     // short-circuit on an empty SO list when CCS is on — the search itself is
@@ -152,6 +198,8 @@ describe('getSyntheticsCertsRoute', () => {
     const result = await route.handler({
       // @ts-expect-error partial implementation for testing
       request: { query: { remoteNames: 'cluster1,cluster2' } },
+      // @ts-expect-error partial implementation for testing
+      response: { badRequest: jest.fn() },
       // @ts-expect-error partial implementation for testing
       syntheticsEsClient: jest.fn(),
       // @ts-expect-error partial implementation for testing

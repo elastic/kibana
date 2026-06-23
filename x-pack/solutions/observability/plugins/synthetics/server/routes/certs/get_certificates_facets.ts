@@ -15,6 +15,11 @@ import { ConfigKey } from '../../../common/constants/monitor_management';
 import { getSyntheticsCertsFacets } from '../../queries/get_certs_facets';
 import { isCCSEnabled } from '../../lib/remote_result_utils';
 
+// Maximum number of remote cluster aliases allowed per request. Each alias
+// generates a wildcard clause in Elasticsearch, so an unbounded list can
+// produce slow queries or exceed query-clause limits.
+const MAX_REMOTE_NAMES = 50;
+
 const EMPTY_FACETS: CertFacets = {
   monitorTypes: [],
   tags: [],
@@ -38,11 +43,24 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
       remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
     }),
   },
-  handler: async ({ request, syntheticsEsClient, monitorConfigRepository, server, spaceId }) => {
+  handler: async ({
+    request,
+    response,
+    syntheticsEsClient,
+    monitorConfigRepository,
+    server,
+    spaceId,
+  }) => {
     const { from, to, remoteNames } = request.query;
 
     const ccsEnabled = isCCSEnabled(server);
-    const remoteNameList = remoteNames ? remoteNames.split(',').filter(Boolean) : undefined;
+    const rawRemoteNames = remoteNames ? remoteNames.split(',').filter(Boolean) : undefined;
+    if (rawRemoteNames && rawRemoteNames.length > MAX_REMOTE_NAMES) {
+      return response.badRequest({
+        body: { message: `remoteNames must not exceed ${MAX_REMOTE_NAMES} entries` },
+      });
+    }
+    const remoteNameList = rawRemoteNames ? [...new Set(rawRemoteNames)] : undefined;
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
