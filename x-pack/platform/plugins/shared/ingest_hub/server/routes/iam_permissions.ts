@@ -30,7 +30,7 @@ export const registerIamPermissionsRoute = (
       validate: {
         query: schema.object({
           /** Comma-separated list of AWS service data stream ids. */
-          services: schema.string({ minLength: 1 }),
+          services: schema.string({ minLength: 1, maxLength: 2048 }),
         }),
       },
       security: {
