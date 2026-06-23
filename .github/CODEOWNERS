@@ -61,7 +61,6 @@ packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-eslint-config @elastic/kibana-operations
-packages/kbn-eslint-plugin-alerting-v2 @elastic/rna-project-team
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/kibana-operations
@@ -1085,7 +1084,6 @@ x-pack/platform/packages/shared/ml/aiops-server-schemas @elastic/ml-ui
 x-pack/platform/packages/shared/ml/anomaly_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/chi2test @elastic/ml-ui
 x-pack/platform/packages/shared/ml/common-types @elastic/ml-ui
-x-pack/platform/packages/shared/ml/data-visualizer-server-schemas @elastic/ml-ui
 x-pack/platform/packages/shared/ml/error_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
@@ -1351,7 +1349,6 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/se
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
-x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering
