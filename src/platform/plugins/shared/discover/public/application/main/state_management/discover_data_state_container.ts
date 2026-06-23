@@ -45,7 +45,13 @@ import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fe
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState, getProfileStateSnapshot } from './utils/default_profile_state';
-import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import type {
+  DefaultProfileStateFields,
+  InternalStateStore,
+  RuntimeStateManager,
+  TabActionInjector,
+  TabState,
+} from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
@@ -381,6 +387,13 @@ export function getDataStateContainer({
 
           let shouldApplyDefaultProfileState = true;
 
+          // `defaultProfileState.fieldsToReset` is stale on profile switches (it's derived from the URL
+          // on the first load and it's set to 'none' after each fetch).
+          // On any profile change after the initial resolution, reset all profile fields
+          // so the target profile's snapshot is restored (or its defaults applied if it's the first visit).
+          const fieldsToReset: DefaultProfileStateFields =
+            didProfileChange && !isFirstResolution ? 'all' : defaultProfileState.fieldsToReset;
+
           // If the data source profile changed, we may need to restore previous profile state
           if (didProfileChange) {
             const profileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
@@ -388,7 +401,7 @@ export function getDataStateContainer({
               getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
             const profileStateUpdate = getProfileStateSnapshot(
               profileStateSnapshot ?? {},
-              defaultProfileState.fieldsToReset
+              fieldsToReset
             );
             const hasProfileStateUpdate =
               profileStateUpdate && Object.keys(profileStateUpdate).length > 0;
@@ -424,18 +437,21 @@ export function getDataStateContainer({
 
               // If there is no profile state yet, sync a snapshot of the current
               // state so it can be restored when switching back to this profile
-              internalState.dispatch(
-                injectCurrentTab(internalStateActions.syncProfileStateSnapshot)({})
-              );
+              if (!profileStateSnapshot) {
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.syncProfileStateSnapshot)({})
+                );
+              }
             }
           }
 
           const dataView = currentDataView$.getValue();
+
           const resolvedDefaultProfileState =
             shouldApplyDefaultProfileState && dataView
               ? getDefaultProfileState({
                   scopedProfilesManager,
-                  defaultProfileState,
+                  defaultProfileState: { ...defaultProfileState, fieldsToReset },
                   dataView,
                 })
               : undefined;
