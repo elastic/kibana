@@ -102,4 +102,4 @@ export function ChangeHistorySidebarPanel({
       <div css={styles.body}>{children}</div>
     </div>
   );
-};
+}

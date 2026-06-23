@@ -8,6 +8,4 @@
 import type { ReactNode } from 'react';
 import type { ChangeHistoryListItem } from './change_history_list_item';
 
-export type ChangeHistoryBadgeRenderFn = (props: {
-  item: ChangeHistoryListItem;
-}) => ReactNode;
+export type ChangeHistoryBadgeRenderFn = (props: { item: ChangeHistoryListItem }) => ReactNode;

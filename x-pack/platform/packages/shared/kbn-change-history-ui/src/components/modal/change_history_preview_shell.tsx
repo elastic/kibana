@@ -68,12 +68,7 @@ export function ChangeHistoryPreviewShell({
   return (
     <div css={styles.shell} data-test-subj="changeHistoryPreviewShell">
       <div css={styles.header}>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="xs"
-          alignItems="flexStart"
-          responsive={false}
-        >
+        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
