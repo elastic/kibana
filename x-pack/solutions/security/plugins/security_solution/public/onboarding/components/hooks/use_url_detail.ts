@@ -77,7 +77,6 @@ interface UseSyncUrlDetailsParams {
  */
 export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetailsParams) => {
   const { config, spaceId, telemetry } = useOnboardingContext();
-  const { navigateTo } = useNavigateTo();
   const { storedUrlDetail, setStoredUrlDetail, navigateToDetail, setTopic } = useUrlDetail();
   const [isCloudOnboardingConsumed, setIsCloudOnboardingConsumed] =
     useStoredCloudOnboardingConsumed(spaceId);
@@ -86,7 +85,7 @@ export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetails
     if (cloudTopicId && config.has(cloudTopicId)) {
       if (cloudTopicId === OnboardingTopicId.siemMigrations) {
         setIsCloudOnboardingConsumed(true);
-        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsManage });
+        navigateToDetail(cloudTopicId);
       } else {
         setTopic(cloudTopicId);
       }
