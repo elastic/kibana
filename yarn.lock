@@ -26617,10 +26617,10 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langsmith@0.7.1, "langsmith@>=0.4.0 <1.0.0", "langsmith@>=0.5.0 <1.0.0":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.7.1.tgz#d721ad2e5211f9a5373e8a84eb4fed36b5621971"
-  integrity sha512-Wjk90UjNoY5cBHMlNAC/eZx5clI8jnjBOBW8uJu8+MWBtx0QesNjsUiLtjI+I3UnrpxFFpDqGXcnhBjH654Mqg==
+langsmith@0.7.2, "langsmith@>=0.4.0 <1.0.0", "langsmith@>=0.5.0 <1.0.0":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.7.2.tgz#a494a199a297dbb262eb1b82cf9897c072a6a233"
+  integrity sha512-3dZUwQDJluxi2ih5eIygFODtlrQKrs3Tua0Ck3l+DAUkSGFkB1Dc0JPqkGbqiVSN+TQDElnkev/ydAOAz6jndA==
   dependencies:
     p-queue "6.6.2"
 
