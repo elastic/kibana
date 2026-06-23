@@ -47,7 +47,6 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
-  - '@kbn/i18n'
 tags:
   - plugin
   - prod
