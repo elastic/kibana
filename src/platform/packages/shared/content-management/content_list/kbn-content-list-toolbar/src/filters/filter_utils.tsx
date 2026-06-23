@@ -122,7 +122,7 @@ export const FilterStateIcon = ({ state }: { state: FilterType | null | undefine
   if (state === 'exclude') {
     return <EuiIcon type="cross" color="danger" aria-label={filterStateIconLabels.exclude} />;
   }
-  return <EuiIcon type="empty" />;
+  return <EuiIcon type="empty" aria-hidden={true} />;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

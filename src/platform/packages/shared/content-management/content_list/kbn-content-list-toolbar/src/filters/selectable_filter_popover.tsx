@@ -230,16 +230,23 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
     return selectedKeys.filter((value) => validOptionValues.has(value)).length;
   }, [selection, validOptionValues, options.length]);
 
+  // For a single value, match-all and match-any are identical, so the green
+  // plus only carries meaning once a field has 2+ required values. Below that,
+  // (or when match-all is disabled) match-all clauses render as a plain include.
+  const matchAllCount = useMemo(
+    () => Object.values(selection).filter((type) => type === 'includeAll').length,
+    [selection]
+  );
+
   // Build selectable options with view rendering.
   const selectableOptions = useMemo((): Array<InternalSelectableOption<T>> => {
+    const showMatchAllIcon = allowMatchAll && matchAllCount >= 2;
     return options.map((option) => {
       const queryValue = option.value ?? option.key;
       const selectedValue = selection[queryValue] ? queryValue : option.key;
       const rawState: FilterType | undefined = selection[queryValue] ?? selection[option.key];
-      // When match-all is disabled, render any match-all clause as a plain
-      // include so the field never shows a green plus.
       const state: FilterType | undefined =
-        !allowMatchAll && rawState === 'includeAll' ? 'include' : rawState;
+        rawState === 'includeAll' && !showMatchAllIcon ? 'include' : rawState;
       const checked = getCheckedState(state);
       const isActive = checked !== undefined;
       const count = option.count ?? 0;
@@ -254,7 +261,7 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
         view: renderOption(option, { checked, isActive, state }),
       };
     });
-  }, [options, selection, renderOption, allowMatchAll]);
+  }, [options, selection, renderOption, allowMatchAll, matchAllCount]);
 
   // Build a lookup from key → checked state for stable comparison that
   // doesn't rely on index alignment (safe if `EuiSelectable` reorders options).
