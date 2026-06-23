@@ -6445,10 +6445,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-sets-plugin@link:x-pack/platform/plugins/private/federated_data":
-  version "0.0.0"
-  uid ""
-
 "@kbn/data-stream-adapter@link:x-pack/solutions/security/packages/data-stream-adapter":
   version "0.0.0"
   uid ""
@@ -7130,6 +7126,10 @@
   uid ""
 
 "@kbn/fec-alerts-test-plugin@link:x-pack/platform/test/functional_execution_context/plugins/alerts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/federated-data-plugin@link:x-pack/platform/plugins/private/federated_data":
   version "0.0.0"
   uid ""
 
