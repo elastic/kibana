@@ -16,9 +16,11 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   notificationServiceMock,
   applicationServiceMock,
+  chromeServiceMock,
   coreMock,
   scopedHistoryMock,
 } from '@kbn/core/public/mocks';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 
 import { breadcrumbService } from '../../../../../services/breadcrumbs';
@@ -81,14 +83,18 @@ export const WithAppDependencies =
   (props: P) => {
     const appDependencies = merge({}, createAppDependencies(), appContextMerge) as AppDependencies;
     return (
-      <AppContextProvider value={appDependencies}>
-        <MappingsEditorProvider>
-          <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup, coreStart)}>
-            <GlobalFlyoutProvider>
-              <Comp {...props} />
-            </GlobalFlyoutProvider>
-          </ComponentTemplatesProvider>
-        </MappingsEditorProvider>
-      </AppContextProvider>
+      <ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
+        <AppContextProvider value={appDependencies}>
+          <MappingsEditorProvider>
+            <ComponentTemplatesProvider
+              value={componentTemplatesDependencies(httpSetup, coreStart)}
+            >
+              <GlobalFlyoutProvider>
+                <Comp {...props} />
+              </GlobalFlyoutProvider>
+            </ComponentTemplatesProvider>
+          </MappingsEditorProvider>
+        </AppContextProvider>
+      </ChromeServiceProvider>
     );
   };

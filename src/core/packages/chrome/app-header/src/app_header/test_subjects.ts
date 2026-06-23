@@ -8,10 +8,12 @@
  */
 
 /**
- * Structural `data-test-subj` values owned by the app header. Both the real components and test
- * consumers (via `@kbn/app-header/mocks`) import these so the rendered subjects and the subjects
- * asserted in tests cannot drift apart. Tab, badge, and menu subjects are caller-provided and are
- * intentionally not part of this contract.
+ * `data-test-subj` values owned by the app header. The real components and test consumers both
+ * import these so the rendered subjects and the subjects asserted in tests cannot drift apart.
+ *
+ * Covers the header's structural slots and the static app-menu items the header itself injects
+ * (documentation, feedback, add integrations). Tab and badge subjects, and items the caller passes
+ * via `menu`, are caller-provided and are intentionally not part of this contract.
  */
 export const APP_HEADER_TEST_SUBJECTS = {
   root: 'appHeader',
@@ -25,4 +27,7 @@ export const APP_HEADER_TEST_SUBJECTS = {
   metadata: 'appHeaderMetadata',
   tabs: 'appHeaderTabs',
   back: 'appHeaderBack',
+  menuDocumentation: 'appHeaderMenuDocumentation',
+  menuFeedback: 'appHeaderMenuFeedback',
+  menuAddIntegrations: 'appHeaderMenuAddIntegrations',
 } as const;

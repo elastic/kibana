@@ -147,6 +147,15 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     [history, index.name, search]
   );
 
+  // An internal app link; the global redirectAppLinks wrapper turns the click into SPA navigation.
+  // The preserved indices-list params (filter, hidden toggle, …) are carried in the href itself.
+  const indicesListHref = useMemo(() => {
+    const paramsString = resetIndexUrlParams(search);
+    return `/app/management/data/index_management/${Section.Indices}${
+      paramsString ? `?${paramsString}` : ''
+    }`;
+  }, [search]);
+
   const onIndexRefresh = useCallback(() => {
     return resendDocumentsSampleRequest();
   }, [resendDocumentsSampleRequest]);
@@ -246,7 +255,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     <>
       <AppHeader
         title={index.name}
-        back={`/app/management/data/index_management/${Section.Indices}`}
+        back={indicesListHref}
         tabs={headerTabs}
         badges={badges}
         menu={appMenu}

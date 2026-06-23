@@ -7,12 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  MockAppHeader,
-  MockAppHeaderView,
-  mockAppHeaderModule,
-} from './src/app_header/app_header.mock';
-
-// RTL interaction helpers are exported from `@kbn/app-header/test_helpers` (they aren't mocks).
-// `APP_HEADER_TEST_SUBJECTS` / `APP_MENU_TEST_SUBJECTS` live on the package root (`@kbn/app-header`)
-// because the real components render those subjects in production; import them from there.
+// RTL interaction helpers (depend on @testing-library), so they live in this test-only entry.
+export { openAppMenuOverflow } from './src/test_helpers';

@@ -31,6 +31,7 @@ import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -196,17 +197,19 @@ export const WithAppDependencies =
     return (
       <KibanaRenderContextProvider {...startServicesMock}>
         <KibanaReactContextProvider>
-          <EuiThemeProvider>
-            <AppContextProvider value={mergedDependencies}>
-              <MappingsEditorProvider>
-                <ComponentTemplatesProvider value={componentTemplatesMockDependencies(httpSetup)}>
-                  <GlobalFlyoutProvider>
-                    <Comp {...props} />
-                  </GlobalFlyoutProvider>
-                </ComponentTemplatesProvider>
-              </MappingsEditorProvider>
-            </AppContextProvider>
-          </EuiThemeProvider>
+          <ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
+            <EuiThemeProvider>
+              <AppContextProvider value={mergedDependencies}>
+                <MappingsEditorProvider>
+                  <ComponentTemplatesProvider value={componentTemplatesMockDependencies(httpSetup)}>
+                    <GlobalFlyoutProvider>
+                      <Comp {...props} />
+                    </GlobalFlyoutProvider>
+                  </ComponentTemplatesProvider>
+                </MappingsEditorProvider>
+              </AppContextProvider>
+            </EuiThemeProvider>
+          </ChromeServiceProvider>
         </KibanaReactContextProvider>
       </KibanaRenderContextProvider>
     );

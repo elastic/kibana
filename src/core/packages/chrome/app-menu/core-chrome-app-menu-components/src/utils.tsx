@@ -30,6 +30,7 @@ import type {
   AppMenuSwitch,
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+import { APP_MENU_TEST_SUBJECTS } from './test_subjects';
 
 const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
   [...items].sort((a, b) => a.order - b.order);
@@ -160,7 +161,9 @@ export const createReturnFocus =
       parentElement.focus();
       return;
     }
-    document.querySelector<HTMLElement>('[data-test-subj="app-menu-overflow-button"]')?.focus();
+    document
+      .querySelector<HTMLElement>(`[data-test-subj="${APP_MENU_TEST_SUBJECTS.overflowButton}"]`)
+      ?.focus();
   };
 
 export const mapAppMenuItemToPanelItem = (
@@ -304,7 +307,7 @@ export const getPopoverSwitchItems = ({
           checked={switchConfig.checked}
           onChange={(e) => switchConfig.onChange(e.target.checked)}
           compressed
-          data-test-subj={switchConfig['data-test-subj'] ?? 'app-menu-switch'}
+          data-test-subj={switchConfig['data-test-subj'] ?? APP_MENU_TEST_SUBJECTS.switch}
         />
       ),
     },

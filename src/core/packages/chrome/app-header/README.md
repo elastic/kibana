@@ -80,8 +80,23 @@ button is present.
 ## Testing
 
 `AppHeader` reads chrome from context, so rendering it in a test without a `ChromeServiceProvider`
-throws `"useChromeService must be used within a ChromeServiceProvider"`. Consumers don't have to always wire
-that provider up by hand, but it is possible to mock the package instead:
+throws `"useChromeService must be used within a ChromeServiceProvider"`. There are two ways to
+satisfy it.
+
+**Option 1 — wrap your test harness with a chrome provider.** Prefer this when a suite already has a
+shared render harness: add the provider once and every test renders the real header.
+
+```tsx
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { chromeServiceMock } from '@kbn/core/public/mocks';
+
+<ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
+  {/* ...rest of your harness... */}
+</ChromeServiceProvider>;
+```
+
+**Option 2 — mock the package.** Prefer this for a one-off test, or when you can't reach a shared
+harness:
 
 ```ts
 jest.mock('@kbn/app-header', () => require('@kbn/app-header/mocks').mockAppHeaderModule());
@@ -91,13 +106,26 @@ jest.mock('@kbn/app-header', () => require('@kbn/app-header/mocks').mockAppHeade
 components wrapped in a mock chrome provider, so the genuine DOM and test subjects are produced. Every
 other export (types, registration helpers) is preserved.
 
-Assert against `APP_HEADER_TEST_SUBJECTS` for the header's structural subjects so component and test
-stay in lockstep (tab/badge/menu subjects are caller-provided and not included):
+Assert against `APP_HEADER_TEST_SUBJECTS` (exported from the package root) for the header's
+structural slots and the static menu items it injects (documentation, feedback, add integrations),
+so component and test stay in lockstep. Tab and badge subjects, and items passed via `menu`, are
+caller-provided and not included.
 
 ```ts
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('My app');
+```
+
+The header injects its `docLink`/feedback/integrations into the app menu, which collapses them into
+an overflow popover. `@kbn/app-header/test_helpers` ships RTL helpers to drive it without re-deriving
+the EuiPopover quirks:
+
+```ts
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
+await openAppMenuOverflow();
+expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
 ```
 
 `MockAppHeader`/`MockAppHeaderView` are also exported directly for tests that render the header
