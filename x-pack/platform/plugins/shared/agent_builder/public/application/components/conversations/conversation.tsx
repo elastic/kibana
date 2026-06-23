@@ -149,6 +149,7 @@ export const Conversation: React.FC<{}> = () => {
     ${useEuiScrollBar()}
     ${useEuiOverflowScroll('y')}
     scrollbar-gutter: stable both-edges;
+    overflow-anchor: none;
   `;
 
   const inputPaddingStyles = css`

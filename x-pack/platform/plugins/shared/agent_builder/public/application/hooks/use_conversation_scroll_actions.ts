@@ -17,6 +17,8 @@ export const useConversationScrollActions = ({
   scrollContainer: HTMLDivElement | null;
 }) => {
   const stuckToBottomRef = useRef(true);
+  const smoothScrollingRef = useRef(false);
+  const pendingSmoothScrollRef = useRef(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const setAtBottom = useCallback(() => {
@@ -24,9 +26,36 @@ export const useConversationScrollActions = ({
     setShowScrollButton(false);
   }, []);
 
+  const stickToBottom = useCallback(() => {
+    if (!scrollContainer) return;
+    scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    setAtBottom();
+  }, [scrollContainer, setAtBottom]);
+
+  const doSmoothScroll = useCallback(() => {
+    if (!scrollContainer) return;
+    smoothScrollingRef.current = true;
+    scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
+    scrollContainer.addEventListener(
+      'scrollend',
+      () => {
+        smoothScrollingRef.current = false;
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        setAtBottom();
+      },
+      { once: true }
+    );
+  }, [scrollContainer, setAtBottom]);
+
+  useEffect(() => {
+    smoothScrollingRef.current = false;
+    pendingSmoothScrollRef.current = false;
+  }, [scrollContainer]);
+
   useEffect(() => {
     if (!scrollContainer) return;
     const onScroll = () => {
+      if (smoothScrollingRef.current) return;
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       const atBottom = scrollHeight - scrollTop - clientHeight <= AT_BOTTOM_THRESHOLD;
       stuckToBottomRef.current = atBottom;
@@ -39,38 +68,50 @@ export const useConversationScrollActions = ({
   useEffect(() => {
     if (!scrollContainer) return;
     const observer = new ResizeObserver(() => {
-      if (stuckToBottomRef.current) {
+      if (!stuckToBottomRef.current) return;
+      if (smoothScrollingRef.current) {
+        pendingSmoothScrollRef.current = false;
+        return;
+      }
+      if (pendingSmoothScrollRef.current) {
+        pendingSmoothScrollRef.current = false;
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+        if (scrollHeight - scrollTop - clientHeight <= AT_BOTTOM_THRESHOLD) {
+          return;
+        }
+        doSmoothScroll();
+      } else {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     });
     const inner = scrollContainer.firstElementChild;
     if (inner) observer.observe(inner);
     return () => observer.disconnect();
-  }, [scrollContainer]);
+  }, [scrollContainer, doSmoothScroll]);
 
   useEffect(() => {
     if (!scrollContainer || !conversationId) return;
-    scrollContainer.scrollTop = scrollContainer.scrollHeight;
-    setAtBottom();
-  }, [conversationId, scrollContainer, setAtBottom]);
-
-  // Instant jump — called programmatically, e.g. after an existing conversation loads.
-  const stickToBottom = useCallback(() => {
-    if (!scrollContainer) return;
-    scrollContainer.scrollTop = scrollContainer.scrollHeight;
-    setAtBottom();
-  }, [scrollContainer, setAtBottom]);
+    stickToBottom();
+  }, [conversationId, scrollContainer, stickToBottom]);
 
   const smoothScrollToBottom = useCallback(() => {
     if (!scrollContainer) return;
+    if (smoothScrollingRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+    if (scrollHeight - scrollTop - clientHeight <= AT_BOTTOM_THRESHOLD) {
+      setAtBottom();
+      return;
+    }
     setShowScrollButton(false);
-    scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
-    scrollContainer.addEventListener('scrollend', setAtBottom, { once: true });
-  }, [scrollContainer, setAtBottom]);
+    doSmoothScroll();
+  }, [scrollContainer, setAtBottom, doSmoothScroll]);
 
   const onMessageSent = useCallback(() => {
-    setAtBottom();
-  }, [setAtBottom]);
+    if (!scrollContainer) return;
+    stuckToBottomRef.current = true;
+    pendingSmoothScrollRef.current = true;
+    setShowScrollButton(false);
+  }, [scrollContainer]);
 
   return {
     showScrollButton,
