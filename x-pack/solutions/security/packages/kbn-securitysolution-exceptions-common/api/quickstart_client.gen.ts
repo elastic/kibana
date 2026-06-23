@@ -239,7 +239,7 @@ export class Client {
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Exports exception lists and their associated items to an NDJSON file.
+   * Returns a streaming NDJSON file with list records, item records, and a summary footer.
    */
   async exportExceptionLists(props: ExportExceptionListsProps) {
     this.log.info(`${new Date().toISOString()} Calling API ExportExceptionLists`);

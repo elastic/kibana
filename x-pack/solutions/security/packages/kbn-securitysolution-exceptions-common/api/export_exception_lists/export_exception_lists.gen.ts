@@ -21,11 +21,11 @@ import { ExceptionNamespaceType } from '../model/exception_list_common.gen';
 export const ExportExceptionListsRequestQuery = lazySchema(() =>
   z.object({
     /**
-     * Filters the returned results according to the KQL query string
+     * Filters the returned results according to the KQL query string.
      */
     filter: z.string().max(10000).optional(),
     /**
-     * Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
+     * Determines whether to include expired exceptions in the exported list. The expiration date is defined by `expire_time`.
      */
     include_expired_exceptions: z.enum(['true', 'false']).optional().default('true'),
     /**

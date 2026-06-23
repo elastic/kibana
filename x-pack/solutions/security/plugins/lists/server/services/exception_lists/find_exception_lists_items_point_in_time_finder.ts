@@ -14,16 +14,15 @@ import type {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { NonEmptyStringArrayDecoded } from '@kbn/securitysolution-io-ts-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectsToFoundExceptionListItem } from './utils';
-import { getExceptionListsItemsFilter } from './utils/get_exception_lists_items_filter';
+import { getExceptionListsItemFilter } from './utils/get_exception_lists_item_filter';
 
 interface FindExceptionListsItemsPointInTimeFinderOptions {
-  listIds: NonEmptyStringArrayDecoded;
+  listIds: string[];
   namespaceTypes: NamespaceTypeArray;
   savedObjectsClient: SavedObjectsClientContract;
   filter: string | undefined;
@@ -85,7 +84,11 @@ export const findExceptionListsItemsPointInTimeFinder = async ({
 }: FindExceptionListsItemsPointInTimeFinderOptions): Promise<void> => {
   const savedObjectTypes = getSavedObjectTypes({ namespaceType: namespaceTypes });
   const finder = savedObjectsClient.createPointInTimeFinder<ExceptionListSoSchema, never>({
-    filter: getExceptionListsItemsFilter({ filter, listIds, savedObjectTypes }),
+    filter: getExceptionListsItemFilter({
+      globalFilter: filter,
+      listId: listIds,
+      savedObjectType: savedObjectTypes,
+    }),
     perPage,
     sortField,
     sortOrder,

@@ -843,10 +843,11 @@ paths:
         - Security Exceptions API
   /api/exception_lists/_bulk_export:
     post:
-      description: Exports exception lists and their associated items to an NDJSON file.
+      description: Returns a streaming NDJSON file with list records, item records,
+        and a summary footer.
       operationId: ExportExceptionLists
       parameters:
-        - description: Filters the returned results according to the KQL query string
+        - description: Filters the returned results according to the KQL query string.
           in: query
           name: filter
           required: false
@@ -854,7 +855,7 @@ paths:
             maxLength: 10000
             type: string
         - description: Determines whether to include expired exceptions in the exported
-            list. Expiration date defined by `expire_time`.
+            list. The expiration date is defined by `expire_time`.
           example: true
           in: query
           name: include_expired_exceptions
@@ -949,6 +950,7 @@ paths:
       summary: Export multiple exception lists
       tags:
         - Security Exceptions API
+      x-state: Generally available; added in 9.5.0
   /api/exception_lists/_duplicate:
     post:
       description: Duplicate an existing exception list.

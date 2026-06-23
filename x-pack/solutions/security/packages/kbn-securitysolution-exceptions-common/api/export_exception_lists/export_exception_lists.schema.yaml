@@ -6,22 +6,23 @@ paths:
   /api/exception_lists/_bulk_export:
     post:
       x-labels: [serverless, ess]
+      x-state: Generally available; added in 9.5.0
       operationId: ExportExceptionLists
       x-codegen-enabled: true
       summary: Export multiple exception lists
-      description: Exports exception lists and their associated items to an NDJSON file.
+      description: Returns a streaming NDJSON file with list records, item records, and a summary footer.
       parameters:
         - name: filter
           in: query
           required: false
-          description: Filters the returned results according to the KQL query string
+          description: Filters the returned results according to the KQL query string.
           schema:
             type: string
             maxLength: 10000
         - name: include_expired_exceptions
           in: query
           required: false
-          description: Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
+          description: Determines whether to include expired exceptions in the exported list. The expiration date is defined by `expire_time`.
           schema:
             type: string
             enum: ['true', 'false']

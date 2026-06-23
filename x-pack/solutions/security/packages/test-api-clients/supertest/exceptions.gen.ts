@@ -157,7 +157,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .query(props.query);
   },
   /**
-   * Exports exception lists and their associated items to an NDJSON file.
+   * Returns a streaming NDJSON file with list records, item records, and a summary footer.
    */
   exportExceptionLists(props: ExportExceptionListsProps, kibanaSpace: string = 'default') {
     return supertest
