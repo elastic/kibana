@@ -37,7 +37,7 @@ export class AddExceptionFlyoutPage {
   }
 
   async waitForVisible() {
-    await this.flyoutTitle.waitFor({ state: 'visible', timeout: 20_000 });
+    await this.flyoutTitle.waitFor({ state: 'visible' });
   }
 
   /**
