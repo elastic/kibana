@@ -34,6 +34,7 @@ import {
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useIsAgentWorkspaceMount } from '../../../../hooks/use_navigation';
 import {
   Cursor,
   esqlLanguagePlugin,
@@ -89,6 +90,7 @@ export function ChatMessageText({
     useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const {
     services: { http, application },
   } = useKibana();
@@ -102,14 +104,14 @@ export function ChatMessageText({
         // External links always show the confirmation modal
         e.preventDefault();
         setPendingExternalUrl(href);
-      } else if (isSidebar) {
-        // Internal link in flyout: navigate in current window
+      } else if (isSidebar || isAgentWorkspaceMount) {
+        // Internal link in flyout or agent workspace: open in application workspace column
         e.preventDefault();
         application.navigateToUrl(new URL(href, window.location.href).toString());
       }
-      // Internal link in full page: target="_blank" handles navigation
+      // Internal link in full-page AB app: target="_blank" handles navigation
     },
-    [isSidebar, http?.externalUrl, application]
+    [isSidebar, isAgentWorkspaceMount, http?.externalUrl, application]
   );
 
   const visualizationRenderer = useMemo(
