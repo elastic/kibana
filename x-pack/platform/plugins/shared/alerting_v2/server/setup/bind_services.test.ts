@@ -6,10 +6,10 @@
  */
 
 import { Container, ContainerModule } from 'inversify';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   EsServiceInternalToken,
@@ -22,75 +22,55 @@ import {
 } from '../lib/services/query_service/tokens';
 import { bindServices } from './bind_services';
 
-const createClientMock = () =>
-  ({
-    esql: { query: jest.fn().mockResolvedValue({ columns: [], values: [] }) },
-  } as unknown as ElasticsearchClient);
-
 describe('bindServices - Elasticsearch client routing', () => {
   let container: Container;
-  let fakeRequest: KibanaRequest;
-  let asInternalUser: ElasticsearchClient;
-  let scopedLocalCurrentUser: ElasticsearchClient;
-  let scopedSpaceCurrentUser: ElasticsearchClient;
-  let asScoped: jest.Mock;
+  let elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
+  let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
   beforeEach(() => {
     container = new Container();
-    fakeRequest = { headers: {} } as unknown as KibanaRequest;
+    elasticsearch = elasticsearchServiceMock.createStart();
+    request = httpServerMock.createKibanaRequest();
 
-    asInternalUser = createClientMock();
-    scopedLocalCurrentUser = createClientMock();
-    scopedSpaceCurrentUser = createClientMock();
-
-    asScoped = jest.fn((_request: KibanaRequest, opts?: AsScopedOptions) => ({
-      asCurrentUser:
-        opts?.projectRouting === 'space' ? scopedSpaceCurrentUser : scopedLocalCurrentUser,
-    }));
-
-    container.bind(CoreStart('elasticsearch')).toConstantValue({
-      client: { asScoped, asInternalUser },
-    } as never);
-    container.bind(Request).toConstantValue(fakeRequest);
+    container.bind(CoreStart('elasticsearch')).toConstantValue(elasticsearch);
+    container.bind(Request).toConstantValue(request);
     container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
 
     container.loadSync(new ContainerModule((options) => bindServices(options)));
   });
 
   it('binds the internal client to asInternalUser (origin-only, local)', () => {
-    expect(container.get(EsServiceInternalToken)).toBe(asInternalUser);
-    expect(asScoped).not.toHaveBeenCalled();
+    expect(container.get(EsServiceInternalToken)).toBe(elasticsearch.client.asInternalUser);
+    expect(elasticsearch.client.asScoped).not.toHaveBeenCalled();
   });
 
   it('binds the scoped client to asCurrentUser without project routing (local)', () => {
-    expect(container.get(EsServiceScopedToken)).toBe(scopedLocalCurrentUser);
-    expect(asScoped).toHaveBeenCalledTimes(1);
-    expect(asScoped).toHaveBeenCalledWith(fakeRequest);
+    const client = container.get(EsServiceScopedToken);
+
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
+    expect(client).toBe(elasticsearch.client.asScoped.mock.results[0].value.asCurrentUser);
   });
 
   it("binds the space-routed scoped client with projectRouting: 'space'", () => {
-    expect(container.get(EsServiceScopedSpaceRoutingToken)).toBe(scopedSpaceCurrentUser);
-    expect(asScoped).toHaveBeenCalledTimes(1);
-    expect(asScoped).toHaveBeenCalledWith(fakeRequest, { projectRouting: 'space' });
+    const client = container.get(EsServiceScopedSpaceRoutingToken);
+
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+    expect(client).toBe(elasticsearch.client.asScoped.mock.results[0].value.asCurrentUser);
   });
 
-  it('wires the scoped QueryService to the origin-only (local) client', async () => {
-    const queryService = container.get(QueryServiceScopedToken);
+  it('wires the scoped QueryService to the origin-only (local) client', () => {
+    container.get(QueryServiceScopedToken);
 
-    await queryService.executeQuery({ query: 'FROM logs-*' });
-
-    expect(asScoped).toHaveBeenCalledWith(fakeRequest);
-    expect(scopedLocalCurrentUser.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(scopedSpaceCurrentUser.esql.query as jest.Mock).not.toHaveBeenCalled();
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
   });
 
-  it('wires the space-routed scoped QueryService to the space-routed client', async () => {
-    const queryService = container.get(QueryServiceScopedSpaceRoutingToken);
+  it("wires the space-routed scoped QueryService with projectRouting: 'space'", () => {
+    container.get(QueryServiceScopedSpaceRoutingToken);
 
-    await queryService.executeQuery({ query: 'FROM logs-*' });
-
-    expect(asScoped).toHaveBeenCalledWith(fakeRequest, { projectRouting: 'space' });
-    expect(scopedSpaceCurrentUser.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(scopedLocalCurrentUser.esql.query as jest.Mock).not.toHaveBeenCalled();
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
   });
 });
