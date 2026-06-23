@@ -165,12 +165,18 @@ The `GET /api/streams/{name}` response enriches the raw stream definition with d
   privileges: { manage, read_failure_store, ... },
   dashboards: ["id1", "id2"],
   rules: ["id3"],
-  queries: [{ ... }],
   index_mode: "...",
 }
 ```
 
 The `stream` object is what can be sent back to `PUT`. Everything outside of `stream` is derived or stored separately (assets, inherited fields, privileges).
+
+**Significant-event queries are not part of the stream payload.**
+
+- `GET`/`PUT /api/streams/{name}` and `PUT /api/streams/{name}/_ingest` neither return nor accept a `queries` field. The `PUT` routes validate the body with `DeepStrict`, so a stray `queries` field is rejected as an unrecognized key (HTTP 400) rather than silently dropped; the GET→PUT converter never emits one. Manage queries through the dedicated `GET`/`PUT`/`DELETE /api/streams/{name}/queries` endpoints instead.
+- Content packs are structural-only: export never writes `queries`, and import rejects any pack whose streams still carry significant-event queries (an empty `queries: []` is ignored), so a content pack never installs detections or alerting rules.
+- Cross-version note: because new exports omit `queries`, a pack produced by a newer node can be rejected by an older node that still expects the field during a rolling upgrade. Content packs are experimental, so this is best-effort rather than guaranteed.
+- Keeping `queries` off stream read/write and content packs means those operations no longer touch the knowledge-indicator data stream, so editor-role users are no longer blocked from `GET`/`PUT` on a stream, and detections are governed exclusively by the `/queries` endpoints.
 
 ### End-to-End Type Safety
 
