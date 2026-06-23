@@ -385,7 +385,7 @@ The inference plugin already has a full anonymization implementation (`chat_comp
 - Not visible to space admins \- configured via advanced settings under Observability; space admins across Search and Security have no path to enabling or customizing it for their space  
 - Configurable but not composable \- admins can adjust regex rules and enable NER via advanced settings without a code deployment, but are limited to what the settings schema exposes; they cannot chain custom logic or integrate with other workflow behaviors  
 - Parallel system to the workflow engine \- two separate anonymization surfaces to maintain long-term as workflows become the configuration model for AI features  
-- NER calls hit Elasticsearch on the hot path \- additional latency risk under load, this risk is the same if we add NER support to option 1 or 2\.
+- NER calls hit Elasticsearch on the hot path \- additional latency risk under load
 
 ## References
 
