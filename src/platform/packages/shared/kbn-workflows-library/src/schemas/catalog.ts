@@ -17,25 +17,25 @@ import { TemplateMetadataSchema } from './template';
  */
 export const TemplateSchema = TemplateMetadataSchema.omit({ install: true })
   .extend({
-    definitionUrl: z.string(),
+    definitionUrl: z.string().min(1),
     contentHash: z.string().regex(/^sha256:[a-f0-9]{64}$/i, 'Must be `sha256:<hex>`.'),
-    fixedConnectors: z.array(z.string()),
+    fixedConnectors: z.array(z.string().min(1)),
   })
   .strict();
 
 export const TemplatesCatalogSchema = z
   .object({
-    version: z.string(),
-    kibanaVersion: z.string(),
-    generatedAt: z.string(),
+    version: z.string().min(1),
+    kibanaVersion: z.string().min(1),
+    generatedAt: z.string().min(1),
     templates: z.array(TemplateSchema),
   })
   .strict();
 
 export const KibanaVersionEntrySchema = z
   .object({
-    id: z.string(),
-    kibana: z.string(),
+    id: z.string().min(1),
+    kibana: z.string().min(1),
     active: z.boolean(),
   })
   .strict();
@@ -43,14 +43,14 @@ export const KibanaVersionEntrySchema = z
 export const KibanaVersionsManifestSchema = z
   .object({
     versions: z.array(KibanaVersionEntrySchema),
-    latest: z.string(),
+    latest: z.string().min(1),
   })
   .strict();
 
 export const ManifestSchema = z
   .object({
-    version: z.string(),
-    generatedAt: z.string(),
-    hashes: z.record(z.string(), z.string()),
+    version: z.string().min(1),
+    generatedAt: z.string().min(1),
+    hashes: z.record(z.string().min(1), z.string().min(1)),
   })
   .strict();

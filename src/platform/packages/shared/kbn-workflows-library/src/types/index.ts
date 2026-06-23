@@ -11,7 +11,7 @@ export type {
   InstallFormField,
   InstallFormFieldOption,
   InstallFormFieldType,
-  InstallForm as InstallFormSchema,
+  InstallForm,
 } from './install_form';
 
 export type {
@@ -20,7 +20,6 @@ export type {
   Manifest,
   Template,
   TemplateBody,
-  TemplateInput,
   TemplateMetadata,
   TemplatesCatalog,
 } from './catalog';

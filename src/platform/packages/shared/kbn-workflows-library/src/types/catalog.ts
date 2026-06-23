@@ -56,30 +56,15 @@ export type KibanaVersionEntry = z.infer<typeof KibanaVersionEntrySchema>;
 export type Manifest = z.infer<typeof ManifestSchema>;
 
 /**
- * A single workflow input declared at the top of a template body
- * (immediately under the `template-metadata` block). Not Zod-validated:
- * this is the parsed-API shape, the workflow body's `inputs:` array is
- * shaped by the wider workflows YAML grammar, not by this package.
- */
-export interface TemplateInput {
-  name: string;
-  type: string;
-  required?: boolean;
-  description?: string;
-  default?: unknown;
-}
-
-/**
  * The shape `GET /internal/workflows/library/templates/:slug` returns:
  * the parsed `template-metadata` block plus the workflow body (consts,
  * inputs, triggers, steps) and the original YAML for preview.
  */
 export interface TemplateBody {
+  /** the parsed `template-metadata` block */
   metadata: TemplateMetadata;
   /** Original YAML string, surfaced unmodified for preview. */
   raw: string;
-  consts?: Record<string, unknown>;
-  inputs?: TemplateInput[];
-  triggers?: unknown[];
-  steps?: unknown[];
+  /** the parsed workflow yaml body */
+  [key: string]: unknown;
 }
