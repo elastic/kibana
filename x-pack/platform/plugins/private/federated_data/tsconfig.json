@@ -14,7 +14,8 @@
     "@kbn/core",
     "@kbn/management-plugin",
     "@kbn/i18n",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/cloud-plugin"
   ],
   "exclude": [
     "target/**/*",
