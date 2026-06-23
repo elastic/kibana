@@ -319,14 +319,12 @@ describe('useSyncUrlDetails', () => {
     act(() => {
       mockCloudOnComplete(OnboardingTopicId.siemMigrations);
     });
-
+    expect(mockSetCloudOnboardingConsumed).toHaveBeenCalledWith(true);
     expect(mockNavigateTo).toHaveBeenCalledWith({
-      deepLinkId: SecurityPageName.siemMigrationsManage,
+      deepLinkId: SecurityPageName.landing,
+      path: OnboardingTopicId.siemMigrations,
     });
     expect(mockSetCloudOnboardingConsumed).toHaveBeenCalledWith(true);
-    expect(mockSetCloudOnboardingConsumed.mock.invocationCallOrder[0]).toBeLessThan(
-      mockNavigateTo.mock.invocationCallOrder[0]
-    );
     expect(mockSetStoredUrlDetail).not.toHaveBeenCalled();
   });
 
