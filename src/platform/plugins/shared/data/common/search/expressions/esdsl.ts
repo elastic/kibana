@@ -118,6 +118,7 @@ export const getEsdslFn = ({
                 defaultMessage:
                   'This request queries Elasticsearch to fetch the data for the visualization.',
               }),
+              getRequestStats: () => ({}),
             },
           }
         );

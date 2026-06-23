@@ -105,7 +105,9 @@ export class SearchMethodsService implements ISearchMethods {
     });
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
-    if (params.index && typeof params.index === 'object') {
+    if (options?.inspector?.getRequestStats) {
+      requestResponder?.stats(options.inspector.getRequestStats());
+    } else if (params.index && typeof params.index === 'object') {
       requestResponder?.stats(getDslRequestInspectorStats(params.index));
     }
 

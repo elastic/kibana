@@ -12,7 +12,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ESQLSearchParams } from '@kbn/es-types';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 
 /**
  * Base options shared across all typed search methods
@@ -45,6 +45,7 @@ export interface IBaseSearchOptions {
     adapter: RequestAdapter;
     title: string;
     description?: string;
+    getRequestStats?: () => RequestStatistics;
   };
 }
 
