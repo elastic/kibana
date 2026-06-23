@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiText, euiShadow } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiText } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -16,19 +16,16 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { OAuthRedirectMode, useConnectorOAuthConnect } from '@kbn/response-ops-oauth-hooks';
-import { borderRadiusXlStyles } from '../../../../../common.styles';
+import { promptContainerStyles } from './prompt_container.styles';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { ConnectorTypeIcon } from '../../../connectors/connector_type_icon';
 
 const labels = {
-  title: i18n.translate('xpack.agentBuilder.authorizationPrompt.title', {
-    defaultMessage: 'Authorization required',
+  deny: i18n.translate('xpack.agentBuilder.authorizationPrompt.deny', {
+    defaultMessage: 'Deny',
   }),
   authorize: i18n.translate('xpack.agentBuilder.authorizationPrompt.authorize', {
     defaultMessage: 'Authorize',
-  }),
-  cancel: i18n.translate('xpack.agentBuilder.authorizationPrompt.cancel', {
-    defaultMessage: 'Cancel',
   }),
   authorized: i18n.translate('xpack.agentBuilder.authorizationPrompt.authorized', {
     defaultMessage: 'Authorized',
@@ -40,22 +37,6 @@ const labels = {
     defaultMessage: 'Authorization failed',
   }),
 };
-
-const containerStyles = (euiThemeContext: UseEuiTheme) => {
-  const { euiTheme } = euiThemeContext;
-  return css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    ${borderRadiusXlStyles}
-    border: 1px solid ${euiTheme.colors.borderStrongWarning};
-    padding: ${euiTheme.size.base};
-    ${euiShadow(euiThemeContext, 's')};
-  `;
-};
-
-const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding-block-end: ${euiTheme.size.m};
-  border-block-end: 1px solid ${euiTheme.colors.lightShade};
-`;
 
 const titleStyles = ({ euiTheme }: UseEuiTheme) => css`
   font-weight: ${euiTheme.font.weight.semiBold};
@@ -111,26 +92,24 @@ export const AuthorizationPrompt = ({
       direction="column"
       responsive={false}
       gutterSize="m"
-      css={containerStyles}
+      css={promptContainerStyles}
       data-test-subj="agentBuilderAuthorizationPrompt"
     >
-      <EuiFlexGroup
-        direction="row"
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        css={headerStyles}
-      >
-        <ConnectorTypeIcon actionTypeId={prompt.connector_type} size="l" />
-        <EuiText component="span" css={titleStyles}>
-          {labels.title}
-        </EuiText>
-      </EuiFlexGroup>
+      <EuiText component="span" css={titleStyles}>
+        <FormattedMessage
+          id="xpack.agentBuilder.authorizationPrompt.title"
+          defaultMessage="Authorize {connectorIcon} {connectorName}?"
+          values={{
+            connectorIcon: <ConnectorTypeIcon actionTypeId={prompt.connector_type} size="s" />,
+            connectorName: prompt.connector_name,
+          }}
+        />
+      </EuiText>
 
       <EuiText component="p" size="s">
         <FormattedMessage
           id="xpack.agentBuilder.authorizationPrompt.message"
-          defaultMessage="You need to authorize the {connectorName} connector to continue."
+          defaultMessage="The agent paused because it needs access to {connectorName} to continue."
           values={{
             connectorName: <strong>{prompt.connector_name}</strong>,
           }}
@@ -142,6 +121,7 @@ export const AuthorizationPrompt = ({
           onClick={handleCancel}
           disabled={isInteractionDisabled}
           size="s"
+          iconType="cross"
           color={isAnswered && answeredValue === false ? 'danger' : 'text'}
           data-test-subj="agentBuilderAuthorizationPromptCancelButton"
           {...getEbtProps({
@@ -150,7 +130,7 @@ export const AuthorizationPrompt = ({
             detail: 'conversation',
           })}
         >
-          {isAnswered && answeredValue === false ? labels.declined : labels.cancel}
+          {isAnswered && answeredValue === false ? labels.declined : labels.deny}
         </EuiButtonEmpty>
         <EuiButton
           onClick={handleAuthorize}
@@ -158,7 +138,8 @@ export const AuthorizationPrompt = ({
           disabled={isInteractionDisabled}
           fill={!isAnswered || answeredValue === true}
           size="s"
-          color={isAnswered && answeredValue === true ? 'success' : 'warning'}
+          iconType="check"
+          color={isAnswered && answeredValue === true ? 'success' : 'primary'}
           data-test-subj="agentBuilderAuthorizationPromptAuthorizeButton"
           {...getEbtProps({
             element: AGENT_BUILDER_UI_EBT.element.pageContent,
