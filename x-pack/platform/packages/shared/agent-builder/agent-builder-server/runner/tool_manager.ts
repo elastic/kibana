@@ -6,7 +6,7 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type { BrowserApiToolMetadata, ToolOrigin } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
@@ -81,10 +81,15 @@ export interface ToolManager {
    */
   getToolIdMapping(): Map<string, string>;
 
+  getToolMeta(toolId: string): { origin: ToolOrigin | undefined; type: ToolType | undefined };
+
   /**
-   * Returns the origin for an internal tool ID, if known.
+   * Returns the resolved executable tool for the given internal id, or `undefined`
+   * if no such tool was registered for this run. Use with `Runner.runInternalTool`
+   * to dispatch a tool from outside the LangChain graph (e.g. `exec_tool` in bash)
+   * while still going through the standard hooks/telemetry pipeline.
    */
-  getToolOrigin(toolId: string): ToolOrigin | undefined;
+  getExecutable(toolId: string): ExecutableTool | undefined;
 
   /**
    * Gets the internal tool IDs of all dynamic tools currently in the tool manager.

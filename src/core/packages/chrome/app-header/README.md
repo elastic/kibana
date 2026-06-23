@@ -11,6 +11,14 @@ Chrome Next uses one shared header view with two placement models:
 Prefer inline rendering for new migrations. Use Chrome-owned registration as a transitional path when
 the page cannot safely own the header placement yet.
 
+## Folder layout
+
+Region components (back button, badges, tabs, metadata, app menu, title actions, etc.) live as flat
+files directly in `src/app_header/`, with shared data resolution in `src/app_header/hooks/`. A region
+graduates to its own folder only when it gains real complexity of its own — an internal component
+split, dedicated stories, or a README. Today only `title_area/` meets that bar. Keep new regions flat
+until they earn a folder; don't pre-folder simple slots.
+
 ## Which API should I use?
 
 Use `AppHeader` when the page can render its header inline. This is the preferred model for pages
@@ -24,6 +32,50 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
+
+## Editable titles
+
+Pass a title object when the page title can be renamed from the header:
+
+```tsx
+<AppHeader
+  title={{
+    text: name,
+    onSave: async (nextName) => {
+      const saved = await saveName(nextName);
+      if (!saved) {
+        return 'Choose a different name.';
+      }
+    },
+  }}
+/>
+```
+
+The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
+saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
+
+## Title size
+
+The title is `xs` for a single-row header and `s` when the header has a second row (tabs or a
+metadata row), where an `xs` title looks too small in the taller header. This is automatic — there
+is no size knob to set.
+
+## Padding
+
+`padding` controls the header's **outer** spacing. The scalar values only add symmetric horizontal
+padding; the `bleed` variant additionally breaks the header out of a surrounding padded container.
+The header's **internal vertical padding** is standardized regardless of this prop (and of the title
+size), so the header keeps a consistent height — 48px for a single row, whether or not only a back
+button is present.
+
+- `'none'` — no horizontal padding, no bleed.
+- `'s'` — symmetric horizontal padding (compact).
+- `'m'` — symmetric horizontal padding (default for inline headers).
+- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. an
+  `EuiPageSection`). Set `bleed` to the section's **symmetric** padding: the header breaks out to that
+  section's top/left/right edges via negative margin so it spans full width and sits flush at the top,
+  and its content is auto re-inset by the same amount to stay aligned with the page gutter. (The
+  single value applies to both the sides and the top because the section's padding is symmetric.)
 
 ## Chrome Next flag and runtime checks
 
