@@ -137,11 +137,13 @@ apiTest.describe(
     apiTest(
       'persists deletion of label and header keys instead of deep-merging them',
       async ({ apiClient }) => {
-        // Regression test for #274387: editing a monitor must fully replace map
-        // fields. A deep-merging saved-object update silently keeps removed keys,
-        // so labels/headers could never be deleted. The edit *response* is built
-        // from the in-memory monitor and looks correct even when persistence is
-        // broken, so this asserts a subsequent GET.
+        // Regression test for #274387. `labels` is a top-level map attribute, so a
+        // deep-merging saved-object update silently kept removed keys and they could
+        // never be deleted. Headers live in the encrypted `secrets` string (replaced
+        // wholesale), so they already worked; asserting them here guards that the
+        // full-attribute replacement keeps round-tripping secrets. The edit *response*
+        // is built from the in-memory monitor and looks correct even when persistence
+        // is broken, so this asserts a subsequent GET.
         const savedMonitor = await saveMonitor(apiClient, {
           ...httpMonitorJson,
           name: 'monitor with maps to prune',

@@ -232,8 +232,8 @@ export class MonitorConfigRepository {
     // If the spaces have changed, we need to delete the saved object and recreate it
     if (isEqual(prevSpaces, spaces)) {
       // `mergeAttributes: false` fully replaces the attributes. The default deep-merge
-      // keeps stale keys in map fields that aren't mapped as `flattened` (e.g. `labels`,
-      // request headers), making it impossible to delete individual entries. See #274387.
+      // keeps stale keys in top-level map fields that aren't mapped as `flattened`
+      // (notably `labels`), making it impossible to delete individual entries. See #274387.
       return this.soClient.update<MonitorFields>(soType, id, data, {
         references,
         mergeAttributes: false,
