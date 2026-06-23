@@ -62,7 +62,8 @@
         "uiamApiKeyId": "string?",
         "spaceId": "string",
         "apiKeyCreatedByUser": "boolean",
-        "userProfileId": "string?"
+        "userProfileId": "string?",
+        "userName": "string?"
       }
     }
   ]
