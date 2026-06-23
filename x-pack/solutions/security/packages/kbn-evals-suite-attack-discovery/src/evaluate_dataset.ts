@@ -6,7 +6,13 @@
  */
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import type { EvalsExecutorClient, EvaluationDataset, Evaluator } from '@kbn/evals';
+import type {
+  DefaultEvaluators,
+  EvalsExecutorClient,
+  EvaluationDataset,
+  Evaluator,
+  TaskOutput,
+} from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscoveryClient } from './clients/attack_discovery_client';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from './types';
@@ -32,11 +38,13 @@ export type EvaluateAttackDiscoveryDataset = (options: {
 }) => Promise<void>;
 
 const configureExperiment = ({
+  evaluators,
   attackDiscoveryClient,
   inferenceClient,
   evaluationInferenceClient,
   log,
 }: {
+  evaluators: DefaultEvaluators;
   attackDiscoveryClient: AttackDiscoveryClient;
   inferenceClient: BoundInferenceClient;
   evaluationInferenceClient: BoundInferenceClient;
@@ -47,6 +55,9 @@ const configureExperiment = ({
   }) => Promise<AttackDiscoveryTaskOutput>;
   evaluators: Array<Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput>>;
 } => {
+  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+    evaluators.traceBasedEvaluators;
+
   return {
     task: async ({ input }) => {
       if (!input) {
@@ -63,17 +74,24 @@ const configureExperiment = ({
     evaluators: [
       createAttackDiscoveryBasicEvaluator(),
       createAttackDiscoveryRubricEvaluator({ inferenceClient: evaluationInferenceClient, log }),
+      toolCalls as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
+      latency as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
+      inputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
+      outputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
+      cachedTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
     ],
   };
 };
 
 export const createEvaluateAttackDiscoveryDataset = ({
+  evaluators,
   attackDiscoveryClient,
   executorClient,
   inferenceClient,
   evaluationConnectorId,
   log,
 }: {
+  evaluators: DefaultEvaluators;
   attackDiscoveryClient: AttackDiscoveryClient;
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
@@ -94,7 +112,8 @@ export const createEvaluateAttackDiscoveryDataset = ({
       connectorId: evaluationConnectorId,
     });
 
-    const { task, evaluators } = configureExperiment({
+    const { task, evaluators: experimentEvaluators } = configureExperiment({
+      evaluators,
       attackDiscoveryClient,
       inferenceClient,
       evaluationInferenceClient,
@@ -108,7 +127,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
         concurrency: resolveConcurrency(),
         trustUpstreamDataset,
       },
-      evaluators
+      experimentEvaluators
     );
   };
 

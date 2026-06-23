@@ -17,7 +17,8 @@ import {
 const createdRuleIds: string[] = [];
 
 evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
-  evaluate.beforeAll(async ({ internalEsClient, chatClient, fetch, log }) => {
+  evaluate.beforeAll(async ({ internalEsClient, chatClient, fetch, log, uiSettings }) => {
+    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
     await seedSiemReadinessData({ esClient: internalEsClient, log });
 
     // Create detection rules for blast-radius testing
@@ -87,16 +88,17 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  evaluate.afterAll(async ({ internalEsClient, fetch, log }) => {
+  evaluate.afterAll(async ({ internalEsClient, fetch, log, uiSettings }) => {
+    await uiSettings.unset('agentBuilder:experimentalFeatures');
     await cleanupSiemReadinessData({ esClient: internalEsClient, log });
-    if (createdRuleIds.length > 0) {
+    const idsToDelete = createdRuleIds.splice(0);
+    if (idsToDelete.length > 0) {
       try {
         await fetch('/api/detection_engine/rules/_bulk_action', {
           method: 'POST',
           version: '2023-10-31',
-          body: JSON.stringify({ ids: createdRuleIds, action: 'delete' }),
+          body: JSON.stringify({ ids: idsToDelete, action: 'delete' }),
         });
-        createdRuleIds.length = 0;
       } catch (e) {
         log.warning(`Failed to delete eval detection rules: ${e}`);
       }

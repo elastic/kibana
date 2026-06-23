@@ -28,12 +28,14 @@
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
 import {
+  createSkillInvocationEvaluator,
   selectEvaluators,
   type DefaultEvaluators,
   type EvaluationDataset,
   type EvalsExecutorClient,
   type Example,
 } from '@kbn/evals';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
@@ -80,12 +82,14 @@ function createEvaluateTriageQuality({
   connector,
   evaluators,
   executorClient,
+  traceEsClient,
   log,
 }: {
   fetch: HttpHandler;
   connector: { id: string };
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }) {
   return async function evaluateTriageQuality({
@@ -98,6 +102,11 @@ function createEvaluateTriageQuality({
     const selectedEvaluators = selectEvaluators([
       evaluators.criteria(criteria),
       attachmentReadCompliance,
+      createSkillInvocationEvaluator({
+        traceEsClient,
+        log,
+        skillName: 'alert-analysis',
+      }),
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);
 
@@ -132,8 +141,8 @@ type EvaluateTriageQuality = ReturnType<typeof createEvaluateTriageQuality>;
 
 const evaluate = base.extend<{ evaluateTriageQuality: EvaluateTriageQuality }, {}>({
   evaluateTriageQuality: [
-    ({ fetch, connector, evaluators, executorClient, log }, use) => {
-      use(createEvaluateTriageQuality({ fetch, connector, evaluators, executorClient, log }));
+    ({ fetch, connector, evaluators, executorClient, traceEsClient, log }, use) => {
+      use(createEvaluateTriageQuality({ fetch, connector, evaluators, executorClient, traceEsClient, log }));
     },
     { scope: 'test' },
   ],

@@ -8,6 +8,7 @@
 import {
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
+  createSkillInvocationEvaluator,
   selectEvaluators,
   withEvaluatorSpan,
   type DefaultEvaluators,
@@ -18,6 +19,8 @@ import {
   type Example,
   type TaskOutput,
 } from '@kbn/evals';
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   EvaluationChatClient,
   ErrorResponse,
@@ -246,12 +249,16 @@ interface CreateEvaluateDatasetOpts {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: EvaluationChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }
 
 export function createEvaluateDataset({
   evaluators,
   executorClient,
   chatClient,
+  traceEsClient,
+  log,
 }: CreateEvaluateDatasetOpts): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
@@ -327,6 +334,11 @@ export function createEvaluateDataset({
         inputTokens as Evaluator<DatasetExample, TaskOutput>,
         outputTokens as Evaluator<DatasetExample, TaskOutput>,
         cachedTokens as Evaluator<DatasetExample, TaskOutput>,
+        createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName: 'entity-analytics',
+        }) as Evaluator<DatasetExample, TaskOutput>,
       ]
     );
   };

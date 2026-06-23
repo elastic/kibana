@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
@@ -13,6 +14,8 @@ import type {
   Example,
   TaskOutput,
 } from '@kbn/evals';
+import { createSkillInvocationEvaluator } from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { SecurityEvalChatClient } from './chat_client';
 
 export interface SecurityDatasetExample extends Example {
@@ -51,10 +54,14 @@ export function createEvaluateSecurityDataset({
   evaluators,
   executorClient,
   chatClient,
+  traceEsClient,
+  log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SecurityEvalChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }): EvaluateSecurityDataset {
   return async function evaluateSecurityDataset({
     dataset: { name, description, examples },
@@ -90,6 +97,11 @@ export function createEvaluateSecurityDataset({
       },
       [
         createEndpointCriteriaEvaluator({ evaluators }),
+        createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName: 'elastic-defend-configuration-troubleshooting',
+        }) as Evaluator<SecurityDatasetExample, TaskOutput>,
         toolCalls as Evaluator<SecurityDatasetExample, TaskOutput>,
         latency as Evaluator<SecurityDatasetExample, TaskOutput>,
         inputTokens as Evaluator<SecurityDatasetExample, TaskOutput>,

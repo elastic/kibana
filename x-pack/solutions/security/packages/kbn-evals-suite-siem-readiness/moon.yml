@@ -19,9 +19,11 @@ project:
 dependsOn:
   - '@kbn/evals'
   - '@kbn/scout'
+  - '@kbn/agent-builder-common'
   - '@kbn/tooling-log'
   - '@kbn/core'
   - '@kbn/test'
+  - '@kbn/siem-readiness'
 tags:
   - functional-tests
   - package

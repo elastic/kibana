@@ -269,7 +269,15 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness/playwright.config.ts",
       "tags": ["security", "siem-readiness"],
       "ciLabels": ["evals:siem-readiness"],
-      "serverConfigSet": "evals_siem_readiness"
+      "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "security-multi-step",
+      "name": "Security Multi-step Execution",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-multi-step/playwright.config.ts",
+      "tags": ["security", "multi-step"],
+      "ciLabels": ["evals:security-multi-step"]
     }
   ]
 }
