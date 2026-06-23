@@ -374,7 +374,7 @@ const alignStaticValueMax: NormalizerConfig<MetricAttributes> = {
     if (!layer || maxColumn?.operationType !== 'static_value') {
       return attributes;
     }
-    
+
     delete layer.columns.metric_accessor_max;
     layer.columnOrder = layer.columnOrder.filter((id: string) => id !== 'metric_accessor_max');
     delete viz.maxAccessor;
