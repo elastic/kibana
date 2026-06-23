@@ -23,6 +23,7 @@ apiTest.describe(
   () => {
     let state: StackAlertsPrivilegeState;
     let withReadPrivilegeCreds: RoleApiCredentials;
+    let withReadPrivilegeCookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
       state = await setupStackAlertsPrivilegeTests(apiClient, requestAuth, samlAuth);
@@ -31,6 +32,12 @@ apiTest.describe(
         kibana: [{ base: [], feature: { stackAlertsOnly: ['read'] }, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [] },
       });
+
+      const session = await samlAuth.asInteractiveUser({
+        kibana: [{ base: [], feature: { stackAlertsOnly: ['read'] }, spaces: ['*'] }],
+        elasticsearch: { cluster: [], indices: [] },
+      });
+      withReadPrivilegeCookieHeader = session.cookieHeader;
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
@@ -39,7 +46,7 @@ apiTest.describe(
 
     apiTest('can find alerts via RAC', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/find', {
-        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },
         body: {
           rule_type_ids: ['.es-query'],
           consumers: ['stackAlerts'],
@@ -60,8 +67,7 @@ apiTest.describe(
       apiTest(
         `cannot mute an alert instance for ${spec.ruleTypeId}`,
         async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-          if (!rule) return;
+          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
           const response = await apiClient.post(
             `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
             { headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader } }
@@ -73,10 +79,10 @@ apiTest.describe(
 
     apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/bulk_update', {
-        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },
         body: {
           status: 'acknowledged',
-          ids: [state.realAlertId ?? 'nonexistent'],
+          ids: [state.realAlertId],
           index: '.alerts-stack.alerts-default',
         },
         responseType: 'json',

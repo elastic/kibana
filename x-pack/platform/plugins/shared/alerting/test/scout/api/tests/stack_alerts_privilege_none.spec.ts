@@ -23,6 +23,7 @@ apiTest.describe(
   () => {
     let state: StackAlertsPrivilegeState;
     let withoutPrivilegeCreds: RoleApiCredentials;
+    let withoutPrivilegeCookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
       state = await setupStackAlertsPrivilegeTests(apiClient, requestAuth, samlAuth);
@@ -31,6 +32,12 @@ apiTest.describe(
         kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [] },
       });
+
+      const session = await samlAuth.asInteractiveUser({
+        kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
+        elasticsearch: { cluster: [], indices: [] },
+      });
+      withoutPrivilegeCookieHeader = session.cookieHeader;
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
@@ -41,8 +48,7 @@ apiTest.describe(
       apiTest(
         `cannot mute an alert instance for ${spec.ruleTypeId}`,
         async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-          if (!rule) return;
+          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
           const response = await apiClient.post(
             `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
             { headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
@@ -54,8 +60,7 @@ apiTest.describe(
       apiTest(
         `cannot unmute an alert instance for ${spec.ruleTypeId}`,
         async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-          if (!rule) return;
+          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId)!;
           const response = await apiClient.post(
             `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
             { headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
@@ -67,7 +72,7 @@ apiTest.describe(
 
     apiTest('cannot find alerts via RAC', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/find', {
-        headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...withoutPrivilegeCookieHeader },
         body: {
           rule_type_ids: ['.es-query'],
           consumers: ['stackAlerts'],
@@ -81,10 +86,10 @@ apiTest.describe(
 
     apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/bulk_update', {
-        headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
+        headers: { ...COMMON_HEADERS, ...withoutPrivilegeCookieHeader },
         body: {
           status: 'acknowledged',
-          ids: [state.realAlertId ?? 'nonexistent'],
+          ids: [state.realAlertId],
           index: '.alerts-stack.alerts-default',
         },
         responseType: 'json',
