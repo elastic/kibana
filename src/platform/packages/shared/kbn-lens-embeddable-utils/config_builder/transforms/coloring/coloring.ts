@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type {
+  ColorMapping,
+  ColorStop,
+  CustomPaletteParams,
+  PaletteContinuity,
+  PaletteOutput,
+} from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
@@ -96,14 +102,17 @@ export function fromColorByValueAPIToLensState(
       // @ts-expect-error - This can be null
       rangeMax,
       rangeType: paletteRangeCompat.toState(config.range ?? 'absolute'),
-      stops: !needsPaletteShift
-        ? stops
-        : stops.map((stop, i) => ({
-            ...stop,
-            // value can be null
-            stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
-          })),
-      colorStops,
+      stops:
+        !needsPaletteShift || rangeMin === null // open-below: keep raw upper-bound stops
+          ? stops
+          : stops.map((stop, i) => ({
+              ...stop,
+              // value can be null
+              stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
+            })),
+      // legacy/named palettes derive their colors from the palette service and ignore colorStops
+      // (see kbn-coloring common.ts: only read when name === 'custom'), so leave it empty for them
+      ...(!isLegacy && { colorStops }),
       continuity: getContinuity(rangeMin, rangeMax),
       steps: stops.length,
       maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
@@ -116,6 +125,12 @@ export function getRangeValue(value?: number | null): number | null {
   return value;
 }
 
+const isUnbounded = (continuity: PaletteContinuity | undefined) => continuity === 'all';
+const isOpenAbove = (continuity: PaletteContinuity | undefined) =>
+  continuity === 'above' || isUnbounded(continuity);
+const isOpenBelow = (continuity: PaletteContinuity | undefined) =>
+  continuity === 'below' || isUnbounded(continuity);
+
 export function fromColorByValueLensStateToAPI(
   config: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
@@ -123,18 +138,24 @@ export function fromColorByValueLensStateToAPI(
 
   if (!colorParams) return;
 
-  const { rangeType, reverse } = colorParams;
+  const { rangeType, reverse, continuity: rawContinuity } = colorParams;
   let originalStops = colorParams.stops ?? [];
 
   // config.name is the root palette identifier used by the runtime palette service
   const palette = config.name ?? colorParams.name ?? 'custom';
   const isLegacy = palette !== 'custom';
-  const rangeMin = getRangeValue(colorParams.rangeMin);
-  const rangeMax = getRangeValue(colorParams.rangeMax);
+
+  const rawRangeMin = getRangeValue(colorParams.rangeMin);
+  const rawRangeMax = getRangeValue(colorParams.rangeMax);
+  const continuity = rawContinuity ?? getContinuity(rawRangeMin, rawRangeMax);
+  // Resolve the contradiction between the continuity and the range bounds
+  const rangeMin = isOpenBelow(continuity) ? null : rawRangeMin;
+  const rangeMax = isOpenAbove(continuity) ? null : rawRangeMax;
+
   const needsPaletteShift =
     isLegacy &&
-    ((rangeMin !== null && rangeMin === originalStops.at(0)?.stop) ||
-      (rangeMax !== null && rangeMax !== originalStops.at(-1)?.stop));
+    ((rawRangeMin !== null && rawRangeMin === originalStops.at(0)?.stop) ||
+      (rawRangeMax !== null && rawRangeMax !== originalStops.at(-1)?.stop));
 
   // legacy non-custom color stops are incorrectly configured for bwc and "fixed" in client logic
   // we need to return the incorrect stops to make it work as it does currently.
@@ -157,6 +178,7 @@ export function fromColorByValueLensStateToAPI(
           ...originalStops[i],
           color,
         }));
+
   const steps = stops.map((step, i): ColorByValueStep => {
     const { stop: currentStop, color } = step;
     if (i === 0) {

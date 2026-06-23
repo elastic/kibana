@@ -944,6 +944,168 @@ describe('Color util transforms', () => {
       });
     });
 
+    describe('double round-trip stability (continuity vs range bounds)', () => {
+      const doubleRoundTrip = (so1: PaletteOutput<CustomPaletteParams>) => {
+        const api1 = fromColorByValueLensStateToAPI(so1);
+        const so2 = fromColorByValueAPIToLensState(api1);
+        const api2 = fromColorByValueLensStateToAPI(so2);
+        const so3 = fromColorByValueAPIToLensState(api2);
+        return { api1, so2, api2, so3 };
+      };
+
+      it('keeps a legacy palette stable except nulling the open-ended last stop when continuity agrees with the bounds', () => {
+        // continuity 'all' agrees with null rangeMin/rangeMax (no contradiction).
+        // The only lossy change is the open-above last stop value, which is dropped
+        // to null; colorStops stays empty because legacy palettes ignore it.
+        const so1: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'status',
+          params: {
+            name: 'status',
+            reverse: false,
+            rangeType: 'number',
+            // @ts-expect-error - This can be null
+            rangeMin: null,
+            // @ts-expect-error - This can be null
+            rangeMax: null,
+            progression: 'fixed',
+            stops: [
+              {
+                color: '#24c292',
+                stop: 3756,
+              },
+              {
+                color: '#fcd883',
+                stop: 7512,
+              },
+              {
+                color: '#f6726a',
+                stop: 11268,
+              },
+            ],
+            steps: 3,
+            colorStops: [],
+            continuity: 'all',
+            maxSteps: 5,
+          },
+        };
+
+        const { api1, so2, api2 } = doubleRoundTrip(so1);
+
+        // keeps continuity 'all' and range bounds null
+        expect(so2?.params?.continuity).toBe('all');
+        expect(so2?.params?.rangeMin).toBeNull();
+        expect(so2?.params?.rangeMax).toBeNull();
+        // shifts the last stop to null
+        expect(so2?.params?.stops).toEqual([
+          {
+            color: '#24c292',
+            stop: 3756,
+          },
+          {
+            color: '#fcd883',
+            stop: 7512,
+          },
+          {
+            color: '#f6726a',
+            stop: null,
+          },
+        ]);
+        // legacy palette: colorStops is not regenerated, it stays empty
+        expect(so2?.params?.colorStops).toBeUndefined();
+
+        expect(api2).toEqual(api1);
+      });
+
+      it('drops the contradicting range bounds and empties legacy colorStops while keeping the API idempotent', () => {
+        // continuity 'all' declares the range open, yet rangeMin/rangeMax are set:
+        // a contradiction. stops are in the legacy lower-bound form.
+        const so1: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'temperature',
+          params: {
+            name: 'temperature',
+            rangeType: 'number',
+            continuity: 'all',
+            progression: 'fixed',
+            reverse: false,
+            steps: 3,
+            maxSteps: 5,
+            rangeMin: 0,
+            rangeMax: 14974.5,
+            stops: [
+              { color: '#209280', stop: 0 },
+              { color: '#d6bf57', stop: 6655.33 },
+              { color: '#cc5642', stop: 13310.66 },
+            ],
+          },
+        };
+
+        const { api1, so2, api2, so3 } = doubleRoundTrip(so1);
+
+        // The 3 api config steps are preserved and their values are identical across both round-trips
+        expect(api1?.steps).toEqual([
+          { color: '#209280', lt: 6655.33 },
+          { color: '#d6bf57', gte: 6655.33, lt: 13310.66 },
+          { color: '#cc5642', gte: 13310.66 },
+        ]);
+        expect(api2?.steps).toEqual(api1?.steps);
+
+        // The SO changes on the first round-trip: continuity 'all' wins, the
+        // contradicting bounds are dropped, and stops move from the legacy
+        // lower-bound form to the canonical upper-bound form.
+        expect(so2?.params?.continuity).toBe('all');
+        expect(so2?.params?.rangeMin).toBeNull();
+        expect(so2?.params?.rangeMax).toBeNull();
+        expect(so2?.params?.stops).toEqual([
+          { color: '#209280', stop: 6655.33 },
+          { color: '#d6bf57', stop: 13310.66 },
+          { color: '#cc5642', stop: null },
+        ]);
+        expect(so2?.params?.colorStops).toBeUndefined();
+
+        // 3) Once normalized, the SO no longer drifts on subsequent round-trips
+        expect(so3).toEqual(so2);
+      });
+
+      it('is fully stable for a custom palette, preserving both stops and colorStops', () => {
+        // custom palettes do read colorStops (lower-bound form) alongside stops
+        // (upper-bound form), so both must survive the round-trip unchanged.
+        const so1: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'custom',
+          params: {
+            name: 'custom',
+            reverse: false,
+            rangeType: 'number',
+            rangeMin: 300,
+            rangeMax: 700,
+            progression: 'fixed',
+            stops: [
+              { color: '#24c292', stop: 424.65 },
+              { color: '#fcd883', stop: 541.29 },
+              { color: '#f6726a', stop: 700 },
+            ],
+            colorStops: [
+              { color: '#24c292', stop: 300 },
+              { color: '#fcd883', stop: 424.65 },
+              { color: '#f6726a', stop: 541.29 },
+            ],
+            continuity: 'none',
+            steps: 3,
+            maxSteps: 5,
+          },
+        };
+
+        const { api1, so2, api2 } = doubleRoundTrip(so1);
+
+        // SO survives the round-trip unchanged, including colorStops
+        expect(so2).toEqual(so1);
+        // API is idempotent
+        expect(api2).toEqual(api1);
+      });
+    });
+
     it('should maintain data integrity for gradient color mapping with mixed assignments', () => {
       const originalColorMapping: ColorMappingType = {
         palette: SEMANTIC_PALETTE,
