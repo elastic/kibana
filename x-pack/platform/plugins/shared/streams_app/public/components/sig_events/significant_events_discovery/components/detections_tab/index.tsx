@@ -10,11 +10,11 @@ import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -117,9 +117,13 @@ export const DetectionsTab = () => {
           defaultMessage: 'Rule',
         }),
         render: (_: unknown, detection: Detection) => (
-          <EuiLink onClick={() => toggleSelectedDetection(detection)}>
+          <EuiButtonEmpty
+            size="s"
+            flush="both"
+            onClick={() => toggleSelectedDetection(detection)}
+          >
             {detection.rule_name}
-          </EuiLink>
+          </EuiButtonEmpty>
         ),
       },
       {
@@ -175,7 +179,7 @@ export const DetectionsTab = () => {
         },
       },
     ],
-    [selectedDetectionId, toggleSelectedDetection, euiTheme.size.xs]
+    [selectedDetectionId, toggleSelectedDetection]
   );
 
   return (
