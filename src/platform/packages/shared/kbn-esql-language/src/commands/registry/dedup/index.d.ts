@@ -1,6 +1,6 @@
 import type { ICommandMethods } from '../registry';
 import type { ICommandContext } from '../types';
-import { Commands } from '../../definitions/keywords';
+import type { Commands } from '../../definitions/keywords';
 export declare const dedupCommand: {
     name: Commands;
     methods: ICommandMethods<ICommandContext>;

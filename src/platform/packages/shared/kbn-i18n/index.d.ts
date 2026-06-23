@@ -1,5 +1,5 @@
-import { formatList, getLocale, getTranslation, init, load, translate } from './src/core';
-import { registerTranslationFile, registerTranslationFiles, getTranslationsByLocale, getAllTranslations, getAllTranslationsFromPaths, getRegisteredLocales as getRegisteredLocalesForLoader } from './src/loader';
+import type { formatList, getLocale, getTranslation, init, load, translate } from './src/core';
+import type { registerTranslationFile, registerTranslationFiles, getTranslationsByLocale, getAllTranslations, getAllTranslationsFromPaths, getRegisteredLocales as getRegisteredLocalesForLoader } from './src/loader';
 declare const i18n: {
     getTranslation: typeof getTranslation;
     getLocale: typeof getLocale;

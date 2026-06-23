@@ -1,6 +1,7 @@
 import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
 import type { ESQLAstCommand } from '@elastic/esql/types';
-import { UnmappedFieldsStrategy, type ESQLColumnData, type ESQLPolicy } from '../commands/registry/types';
+import type { UnmappedFieldsStrategy} from '../commands/registry/types';
+import { type ESQLColumnData, type ESQLPolicy } from '../commands/registry/types';
 export declare function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks): Promise<ESQLFieldWithMetadata[]>;
 /**
  * After KEEP or STATS, no new unmapped fields are added as they were erased by those destructive commands.

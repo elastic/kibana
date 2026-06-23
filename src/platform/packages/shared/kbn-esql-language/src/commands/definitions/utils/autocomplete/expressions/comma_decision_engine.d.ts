@@ -1,5 +1,5 @@
 import type { SupportedDataType } from '../../../types';
-import { FunctionDefinitionTypes } from '../../../types';
+import type { FunctionDefinitionTypes } from '../../../types';
 export interface CommaContext {
     /** Determines which strategy handler to use */
     position: 'after_complete' | 'empty_expression' | 'enum_value' | 'inside_list';

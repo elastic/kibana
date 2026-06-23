@@ -1,5 +1,5 @@
 import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
-import { Location } from './types';
+import type { Location } from './types';
 /**
  * Pause before using this in new places. Where possible, use the Location enum directly.
  *

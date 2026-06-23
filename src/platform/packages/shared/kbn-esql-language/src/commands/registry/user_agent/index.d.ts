@@ -1,4 +1,4 @@
-import { Commands } from '../../definitions/keywords';
+import type { Commands } from '../../definitions/keywords';
 import type { ICommandMethods } from '../registry';
 import type { ICommandContext } from '../types';
 export declare const userAgentCommand: {

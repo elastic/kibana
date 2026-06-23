@@ -1,4 +1,4 @@
-import { Walker } from '@elastic/esql';
+import type { Walker } from '@elastic/esql';
 import type { ESQLAstBaseItem, ESQLFunction } from '@elastic/esql/types';
 /**
  * Extracts the parameter list from a formatted function signature.

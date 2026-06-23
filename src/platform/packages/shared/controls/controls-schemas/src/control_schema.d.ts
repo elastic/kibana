@@ -1,5 +1,5 @@
 import { type Type } from '@kbn/config-schema';
-import { ControlValuesSource } from '@kbn/controls-constants';
+import type { ControlValuesSource } from '@kbn/controls-constants';
 export declare const controlTitleSchema: import("@kbn/config-schema").ObjectType<{
     title: Type<string | undefined>;
 }>;

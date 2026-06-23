@@ -1,5 +1,5 @@
 import type { ByteSizeValue } from '../byte_size_value';
-import { SchemaTypeError } from '../errors';
+import type { SchemaTypeError } from '../errors';
 import { Type } from './type';
 export interface ByteSizeOptions {
     validate?: (value: ByteSizeValue) => string | void;

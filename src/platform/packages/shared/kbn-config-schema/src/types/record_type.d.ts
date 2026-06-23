@@ -1,4 +1,4 @@
-import { SchemaTypeError } from '../errors';
+import type { SchemaTypeError } from '../errors';
 import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
 import { Type } from './type';
 export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>> & UnknownOptions;

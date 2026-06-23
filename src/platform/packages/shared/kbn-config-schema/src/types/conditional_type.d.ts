@@ -1,4 +1,4 @@
-import { Reference } from '../references';
+import type { Reference } from '../references';
 import type { ExtendsDeepOptions, TypeOptions } from './type';
 import { Type } from './type';
 export type ConditionalTypeValue = string | number | boolean | object | null;

@@ -1,4 +1,4 @@
-import { ControlValuesSource } from './control_constants';
+import type { ControlValuesSource } from './control_constants';
 export declare const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
 export declare const DEFAULT_DSL_OPTIONS_LIST_STATE: {
     readonly values_source: ControlValuesSource.FIELD;

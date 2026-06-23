@@ -1,5 +1,5 @@
 import type { KbnFieldType } from './kbn_field_type';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
+import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 /**
  *  Get a type object by name
  *
