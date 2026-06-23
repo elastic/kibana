@@ -115,7 +115,9 @@ describe('FrozenPhaseCard', () => {
 
     fireEvent.click(getByTestId('enterpriseLicenseRequiredBadge'));
 
-    expect(getByText('Unlock the frozen data phase by upgrading to Enterprise')).toBeInTheDocument();
+    expect(
+      getByText('Unlock the frozen data phase by upgrading to Enterprise')
+    ).toBeInTheDocument();
   });
 
   it('opens the default repository modal from the default repository badge', () => {
@@ -150,7 +152,9 @@ describe('FrozenPhaseCard', () => {
       expect(getByTestId('frozenDurationValue')).toBeInTheDocument();
 
       fireEvent.click(getByTestId('frozenUpgradeEnterpriseButton'));
-      expect(getByText('Unlock the frozen data phase by upgrading to Enterprise')).toBeInTheDocument();
+      expect(
+        getByText('Unlock the frozen data phase by upgrading to Enterprise')
+      ).toBeInTheDocument();
     });
 
     it('renders the default repository callout and opens the create-repository modal', () => {

@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-    FrozenDefaultRepositoryRequiredCallout,
-    SearchableSnapshotRepositoryInfo,
+  FrozenDefaultRepositoryRequiredCallout,
+  SearchableSnapshotRepositoryInfo,
 } from '@kbn/data-lifecycle-phases';
 
 export interface DlmSearchableSnapshotInfoSectionProps {

@@ -47,10 +47,7 @@ describe('FrozenDefaultRepositoryRequiredCallout', () => {
 
   it('disables the create button when onCreateDefaultRepository is not provided', () => {
     renderWithI18n(
-      <FrozenDefaultRepositoryRequiredCallout
-        onRefresh={() => {}}
-        createButtonTestSubj="create"
-      />
+      <FrozenDefaultRepositoryRequiredCallout onRefresh={() => {}} createButtonTestSubj="create" />
     );
 
     expect(screen.getByTestId('create')).toBeDisabled();
