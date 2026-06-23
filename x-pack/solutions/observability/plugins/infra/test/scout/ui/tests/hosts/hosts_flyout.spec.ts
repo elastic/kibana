@@ -31,12 +31,6 @@ test.describe(
       log.info('Sequential suite: ingesting ECS hosts + logs + APM services for flyout tests');
       await ingestHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
 
-      // The Hosts table only renders once a single POST /api/metrics/infra/host
-      // request resolves (see `useHostsView`). On serverless that first query is
-      // cold (field caps + search-tier visibility after ingest) and can blow the
-      // table-load budget, which is the root cause of this suite's flakiness.
-      // Poll the same endpoint here so we don't navigate until the data is
-      // searchable, and so the cold cost is paid once before any UI load.
       log.info('Sequential suite: waiting for hosts metrics to be searchable before navigating');
       await expect
         .poll(
@@ -55,7 +49,6 @@ test.describe(
               });
               return data.nodes.length;
             } catch (error) {
-              // Transient errors while the search tier catches up; retry until timeout.
               const message = error instanceof Error ? error.message : String(error);
               log.debug(`Hosts metrics readiness probe failed, retrying: ${message}`);
               return 0;
