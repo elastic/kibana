@@ -158,9 +158,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // A role with `read` + `view_index_metadata` but no `monitor` should report
-    // `canMonitor: true` because Dataset Quality maps `canMonitor` from
-    // `view_index_metadata`, not `monitor`.
+    // A role with `read` + `view_index_metadata` but no `monitor`:
+    // - wildcard canMonitor (from getDatasetPrivileges) is true — it uses view_index_metadata
+    // - per-stream canMonitor is false — it uses the monitor privilege directly
     describe('Read + view_index_metadata user (no monitor)', () => {
       let supertestReadViewMetaWithCookieCredentials: SupertestWithRoleScopeType;
       let roleAuthc: RoleCredentials;
@@ -204,14 +204,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      it('reports canMonitor true per data stream', async () => {
+      it('reports canMonitor false per data stream because monitor privilege is absent', async () => {
         const resp = await callApiAs(supertestReadViewMetaWithCookieCredentials);
 
-        const streamWithMonitor = resp.body.dataStreamsStats.find(
+        const stream = resp.body.dataStreamsStats.find(
           ({ name }: { name: string }) => name === 'logs-synth.1-default'
         );
-        expect(streamWithMonitor).to.be.ok();
-        expect(streamWithMonitor.userPrivileges.canMonitor).to.be(true);
+        expect(stream).to.be.ok();
+        expect(stream.userPrivileges.canMonitor).to.be(false);
       });
     });
 

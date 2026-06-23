@@ -138,9 +138,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // A role with `read` + `view_index_metadata` but no `monitor` should report
-    // `canMonitor: true` because Dataset Quality maps `canMonitor` from
-    // `view_index_metadata`, not `monitor`.
+    // The wildcard canMonitor (from getDatasetPrivileges) maps from view_index_metadata,
+    // so a role with view_index_metadata but no monitor still gets canMonitor: true here.
     describe('Read + view_index_metadata user (no monitor)', () => {
       let supertestReadViewMetaWithCookieCredentials: SupertestWithRoleScopeType;
       let roleAuthc: RoleCredentials;
