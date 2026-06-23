@@ -26,9 +26,9 @@ export interface ListAgentResponse {
   results: AgentDefinitionWithPermissions[];
 }
 
-export type UpdateAgentResponse = AgentDefinition;
+export type UpdateAgentResponse = AgentDefinitionWithPermissions;
 
-export type CreateAgentResponse = AgentDefinition;
+export type CreateAgentResponse = AgentDefinitionWithPermissions;
 
 export interface DeleteAgentResponse {
   success: boolean;

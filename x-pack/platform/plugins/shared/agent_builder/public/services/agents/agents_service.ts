@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { AgentAccessControl, AgentDefinition } from '@kbn/agent-builder-common';
+import type { AgentAccessControl } from '@kbn/agent-builder-common';
 import type {
   AgentAccessControlUpdateRequest,
   AgentCreateRequest,
@@ -50,7 +50,7 @@ export class AgentService {
   /**
    * Create a new agent
    */
-  async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
+  async create(profile: AgentCreateRequest): Promise<AgentDefinitionWithPermissions> {
     return await this.http.post<CreateAgentResponse>(`${publicApiPath}/agents`, {
       body: JSON.stringify(profile),
     });
@@ -59,7 +59,7 @@ export class AgentService {
   /**
    * Update an existing agent
    */
-  async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinition> {
+  async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinitionWithPermissions> {
     return await this.http.put<UpdateAgentResponse>(`${publicApiPath}/agents/${id}`, {
       body: JSON.stringify(update),
     });
