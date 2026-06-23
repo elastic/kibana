@@ -5,16 +5,46 @@
  * 2.0.
  */
 
-import type { RuleResponse, CreateRuleData, Query, UpdateRuleData } from '@kbn/alerting-v2-schemas';
-import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import type {
+  RuleResponse,
+  CreateRuleData,
+  Query,
+  UpdateRuleData,
+  RecoveryStrategy,
+  NoDataStrategy,
+} from '@kbn/alerting-v2-schemas';
 import { DELAY_MODE } from '../types';
-import type { FormValues, StateTransition } from '../types';
+import type { FormValues, StateTransition, RuleQuery } from '../types';
+import {
+  deriveAlertDelayModeFromStateTransition,
+  deriveRecoveryDelayModeFromStateTransition,
+} from '../types';
 import {
   mapArtifacts,
   mergeArtifactsByType,
   splitArtifactsByType,
   type RuleArtifactPayload,
 } from './artifact_mappers';
+
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolves the recovery_strategy for an API request.
+ * Non-representable strategies (no_breach, none) are preserved as-is.
+ * 'query' is always derived from the recovery block presence — never
+ * kept as a stale value — because the form can add/remove recovery
+ * without updating the recoveryStrategy field.
+ */
+export const resolveRecoveryStrategy = (
+  formValues: Pick<FormValues, 'recoveryStrategy' | 'query'>
+): RecoveryStrategy | undefined => {
+  if (formValues.recoveryStrategy && formValues.recoveryStrategy !== 'query') {
+    return formValues.recoveryStrategy;
+  }
+  return formValues.query.recovery != null ? ('query' as const) : undefined;
+};
 
 // ---------------------------------------------------------------------------
 // FormValues → API request
@@ -32,41 +62,25 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
   lookback: schedule.lookback,
 });
 
-/**
- * Builds the API `query` field from the form's query values. Emits
- * `standalone` format with an optional `recovery` block when the compose
- * discover flow has configured a custom recovery condition. The corresponding
- * `recovery_strategy: 'query'` is emitted as a top-level field in
- * `mapFormValuesToRuleRequest`.
- */
-const mapQuery = (query: FormValues['query']): Query => ({
-  format: 'standalone',
-  breach: { query: query.breach },
-  ...(query.recover ? { recovery: { query: query.recover } } : {}),
-});
+const mapQuery = (query: RuleQuery): Query => {
+  if (query.format === 'composed') {
+    return {
+      format: 'composed',
+      base: query.base,
+      breach: { segment: query.breach.segment },
+      ...(query.recovery ? { recovery: { segment: query.recovery.segment } } : {}),
+    };
+  }
+  return {
+    format: 'standalone',
+    breach: { query: query.breach.query },
+    ...(query.recovery ? { recovery: { query: query.recovery.query } } : {}),
+    ...(query.no_data ? { no_data: { query: query.no_data.query } } : {}),
+  };
+};
 
 const mapGrouping = (grouping: FormValues['grouping']) =>
   grouping?.fields?.length ? { fields: grouping.fields } : undefined;
-
-/** Derives alert-delay mode from persisted `state_transition` (same rules as `AlertDelayField`). */
-export const deriveAlertDelayModeFromStateTransition = (
-  stateTransition?: StateTransition | null
-): FormValues['stateTransitionAlertDelayMode'] => {
-  if (stateTransition?.pendingTimeframe != null) return DELAY_MODE.duration;
-  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0)
-    return DELAY_MODE.breaches;
-  return DELAY_MODE.immediate;
-};
-
-/** Derives recovery-delay mode from persisted `state_transition` (same rules as `RecoveryDelayField`). */
-export const deriveRecoveryDelayModeFromStateTransition = (
-  stateTransition?: StateTransition | null
-): FormValues['stateTransitionRecoveryDelayMode'] => {
-  if (stateTransition?.recoveringTimeframe != null) return DELAY_MODE.duration;
-  if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
-    return DELAY_MODE.recoveries;
-  return DELAY_MODE.immediate;
-};
 
 const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
@@ -120,7 +134,8 @@ export interface RuleRequestCommon {
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
-  recovery_strategy?: 'query';
+  recovery_strategy?: RecoveryStrategy;
+  no_data_strategy?: NoDataStrategy;
   grouping?: { fields: string[] };
   state_transition?: {
     pending_count?: number;
@@ -131,45 +146,37 @@ export interface RuleRequestCommon {
   artifacts?: RuleArtifactPayload;
 }
 
-/**
- * Maps `FormValues` to the common API request shape (snake_case) shared by
- * both create and update endpoints. Does not include `kind`.
- */
 export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
   const { metadata, timeField, schedule, query, grouping } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
+  const recoveryStrategy = resolveRecoveryStrategy(formValues);
 
   return {
     metadata: mapMetadata(metadata),
     time_field: timeField,
     schedule: mapSchedule(schedule),
     query: mapQuery(query),
-    ...(query.recover ? { recovery_strategy: 'query' as const } : {}),
+    ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
+    ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
     grouping: mapGrouping(grouping),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
   };
 };
 
-/**
- * Maps `FormValues` to the create API request payload.
- * Adds `kind` on top of the common request shape since it is required for creation.
- */
 export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRuleData => ({
   kind: formValues.kind,
   ...mapFormValuesToRuleRequest(formValues),
 });
 
-/**
- * Maps `FormValues` to the update API request payload.
- * Coerces absent optional fields to `null` so the API interprets them as
- * explicit removals (as opposed to `undefined` which omits the key entirely).
- */
 export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, state_transition, artifacts, ...rest } = mapFormValuesToRuleRequest(formValues);
+  const { grouping, state_transition, artifacts, recovery_strategy, no_data_strategy, ...rest } =
+    mapFormValuesToRuleRequest(formValues);
 
   return {
     ...rest,
+    recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
+    no_data_strategy: no_data_strategy ?? null,
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,
@@ -180,18 +187,30 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
 // API response → FormValues
 // ---------------------------------------------------------------------------
 
-/**
- * Maps a `RuleResponse` (API shape, snake_case) to `Partial<FormValues>` (form shape, camelCase).
- *
- * Only fields present in the response are included so the form defaults fill in the rest.
- * Use this when populating the edit form with an existing rule's data.
- *
- * The form has a single breach-query field, so composed-format rules are
- * flattened to their effective breach query. Recover and no-data queries on
- * the existing rule are dropped: the form does not yet surface them and
- * saving will overwrite the rule with a `standalone` query containing only
- * the (possibly edited) breach.
- */
+const apiQueryToRuleQuery = (
+  q: RuleResponse['query'],
+  recoveryStrategy?: RuleResponse['recovery_strategy']
+): RuleQuery => {
+  if (q.format === 'composed') {
+    return {
+      format: 'composed',
+      base: q.base,
+      breach: { segment: q.breach.segment },
+      ...(recoveryStrategy === 'query' && q.recovery
+        ? { recovery: { segment: q.recovery.segment } }
+        : {}),
+    };
+  }
+  return {
+    format: 'standalone',
+    breach: { query: q.breach.query },
+    ...(recoveryStrategy === 'query' && q.recovery
+      ? { recovery: { query: q.recovery.query } }
+      : {}),
+    ...(q.no_data ? { no_data: { query: q.no_data.query } } : {}),
+  };
+};
+
 export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormValues> => {
   const stateTransition: StateTransition = {
     pendingCount: rule.state_transition?.pending_count ?? null,
@@ -214,9 +233,9 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: {
-      breach: getBreachEsqlQuery(rule.query),
-    },
+    query: apiQueryToRuleQuery(rule.query, rule.recovery_strategy),
+    recoveryStrategy: rule.recovery_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? undefined,
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
