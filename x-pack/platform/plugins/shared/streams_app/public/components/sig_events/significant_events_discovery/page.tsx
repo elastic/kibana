@@ -6,6 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -24,10 +25,10 @@ import {
   KnowledgeIndicatorsTable,
   KiGenerationProvider,
 } from './components/knowledge_indicators_table';
+import { SignificantEventsDiscoveryProvider } from './context/significant_events_discovery_context';
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
-import { InsightsTab } from './components/insights/tab';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
@@ -38,7 +39,6 @@ const discoveryTabs = [
   'streams',
   'knowledge_indicators',
   'queries',
-  'insights',
   'detections',
   'discoveries',
   'significant_events',
@@ -62,6 +62,9 @@ export function SignificantEventsDiscoveryPage() {
       application: { getUrlForApp },
       notifications: { toasts },
     },
+    dependencies: {
+      start: { agentBuilder },
+    },
   } = useKibana();
 
   const {
@@ -81,6 +84,20 @@ export function SignificantEventsDiscoveryPage() {
   );
 
   const { isMemoryEnabled } = useDiscoverySettings();
+
+  const handleOpenSystemOnboarding = useCallback(() => {
+    agentBuilder?.openChat({
+      newConversation: true,
+      initialMessage: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.onboardingInitialMessage',
+        {
+          defaultMessage:
+            'Start the significant-events-onboarding skill. First check whether there is already memory about my system. If there is, summarise what you know and ask whether I have something specific to add or correct, or whether I want a general review of the gaps. If memory is empty, go straight into gathering information.',
+        }
+      ),
+      autoSendInitialMessage: true,
+    });
+  }, [agentBuilder]);
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -143,14 +160,6 @@ export function SignificantEventsDiscoveryPage() {
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
         isSelected: tab === 'significant_events',
-      },
-      {
-        id: 'insights',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.insightsTab', {
-          defaultMessage: 'Insights',
-        }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'insights' } }),
-        isSelected: tab === 'insights',
       },
     ];
 
@@ -234,22 +243,37 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiButton>
             </EuiFlexItem>
+            {isMemoryEnabled && agentBuilder && (
+              <EuiFlexItem grow={false}>
+                <AiButton
+                  iconType="sparkles"
+                  onClick={handleOpenSystemOnboarding}
+                  data-test-subj="significantEventsSystemOnboardingButton"
+                >
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
+                    { defaultMessage: 'Tell us about your system' }
+                  )}
+                </AiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         tabs={tabs}
       />
       <KiGenerationProvider onFailed={onOnboardingFailed}>
-        <StreamsAppPageTemplate.Body grow>
-          {tab === 'streams' && <StreamsView />}
-          {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
-          {tab === 'queries' && <QueriesTable />}
-          {tab === 'insights' && <InsightsTab />}
-          {tab === 'detections' && <DetectionsTab />}
-          {tab === 'discoveries' && <DiscoveriesTab />}
-          {tab === 'significant_events' && <SigEventsTab />}
-          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
-          {tab === 'settings' && <SettingsTab />}
-        </StreamsAppPageTemplate.Body>
+        <SignificantEventsDiscoveryProvider>
+          <StreamsAppPageTemplate.Body grow>
+            {tab === 'streams' && <StreamsView />}
+            {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+            {tab === 'queries' && <QueriesTable />}
+            {tab === 'detections' && <DetectionsTab />}
+            {tab === 'discoveries' && <DiscoveriesTab />}
+            {tab === 'significant_events' && <SigEventsTab />}
+            {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+            {tab === 'settings' && <SettingsTab />}
+          </StreamsAppPageTemplate.Body>
+        </SignificantEventsDiscoveryProvider>
       </KiGenerationProvider>
     </>
   );
