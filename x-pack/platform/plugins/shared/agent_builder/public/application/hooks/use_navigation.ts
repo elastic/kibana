@@ -46,6 +46,12 @@ export const useIsAgentWorkspaceMount = (): boolean => {
   return services.appParams.isAgentWorkspaceMount === true;
 };
 
+/** Sidebar chat is redundant when AB is already in the chrome sidebar flyout or agent workspace column. */
+export const shouldOfferSidebarConversation = (
+  isSidebar: boolean,
+  isAgentWorkspaceMount: boolean
+): boolean => !isSidebar && !isAgentWorkspaceMount;
+
 export const useIsOnManagementLlmConnectorsPage = (): boolean => {
   const {
     services: { application },
