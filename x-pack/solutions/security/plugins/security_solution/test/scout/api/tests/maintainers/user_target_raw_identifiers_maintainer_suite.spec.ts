@@ -19,6 +19,7 @@ import {
 } from '../../fixtures/maintainers/constants';
 import {
   clearEntityStoreIndices,
+  getRelationshipIds,
   seedUserEntity,
   triggerMaintainerRun,
   waitForRelationshipIds,
@@ -32,10 +33,11 @@ import {
  *
  * Unlike the host-target suite in
  * `host_target_raw_identifiers_maintainer_suite.spec.ts`, these maintainers
- * resolve a user actor's `raw_identifiers.user.email` into a user EUID *with*
- * the IDP namespace suffix (`user:<email>@<ns>`). Both actor and target are user
- * entities, so this suite seeds user entities (not hosts) and asserts the same
- * entity.lifecycle.last_seen watermark gate end-to-end.
+ * union all three raw_identifiers fields (user.email, user.id, user.name) into
+ * a user EUID with the IDP namespace suffix (`user:<value>@<ns>`), with
+ * VALUES() deduplicating identical EUIDs within each actor group. Both actor
+ * and target are user entities, so this suite seeds user entities (not hosts)
+ * and asserts the entity.lifecycle.last_seen watermark gate end-to-end.
  */
 interface UserTargetRawIdentifiersMaintainerSuiteConfig {
   /** Maintainer id used by the run route, e.g. 'supervises'. */
@@ -216,6 +218,101 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
 
           await waitForRelationshipIds(esClient, relationshipKey, freshActor, freshTarget);
           await assertNoRelationshipId(esClient, relationshipKey, staleActor, staleTarget);
+        }
+      );
+
+      apiTest(
+        `deduplicates ${relationshipKey}.ids when the same raw value appears in multiple identifier fields`,
+        async ({ apiClient, esClient }) => {
+          // Scenario: actor has two direct reports. Each report's raw identifiers
+          // are stored across all three fields. user.name duplicates user.email
+          // (Okta login == email), so after MV_APPEND + MV_EXPAND we get 6 candidate
+          // EUIDs — VALUES() must collapse that to 4 unique ones (2 from email/name
+          // deduplicated + 2 from id).
+          const emailA = targetEmail('dup-a');
+          const emailB = targetEmail('dup-b');
+          const rawIdA = `okta-id-${entityPrefix}-dup-a`;
+          const rawIdB = `okta-id-${entityPrefix}-dup-b`;
+
+          const targetFromEmailA = userId(emailA);
+          const targetFromEmailB = userId(emailB);
+          const targetFromIdA = `user:${rawIdA}@${namespace}`;
+          const targetFromIdB = `user:${rawIdB}@${namespace}`;
+
+          const aEmail = actorEmail('dup');
+          const actor = userId(aEmail);
+          const futureTs = new Date(Date.now() + 3_600_000).toISOString();
+
+          // Seed target entities so the maintainer can resolve them.
+          await seedUserEntity(esClient, { entityId: targetFromEmailA, namespace, email: emailA });
+          await seedUserEntity(esClient, { entityId: targetFromEmailB, namespace, email: emailB });
+          await seedUserEntity(esClient, { entityId: targetFromIdA, namespace, email: emailA });
+          await seedUserEntity(esClient, { entityId: targetFromIdB, namespace, email: emailB });
+
+          // Actor: all three raw_identifier fields populated.
+          // user.name == user.email (Okta login == email) → duplicate EUIDs after CONCAT.
+          await seedUserEntity(esClient, {
+            entityId: actor,
+            namespace,
+            email: aEmail,
+            entitySource: requiredEntitySource,
+            relationship: {
+              key: relationshipKey,
+              userEmails: [emailA, emailB],
+              userIds: [rawIdA, rawIdB],
+              userNames: [emailA, emailB],
+            },
+            lastSeen: futureTs,
+            firstSeen: futureTs,
+          });
+
+          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
+
+          // Wait until at least one target is resolved, then assert exact count.
+          const source = await waitForRelationshipIds(
+            esClient,
+            relationshipKey,
+            actor,
+            targetFromEmailA
+          );
+          const ids = getRelationshipIds(source, relationshipKey);
+          // 2 from user.email + 2 from user.id = 4 unique EUIDs.
+          // The 2 from user.name duplicate user.email and are collapsed by VALUES().
+          expect(ids).toHaveLength(4);
+          expect(ids).toContain(targetFromEmailA);
+          expect(ids).toContain(targetFromEmailB);
+          expect(ids).toContain(targetFromIdA);
+          expect(ids).toContain(targetFromIdB);
+        }
+      );
+
+      apiTest(
+        `resolves ${relationshipKey}.ids when raw identifier is in user.id only (no email)`,
+        async ({ apiClient, esClient }) => {
+          // Verify the MV_APPEND union picks up values from user.id even when
+          // user.email is absent. The target entity is identified by its Okta id,
+          // so the actor seeds user.id (not user.email) in the raw_identifiers bag.
+          const rawId = `okta-id-${entityPrefix}-idonly`;
+          const target = `user:${rawId}@${namespace}`;
+          const aEmail = actorEmail('idonly');
+          const actor = userId(aEmail);
+
+          const futureTs = new Date(Date.now() + 3_600_000).toISOString();
+
+          await seedUserEntity(esClient, { entityId: target, namespace, email: aEmail });
+          await seedUserEntity(esClient, {
+            entityId: actor,
+            namespace,
+            email: aEmail,
+            entitySource: requiredEntitySource,
+            relationship: { key: relationshipKey, userIds: [rawId] },
+            lastSeen: futureTs,
+            firstSeen: futureTs,
+          });
+
+          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
+
+          await waitForRelationshipIds(esClient, relationshipKey, actor, target);
         }
       );
 

@@ -53,16 +53,13 @@ const SUPERVISES_SOURCES: SupervisesSource[] = [
 /**
  * Step 2 ES|QL. Differs from the generic `buildRawIdentifiersEsqlQuery` in two ways:
  *
- * 1. User EUIDs carry a namespace suffix (`user:<id>@<namespace>`), so the target
- *    is rebuilt as `CONCAT("user:", <key>, "@<namespace>")`, not the bare form.
- * 2. One key per report, not one per field. Extraction flattens the report
- *    objects `{email, id, name}` into three PARALLEL arrays, losing per-report
- *    pairing — so unioning fields would emit multiple EUIDs for one report. A
- *    CASE picks ONE field for the bag by the user EUID ranking (see user.ts):
- *    email (rank-1) → id (rank-2) → name (rank-4).
- *
- * The chosen field is MV_EXPAND-ed BEFORE the CONCAT — `CONCAT` returns NULL on
- * any multi-valued argument.
+ * 1. User EUIDs carry a namespace suffix (`user:<id>@<namespace>`), so each target
+ *    is built as `CONCAT("user:", <value>, "@<namespace>")`.
+ * 2. All three raw identifier fields (email, id, name) are unioned into one
+ *    multi-valued column before a single MV_EXPAND. ES|QL `MV_APPEND(null, x)`
+ *    returns null, so each field is appended only when non-null via a CASE guard.
+ *    VALUES() in the STATS clause deduplicates identical EUIDs (e.g. when email
+ *    and name hold the same value, as is common in Okta where login == email).
  */
 function buildSupervisesEsqlQuery(
   source: SupervisesSource,
@@ -74,6 +71,7 @@ function buildSupervisesEsqlQuery(
   const emailField = `${rawIdentifiersPrefix}.user.email`;
   const idField = `${rawIdentifiersPrefix}.user.id`;
   const nameField = `${rawIdentifiersPrefix}.user.name`;
+  const ns = source.namespace;
 
   const watermarkClause = lastProcessedTimestamp
     ? `\n    AND entity.lifecycle.last_seen > "${lastProcessedTimestamp}"`
@@ -81,19 +79,22 @@ function buildSupervisesEsqlQuery(
 
   const entitySourceList = source.entitySources.map((s) => `"${s}"`).join(', ');
 
+  // Union all three raw fields into one multi-valued column before expanding.
+  // ES|QL MV_APPEND(null, x) returns null, so the accumulator is built
+  // incrementally: start with email (may be null), then append each subsequent
+  // field only when the accumulator is non-null (CASE(acc IS NULL, field, MV_APPEND(acc, field)))
+  // OR when the field itself is non-null. The streamlang Append transpiler uses
+  // CASE(target IS NULL, newValue, MV_APPEND(target, newValue)) for exactly this.
   return `FROM ${entityIndex}
 | WHERE (${emailField} IS NOT NULL OR ${idField} IS NOT NULL OR ${nameField} IS NOT NULL)
     AND entity.source IN (${entitySourceList})${watermarkClause}
 | EVAL ${ENGINE_COLUMNS.actor} = entity.id
-| EVAL rawTargetKey = CASE(
-    MV_COUNT(${emailField}) > 0, ${emailField},
-    MV_COUNT(${idField}) > 0, ${idField},
-    ${nameField}
-  )
+| EVAL rawTargetKey = CASE(${emailField} IS NULL, ${idField}, ${idField} IS NULL, ${emailField}, MV_APPEND(${emailField}, ${idField}))
+| EVAL rawTargetKey = CASE(${nameField} IS NULL, rawTargetKey, rawTargetKey IS NULL, ${nameField}, MV_APPEND(rawTargetKey, ${nameField}))
 | MV_EXPAND rawTargetKey
-| EVAL targetEntityId = CONCAT("user:", rawTargetKey, "@${source.namespace}")
+| EVAL targetEntityId = CONCAT("user:", rawTargetKey, "@${ns}")
 | WHERE COALESCE(targetEntityId, "") != ""
-    AND targetEntityId != "user:@${source.namespace}"
+    AND targetEntityId != "user:@${ns}"
     AND targetEntityId RLIKE ".+:.+@.+"
 | STATS ${RELATIONSHIP_KEY} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""

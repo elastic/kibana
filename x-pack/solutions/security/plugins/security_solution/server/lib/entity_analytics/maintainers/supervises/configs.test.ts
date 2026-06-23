@@ -77,30 +77,29 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   );
 
   it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query picks ONE raw field per actor by EUID rank (email → id → name)',
+    '$id: override query unions all three raw identifier fields with null-safe CASE guards',
     (config) => {
       const query = buildTargetsPerActorQuery(config, 'default');
-      // CASE falls through email → id → name; it must NOT union email+id
-      // (that would emit two EUIDs per report, double-counting the entity).
-      const emailIdx = query.indexOf(
-        'MV_COUNT(entity.relationships.supervises.raw_identifiers.user.email) > 0'
+      const emailField = 'entity.relationships.supervises.raw_identifiers.user.email';
+      const idField = 'entity.relationships.supervises.raw_identifiers.user.id';
+      const nameField = 'entity.relationships.supervises.raw_identifiers.user.name';
+      // ES|QL MV_APPEND(null, x) = null, so both the accumulator and the field
+      // being appended are guarded: CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)).
+      expect(query).toContain(
+        `CASE(${emailField} IS NULL, ${idField}, ${idField} IS NULL, ${emailField}, MV_APPEND(${emailField}, ${idField}))`
       );
-      const idIdx = query.indexOf(
-        'MV_COUNT(entity.relationships.supervises.raw_identifiers.user.id) > 0'
+      expect(query).toContain(
+        `CASE(${nameField} IS NULL, rawTargetKey, rawTargetKey IS NULL, ${nameField}, MV_APPEND(rawTargetKey, ${nameField}))`
       );
-      expect(emailIdx).toBeGreaterThanOrEqual(0);
-      expect(idIdx).toBeGreaterThanOrEqual(0);
-      // Email is checked before id (rank-1 before rank-2).
-      expect(emailIdx).toBeLessThan(idIdx);
-      // The name field is the final fallback branch of the CASE.
-      expect(query).toContain('entity.relationships.supervises.raw_identifiers.user.name\n  )');
-      // Must not union email + id (the double-counting bug).
-      expect(query).not.toContain('MV_APPEND(');
+      // Single MV_EXPAND after the union — no cartesian product.
+      expect(query).toContain('MV_EXPAND rawTargetKey');
+      // Must not use MV_COUNT to pick only one field.
+      expect(query).not.toContain('MV_COUNT(');
     }
   );
 
   it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query MV_EXPANDs the chosen key BEFORE CONCAT (CONCAT is null on multi-valued input)',
+    '$id: override query MV_EXPANDs rawTargetKey BEFORE CONCAT (CONCAT is null on multi-valued input)',
     (config) => {
       const { namespace } = EXPECTED_SOURCE_BY_ID[config.id];
       const query = buildTargetsPerActorQuery(config, 'default');
@@ -108,7 +107,6 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       const concatIdx = query.indexOf(`CONCAT("user:", rawTargetKey, "@${namespace}")`);
       expect(expandIdx).toBeGreaterThanOrEqual(0);
       expect(concatIdx).toBeGreaterThanOrEqual(0);
-      // The expand must come first, or CONCAT collapses the multi-valued field to null.
       expect(expandIdx).toBeLessThan(concatIdx);
     }
   );

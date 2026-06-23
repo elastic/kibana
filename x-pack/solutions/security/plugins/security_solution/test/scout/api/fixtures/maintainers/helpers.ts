@@ -102,9 +102,9 @@ interface SeedUserEntityOptions {
   entitySource?: string;
   /**
    * Optional relationship raw_identifier bag to seed under
-   * `entity.relationships.<key>.raw_identifiers.{user.{email,id},host.name}`.
+   * `entity.relationships.<key>.raw_identifiers.{user.{email,id,name},host.name}`.
    *
-   * - `userEmails` / `userIds` → user → user maintainers (supervises, …),
+   * - `userEmails` / `userIds` / `userNames` → user → user maintainers (supervises, …),
    *   resolved into `<key>.ids` as `user:<value>@<namespace>`.
    * - `hostNames` → user → host maintainers (administers, …), resolved into
    *   `<key>.ids` as a namespace-less `host:<name>`. Use this to seed a USER
@@ -117,6 +117,8 @@ interface SeedUserEntityOptions {
     userEmails?: string[];
     /** Raw user ids placed under raw_identifiers.user.id. */
     userIds?: string[];
+    /** Raw user names placed under raw_identifiers.user.name. */
+    userNames?: string[];
     /** Raw host names placed under raw_identifiers.host.name (user → host targets). */
     hostNames?: string[];
   };
@@ -144,6 +146,9 @@ export const seedUserEntity = async (
   }
   if (relationship?.userIds?.length) {
     userBag.id = relationship.userIds;
+  }
+  if (relationship?.userNames?.length) {
+    userBag.name = relationship.userNames;
   }
   const rawIdentifiers: Record<string, unknown> = {};
   if (Object.keys(userBag).length > 0) {
@@ -446,6 +451,15 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
     return undefined;
   }, obj);
 }
+
+/** Extracts `entity.relationships.<key>.ids` from a raw ES `_source` object. */
+export const getRelationshipIds = (
+  source: Record<string, unknown>,
+  relationshipKey: string
+): string[] => {
+  const path = relationshipIdsPath(relationshipKey);
+  return normalizeKeywordList(getNestedValue(source, path) ?? source[path]);
+};
 
 export const forceLogExtraction = async (
   apiClient: ForceLogExtractionApiClient,
