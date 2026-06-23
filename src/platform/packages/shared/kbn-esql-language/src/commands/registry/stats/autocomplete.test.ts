@@ -129,7 +129,7 @@ describe('STATS Autocomplete', () => {
 
   const suggest = async (query: string) => {
     const cursorPosition = query.length;
-    const { innerText, root, command } = findAutocompleteAstPosition(query, cursorPosition);
+    const { innerText, root, command, tokens } = findAutocompleteAstPosition(query, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
@@ -141,7 +141,10 @@ describe('STATS Autocomplete', () => {
       contextWithRoot,
       cursorPosition
     );
-    return attachReplacementRanges(innerText, suggestions, { commandContext: contextWithRoot });
+    return attachReplacementRanges(innerText, suggestions, {
+      commandContext: contextWithRoot,
+      tokens,
+    });
   };
   describe('STATS ...', () => {
     afterEach(() => setTestFunctions([]));
@@ -752,7 +755,10 @@ describe('STATS Autocomplete', () => {
             }),
             // Filter out functions that are not compatible with this context
             ...allGroupingFunctions.filter(
-              (f) => !['CATEGORIZE', 'TBUCKET'].some((incompatible) => f.includes(incompatible))
+              (f) =>
+                !['CATEGORIZE', 'TBUCKET', 'WITHOUT'].some((incompatible) =>
+                  f.includes(incompatible)
+                )
             ),
           ],
           mockCallbacks
