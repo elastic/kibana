@@ -8,7 +8,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { FocusedTraceWaterfallRenderer } from './focused_trace_waterfall_renderer';
+import {
+  FocusedTraceWaterfallRenderer,
+  FETCH_FOCUSED_TRACE_WATERFALL_OPERATION_ID,
+} from './focused_trace_waterfall_renderer';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 import * as FocusedTraceWaterfallModule from '.';
 
@@ -88,6 +91,23 @@ describe('FocusedTraceWaterfallRenderer', () => {
     renderComponent();
 
     expect(screen.getByTestId('focusedTraceWaterfall')).toBeInTheDocument();
+  });
+
+  it('calls useFetcher with the correct operationId', () => {
+    mockUseFetcher.mockReturnValue({
+      data: undefined,
+      status: useFetcherModule.FETCH_STATUS.LOADING,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    renderComponent();
+
+    expect(mockUseFetcher).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Array),
+      expect.objectContaining({ operationId: FETCH_FOCUSED_TRACE_WATERFALL_OPERATION_ID })
+    );
   });
 
   describe('service badge navigation', () => {

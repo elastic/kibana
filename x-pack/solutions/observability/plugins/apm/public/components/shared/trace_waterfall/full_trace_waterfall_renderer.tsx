@@ -19,6 +19,8 @@ import { useGetServiceBadgeHrefFromCore } from './use_get_service_badge_href_fro
 
 type Props = FullTraceWaterfallProps & { core: CoreStart };
 
+export const FETCH_FULL_TRACE_WATERFALL_OPERATION_ID = 'fetch-full-trace-waterfall';
+
 export function FullTraceWaterfallRenderer({
   traceId,
   rangeFrom,
@@ -49,7 +51,8 @@ export function FullTraceWaterfallRenderer({
         },
       });
     },
-    [rangeFrom, rangeTo, traceId]
+    [rangeFrom, rangeTo, traceId],
+    { operationId: FETCH_FULL_TRACE_WATERFALL_OPERATION_ID }
   );
 
   if (isPending(status)) {

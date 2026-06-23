@@ -20,6 +20,8 @@ interface Props extends FocusedTraceWaterfallProps {
   core: CoreStart;
 }
 
+export const FETCH_FOCUSED_TRACE_WATERFALL_OPERATION_ID = 'fetch-focused-trace-waterfall';
+
 export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, docId, core }: Props) {
   useEffectOnce(() => {
     createCallApmApi(core);
@@ -36,7 +38,8 @@ export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, doc
         },
       });
     },
-    [docId, rangeFrom, rangeTo, traceId]
+    [docId, rangeFrom, rangeTo, traceId],
+    { operationId: FETCH_FOCUSED_TRACE_WATERFALL_OPERATION_ID }
   );
 
   if (isPending(status)) {
