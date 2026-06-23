@@ -31,7 +31,6 @@ export const getPublicTemplateRoute = createCasesRoute({
     }),
     query: schema.object({
       version: schema.maybe(schema.number()),
-      includeDeleted: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ context, request, response }) => {
@@ -40,12 +39,11 @@ export const getPublicTemplateRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
 
       const { template_id: templateId } = request.params;
-      const { version, includeDeleted } = request.query;
+      const { version } = request.query;
 
       const template = await casesClient.templates.getTemplate(
         templateId,
-        version !== undefined ? String(version) : undefined,
-        { includeDeleted }
+        version !== undefined ? String(version) : undefined
       );
 
       if (!template) {
