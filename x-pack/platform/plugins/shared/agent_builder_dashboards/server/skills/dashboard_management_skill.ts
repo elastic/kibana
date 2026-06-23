@@ -92,6 +92,10 @@ After a successful call:
 
 ${dashboardDesignGuidancePrompt}
 
+## ES|QL
+
+Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
+
 ## Edge Cases
 
 - If a visualization attachment is missing or cannot be resolved, do not invent a replacement attachment ID. Call the tool only with valid attachment IDs and report unresolved attachments clearly.

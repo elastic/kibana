@@ -39,7 +39,7 @@ export const visualizationPanelBaseInputSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) An ES|QL query. If not provided, the tool will generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+      '(optional) A validated ES|QL query from a prior tool result or explicit user input. Omit this field when composing new visualizations — the tool generates the query from the natural language query. NEVER write or invent an ES|QL query yourself.'
     ),
   grid: panelGridSchema,
 });
