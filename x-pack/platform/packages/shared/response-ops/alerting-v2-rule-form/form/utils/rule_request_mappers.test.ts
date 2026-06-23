@@ -580,6 +580,17 @@ describe('rule_request_mappers', () => {
 
       expect(result.recovery_strategy).toBe('query');
     });
+
+    it('nullifies recovery_strategy when user removes recovery from a loaded rule', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        recoveryStrategy: 'query',
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.recovery_strategy).toBeNull();
+    });
   });
 
   describe('mapRuleResponseToFormValues', () => {

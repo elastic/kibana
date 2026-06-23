@@ -31,13 +31,18 @@ import {
 // ---------------------------------------------------------------------------
 
 /**
- * Resolves the recovery_strategy for an API request. If the form explicitly
- * holds a value, use it; otherwise infer 'query' when a recovery query exists.
+ * Resolves the recovery_strategy for an API request.
+ * Non-representable strategies (no_breach, none) are preserved as-is.
+ * 'query' is always derived from the recovery block presence — never
+ * kept as a stale value — because the form can add/remove recovery
+ * without updating the recoveryStrategy field.
  */
 export const resolveRecoveryStrategy = (
   formValues: Pick<FormValues, 'recoveryStrategy' | 'query'>
 ): RecoveryStrategy | undefined => {
-  if (formValues.recoveryStrategy) return formValues.recoveryStrategy;
+  if (formValues.recoveryStrategy && formValues.recoveryStrategy !== 'query') {
+    return formValues.recoveryStrategy;
+  }
   return formValues.query.recovery != null ? ('query' as const) : undefined;
 };
 
@@ -170,12 +175,7 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
 
   return {
     ...rest,
-    // When recoveryStrategy is explicitly set (loaded from API), use it as-is.
-    // When undefined (user added a recovery block via the form), infer from the query.
-    recovery_strategy:
-      formValues.recoveryStrategy !== undefined
-        ? formValues.recoveryStrategy ?? null
-        : resolveRecoveryStrategy(formValues) ?? null,
+    recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
     no_data_strategy: no_data_strategy ?? null,
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,

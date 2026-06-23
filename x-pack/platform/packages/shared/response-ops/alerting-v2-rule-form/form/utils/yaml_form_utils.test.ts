@@ -622,6 +622,7 @@ describe('yaml_form_utils', () => {
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | WHERE level == "error"' },
+          recovery: { query: 'FROM logs-* | WHERE level != "error"' },
           no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
         },
         recoveryStrategy: 'query',

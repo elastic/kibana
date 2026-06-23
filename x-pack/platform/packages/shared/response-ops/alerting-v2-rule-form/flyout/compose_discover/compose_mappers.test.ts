@@ -279,6 +279,15 @@ describe('composeFormToUpdateRequest', () => {
     const result = composeFormToUpdateRequest(values);
     expect(result.recovery_strategy).toBe('query');
   });
+
+  it('nullifies recovery_strategy when user removes recovery from a loaded rule', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      recoveryStrategy: 'query',
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBeNull();
+  });
 });
 
 // ── mapRuleToComposeFormValues ───────────────────────────────────────────────
