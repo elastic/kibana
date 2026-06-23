@@ -6,12 +6,18 @@
  */
 
 import React, { useState } from 'react';
-import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from './monitor_page_link';
 import type { CertMonitor } from '../../../../../common/runtime_types';
 
 const DEFAULT_DISPLAY_COUNT = 10;
+
+const getRemoteClusterLabel = (remoteName: string) =>
+  i18n.translate('xpack.synthetics.certs.monitors.remoteClusterTooltip', {
+    defaultMessage: 'Loaded from remote cluster {remoteName}',
+    values: { remoteName },
+  });
 
 interface Props {
   monitors: CertMonitor[];
@@ -27,26 +33,14 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
       {monitorsToDisplay.map((mon: CertMonitor, ind: number) => (
         <span key={mon.id}>
           {ind > 0 && ', '}
-          <EuiToolTip content={mon.url}>
+          <EuiToolTip
+            content={mon.url}
+            title={mon.remote?.remoteName ? getRemoteClusterLabel(mon.remote.remoteName) : undefined}
+          >
             <MonitorPageLink configId={mon.configId!} remote={mon.remote}>
               {mon.name || mon.id}
             </MonitorPageLink>
           </EuiToolTip>
-          {mon.remote?.remoteName && (
-            <>
-              {' '}
-              <EuiBadge
-                color="hollow"
-                data-test-subj="certMonitorRemoteBadge"
-                title={i18n.translate('xpack.synthetics.certs.monitors.remoteBadgeTooltip', {
-                  defaultMessage: 'Loaded from remote cluster {remoteName}',
-                  values: { remoteName: mon.remote.remoteName },
-                })}
-              >
-                {mon.remote.remoteName}
-              </EuiBadge>
-            </>
-          )}
         </span>
       ))}
       {monitors.length > DEFAULT_DISPLAY_COUNT && !showAll && (

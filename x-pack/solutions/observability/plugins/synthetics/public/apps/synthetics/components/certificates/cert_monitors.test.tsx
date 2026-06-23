@@ -100,19 +100,20 @@ describe('CertMonitors', () => {
       remote: { remoteName: 'cluster2' },
     };
 
-    it('renders no remote badge for a local cert monitor', () => {
-      const { queryByTestId } = render(<CertMonitors monitors={[localMonitor]} />);
-      expect(queryByTestId('certMonitorRemoteBadge')).not.toBeInTheDocument();
+    it('shows only the url tooltip (no remote cluster title) for a local cert monitor', () => {
+      const { getByTestId, getByText, queryByText } = render(
+        <CertMonitors monitors={[localMonitor]} />
+      );
+      fireEvent.mouseOver(getByTestId('syntheticsMonitorPageLinkLink'));
+      expect(getByText(localMonitor.url!)).toBeInTheDocument();
+      expect(queryByText(/Loaded from remote cluster/)).not.toBeInTheDocument();
     });
 
-    it('renders the cluster alias as a badge next to a remote cert monitor', () => {
-      const { getAllByTestId } = render(
-        <CertMonitors monitors={[remoteWithKibanaUrl, remoteWithoutKibanaUrl]} />
-      );
-      const badges = getAllByTestId('certMonitorRemoteBadge');
-      expect(badges).toHaveLength(2);
-      expect(badges[0]).toHaveTextContent('cluster1');
-      expect(badges[1]).toHaveTextContent('cluster2');
+    it('shows the remote cluster name as the tooltip title for a remote cert monitor', () => {
+      const { getByTestId, getByText } = render(<CertMonitors monitors={[remoteWithKibanaUrl]} />);
+      fireEvent.mouseOver(getByTestId('syntheticsMonitorPageLinkRemoteLink'));
+      expect(getByText(remoteWithKibanaUrl.url!)).toBeInTheDocument();
+      expect(getByText('Loaded from remote cluster cluster1')).toBeInTheDocument();
     });
 
     it('opens an external link to remote Kibana when a kibanaUrl is known', () => {
