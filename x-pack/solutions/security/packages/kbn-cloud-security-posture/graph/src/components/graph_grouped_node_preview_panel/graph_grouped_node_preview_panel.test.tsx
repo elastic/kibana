@@ -61,6 +61,12 @@ let defaultProps: {
   dataViewId: string;
   documentIds: string[];
   entityItems: EntityItem[];
+  onShowDocument: (docId: string, indexName?: string) => void;
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 };
 
 describe('GraphGroupedNodePreviewPanel', () => {
@@ -88,6 +94,8 @@ describe('GraphGroupedNodePreviewPanel', () => {
       dataViewId: TEST_DATA_VIEW_ID,
       documentIds: ['doc-1', 'doc-2', 'doc-3'],
       entityItems: [] as EntityItem[],
+      onShowDocument: jest.fn(),
+      onShowEntity: jest.fn(),
     };
     getOrCreateFilterStore(TEST_SCOPE_ID);
     jest.clearAllMocks();

@@ -6,8 +6,22 @@
  */
 
 import type { FC } from 'react';
-import React, { memo } from 'react';
-import { GraphVisualization } from '../../../../shared/components/graph_visualization';
+import React, { memo, useCallback } from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  GraphGroupedNodePreviewPanelKey,
+  GROUP_PREVIEW_BANNER,
+  NETWORK_PREVIEW_BANNER,
+  type GraphGroupedNodePreviewPanelProps,
+} from '@kbn/cloud-security-posture-graph';
+import { GraphVisualization } from '../../../../../flyout_v2/document/tools/graph/components/graph_visualization';
+import { DocumentDetailsPreviewPanelKey } from '../../../../document_details/shared/constants/panel_keys';
+import { EntityPanelKeyByType, GenericEntityPanelKey } from '../../constants';
+import {
+  EVENT_PREVIEW_BANNER,
+  GENERIC_ENTITY_PREVIEW_BANNER,
+} from '../../../../document_details/preview/constants';
+import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 
 export interface GraphViewTabProps {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
@@ -17,11 +31,111 @@ export interface GraphViewTabProps {
 }
 
 /**
- * Graph view tab content for entity detail left panels.
- * Renders the full graph investigation view centered on the given entity.
+ * Graph view tab content for entity detail left panels. Renders the shared {@link GraphVisualization}
+ * centered on the given entity, supplying the node-click handlers that open previews via the legacy
+ * expandable flyout API.
  */
 export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) => {
-  return <GraphVisualization mode="entity" entityId={entityId} scopeId={scopeId} />;
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const onShowDocument = useCallback(
+    (id: string, indexName?: string) => {
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id,
+          indexName,
+          scopeId,
+          banner: EVENT_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel, scopeId]
+  );
+
+  const onShowEntity = useCallback(
+    ({
+      engineType,
+      entityId: previewEntityId,
+      entityName,
+    }: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => {
+      const panelId =
+        engineType && engineType in EntityPanelKeyByType
+          ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType]
+          : GenericEntityPanelKey;
+      if (!panelId) {
+        return;
+      }
+      const nameParam =
+        engineType === 'host'
+          ? { hostName: entityName }
+          : engineType === 'user'
+          ? { userName: entityName }
+          : engineType === 'service'
+          ? { serviceName: entityName }
+          : {};
+      openPreviewPanel({
+        id: panelId,
+        params: {
+          entityId: previewEntityId,
+          scopeId,
+          isPreviewMode: true,
+          banner: GENERIC_ENTITY_PREVIEW_BANNER,
+          isEngineMetadataExist: true,
+          ...nameParam,
+        },
+      });
+    },
+    [openPreviewPanel, scopeId]
+  );
+
+  const onShowGrouped = useCallback(
+    (
+      params: Omit<
+        GraphGroupedNodePreviewPanelProps,
+        'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+      >
+    ) => {
+      openPreviewPanel({
+        id: GraphGroupedNodePreviewPanelKey,
+        params: { scopeId, isPreviewMode: true, banner: GROUP_PREVIEW_BANNER, ...params },
+      });
+    },
+    [openPreviewPanel, scopeId]
+  );
+
+  const onShowNetwork = useCallback(
+    (ip: string) => {
+      openPreviewPanel({
+        id: 'network-preview',
+        params: {
+          ip,
+          scopeId,
+          flowTarget: FlowTargetSourceDest.source,
+          banner: NETWORK_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel, scopeId]
+  );
+
+  return (
+    <GraphVisualization
+      mode="entity"
+      entityId={entityId}
+      scopeId={scopeId}
+      onShowDocument={onShowDocument}
+      onShowEntity={onShowEntity}
+      onShowGrouped={onShowGrouped}
+      onShowNetwork={onShowNetwork}
+    />
+  );
 });
 
 GraphViewTab.displayName = 'GraphViewTab';

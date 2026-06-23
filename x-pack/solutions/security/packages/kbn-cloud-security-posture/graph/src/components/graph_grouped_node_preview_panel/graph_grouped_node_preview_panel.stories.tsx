@@ -116,6 +116,8 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
         icon={icon}
         groupedItemsType={groupedItemsType}
         pagination={pagination}
+        onShowDocument={() => {}}
+        onShowEntity={() => {}}
       />
     </div>
   );
@@ -367,6 +369,8 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
         icon={icon}
         groupedItemsType={groupedItemsType}
         pagination={pagination}
+        onShowDocument={() => {}}
+        onShowEntity={() => {}}
       />
     </div>
   );
