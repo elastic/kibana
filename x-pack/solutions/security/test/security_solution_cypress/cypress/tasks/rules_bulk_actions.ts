@@ -451,7 +451,7 @@ export const waitForBulkEditActionToFinish = ({
     if (showDataViewsWarning) {
       cy.contains(
         TOASTER_BODY,
-        'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.'
+        'Rules using data views were not changed. Check the bulk update dialog to include them.'
       );
     }
   }
