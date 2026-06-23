@@ -50,14 +50,6 @@ describe('registerIamPermissionsRoute', () => {
   /** Extract the registered GET handler. */
   const getHandler = () => router.get.mock.calls[0][1];
 
-  /** Call the handler with a mocked request. */
-  const callHandler = (query: Record<string, string>) => {
-    const handler = getHandler();
-    const request = httpServerMock.createKibanaRequest({ query });
-    const response = httpServerMock.createResponseFactory();
-    return handler({} as any, request, response);
-  };
-
   it('registers a GET route at the correct path', () => {
     const [config] = router.get.mock.calls[0];
     expect(config.path).toBe('/internal/onboarding/iam_permissions');
