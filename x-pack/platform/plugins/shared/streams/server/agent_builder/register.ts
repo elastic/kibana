@@ -61,9 +61,16 @@ export const registerStreamsAgentBuilder = async ({
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }): Promise<void> => {
+  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
+
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
+  registerAgentBuilderSkills({
+    agentBuilder,
+    telemetry,
+    streamsKIsOnboardingClient,
+    memoryToolsOptions,
+  });
   registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
 };

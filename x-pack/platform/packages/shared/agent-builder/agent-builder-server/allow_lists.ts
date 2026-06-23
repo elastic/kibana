@@ -125,6 +125,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'streams-gap-detection',
 
   // Platform – Workflows
   'workflow-authoring',
