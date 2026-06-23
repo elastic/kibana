@@ -82,6 +82,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       return (tabsBar) => (
         <ChromeAppHeader
           menu={topNavMenuItems}
+          hasTabs={Boolean(tabsBar)}
           titleAppend={tabsBar}
           isCollapsed={shouldCollapseAppMenu}
         />
