@@ -186,3 +186,54 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     });
   });
 });
+
+describe('StreamDetailGeneralData draft mode', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const definition = {
+    stream: {
+      name: 'test-draft-stream',
+      ingest: { lifecycle: { inherit: {} }, processing: { steps: [], updated_at: '2023-10-31' } },
+    },
+    privileges: { lifecycle: true, monitor: true, create_snapshot_repository: false },
+    effective_lifecycle: { dsl: { data_retention: '7d' } },
+  } as unknown as Streams.ingest.all.GetResponse;
+
+  const data: ReturnType<typeof useDataStreamStats> = {
+    stats: undefined,
+    error: undefined,
+    isLoading: false,
+    refresh: jest.fn(),
+    timeSeriesCountLoading: false,
+    timeSeriesCountError: undefined,
+  };
+
+  it('renders only the retention editor and hides data-stream stats sections for drafts', () => {
+    const { container } = render(
+      <StreamDetailGeneralData
+        definition={definition}
+        refreshDefinition={jest.fn()}
+        data={data}
+        isDraft
+      />
+    );
+
+    expect(container.querySelector('[data-test-subj="retentionCard"]')).not.toBeNull();
+    expect(container.querySelector('[data-test-subj="storageSizeCard"]')).toBeNull();
+    expect(container.querySelector('[data-test-subj="ingestionCard"]')).toBeNull();
+    expect(container.querySelector('[data-test-subj="ingestionRate"]')).toBeNull();
+    expect(container.querySelector('[data-test-subj="mockLifecycleSummary"]')).toBeNull();
+  });
+
+  it('renders the data-stream stats sections when not a draft', () => {
+    const { container } = render(
+      <StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />
+    );
+
+    expect(container.querySelector('[data-test-subj="retentionCard"]')).not.toBeNull();
+    expect(container.querySelector('[data-test-subj="storageSizeCard"]')).not.toBeNull();
+    expect(container.querySelector('[data-test-subj="ingestionRate"]')).not.toBeNull();
+  });
+});

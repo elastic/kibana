@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
@@ -19,12 +20,14 @@ import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_fr
 export function StreamDetailLifecycle({
   definition,
   refreshDefinition,
+  isDraft = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
+  isDraft?: boolean;
 }) {
   const { timeState } = useTimefilter();
-  const data = useDataStreamStats({ definition, timeState });
+  const data = useDataStreamStats({ definition, timeState, enabled: !isDraft });
 
   const { onPageReady } = usePerformanceContext();
 
@@ -62,17 +65,33 @@ export function StreamDetailLifecycle({
 
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
+      {isDraft && (
+        <EuiCallOut
+          announceOnMount={false}
+          iconType="info"
+          color="primary"
+          title={i18n.translate('xpack.streams.streamDetailLifecycle.draftRetentionCallout', {
+            defaultMessage:
+              'Retention is saved on the draft now and applied to the data stream when you convert it to ingest-time.',
+          })}
+        />
+      )}
       <StreamDetailGeneralData
         definition={definition}
         refreshDefinition={refreshDefinition}
         data={data}
+        isDraft={isDraft}
       />
-      <EuiHorizontalRule margin="m" />
-      <StreamDetailFailureStore
-        definition={definition}
-        data={data}
-        refreshDefinition={refreshDefinition}
-      />
+      {!isDraft && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <StreamDetailFailureStore
+            definition={definition}
+            data={data}
+            refreshDefinition={refreshDefinition}
+          />
+        </>
+      )}
     </EuiFlexGroup>
   );
 }

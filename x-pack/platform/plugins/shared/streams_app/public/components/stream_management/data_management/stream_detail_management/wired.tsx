@@ -171,27 +171,30 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Overview',
       }),
     },
-    ...(!isDraft
-      ? {
-          lifecycle: {
-            content: (
-              <StreamDetailLifecycle
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-              />
-            ),
-            label: (
-              <LifecycleTabLabel
-                definition={definition}
-                showActions={tab === 'lifecycle'}
-                indexTemplateName={`${definition.stream.name}@stream`}
-                notifications={notifications}
-                share={share}
-              />
-            ),
-          },
-        }
-      : {}),
+    lifecycle: {
+      content: (
+        <StreamDetailLifecycle
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          isDraft={isDraft}
+        />
+      ),
+      // Drafts have no backing data stream/index template, so the actions menu
+      // (copy request / edit index template) is omitted in favour of a plain label.
+      label: isDraft ? (
+        i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+          defaultMessage: 'Data lifecycle',
+        })
+      ) : (
+        <LifecycleTabLabel
+          definition={definition}
+          showActions={tab === 'lifecycle'}
+          indexTemplateName={`${definition.stream.name}@stream`}
+          notifications={notifications}
+          share={share}
+        />
+      ),
+    },
     partitioning: {
       content: (
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
@@ -257,7 +260,7 @@ export function WiredStreamDetailManagement({
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
-  if (isDraft && (tab === 'lifecycle' || tab === 'dataQuality')) {
+  if (isDraft && tab === 'dataQuality') {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
     );

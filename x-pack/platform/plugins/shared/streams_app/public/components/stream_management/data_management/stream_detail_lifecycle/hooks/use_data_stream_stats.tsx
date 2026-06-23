@@ -36,9 +36,15 @@ export type EnhancedFailureStoreStats = FailureStoreStatsResponse & CalculatedSt
 export const useDataStreamStats = ({
   definition,
   timeState,
+  enabled = true,
 }: {
   definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
+  /**
+   * When false, the underlying stats requests are skipped. Draft streams have no
+   * backing data stream, so these endpoints would 404; callers pass `enabled: false`.
+   */
+  enabled?: boolean;
 }) => {
   const {
     core,
@@ -53,6 +59,9 @@ export const useDataStreamStats = ({
 
   const statsFetch = useStreamsAppFetch(
     async ({ signal }) => {
+      if (!enabled) {
+        return undefined;
+      }
       const client = await dataStreamsClient;
       const [
         {
@@ -126,7 +135,7 @@ export const useDataStreamStats = ({
         },
       };
     },
-    [dataStreamsClient, definition, streamsRepositoryClient, core, search, timeState],
+    [dataStreamsClient, definition, streamsRepositoryClient, core, search, timeState, enabled],
     {
       withTimeRange: false,
       withRefresh: true,
@@ -134,7 +143,7 @@ export const useDataStreamStats = ({
   );
 
   // Only fetch time series count if the index mode is time_series
-  const shouldFetchTimeSeriesCount = definition.index_mode === 'time_series';
+  const shouldFetchTimeSeriesCount = enabled && definition.index_mode === 'time_series';
 
   const timeSeriesCountFetch = useStreamsAppFetch(
     async ({ signal }) => {
