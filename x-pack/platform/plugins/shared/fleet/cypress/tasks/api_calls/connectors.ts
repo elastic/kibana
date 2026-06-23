@@ -37,6 +37,7 @@ export const INTERNAL_INFERENCE_CONNECTORS = [
   'OpenAI-GPT-4-1',
   'OpenAI-GPT-4-1-Mini',
   'OpenAI-GPT-5-2',
+  'OpenAI-GPT-5-4',
   'OpenAI-GPT-OSS-20B',
   'OpenAI-o4',
   'OpenAI-o4-Mini',

@@ -134,6 +134,16 @@ xpack.actions.preconfigured:
       inferenceId: ".openai-gpt-5.2-chat_completion"
       providerConfig:
         model_id: "openai-gpt-5.2"
+  OpenAI-GPT-5-4:
+    name: OpenAI GPT-5.4
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-gpt-5.4-chat_completion"
+      providerConfig:
+        model_id: "openai-gpt-5.4"
   OpenAI-GPT-OSS-20B:
     name: OpenAI GPT-OSS 20B
     actionTypeId: .inference
