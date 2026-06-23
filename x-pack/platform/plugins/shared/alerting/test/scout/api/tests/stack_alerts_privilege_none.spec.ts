@@ -17,79 +17,69 @@ import {
   type StackAlertsPrivilegeState,
 } from '../lib/stack_alerts_privilege_setup';
 
-apiTest.describe(
-  'Stack alerts privilege - no privilege',
-  { tag: tags.deploymentAgnostic },
-  () => {
-    let state: StackAlertsPrivilegeState;
-    let withoutPrivilegeCreds: RoleApiCredentials;
+apiTest.describe('Stack alerts privilege - no privilege', { tag: tags.deploymentAgnostic }, () => {
+  let state: StackAlertsPrivilegeState;
+  let withoutPrivilegeCreds: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
-      state = await setupStackAlertsPrivilegeTests(apiClient, requestAuth, samlAuth);
+  apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
+    state = await setupStackAlertsPrivilegeTests(apiClient, requestAuth, samlAuth);
 
-      withoutPrivilegeCreds = await requestAuth.getApiKeyForCustomRole({
-        kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
-        elasticsearch: { cluster: [], indices: [] },
-      });
+    withoutPrivilegeCreds = await requestAuth.getApiKeyForCustomRole({
+      kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
+      elasticsearch: { cluster: [], indices: [] },
     });
+  });
 
-    apiTest.afterAll(async ({ apiClient }) => {
-      await teardownStackAlertsPrivilegeTests(apiClient, state);
-    });
+  apiTest.afterAll(async ({ apiClient }) => {
+    await teardownStackAlertsPrivilegeTests(apiClient, state);
+  });
 
-    for (const spec of RULE_SPECS) {
-      apiTest(
-        `cannot mute an alert instance for ${spec.ruleTypeId}`,
-        async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-          if (!rule) return;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
-            { headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
-          );
-          expect(response).toHaveStatusCode(403);
-        }
+  for (const spec of RULE_SPECS) {
+    apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+      const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+      if (!rule) return;
+      const response = await apiClient.post(
+        `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+        { headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
       );
-
-      apiTest(
-        `cannot unmute an alert instance for ${spec.ruleTypeId}`,
-        async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-          if (!rule) return;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
-            { headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
-          );
-          expect(response).toHaveStatusCode(403);
-        }
-      );
-    }
-
-    apiTest('cannot find alerts via RAC', async ({ apiClient }) => {
-      const response = await apiClient.post('internal/rac/alerts/find', {
-        headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
-        body: {
-          rule_type_ids: ['.es-query'],
-          consumers: ['stackAlerts'],
-          query: { match_all: {} },
-          size: 10,
-        },
-        responseType: 'json',
-      });
       expect(response).toHaveStatusCode(403);
     });
 
-    apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
-      const response = await apiClient.post('internal/rac/alerts/bulk_update', {
-        headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
-        body: {
-          status: 'acknowledged',
-          ids: [state.realAlertId ?? 'nonexistent'],
-          index: '.alerts-stack.alerts-default',
-        },
-        responseType: 'json',
-      });
+    apiTest(`cannot unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+      const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+      if (!rule) return;
+      const response = await apiClient.post(
+        `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
+        { headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
+      );
       expect(response).toHaveStatusCode(403);
     });
   }
-);
+
+  apiTest('cannot find alerts via RAC', async ({ apiClient }) => {
+    const response = await apiClient.post('internal/rac/alerts/find', {
+      headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
+      body: {
+        rule_type_ids: ['.es-query'],
+        consumers: ['stackAlerts'],
+        query: { match_all: {} },
+        size: 10,
+      },
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(403);
+  });
+
+  apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
+    const response = await apiClient.post('internal/rac/alerts/bulk_update', {
+      headers: { ...COMMON_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader },
+      body: {
+        status: 'acknowledged',
+        ids: [state.realAlertId ?? 'nonexistent'],
+        index: '.alerts-stack.alerts-default',
+      },
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(403);
+  });
+});

@@ -57,18 +57,15 @@ apiTest.describe(
     });
 
     for (const spec of RULE_SPECS) {
-      apiTest(
-        `cannot mute an alert instance for ${spec.ruleTypeId}`,
-        async ({ apiClient }) => {
-          const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-          if (!rule) return;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
-            { headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader } }
-          );
-          expect(response).toHaveStatusCode(403);
-        }
-      );
+      apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+        const rule = state.createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+        if (!rule) return;
+        const response = await apiClient.post(
+          `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+          { headers: { ...COMMON_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader } }
+        );
+        expect(response).toHaveStatusCode(403);
+      });
     }
 
     apiTest('cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
