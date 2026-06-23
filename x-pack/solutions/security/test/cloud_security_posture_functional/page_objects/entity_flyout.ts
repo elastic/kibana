@@ -14,7 +14,6 @@ const {
   HOST_PANEL_HEADER_TEST_ID,
   USER_PANEL_HEADER_TEST_ID,
   SERVICE_PANEL_HEADER_TEST_ID,
-  GROUPED_ITEM_TITLE_TEST_ID_LINK,
 } = testSubjectIds;
 
 export class EntityFlyoutPageObject extends FtrService {
@@ -66,19 +65,5 @@ export class EntityFlyoutPageObject extends FtrService {
       const headerText = await this.testSubjects.getVisibleText(testId);
       expect(headerText).to.contain(expectedName);
     }
-  }
-
-  async clickOnEntity(entityName: string): Promise<void> {
-    const entities = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_LINK);
-
-    for (const entityElement of entities) {
-      const text = await entityElement.getVisibleText();
-      if (text === entityName) {
-        await entityElement.click();
-        return;
-      }
-    }
-
-    throw new Error(`Entity "${entityName}" not found`);
   }
 }

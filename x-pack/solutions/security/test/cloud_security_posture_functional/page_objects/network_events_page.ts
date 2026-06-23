@@ -46,48 +46,31 @@ export class NetworkEventsPageObject extends FtrService {
     return `flyout=(preview:!(),right:(id:document-details-right,params:(id:%27${eventId}%27,indexName:logs-gcp.audit-default,scopeId:network-page-events)))`;
   }
 
-  /**
-   * Clicks the refresh button on the network events page and waits for it to complete
-   */
-  async clickRefresh(): Promise<void> {
-    await this.ensureOnNetworkEventsPage();
-    await this.testSubjects.click('querySubmitButton');
-
-    // wait for refresh to complete
-    await this.retry.waitFor(
-      'Network events pages refresh button to be enabled',
-      async (): Promise<boolean> => {
-        const refreshButton = await this.testSubjects.find('querySubmitButton');
-
-        return (await refreshButton.isDisplayed()) && (await refreshButton.isEnabled());
-      }
-    );
-  }
-
   async ensureOnNetworkEventsPage(): Promise<void> {
-    await this.testSubjects.existOrFail('network-details-headline');
+    // The network events page exposes no dedicated page-level test subject, so
+    // anchor on the search bar refresh control to confirm the page has rendered.
+    await this.testSubjects.existOrFail('querySubmitButton');
   }
 
   async waitForListToHaveEvents(timeoutMs?: number): Promise<void> {
-    const allEventRows = await this.testSubjects.findService.allByCssSelector(
-      EVENTS_TABLE_ROW_CSS_SELECTOR
+    // Tests open this page with the document-details flyout already in the URL,
+    // and that flyout overlays the top-right `querySubmitButton`, so the refresh
+    // control cannot be clicked while it is open. The events table holds static
+    // archived data that is queried on load, so poll for its rows to render
+    // instead of clicking refresh.
+    await this.ensureOnNetworkEventsPage();
+
+    await this.retry.waitForWithTimeout(
+      'waiting for events to show up on network events page',
+      timeoutMs ?? this.defaultTimeoutMs,
+      async (): Promise<boolean> => {
+        const allEventRows = await this.testSubjects.findService.allByCssSelector(
+          EVENTS_TABLE_ROW_CSS_SELECTOR
+        );
+
+        return Boolean(allEventRows.length);
+      }
     );
-
-    if (!Boolean(allEventRows.length)) {
-      await this.retry.waitForWithTimeout(
-        'waiting for events to show up on network events page',
-        timeoutMs ?? this.defaultTimeoutMs,
-        async (): Promise<boolean> => {
-          await this.clickRefresh();
-
-          const allEventRowsInner = await this.testSubjects.findService.allByCssSelector(
-            EVENTS_TABLE_ROW_CSS_SELECTOR
-          );
-
-          return Boolean(allEventRowsInner.length);
-        }
-      );
-    }
   }
 
   flyout = {
