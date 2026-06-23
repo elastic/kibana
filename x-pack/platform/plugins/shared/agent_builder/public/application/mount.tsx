@@ -7,6 +7,7 @@
 
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -23,6 +24,23 @@ import { PageWrapper } from './page_wrapper';
 import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
 import { StreamingProvider } from './context/streaming/streaming_context';
 import { AgentWorkspaceLinkInterceptor } from './context/agent_workspace_link_interceptor';
+import { AgentWorkspaceOrchestrationBar } from '../agent_workspace/agent_workspace_orchestration_bar';
+
+const agentWorkspaceLayoutStyles = css`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+`;
+
+const agentWorkspaceMainStyles = css`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+`;
 
 export const mountApp = async ({
   core,
@@ -63,17 +81,26 @@ export const mountApp = async ({
                   <AppLeaveContext.Provider value={onAppLeave}>
                     <RedirectAppLinks coreStart={core}>
                       <PageWrapper>
-                        <Router history={history}>
-                          <StreamingProvider>
-                            {isAgentWorkspaceMount ? (
-                              <AgentWorkspaceLinkInterceptor history={history}>
-                                <AgentBuilderRoutes />
-                              </AgentWorkspaceLinkInterceptor>
-                            ) : (
+                        {isAgentWorkspaceMount ? (
+                          <div css={agentWorkspaceLayoutStyles}>
+                            <div css={agentWorkspaceMainStyles}>
+                              <Router history={history}>
+                                <StreamingProvider>
+                                  <AgentWorkspaceLinkInterceptor history={history}>
+                                    <AgentBuilderRoutes />
+                                  </AgentWorkspaceLinkInterceptor>
+                                </StreamingProvider>
+                              </Router>
+                            </div>
+                            <AgentWorkspaceOrchestrationBar />
+                          </div>
+                        ) : (
+                          <Router history={history}>
+                            <StreamingProvider>
                               <AgentBuilderRoutes />
-                            )}
-                          </StreamingProvider>
-                        </Router>
+                            </StreamingProvider>
+                          </Router>
+                        )}
                       </PageWrapper>
                     </RedirectAppLinks>
                   </AppLeaveContext.Provider>

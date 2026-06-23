@@ -27,6 +27,15 @@ export const INFERENCE_MANAGEMENT_APP_ID = 'management';
 
 export const INFERENCE_MANAGEMENT_PATH = '/modelManagement/model_settings';
 
+export const DISCOVER_APP_ID = 'discover';
+
+export const DASHBOARDS_APP_ID = 'dashboards';
+
+export type OrchestratedAppNavigateOptions = {
+  path?: string;
+  state?: unknown;
+};
+
 const buildAgentBuilderPath = (path: string, params?: Record<string, string>): string => {
   const queryParams = new URLSearchParams(params);
   return queryParams.size ? `${path}?${queryParams}` : path;
@@ -54,6 +63,15 @@ export const useIsOnManagementLlmConnectorsPage = (): boolean => {
   );
 
   return useObservable(isOnPage$, false);
+};
+
+/** Current app in the chrome application workspace column (not the agent slot). */
+export const useOrchestratedAppId = (): string | undefined => {
+  const {
+    services: { application },
+  } = useKibana();
+
+  return useObservable(application.currentAppId$, undefined);
 };
 
 export const useNavigation = () => {
@@ -96,23 +114,34 @@ export const useNavigation = () => {
     [application, isAgentWorkspaceMount, scopedHistory]
   );
 
-  const navigateToManageConnectors = useCallback(
-    () =>
-      application.navigateToApp(INFERENCE_MANAGEMENT_APP_ID, { path: INFERENCE_MANAGEMENT_PATH }),
+  const navigateToOrchestratedApp = useCallback(
+    (appId: string, options?: OrchestratedAppNavigateOptions) =>
+      application.navigateToApp(appId, options),
     [application]
   );
 
-  const manageConnectorsUrl = useMemo(
-    () =>
-      application.getUrlForApp(INFERENCE_MANAGEMENT_APP_ID, {
-        path: INFERENCE_MANAGEMENT_PATH,
-      }),
+  const getOrchestratedAppUrl = useCallback(
+    (appId: string, options?: OrchestratedAppNavigateOptions) =>
+      application.getUrlForApp(appId, options),
     [application]
+  );
+
+  const navigateToManageConnectors = useCallback(
+    () =>
+      navigateToOrchestratedApp(INFERENCE_MANAGEMENT_APP_ID, { path: INFERENCE_MANAGEMENT_PATH }),
+    [navigateToOrchestratedApp]
+  );
+
+  const manageConnectorsUrl = useMemo(
+    () => getOrchestratedAppUrl(INFERENCE_MANAGEMENT_APP_ID, { path: INFERENCE_MANAGEMENT_PATH }),
+    [getOrchestratedAppUrl]
   );
 
   return {
     createAgentBuilderUrl,
     navigateToAgentBuilderUrl,
+    navigateToOrchestratedApp,
+    getOrchestratedAppUrl,
     navigateToManageConnectors,
     manageConnectorsUrl,
   };

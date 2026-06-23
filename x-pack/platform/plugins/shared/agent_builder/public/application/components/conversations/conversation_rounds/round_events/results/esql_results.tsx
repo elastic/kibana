@@ -13,6 +13,8 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { EsqlResults as EsqlResultsData } from '@kbn/agent-builder-common/tools/tool_result';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useIsAgentWorkspaceMount } from '../../../../../hooks/use_navigation';
+import { useKibana } from '../../../../../hooks/use_kibana';
 
 interface EsqlResultsProps {
   result: EsqlResultsData;
@@ -22,6 +24,10 @@ export const EsqlResults: React.FC<EsqlResultsProps> = ({ result: { data } }) =>
   const {
     startDependencies: { share },
   } = useAgentBuilderServices();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+  const {
+    services: { application },
+  } = useKibana();
 
   const {
     url: { locators },
@@ -38,6 +44,17 @@ export const EsqlResults: React.FC<EsqlResultsProps> = ({ result: { data } }) =>
     });
   }, [discoverLocator, esqlQuery]);
 
+  const openInDiscover = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!discoverUrl) {
+      return;
+    }
+
+    if (isAgentWorkspaceMount) {
+      event.preventDefault();
+      application.navigateToUrl(discoverUrl);
+    }
+  };
+
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
       <EuiText size="s">
@@ -48,12 +65,13 @@ export const EsqlResults: React.FC<EsqlResultsProps> = ({ result: { data } }) =>
             results: (
               <EuiLink
                 href={discoverUrl}
+                onClick={openInDiscover}
                 data-test-subj="agent-builder-esql-data-result-see-in-discover"
                 aria-label={i18n.translate(
                   'xpack.agentBuilder.roundEvents.results.esqlResults.seeInDiscoverAriaLabel',
                   { defaultMessage: 'Explore results in Discover' }
                 )}
-                target="_blank"
+                target={isAgentWorkspaceMount ? undefined : '_blank'}
                 {...getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.pageContent,
                   action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_ESQL_IN_DISCOVER,
