@@ -71,7 +71,9 @@ spaceTest.describe(
         await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
         await page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
 
-        await page.testSubj.locator('doc-hit').waitFor();
+        const docHit = page.testSubj.locator('doc-hit');
+        await docHit.waitFor();
+        await expect(docHit).toBeVisible();
       }
     );
 
