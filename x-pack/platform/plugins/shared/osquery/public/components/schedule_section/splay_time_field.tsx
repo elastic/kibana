@@ -33,7 +33,7 @@ export interface SplayTimeFieldProps {
   value: SplayFormStateUI;
   onChange: (next: SplayFormStateUI) => void;
   /**
-   * Current frequency mode — used to drive the D23 advisory when splay is off
+   * Current frequency mode — used to drive the query-storm advisory when splay is off
    * and the recurrence is calendar-anchored.
    */
   frequency?: FrequencyMode;
@@ -61,7 +61,7 @@ export const SplayTimeField = ({
   const handleToggle = useCallback(
     (next: boolean) => {
       // Touching the toggle invalidates any preserved compound string from the
-      // permissive parser (D16): once the user takes control, the form re-emits
+      // permissive parser: once the user takes control, the form re-emits
       // a single-unit value.
       onChange({ ...value, enabled: next, rawCompound: undefined });
     },

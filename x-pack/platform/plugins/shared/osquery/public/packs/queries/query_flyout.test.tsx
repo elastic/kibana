@@ -186,9 +186,6 @@ describe('QueryFlyout', () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Category E: rrule-mode override toggle
-  // ─────────────────────────────────────────────────────────────────────────
   describe('rrule-mode override toggle', () => {
     beforeEach(() => {
       ExperimentalFeaturesService.init({
@@ -202,8 +199,7 @@ describe('QueryFlyout', () => {
       });
     });
 
-    // E1 ────────────────────────────────────────────────────────────────────
-    it('E1: should render the override toggle row when rruleScheduling flag is on and packSchedule is set', () => {
+    it('should render the override toggle row when rruleScheduling flag is on and packSchedule is set', () => {
       renderFlyout({
         packSchedule: {
           schedule_type: 'rrule',
@@ -219,8 +215,7 @@ describe('QueryFlyout', () => {
       expect(screen.getByTestId('osquery-query-override-pack-schedule-row')).toBeInTheDocument();
     });
 
-    // E2 ────────────────────────────────────────────────────────────────────
-    it('E2: should show "Using pack schedule" label when override is off and packSchedule is set', () => {
+    it('should show "Using pack schedule" label when override is off and packSchedule is set', () => {
       renderFlyout({
         packSchedule: {
           schedule_type: 'rrule',
@@ -239,8 +234,7 @@ describe('QueryFlyout', () => {
       expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
     });
 
-    // E3 ────────────────────────────────────────────────────────────────────
-    it('E3: should render ScheduleSection disabled when override is off, then enable it when toggled on', async () => {
+    it('should render ScheduleSection disabled when override is off, then enable it when toggled on', async () => {
       renderFlyout({
         packSchedule: {
           schedule_type: 'rrule',
@@ -278,8 +272,7 @@ describe('QueryFlyout', () => {
       });
     });
 
-    // E4 ────────────────────────────────────────────────────────────────────
-    it('E4: should call onSave with no schedule fields when override is off at submit', async () => {
+    it('should call onSave with no schedule fields when override is off at submit', async () => {
       const onSave = jest.fn().mockResolvedValue(undefined);
       const onClose = jest.fn();
 
@@ -315,45 +308,8 @@ describe('QueryFlyout', () => {
       expect(saved).not.toHaveProperty('interval');
     });
 
-    // E5 ────────────────────────────────────────────────────────────────────
-    it('E5: blocks save when an override schedule is invalid (over-cap splay, review #5)', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
-      const onClose = jest.fn();
-
-      // Pack schedule carries an over-cap (13h) splay. Turning the override on
-      // copies it into the query's override schedule, which is then invalid.
-      renderFlyout({
-        onSave,
-        onClose,
-        packSchedule: {
-          schedule_type: 'rrule',
-          rrule_schedule: {
-            rrule: 'FREQ=DAILY',
-            start_date: '2024-01-01T00:00:00.000Z',
-            splay: '13h',
-          },
-        },
-      });
-
-      // Turn the override on so the gate applies to the (invalid) schedule.
-      const overrideSwitch = screen.getByTestId('osquery-query-override-pack-schedule');
-      act(() => {
-        fireEvent.click(overrideSwitch);
-      });
-
-      const idInput = screen.getByRole('textbox', { name: /ID/i });
-      fireEvent.change(idInput, { target: { value: 'bad-override-query' } });
-
-      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
-
-      // The submit gate must abort — onSave is never called.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(onSave).not.toHaveBeenCalled();
-      expect(onClose).not.toHaveBeenCalled();
-    });
-
-    // Submit-gate UX: an invalid override keeps the Save button enabled but
-    // clicking it fires a danger toast and never saves; a valid override saves.
+    // An invalid override keeps the Save button enabled but clicking it fires a
+    // danger toast and never saves (this subsumes the bare not-saved assertion).
     it('shows a danger toast and blocks save for an invalid override schedule', async () => {
       const onSave = jest.fn().mockResolvedValue(undefined);
 
@@ -518,7 +474,10 @@ describe('QueryFlyout', () => {
       expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('rrule');
     });
 
-    it('disables the TimeoutField when inheriting an rrule pack schedule (review #6)', () => {
+    // Timeout is stripped from the wire for any rrule-mode query, so the control
+    // must be disabled whether the query inherits the rrule pack schedule or
+    // actively overrides it (still locked to rrule mode).
+    it('disables the TimeoutField when inheriting an rrule pack schedule', () => {
       renderFlyout({
         packSchedule: {
           schedule_type: 'rrule',
@@ -529,54 +488,33 @@ describe('QueryFlyout', () => {
         },
       });
 
-      // Override is off by default → timeout is inherited from the rrule pack
-      // schedule and the field must be disabled.
+      // Override off → inherits the rrule pack schedule; the field is disabled.
       expect(screen.getByTestId('timeout-input')).toBeDisabled();
     });
 
-    // ───────────────────────────────────────────────────────────────────────
-    // Inherited-fields visibility (Problem 2)
-    // ───────────────────────────────────────────────────────────────────────
-    describe('inherited ScheduleSection visibility', () => {
-      it('renders the inherited ScheduleSection disabled when the override is off', () => {
-        renderFlyout({
-          packSchedule: {
-            schedule_type: 'rrule',
-            rrule_schedule: {
-              rrule: 'FREQ=DAILY',
-              start_date: '2024-01-01T00:00:00.000Z',
-            },
+    it('keeps the TimeoutField disabled when overriding an rrule pack schedule', async () => {
+      renderFlyout({
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
           },
-        });
-
-        const section = screen.getByTestId('mocked-schedule-section');
-        expect(section).toBeInTheDocument();
-        expect(section).toHaveAttribute('data-disabled', 'true');
+        },
       });
 
-      it('renders the ScheduleSection editable when the override is on', async () => {
-        renderFlyout({
-          packSchedule: {
-            schedule_type: 'rrule',
-            rrule_schedule: {
-              rrule: 'FREQ=DAILY',
-              start_date: '2024-01-01T00:00:00.000Z',
-            },
-          },
-        });
-
-        act(() => {
-          fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
-        });
-
-        await waitFor(() => {
-          expect(screen.getByTestId('mocked-schedule-section')).toHaveAttribute(
-            'data-disabled',
-            'false'
-          );
-        });
+      // Turn the override on — the schedule is locked to rrule mode, so the
+      // timeout is still dropped on save and the field must stay disabled.
+      act(() => {
+        fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
       });
 
+      await waitFor(() => {
+        expect(screen.getByTestId('timeout-input')).toBeDisabled();
+      });
+    });
+
+    describe('inherited ScheduleSection', () => {
       it('does not surface a validation toast while inheriting an invalid pack schedule', async () => {
         const onSave = jest.fn().mockResolvedValue(undefined);
 

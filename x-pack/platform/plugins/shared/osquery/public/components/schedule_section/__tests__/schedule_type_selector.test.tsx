@@ -64,7 +64,7 @@ describe('ScheduleTypeSelector', () => {
     });
   });
 
-  describe('locked mode (D11 same-mode constraint)', () => {
+  describe('locked mode (same-mode constraint)', () => {
     it('renders the lockedScheduleType as selected, regardless of value prop', () => {
       // Pass mismatched `value` to prove `lockedScheduleType` wins.
       renderWithProviders(

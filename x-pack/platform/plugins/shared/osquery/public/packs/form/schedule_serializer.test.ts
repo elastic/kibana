@@ -13,9 +13,7 @@ import {
   DEFAULT_INTERVAL_SECONDS,
 } from '../../components/schedule_section/types';
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 const makeIntervalFormData = (interval: number): ScheduleFormData => ({
   ...createDefaultScheduleFormData('interval'),
@@ -35,14 +33,9 @@ const makeRruleFormData = (overrides: Partial<ScheduleFormData> = {}): ScheduleF
   ...overrides,
 });
 
-// ---------------------------------------------------------------------------
-// Category C: serializeSchedule + deserializeSchedule pure unit tests
-// ---------------------------------------------------------------------------
-
 describe('schedule_serializer', () => {
   describe('serializeSchedule', () => {
-    // C1 ──────────────────────────────────────────────────────────────────────
-    it('C1: should emit schedule_type interval and interval field for interval mode', () => {
+    it('should emit schedule_type interval and interval field for interval mode', () => {
       const result = serializeSchedule(makeIntervalFormData(7200));
 
       expect(result.schedule_type).toBe('interval');
@@ -50,8 +43,7 @@ describe('schedule_serializer', () => {
       expect(result).not.toHaveProperty('rrule_schedule');
     });
 
-    // C2 ──────────────────────────────────────────────────────────────────────
-    it('C2: should emit schedule_type rrule and rrule_schedule for rrule mode', () => {
+    it('should emit schedule_type rrule and rrule_schedule for rrule mode', () => {
       const result = serializeSchedule(makeRruleFormData());
 
       expect(result.schedule_type).toBe('rrule');
@@ -60,8 +52,7 @@ describe('schedule_serializer', () => {
       expect(result).not.toHaveProperty('interval');
     });
 
-    // C3 ──────────────────────────────────────────────────────────────────────
-    it('C3: should omit interval from rrule result (mutual exclusivity)', () => {
+    it('should omit interval from rrule result (mutual exclusivity)', () => {
       const result = serializeSchedule(makeRruleFormData());
 
       // The wire shape must not carry `interval` alongside `rrule_schedule` —
@@ -70,8 +61,7 @@ describe('schedule_serializer', () => {
       expect(result.interval).toBeUndefined();
     });
 
-    // C4 ──────────────────────────────────────────────────────────────────────
-    it('C4: should emit start_date as RFC 3339 string', () => {
+    it('should emit start_date as RFC 3339 string', () => {
       const RFC3339_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 
       const result = serializeSchedule(
@@ -81,8 +71,7 @@ describe('schedule_serializer', () => {
       expect(result.rrule_schedule?.start_date).toMatch(RFC3339_REGEX);
     });
 
-    // C5 ──────────────────────────────────────────────────────────────────────
-    it('C5: should omit end_date when stopAfter is disabled', () => {
+    it('should omit end_date when stopAfter is disabled', () => {
       const result = serializeSchedule(
         makeRruleFormData({
           stopAfter: { enabled: false, date: new Date('2025-01-01T00:00:00.000Z') },
@@ -92,8 +81,7 @@ describe('schedule_serializer', () => {
       expect(result.rrule_schedule).not.toHaveProperty('end_date');
     });
 
-    // C6 ──────────────────────────────────────────────────────────────────────
-    it('C6: should emit end_date when stopAfter is enabled with a valid date', () => {
+    it('should emit end_date when stopAfter is enabled with a valid date', () => {
       const endDate = new Date('2025-12-31T00:00:00.000Z');
       const result = serializeSchedule(
         makeRruleFormData({
@@ -105,8 +93,7 @@ describe('schedule_serializer', () => {
       expect(new Date(result.rrule_schedule!.end_date!).toISOString()).toBe(endDate.toISOString());
     });
 
-    // C7 ──────────────────────────────────────────────────────────────────────
-    it('C7: should emit splay string when splay is enabled', () => {
+    it('should emit splay string when splay is enabled', () => {
       const result = serializeSchedule(
         makeRruleFormData({
           splay: { enabled: true, value: 30, unit: 'seconds' },
@@ -116,8 +103,7 @@ describe('schedule_serializer', () => {
       expect(result.rrule_schedule?.splay).toBe('30s');
     });
 
-    // C8 ──────────────────────────────────────────────────────────────────────
-    it('C8: should omit splay when splay is disabled', () => {
+    it('should omit splay when splay is disabled', () => {
       const result = serializeSchedule(
         makeRruleFormData({
           splay: { enabled: false, value: 30, unit: 'seconds' },
@@ -127,8 +113,7 @@ describe('schedule_serializer', () => {
       expect(result.rrule_schedule).not.toHaveProperty('splay');
     });
 
-    // C9 ──────────────────────────────────────────────────────────────────────
-    it('C9: should serialize custom (weekly) recurrence with BYDAY', () => {
+    it('should serialize custom (weekly) recurrence with BYDAY', () => {
       const result = serializeSchedule(
         makeRruleFormData({
           recurrence: {
@@ -145,24 +130,21 @@ describe('schedule_serializer', () => {
   });
 
   describe('deserializeSchedule', () => {
-    // C10 ─────────────────────────────────────────────────────────────────────
-    it('C10: should deserialize interval input to interval form state', () => {
+    it('should deserialize interval input to interval form state', () => {
       const result = deserializeSchedule({ schedule_type: 'interval', interval: 7200 });
 
       expect(result.scheduleType).toBe('interval');
       expect(result.interval).toBe(7200);
     });
 
-    // C11 ─────────────────────────────────────────────────────────────────────
-    it('C11: should fall back to default interval when input is undefined (legacy pack)', () => {
+    it('should fall back to default interval when input is undefined (legacy pack)', () => {
       const result = deserializeSchedule(undefined);
 
       expect(result.scheduleType).toBe('interval');
       expect(result.interval).toBe(DEFAULT_INTERVAL_SECONDS);
     });
 
-    // C12 ─────────────────────────────────────────────────────────────────────
-    it('C12: should deserialize rrule input to rrule form state with correct startDate', () => {
+    it('should deserialize rrule input to rrule form state with correct startDate', () => {
       const startDateIso = '2024-03-15T09:00:00.000Z';
       const result = deserializeSchedule({
         schedule_type: 'rrule',
@@ -211,7 +193,6 @@ describe('schedule_serializer', () => {
       expect(result.stopAfter.date.toISOString()).toBe(endDateIso);
     });
 
-    // Round-trip check ────────────────────────────────────────────────────────
     it('should round-trip interval mode: serialize → deserialize', () => {
       const original = makeIntervalFormData(1800);
       const serialized = serializeSchedule(original);
@@ -238,7 +219,7 @@ describe('schedule_serializer', () => {
 
   // 11.2.2/11.2.3: recognized-but-unrenderable parts fold into `_unknown` so a
   // no-op deserialize → serialize round-trip preserves the original RRULE.
-  describe('_unknown fold round-trip (review #1)', () => {
+  describe('_unknown fold round-trip', () => {
     const roundTripRrule = (rrule: string): string => {
       const restored = deserializeSchedule({
         schedule_type: 'rrule',
@@ -259,7 +240,14 @@ describe('schedule_serializer', () => {
       expect(roundTripRrule('FREQ=MONTHLY;BYMONTHDAY=15')).toBe('FREQ=MONTHLY;BYMONTHDAY=15');
     });
 
-    it('surfaces a non-empty _unknown so the D22 advisory can render', () => {
+    it('preserves a WEEKLY rule with no BYDAY (no Mon–Fri injection)', () => {
+      // "Every 3 weeks on the start date's weekday" has no Custom selection to
+      // render, so it folds into `_unknown` and round-trips byte-stable instead
+      // of being rewritten to FREQ=WEEKLY;INTERVAL=3;BYDAY=MO,TU,WE,TH,FR.
+      expect(roundTripRrule('FREQ=WEEKLY;INTERVAL=3')).toBe('FREQ=WEEKLY;INTERVAL=3');
+    });
+
+    it('surfaces a non-empty _unknown so the advanced-parts advisory can render', () => {
       const restored = deserializeSchedule({
         schedule_type: 'rrule',
         rrule_schedule: {
@@ -273,10 +261,22 @@ describe('schedule_serializer', () => {
     });
 
     it('does not double-emit a part present as both a typed field and _unknown', () => {
-      // A no-op round-trip of a WEEKLY+INTERVAL rule keeps INTERVAL exactly once
-      // — the serializer dedup (11.2.1) prefers the typed field.
-      const out = roundTripRrule('FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE');
-      expect(out.match(/INTERVAL=/g)?.length ?? 0).toBe(1);
+      // Custom (WEEKLY) emits BYDAY from the typed `byweekday` field. A stray
+      // `_unknown.BYDAY` (e.g. left over from external state) must be dropped by
+      // the serializer dedup — the typed field wins and BYDAY appears once.
+      const data = makeRruleFormData({
+        recurrence: {
+          ...createDefaultRecurrence(),
+          frequency: 'custom',
+          byweekday: ['MO'],
+          _unknown: { BYDAY: 'TU,WE' },
+        },
+      });
+
+      const out = serializeSchedule(data).rrule_schedule!.rrule;
+      expect(out.match(/BYDAY=/g)?.length ?? 0).toBe(1);
+      expect(out).toContain('BYDAY=MO');
+      expect(out).not.toContain('TU,WE');
     });
   });
 });

@@ -15,7 +15,7 @@ import { roundUpTo30Min } from './slot_utils';
  * osquerybeat (`MINUTELY`, `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`) but
  * adds the `'custom'` pseudo-mode the form uses for WEEKLY-with-BYDAY selection
  * — and emits as lowercase strings so radio IDs and i18n keys stay readable.
- * The conversion to `Frequency` happens at the form serializer (PR D).
+ * The conversion to `Frequency` happens at the form serializer.
  */
 export type FrequencyMode =
   // 'minutely' | 'hourly' |
@@ -44,7 +44,7 @@ export const WEEKDAY_TOKENS: readonly WeekdayStr[] = [
  * which carries the `'custom'` pseudo-mode that maps to `Frequency.WEEKLY +
  * BYDAY`.
  *
- * The `_unknown` slot preserves D9 / D22 forward-compat: advanced parts the
+ * The `_unknown` slot preserves forward-compatibility: advanced parts the
  * form cannot render survive a no-op round-trip but are cleared on frequency
  * change.
  */
@@ -61,7 +61,7 @@ export interface RecurrenceFormState {
   // bymonth: number;
   /**
    * Passthrough for unrecognized RRULE parts encountered on load. Preserved
-   * verbatim through save unless the user changes {@link frequency} (D22).
+   * verbatim through save unless the user changes {@link frequency}.
    * Same shape as `RRuleFields['_unknown']`.
    */
   _unknown?: Record<string, string>;
@@ -74,7 +74,7 @@ export interface RecurrenceFormState {
  * - `enabled` — toggle controlling whether the splay sub-fields render.
  * - `rawCompound` — when the loaded splay was a compound Go duration the
  *   single-unit input cannot represent, the form SHALL re-emit this string
- *   unchanged unless the user touches the splay field (D16).
+ *   unchanged unless the user touches the splay field.
  */
 export interface SplayFormStateUI extends SplayFormState {
   enabled: boolean;
@@ -86,7 +86,7 @@ export interface SplayFormStateUI extends SplayFormState {
  * with the per-mode sub-state. Callers (pack form, query flyout) initialize via
  * {@link createDefaultScheduleFormData} and persist the whole object on save.
  *
- * Per the same-mode constraint (D11), when this state is mounted inside the
+ * Per the same-mode constraint, when this state is mounted inside the
  * QueryFlyout the parent SHALL pass `lockedScheduleType={pack.schedule_type}`
  * to `<ScheduleSection>` and the type selector SHALL be locked.
  */
@@ -151,7 +151,7 @@ export const createDefaultScheduleFormData = (
 
 /**
  * Frequencies whose recurrence anchors to a calendar instant rather than to the
- * agent's enrollment moment. These benefit from splay on large fleets (D23).
+ * agent's enrollment moment. These benefit from splay on large fleets.
  */
 export const CALENDAR_ANCHORED_FREQUENCIES: ReadonlySet<FrequencyMode> = new Set([
   'daily',

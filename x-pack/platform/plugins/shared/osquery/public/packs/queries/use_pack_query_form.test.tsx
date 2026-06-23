@@ -15,9 +15,7 @@ import {
   createDefaultRecurrence,
 } from '../../components/schedule_section/types';
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 const makeIntervalSchedule = (intervalSeconds: number): ScheduleFormData => ({
   ...createDefaultScheduleFormData('interval'),
@@ -59,14 +57,9 @@ const getSerializer = (props: Parameters<typeof usePackQueryForm>[0]) => {
   return result.current.serializer;
 };
 
-// ---------------------------------------------------------------------------
-// Category A: serializer unit tests via renderHook
-// ---------------------------------------------------------------------------
-
 describe('usePackQueryForm', () => {
   describe('serializer', () => {
-    // A1 ──────────────────────────────────────────────────────────────────────
-    it('A1: should strip schedule_type and interval from query when pack is rrule-scheduled and override is off', () => {
+    it('should strip schedule_type and interval from query when pack is rrule-scheduled and override is off', () => {
       const serialize = getSerializer({
         uniqueQueryIds: [],
         packSchedule: {
@@ -96,8 +89,7 @@ describe('usePackQueryForm', () => {
       expect(result).not.toHaveProperty('rrule_schedule');
     });
 
-    // A2 ──────────────────────────────────────────────────────────────────────
-    it('A2: should emit rrule_schedule and schedule_type when pack is rrule and override is on with matching type', () => {
+    it('should emit rrule_schedule and schedule_type when pack is rrule and override is on with matching type', () => {
       const packSchedule = {
         schedule_type: 'rrule' as const,
         rrule_schedule: {

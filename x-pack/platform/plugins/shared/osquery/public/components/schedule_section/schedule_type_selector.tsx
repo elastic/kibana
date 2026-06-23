@@ -28,7 +28,7 @@ export interface ScheduleTypeSelectorProps {
   onChange: (value: ScheduleType) => void;
   /**
    * When set, the selector locks to the given mode. Used by the QueryFlyout
-   * to enforce the same-mode constraint (D11) — per-query overrides cannot
+   * to enforce the same-mode constraint — per-query overrides cannot
    * change the pack's schedule mode, only its details.
    */
   lockedScheduleType?: ScheduleType;

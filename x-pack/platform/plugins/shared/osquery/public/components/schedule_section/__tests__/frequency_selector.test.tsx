@@ -119,7 +119,7 @@ describe('FrequencySelector', () => {
   });
 
   describe('change handling', () => {
-    it('switches frequency and clears `_unknown` on the change (D22)', () => {
+    it('switches frequency and clears `_unknown` on the change', () => {
       const onChange = jest.fn();
       renderWithProviders(
         <FrequencySelector
@@ -137,7 +137,7 @@ describe('FrequencySelector', () => {
       expect(onChange).toHaveBeenCalledTimes(1);
       const next = onChange.mock.calls[0][0] as RecurrenceFormState;
       expect(next.frequency).toBe('custom');
-      // D22 — frequency change must clear `_unknown` so the new RRULE shape
+      // A frequency change must clear `_unknown` so the new RRULE shape
       // isn't contaminated by parts that only made sense under the prior mode.
       expect(next._unknown).toBeUndefined();
     });

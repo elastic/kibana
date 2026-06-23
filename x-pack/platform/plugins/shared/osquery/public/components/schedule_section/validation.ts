@@ -35,7 +35,7 @@ export interface ValidateScheduleOptions {
 /**
  * Pure submit-time validator for the schedule section. Mirrors the inline field
  * errors but answers a single question for the form / flyout `onSubmit`: "is the
- * whole schedule submittable?" (review #4 / #5). Returns an array of
+ * whole schedule submittable?". Returns an array of
  * human-readable i18n strings — empty when the schedule is valid.
  *
  * Interval-mode schedules are always valid here (the numeric field clamps its
@@ -79,7 +79,7 @@ export const validateScheduleFormData = (
     errors.push(STOP_AFTER_BEFORE_START_ERROR);
   }
 
-  // (c) Splay over the 12h cap, including the summed-compound case (D16, #2).
+  // (c) Splay over the 12h cap, including the summed-compound case.
   if (data.splay.enabled) {
     const splaySeconds = data.splay.rawCompound
       ? sumCompoundSeconds(data.splay.rawCompound)

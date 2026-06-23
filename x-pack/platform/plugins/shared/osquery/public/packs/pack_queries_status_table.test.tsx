@@ -276,5 +276,20 @@ describe('PackQueriesStatusTable', () => {
 
       expect(screen.getByText('Daily')).toBeInTheDocument();
     });
+
+    it('falls back to the row interval for an inherited row when packSchedule is undefined', () => {
+      // Inherited row (no per-query schedule_type) and no packSchedule prop —
+      // exercises the `?? { interval: item.interval }` fallback so the column
+      // still shows the query's own interval rather than blank/zero.
+      const data: PackQueryFormData[] = [
+        { id: 'q1', query: 'SELECT 1;', interval: 3600, ecs_mapping: {} },
+      ];
+
+      renderWithContext(
+        <PackQueriesStatusTable agentIds={['a-1']} data={data} packName="pack-name" />
+      );
+
+      expect(screen.getByText('3600s')).toBeInTheDocument();
+    });
   });
 });

@@ -40,7 +40,7 @@ describe('SplayTimeField', () => {
   });
 
   describe('change handling', () => {
-    it('clears `rawCompound` when the user toggles splay on (D16)', () => {
+    it('clears `rawCompound` when the user toggles splay on', () => {
       const onChange = jest.fn();
       renderWithProviders(
         <SplayTimeField
@@ -51,7 +51,7 @@ describe('SplayTimeField', () => {
 
       fireEvent.click(screen.getByTestId('osquery-schedule-splay-toggle'));
 
-      // D16: once the user touches the splay control, the form re-emits a
+      // Once the user touches the splay control, the form re-emits a
       // single-unit value and the preserved compound string is discarded.
       expect(onChange).toHaveBeenCalledWith({
         ...baseSplay({ enabled: true }),
@@ -145,9 +145,9 @@ describe('SplayTimeField', () => {
       expect(screen.queryByText(SPLAY_MAX_ERROR)).not.toBeInTheDocument();
     });
 
-    it('does not show the max-splay error for a within-cap compound rawCompound (D16 passthrough)', () => {
+    it('does not show the max-splay error for a within-cap compound rawCompound', () => {
       // A compound value preserved verbatim is still round-tripped to beats —
-      // but only while within the 12h cap (review #2). `1h30m` is well under.
+      // but only while within the 12h cap. `1h30m` is well under.
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({
@@ -163,7 +163,7 @@ describe('SplayTimeField', () => {
       expect(screen.queryByText(SPLAY_MAX_ERROR)).not.toBeInTheDocument();
     });
 
-    it('shows the max-splay error for an over-cap compound rawCompound (review #2)', () => {
+    it('shows the max-splay error for an over-cap compound rawCompound', () => {
       // The compound-splay cap bypass is closed: `13h0m` sums to > 12h and must
       // surface the error rather than short-circuit to valid.
       renderWithProviders(
@@ -182,7 +182,7 @@ describe('SplayTimeField', () => {
     });
   });
 
-  describe('D23 query-storm advisory', () => {
+  describe('query-storm advisory', () => {
     it('renders the advisory when splay is off and frequency is calendar-anchored (daily)', () => {
       renderWithProviders(
         <SplayTimeField

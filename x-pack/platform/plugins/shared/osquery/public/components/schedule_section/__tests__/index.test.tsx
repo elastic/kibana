@@ -15,15 +15,13 @@ import {
 } from '../translations';
 import { createDefaultScheduleFormData } from '../types';
 import type { ScheduleFormData } from '../types';
-import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { renderWithProviders } from './test_helpers';
 
-const initFlag = (rruleScheduling: boolean) => {
-  ExperimentalFeaturesService.init({
-    experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling },
-  });
-};
+const flagOn = { ...allowedExperimentalValues, rruleScheduling: true };
+
+const renderFlagOn = (ui: React.ReactElement) =>
+  renderWithProviders(ui, { experimentalFeatures: flagOn });
 
 const intervalState = (overrides: Partial<ScheduleFormData> = {}): ScheduleFormData => ({
   ...createDefaultScheduleFormData('interval'),
@@ -36,14 +34,11 @@ const recurrenceState = (overrides: Partial<ScheduleFormData> = {}): ScheduleFor
 });
 
 describe('ScheduleSection', () => {
-  describe('feature-flag gate (D25 / PR B ship boundary)', () => {
-    beforeEach(() => {
-      initFlag(false);
-    });
-
+  describe('feature-flag gate', () => {
     it('renders nothing when `rruleScheduling` is off', () => {
       const { container } = renderWithProviders(
-        <ScheduleSection value={intervalState()} onChange={jest.fn()} />
+        <ScheduleSection value={intervalState()} onChange={jest.fn()} />,
+        { experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false } }
       );
 
       expect(container).toBeEmptyDOMElement();
@@ -52,20 +47,14 @@ describe('ScheduleSection', () => {
   });
 
   describe('rendering with the flag on', () => {
-    beforeEach(() => {
-      initFlag(true);
-    });
-
     it('renders the section title by default', () => {
-      renderWithProviders(<ScheduleSection value={intervalState()} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={intervalState()} onChange={jest.fn()} />);
 
       expect(screen.getByText(SCHEDULE_SECTION_TITLE)).toBeInTheDocument();
     });
 
     it('omits the title when `title={null}` is passed (embedded QueryFlyout shape)', () => {
-      renderWithProviders(
-        <ScheduleSection value={intervalState()} onChange={jest.fn()} title={null} />
-      );
+      renderFlagOn(<ScheduleSection value={intervalState()} onChange={jest.fn()} title={null} />);
 
       expect(screen.queryByText(SCHEDULE_SECTION_TITLE)).not.toBeInTheDocument();
       // Still renders the type selector + body — only the heading is suppressed.
@@ -73,7 +62,7 @@ describe('ScheduleSection', () => {
     });
 
     it('renders the interval body when scheduleType is "interval"', () => {
-      renderWithProviders(<ScheduleSection value={intervalState()} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={intervalState()} onChange={jest.fn()} />);
 
       expect(screen.getByTestId('osquery-schedule-interval')).toBeInTheDocument();
       expect(screen.queryByTestId('osquery-schedule-start-date')).not.toBeInTheDocument();
@@ -81,7 +70,7 @@ describe('ScheduleSection', () => {
     });
 
     it('renders the recurrence body when scheduleType is "rrule"', () => {
-      renderWithProviders(<ScheduleSection value={recurrenceState()} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={recurrenceState()} onChange={jest.fn()} />);
 
       expect(screen.getByTestId('osquery-schedule-start-date')).toBeInTheDocument();
       expect(screen.getByTestId('osquery-frequency-selector')).toBeInTheDocument();
@@ -91,11 +80,7 @@ describe('ScheduleSection', () => {
     });
   });
 
-  describe('D22 advanced-parts advisory', () => {
-    beforeEach(() => {
-      initFlag(true);
-    });
-
+  describe('advanced-parts advisory', () => {
     it('renders the advisory when recurrence carries non-empty `_unknown` parts', () => {
       const state = recurrenceState({
         recurrence: {
@@ -104,14 +89,14 @@ describe('ScheduleSection', () => {
         },
       });
 
-      renderWithProviders(<ScheduleSection value={state} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={state} onChange={jest.fn()} />);
 
       expect(screen.getByText(ADVANCED_PARTS_ADVISORY_TITLE)).toBeInTheDocument();
       expect(screen.getByTestId('osquery-schedule-advanced-parts-advisory')).toBeInTheDocument();
     });
 
     it('does NOT render the advisory when `_unknown` is undefined', () => {
-      renderWithProviders(<ScheduleSection value={recurrenceState()} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={recurrenceState()} onChange={jest.fn()} />);
 
       expect(
         screen.queryByTestId('osquery-schedule-advanced-parts-advisory')
@@ -126,7 +111,7 @@ describe('ScheduleSection', () => {
         },
       });
 
-      renderWithProviders(<ScheduleSection value={state} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={state} onChange={jest.fn()} />);
 
       expect(
         screen.queryByTestId('osquery-schedule-advanced-parts-advisory')
@@ -141,7 +126,7 @@ describe('ScheduleSection', () => {
         },
       });
 
-      renderWithProviders(<ScheduleSection value={state} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={state} onChange={jest.fn()} />);
 
       expect(
         screen.queryByTestId('osquery-schedule-advanced-parts-advisory')
@@ -150,14 +135,10 @@ describe('ScheduleSection', () => {
   });
 
   describe('change propagation', () => {
-    beforeEach(() => {
-      initFlag(true);
-    });
-
     it('switches scheduleType when the user picks the other card', () => {
       const onChange = jest.fn();
       const state = intervalState();
-      renderWithProviders(<ScheduleSection value={state} onChange={onChange} />);
+      renderFlagOn(<ScheduleSection value={state} onChange={onChange} />);
 
       fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
 
@@ -167,7 +148,7 @@ describe('ScheduleSection', () => {
     it('propagates an interval change in interval mode', () => {
       const onChange = jest.fn();
       const state = intervalState({ interval: 60 });
-      renderWithProviders(<ScheduleSection value={state} onChange={onChange} />);
+      renderFlagOn(<ScheduleSection value={state} onChange={onChange} />);
 
       fireEvent.change(screen.getByTestId('osquery-schedule-interval'), {
         target: { value: '120' },
@@ -177,13 +158,9 @@ describe('ScheduleSection', () => {
     });
   });
 
-  describe('D11 same-mode constraint (lockedScheduleType)', () => {
-    beforeEach(() => {
-      initFlag(true);
-    });
-
+  describe('same-mode constraint (lockedScheduleType)', () => {
     it('locks the selector to the parent-supplied mode and surfaces the help text', () => {
-      renderWithProviders(
+      renderFlagOn(
         <ScheduleSection
           value={recurrenceState()}
           onChange={jest.fn()}
@@ -196,7 +173,7 @@ describe('ScheduleSection', () => {
 
     it('rejects type-switch attempts when locked', () => {
       const onChange = jest.fn();
-      renderWithProviders(
+      renderFlagOn(
         <ScheduleSection value={recurrenceState()} onChange={onChange} lockedScheduleType="rrule" />
       );
 

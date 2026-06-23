@@ -23,7 +23,7 @@ export interface UsePackQueryFormProps {
   /**
    * Pack-level schedule fields (read from the pack form). When set, the query
    * flyout treats them as the inherited defaults and the per-query override
-   * toggle controls whether they are overridden (D11). The flyout SHALL pass
+   * toggle controls whether they are overridden. The flyout SHALL pass
    * `lockedScheduleType={packSchedule.schedule_type}` to `<ScheduleSection>`
    * so the type selector is bound to the pack's mode.
    */
@@ -197,7 +197,7 @@ const serializer = (
     return stripInheritedScheduleFields(base, packSchedule?.schedule_type);
   }
 
-  // Same-mode constraint (D11): the override mode MUST match the pack's. The UI
+  // Same-mode constraint: the override mode MUST match the pack's. The UI
   // locks the selector so this is normally a no-op; the guard catches
   // programmatic mutation, falling through to the inherited shape as a safety net.
   const serialized = serializeSchedule(schedule);

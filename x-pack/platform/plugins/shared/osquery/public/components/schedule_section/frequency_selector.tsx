@@ -122,7 +122,7 @@ export const FrequencySelector = ({
       const next = modeForOptionId(optionId);
       if (!next || !isFrequencyMode(next) || next === value.frequency) return;
 
-      // D22: changing the frequency SHALL clear `_unknown` parts so the new
+      // Changing the frequency SHALL clear `_unknown` parts so the new
       // RRULE shape is not silently contaminated by parts that only made
       // sense under the previous frequency.
       onChange({

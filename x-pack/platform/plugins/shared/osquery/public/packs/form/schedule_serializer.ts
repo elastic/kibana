@@ -68,10 +68,6 @@ const STRING_TO_FREQUENCY: Record<string, Frequency> = {
 const isValidDate = (date: unknown): date is Date =>
   date instanceof Date && !Number.isNaN(date.getTime());
 
-/**
- * Resolve a date input — accepts `Date`, RFC 3339 string, or `undefined`.
- * Returns `undefined` if the input cannot be parsed to a finite date.
- */
 const resolveDate = (value: unknown): Date | undefined => {
   if (value === undefined || value === null) return undefined;
   if (isValidDate(value)) return value;
@@ -143,19 +139,37 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
 
   const foldedUnknown: Record<string, string> = {};
 
-  if (fields.freq === Frequency.WEEKLY) {
+  if (fields.freq === Frequency.WEEKLY && fields.byweekday && fields.byweekday.length > 0) {
     frequency = 'custom';
-    if (fields.byweekday && fields.byweekday.length > 0) {
-      byweekday = fields.byweekday
-        .map((day) => WEEKDAY_TO_TOKEN[day])
-        .filter((token): token is WeekdayStr => token !== undefined);
-    }
+    byweekday = fields.byweekday
+      .map((day) => WEEKDAY_TO_TOKEN[day])
+      .filter((token): token is WeekdayStr => token !== undefined);
 
     if (fields.interval && fields.interval > 0) {
       interval = fields.interval;
     }
 
     // WEEKLY does not render BYMONTHDAY / BYMONTH — preserve them.
+    if (fields.bymonthday && fields.bymonthday.length > 0) {
+      foldedUnknown.BYMONTHDAY = fields.bymonthday.join(',');
+    }
+
+    if (fields.bymonth && fields.bymonth.length > 0) {
+      foldedUnknown.BYMONTH = fields.bymonth.join(',');
+    }
+  } else if (fields.freq === Frequency.WEEKLY) {
+    // WEEKLY with no BYDAY ("every N weeks on the start date's weekday") is a
+    // valid externally-authored rule the form cannot render — it has no Custom
+    // weekday selection to populate. Land on the editable 'daily' default and
+    // preserve the rule verbatim in `_unknown` so a no-op save round-trips it
+    // unchanged and the advisory fires, rather than injecting a Mon–Fri BYDAY.
+    frequency = 'daily';
+    foldedUnknown.FREQ = 'WEEKLY';
+
+    if (fields.interval && fields.interval > 1) {
+      foldedUnknown.INTERVAL = String(fields.interval);
+    }
+
     if (fields.bymonthday && fields.bymonthday.length > 0) {
       foldedUnknown.BYMONTHDAY = fields.bymonthday.join(',');
     }
@@ -232,7 +246,7 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
  * Deserialize a Go duration splay string into the UI form-state shape. Compound
  * durations (`"1h30m"`) are tolerated via {@link parseSplayPermissive} and the
  * raw string is stashed in `rawCompound` so the form re-emits it verbatim
- * unless the user touches the splay control (D16).
+ * unless the user touches the splay control.
  */
 const deserializeSplay = (raw: string | undefined): SplayFormStateUI => {
   if (!raw) {
@@ -261,7 +275,7 @@ const deserializeSplay = (raw: string | undefined): SplayFormStateUI => {
 /**
  * Build the wire-shape splay string from form state. Returns `undefined` when
  * splay is disabled. Preserves a previously-loaded compound string verbatim
- * (D16) unless the user touched the single-unit input.
+ * unless the user touched the single-unit input.
  */
 const serializeSplayState = (splay: SplayFormStateUI): string | undefined => {
   if (!splay.enabled) return undefined;
@@ -295,7 +309,7 @@ export interface SerializedScheduleFields {
  *
  * - When `scheduleType === 'interval'`: emit `{ schedule_type, interval }`.
  * - When `scheduleType === 'rrule'`: emit `{ schedule_type, rrule_schedule }`.
- *   Mutually exclusive at the boundary (D11).
+ *   Mutually exclusive at the boundary.
  */
 export const serializeSchedule = (data: ScheduleFormData): SerializedScheduleFields => {
   if (data.scheduleType === 'interval') {

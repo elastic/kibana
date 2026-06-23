@@ -6,19 +6,10 @@
  */
 
 /**
- * Category D: QueriesField — uploaded pack injects legacy `interval` field.
- *
- * D1 pins the CURRENT BEHAVIOR of the pack uploader: when a pack JSON is
- * uploaded, each query receives the `interval` from the file (or falls back
- * to the hardcoded default of '3600'). The serializer in `use_pack_query_form`
- * is the downstream defense that strips `interval` when the pack uses
- * `schedule_type: 'rrule'`. This test exercises the uploader's injection path
- * directly via the `handlePackUpload` callback that drives `replace()`.
- *
- * Because `QueriesField` requires a full `FormProvider` context (it reads from
- * `useWatch()` and `useController()`), and because rendering the full pack-form
- * tree in isolation is heavyweight, we mount `QueriesField` inside a minimal
- * `FormProvider` stub that satisfies the hook dependencies.
+ * Pins the pack uploader's current behavior: an uploaded pack JSON injects each
+ * query's `interval` from the file (or the hardcoded '3600' default). The
+ * serializer in `use_pack_query_form` is the downstream defense that strips
+ * `interval` for `schedule_type: 'rrule'` packs — exercised separately.
  */
 
 import React from 'react';
@@ -102,7 +93,7 @@ beforeAll(() => {
 
 // Probe that surfaces the live `queries` form-array state out of the provider
 // so the test can assert what the uploader actually wrote into RHF — not the
-// input literal it was handed (review #8).
+// input literal it was handed.
 interface UploadedQueryState {
   id?: string;
   interval?: string | number;
@@ -150,7 +141,6 @@ const renderQueriesField = () =>
   );
 
 // ---------------------------------------------------------------------------
-// Category D
 // ---------------------------------------------------------------------------
 
 describe('QueriesField', () => {
@@ -160,7 +150,6 @@ describe('QueriesField', () => {
     jest.clearAllMocks();
   });
 
-  // D1 ──────────────────────────────────────────────────────────────────────
   describe('pack uploader', () => {
     it('D1: should inject interval onto each uploaded query in RHF form state (serializer is the downstream defense)', () => {
       // The uploader callback (handlePackUpload in queries_field.tsx) maps

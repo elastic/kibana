@@ -16,12 +16,13 @@ import { ThemeProvider } from '@emotion/react';
 import { PackForm } from '.';
 import { queryClient } from '../../query_client';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 const mockUseRouterNavigate = jest.fn();
 const mockAddDanger = jest.fn();
 
-// Mutable references so B-series tests can capture and assert on calls.
+// Mutable references so the payload-shape tests can capture and assert on calls.
 let mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
 let mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
 
@@ -81,7 +82,9 @@ const renderWithContext = (Element: React.ReactElement) =>
         }}
       >
         <IntlProvider locale={'en'}>
-          <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
+          <ExperimentalFeaturesProvider value={ExperimentalFeaturesService.get()}>
+            <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
+          </ExperimentalFeaturesProvider>
         </IntlProvider>
       </ThemeProvider>
     </EuiProvider>
@@ -202,7 +205,7 @@ describe('PackForm', () => {
 
       // Wire-boundary guarantee: with the flag off, the ScheduleSection does
       // not mount even if the SO already carries `schedule_type: 'rrule'`. This
-      // pairs with the server-side D25 wire gate so a downgrade is a clean
+      // pairs with the server-side wire gate so a downgrade is a clean
       // "pretend this never happened" experience.
       expect(queryByTestId('osquery-schedule-section')).toBeNull();
       expect(queryByTestId('osquery-schedule-type-selector')).toBeNull();
@@ -237,9 +240,6 @@ describe('PackForm', () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Category B: onSubmit payload shape tests
-  // ─────────────────────────────────────────────────────────────────────────
   describe('onSubmit payload shape', () => {
     beforeEach(() => {
       mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
@@ -255,8 +255,7 @@ describe('PackForm', () => {
       });
     });
 
-    // B1 ──────────────────────────────────────────────────────────────────────
-    it('B1: should submit schedule_type interval and interval when pack is in interval mode', async () => {
+    it('should submit schedule_type interval and interval when pack is in interval mode', async () => {
       const defaultValue = {
         id: 'pack-b1',
         saved_object_id: 'saved-b1',
@@ -291,8 +290,7 @@ describe('PackForm', () => {
       expect(submitted.rrule_schedule).toBeUndefined();
     });
 
-    // B2 ──────────────────────────────────────────────────────────────────────
-    it('B2: should not leak stale interval field when pack is in rrule mode', async () => {
+    it('should not leak stale interval field when pack is in rrule mode', async () => {
       // Wire-boundary: a pack previously saved as interval-type (interval: 3600)
       // is updated to rrule mode. The serializer MUST NOT emit `interval`
       // alongside `rrule_schedule` — the server rejects mixed payloads.
@@ -333,8 +331,7 @@ describe('PackForm', () => {
       expect(submitted.interval).toBeUndefined();
     });
 
-    // B3 ──────────────────────────────────────────────────────────────────────
-    it('B3: should not include schedule fields in payload when rruleScheduling flag is off', async () => {
+    it('should not include schedule fields in payload when rruleScheduling flag is off', async () => {
       // Reset flag to off for this test
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
@@ -369,8 +366,7 @@ describe('PackForm', () => {
       expect(submitted).not.toHaveProperty('rrule_schedule');
     });
 
-    // B4 ──────────────────────────────────────────────────────────────────────
-    it('B4: should submit with schedule_type present in create mode when rruleScheduling is on', async () => {
+    it('should submit with schedule_type present in create mode when rruleScheduling is on', async () => {
       // Create a new pack (no defaultValue → create path).
       // The form initializes with an interval schedule by default when the
       // rruleScheduling flag is on. We verify that schedule_type is always
@@ -393,8 +389,7 @@ describe('PackForm', () => {
       expect(submitted).toHaveProperty('schedule_type');
     });
 
-    // B5 ──────────────────────────────────────────────────────────────────────
-    it('B5: should call updateAsync with pack saved_object_id in edit mode', async () => {
+    it('should call updateAsync with pack saved_object_id in edit mode', async () => {
       const savedObjectId = 'saved-object-id-b5';
       const defaultValue = {
         id: 'pack-b5',
@@ -436,128 +431,7 @@ describe('PackForm', () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Phase 11: submit-boundary validation gate (11.1.4) + flag-off leak (11.2.5)
-  // ─────────────────────────────────────────────────────────────────────────
-  describe('schedule submit gate (review #4)', () => {
-    beforeEach(() => {
-      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
-      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
-      });
-    });
-
-    afterEach(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
-      });
-    });
-
-    it('blocks submit when the rrule schedule has an over-cap splay', async () => {
-      // An SO with a 13h splay deserializes into an invalid schedule; the submit
-      // gate must abort so the API never receives it.
-      const defaultValue = {
-        id: 'pack-gate-splay',
-        saved_object_id: 'saved-gate-splay',
-        name: 'over-splay-pack',
-        description: '',
-        enabled: true,
-        queries: {},
-        created_at: '2024-01-01',
-        created_by: 'test-user',
-        updated_at: '2024-01-01',
-        updated_by: 'test-user',
-        policy_ids: [],
-        references: [],
-        schedule_type: 'rrule' as const,
-        rrule_schedule: {
-          rrule: 'FREQ=DAILY',
-          start_date: '2024-01-01T00:00:00.000Z',
-          splay: '13h',
-        },
-      };
-
-      const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-splay" />
-      );
-
-      fireEvent.click(getByTestId('update-pack-button'));
-
-      // Give the async submit a chance to fire; it must not call the API.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(mockUpdateAsync).not.toHaveBeenCalled();
-    });
-
-    it('blocks submit when the rrule stop date is before the start date', async () => {
-      const defaultValue = {
-        id: 'pack-gate-stop',
-        saved_object_id: 'saved-gate-stop',
-        name: 'bad-stop-pack',
-        description: '',
-        enabled: true,
-        queries: {},
-        created_at: '2024-01-01',
-        created_by: 'test-user',
-        updated_at: '2024-01-01',
-        updated_by: 'test-user',
-        policy_ids: [],
-        references: [],
-        schedule_type: 'rrule' as const,
-        rrule_schedule: {
-          rrule: 'FREQ=DAILY',
-          start_date: '2024-06-01T00:00:00.000Z',
-          end_date: '2024-01-01T00:00:00.000Z', // before start
-        },
-      };
-
-      const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-stop" />
-      );
-
-      fireEvent.click(getByTestId('update-pack-button'));
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(mockUpdateAsync).not.toHaveBeenCalled();
-    });
-
-    it('allows submit for a valid rrule schedule', async () => {
-      const defaultValue = {
-        id: 'pack-gate-ok',
-        saved_object_id: 'saved-gate-ok',
-        name: 'valid-rrule-pack',
-        description: '',
-        enabled: true,
-        queries: {},
-        created_at: '2024-01-01',
-        created_by: 'test-user',
-        updated_at: '2024-01-01',
-        updated_by: 'test-user',
-        policy_ids: [],
-        references: [],
-        schedule_type: 'rrule' as const,
-        rrule_schedule: {
-          rrule: 'FREQ=DAILY',
-          start_date: '2024-01-01T00:00:00.000Z',
-          splay: '5m',
-        },
-      };
-
-      const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ok" />
-      );
-
-      fireEvent.click(getByTestId('update-pack-button'));
-
-      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Beyond "no save", assert the button is disabled, the confirmation modal
-  // never opens, and the inline error region surfaces the cause.
-  // ─────────────────────────────────────────────────────────────────────────
-  describe('schedule submit-gate UX (Option B — toast on click)', () => {
+  describe('schedule submit-gate UX (toast on click)', () => {
     beforeEach(() => {
       mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
       mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
@@ -594,13 +468,14 @@ describe('PackForm', () => {
       },
     });
 
-    // empty weekdays (custom WEEKLY with no byweekday). The deserializer
-    // never emits an empty byweekday, so drive it through the UI: start from a
-    // valid custom-weekly pack (MO-FR checked) and uncheck every day.
+    // empty weekdays (custom WEEKLY with no byweekday). The deserializer never
+    // emits an empty byweekday, so drive it through the UI: start from a valid
+    // custom-weekly pack (MO-FR checked) and uncheck every day. This case stays
+    // distinct from the it.each group because it needs a UI interaction.
     it('shows a danger toast and blocks save when all weekdays are unchecked', async () => {
-      // FREQ=WEEKLY deserializes to the "custom" UI mode with the default
-      // Mon-Fri selection — a valid starting point.
-      const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY' });
+      // A WEEKLY rule that carries an explicit BYDAY deserializes to the
+      // "custom" UI mode with those weekdays checked — a valid starting point.
+      const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR' });
 
       const { getByTestId, container } = renderWithContext(
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
@@ -628,40 +503,18 @@ describe('PackForm', () => {
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
-    // stop date before start date.
-    it('shows a danger toast and blocks save when the stop date precedes the start', async () => {
-      const defaultValue = baseRrulePack({
-        start_date: '2024-06-01T00:00:00.000Z',
-        end_date: '2024-01-01T00:00:00.000Z',
-      });
-
-      const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
-      );
-
-      expect(getByTestId('update-pack-button')).not.toBeDisabled();
-      fireEvent.click(getByTestId('update-pack-button'));
-      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
-      expect(mockUpdateAsync).not.toHaveBeenCalled();
-    });
-
-    // over-cap plain splay.
-    it('shows a danger toast and blocks save for an over-cap splay', async () => {
-      const defaultValue = baseRrulePack({ splay: '13h' });
-
-      const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
-      );
-
-      expect(getByTestId('update-pack-button')).not.toBeDisabled();
-      fireEvent.click(getByTestId('update-pack-button'));
-      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
-      expect(mockUpdateAsync).not.toHaveBeenCalled();
-    });
-
-    // over-cap COMPOUND splay (distinct rawCompound branch).
-    it('shows a danger toast and blocks save for an over-cap compound splay (12h1m)', async () => {
-      const defaultValue = baseRrulePack({ splay: '12h1m' });
+    // Invalid schedules that the deserializer produces directly (no UI
+    // interaction needed): each must fire a danger toast and block the save.
+    // The compound-splay case also exercises the distinct `rawCompound` branch.
+    it.each([
+      [
+        'the stop date precedes the start',
+        { start_date: '2024-06-01T00:00:00.000Z', end_date: '2024-01-01T00:00:00.000Z' },
+      ],
+      ['the splay is over-cap', { splay: '13h' }],
+      ['the compound splay is over-cap (12h1m)', { splay: '12h1m' }],
+    ])('shows a danger toast and blocks save when %s', async (_label, overrides) => {
+      const defaultValue = baseRrulePack(overrides);
 
       const { getByTestId } = renderWithContext(
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
@@ -738,7 +591,9 @@ describe('PackForm', () => {
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
       });
 
-      const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY' }); // invalid IF rrule were on
+      // With the flag off the schedule gate never runs, so the rule shape is
+      // irrelevant — a plain daily rule keeps the save path unblocked.
+      const defaultValue = baseRrulePack({ rrule: 'FREQ=DAILY' });
 
       const { getByTestId } = renderWithContext(
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
@@ -755,7 +610,7 @@ describe('PackForm', () => {
   // rollback-style flag-off leak. Mount in edit mode with an RRULE SO
   // and the flag OFF; the submit payload must be byte-identical to the legacy
   // shape (no schedule_type / interval / rrule_schedule).
-  describe('flag-off leak (review #3)', () => {
+  describe('flag-off leak — RRULE SO with the flag off', () => {
     beforeEach(() => {
       mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
       mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });

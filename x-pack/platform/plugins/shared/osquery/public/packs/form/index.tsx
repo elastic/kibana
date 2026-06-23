@@ -109,7 +109,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       (policyId) => payload.shards?.[policyId] == null
     );
 
-    // Flag-off leak fix (review #3): strip the rrule-era schedule fields off the
+    // Flag-off leak fix: strip the rrule-era schedule fields off the
     // spread so a flag-off form never carries `schedule_type` / pack-level
     // `interval` / `rrule_schedule` into state — and therefore never re-emits
     // them on submit. Flag-off is byte-identical to the pre-rrule contract.

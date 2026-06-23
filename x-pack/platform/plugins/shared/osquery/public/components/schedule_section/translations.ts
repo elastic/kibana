@@ -239,6 +239,6 @@ export const TIMEOUT_RRULE_INHERIT_HELP = i18n.translate(
   'xpack.osquery.scheduleSection.timeoutRruleInheritHelp',
   {
     defaultMessage:
-      'Timeout applies only when overriding the pack schedule. Queries inheriting a recurrence-scheduled pack use the pack schedule timeout.',
+      'Timeout does not apply to recurrence-scheduled queries. The schedule timeout is used instead.',
   }
 );

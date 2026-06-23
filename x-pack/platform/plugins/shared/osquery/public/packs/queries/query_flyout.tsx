@@ -162,12 +162,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     setValue,
   ]);
 
-  const isTimeoutInherited =
-    isRruleSchedulingEnabled && !overridePackSchedule && packSchedule?.schedule_type === 'rrule';
+  // The serializer strips `timeout` from the wire for any rrule-mode query
+  // (beats reads `rrule_schedule.timeout`), so the control must be disabled for
+  // ALL rrule queries — inherited and override alike — never just inherited.
+  // Derive from the resolved mode rather than the override flag.
+  const resolvedScheduleType = overridePackSchedule
+    ? schedule?.scheduleType
+    : packSchedule?.schedule_type;
+  const isTimeoutDisabledForRrule = isRruleSchedulingEnabled && resolvedScheduleType === 'rrule';
   const timeoutFieldProps = useMemo(
     () =>
-      isTimeoutInherited ? { isDisabled: true, title: TIMEOUT_RRULE_INHERIT_HELP } : undefined,
-    [isTimeoutInherited]
+      isTimeoutDisabledForRrule
+        ? { isDisabled: true, title: TIMEOUT_RRULE_INHERIT_HELP }
+        : undefined,
+    [isTimeoutDisabledForRrule]
   );
 
   const handleToggleOverride = useCallback(
@@ -185,7 +193,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   );
   const onSubmit = useCallback(
     async (payload: PackQueryFormData) => {
-      // Final guard (§11.1): the controlled schedule object doesn't register
+      // Final guard: the controlled schedule object doesn't register
       // with RHF, so re-validate here and abort on error.
       if (payload.override_pack_schedule && payload.schedule) {
         const errors = validateScheduleFormData(payload.schedule, { originalStartDate });
@@ -202,7 +210,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   );
 
   const handleSaveClick = useCallback(() => {
-    // Option-B gate (design D1/D2): when the override schedule is invalid,
+    // When the override schedule is invalid,
     // surface the cause as a danger toast and do NOT save. The inline field
     // errors stay visible (ScheduleSection `showErrors`) for in-place context.
     if (scheduleErrors.length > 0) {

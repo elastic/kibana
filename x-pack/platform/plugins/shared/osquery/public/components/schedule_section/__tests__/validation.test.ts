@@ -63,7 +63,7 @@ describe('validateScheduleFormData', () => {
     });
   });
 
-  describe('rule (a): custom recurrence with no weekday', () => {
+  describe('custom recurrence with no weekday', () => {
     it('flags an empty byweekday on the custom frequency', () => {
       const data = recurrenceState({
         recurrence: { frequency: 'custom', interval: 1, byweekday: [] },
