@@ -653,8 +653,9 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **DEPRECATED.**
-   */
+    * **DEPRECATED.** Use the Entity Store APIs to check privileges managing asset criticality.
+
+    */
   async assetCriticalityGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API AssetCriticalityGetPrivileges`);
     return this.kbnClient
@@ -692,7 +693,7 @@ is added to its existing source labels instead.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **DEPRECATED.**
+    * **DEPRECATED.** Use the Entity Store APIs to bulk set asset criticality.
 
 Bulk upsert up to 1000 asset criticality records.
 
@@ -836,7 +837,7 @@ and should not remove existing data, but it can consume significant cluster reso
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **DEPRECATED.**
+    * **DEPRECATED.** Use the Entity Store APIs to set asset criticality for an entity.
 
 Create or update an asset criticality record for a specific entity.
 
@@ -1159,8 +1160,11 @@ Call `GET /api/detection_engine/index` first to confirm the index that will be r
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **DEPRECATED.** Delete the asset criticality record for a specific entity.
-   */
+    * **DEPRECATED.** Use the Entity Store APIs to unset asset criticality for a specific entity.
+
+Delete the asset criticality record for a specific entity.
+
+    */
   async deleteAssetCriticalityRecord(props: DeleteAssetCriticalityRecordProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAssetCriticalityRecord`);
     return this.kbnClient
@@ -1892,8 +1896,9 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **DEPRECATED.**
-   */
+    * **DEPRECATED.** Use the Entity Store APIs to get asset criticality for a specific entity.
+
+    */
   async getAssetCriticalityStatus() {
     this.log.info(`${new Date().toISOString()} Calling API GetAssetCriticalityStatus`);
     return this.kbnClient
@@ -3803,8 +3808,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **DEPRECATED.**
-   */
+    * **DEPRECATED.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
+
+    */
   async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient

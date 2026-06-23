@@ -135,8 +135,9 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * **DEPRECATED.**
-   */
+      * **DEPRECATED.** Use the Entity Store APIs to check privileges managing asset criticality.
+
+      */
   assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/privileges', kibanaSpace))
@@ -169,7 +170,7 @@ is added to its existing source labels instead.
       .send(props.body as object);
   },
   /**
-      * **DEPRECATED.**
+      * **DEPRECATED.** Use the Entity Store APIs to bulk set asset criticality.
 
 Bulk upsert up to 1000 asset criticality records.
 
@@ -212,7 +213,7 @@ If asset criticality records already exist for the specified entities, those rec
       .send(props.body as object);
   },
   /**
-      * **DEPRECATED.**
+      * **DEPRECATED.** Use the Entity Store APIs to set asset criticality for an entity.
 
 Create or update an asset criticality record for a specific entity.
 
@@ -291,8 +292,11 @@ If a record already exists for the specified entity, that record is overwritten 
       .send(props.body as object);
   },
   /**
-   * **DEPRECATED.** Delete the asset criticality record for a specific entity.
-   */
+      * **DEPRECATED.** Use the Entity Store APIs to unset asset criticality for a specific entity.
+
+Delete the asset criticality record for a specific entity.
+
+      */
   deleteAssetCriticalityRecord(
     props: DeleteAssetCriticalityRecordProps,
     kibanaSpace: string = 'default'
@@ -522,8 +526,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .query(props.query);
   },
   /**
-   * **DEPRECATED.**
-   */
+      * **DEPRECATED.** Use the Entity Store APIs to get asset criticality for a specific entity.
+
+      */
   getAssetCriticalityStatus(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/status', kibanaSpace))
@@ -1023,8 +1028,9 @@ remain on the watchlist.
       .send(props.body as object);
   },
   /**
-   * **DEPRECATED.**
-   */
+      * **DEPRECATED.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
+
+      */
   uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))
