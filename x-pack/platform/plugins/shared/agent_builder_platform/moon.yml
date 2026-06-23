@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/core-lifecycle-server'
   - '@kbn/esql-language'
+  - '@kbn/esql-utils'
   - '@kbn/inference-common'
   - '@kbn/llm-tasks-plugin'
   - '@kbn/i18n'
