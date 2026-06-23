@@ -252,6 +252,7 @@ interface InternalUnifiedDataTableProps {
    */
   isSortEnabled?: boolean;
   /**
+   * Only for ES|QL mode for now.
    * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
    * server-side (e.g. via a SORT clause in ES|QL) so the table displays the already-sorted rows
    * verbatim instead of reordering them again. Defaults to true.
