@@ -15,9 +15,10 @@ describe('Observability Alerts Feature Privileges', () => {
     expect(feature.alerting).toEqual(OBS_ALERTING_FEATURES);
   });
 
-  test('all privilege should grant alert.all and rule.mute_alerts', () => {
+  test('all privilege should grant alert.all, rule.read, and rule.mute_alerts', () => {
     const { alerting } = feature.privileges!.all;
     expect(alerting?.alert?.all).toEqual(OBS_ALERTING_FEATURES);
+    expect(alerting?.rule?.read).toEqual(OBS_ALERTING_FEATURES);
     expect(alerting?.rule?.mute_alerts).toEqual(OBS_ALERTING_FEATURES);
   });
 

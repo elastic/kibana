@@ -37,6 +37,15 @@ apiTest.describe(
       await teardownObsAlertsPrivilegeRules(apiClient, state.adminCreds, state.createdRules);
     });
 
+    apiTest('can get a rule by ID', async ({ apiClient }) => {
+      const { ruleId } = state.createdRules[0];
+      const response = await apiClient.get(`api/alerting/rule/${ruleId}`, {
+        headers: { ...KIBANA_HEADERS, ...withAllPrivilegeCreds.apiKeyHeader },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+    });
+
     for (const spec of RULE_SPECS) {
       apiTest(`cannot create a ${spec.ruleTypeId} rule`, async ({ apiClient }) => {
         const response = await apiClient.post('api/alerting/rule', {
