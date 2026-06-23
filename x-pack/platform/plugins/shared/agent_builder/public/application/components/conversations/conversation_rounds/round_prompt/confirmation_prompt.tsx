@@ -57,7 +57,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
   const body = prompt.message ?? defaultLabels.message;
 
   const headerStyles = css`
-    padding-bottom: ${euiTheme.size.m};
+    padding-bottom: ${euiTheme.size.s};
   `;
 
   const titleStyles = css`
@@ -70,7 +70,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
   `;
 
   const footerStyles = css`
-    margin-top: ${euiTheme.size.m};
+    margin-top: ${euiTheme.size.base};
   `;
 
   return (

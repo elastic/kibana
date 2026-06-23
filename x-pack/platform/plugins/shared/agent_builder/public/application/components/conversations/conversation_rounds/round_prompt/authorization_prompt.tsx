@@ -42,6 +42,14 @@ const titleStyles = ({ euiTheme }: UseEuiTheme) => css`
   font-weight: ${euiTheme.font.weight.semiBold};
 `;
 
+const descriptionStyles = ({ euiTheme }: UseEuiTheme) => css`
+  margin-top: ${euiTheme.size.s};
+`;
+
+const buttonsRowStyles = ({ euiTheme }: UseEuiTheme) => css`
+  margin-top: ${euiTheme.size.base};
+`;
+
 export interface AuthorizationPromptProps {
   prompt: AuthorizationPromptDefinition;
   onAuthorize: () => void;
@@ -91,7 +99,7 @@ export const AuthorizationPrompt = ({
     <EuiFlexGroup
       direction="column"
       responsive={false}
-      gutterSize="m"
+      gutterSize="none"
       css={promptContainerStyles}
       data-test-subj="agentBuilderAuthorizationPrompt"
     >
@@ -106,7 +114,7 @@ export const AuthorizationPrompt = ({
         />
       </EuiText>
 
-      <EuiText component="p" size="s" color="subdued">
+      <EuiText component="p" size="s" color="subdued" css={descriptionStyles}>
         <FormattedMessage
           id="xpack.agentBuilder.authorizationPrompt.message"
           defaultMessage="The agent paused because it needs access to {connectorName} to continue."
@@ -116,7 +124,7 @@ export const AuthorizationPrompt = ({
         />
       </EuiText>
 
-      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false} css={buttonsRowStyles}>
         <EuiButton
           onClick={handleCancel}
           disabled={isInteractionDisabled}
