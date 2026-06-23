@@ -209,37 +209,46 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+      const deleteAgentIfPresent = async (agentId: string) => {
+        const response = await apiClient.delete(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+          {
+            headers: adminInternalHeaders(),
+          }
+        );
+        expect([200, 404]).toContain(response.statusCode);
+      };
+
+      const deleteKibanaResourceIfPresent = async (
+        path: string,
+        headers: Record<string, string>
+      ) => {
+        await kbnClient.request({
+          method: 'DELETE',
+          path,
+          headers,
+          ignoreErrors: [404],
+        });
+      };
+
       // Agents first (their authz still uses ES; admin can delete anything).
       for (const agentId of createdAgentIds) {
-        await apiClient
-          .delete(`${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`, {
-            headers: adminInternalHeaders(),
-          })
-          .catch(() => {});
+        await deleteAgentIfPresent(agentId);
       }
       for (const user of allPrincipals) {
-        await kbnClient
-          .request({
-            method: 'DELETE',
-            path: `/internal/security/users/${encodeURIComponent(user.username)}`,
-            headers: adminInternalHeaders(),
-          })
-          .catch(() => {});
-        await kbnClient
-          .request({
-            method: 'DELETE',
-            path: `/api/security/role/${encodeURIComponent(user.roleName)}`,
-            headers: adminPublicHeaders(),
-          })
-          .catch(() => {});
+        await deleteKibanaResourceIfPresent(
+          `/internal/security/users/${encodeURIComponent(user.username)}`,
+          adminInternalHeaders()
+        );
+        await deleteKibanaResourceIfPresent(
+          `/api/security/role/${encodeURIComponent(user.roleName)}`,
+          adminPublicHeaders()
+        );
       }
-      await kbnClient
-        .request({
-          method: 'DELETE',
-          path: `/api/spaces/space/${encodeURIComponent(accessControlSpaceId)}`,
-          headers: adminPublicHeaders(),
-        })
-        .catch(() => {});
+      await deleteKibanaResourceIfPresent(
+        `/api/spaces/space/${encodeURIComponent(accessControlSpaceId)}`,
+        adminPublicHeaders()
+      );
     });
 
     // ── helpers ─────────────────────────────────────────────────────────────
@@ -376,50 +385,56 @@ apiTest.describe(
       const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-read-${randomUUID()}`;
       await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
 
-      // Bob has no grant.
-      const denied = await apiClient.get(
-        `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
-        {
+      await apiTest.step('Bob cannot read or list the private agent before a grant', async () => {
+        const denied = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+          {
+            headers: headersFor(bob),
+            responseType: 'json',
+          }
+        );
+        expect(denied).toHaveStatusCode(404);
+
+        const listBeforeGrant = await apiClient.get(`${accessControlApiBase}/agents`, {
           headers: headersFor(bob),
           responseType: 'json',
-        }
-      );
-      expect(denied).toHaveStatusCode(404);
-
-      const listBeforeGrant = await apiClient.get(`${accessControlApiBase}/agents`, {
-        headers: headersFor(bob),
-        responseType: 'json',
+        });
+        expect(listBeforeGrant).toHaveStatusCode(200);
+        const idsBefore = listBeforeGrant.body.results.map((a: { id: string }) => a.id);
+        expect(idsBefore).not.toContain(agentId);
       });
-      expect(listBeforeGrant).toHaveStatusCode(200);
-      const idsBefore = listBeforeGrant.body.results.map((a: { id: string }) => a.id);
-      expect(idsBefore).not.toContain(agentId);
 
-      // Alice grants Bob User access.
-      const accessControlRes = await setAccessControlAs(apiClient, alice, agentId, [
-        { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
-      ]);
-      expect(accessControlRes).toHaveStatusCode(200);
+      await apiTest.step('Alice grants Bob User access', async () => {
+        const accessControlRes = await setAccessControlAs(apiClient, alice, agentId, [
+          { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
+        ]);
+        expect(accessControlRes).toHaveStatusCode(200);
+      });
 
-      const granted = await apiClient.get(
-        `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
-        {
+      await apiTest.step('Bob can read and list the private agent after the grant', async () => {
+        const granted = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+          {
+            headers: headersFor(bob),
+            responseType: 'json',
+          }
+        );
+        expect(granted).toHaveStatusCode(200);
+
+        const listAfterGrant = await apiClient.get(`${accessControlApiBase}/agents`, {
           headers: headersFor(bob),
           responseType: 'json',
-        }
-      );
-      expect(granted).toHaveStatusCode(200);
-
-      const listAfterGrant = await apiClient.get(`${accessControlApiBase}/agents`, {
-        headers: headersFor(bob),
-        responseType: 'json',
-      });
-      const idsAfter = listAfterGrant.body.results.map((a: { id: string }) => a.id);
-      expect(idsAfter).toContain(agentId);
-      const listedAgent = listAfterGrant.body.results.find((a: { id: string }) => a.id === agentId);
-      expect(listedAgent.access_control.entries).toHaveLength(1);
-      expect(listedAgent.permissions).toMatchObject({
-        update_agent: false,
-        update_access_control: false,
+        });
+        const idsAfter = listAfterGrant.body.results.map((a: { id: string }) => a.id);
+        expect(idsAfter).toContain(agentId);
+        const listedAgent = listAfterGrant.body.results.find(
+          (a: { id: string }) => a.id === agentId
+        );
+        expect(listedAgent.access_control.entries).toHaveLength(1);
+        expect(listedAgent.permissions).toMatchObject({
+          update_agent: false,
+          update_access_control: false,
+        });
       });
     });
 
@@ -429,79 +444,91 @@ apiTest.describe(
         const deniedAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-denied-${randomUUID()}`;
         const grantedAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-granted-${randomUUID()}`;
 
-        await seedLegacyAgent({
-          agentId: deniedAgentId,
-          visibility: AgentAccessControlMode.Private,
-        });
-        await seedLegacyAgent({
-          agentId: grantedAgentId,
-          visibility: AgentAccessControlMode.Private,
-          entries: [
-            { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
-            { type: 'user', name: eve.username, role: AgentAccessControlRole.Manager },
-          ],
+        await apiTest.step('seed legacy agents with and without direct grants', async () => {
+          await seedLegacyAgent({
+            agentId: deniedAgentId,
+            visibility: AgentAccessControlMode.Private,
+          });
+          await seedLegacyAgent({
+            agentId: grantedAgentId,
+            visibility: AgentAccessControlMode.Private,
+            entries: [
+              { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
+              { type: 'user', name: eve.username, role: AgentAccessControlRole.Manager },
+            ],
+          });
         });
 
-        const denied = await apiClient.get(
-          `${accessControlApiBase}/agents/${encodeURIComponent(deniedAgentId)}`,
-          {
+        await apiTest.step('Bob gets 404 on the ungranted legacy agent', async () => {
+          const denied = await apiClient.get(
+            `${accessControlApiBase}/agents/${encodeURIComponent(deniedAgentId)}`,
+            {
+              headers: headersFor(bob),
+              responseType: 'json',
+            }
+          );
+          expect(denied).toHaveStatusCode(404);
+        });
+
+        await apiTest.step('Bob reads only his own entry on the granted legacy agent', async () => {
+          const granted = await apiClient.get(
+            `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}`,
+            {
+              headers: headersFor(bob),
+              responseType: 'json',
+            }
+          );
+          expect(granted).toHaveStatusCode(200);
+          expect(granted.body.access_control).toMatchObject({
+            access_mode: AgentAccessControlMode.Private,
+          });
+          expect(granted.body.access_control.entries).toHaveLength(1);
+          expect(granted.body.access_control.entries[0]).toMatchObject({
+            type: 'user',
+            name: bob.username,
+            role: AgentAccessControlRole.User,
+          });
+          expect(granted.body.permissions).toMatchObject({
+            update_agent: false,
+            update_access_control: false,
+          });
+        });
+
+        await apiTest.step('Bob list omits the ungranted legacy agent', async () => {
+          const list = await apiClient.get(`${accessControlApiBase}/agents`, {
             headers: headersFor(bob),
             responseType: 'json',
-          }
-        );
-        expect(denied).toHaveStatusCode(404);
-
-        const granted = await apiClient.get(
-          `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}`,
-          {
-            headers: headersFor(bob),
-            responseType: 'json',
-          }
-        );
-        expect(granted).toHaveStatusCode(200);
-        expect(granted.body.access_control).toMatchObject({
-          access_mode: AgentAccessControlMode.Private,
-        });
-        expect(granted.body.access_control.entries).toHaveLength(1);
-        expect(granted.body.access_control.entries[0]).toMatchObject({
-          type: 'user',
-          name: bob.username,
-          role: AgentAccessControlRole.User,
-        });
-        expect(granted.body.permissions).toMatchObject({
-          update_agent: false,
-          update_access_control: false,
+          });
+          expect(list).toHaveStatusCode(200);
+          const listedIds = list.body.results.map((agent: { id: string }) => agent.id);
+          expect(listedIds).not.toContain(deniedAgentId);
+          expect(listedIds).toContain(grantedAgentId);
         });
 
-        const list = await apiClient.get(`${accessControlApiBase}/agents`, {
-          headers: headersFor(bob),
-          responseType: 'json',
-        });
-        expect(list).toHaveStatusCode(200);
-        const listedIds = list.body.results.map((agent: { id: string }) => agent.id);
-        expect(listedIds).not.toContain(deniedAgentId);
-        expect(listedIds).toContain(grantedAgentId);
-
-        const bobAccessControl = await apiClient.get(
-          `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}/access_control`,
-          { headers: headersFor(bob), responseType: 'json' }
-        );
-        expect(bobAccessControl).toHaveStatusCode(200);
-        expect(bobAccessControl.body.permissions.update_access_control).toBe(false);
-        expect(bobAccessControl.body.access_control.entries).toHaveLength(1);
-        expect(bobAccessControl.body.access_control.entries[0]).toMatchObject({
-          type: 'user',
-          name: bob.username,
-          role: AgentAccessControlRole.User,
+        await apiTest.step('Bob sees only his own entry via access-control API', async () => {
+          const bobAccessControl = await apiClient.get(
+            `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}/access_control`,
+            { headers: headersFor(bob), responseType: 'json' }
+          );
+          expect(bobAccessControl).toHaveStatusCode(200);
+          expect(bobAccessControl.body.permissions.update_access_control).toBe(false);
+          expect(bobAccessControl.body.access_control.entries).toHaveLength(1);
+          expect(bobAccessControl.body.access_control.entries[0]).toMatchObject({
+            type: 'user',
+            name: bob.username,
+            role: AgentAccessControlRole.User,
+          });
         });
 
-        const eveAccessControl = await apiClient.get(
-          `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}/access_control`,
-          { headers: headersFor(eve), responseType: 'json' }
-        );
-        expect(eveAccessControl).toHaveStatusCode(200);
-        expect(eveAccessControl.body.permissions.update_access_control).toBe(true);
-        expect(eveAccessControl.body.access_control.entries).toHaveLength(2);
+        await apiTest.step('Manager sees all entries via access-control API', async () => {
+          const eveAccessControl = await apiClient.get(
+            `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}/access_control`,
+            { headers: headersFor(eve), responseType: 'json' }
+          );
+          expect(eveAccessControl).toHaveStatusCode(200);
+          expect(eveAccessControl.body.permissions.update_access_control).toBe(true);
+          expect(eveAccessControl.body.access_control.entries).toHaveLength(2);
+        });
       }
     );
 
