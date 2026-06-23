@@ -16,7 +16,12 @@ project:
   channel: ''
   owner: '@elastic/kibana-presentation'
   sourceRoot: src/platform/packages/shared/controls/control-editors-shared-ui
-dependsOn: []
+dependsOn:
+  - '@kbn/es-types'
+  - '@kbn/esql-language'
+  - '@kbn/field-formats-common'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
 tags:
   - shared-common
   - package
@@ -27,6 +32,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.tsx'
     - '!target/**/*'
   jest-config:
     - jest.config.js
