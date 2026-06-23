@@ -341,7 +341,8 @@ describe('WorkflowSearchService', () => {
           },
         })
       );
-      expect(esClient.search.mock.calls[0][0].query.bool.must_not).toBeUndefined();
+      const executionStatsQuery = esClient.search.mock.calls[0]?.[0]?.query;
+      expect(executionStatsQuery?.bool?.must_not).toBeUndefined();
     });
 
     it('returns an empty execution-history array when the executions index is missing', async () => {

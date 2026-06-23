@@ -24,6 +24,8 @@ const createCapabilities = (
   canDeleteWorkflow: true,
   canExecuteWorkflow: true,
   canReadWorkflowExecution: true,
+  canReadManagedWorkflow: true,
+  canReadManagedWorkflowExecution: true,
   canCancelWorkflowExecution: true,
   ...overrides,
 });

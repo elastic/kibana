@@ -42,6 +42,8 @@ const createCapabilities = (
     canDeleteWorkflow: true,
     canExecuteWorkflow,
     canReadWorkflowExecution: true,
+    canReadManagedWorkflow: true,
+    canReadManagedWorkflowExecution: true,
     canCancelWorkflowExecution: true,
   };
 };

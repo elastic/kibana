@@ -31,6 +31,8 @@ const allWorkflowCapabilitiesTrue = {
   canDeleteWorkflow: true,
   canExecuteWorkflow: true,
   canReadWorkflowExecution: true,
+  canReadManagedWorkflow: true,
+  canReadManagedWorkflowExecution: true,
   canCancelWorkflowExecution: true,
 };
 
