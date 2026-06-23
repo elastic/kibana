@@ -201,7 +201,10 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
             checked={rule?.state !== 'muted'}
             onChange={switchRuleStates}
             data-test-subj={RULES_FLYOUT_SWITCH_BUTTON}
-            label=" "
+            label=""
+            aria-label={i18n.translate('xpack.csp.rules.rulesFlyout.ruleSwitchAriaLabel', {
+              defaultMessage: 'Enabled',
+            })}
           />
         </>
       ),
