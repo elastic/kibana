@@ -103,6 +103,8 @@ export function getTokenCommandStart(
     }
   }
 
+  // Pick the last pipe in the same query scope as the cursor. In `FORK (WHERE a | SORT b)`,
+  // the pipe inside the branch wins; if there is no branch-local pipe, the branch paren starts the command.
   const scopeKey = getScopeKey(openDelimiters, queryParenStarts);
   const previousPipe = pipes.filter((pipe) => pipe.scopeKey === scopeKey).at(-1);
   const lastQueryParen = openDelimiters.filter(({ start }) => queryParenStarts.has(start)).at(-1);
@@ -116,7 +118,10 @@ export function isVisibleToken(token: EsqlLexerToken): boolean {
   return token.channel === Token.DEFAULT_CHANNEL;
 }
 
-/** Stops lexer scope at an unfinished block comment because the lexer exposes its contents. */
+/**
+ * Stops command-boundary scanning at an unfinished block comment.
+ * The lexer can expose comment contents before the closing delimiter, including pipes that are not command delimiters.
+ */
 function startsUnclosedBlockComment(text: string, start: number, offset: number): boolean {
   return (
     text.slice(start, start + BLOCK_COMMENT_OPEN_DELIMITER.length) ===

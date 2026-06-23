@@ -28,7 +28,7 @@ import type {
 } from '../../commands/registry/types';
 import { getControlSuggestionIfSupported } from '../../commands/definitions/utils';
 import { getAutocompleteCursorContext } from '../shared/parse_for_autocomplete_query';
-import type { CommandSegment } from '../shared/resolve_command_text_before_cursor';
+import type { CommandSegment } from '../shared/resolve_command_segment';
 import { getFromCommandHelper } from '../shared/resources_helpers';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';

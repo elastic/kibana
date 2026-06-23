@@ -18,10 +18,7 @@ import {
 } from '../../commands/definitions/utils/ast';
 import { getCursorContext } from './get_cursor_context';
 import { getEsqlLexerTokens, type EsqlLexerToken } from './lexer_scope';
-import {
-  resolveCommandTextBeforeCursor,
-  type CommandSegment,
-} from './resolve_command_text_before_cursor';
+import { resolveCommandSegment, type CommandSegment } from './resolve_command_segment';
 
 interface ParsedAutocompleteQuery {
   innerText: string;
@@ -47,7 +44,7 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
     innerText,
     root: rootWithoutMarkers,
     tokens,
-    commandSegment: resolveCommandTextBeforeCursor(innerText, offset, rootWithoutMarkers, tokens),
+    commandSegment: resolveCommandSegment(innerText, offset, rootWithoutMarkers, tokens),
   };
 }
 

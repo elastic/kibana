@@ -24,7 +24,7 @@ import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 import type { ReplacementRangeStrategy } from '../../language/autocomplete/utils/prefix_range';
-import type { CommandSegment } from '../../language/shared/resolve_command_text_before_cursor';
+import type { CommandSegment } from '../../language/shared/resolve_command_segment';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =

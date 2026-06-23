@@ -158,7 +158,7 @@ describe('ENRICH Autocomplete', () => {
       await enrichExpectSuggestions(`from a | enrich policy on b with col0 = /`, [
         ...getPolicyFields('policy'),
       ]);
-      await enrichExpectSuggestions(`from a | enrich policy with "a|b" = /`, [
+      await enrichExpectSuggestions(`from a | enrich policy with \`a|b\` = /`, [
         ...getPolicyFields('policy'),
       ]);
       await enrichExpectSuggestions(`from a | enrich policy on b with col0 = fi/`, [

@@ -8,7 +8,7 @@
  */
 
 import { parseAutocompleteQuery } from './parse_for_autocomplete_query';
-import { resolveCommandTextBeforeCursor } from './resolve_command_text_before_cursor';
+import { resolveCommandSegment } from './resolve_command_segment';
 
 function resolve(queryWithCursor: string) {
   const offset = queryWithCursor.indexOf('^');
@@ -19,7 +19,7 @@ function resolve(queryWithCursor: string) {
   const fullText = queryWithCursor.replace('^', '');
   const { root, tokens } = parseAutocompleteQuery(fullText, offset);
 
-  return resolveCommandTextBeforeCursor(fullText, offset, root, tokens);
+  return resolveCommandSegment(fullText, offset, root, tokens);
 }
 
 function expectCommandCursor(queryWithCursor: string, textBeforeCursor: string) {
@@ -29,7 +29,7 @@ function expectCommandCursor(queryWithCursor: string, textBeforeCursor: string) 
   expect(cursor.end - cursor.start).toBe(textBeforeCursor.length);
 }
 
-describe('resolveCommandTextBeforeCursor', () => {
+describe('resolveCommandSegment', () => {
   it('resolves an empty command text at the beginning of the query', () => {
     expectCommandCursor('^FROM a', '');
   });
@@ -88,22 +88,22 @@ describe('resolveCommandTextBeforeCursor', () => {
     expectCommandCursor(query, 'STATS ');
   });
 
-  it('uses the AST command start for ENRICH lexer mode', () => {
+  it('keeps pipes inside ENRICH quoted identifiers command-local', () => {
     expectCommandCursor(
-      'FROM a | ENRICH policy WITH "a|b" = field^',
-      'ENRICH policy WITH "a|b" = field'
+      'FROM a | ENRICH policy WITH `a|b` = field^',
+      'ENRICH policy WITH `a|b` = field'
     );
   });
 
-  it('does not let an earlier ENRICH lexer mode capture later commands', () => {
-    expectCommandCursor('FROM a | ENRICH policy WITH "a|b" = field | STATS ^', 'STATS ');
+  it('keeps pipes inside ENRICH quoted policy names command-local', () => {
+    expectCommandCursor(
+      'FROM a | ENRICH "policy|name" WITH field^',
+      'ENRICH "policy|name" WITH field'
+    );
   });
 
-  it('uses the closest ENRICH command for ENRICH lexer mode', () => {
-    expectCommandCursor(
-      'FROM a | ENRICH first WITH "a|b" = field | ENRICH second WITH "c|d" = other^',
-      'ENRICH second WITH "c|d" = other'
-    );
+  it('does not let an earlier ENRICH quoted identifier capture later commands', () => {
+    expectCommandCursor('FROM a | ENRICH policy WITH `a|b` = field | STATS ^', 'STATS ');
   });
 
   it('ignores delimiters after the cursor', () => {

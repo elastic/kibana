@@ -123,8 +123,8 @@ describe('getAutocompleteCursorContext', () => {
     ['subquery', 'FROM employees, (FROM departments | WHERE name == "IT")', 'WHERE '],
     [
       'ENRICH',
-      'FROM employees | ENRICH policy WITH "a|b" = department',
-      'ENRICH policy WITH "a|b" = department',
+      'FROM employees | ENRICH policy WITH new_department = department',
+      'ENRICH policy WITH new_department = department',
     ],
   ])('returns command-local text before the cursor for %s', (_, query, textBeforeCursor) => {
     const start = query.indexOf(textBeforeCursor);
