@@ -29,8 +29,8 @@ steps:
     type: ai.agent
     connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
     create-conversation: true
+    timeout: 1800s
     with:
-      timeout: 1800s
       message: |
         First, call the load_skill tool with skill path skills/platform/streams/streams-memory-consolidation.
         Wait for the skill to load before calling any other tools.

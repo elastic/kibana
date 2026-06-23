@@ -41,6 +41,11 @@ triggers:
         default: 3
         required: false
         description: "Max rules per investigator invocation. Caps agent message size; remaining detections are picked up on the next cycle."
+      - name: connectorId
+        type: string
+        default: ".openai-gpt-5.2-chat_completion"
+        required: false
+        description: "AI connector ID to use for the investigator agent."
 consts:
   CONTEXT_FETCH_SIZE: 20
   DETECTIONS_INDEX: ".significant_events-detections"
@@ -440,12 +445,9 @@ steps:
       acknowledged_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source' | default: [] }}"
 
   - name: run_investigator_agent
-    # TODO: agent-id and connector-id are config fields and are NOT rendered through Liquid by the
-    # workflow engine (CustomStepImpl passes context.config raw). Use static values until the engine
-    # supports template rendering for config fields.
     type: ai.agent
     agent-id: "platform.streams.significant-events.discovery.investigator"
-    connector-id: ".openai-gpt-5.2-chat_completion"
+    connector-id: "${{ inputs.connectorId }}"
     create-conversation: true
     with:
       message: |
