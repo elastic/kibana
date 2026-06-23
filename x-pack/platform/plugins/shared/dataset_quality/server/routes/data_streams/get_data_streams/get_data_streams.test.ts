@@ -78,7 +78,7 @@ describe('getDataStreams', () => {
     expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
   });
 
-  it('requests both monitor and view_index_metadata per stream, mapping canMonitor from monitor', async () => {
+  it('requests only monitor (not view_index_metadata) per stream and maps canMonitor from it', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const result = await getDataStreams({
       esClient: esClientMock,
@@ -90,7 +90,13 @@ describe('getDataStreams', () => {
     expect(datasetQualityPrivileges.getHasIndexPrivileges).toHaveBeenCalledWith(
       expect.anything(),
       expect.any(Array),
-      expect.arrayContaining(['monitor', 'view_index_metadata']),
+      expect.arrayContaining(['monitor']),
+      true
+    );
+    expect(datasetQualityPrivileges.getHasIndexPrivileges).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(Array),
+      expect.not.arrayContaining(['view_index_metadata']),
       true
     );
 
@@ -99,14 +105,9 @@ describe('getDataStreams', () => {
     });
   });
 
-  it('sets canMonitor from monitor privilege (not view_index_metadata)', async () => {
+  it('sets canMonitor false when monitor privilege is absent', async () => {
     mockGetMockDataStreamPrivileges.mockResolvedValueOnce(
-      Object.fromEntries(
-        MATCHING_DATA_STREAMS.map(({ name }) => [
-          name,
-          { monitor: true, view_index_metadata: false },
-        ])
-      )
+      Object.fromEntries(MATCHING_DATA_STREAMS.map(({ name }) => [name, { monitor: false }]))
     );
 
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
@@ -118,7 +119,7 @@ describe('getDataStreams', () => {
     });
 
     result.dataStreams.forEach((stream) => {
-      expect(stream.userPrivileges.canMonitor).toBe(true);
+      expect(stream.userPrivileges.canMonitor).toBe(false);
     });
   });
 
@@ -259,6 +260,6 @@ const MATCHING_DATA_STREAMS = [
 ];
 
 const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce((acc, stream) => {
-  acc[stream.name] = { monitor: true, view_index_metadata: true };
+  acc[stream.name] = { monitor: true };
   return acc;
-}, {} as Record<string, { monitor: boolean; view_index_metadata: boolean }>);
+}, {} as Record<string, { monitor: boolean }>);

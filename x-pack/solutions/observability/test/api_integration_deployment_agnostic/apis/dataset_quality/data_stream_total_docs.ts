@@ -358,6 +358,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let roleAuthc: RoleCredentials;
 
       before(async () => {
+        // Index different doc counts so the test can assert counts, not just names.
+        // accessible: 1 doc, excluded: 3 docs — verifies excluded docs are not folded in.
         await synthtraceLogsEsClient.index([
           timerange(from, to)
             .interval('1m')
@@ -370,6 +372,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 .dataset(accessibleDataset)
                 .namespace(namespace)
                 .defaults({ 'log.file.path': '/my-service.log' }),
+            ]),
+          timerange(from, to)
+            .interval('20s')
+            .rate(1)
+            .generator((timestamp) => [
               log
                 .create()
                 .message('Excluded log message')
@@ -395,7 +402,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await samlAuth.deleteCustomRole();
       });
 
-      it('returns 200 with counts for accessible streams and excludes negated ones', async () => {
+      it('returns 200 with counts only for accessible streams; excluded stream docs are not counted', async () => {
         const res = await callApiAs({
           roleScopedSupertestWithCookieCredentials: supertestNegatedWithCookieCredentials,
           apiParams: {
@@ -407,9 +414,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(res.statusCode).to.be(200);
 
-        const datasets = res.body.totalDocs.map((stat: DataStreamDocsStat) => stat.dataset);
-        expect(datasets).to.contain(accessibleDataStreamName);
-        expect(datasets).to.not.contain(excludedDataStreamName);
+        const statsByDataset = res.body.totalDocs.reduce(
+          (acc: Record<string, number>, stat: DataStreamDocsStat) => {
+            acc[stat.dataset] = stat.count;
+            return acc;
+          },
+          {}
+        );
+
+        // The accessible stream must appear with its own count (1 doc).
+        expect(statsByDataset[accessibleDataStreamName]).to.be.greaterThan(0);
+        // The excluded stream must not appear at all — its docs must not be
+        // folded into any result entry, proving the wildcard aggregation is auth-scoped.
+        expect(statsByDataset[excludedDataStreamName]).to.be(undefined);
       });
     });
   });

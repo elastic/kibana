@@ -39,8 +39,8 @@ const datasetQualityMonitorUserRole: KibanaRoleDescriptors = {
 };
 
 // Has `read` and `view_index_metadata` on logs but no `monitor`. Used to verify
-// that `canMonitor` is derived from `view_index_metadata` alone (consistent with
-// `getDatasetPrivileges`) and that the data streams list is still shown correctly.
+// that data streams are still listed (no empty-state) even without `monitor`,
+// while per-stream `canMonitor` (which requires `monitor`) is correctly false.
 const readAndViewMetadataUserRole: KibanaRoleDescriptors = {
   elasticsearch: {
     indices: [

@@ -716,21 +716,41 @@ describe('DatasetQualityControllerStateMachine', () => {
         actor.stop();
       });
 
-      it('should transition docsStats to unauthorized on 403 error from any type', async () => {
+      it('should treat per-type 403 as empty result and still reach loaded', async () => {
+        // A negated-role user (e.g. access to everything except logs-apm*) passes
+        // the wildcard check for no type, so all 4 types are fetched. metrics/
+        // traces/synthetics 403, but logs succeeds.
+        // 403s are absorbed as empty results so the machine reaches loaded state
+        // and logs doc counts are preserved for correct quality scoring.
+        const logsDocs: DataStreamDocsStat[] = [{ dataset: 'logs-test-default', count: 100 }];
+
         const { machine } = buildStateMachine({
+          initialContext: {
+            ...DEFAULT_CONTEXT,
+            filters: { ...DEFAULT_CONTEXT.filters, types: [] },
+          },
           dataStreamStatsClient: createMockDataStreamStatsClient({
             getDataStreamsTotalDocs: jest.fn().mockImplementation(({ type }) => {
-              if (type === 'logs') return Promise.reject(createForbiddenError());
-              return Promise.resolve([]);
+              if (type === 'logs') return Promise.resolve(logsDocs);
+              // simulates a negated-role user: metrics/traces/synthetics are inaccessible
+              return Promise.reject(createForbiddenError());
             }),
           }),
         });
         const actor = createActor(machine);
         actor.start();
 
-        await waitForState(actor, 'main.stats.docsStats.unauthorized');
+        await waitForState(actor, 'main.stats.docsStats.loaded');
 
-        expect(stateMatches(actor.getSnapshot(), 'main.stats.docsStats.unauthorized')).toBe(true);
+        expect(stateMatches(actor.getSnapshot(), 'main.stats.docsStats.loaded')).toBe(true);
+
+        const { totalDocsStats } = actor.getSnapshot().context;
+        // logs doc counts are preserved → quality percentage is computed correctly
+        expect(totalDocsStats.logs).toEqual(logsDocs);
+        // inaccessible types silently resolve as empty — not an error
+        expect(totalDocsStats.metrics).toEqual([]);
+        expect(totalDocsStats.traces).toEqual([]);
+        expect(totalDocsStats.synthetics).toEqual([]);
 
         actor.stop();
       });
