@@ -250,8 +250,8 @@ describe('getCustomAgents', () => {
     expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
 
-    expect((httpsAgent as any).targetSSLOptions.ca).toBe('ca data here');
-    expect((httpsAgent as any).targetSSLOptions.rejectUnauthorized).toBe(false);
+    expect(httpsAgent?.options.ca).toBe('ca data here');
+    expect(httpsAgent?.options.rejectUnauthorized).toBe(false);
   });
 
   test('sets auth on HttpsProxyAgent when proxy URL contains credentials', () => {
@@ -270,8 +270,8 @@ describe('getCustomAgents', () => {
       url: targetUrl,
     });
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
-    expect((httpsAgent as any).proxy.username).toBe('proxyuser');
-    expect((httpsAgent as any).proxy.password).toBe('proxypass');
+    expect((httpsAgent as HttpsProxyAgent<string>).proxy.username).toBe('proxyuser');
+    expect((httpsAgent as HttpsProxyAgent<string>).proxy.password).toBe('proxypass');
   });
 
   test('does not set auth on HttpsProxyAgent when proxy URL has no credentials', () => {
@@ -290,8 +290,8 @@ describe('getCustomAgents', () => {
       url: targetUrl,
     });
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
-    expect((httpsAgent as any).proxy.username).toBe('');
-    expect((httpsAgent as any).proxy.password).toBe('');
+    expect((httpsAgent as HttpsProxyAgent<string>).proxy.username).toBe('');
+    expect((httpsAgent as HttpsProxyAgent<string>).proxy.password).toBe('');
   });
 
   test('handles overriding global verificationMode "none"', () => {
@@ -373,7 +373,7 @@ describe('getCustomAgents', () => {
 
     expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
-    expect((httpsAgent as any).targetSSLOptions.rejectUnauthorized).toBeTruthy();
+    expect(httpsAgent?.options.rejectUnauthorized).toBeTruthy();
   });
 
   test('handles overriding global verificationMode "full" with a proxy', () => {

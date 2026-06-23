@@ -173,5 +173,13 @@ export function getCustomAgents(opts: GetCustomAgentsOpts): GetCustomAgentsRespo
     },
     targetSSLOptions
   );
+
+  if (targetSSLOptions) {
+    httpsAgent.options = {
+      ...httpsAgent.options,
+      ...targetSSLOptions,
+    };
+  }
+
   return { httpAgent, httpsAgent };
 }
