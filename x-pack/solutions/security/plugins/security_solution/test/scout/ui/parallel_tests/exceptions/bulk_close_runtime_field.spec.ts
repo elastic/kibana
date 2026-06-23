@@ -119,12 +119,13 @@ spaceTest.describe(
         await spaceTest.step(
           'build the exception entry referencing the runtime field',
           async () => {
-            // Operator defaults to "is" — see AddExceptionFlyoutPage.setEntry.
-            await pageObjects.addExceptionFlyoutPage.setEntry({
+            await pageObjects.addExceptionFlyoutPage.fillConditionEntry({
+              entryIndex: 0,
               field: runtimeFieldName,
+              operator: 'is',
               value: MATCHING_IP,
             });
-            await pageObjects.addExceptionFlyoutPage.setItemName(
+            await pageObjects.addExceptionFlyoutPage.setExceptionName(
               `Runtime field exception ${ruleName}`
             );
           }

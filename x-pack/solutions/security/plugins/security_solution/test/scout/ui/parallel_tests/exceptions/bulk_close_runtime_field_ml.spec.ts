@@ -6,6 +6,7 @@
  */
 
 import { spaceTest, tags } from '@kbn/scout-security';
+import { AddExceptionButtonType } from '@kbn/scout-security/src/playwright/fixtures/test/page_objects/add_exception_flyout';
 import { expect } from '@kbn/scout-security/ui';
 
 /**
@@ -231,23 +232,11 @@ spaceTest.describe(
 
     spaceTest(
       'closes ML rule alerts when the exception references a runtime field on the anomaly index',
-      async ({ pageObjects, page, esClient }) => {
+      async ({ pageObjects, page, esClient, apiServices }) => {
         await spaceTest.step('wait for the ML rule to produce at least one alert', async () => {
           await pageObjects.alertsTablePage.navigate();
           await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
-          await expect
-            .poll(
-              async () => {
-                await esClient.indices.refresh({ index: alertsIndex });
-                const res = await esClient.count({
-                  index: alertsIndex,
-                  query: { term: { 'kibana.alert.rule.name': ruleName } },
-                });
-                return res.count;
-              },
-              { timeout: 180_000, intervals: [3_000] }
-            )
-            .toBeGreaterThan(0);
+          await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 180_000);
           await page.reload();
           await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
         });
@@ -258,45 +247,23 @@ spaceTest.describe(
         });
 
         await spaceTest.step(
-          'add a second exception condition referencing the source-index runtime field',
+          'build the exception entry referencing the runtime field',
           async () => {
             // ML alerts pre-fill the first exception entry with the alert's
             // identifying field (here `host.name: host-burst`). Rather than
             // editing that pre-filled entry, add a second AND-joined entry
             // for the runtime field. Both conditions match the alert so
             // the exception is well-formed.
-            await page.testSubj.locator('exceptionsAndButton').click();
+            await pageObjects.addExceptionFlyoutPage.addException(AddExceptionButtonType.AND);
 
-            // The newly-added field combobox is the only one whose search
-            // input has an empty `value` attribute (the pre-filled one
-            // reads "host.name"). Targeting by `value=""` avoids the
-            // `.first()` / `.nth()` lint rule.
-            const newFieldInput = page.testSubj
-              .locator('fieldAutocompleteComboBox')
-              .filter({
-                has: page.locator('input[data-test-subj="comboBoxSearchInput"][value=""]'),
-              })
-              .locator('input[data-test-subj="comboBoxSearchInput"]');
-            await newFieldInput.click();
-            await newFieldInput.pressSequentially(runtimeFieldName, { delay: 30 });
-            // Runtime field name embeds the space id, so exact-match
-            // resolves to a single option.
-            await page.getByRole('option', { name: runtimeFieldName, exact: true }).click();
+            await pageObjects.addExceptionFlyoutPage.fillConditionEntry({
+              entryIndex: 1,
+              field: runtimeFieldName,
+              operator: 'is',
+              value: MATCHING_IP,
+            });
 
-            // After selecting the field, the second row gets its own
-            // value combobox; that one is empty while the first row's
-            // already holds the `host-burst` pill.
-            const newValueInput = page.testSubj
-              .locator('valuesAutocompleteMatch')
-              .filter({
-                has: page.locator('input[data-test-subj="comboBoxSearchInput"][value=""]'),
-              })
-              .locator('input[data-test-subj="comboBoxSearchInput"]');
-            await newValueInput.click();
-            await newValueInput.pressSequentially(MATCHING_IP, { delay: 30 });
-            await page.keyboard.press('Enter');
-
-            await pageObjects.addExceptionFlyoutPage.setItemName(
+            await pageObjects.addExceptionFlyoutPage.setExceptionName(
               `ML runtime field exception ${ruleName}`
             );
           }
