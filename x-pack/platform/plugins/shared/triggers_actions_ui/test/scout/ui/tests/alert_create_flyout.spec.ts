@@ -107,9 +107,10 @@ const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => 
 
 const selectComboBoxOption = async (page: ScoutPage, testSubj: string, value: string) => {
   await page.testSubj.click(`${testSubj} > comboBoxInput`);
-  await page.testSubj.locator(`${testSubj} > comboBoxSearchInput`).pressSequentially(value);
-  // CI field-capability API calls can be very slow (> 30 s on loaded agents).
-  await page.locator(`.euiComboBoxOption[title="${value}"]`).click({ timeout: 60_000 });
+  // fill() fires a single input event; pressSequentially() fires one per character,
+  // causing cascading async field-fetch requests that can cancel each other on CI.
+  await page.testSubj.locator(`${testSubj} > comboBoxSearchInput`).fill(value);
+  await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
 };
 
 const selectComboBoxOptionIn = async (
@@ -121,8 +122,8 @@ const selectComboBoxOptionIn = async (
   const container = page.testSubj.locator(containerTestSubj);
   const combo = container.locator(`[data-test-subj="${testSubj}"]`);
   await combo.locator('[data-test-subj="comboBoxInput"]').click();
-  await combo.locator('[data-test-subj="comboBoxSearchInput"]').pressSequentially(value);
-  await page.locator(`.euiComboBoxOption[title="${value}"]`).click({ timeout: 60_000 });
+  await combo.locator('[data-test-subj="comboBoxSearchInput"]').fill(value);
+  await page.locator(`.euiComboBoxOption[title="${value}"]`).click();
 };
 
 const addStructuredFilterCondition = async (
