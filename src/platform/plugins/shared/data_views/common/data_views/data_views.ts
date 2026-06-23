@@ -332,6 +332,7 @@ export interface DataViewsServicePublicMethods {
   getDataViewLazy: (id: string) => Promise<DataViewLazy>;
   getDataViewLazyFromCache: (id: string) => Promise<DataViewLazy | undefined>;
 
+  createFromSpecLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
   createDataViewLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
 
   createAndSaveDataViewLazy: (spec: DataViewSpec, override?: boolean) => Promise<DataViewLazy>;
