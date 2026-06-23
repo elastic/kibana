@@ -17,16 +17,23 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { DataControlState } from '@kbn/controls-schemas';
+import { ControlValuesSource } from '@kbn/controls-constants';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
   getMockedSearchControlFactory,
-} from './mocks/factory_mocks';
+} from '../mocks/factory_mocks';
 
-import { dataViewsService, uiActionsService } from '../../services/kibana_services';
+import { dataViewsService, uiActionsService } from '../../../services/kibana_services';
 import { DataControlEditor } from './data_control_editor';
 import type { Writable } from '@kbn/utility-types';
-import type { CreateControlTypeAction } from '../../actions/control_panel_actions';
+import type { CreateControlTypeAction } from '../../../actions/control_panel_actions';
+
+// Stub out the ES|QL editor so we don't mount Monaco in tests; we only care about the
+// surrounding editor's reaction to the values_source toggle.
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: () => <div data-test-subj="mock-esql-editor" />,
+}));
 
 const mockDataView = createStubDataView({
   spec: {
@@ -49,6 +56,7 @@ const mockDataView = createStubDataView({
 
 const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+  esqlVariables$: new BehaviorSubject([]),
   getEditorConfig: jest.fn(),
 };
 
@@ -105,10 +113,13 @@ describe('Data control editor', () => {
           onCancel={() => {}}
           onSave={() => {}}
           parentApi={dashboardApi}
-          initialState={{
-            data_view_id: mockDataView.id,
-            ...initialState,
-          }}
+          initialState={
+            {
+              values_source: ControlValuesSource.FIELD,
+              data_view_id: mockDataView.id,
+              ...initialState,
+            } as Partial<DataControlState>
+          }
           controlId={controlId}
           controlType={controlType}
           initialDefaultPanelTitle={initialDefaultPanelTitle}
@@ -206,6 +217,22 @@ describe('Data control editor', () => {
       await selectField(controlEditor, 'machine.os.raw');
       expect(controlEditor.queryByTestId('optionsListCustomSettings')).toBeInTheDocument();
     });
+
+    test('toggling on the ES|QL values source disables save until the query is validated', async () => {
+      const controlEditor = await mountComponent({});
+      await selectField(controlEditor, 'machine.os.raw');
+
+      const saveButton = controlEditor.getByTestId('control-editor-save');
+      expect(saveButton).toBeEnabled();
+      expect(saveButton).not.toHaveAttribute('aria-disabled', 'true');
+
+      await act(async () => {
+        fireEvent.click(controlEditor.getByTestId('control-editor-input-esql'));
+      });
+
+      // Toggling ES|QL on requires a successful query run before the control can be saved.
+      expect(saveButton).toHaveAttribute('aria-disabled', 'true');
+    });
   });
 
   describe('editing existing control', () => {
@@ -273,12 +300,15 @@ describe('Data control editor', () => {
       expect(dataViewPicker).toBeInTheDocument();
       const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
       expect(customSettings).toBeInTheDocument();
+      const valuesSourceSelect = controlEditor.queryByTestId('control-editor-values-source-select');
+      expect(valuesSourceSelect).toBeInTheDocument();
     });
 
     test('can hide elements with the editor config', async () => {
       dashboardApi.getEditorConfig.mockImplementationOnce(() => ({
         hideDataViewSelector: true,
         hideAdditionalSettings: true,
+        hideValuesSourceSelector: true,
       }));
 
       const controlEditor = await mountComponent({
@@ -294,6 +324,8 @@ describe('Data control editor', () => {
       expect(dataViewPicker).not.toBeInTheDocument();
       const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
       expect(customSettings).not.toBeInTheDocument();
+      const valuesSourceSelect = controlEditor.queryByTestId('control-editor-values-source-select');
+      expect(valuesSourceSelect).not.toBeInTheDocument();
     });
   });
 });
