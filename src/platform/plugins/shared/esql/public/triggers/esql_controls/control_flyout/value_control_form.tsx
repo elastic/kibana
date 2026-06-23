@@ -205,7 +205,6 @@ export function ValueControlForm({
 
         setIsPreviewQueryRunning(false);
         const columns = results.response.columns;
-        const allColumns = results.response.all_columns;
 
         if (columns.length === 1) {
           const [column] = columns;
@@ -231,11 +230,6 @@ export function ValueControlForm({
           setSelectedValues(options);
           setAvailableValuesOptions(options);
           setIsValid(true);
-        } else if (columns.length === 0 && allColumns?.length === 1) {
-          updatePreviewOptionsAndColumns([], [allColumns[0]]);
-          setPreviewError(undefined);
-          setEsqlQueryErrors([]);
-          setIsValid(false);
         } else if (columns.length > 1) {
           updatePreviewOptionsAndColumns([], columns);
           setPreviewError(undefined);
