@@ -13,10 +13,8 @@ import type { AlertEpisode } from '../../queries/episodes_query';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
-import {
-  AlertEpisodeSeverityBadge,
-  isSupportedEpisodeSeverity,
-} from '../severity/episode_severity_badge';
+import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
+import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
 import { getNonEmptyGroupingFields, parseEpisodeDataJson } from '../../utils/episode_grouping_data';
 
 export interface RelatedAlertEpisodeProps {

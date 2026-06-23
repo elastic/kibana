@@ -8,45 +8,33 @@
 import React from 'react';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
-import { upperFirst } from 'lodash';
+import { EPISODE_SEVERITY_BADGE_COLORS } from './severity_utils';
+import {
+  getEpisodeSeverityLabel,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+} from './severity_utils';
 
-const SUPPORTED_SEVERITIES = new Set(['info', 'low', 'medium', 'high', 'critical']);
-
-const SEVERITY_COLORS: Record<string, EuiBadgeProps['color']> = {
-  critical: 'danger',
-  high: 'warning',
-  medium: 'success',
-  low: 'primary',
-  info: 'default',
-};
+const SEVERITY_COLORS: Record<string, EuiBadgeProps['color']> = EPISODE_SEVERITY_BADGE_COLORS;
 
 export interface AlertEpisodeSeverityBadgeProps {
   severity: string | undefined | null;
 }
-
-export const isSupportedEpisodeSeverity = (
-  severity: string | undefined | null
-): severity is string => {
-  if (severity == null || severity === '') {
-    return false;
-  }
-
-  return SUPPORTED_SEVERITIES.has(severity.toLowerCase());
-};
 
 export const AlertEpisodeSeverityBadge = ({ severity }: AlertEpisodeSeverityBadgeProps) => {
   if (!isSupportedEpisodeSeverity(severity)) {
     return null;
   }
 
-  const normalized = severity.toLowerCase();
+  const normalized = normalizeEpisodeSeverity(severity);
 
   return (
     <EuiBadge
       color={SEVERITY_COLORS[normalized]}
+      fill
       data-test-subj={`alertingV2EpisodeSeverityBadge-${normalized}`}
     >
-      {upperFirst(normalized)}
+      {getEpisodeSeverityLabel(normalized)}
     </EuiBadge>
   );
 };

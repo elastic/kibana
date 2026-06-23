@@ -171,38 +171,45 @@ export const SEVERITY_HEATMAP_TITLE = i18n.translate(
   }
 );
 
-export const SEVERITY_HEATMAP_INFO_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.severityHeatmap.infoLabel',
+export const SEVERITY_HEATMAP_TOOLTIP_FIELD_COLUMN = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.tooltipFieldColumn',
   {
-    defaultMessage: 'Info',
+    defaultMessage: 'Field',
   }
 );
 
-export const SEVERITY_HEATMAP_LOW_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.severityHeatmap.lowLabel',
+export const SEVERITY_HEATMAP_TOOLTIP_VALUE_COLUMN = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.tooltipValueColumn',
   {
-    defaultMessage: 'Low',
+    defaultMessage: 'Value',
   }
 );
 
-export const SEVERITY_HEATMAP_MEDIUM_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.severityHeatmap.mediumLabel',
+export const SEVERITY_HEATMAP_EVENT_DATA_TABLE_CAPTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.eventDataTableCaption',
   {
-    defaultMessage: 'Medium',
+    defaultMessage: 'Alert evaluation data fields and values',
   }
 );
 
-export const SEVERITY_HEATMAP_HIGH_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.severityHeatmap.highLabel',
+export const SEVERITY_HEATMAP_CLICK_TO_SEE_DATA = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.clickToSeeData',
   {
-    defaultMessage: 'High',
+    defaultMessage: 'Click to see data',
   }
 );
 
-export const SEVERITY_HEATMAP_CRITICAL_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.severityHeatmap.criticalLabel',
+export const SEVERITY_HEATMAP_DETAIL_PANEL_CLOSE_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.detailPanelCloseAriaLabel',
   {
-    defaultMessage: 'Critical',
+    defaultMessage: 'Close severity event data panel',
+  }
+);
+
+export const SEVERITY_HEATMAP_DETAIL_PANEL_EMPTY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.detailPanelEmpty',
+  {
+    defaultMessage: 'No evaluation data is available for this event.',
   }
 );
 

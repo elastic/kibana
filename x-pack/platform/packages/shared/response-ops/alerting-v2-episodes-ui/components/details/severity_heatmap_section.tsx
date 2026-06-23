@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
-import { isSupportedEpisodeSeverity } from '../severity/episode_severity_badge';
+import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 

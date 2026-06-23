@@ -11,10 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elasti
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
 import { AlertEpisodeTags } from '../actions/tags';
-import {
-  AlertEpisodeSeverityBadge,
-  isSupportedEpisodeSeverity,
-} from '../severity/episode_severity_badge';
+import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
+import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import * as i18n from './translations';
 

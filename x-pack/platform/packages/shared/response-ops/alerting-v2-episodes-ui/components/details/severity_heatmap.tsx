@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import type { HeatmapStyle, RecursivePartial } from '@elastic/charts';
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
+  ElementClickListener,
+  HeatmapElementEvent,
+  HeatmapStyle,
+  RecursivePartial,
+} from '@elastic/charts';
 import { Chart, Heatmap, Predicate, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -22,7 +27,21 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { EpisodeEventRow } from '../../queries/episode_events_query';
-import { isSupportedEpisodeSeverity } from '../severity/episode_severity_badge';
+import { resolveEpisodeEventData } from '../../utils/resolve_episode_event_data';
+import {
+  EPISODE_SEVERITY_CHART_VALUE,
+  getEpisodeSeverityHeatmapColor,
+  getEpisodeSeverityLabel,
+  getHeatmapDatumFromElementClick,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+  shouldSuppressSeverityHeatmapTooltip,
+  toEpisodeSeverityChartColorBands,
+  type EpisodeSeverity,
+  type HeatmapTableDatum,
+} from '../severity/severity_utils';
+import { SeverityHeatmapDetailPanel } from './severity_heatmap_detail_panel';
+import { SeverityHeatmapHoverSummary } from './severity_heatmap_hover_summary';
 import * as i18n from './translations';
 
 interface AlertEpisodeSeverityHeatmapServices {
@@ -31,76 +50,6 @@ interface AlertEpisodeSeverityHeatmapServices {
 
 /** Short strip: one heatmap row. Timestamps are rendered outside the chart. */
 const CHART_HEIGHT = 20;
-
-type EpisodeSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
-
-const SEVERITY_VALUE: Record<EpisodeSeverity, number> = {
-  info: 0,
-  low: 1,
-  medium: 2,
-  high: 3,
-  critical: 4,
-};
-
-interface EpisodeSeverityColorBand {
-  start: EpisodeSeverity;
-  end: EpisodeSeverity;
-}
-
-const EPISODE_SEVERITY_COLOR_BANDS: readonly EpisodeSeverityColorBand[] = [
-  { start: 'info', end: 'info' },
-  { start: 'low', end: 'low' },
-  { start: 'medium', end: 'medium' },
-  { start: 'high', end: 'high' },
-  { start: 'critical', end: 'critical' },
-];
-
-function toChartsNumericColorBands(
-  bands: readonly EpisodeSeverityColorBand[],
-  colorForSeverity: (severity: EpisodeSeverity) => string
-): Array<{ start: number; end: number; color: string; label: string }> {
-  return bands.map((band, index) => {
-    const severity = band.start;
-    const n = SEVERITY_VALUE[severity];
-    const isLast = index === bands.length - 1;
-    return {
-      start: n,
-      end: isLast ? Infinity : n + 1,
-      color: colorForSeverity(severity),
-      label: severityLabel(severity),
-    };
-  });
-}
-
-function severityFromHeatmapValue(value: number): EpisodeSeverity {
-  const rounded = Math.round(value);
-  if (rounded === 0) return 'info';
-  if (rounded === 1) return 'low';
-  if (rounded === 2) return 'medium';
-  if (rounded === 3) return 'high';
-  return 'critical';
-}
-
-function severityLabel(severity: EpisodeSeverity): string {
-  switch (severity) {
-    case 'info':
-      return i18n.SEVERITY_HEATMAP_INFO_LABEL;
-    case 'low':
-      return i18n.SEVERITY_HEATMAP_LOW_LABEL;
-    case 'medium':
-      return i18n.SEVERITY_HEATMAP_MEDIUM_LABEL;
-    case 'high':
-      return i18n.SEVERITY_HEATMAP_HIGH_LABEL;
-    case 'critical':
-      return i18n.SEVERITY_HEATMAP_CRITICAL_LABEL;
-    default:
-      return severity;
-  }
-}
-
-function normalizeSeverity(severity: string): EpisodeSeverity {
-  return severity.toLowerCase() as EpisodeSeverity;
-}
 
 function formatTimestamp(iso: string): string {
   const ms = Date.parse(iso);
@@ -121,19 +70,13 @@ function compactAxisTime(iso: string): string {
 
 const SEVERITY_Y = 'Severity';
 
-interface HeatmapDatum {
+export interface HeatmapDatum {
   x: number;
   y: string;
   value: number;
   ts: string;
   severity: EpisodeSeverity;
-}
-
-interface HeatmapTableDatum {
-  x: string | number;
-  y: string | number;
-  value: number;
-  originalIndex: number;
+  eventData: Record<string, unknown> | null;
 }
 
 export interface AlertEpisodeSeverityHeatmapProps {
@@ -144,6 +87,7 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<AlertEpisodeSeverityHeatmapServices>();
   const baseTheme = services.charts.theme.useChartsBaseTheme();
+  const [selectedDatum, setSelectedDatum] = useState<HeatmapDatum | null>(null);
 
   const data: HeatmapDatum[] = useMemo(() => {
     const rows = eventRows
@@ -152,14 +96,15 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
       )
       .map((row, rowIndex) => {
         const { '@timestamp': ts, severity } = row;
-        const normalized = normalizeSeverity(severity);
+        const normalized = normalizeEpisodeSeverity(severity);
         const tsMs = ts ? Date.parse(ts) : Number.NaN;
         return {
           ts,
           tsMs: Number.isFinite(tsMs) ? tsMs : Number.POSITIVE_INFINITY,
           y: SEVERITY_Y,
-          value: SEVERITY_VALUE[normalized],
+          value: EPISODE_SEVERITY_CHART_VALUE[normalized],
           severity: normalized,
+          eventData: resolveEpisodeEventData(row),
           rowIndex,
         };
       });
@@ -175,6 +120,7 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
       value: row.value,
       ts: row.ts,
       severity: row.severity,
+      eventData: row.eventData,
     }));
   }, [eventRows]);
 
@@ -198,23 +144,22 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
 
   const colorBands = useMemo(
     () =>
-      toChartsNumericColorBands(EPISODE_SEVERITY_COLOR_BANDS, (severity) => {
-        switch (severity) {
-          case 'critical':
-            return euiTheme.colors.danger;
-          case 'high':
-            return euiTheme.colors.warning;
-          case 'medium':
-            return euiTheme.colors.success;
-          case 'low':
-            return euiTheme.colors.primary;
-          case 'info':
-            return euiTheme.colors.lightShade;
-          default:
-            return euiTheme.colors.lightShade;
-        }
-      }),
+      toEpisodeSeverityChartColorBands((severity) =>
+        getEpisodeSeverityHeatmapColor(euiTheme, severity)
+      ),
     [euiTheme]
+  );
+
+  const handleElementClick = useCallback<ElementClickListener>(
+    (elements) => {
+      const datum = getHeatmapDatumFromElementClick(elements as HeatmapElementEvent[], data);
+      if (!datum) {
+        return;
+      }
+
+      setSelectedDatum((current) => (current?.x === datum.x ? null : datum));
+    },
+    [data]
   );
 
   return (
@@ -226,30 +171,25 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
       <Chart size={{ height: CHART_HEIGHT }}>
         <Tooltip
           body={({ items: values }) => {
+            if (shouldSuppressSeverityHeatmapTooltip(selectedDatum)) {
+              return null;
+            }
+
             const tableDatum = values?.[0]?.datum as HeatmapTableDatum | undefined;
             if (tableDatum == null) {
               return null;
             }
-            const severity = severityFromHeatmapValue(tableDatum.value);
+
             const original = data[tableDatum.originalIndex];
-            const timeLabel =
-              original?.ts && original.ts.length > 0 ? formatTimestamp(original.ts) : '';
+            if (!original) {
+              return null;
+            }
+
             return (
-              <div
-                css={css`
-                  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-                `}
-              >
-                <EuiText size="xs">
-                  <strong>{severityLabel(severity)}</strong>
-                  {timeLabel.length > 0 && (
-                    <>
-                      <br />
-                      {timeLabel}
-                    </>
-                  )}
-                </EuiText>
-              </div>
+              <SeverityHeatmapHoverSummary
+                severityLabel={getEpisodeSeverityLabel(original.severity)}
+                timestamp={original.ts ? formatTimestamp(original.ts) : undefined}
+              />
             );
           }}
         />
@@ -258,6 +198,7 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
           theme={{ heatmap: heatmapTheme }}
           baseTheme={baseTheme}
           locale={kbnI18n.getLocale()}
+          onElementClick={handleElementClick}
         />
         <Heatmap
           id="episode-severity-heatmap"
@@ -294,6 +235,18 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+      )}
+      {selectedDatum && (
+        <>
+          <EuiSpacer size="s" />
+          <SeverityHeatmapDetailPanel
+            severityLabel={getEpisodeSeverityLabel(selectedDatum.severity)}
+            timestamp={selectedDatum.ts ? formatTimestamp(selectedDatum.ts) : ''}
+            eventData={selectedDatum.eventData}
+            euiTheme={euiTheme}
+            onClose={() => setSelectedDatum(null)}
+          />
+        </>
       )}
     </EuiPanel>
   );
