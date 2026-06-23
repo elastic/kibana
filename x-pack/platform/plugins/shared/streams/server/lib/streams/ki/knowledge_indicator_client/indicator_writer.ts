@@ -258,7 +258,9 @@ export class IndicatorWriter {
     for (const latest of excludableLatest) {
       const feature = fromStoredFeature(latest);
       const expiresAt = latest.expires_at ? computeExpiresAt(now, this.ttlDays) : undefined;
-      docs.push(toStoredFeature(stream, { ...feature, excluded: true }, includeEmbedding, expiresAt));
+      docs.push(
+        toStoredFeature(stream, { ...feature, excluded: true }, includeEmbedding, expiresAt)
+      );
     }
     for (const latest of restorableLatest) {
       const feature = fromStoredFeature(latest);

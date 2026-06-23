@@ -31,8 +31,8 @@ export const STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID =
 
 const queryInputSchema = upsertStreamQueryRequestSchema.extend({
   id: z.string().optional(),
-  expires_at: z
-    .iso.datetime()
+  expires_at: z.iso
+    .datetime()
     .optional()
     .describe(
       'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +

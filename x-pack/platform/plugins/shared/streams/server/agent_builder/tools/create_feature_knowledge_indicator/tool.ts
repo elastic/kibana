@@ -30,8 +30,8 @@ export const STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID =
   platformStreamsSigEventsTools.createFeatureKnowledgeIndicator;
 
 const createFeatureKISchema = baseFeatureSchema.extend({
-  expires_at: z
-    .iso.datetime()
+  expires_at: z.iso
+    .datetime()
     .optional()
     .describe(
       'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
