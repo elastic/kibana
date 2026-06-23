@@ -55,9 +55,15 @@ import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
-import { initializeStepExecutionsDataStream } from './repositories/step_executions_data_stream';
+import {
+  initializeStepExecutionsClient,
+  initializeStepExecutionsDataStream,
+} from './repositories/step_executions_data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { initializeWorkflowExecutionsDataStream } from './repositories/workflow_executions_data_stream';
+import {
+  initializeWorkflowExecutionsClient,
+  initializeWorkflowExecutionsDataStream,
+} from './repositories/workflow_executions_data_stream';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -119,6 +125,22 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
+
+const ensureExecutionDataStreamsReady = (coreDataStreams: CoreStart['dataStreams']) => {
+  return Promise.all([
+    initializeWorkflowExecutionsClient(coreDataStreams),
+    initializeStepExecutionsClient(coreDataStreams),
+  ]);
+};
+
+const resolvePinnedExecutionWriteIndexes = async (
+  coreDataStreams: CoreStart['dataStreams'],
+  stepRepo: StepExecutionRepository,
+  workflowRepo: WorkflowExecutionRepository
+): Promise<[string, string]> => {
+  await ensureExecutionDataStreamsReady(coreDataStreams);
+  return Promise.all([stepRepo.resolveWriteIndex(), workflowRepo.resolveWriteIndex()]);
+};
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -540,10 +562,12 @@ export class WorkflowsExecutionEnginePlugin
               );
               span?.end();
 
-              const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
-                stepExecutionRepository.resolveWriteIndex(),
-                workflowExecutionRepository.resolveWriteIndex(),
-              ]);
+              const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] =
+                await resolvePinnedExecutionWriteIndexes(
+                  coreStart.dataStreams,
+                  stepExecutionRepository,
+                  workflowExecutionRepository
+                );
 
               const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateEncodedWorkflowExecutionId({
@@ -648,6 +672,7 @@ export class WorkflowsExecutionEnginePlugin
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
+    void ensureExecutionDataStreamsReady(coreStart.dataStreams);
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
@@ -706,10 +731,11 @@ export class WorkflowsExecutionEnginePlugin
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = resolvedIndexes
         ? [resolvedIndexes.stepExecutionsIndex, resolvedIndexes.executionsIndex]
-        : await Promise.all([
-            stepExecutionRepo.resolveWriteIndex(),
-            workflowExecutionRepository.resolveWriteIndex(),
-          ]);
+        : await resolvePinnedExecutionWriteIndexes(
+            coreStart.dataStreams,
+            stepExecutionRepo,
+            workflowExecutionRepository
+          );
       const metadata = context.metadata as Record<string, unknown> | undefined;
       const eventPayload = context.event as Record<string, unknown> | undefined;
       let rootEventChainDepth: number | undefined;
@@ -1004,10 +1030,12 @@ export class WorkflowsExecutionEnginePlugin
       }
       const prepared: PreparedItem[] = [];
 
-      const [bulkStepExecutionsIndex, bulkExecutionsIndex] = await Promise.all([
-        stepExecutionRepo.resolveWriteIndex(),
-        workflowExecutionRepository.resolveWriteIndex(),
-      ]);
+      const [bulkStepExecutionsIndex, bulkExecutionsIndex] =
+        await resolvePinnedExecutionWriteIndexes(
+          coreStart.dataStreams,
+          stepExecutionRepo,
+          workflowExecutionRepository
+        );
 
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
@@ -1157,10 +1185,12 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.security,
         coreStart.elasticsearch.client
       );
-      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
-        stepExecutionRepo.resolveWriteIndex(),
-        workflowExecutionRepository.resolveWriteIndex(),
-      ]);
+      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] =
+        await resolvePinnedExecutionWriteIndexes(
+          coreStart.dataStreams,
+          stepExecutionRepo,
+          workflowExecutionRepository
+        );
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateEncodedWorkflowExecutionId({
           backingIndexName: resolvedExecutionsIndex,

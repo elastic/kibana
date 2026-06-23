@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
+import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '@kbn/workflows';
 import {
@@ -36,4 +36,8 @@ export const initializeWorkflowExecutionsDataStream = (
       mappings: workflowExecutionsMappings,
     },
   });
+};
+
+export const initializeWorkflowExecutionsClient = (coreDataStreams: DataStreamsStart) => {
+  return coreDataStreams.initializeClient(WORKFLOWS_EXECUTIONS_INDEX);
 };
