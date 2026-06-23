@@ -212,7 +212,9 @@ export const getAnomalyData = async ({
           uiSettingsClient,
         }));
   } catch (error) {
-      logger.error(`Failed to get anomaly data: ${error instanceof Error ? error.message : String(error)}`);
-      return entities.map(() => []);
-    }
+    logger.error(
+      `Failed to get anomaly data: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return entities.map(() => []);
+  }
 };
