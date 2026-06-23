@@ -6,6 +6,7 @@
  */
 
 import { chunk, sum } from 'lodash';
+import { performance } from 'perf_hooks';
 
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -18,6 +19,7 @@ import {
   addToSearchAfterReturn,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
+  makeFloatString,
 } from '../utils/utils';
 import { getFilter } from '../utils/get_filter';
 import { buildEsqlSearchRequest } from '../esql/build_esql_search_request';
@@ -35,11 +37,251 @@ import {
 } from '../utils/get_is_alert_suppression_active';
 import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import type { EsqlTable } from '../esql/esql_request';
 
 type NewTermsExecutorOptions = SecurityExecutorOptions<
   NewTermsRuleParams,
   { isLoggedRequestsEnabled?: boolean }
 >;
+
+type NewTermsCombination = Record<string, string | number | boolean>;
+
+interface BuildNewTermsEsqlQueryParams {
+  inputIndex: string[] | undefined;
+  newTermsFields: string[];
+  aggregatableTimestampField: string;
+  primaryTimestamp: string;
+  secondaryTimestamp: string;
+  ruleIntervalFrom: string;
+}
+
+const buildNewTermsEsqlQuery = ({
+  inputIndex,
+  newTermsFields,
+  aggregatableTimestampField,
+  primaryTimestamp,
+  secondaryTimestamp,
+  ruleIntervalFrom,
+}: BuildNewTermsEsqlQueryParams): string => {
+  const byFields = newTermsFields.join(', ');
+  const timestampField = aggregatableTimestampField;
+  const nullFilters = newTermsFields.map((field) => `\`${field}\` IS NOT NULL`).join(' AND ');
+  const mvExpandCommands = newTermsFields.map((field) => `| MV_EXPAND \`${field}\``).join(' ');
+  const timestampOverrideCommand =
+    aggregatableTimestampField === 'kibana.combined_timestamp'
+      ? `| EVAL ${aggregatableTimestampField} = CASE(${primaryTimestamp} IS NOT NULL, ${primaryTimestamp}, ${secondaryTimestamp})`
+      : '';
+
+  return [
+    `FROM ${(inputIndex ?? []).join(', ')}`,
+    timestampOverrideCommand,
+    `| WHERE ${nullFilters}`,
+    mvExpandCommands,
+    `| STATS first_seen = MIN(\`${timestampField}\`) BY ${byFields}`,
+    `| WHERE first_seen > "${ruleIntervalFrom}"`,
+  ]
+    .filter(Boolean)
+    .join(' ');
+};
+
+const parseNewTermsCombinationsFromEsqlResponse = (
+  esqlResponse: EsqlTable,
+  newTermsFields: string[]
+): NewTermsCombination[] => {
+  const columnNames = esqlResponse.columns.map((col) => col.name);
+  const newTermsFieldIndices = newTermsFields.map((field) => columnNames.indexOf(field));
+  const newTermsCombinations: NewTermsCombination[] = [];
+
+  for (const row of esqlResponse.values) {
+    const combination: NewTermsCombination = {};
+    for (let i = 0; i < newTermsFields.length; i++) {
+      const fieldIndex = newTermsFieldIndices[i];
+      const fieldValue = fieldIndex >= 0 ? row[fieldIndex] : null;
+      if (fieldValue != null) {
+        combination[newTermsFields[i]] = fieldValue as string | number | boolean;
+      }
+    }
+    if (Object.keys(combination).length === newTermsFields.length) {
+      newTermsCombinations.push(combination);
+    }
+  }
+
+  return newTermsCombinations;
+};
+
+interface BuildMsearchSearchesParams {
+  batch: NewTermsCombination[];
+  newTermsFields: string[];
+  inputIndex: string[] | undefined;
+  tupleFrom: string;
+  tupleTo: string;
+  esFilter: estypes.QueryDslQueryContainer | undefined;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp: string;
+}
+
+const buildMsearchSearchesForCombinationBatch = ({
+  batch,
+  newTermsFields,
+  inputIndex,
+  tupleFrom,
+  tupleTo,
+  esFilter,
+  runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: BuildMsearchSearchesParams): estypes.MsearchRequestItem[] => {
+  const searches: estypes.MsearchRequestItem[] = [];
+
+  for (const combination of batch) {
+    const combinationFilter: estypes.QueryDslQueryContainer = {
+      bool: {
+        must: newTermsFields.map((field) => ({
+          term: { [field]: combination[field] },
+        })),
+      },
+    };
+
+    const searchQuery = buildEventsSearchQuery({
+      aggregations: undefined,
+      runtimeMappings,
+      searchAfterSortIds: undefined,
+      index: inputIndex,
+      from: tupleFrom,
+      to: tupleTo,
+      filter: esFilter,
+      additionalFilters: [combinationFilter],
+      size: 1,
+      primaryTimestamp,
+      secondaryTimestamp,
+    });
+
+    const {
+      index: _index,
+      allow_no_indices: allowNoIndices,
+      ignore_unavailable: ignoreUnavailable,
+      ...searchBody
+    } = searchQuery;
+
+    searches.push({
+      index: inputIndex,
+      ignore_unavailable: ignoreUnavailable ?? true,
+      allow_no_indices: allowNoIndices ?? true,
+    });
+    searches.push(searchBody);
+  }
+
+  return searches;
+};
+
+const processMsearchResponsesToEventsAndTerms = ({
+  batch,
+  responses,
+  newTermsFields,
+  result,
+  ruleExecutionLogger,
+}: {
+  batch: NewTermsCombination[];
+  responses: estypes.MsearchMultiSearchItem[];
+  newTermsFields: string[];
+  result: ReturnType<typeof createSearchAfterReturnType>;
+  ruleExecutionLogger: NewTermsExecutorOptions['sharedParams']['ruleExecutionLogger'];
+}): EventsAndTerms[] => {
+  const eventsAndTerms: EventsAndTerms[] = [];
+
+  for (let i = 0; i < batch.length; i++) {
+    const response = responses[i];
+    if ('error' in response) {
+      const errorMsg = `Failed to fetch document for new term combination ${JSON.stringify(
+        batch[i]
+      )}: ${JSON.stringify(response.error)}`;
+      result.errors.push(errorMsg);
+      ruleExecutionLogger.warn(errorMsg);
+    } else if ('hits' in response && response.hits?.hits?.length > 0) {
+      const hit = response.hits.hits[0] as estypes.SearchHit<SignalSource>;
+      const combination = batch[i];
+      const newTerms = newTermsFields.map((field) => combination[field]);
+      eventsAndTerms.push({
+        event: hit,
+        newTerms,
+      });
+    }
+  }
+
+  return eventsAndTerms;
+};
+
+type NewTermsExecutorSharedParams = NewTermsExecutorOptions['sharedParams'];
+
+interface CreateAlertsFromEventsParams {
+  eventsAndTerms: EventsAndTerms[];
+  sharedParams: NewTermsExecutorSharedParams;
+  params: NewTermsRuleParams;
+  services: NewTermsExecutorOptions['services'];
+  result: ReturnType<typeof createSearchAfterReturnType>;
+  isAlertSuppressionActive: boolean;
+}
+
+const createAlertsFromEventsAndTerms = async ({
+  eventsAndTerms,
+  sharedParams,
+  params,
+  services,
+  result,
+  isAlertSuppressionActive,
+}: CreateAlertsFromEventsParams): Promise<{ alertsWereTruncated: boolean }> => {
+  const eventAndTermsChunks = chunk(eventsAndTerms, ALERT_CHUNK_MULTIPLIER * params.maxSignals);
+  let bulkCreateResult: Omit<
+    GenericBulkCreateResponse<NewTermsAlertLatest>,
+    'suppressedItemsCount'
+  > = {
+    errors: [],
+    success: true,
+    enrichmentDuration: '0',
+    bulkCreateDuration: '0',
+    createdItemsCount: 0,
+    createdItems: [],
+    alertsWereTruncated: false,
+  };
+
+  for (let i = 0; i < eventAndTermsChunks.length; i++) {
+    const eventAndTermsChunk = eventAndTermsChunks[i];
+
+    if (isAlertSuppressionActive && alertSuppressionTypeGuard(params.alertSuppression)) {
+      bulkCreateResult = await bulkCreateSuppressedNewTermsAlertsInMemory({
+        sharedParams,
+        eventsAndTerms: eventAndTermsChunk,
+        toReturn: result,
+        services,
+        alertSuppression: params.alertSuppression,
+      });
+    } else {
+      const wrappedAlerts = wrapNewTermsAlerts({
+        sharedParams,
+        eventsAndTerms: eventAndTermsChunk,
+      });
+
+      bulkCreateResult = await bulkCreate({
+        wrappedAlerts,
+        services,
+        sharedParams,
+        maxAlerts: params.maxSignals - result.createdSignalsCount,
+      });
+
+      addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+    }
+
+    if (bulkCreateResult.alertsWereTruncated) {
+      result.warningMessages.push(
+        isAlertSuppressionActive ? getSuppressionMaxSignalsWarning() : getMaxSignalsWarning()
+      );
+      break;
+    }
+  }
+
+  return { alertsWereTruncated: bulkCreateResult.alertsWereTruncated };
+};
 
 // Process new term combinations in batches to avoid issuing too many concurrent searches in a single _msearch
 const BATCH_SIZE = 500;
@@ -55,7 +297,6 @@ const BATCH_SIZE = 500;
  * combinations whose `first_seen` falls inside the rule interval (i.e. the new ones). It then fetches
  * the source document for each new combination via a single batched `_msearch`.
  */
-// eslint-disable-next-line complexity
 export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorOptions) => {
   const { sharedParams, services, params, state } = execOptions;
 
@@ -113,20 +354,6 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
   });
 
   const newTermsFields = params.newTermsFields;
-  const byFields = newTermsFields.join(', ');
-  const timestampField = aggregatableTimestampField;
-
-  // Build null filters - exclude documents where new terms fields are null
-  const nullFilters = newTermsFields.map((field) => `\`${field}\` IS NOT NULL`).join(' AND ');
-
-  // Build MV_EXPAND commands for each new terms field
-  const mvExpandCommands = newTermsFields.map((field) => `| MV_EXPAND \`${field}\``).join(' ');
-
-  // Handle timestamp override with EVAL command
-  const timestampOverrideCommand =
-    aggregatableTimestampField === 'kibana.combined_timestamp'
-      ? `| EVAL ${aggregatableTimestampField} = CASE(${primaryTimestamp} IS NOT NULL, ${primaryTimestamp}, ${secondaryTimestamp})`
-      : '';
 
   // ============================================
   // STEP 1: ES|QL QUERY TO GET BUCKETS
@@ -134,17 +361,14 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
   // This replaces Phase 1 (composite aggregation) and Phase 2 (terms aggregation)
   // Query structure matches the example pattern:
   // FROM -> WHERE null filters -> MV_EXPAND -> STATS -> WHERE first_seen filter
-  const indexPattern = inputIndex ?? [];
-  const esqlQuery = [
-    `FROM ${indexPattern.join(', ')}`,
-    timestampOverrideCommand,
-    `| WHERE ${nullFilters}`,
-    mvExpandCommands,
-    `| STATS first_seen = MIN(\`${timestampField}\`) BY ${byFields}`,
-    `| WHERE first_seen > "${tuple.from.toISOString()}"`,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const esqlQuery = buildNewTermsEsqlQuery({
+    inputIndex,
+    newTermsFields,
+    aggregatableTimestampField,
+    primaryTimestamp,
+    secondaryTimestamp,
+    ruleIntervalFrom: tuple.from.toISOString(),
+  });
 
   ruleExecutionLogger.debug(`New Terms ES|QL query: ${esqlQuery}`);
 
@@ -193,22 +417,10 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
 
   logClusterShardFailuresEsql({ response: esqlResponse, result });
 
-  const columnNames = esqlResponse.columns.map((col) => col.name);
-  const newTermsFieldIndices = newTermsFields.map((field) => columnNames.indexOf(field));
-  const newTermsCombinations: Array<Record<string, string | number>> = [];
-
-  for (const row of esqlResponse.values) {
-    const combination: Record<string, string | number> = {};
-    for (let i = 0; i < newTermsFields.length; i++) {
-      const fieldIndex = newTermsFieldIndices[i];
-      if (fieldIndex >= 0 && row[fieldIndex] != null) {
-        combination[newTermsFields[i]] = row[fieldIndex] as string | number;
-      }
-    }
-    if (Object.keys(combination).length === newTermsFields.length) {
-      newTermsCombinations.push(combination);
-    }
-  }
+  const newTermsCombinations = parseNewTermsCombinationsFromEsqlResponse(
+    esqlResponse,
+    newTermsFields
+  );
 
   if (newTermsCombinations.length >= 10000) {
     result.warningMessages.push(
@@ -240,51 +452,19 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
     const batch = newTermsCombinations.slice(combinationIndex, combinationIndex + BATCH_SIZE);
     combinationIndex += BATCH_SIZE;
 
-    const searches: estypes.MsearchRequestItem[] = [];
-    for (const combination of batch) {
-      const combinationFilter: estypes.QueryDslQueryContainer = {
-        bool: {
-          must: newTermsFields.map((field) => ({
-            term: { [field]: combination[field] },
-          })),
-        },
-      };
+    const searches = buildMsearchSearchesForCombinationBatch({
+      batch,
+      newTermsFields,
+      inputIndex,
+      tupleFrom: tuple.from.toISOString(),
+      tupleTo: tuple.to.toISOString(),
+      esFilter,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
+    });
 
-      const searchQuery = buildEventsSearchQuery({
-        aggregations: undefined,
-        runtimeMappings,
-        searchAfterSortIds: undefined,
-        index: inputIndex,
-        from: tuple.from.toISOString(),
-        to: tuple.to.toISOString(),
-        filter: esFilter,
-        additionalFilters: [combinationFilter],
-        size: 1,
-        primaryTimestamp,
-        secondaryTimestamp,
-      });
-
-      // Extract header fields (index, allow_no_indices, ignore_unavailable) from search query
-      // and put them in the header, rest goes in the body
-      const {
-        index: _index,
-        allow_no_indices: allowNoIndices,
-        ignore_unavailable: ignoreUnavailable,
-        ...searchBody
-      } = searchQuery;
-
-      // Header for this search - msearch requires header before body
-      searches.push({
-        index: inputIndex,
-        ignore_unavailable: ignoreUnavailable ?? true,
-        allow_no_indices: allowNoIndices ?? true,
-      });
-
-      searches.push(searchBody);
-    }
-
-    // Execute msearch
-    const startTime = Date.now();
+    const startTime = performance.now();
 
     // Log msearch request if enabled
     // msearch format is newline-delimited JSON: header1\nbody1\nheader2\nbody2\n...
@@ -315,40 +495,24 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
       break;
     }
 
-    const searchDuration = `${(Date.now() - startTime) / 1000}s`;
+    const searchDuration = makeFloatString(performance.now() - startTime);
     result.searchAfterTimes.push(searchDuration);
 
     // Update duration in loggedRequests if enabled
     if (isLoggedRequestsEnabled && loggedRequests.length > 0) {
       const lastRequest = loggedRequests[loggedRequests.length - 1];
       if (lastRequest && lastRequest.description?.includes('new term combinations')) {
-        lastRequest.duration = Math.round((Date.now() - startTime) / 1000);
+        lastRequest.duration = Math.round(performance.now() - startTime);
       }
     }
 
-    // Process responses and create eventsAndTerms
-    const eventsAndTerms: EventsAndTerms[] = [];
-    for (let i = 0; i < batch.length; i++) {
-      const response = msearchResponse.responses[i];
-      if ('status' in response && response.status === 200 && 'hits' in response) {
-        const hits = response.hits;
-        if (hits?.hits?.length > 0) {
-          const hit = hits.hits[0] as estypes.SearchHit<SignalSource>;
-          const combination = batch[i];
-          const newTerms = newTermsFields.map((field) => combination[field]);
-          eventsAndTerms.push({
-            event: hit,
-            newTerms,
-          });
-        }
-      } else if ('status' in response && response.status !== 200) {
-        const errorMsg = `Failed to fetch document for new term combination ${JSON.stringify(
-          batch[i]
-        )}: status ${response.status}`;
-        result.errors.push(errorMsg);
-        ruleExecutionLogger.warn(errorMsg);
-      }
-    }
+    const eventsAndTerms = processMsearchResponsesToEventsAndTerms({
+      batch,
+      responses: msearchResponse.responses,
+      newTermsFields,
+      result,
+      ruleExecutionLogger,
+    });
 
     // Collect rule execution metrics: each found document for a new terms combination is a
     // candidate alert (before suppression / maxSignals truncation).
@@ -356,56 +520,16 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
 
     // Create alerts from eventsAndTerms
     if (eventsAndTerms.length > 0) {
-      const eventAndTermsChunks = chunk(eventsAndTerms, ALERT_CHUNK_MULTIPLIER * params.maxSignals);
-      let bulkCreateResult: Omit<
-        GenericBulkCreateResponse<NewTermsAlertLatest>,
-        'suppressedItemsCount'
-      > = {
-        errors: [],
-        success: true,
-        enrichmentDuration: '0',
-        bulkCreateDuration: '0',
-        createdItemsCount: 0,
-        createdItems: [],
-        alertsWereTruncated: false,
-      };
+      const { alertsWereTruncated } = await createAlertsFromEventsAndTerms({
+        eventsAndTerms,
+        sharedParams,
+        params,
+        services,
+        result,
+        isAlertSuppressionActive,
+      });
 
-      for (let i = 0; i < eventAndTermsChunks.length; i++) {
-        const eventAndTermsChunk = eventAndTermsChunks[i];
-
-        if (isAlertSuppressionActive && alertSuppressionTypeGuard(params.alertSuppression)) {
-          bulkCreateResult = await bulkCreateSuppressedNewTermsAlertsInMemory({
-            sharedParams,
-            eventsAndTerms: eventAndTermsChunk,
-            toReturn: result,
-            services,
-            alertSuppression: params.alertSuppression,
-          });
-        } else {
-          const wrappedAlerts = wrapNewTermsAlerts({
-            sharedParams,
-            eventsAndTerms: eventAndTermsChunk,
-          });
-
-          bulkCreateResult = await bulkCreate({
-            wrappedAlerts,
-            services,
-            sharedParams,
-            maxAlerts: params.maxSignals - result.createdSignalsCount,
-          });
-
-          addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-        }
-
-        if (bulkCreateResult.alertsWereTruncated) {
-          result.warningMessages.push(
-            isAlertSuppressionActive ? getSuppressionMaxSignalsWarning() : getMaxSignalsWarning()
-          );
-          break;
-        }
-      }
-
-      if (bulkCreateResult.alertsWereTruncated || result.createdSignalsCount >= params.maxSignals) {
+      if (alertsWereTruncated || result.createdSignalsCount >= params.maxSignals) {
         break;
       }
     }

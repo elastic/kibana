@@ -75,10 +75,9 @@ export const createNewTermsAlertType = (): SecurityAlertType<
     producer: SERVER_APP_ID,
     solution: 'security',
     async executor(execOptions) {
-      const { licensing, inputIndex, experimentalFeatures } = execOptions.sharedParams;
+      const { licensing, inputIndex, experimentalFeatures, ruleExecutionLogger } =
+        execOptions.sharedParams;
       const { newTermsFields } = execOptions.params;
-
-      const { ruleExecutionLogger } = execOptions.sharedParams;
 
       if (!experimentalFeatures.newTermsEsqlApproachEnabled) {
         ruleExecutionLogger.debug('New Terms: using aggregation approach (feature flag disabled)');
