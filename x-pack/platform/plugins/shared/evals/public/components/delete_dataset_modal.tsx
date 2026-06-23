@@ -27,7 +27,7 @@ export interface DeleteDatasetModalProps {
   onDeleted?: () => void;
 }
 
-const TITLE = (datasetName: string) =>
+const getTitle = (datasetName: string) =>
   i18n.translate('xpack.evals.deleteDatasetModal.title', {
     defaultMessage: 'Delete dataset "{datasetName}"?',
     values: { datasetName },
@@ -49,7 +49,7 @@ const CHECKING_USAGE = i18n.translate('xpack.evals.deleteDatasetModal.checkingUs
   defaultMessage: 'Checking experiment usage…',
 });
 
-const CONFIRM_LABEL = (datasetName: string) =>
+const getConfirmLabel = (datasetName: string) =>
   i18n.translate('xpack.evals.deleteDatasetModal.confirmInputLabel', {
     defaultMessage: 'Type "{datasetName}" to confirm',
     values: { datasetName },
@@ -89,8 +89,8 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
 
   return (
     <EuiConfirmModal
-      aria-label={TITLE(datasetName)}
-      title={TITLE(datasetName)}
+      aria-label={getTitle(datasetName)}
+      title={getTitle(datasetName)}
       onCancel={onClose}
       onConfirm={onConfirm}
       cancelButtonText={CANCEL}
@@ -140,7 +140,7 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
         </>
       ) : null}
 
-      <EuiFormRow label={CONFIRM_LABEL(datasetName)}>
+      <EuiFormRow label={getConfirmLabel(datasetName)}>
         <EuiFieldText
           autoFocus
           value={confirmText}
