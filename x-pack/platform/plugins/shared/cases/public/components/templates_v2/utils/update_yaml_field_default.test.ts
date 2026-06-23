@@ -347,70 +347,213 @@ fields:
     expect(result).toContain('default: new value # important comment');
     expect(result).not.toContain('old value');
   });
+
+  describe('$ref entries', () => {
+    it('adds metadata.default to a $ref entry matched by its $ref name', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+`;
+      const result = updateYamlFieldDefault(yaml, 'my_field', 'hello');
+      expect(result).toContain('$ref: my_field');
+      expect(result).toContain('metadata:');
+      expect(result).toContain('default: hello');
+    });
+
+    it('adds metadata.default to a $ref entry matched by its alias name', () => {
+      const yaml = `name: T
+fields:
+  - name: my_alias
+    $ref: my_field
+`;
+      const result = updateYamlFieldDefault(yaml, 'my_alias', 'hello');
+      expect(result).toContain('default: hello');
+      // Untouched ref should remain
+      expect(result).toContain('$ref: my_field');
+    });
+
+    it('updates an existing metadata.default on a $ref entry', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+    metadata:
+      default: old
+`;
+      const result = updateYamlFieldDefault(yaml, 'my_field', 'new');
+      expect(result).toContain('default: new');
+      expect(result).not.toContain('default: old');
+    });
+
+    it('does not match a $ref entry by its raw $ref when an alias is set', () => {
+      const yaml = `name: T
+fields:
+  - name: my_alias
+    $ref: my_field
+`;
+      // Effective name is `my_alias`; `my_field` should not match.
+      const result = updateYamlFieldDefault(yaml, 'my_field', 'hello');
+      expect(result).toBe(yaml);
+    });
+  });
 });
 
 describe('removeYamlFieldDefault', () => {
-  it('removes metadata.default from a field that has it', () => {
-    const yaml = `name: Test
+  const baseYaml = `name: Test Template
 fields:
-  - name: score
-    control: INPUT_NUMBER
-    type: integer
-    metadata:
-      default: 42
-`;
-    const result = removeYamlFieldDefault(yaml, 'score');
-
-    expect(result).not.toContain('default');
-    expect(result).toContain('name: score');
-  });
-
-  it('preserves other metadata keys when removing default', () => {
-    const yaml = `name: Test
-fields:
-  - name: priority
-    control: SELECT_BASIC
+  - name: assignee
+    control: USER_PICKER
     type: keyword
     metadata:
-      options:
-        - low
-        - high
-      default: low
+      multiple: true
+      default:
+        - uid: uid-1
+          name: Alice
 `;
-    const result = removeYamlFieldDefault(yaml, 'priority');
 
-    expect(result).not.toContain('default');
-    expect(result).toContain('options:');
-    expect(result).toContain('- low');
-    expect(result).toContain('- high');
+  it('removes default from metadata, leaves other metadata keys intact', () => {
+    const result = removeYamlFieldDefault(baseYaml, 'assignee');
+
+    expect(result).toContain('multiple: true');
+    expect(result).not.toContain('default:');
+    expect(result).not.toContain('uid-1');
   });
 
-  it('returns original yaml when field has no default', () => {
+  it('removes entire metadata block when default was the only key', () => {
     const yaml = `name: Test
 fields:
-  - name: score
-    control: INPUT_NUMBER
-    type: integer
+  - name: assignee
+    control: USER_PICKER
+    type: keyword
+    metadata:
+      default:
+        - uid: uid-1
+          name: Alice
 `;
-    const result = removeYamlFieldDefault(yaml, 'score');
+
+    const result = removeYamlFieldDefault(yaml, 'assignee');
+
+    expect(result).not.toContain('metadata:');
+    expect(result).not.toContain('default:');
+  });
+
+  it('returns yaml unchanged when field does not exist', () => {
+    const result = removeYamlFieldDefault(baseYaml, 'nonexistent');
+
+    expect(result).toBe(baseYaml);
+  });
+
+  it('returns yaml unchanged when field has no metadata', () => {
+    const yaml = `name: Test
+fields:
+  - name: assignee
+    control: USER_PICKER
+    type: keyword
+`;
+
+    const result = removeYamlFieldDefault(yaml, 'assignee');
 
     expect(result).toBe(yaml);
   });
 
-  it('returns original yaml when field does not exist', () => {
+  it('returns yaml unchanged when metadata has no default key', () => {
     const yaml = `name: Test
 fields:
-  - name: score
-    control: INPUT_NUMBER
-    type: integer
+  - name: assignee
+    control: USER_PICKER
+    type: keyword
+    metadata:
+      multiple: true
 `;
-    const result = removeYamlFieldDefault(yaml, 'nonexistent');
 
-    expect(result).toBe(yaml);
+    const result = removeYamlFieldDefault(yaml, 'assignee');
+
+    expect(result).toContain('multiple: true');
+    expect(result).not.toContain('default:');
   });
 
-  it('returns original yaml when yaml is empty', () => {
-    expect(removeYamlFieldDefault('', 'score')).toBe('');
+  it('returns original yaml for empty input', () => {
+    expect(removeYamlFieldDefault('', 'assignee')).toBe('');
+  });
+
+  it('returns original yaml for whitespace-only input', () => {
+    expect(removeYamlFieldDefault('   ', 'assignee')).toBe('   ');
+  });
+
+  it('returns original yaml when parsing fails', () => {
+    const invalidYaml = 'invalid: yaml: [broken';
+
+    expect(removeYamlFieldDefault(invalidYaml, 'assignee')).toBe(invalidYaml);
+  });
+
+  it('does not affect other fields in the document', () => {
+    const yaml = `name: Test
+fields:
+  - name: assignee
+    control: USER_PICKER
+    type: keyword
+    metadata:
+      default:
+        - uid: uid-1
+          name: Alice
+  - name: summary
+    control: INPUT_TEXT
+    type: keyword
+    metadata:
+      default: My summary
+`;
+
+    const result = removeYamlFieldDefault(yaml, 'assignee');
+
+    expect(result).not.toContain('uid-1');
+    expect(result).toContain('default: My summary');
+  });
+
+  it('preserves comments in the yaml', () => {
+    const yaml = `# Template header
+name: Test
+fields:
+  # field comment
+  - name: assignee
+    control: USER_PICKER
+    type: keyword
+    metadata:
+      default:
+        - uid: uid-1
+          name: Alice
+`;
+
+    const result = removeYamlFieldDefault(yaml, 'assignee');
+
+    expect(result).toContain('# Template header');
+    expect(result).toContain('# field comment');
+    expect(result).not.toContain('default:');
+  });
+
+  describe('$ref entries', () => {
+    it('removes metadata.default from a $ref entry matched by $ref name', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+    metadata:
+      default: hello
+`;
+      const result = removeYamlFieldDefault(yaml, 'my_field');
+      expect(result).toContain('$ref: my_field');
+      expect(result).not.toContain('default:');
+    });
+
+    it('removes metadata.default from a $ref entry matched by alias name', () => {
+      const yaml = `name: T
+fields:
+  - name: my_alias
+    $ref: my_field
+    metadata:
+      default: hello
+`;
+      const result = removeYamlFieldDefault(yaml, 'my_alias');
+      expect(result).not.toContain('default:');
+      expect(result).toContain('$ref: my_field');
+    });
   });
 });
 
@@ -537,5 +680,37 @@ fields:
 `;
 
     expect(hasFieldDefault(yaml, 'systems')).toBe(true);
+  });
+
+  describe('$ref entries', () => {
+    it('returns true for a $ref entry with metadata.default matched by $ref name', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+    metadata:
+      default: hello
+`;
+      expect(hasFieldDefault(yaml, 'my_field')).toBe(true);
+    });
+
+    it('returns false for a $ref entry without metadata.default', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+`;
+      expect(hasFieldDefault(yaml, 'my_field')).toBe(false);
+    });
+
+    it('matches by alias name when set on the $ref entry', () => {
+      const yaml = `name: T
+fields:
+  - name: my_alias
+    $ref: my_field
+    metadata:
+      default: hello
+`;
+      expect(hasFieldDefault(yaml, 'my_alias')).toBe(true);
+      expect(hasFieldDefault(yaml, 'my_field')).toBe(false);
+    });
   });
 });

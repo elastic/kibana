@@ -17,29 +17,37 @@ import type {
 import {
   builtInStepDefinitions,
   DEPRECATED_STEP_METADATA,
+  generateLightweightYamlSchema,
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
+  getStepPrefixDeprecationInfo,
   SystemConnectorsMap,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
-// Import connector schemas from the organized structure
-import {
-  ConnectorActionInputSchemas,
-  ConnectorActionOutputSchemas,
-  ConnectorInputSchemas,
-  ConnectorOutputSchemas,
-  ConnectorSpecsInputSchemas,
-  staticConnectors,
-} from './connector_action_schema';
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
+
+// Defers ~16 MB of zod-schema heap until the first workflow edit/execute call.
+// connector_action_schema.ts eagerly builds Maps of Zod schemas from
+// stack_connectors_schema/* and @kbn/connector-specs; keeping it behind a
+// lazy require() avoids that cost at Kibana startup. See #264175.
+let _connectorSchemas: typeof import('./connector_action_schema') | null = null;
+function getConnectorSchemas(): typeof import('./connector_action_schema') {
+  if (_connectorSchemas === null) {
+    _connectorSchemas = require('./connector_action_schema');
+  }
+  return _connectorSchemas as typeof import('./connector_action_schema');
+}
 
 /**
  * Get parameter schema for a specific sub-action
  */
 function getSubActionParamsSchema(actionTypeId: string, subActionName: string): z.ZodSchema {
+  const { ConnectorInputSchemas, ConnectorActionInputSchemas, ConnectorSpecsInputSchemas } =
+    getConnectorSchemas();
+
   const schema = ConnectorInputSchemas.get(actionTypeId);
   if (schema) {
     return schema;
@@ -69,6 +77,8 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
  * Get output schema for a specific sub-action
  */
 function getSubActionOutputSchema(actionTypeId: string, subActionName: string): z.ZodSchema {
+  const { ConnectorOutputSchemas, ConnectorActionOutputSchemas } = getConnectorSchemas();
+
   const schema = ConnectorOutputSchemas.get(actionTypeId);
   if (schema) {
     return schema;
@@ -85,6 +95,54 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
   // Generic fallback
   return z.any();
 }
+
+const getSubActionMetadata = (
+  actionTypeId: string,
+  subActionName: string
+): Pick<BaseConnectorContract, 'description' | 'documentation' | 'examples'> | undefined => {
+  if (actionTypeId !== '.xsoar') {
+    return undefined;
+  }
+
+  if (subActionName === 'getPlaybooks') {
+    return {
+      description: 'Retrieve XSOAR playbooks visible to the connector.',
+      examples: {
+        snippet: `- name: get_xsoar_playbooks
+  type: xsoar.getPlaybooks
+  connector-id: <connector-id>`,
+      },
+    };
+  }
+
+  if (subActionName === 'run') {
+    return {
+      description: 'Create an XSOAR incident and optionally associate it with a playbook.',
+      examples: {
+        params: {
+          name: 'Suspicious login detected',
+          playbookId: '<xsoar-playbook-id>',
+          body: '{"details":"Investigate suspicious login activity.","type":"Unclassified"}',
+        },
+        snippet: `- name: create_xsoar_incident
+  type: xsoar.run
+  connector-id: <connector-id>
+  with:
+    name: Suspicious login detected
+    playbookId: <xsoar-playbook-id>
+    createInvestigation: true
+    severity: 2
+    body: |
+      {
+        "details": "Investigate suspicious login activity.",
+        "type": "Unclassified"
+      }`,
+      },
+    };
+  }
+
+  return undefined;
+};
 
 /**
  * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
@@ -104,11 +162,13 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
       };
 
       if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-        // Only public step definitions have documentation and examples
+        // Only public step definitions have documentation and examples.
+        // Match the convention used by every other connector source: summary
+        // is the short label, description is the longer behavioral explanation.
         return {
           ...definition,
-          description: stepDefinition.label, // Short title-like text
-          summary: stepDefinition.description ?? null, // Explanation of the step behavior
+          summary: stepDefinition.label,
+          description: stepDefinition.description ?? null,
           documentation: stepDefinition.documentation?.url,
           examples: stepDefinition.documentation?.examples
             ? { snippet: stepDefinition.documentation?.examples.join('\n') }
@@ -148,9 +208,11 @@ function convertDynamicConnectorsToContractsInternal(
 
           const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, subAction.name);
           const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, subAction.name);
+          const metadata = getSubActionMetadata(connectorType.actionTypeId, subAction.name);
 
           connectorContracts.push({
             actionTypeId: connectorType.actionTypeId,
+            displayName: connectorType.displayName,
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
@@ -158,6 +220,7 @@ function convertDynamicConnectorsToContractsInternal(
             outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
             instances: connectorType.instances,
+            ...metadata,
           });
         });
       } else {
@@ -168,6 +231,7 @@ function convertDynamicConnectorsToContractsInternal(
 
         connectorContracts.push({
           actionTypeId: connectorType.actionTypeId,
+          displayName: connectorType.displayName,
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
@@ -182,6 +246,7 @@ function convertDynamicConnectorsToContractsInternal(
       // Return a basic connector contract as fallback
       connectorContracts.push({
         actionTypeId: connectorType.actionTypeId,
+        displayName: connectorType.displayName,
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),
@@ -199,14 +264,15 @@ function convertDynamicConnectorsToContractsInternal(
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 
-// Legacy exports for backward compatibility - these will be deprecated
-// TODO: Remove these once all consumers are updated to use the lazy-loaded versions
-export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(staticConnectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(
-  staticConnectors,
-  [],
-  true
-);
+export interface WorkflowZodSchemaOptions {
+  lightweight?: boolean;
+}
+
+// NOTE: The former `WORKFLOW_ZOD_SCHEMA` / `WORKFLOW_ZOD_SCHEMA_LOOSE`
+// module-level constants were removed in favour of `getWorkflowZodSchema()` /
+// `getWorkflowZodSchemaLoose()`. They were unreferenced and their eager
+// `generateYamlSchemaFromConnectors(...)` calls were a significant contributor
+// to the startup heap described in https://github.com/elastic/kibana/issues/264175.
 
 /**
  * Combine static connectors with dynamic Elasticsearch and Kibana connectors
@@ -226,7 +292,7 @@ export function getAllConnectorsInternal(): ConnectorContractUnion[] {
   const elasticsearchConnectors = getElasticsearchConnectors();
   const kibanaConnectors = getKibanaConnectors();
   const allConnectors = [
-    ...staticConnectors,
+    ...getConnectorSchemas().staticConnectors,
     ...elasticsearchConnectors,
     ...kibanaConnectors,
     ...registeredStepDefinitions,
@@ -317,7 +383,7 @@ export function addDynamicConnectorsToCache(
   const elasticsearchConnectors = getElasticsearchConnectors();
   const kibanaConnectors = getKibanaConnectors();
   const baseConnectors = [
-    ...staticConnectors,
+    ...getConnectorSchemas().staticConnectors,
     ...elasticsearchConnectors,
     ...kibanaConnectors,
     ...registeredStepDefinitions,
@@ -363,6 +429,11 @@ export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDepr
   for (const connector of getAllConnectorsInternal()) {
     if (connector.deprecation) {
       deprecatedStepMetadata[connector.type] = connector.deprecation;
+    } else {
+      const prefixMatch = getStepPrefixDeprecationInfo(connector.type);
+      if (prefixMatch) {
+        deprecatedStepMetadata[connector.type] = prefixMatch;
+      }
     }
   }
 
@@ -375,7 +446,7 @@ export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDepr
 }
 
 export function getDeprecatedStepMetadata(stepType: string): StepDeprecationInfo | undefined {
-  return getDeprecatedStepMetadataMap()[stepType];
+  return getDeprecatedStepMetadataMap()[stepType] ?? getStepPrefixDeprecationInfo(stepType);
 }
 
 export function isDeprecatedStepType(stepType: string): boolean {
@@ -390,8 +461,13 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  registeredTriggerIds: string[] = []
+  registeredTriggerIds: string[] = [],
+  options: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
+  if (options.lightweight) {
+    return generateLightweightYamlSchema(registeredTriggerIds);
+  }
+
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
 };

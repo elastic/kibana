@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
@@ -21,7 +22,10 @@ import { validateVariable } from './validate_variable';
 import { validateVariables } from './validate_variables';
 import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
-import { getContextSchemaForStep } from '../../workflow_context/lib/get_context_for_path';
+import {
+  extendWithPathSpecificContext,
+  getContextSchemaForStep,
+} from '../../workflow_context/lib/get_context_for_path';
 import { getWorkflowContextSchema } from '../../workflow_context/lib/get_workflow_context_schema';
 import type { VariableItem, YamlValidationResult } from '../model/types';
 
@@ -31,6 +35,9 @@ const mockGetScalarValueAtOffset = getScalarValueAtOffset as jest.MockedFunction
 
 const mockGetContextSchemaForStep = getContextSchemaForStep as jest.MockedFunction<
   typeof getContextSchemaForStep
+>;
+const mockExtendWithPathSpecificContext = extendWithPathSpecificContext as jest.MockedFunction<
+  typeof extendWithPathSpecificContext
 >;
 const mockGetWorkflowContextSchema = getWorkflowContextSchema as jest.MockedFunction<
   typeof getWorkflowContextSchema
@@ -48,6 +55,7 @@ describe('validateVariables', () => {
     jest.clearAllMocks();
     mockGetWorkflowContextSchema.mockReturnValue(DynamicWorkflowContextSchema);
     mockGetContextSchemaForStep.mockReturnValue(mockStepSchema as any);
+    mockExtendWithPathSpecificContext.mockImplementation((schema) => schema);
     mockGetContextSchemaWithTemplateLocals.mockReturnValue(mockStepSchema as any);
   });
 
@@ -265,6 +273,24 @@ describe('validateVariables', () => {
     expect(result).toEqual([]);
     expect(mockGetContextSchemaForStep).not.toHaveBeenCalled();
     expect(mockValidateVariable).not.toHaveBeenCalled();
+  });
+
+  it('should cache path and template-local context for variables with the same yaml path and offset', () => {
+    const sharedPath: Array<string | number> = ['steps', 0, 'with', 'value'];
+    const sharedOffset = 42;
+    const variables = [
+      createVariableItem({ key: 'var1', yamlPath: sharedPath, offset: sharedOffset }),
+      createVariableItem({ key: 'var2', yamlPath: sharedPath, offset: sharedOffset }),
+    ];
+
+    mockValidateVariable.mockReturnValue({} as YamlValidationResult);
+
+    validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition, {} as Document);
+
+    expect(mockGetContextSchemaForStep).toHaveBeenCalledTimes(1);
+    expect(mockExtendWithPathSpecificContext).toHaveBeenCalledTimes(1);
+    expect(mockGetContextSchemaWithTemplateLocals).toHaveBeenCalledTimes(1);
+    expect(mockValidateVariable).toHaveBeenCalledTimes(2);
   });
 
   it('should pass correct parameters to validateVariable', () => {

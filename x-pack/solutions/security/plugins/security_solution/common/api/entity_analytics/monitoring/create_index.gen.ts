@@ -14,28 +14,32 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const CreatePrivilegesImportIndexRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The index name to create
+     */
+    name: z.string(),
+    /**
+     * The mode of index creation, either 'standard' or 'lookup'
+     */
+    mode: z.enum(['standard', 'lookup']),
+  })
+);
 export type CreatePrivilegesImportIndexRequestBody = z.infer<
   typeof CreatePrivilegesImportIndexRequestBody
 >;
-export const CreatePrivilegesImportIndexRequestBody = z.object({
-  /**
-   * The index name to create
-   */
-  name: z.string(),
-  /**
-   * The mode of index creation, either 'standard' or 'lookup'
-   */
-  mode: z.enum(['standard', 'lookup']),
-});
 export type CreatePrivilegesImportIndexRequestBodyInput = z.input<
   typeof CreatePrivilegesImportIndexRequestBody
 >;
 
+export const CreatePrivilegesImportIndexResponse = lazySchema(() =>
+  z.object({
+    success: z.boolean().optional(),
+  })
+);
 export type CreatePrivilegesImportIndexResponse = z.infer<
   typeof CreatePrivilegesImportIndexResponse
 >;
-export const CreatePrivilegesImportIndexResponse = z.object({
-  success: z.boolean().optional(),
-});

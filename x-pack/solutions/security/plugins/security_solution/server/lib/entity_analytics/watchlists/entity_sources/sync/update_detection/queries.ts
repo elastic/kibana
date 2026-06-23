@@ -9,9 +9,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { EntityType } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DateRange } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { AfterKey } from './types';
 
 const EUID_RUNTIME_FIELD = 'euid';
+
+const DEFAULT_RANGE: DateRange = { start: 'now-10d', end: 'now' };
 
 /** Entity name fields for top_hits _source when syncMarker is set (used by getEntityNameFromDoc) */
 const ENTITY_NAME_SOURCE_FIELDS = [
@@ -32,10 +35,13 @@ export const buildIndexSourceSearchBody = (
   correlationValues: string[],
   afterKey?: AfterKey,
   pageSize: number = 100,
-  queryRule?: string
+  queryRule?: string,
+  range?: DateRange
 ): Omit<estypes.SearchRequest, 'index'> => {
+  const effectiveRange = range ?? DEFAULT_RANGE;
   const must: estypes.QueryDslQueryContainer[] = [
     { terms: { [identifierField]: correlationValues } },
+    { range: { '@timestamp': { gte: effectiveRange.start, lte: effectiveRange.end } } },
   ];
 
   if (queryRule) {
@@ -66,14 +72,23 @@ export const buildEntitiesSearchBody = (
   afterKey?: AfterKey,
   pageSize: number = 100,
   syncMarker?: string,
-  allowedEntityIds?: string[]
+  allowedEntityIds?: string[],
+  queryRule?: string,
+  range?: DateRange
 ): Omit<estypes.SearchRequest, 'index'> => {
-  const must = [euid.dsl.getEuidDocumentsContainsIdFilter(entityType)];
+  const must: estypes.QueryDslQueryContainer[] = [
+    euid.dsl.getEuidDocumentsContainsIdFilter(entityType),
+  ];
   if (allowedEntityIds && allowedEntityIds.length > 0) {
     must.push({ terms: { [EUID_RUNTIME_FIELD]: allowedEntityIds } });
   }
   if (syncMarker) {
     must.push({ range: { '@timestamp': { gte: syncMarker, lte: 'now' } } });
+  } else if (range) {
+    must.push({ range: { '@timestamp': { gte: range.start, lte: range.end } } });
+  }
+  if (queryRule) {
+    must.push(toElasticsearchQuery(fromKueryExpression(queryRule)));
   }
 
   const entitiesComposite = {

@@ -920,3 +920,35 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "dset2_5sBzpZGGHYpLUFV",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:23Z",
+      "event": { "kind": "asset" },
+      "data_stream": { "dataset": "jamf" },
+      "user": { "name": "should-be-local", "email": "should_be_local@example.com" },
+      "host": { "id": "macbookpro-123" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "dset2_5sBzpZGGHYpLUFD",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:24Z",
+      "event": { "kind": "asset" },
+      "data_stream": { "dataset": "jamf" },
+      "user": { "name": "root" },
+      "host": { "id": "macbookpro-123" }
+    }
+  }
+}

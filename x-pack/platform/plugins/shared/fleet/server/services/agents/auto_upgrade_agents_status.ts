@@ -7,6 +7,8 @@
 
 import pMap from 'p-map';
 
+import { escapeQuotes } from '@kbn/es-query';
+
 import { AGENTS_PREFIX } from '../../../common';
 import { AgentStatusKueryHelper } from '../../../common/services';
 import type {
@@ -32,7 +34,9 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"`,
+      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
+        agentPolicyId
+      )}"`,
       aggregations: {
         versions: {
           terms: {
@@ -59,7 +63,9 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
+      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
+        agentPolicyId
+      )}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
       aggregations: {
         action_id_versions: {
           multi_terms: {
@@ -124,7 +130,9 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:* AND not ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
+      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
+        agentPolicyId
+      )}" AND ${AGENTS_PREFIX}.upgrade_details.state:* AND not ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
       aggregations: {
         action_id_versions: {
           multi_terms: {

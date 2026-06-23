@@ -8,6 +8,7 @@
 import React, { useCallback, useContext, useState } from 'react';
 
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useSelector, useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
@@ -94,7 +95,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       items: [
         {
           name: labels.EXPLORE_IN_ML_APP,
-          icon: <EuiIcon type="dataVisualizer" size="m" />,
+          icon: <EuiIcon type="dataVisualizer" size="m" aria-hidden={true} />,
           href: getMLJobLinkHref({
             basePath,
             monitorId,
@@ -129,7 +130,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         {
           name: labels.DISABLE_ANOMALY_DETECTION,
           'data-test-subj': 'uptimeDeleteMLJobBtn',
-          icon: <EuiIcon type="trash" size="m" />,
+          icon: <EuiIcon type="trash" size="m" aria-hidden={true} />,
           onClick: () => {
             setIsPopOverOpen(false);
             onJobDelete();
@@ -168,6 +169,9 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.uptime.manageMlJob.popoverAriaLabel', {
+          defaultMessage: 'Manage anomaly detection actions',
+        })}
         button={button}
         isOpen={isPopOverOpen}
         closePopover={() => setIsPopOverOpen(false)}

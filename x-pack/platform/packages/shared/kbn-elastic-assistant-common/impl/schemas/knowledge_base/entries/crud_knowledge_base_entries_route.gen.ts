@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   KnowledgeBaseEntryCreateProps,
@@ -24,69 +24,77 @@ import {
 } from './common_attributes.gen';
 import { NonEmptyString } from '../../common_attributes.gen';
 
+export const CreateKnowledgeBaseEntryRequestBody = lazySchema(() => KnowledgeBaseEntryCreateProps);
 export type CreateKnowledgeBaseEntryRequestBody = z.infer<
   typeof CreateKnowledgeBaseEntryRequestBody
 >;
-export const CreateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryCreateProps;
 export type CreateKnowledgeBaseEntryRequestBodyInput = z.input<
   typeof CreateKnowledgeBaseEntryRequestBody
 >;
 
+export const CreateKnowledgeBaseEntryResponse = lazySchema(() => KnowledgeBaseEntryResponse);
 export type CreateKnowledgeBaseEntryResponse = z.infer<typeof CreateKnowledgeBaseEntryResponse>;
-export const CreateKnowledgeBaseEntryResponse = KnowledgeBaseEntryResponse;
 
+export const DeleteKnowledgeBaseEntryRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier (`id`) of the Knowledge Base Entry to delete.
+     */
+    id: NonEmptyString,
+  })
+);
 export type DeleteKnowledgeBaseEntryRequestParams = z.infer<
   typeof DeleteKnowledgeBaseEntryRequestParams
 >;
-export const DeleteKnowledgeBaseEntryRequestParams = z.object({
-  /**
-   * The unique identifier (`id`) of the Knowledge Base Entry to delete.
-   */
-  id: NonEmptyString,
-});
 export type DeleteKnowledgeBaseEntryRequestParamsInput = z.input<
   typeof DeleteKnowledgeBaseEntryRequestParams
 >;
 
+export const DeleteKnowledgeBaseEntryResponse = lazySchema(() => DeleteResponseFields);
 export type DeleteKnowledgeBaseEntryResponse = z.infer<typeof DeleteKnowledgeBaseEntryResponse>;
-export const DeleteKnowledgeBaseEntryResponse = DeleteResponseFields;
 
+export const ReadKnowledgeBaseEntryRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
+     */
+    id: NonEmptyString,
+  })
+);
 export type ReadKnowledgeBaseEntryRequestParams = z.infer<
   typeof ReadKnowledgeBaseEntryRequestParams
 >;
-export const ReadKnowledgeBaseEntryRequestParams = z.object({
-  /**
-   * The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
-   */
-  id: NonEmptyString,
-});
 export type ReadKnowledgeBaseEntryRequestParamsInput = z.input<
   typeof ReadKnowledgeBaseEntryRequestParams
 >;
 
+export const ReadKnowledgeBaseEntryResponse = lazySchema(() => KnowledgeBaseEntryResponse);
 export type ReadKnowledgeBaseEntryResponse = z.infer<typeof ReadKnowledgeBaseEntryResponse>;
-export const ReadKnowledgeBaseEntryResponse = KnowledgeBaseEntryResponse;
 
+export const UpdateKnowledgeBaseEntryRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier (`id`) of the Knowledge Base Entry to update.
+     */
+    id: NonEmptyString,
+  })
+);
 export type UpdateKnowledgeBaseEntryRequestParams = z.infer<
   typeof UpdateKnowledgeBaseEntryRequestParams
 >;
-export const UpdateKnowledgeBaseEntryRequestParams = z.object({
-  /**
-   * The unique identifier (`id`) of the Knowledge Base Entry to update.
-   */
-  id: NonEmptyString,
-});
 export type UpdateKnowledgeBaseEntryRequestParamsInput = z.input<
   typeof UpdateKnowledgeBaseEntryRequestParams
 >;
 
+export const UpdateKnowledgeBaseEntryRequestBody = lazySchema(
+  () => KnowledgeBaseEntryUpdateRouteProps
+);
 export type UpdateKnowledgeBaseEntryRequestBody = z.infer<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;
-export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateRouteProps;
 export type UpdateKnowledgeBaseEntryRequestBodyInput = z.input<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;
 
+export const UpdateKnowledgeBaseEntryResponse = lazySchema(() => KnowledgeBaseEntryResponse);
 export type UpdateKnowledgeBaseEntryResponse = z.infer<typeof UpdateKnowledgeBaseEntryResponse>;
-export const UpdateKnowledgeBaseEntryResponse = KnowledgeBaseEntryResponse;

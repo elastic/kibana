@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { joinIndices, timeseriesIndices } from '../../../__tests__/commands/context_fixtures';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
@@ -16,7 +16,9 @@ import {
   shouldBeQuotedSource,
   sourceExists,
   buildSourcesDefinitions,
+  buildViewsDefinitions,
   getLookupJoinSource,
+  hasWiredStreamsInQuery,
   getIndexSourcesFromQuery,
 } from './sources';
 import { EsqlQuery, synth, Walker } from '@elastic/esql';
@@ -156,48 +158,260 @@ describe('sourceExists', () => {
   });
 });
 
-describe('buildSourcesDefinitions with timeseries', () => {
-  test('keeps timeseries suggestions list-facing and attaches an accept command', () => {
-    const sources = [
-      { name: 'my_timeseries_index', isIntegration: false, type: SOURCES_TYPES.TIMESERIES },
-      { name: 'regular_index', isIntegration: false, type: SOURCES_TYPES.INDEX },
-    ];
+describe('buildSourcesDefinitions', () => {
+  describe('timeseries', () => {
+    test('keeps timeseries suggestions list-facing and attaches an accept command', () => {
+      const sources = [
+        { name: 'my_timeseries_index', isIntegration: false, type: SOURCES_TYPES.TIMESERIES },
+        { name: 'regular_index', isIntegration: false, type: SOURCES_TYPES.INDEX },
+      ];
 
-    const suggestions = buildSourcesDefinitions(sources, {
-      textBeforeCursor: 'FROM my_t',
-      commandStart: 0,
+      const suggestions = buildSourcesDefinitions(sources, {
+        textBeforeCursor: 'FROM my_t',
+        commandStart: 0,
+      });
+
+      const timeseriesSuggestion = suggestions.find((s) => s.label === 'my_timeseries_index');
+      const regularSuggestion = suggestions.find((s) => s.label === 'regular_index');
+      const timeseriesCommand =
+        timeseriesSuggestion?.command?.id === 'esql.multiCommands'
+          ? (
+              JSON.parse(timeseriesSuggestion.command.arguments?.[0]?.commands ?? '[]') as Array<{
+                id: string;
+                arguments?: unknown[];
+                title: string;
+              }>
+            ).find(({ id }) => id === ESQL_APPLY_TEXT_REPLACEMENT_COMMAND)
+          : timeseriesSuggestion?.command;
+
+      expect(timeseriesSuggestion?.text).toBe('my_timeseries_index');
+      expect(timeseriesSuggestion?.filterText).toBeUndefined();
+      expect(timeseriesSuggestion?.rangeToReplace).toBeUndefined();
+      expect(timeseriesCommand).toEqual({
+        title: 'Apply text replacement',
+        id: ESQL_APPLY_TEXT_REPLACEMENT_COMMAND,
+        arguments: [
+          {
+            replacementText: 'TS my_timeseries_index',
+            replaceStart: '0',
+            replaceEnd: String('FROM '.length + 'my_timeseries_index'.length),
+          },
+        ],
+      });
+
+      expect(regularSuggestion?.text).toBe('regular_index');
+      expect(regularSuggestion?.rangeToReplace).toBeUndefined();
+    });
+  });
+
+  describe('label', () => {
+    it('uses title as label when provided', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        { name: 'my-index', isIntegration: false, title: 'My Index Title' },
+      ]);
+      expect(suggestion.label).toBe('My Index Title');
     });
 
-    const timeseriesSuggestion = suggestions.find((s) => s.label === 'my_timeseries_index');
-    const regularSuggestion = suggestions.find((s) => s.label === 'regular_index');
-    const timeseriesCommand =
-      timeseriesSuggestion?.command?.id === 'esql.multiCommands'
-        ? (
-            JSON.parse(timeseriesSuggestion.command.arguments?.[0]?.commands ?? '[]') as Array<{
-              id: string;
-              arguments?: unknown[];
-              title: string;
-            }>
-          ).find(({ id }) => id === ESQL_APPLY_TEXT_REPLACEMENT_COMMAND)
-        : timeseriesSuggestion?.command;
+    it('falls back to name when title is not provided', () => {
+      const [suggestion] = buildSourcesDefinitions([{ name: 'my-index', isIntegration: false }]);
+      expect(suggestion.label).toBe('my-index');
+    });
+  });
 
-    expect(timeseriesSuggestion?.text).toBe('my_timeseries_index');
-    expect(timeseriesSuggestion?.filterText).toBeUndefined();
-    expect(timeseriesSuggestion?.rangeToReplace).toBeUndefined();
-    expect(timeseriesCommand).toEqual({
-      title: 'Apply text replacement',
-      id: ESQL_APPLY_TEXT_REPLACEMENT_COMMAND,
-      arguments: [
+  describe('kind', () => {
+    it('assigns Folder kind to wired streams', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        { name: 'logs', isIntegration: false, type: SOURCES_TYPES.WIRED_STREAM },
+      ]);
+      expect(suggestion.kind).toBe('Folder');
+    });
+
+    it('assigns Class kind to classic streams', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        { name: 'logs-classic', isIntegration: false, type: SOURCES_TYPES.CLASSIC_STREAM },
+      ]);
+      expect(suggestion.kind).toBe('Class');
+    });
+
+    it('assigns Class kind to integrations (isIntegration=true)', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        { name: 'logs-nginx.access-default', isIntegration: true },
+      ]);
+      expect(suggestion.kind).toBe('Class');
+    });
+
+    it('assigns Issue kind to regular indices', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        { name: 'my-index', isIntegration: false, type: SOURCES_TYPES.INDEX },
+      ]);
+      expect(suggestion.kind).toBe('Issue');
+    });
+
+    it('assigns Issue kind when type is not provided', () => {
+      const [suggestion] = buildSourcesDefinitions([{ name: 'my-index', isIntegration: false }]);
+      expect(suggestion.kind).toBe('Issue');
+    });
+  });
+
+  describe('documentation', () => {
+    it('is undefined when neither description nor links are provided', () => {
+      const [suggestion] = buildSourcesDefinitions([{ name: 'my-index', isIntegration: false }]);
+      expect(suggestion.documentation).toBeUndefined();
+    });
+
+    it('includes only description when no links are provided', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        { name: 'my-index', isIntegration: false, description: 'An index description' },
+      ]);
+      expect(suggestion.documentation).toEqual({ value: 'An index description' });
+    });
+
+    it('includes only links when no description is provided', () => {
+      const [suggestion] = buildSourcesDefinitions([
         {
-          replacementText: 'TS my_timeseries_index',
-          replaceStart: '0',
-          replaceEnd: String('FROM '.length + 'my_timeseries_index'.length),
+          name: 'my-index',
+          isIntegration: false,
+          links: [{ label: 'Docs', url: 'https://example.com' }],
         },
-      ],
+      ]);
+      expect(suggestion.documentation).toEqual({ value: '[Docs](https://example.com)' });
     });
 
-    expect(regularSuggestion?.text).toBe('regular_index');
-    expect(regularSuggestion?.rangeToReplace).toBeUndefined();
+    it('includes links followed by a blank line and description when both are provided', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        {
+          name: 'my-index',
+          isIntegration: false,
+          description: 'An index description',
+          links: [
+            { label: 'Docs', url: 'https://example.com' },
+            { label: 'More', url: 'https://example.com/more' },
+          ],
+        },
+      ]);
+      expect(suggestion.documentation).toEqual({
+        value:
+          '[Docs](https://example.com)\n[More](https://example.com/more)\n\nAn index description',
+      });
+    });
+  });
+
+  describe('detail', () => {
+    it('shows Integration detail for integrations', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        { name: 'logs-nginx.access-default', isIntegration: true },
+      ]);
+      expect(suggestion.detail).toBe(SOURCES_TYPES.INTEGRATION);
+    });
+
+    it('shows the type as detail for non-integrations', () => {
+      const [suggestion] = buildSourcesDefinitions([
+        { name: 'my-index', isIntegration: false, type: SOURCES_TYPES.WIRED_STREAM },
+      ]);
+      expect(suggestion.detail).toBe(SOURCES_TYPES.WIRED_STREAM);
+    });
+
+    it('defaults to Index detail when type is not provided', () => {
+      const [suggestion] = buildSourcesDefinitions([{ name: 'my-index', isIntegration: false }]);
+      expect(suggestion.detail).toBe(SOURCES_TYPES.INDEX);
+    });
+  });
+});
+
+describe('buildViewsDefinitions', () => {
+  describe('basic', () => {
+    it('creates a suggestion for each view', () => {
+      const suggestions = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*' },
+        { name: 'another-view', query: 'FROM metrics*' },
+      ]);
+      expect(suggestions).toHaveLength(2);
+      expect(suggestions.map((s) => s.label)).toEqual(['my-view', 'another-view']);
+    });
+
+    it('filters out already used views', () => {
+      const suggestions = buildViewsDefinitions(
+        [
+          { name: 'my-view', query: 'FROM logs*' },
+          { name: 'used-view', query: 'FROM metrics*' },
+        ],
+        ['used-view']
+      );
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].label).toBe('my-view');
+    });
+
+    it('quotes view names containing special characters', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my:view', query: 'FROM logs*' }]);
+      expect(suggestion.text).toBe('"my:view"');
+    });
+  });
+
+  describe('detail', () => {
+    it('defaults to View when type is not provided', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my-view', query: 'FROM logs*' }]);
+      expect(suggestion.detail).toBe('View');
+    });
+
+    it('shows the type when provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*', type: SOURCES_TYPES.QUERY_STREAM },
+      ]);
+      expect(suggestion.detail).toBe(SOURCES_TYPES.QUERY_STREAM);
+    });
+  });
+
+  describe('documentation', () => {
+    it('is undefined when neither description nor links are provided', () => {
+      const [suggestion] = buildViewsDefinitions([{ name: 'my-view', query: 'FROM logs*' }]);
+      expect(suggestion.documentation).toBeUndefined();
+    });
+
+    it('includes only description when no links are provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        { name: 'my-view', query: 'FROM logs*', description: 'A query stream description' },
+      ]);
+      expect(suggestion.documentation).toEqual({ value: 'A query stream description' });
+    });
+
+    it('includes only links when no description is provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        {
+          name: 'my-view',
+          query: 'FROM logs*',
+          links: [
+            {
+              label: 'View details',
+              url: 'http://localhost:5699/foo/app/streams/my-view/management/overview',
+            },
+          ],
+        },
+      ]);
+      expect(suggestion.documentation).toEqual({
+        value: '[View details](http://localhost:5699/foo/app/streams/my-view/management/overview)',
+      });
+    });
+
+    it('includes links followed by a blank line and description when both are provided', () => {
+      const [suggestion] = buildViewsDefinitions([
+        {
+          name: 'my-view',
+          query: 'FROM logs*',
+          description: 'Error logs from all sources',
+          links: [
+            {
+              label: 'View details',
+              url: 'http://localhost:5699/foo/app/streams/my-view/management/overview',
+            },
+            { label: 'Docs', url: 'https://example.com/docs' },
+          ],
+        },
+      ]);
+      expect(suggestion.documentation).toEqual({
+        value:
+          '[View details](http://localhost:5699/foo/app/streams/my-view/management/overview)\n[Docs](https://example.com/docs)\n\nError logs from all sources',
+      });
+    });
   });
 });
 
@@ -234,5 +448,55 @@ describe('getSourceOfJoinTarget', () => {
     const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
 
     expect(joinTarget).toBe('lookup_index');
+  });
+});
+
+describe('hasWiredStreamsInQuery', () => {
+  const wiredStreamSource = (name: string) =>
+    ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM } as ESQLSourceResult);
+
+  const indexSource = (name: string) =>
+    ({ name, hidden: false, type: SOURCES_TYPES.INDEX } as ESQLSourceResult);
+
+  it('returns false when getSources is missing', async () => {
+    const result = await hasWiredStreamsInQuery('FROM logs-ds', {});
+    expect(result).toBe(false);
+  });
+
+  it('returns false and does not call any callbacks when the query has no FROM sources', async () => {
+    const getSources = jest.fn(async () => [wiredStreamSource('ignored')]);
+
+    const result = await hasWiredStreamsInQuery('ROW x = 1', { getSources });
+
+    expect(result).toBe(false);
+    expect(getSources).not.toHaveBeenCalled();
+  });
+
+  it('returns false when a data stream is used but it is not a wired stream', async () => {
+    const getSources = jest.fn(async () => [indexSource('logs')]);
+
+    const result = await hasWiredStreamsInQuery('FROM logs', { getSources });
+
+    expect(result).toBe(false);
+  });
+
+  it('returns true when the query has a source that is a wired stream', async () => {
+    const getSources = jest.fn(async () => [wiredStreamSource('logs.otel.child')]);
+
+    const result = await hasWiredStreamsInQuery('FROM logs.otel.child | LIMIT 10', {
+      getSources,
+    });
+
+    expect(result).toBe(true);
+    expect(getSources).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns true when the wired stream has a wildcard in the name', async () => {
+    const getSources = jest.fn(async () => [wiredStreamSource('logs')]);
+
+    const result = await hasWiredStreamsInQuery('FROM logs*', { getSources });
+
+    expect(result).toBe(true);
+    expect(getSources).toHaveBeenCalledTimes(1);
   });
 });

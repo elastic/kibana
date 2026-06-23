@@ -43,6 +43,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiIconTip,
+  EuiSplitButton,
   useEuiTheme,
   type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
@@ -53,7 +54,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
@@ -72,10 +72,8 @@ import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
 
-/** Feature flag key for the new DateRangePicker. Falls back to `false` (legacy picker). */
+/** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
 const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
-
-const BUTTON_MIN_WIDTH = 108;
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -253,10 +251,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
   useBackgroundSearchButton?: boolean;
   /**
-   * Opt-in to the new DateRangePicker. The new picker is shown only when both
-   * this prop is `true` and the `unifiedSearch.newDateRangePickerEnabled` feature
-   * flag is enabled. When the feature flag is disabled, the legacy
-   * EuiSuperDatePicker is always used regardless of this prop.
+   * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
+   * to opt out and keep the legacy EuiSuperDatePicker. The new picker is shown
+   * only when this resolves to `true` *and* the
+   * `unifiedSearch.newDateRangePickerEnabled` feature flag is enabled — when
+   * the flag is disabled, the legacy picker is always used.
    */
   enableDateRangePicker?: boolean;
 }
@@ -338,6 +337,7 @@ export const QueryBarTopRow = React.memo(
       showDatePicker = true,
       showAutoRefreshOnly = false,
       showSubmitButton = true,
+      enableDateRangePicker = true,
     } = props;
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
@@ -391,8 +391,8 @@ export const QueryBarTopRow = React.memo(
     } = kibana.services;
 
     const shouldUseLegacyTimePicker =
-      !props.enableDateRangePicker ||
-      !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, false);
+      !enableDateRangePicker ||
+      !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
@@ -811,9 +811,19 @@ export const QueryBarTopRow = React.memo(
       } else {
         const noTimeFieldNameDisabled =
           typeof isDisabled === 'object' && isDisabled.display !== undefined;
+        // Visualize-style consumers request auto-refresh-only mode via
+        // `showAutoRefreshOnly` + `!showDatePicker`. The legacy picker rendered a
+        // read-only date display while still letting users operate the auto-refresh
+        // controls. The new picker has no read-only mode, so we disable it here —
+        // but that also removes access to auto-refresh, a temporary regression.
+        // TODO: add a `readOnly` prop to the new picker so auto-refresh stays
+        // operable, and use it instead of `disabled` for this case.
+        const autoRefreshOnlyDisabled = Boolean(showAutoRefreshOnly && !showDatePicker);
+        const pickerDisabled =
+          Boolean(props.isDisabled) || noTimeFieldNameDisabled || autoRefreshOnlyDisabled;
         datePicker = (
           <>
-            {noTimeFieldNameDisabled && (
+            {(noTimeFieldNameDisabled || autoRefreshOnlyDisabled) && (
               // Hidden sibling so FTR tests can detect the disabled state via
               // testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'), matching
               // the span the legacy picker renders inside its isDisabled.display node.
@@ -822,13 +832,14 @@ export const QueryBarTopRow = React.memo(
             <DateRangePicker
               className="kbnQueryBar__datePicker"
               value={
-                noTimeFieldNameDisabled ? strings.getDisabledDatePickerLabel() : dateRangeValue
+                noTimeFieldNameDisabled || autoRefreshOnlyDisabled
+                  ? strings.getDisabledDatePickerLabel()
+                  : dateRangeValue
               }
               onChange={onDateRangeChange}
               onInputChange={onDateRangeInputChange}
               isInvalid={isDateRangeInvalid}
-              isLoading={props.isLoading}
-              disabled={props.isDisabled || noTimeFieldNameDisabled}
+              disabled={pickerDisabled}
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}
@@ -864,43 +875,50 @@ export const QueryBarTopRow = React.memo(
 
       if (props.useBackgroundSearchButton) {
         return (
-          <SplitButton
-            aria-label={buttonLabelCancel}
-            color="text"
-            data-test-subj="queryCancelButton"
-            iconType="cross"
-            isMainButtonLoading={isCancelling}
-            isDisabled={isCancelling}
-            isSecondaryButtonDisabled={!canSendToBackground}
-            isSecondaryButtonLoading={isSendingToBackground}
-            onClick={onClickCancelButton}
-            onSecondaryButtonClick={onClickSendToBackground}
-            secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            secondaryButtonIcon="backgroundTask"
-            secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-            size="s"
-            minWidth={BUTTON_MIN_WIDTH}
-          >
-            {buttonLabelCancel}
-          </SplitButton>
+          <EuiSplitButton color="text" size="s">
+            <EuiSplitButton.ActionPrimary
+              aria-label={buttonLabelCancel}
+              iconType="cross"
+              isLoading={isCancelling}
+              isDisabled={isCancelling}
+              onClick={onClickCancelButton}
+              data-test-subj="queryCancelButton"
+            >
+              {buttonLabelCancel}
+            </EuiSplitButton.ActionPrimary>
+            <EuiSplitButton.ActionSecondary
+              isLoading={isSendingToBackground}
+              isDisabled={!canSendToBackground}
+              onClick={onClickSendToBackground}
+              tooltipProps={{
+                content: strings.getSendToBackgroundLabel(),
+                disableScreenReaderOutput: true,
+              }}
+              aria-label={strings.getSendToBackgroundLabel()}
+              iconType="backgroundTask"
+              data-test-subj="queryCancelButton-secondary-button"
+            />
+          </EuiSplitButton>
         );
       }
 
       if (submitButtonIconOnly) {
         return (
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={buttonLabelCancel}
-            onClick={onClickCancelButton}
-            size="s"
-            data-test-subj="queryCancelButton"
-            color="text"
-            display="base"
-            isLoading={isCancelling}
-            isDisabled={isCancelling}
-          >
-            {buttonLabelCancel}
-          </EuiButtonIcon>
+          <EuiToolTip content={buttonLabelCancel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={buttonLabelCancel}
+              onClick={onClickCancelButton}
+              size="s"
+              data-test-subj="queryCancelButton"
+              color="text"
+              display="base"
+              isLoading={isCancelling}
+              isDisabled={isCancelling}
+            >
+              {buttonLabelCancel}
+            </EuiButtonIcon>
+          </EuiToolTip>
         );
       }
 
@@ -956,25 +974,30 @@ export const QueryBarTopRow = React.memo(
       } = getSubmitButtonProps();
 
       const updateButton = props.useBackgroundSearchButton ? (
-        <SplitButton
-          aria-label={buttonAriaLabel}
-          color={buttonColor}
-          data-test-subj="querySubmitButton"
-          iconType={buttonIcon}
-          isDisabled={isDateRangeInvalid || props.isDisabled}
-          isLoading={props.isLoading}
-          isSecondaryButtonDisabled={!canSendToBackground}
-          isSecondaryButtonLoading={isSendingToBackground}
-          onClick={onClickSubmitButton}
-          onSecondaryButtonClick={onClickSendToBackground}
-          secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-          secondaryButtonIcon="backgroundTask"
-          secondaryButtonTitle={strings.getSendToBackgroundLabel()}
-          size="s"
-          minWidth={BUTTON_MIN_WIDTH}
-        >
-          {buttonText}
-        </SplitButton>
+        <EuiSplitButton color={buttonColor} size="s">
+          <EuiSplitButton.ActionPrimary
+            iconType={buttonIcon}
+            isLoading={props.isLoading}
+            isDisabled={isDateRangeInvalid || props.isDisabled}
+            onClick={onClickSubmitButton}
+            aria-label={buttonAriaLabel}
+            data-test-subj="querySubmitButton"
+          >
+            {buttonText}
+          </EuiSplitButton.ActionPrimary>
+          <EuiSplitButton.ActionSecondary
+            iconType="backgroundTask"
+            isLoading={isSendingToBackground}
+            isDisabled={!canSendToBackground}
+            onClick={onClickSendToBackground}
+            tooltipProps={{
+              content: strings.getSendToBackgroundLabel(),
+              disableScreenReaderOutput: true,
+            }}
+            aria-label={strings.getSendToBackgroundLabel()}
+            data-test-subj="querySubmitButton-secondary-button"
+          />
+        </EuiSplitButton>
       ) : (
         <EuiSuperUpdateButton
           iconType={buttonIcon}
@@ -990,7 +1013,6 @@ export const QueryBarTopRow = React.memo(
           data-test-subj="querySubmitButton"
           toolTipProps={{
             content: buttonAriaLabel,
-            delay: 'long',
             position: 'bottom',
           }}
         >
@@ -1254,10 +1276,12 @@ export const QueryBarTopRow = React.memo(
                 {/* Optional wrapper for the ES|QL controls elements */}
                 {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
                   <EuiFlexItem
-                    grow={false}
+                    grow={true}
                     css={css`
+                      min-width: 0;
                       @media (max-width: ${euiTheme.breakpoint.xl}px) {
                         order: 1;
+                        flex-basis: 100%;
                       }
                     `}
                   >

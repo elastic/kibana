@@ -13,41 +13,55 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  createInternalError,
+  isAgentBuilderError,
+} from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
-import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import type {
-  ScopedRunner,
-  ScopedRunnerRunAgentParams,
+  HooksServiceStart,
+  ModelProvider,
+  RunAgentReturn,
   RunContext,
   Runner,
   RunToolReturn,
-  RunAgentReturn,
+  ScopedRunner,
+  ScopedRunnerRunAgentParams,
+  SubAgentExecutor,
   WritableToolResultStore,
-  ModelProvider,
-  HooksServiceStart,
 } from '@kbn/agent-builder-server';
-import type { WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type {
-  ScopedRunnerRunToolsParams,
-  ScopedRunnerRunInternalToolParams,
   ConversationStateManager,
   PromptManager,
+  ScopedRunnerRunInternalToolParams,
+  ScopedRunnerRunToolsParams,
   ToolManager,
+  WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
+import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
-import { createEmptyRunContext, createConversationStateManager, createToolManager } from './utils';
+import {
+  createConversationStateManager,
+  createEmptyRunContext,
+  createSubAgentExecutor,
+  createToolManager,
+} from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
-import { runTool, runInternalTool } from './run_tool';
+import { runInternalTool, runTool } from './run_tool';
 import { runAgent } from './run_agent';
-import { createStore } from './store';
+import { createResultStore } from './store/volumes/tool_results/tool_result_store';
+import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 
@@ -83,10 +97,16 @@ export interface CreateScopedRunnerDeps {
   resultStore: WritableToolResultStore;
   skillsStore: WritableSkillsStore;
   attachmentStateManager: AttachmentStateManager;
+  todoStateManager: TodoStateManager;
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
-  filestore: IFileStore;
+  /** Execution mode for this runner context. */
+  executionMode: AgentExecutionMode;
+  /** Sub-agent executor for spawning child executions. */
+  subAgentExecutor: SubAgentExecutor;
+  /** The effective agent configuration for the current run (with overrides applied). */
+  agentConfiguration?: AgentConfiguration;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -96,13 +116,17 @@ export type CreateRunnerDeps = Omit<
   | 'resultStore'
   | 'skillsStore'
   | 'attachmentStateManager'
+  | 'todoStateManager'
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
-  | 'filestore'
   | 'toolManager'
+  | 'subAgentExecutor'
+  | 'executionMode'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
+  /** Lazy getter for the execution service (breaks circular dep with runner). */
+  getExecutionService: () => AgentExecutionService;
 };
 
 export class RunnerManager {
@@ -168,34 +192,44 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, ...runnerDeps } = deps;
+  const { modelProviderFactory, getExecutionService, ...runnerDeps } = deps;
 
   const createScopedRunnerWithDeps = async ({
     request,
     defaultConnectorId,
+    telemetryMetadata,
     conversation,
     nextInput,
     promptState,
     abortSignal,
+    executionMode,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
+    telemetryMetadata?: ConnectorTelemetryMetadata;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
+    executionMode: AgentExecutionMode;
   }): Promise<ScopedRunner> => {
-    const { resultStore, filestore, skillsStore } = createStore({ conversation });
+    const resultStore = createResultStore({ conversation });
+    const skillsStore = createSkillsStore({ skills: [] });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
     });
 
+    const todoStateManager = createTodoStateManager(conversation?.state?.todos);
+
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+    const modelProvider = modelProviderFactory({ request, defaultConnectorId, telemetryMetadata });
+
+    const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
+
     const allDeps = {
       ...runnerDeps,
       modelProvider,
@@ -205,10 +239,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       resultStore,
       skillsStore,
       attachmentStateManager,
+      todoStateManager,
       stateManager,
       promptManager,
-      filestore,
       toolManager,
+      executionMode,
+      subAgentExecutor,
     };
     return createScopedRunner(allDeps);
   };
@@ -222,6 +258,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         promptState,
         defaultConnectorId,
         abortSignal,
+        // tools always executed in standalone context
+        executionMode: AgentExecutionMode.standalone,
       });
       return runner.runTool(otherParams);
     },
@@ -233,18 +271,29 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         promptState,
         defaultConnectorId,
         abortSignal,
+        // tools always executed in standalone context
+        executionMode: AgentExecutionMode.standalone,
       });
       return runner.runInternalTool(otherParams);
     },
     runAgent: async (params) => {
-      const { request, defaultConnectorId, abortSignal, ...otherParams } = params;
+      const {
+        request,
+        defaultConnectorId,
+        telemetryMetadata,
+        abortSignal,
+        executionMode = AgentExecutionMode.conversation,
+        ...otherParams
+      } = params;
       const { nextInput, conversation } = params.agentParams;
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
+        telemetryMetadata,
         conversation,
         nextInput,
         abortSignal,
+        executionMode,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

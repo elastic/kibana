@@ -40,7 +40,6 @@ export const DashboardLink: React.FC<Props> = ({
   return dashboardUrl != null ? (
     // href gives us right click -> open in new tab
     // onclick prevents page reload
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick} href={dashboardUrl}>
       {i18n.USAGE_DASHBOARD_LINK(selectedProvider, connectorName)}
     </EuiLink>

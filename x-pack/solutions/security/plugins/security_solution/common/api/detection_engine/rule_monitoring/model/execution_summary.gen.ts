@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { RuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status.gen';
 import { RuleExecutionMetrics } from './execution_metrics.gen';
@@ -25,19 +25,21 @@ import { RuleExecutionMetrics } from './execution_metrics.gen';
 > This field is under development and its usage or schema may change
 
   */
+export const RuleExecutionSummary = lazySchema(() =>
+  z.object({
+    last_execution: z.object({
+      /**
+       * Date of the last execution
+       */
+      date: z.string().datetime(),
+      /**
+       * Status of the last execution
+       */
+      status: RuleExecutionStatus,
+      status_order: RuleExecutionStatusOrder,
+      message: z.string(),
+      metrics: RuleExecutionMetrics,
+    }),
+  })
+);
 export type RuleExecutionSummary = z.infer<typeof RuleExecutionSummary>;
-export const RuleExecutionSummary = z.object({
-  last_execution: z.object({
-    /**
-     * Date of the last execution
-     */
-    date: z.string().datetime(),
-    /**
-     * Status of the last execution
-     */
-    status: RuleExecutionStatus,
-    status_order: RuleExecutionStatusOrder,
-    message: z.string(),
-    metrics: RuleExecutionMetrics,
-  }),
-});

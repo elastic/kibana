@@ -6,52 +6,65 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
-import { map } from 'rxjs';
+import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiCode,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiScreenReaderOnly,
-  EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   logicalCSS,
   useEuiTheme,
+  EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import type { SortOrder } from '@kbn/unified-data-table';
+import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
+  ROWS_HEIGHT_OPTIONS,
   UnifiedDataTable,
+  type CustomCellRenderer,
+  type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { RowControlColumn, RowControlRowProps } from '@kbn/discover-utils';
+import { AlertEpisodeDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/components/details/details_flyout';
 import { css } from '@emotion/react';
+import deepEqual from 'fast-deep-equal';
+import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
-import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
-import { AlertEpisodeActions } from '@kbn/alerting-v2-episodes-ui/components/actions/actions';
-import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
-import type {
-  AlertEpisode,
-  EpisodesFilterState,
-  EpisodesSortState,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
+import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
-import useObservable from 'react-use/lib/useObservable';
-import type { InputTimeRange } from '@kbn/data-plugin/public/query';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
+import {
+  EpisodeStatusCell,
+  EpisodeTagsCell,
+  EpisodeRuleCell,
+} from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
+import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
+import { EpisodesKpis } from './components/episodes_kpis';
+import { EpisodesHistogram } from './components/episodes_histogram';
+import { alertEpisodeToDataTableRecord } from './utils';
+import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
+import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
+import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 
 const PAGE_SIZE = 1000;
 
@@ -59,10 +72,25 @@ const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection
 
 const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
-    duration: { width: 100 },
-    actions: { width: 360 },
-    'episode.status': { width: 220 },
+    duration: { width: 110 },
+    assignees: { width: 120 },
+    'episode.status': { width: 110 },
   },
+};
+
+const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
+  tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
+  }),
+  assignees: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
+  }),
+  duration: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
+    ...column,
+    displayHeaderCellProps: { style: { textAlign: 'left' } },
+  }),
 };
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
@@ -77,48 +105,51 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
 
   & .euiDataGridRowCell__content {
     display: flex;
-    align-items: center;
+  }
+
+  & .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--autoHeight) {
+    block-size: 100%;
   }
 
   & .euiDataGridRowCell[data-gridcell-column-id='select'] .euiDataGridRowCell__content {
-    align-items: center;
     justify-content: flex-start;
-    height: 100%;
   }
 
-  & .euiDataGridRowCell[data-gridcell-column-id='actions'] .euiDataGridRowCell__content {
-    justify-content: flex-end;
+  &
+    .euiDataGridRowCell--controlColumn[data-gridcell-column-id='actions']
+    .euiDataGridRowCell__content
+    > .euiFlexGroup {
+    justify-content: center;
   }
 `;
 
-const alertEpisodeToDataTableRecord = (row: AlertEpisode, idx: number): DataTableRecord => ({
-  id: String(idx),
-  raw: {},
-  flattened: Object.fromEntries(Object.entries(row)),
-});
-
-function EmptyToolbar() {
-  return <></>;
-}
-
 export const AlertEpisodesListPage = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
+  const queryClient = useQueryClient();
+  const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
 
   useBreadcrumbs('episodes_list');
 
-  const timeRange$ = useMemo(
-    () => timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
-    [timefilter]
+  const {
+    filterState,
+    setFilterState,
+    timeRange,
+    handleTimeChange,
+    histogramBreakdownField,
+    setHistogramBreakdownField,
+  } = useEpisodesListUrlState(timefilter);
+
+  const hasActiveFilters = useMemo(
+    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER),
+    [filterState]
   );
 
-  const timeRange = useObservable(
-    timeRange$,
-    timefilter?.getTime() ?? { from: 'now-24h', to: 'now' }
-  );
+  const handleClearFilters = useCallback(() => {
+    setFilterState({ ...DEFAULT_EPISODES_LIST_FILTER });
+  }, [setFilterState]);
 
-  const [filterState, setFilterState] = useState<EpisodesFilterState>({});
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
@@ -126,22 +157,16 @@ export const AlertEpisodesListPage = () => {
     'rule.id',
     'duration',
     'tags',
-    'actions',
+    'assignees',
   ]);
-  const [rowHeight, setRowHeight] = useState(2);
-
-  const handleTimeChange = useCallback(
-    (range: InputTimeRange) => {
-      timefilter.setTime(range);
-    },
-    [timefilter]
-  );
+  const [rowHeight, setRowHeight] = useState<number>(ROWS_HEIGHT_OPTIONS.default);
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+  const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
 
   const {
     data: episodesData,
     dataView,
     isLoading,
-    refetch,
   } = useFetchAlertingEpisodesQuery({
     pageSize: PAGE_SIZE,
     services,
@@ -150,24 +175,36 @@ export const AlertEpisodesListPage = () => {
     timeRange,
   });
 
+  const { data: filteredKpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
+  const { data: totalKpis } = useEpisodesKpisQuery({ services, timeRange });
+
+  const filteredAlertEpisodesCount = filteredKpis?.alertsCount ?? 0;
+  /* The two KPI queries resolve independently; clamping avoids briefly showing an
+  impossible "filtered > total" state when the filtered count updates first.
+  */
+  const totalAlertEpisodesCount = Math.max(totalKpis?.alertsCount ?? 0, filteredAlertEpisodesCount);
+
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
     [sortState.sortField, sortState.sortDirection]
   );
 
-  const onSort = useCallback((nextSort: string[][]) => {
-    if (!nextSort.length) {
-      setSortState(DEFAULT_SORT);
-      return;
-    }
-    const [field, dir] = nextSort[nextSort.length - 1];
-    if (field != null && dir != null) {
-      setSortState({
-        sortField: String(field),
-        sortDirection: dir === 'asc' ? 'asc' : 'desc',
-      });
-    }
-  }, []);
+  const onSort = useCallback(
+    (nextSort: string[][]) => {
+      if (!nextSort.length) {
+        setSortState(DEFAULT_SORT);
+        return;
+      }
+      const [field, dir] = nextSort[nextSort.length - 1];
+      if (field != null && dir != null) {
+        setSortState({
+          sortField: String(field),
+          sortDirection: dir === 'asc' ? 'asc' : 'desc',
+        });
+      }
+    },
+    [setSortState]
+  );
 
   const ruleIds = useMemo(
     () => [...new Set(episodesData?.map((row) => row['rule.id']) ?? [])],
@@ -190,25 +227,118 @@ export const AlertEpisodesListPage = () => {
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
-  const episodeIds = useMemo(
-    () => episodesData?.map((row) => row['episode.id']).filter(Boolean),
-    [episodesData]
+  const episodeActions: EpisodeAction[] = useMemo(
+    () =>
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        spaces: services.spaces,
+        queryClient,
+        getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
+          getDiscoverHrefForRuleAndEpisodeTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: rulesCache[ruleId]?.query
+              ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
+              : undefined,
+            episodeIsoTimestamp,
+          }),
+      }),
+    [services, queryClient, rulesCache]
   );
 
-  const groupHashes = useMemo(
-    () => [...new Set(episodesData?.map((row) => row.group_hash).filter(Boolean))],
-    [episodesData]
+  const renderDocumentView = useCallback<RenderDocumentViewCallback>(
+    (hit) => (
+      <AlertEpisodeDetailsFlyout
+        episodeId={hit.flattened['episode.id'] as string}
+        groupHash={hit.flattened.group_hash as string | undefined}
+        onClose={closeFlyout}
+        actions={episodeActions}
+        services={{
+          data: services.data,
+          http: services.http,
+          expressions: services.expressions,
+          userProfile: services.userProfile,
+          spaces: services.spaces,
+          uiSettings: services.uiSettings,
+          unifiedDocViewer: services.unifiedDocViewer,
+          dataViews: services.dataViews,
+        }}
+      />
+    ),
+    [closeFlyout, episodeActions, services]
   );
 
-  const { data: episodeActionsMap } = useFetchEpisodeActions({
-    episodeIds: episodeIds ?? [],
-    services,
+  const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
+    () =>
+      episodeActions.map((action) => ({
+        id: action.id,
+        isAvailable: ({ record }: RowControlRowProps) =>
+          action.isCompatible({ episodes: [dataTableRecordToEpisode(record)] }),
+        render: (Control, { record }) => {
+          const episodes = [dataTableRecordToEpisode(record)];
+          return (
+            <Control
+              iconType={action.iconType}
+              label={action.displayName}
+              onClick={() => action.execute({ episodes, onSuccess: invalidateEpisodeQueries })}
+              tooltipContent={action.displayName}
+            />
+          );
+        },
+      })),
+    [episodeActions, invalidateEpisodeQueries]
+  );
+
+  const customBulkActions = useEpisodesBulkActions({
+    actions: episodeActions,
+    episodesData,
+    onSuccess: invalidateEpisodeQueries,
   });
-  const { data: groupActionsMap } = useFetchGroupActions({ groupHashes, services });
+
+  const assigneeUids = useMemo(
+    () => [
+      ...new Set(
+        (episodesData ?? [])
+          .map((row) => row.last_assignee_uid)
+          .filter((uid): uid is string => uid != null)
+      ),
+    ],
+    [episodesData]
+  );
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
     setColumns(cols);
   }, []);
+
+  const externalCustomRenderers = useMemo<CustomCellRenderer>(
+    () => ({
+      'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      tags: (props) => <EpisodeTagsCell {...props} />,
+      'rule.id': (props) => (
+        <EpisodeRuleCell
+          {...props}
+          rulesCache={rulesCache}
+          isLoadingRules={isLoadingRules}
+          rowHeight={rowHeight}
+        />
+      ),
+      assignees: (props) => {
+        const assigneeUid = props.row.flattened.last_assignee_uid as string | undefined;
+        return (
+          <AlertEpisodeAssigneeCell assigneeUid={assigneeUid} userProfile={services.userProfile} />
+        );
+      },
+    }),
+    [rulesCache, isLoadingRules, rowHeight, services.userProfile]
+  );
 
   return (
     <div
@@ -223,9 +353,28 @@ export const AlertEpisodesListPage = () => {
     >
       <EuiPageHeader
         bottomBorder
-        pageTitle={i18n.translate('xpack.alertingV2.episodes.listPageTitle', {
-          defaultMessage: 'Alert episodes',
-        })}
+        pageTitle={
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              {i18n.EPISODES_LIST_PAGE_TITLE}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        rightSideItems={[
+          <EuiButton
+            key="manage-rules"
+            color="text"
+            size="s"
+            iconType="gear"
+            href={services.http.basePath.prepend(paths.ruleList)}
+            data-test-subj="alertingV2EpisodesListManageRules"
+          >
+            {i18n.EPISODES_LIST_MANAGE_RULES}
+          </EuiButton>,
+        ]}
       />
       <EuiSpacer size="m" />
 
@@ -243,11 +392,25 @@ export const AlertEpisodesListPage = () => {
             timeRange={timeRange}
             onTimeChange={handleTimeChange}
             ruleOptions={ruleOptions}
-            onRefresh={() => refetch()}
+            assigneeUids={assigneeUids}
+            onRefresh={invalidateEpisodeQueries}
             isLoading={isLoading}
             services={services}
           />
-          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EpisodesHistogram
+            services={services}
+            dataView={dataView}
+            filterState={filterState}
+            timeRange={timeRange}
+            onTimeRangeChange={handleTimeChange}
+            breakdownField={histogramBreakdownField}
+            onBreakdownFieldChange={setHistogramBreakdownField}
+          />
         </EuiFlexItem>
         <EuiFlexItem
           grow
@@ -255,156 +418,102 @@ export const AlertEpisodesListPage = () => {
             min-width: 0;
           `}
         >
-          <CellActionsProvider
-            getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
-          >
-            <EuiScreenReaderOnly>
-              <span id="alertingEpisodesTableAriaLabel">
-                {i18n.translate('xpack.alertingV2.episodes.tableAriaLabel', {
-                  defaultMessage: 'Alerting episodes table',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            {!dataView ? (
-              <EuiLoadingSpinner />
-            ) : (
-              <UnifiedDataTable
-                ariaLabelledBy="alertingEpisodesTableAriaLabel"
-                settings={ALERT_EPISODES_TABLE_SETTINGS}
-                css={getTableCss(euiTheme)}
-                gridStyleOverride={{
-                  stripes: false,
-                  cellPadding: 'l',
-                }}
-                renderCustomToolbar={EmptyToolbar}
-                dataView={dataView}
-                columns={columns}
-                onSetColumns={onSetColumns}
-                canDragAndDropColumns
-                showTimeCol={!!dataView.timeFieldName}
-                customGridColumnsConfiguration={{
-                  actions: ({ column }) => ({
-                    ...column,
-                    displayAsText: i18n.translate('xpack.alertingV2.episodes.columns.actions', {
-                      defaultMessage: 'Actions',
-                    }),
-                  }),
-                  tags: ({ column }) => ({
-                    ...column,
-                    displayAsText: i18n.translate('xpack.alertingV2.episodes.columns.tags', {
-                      defaultMessage: 'Tags',
-                    }),
-                  }),
-                }}
-                externalCustomRenderers={{
-                  'episode.status': (props) => {
-                    const status = props.row.flattened[props.columnId] as AlertEpisodeStatus;
-                    const episodeId = props.row.flattened['episode.id'] as string;
-                    const groupHash = props.row.flattened.group_hash as string;
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                margin-top: ${euiTheme.size.m};
+              `}
+            >
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                    <FormattedMessage
+                      id="xpack.alertingV2.episodes.itemCount"
+                      defaultMessage="Showing {filtered} of {total} {total, plural, one {alert} other {alerts}}"
+                      values={{
+                        filtered: <strong>{filteredAlertEpisodesCount}</strong>,
+                        total: <strong>{totalAlertEpisodesCount}</strong>,
+                      }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    |
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="eraser"
+                    disabled={!hasActiveFilters}
+                    onClick={handleClearFilters}
+                    data-test-subj="episodesFilterBar-resetFilters"
+                  >
+                    {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
 
-                    return (
-                      <AlertEpisodeStatusBadges
-                        status={status}
-                        episodeAction={episodeActionsMap?.get(episodeId)}
-                        groupAction={groupActionsMap?.get(groupHash)}
-                      />
-                    );
-                  },
-                  actions: (props) => {
-                    const episodeId = props.row.flattened['episode.id'] as string;
-                    const groupHash = props.row.flattened.group_hash as string;
-                    const ruleId = props.row.flattened['rule.id'] as string;
-                    const discoverHref = getDiscoverHrefForRuleAndEpisodeTimestamp({
-                      share: services.share,
-                      capabilities: services.application.capabilities,
-                      uiSettings: services.uiSettings,
-                      ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
-                      episodeIsoTimestamp: props.row.flattened['@timestamp'] as string,
-                    });
-
-                    return (
-                      <AlertEpisodeActions
-                        episodeId={episodeId}
-                        groupHash={groupHash}
-                        episodeAction={episodeActionsMap?.get(episodeId)}
-                        groupAction={groupActionsMap?.get(groupHash)}
-                        http={services.http}
-                        openInDiscoverHref={discoverHref}
-                        expressions={services.expressions}
-                        viewDetailsHref={
-                          episodeId
-                            ? services.http.basePath.prepend(paths.alertEpisodeDetails(episodeId))
-                            : undefined
-                        }
-                      />
-                    );
-                  },
-                  tags: (props) => {
-                    const groupHash = props.row.flattened.group_hash as string;
-                    const groupAction = groupActionsMap?.get(groupHash);
-
-                    return <AlertEpisodeTags tags={groupAction?.tags ?? []} />;
-                  },
-                  'rule.id': (props) => {
-                    if (!Object.keys(rulesCache).length && isLoadingRules) {
-                      return <EuiSkeletonText />;
-                    }
-                    const ruleId = props.row.flattened[props.columnId] as string;
-                    const rule = rulesCache[ruleId];
-                    if (!rule) {
-                      return ruleId;
-                    }
-                    const ruleName = (
-                      <EuiText
-                        size="s"
-                        css={css`
-                          font-weight: ${euiTheme.font.weight.semiBold};
-                        `}
-                      >
-                        {rule.metadata.name}
-                      </EuiText>
-                    );
-                    if (rowHeight === 1) {
-                      return ruleName;
-                    }
-                    return (
-                      <EuiFlexGroup direction="column" gutterSize="none">
-                        <EuiFlexItem>{ruleName}</EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiCode
-                            color="subdued"
-                            css={css`
-                              background: none;
-                              color: ${euiTheme.colors.mediumShade};
-                              font-size: ${euiTheme.font.scale.xs};
-                              white-space: nowrap;
-                              overflow: hidden;
-                              text-overflow: ellipsis;
-                              padding: 0;
-                            `}
-                          >
-                            {rule.evaluation.query.base}
-                          </EuiCode>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    );
-                  },
-                }}
-                rows={rows}
-                totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
-                loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-                isPaginationEnabled
-                paginationMode="singlePage"
-                sampleSizeState={PAGE_SIZE}
-                isSortEnabled
-                sort={sort}
-                onSort={onSort}
-                rowHeightState={rowHeight}
-                onUpdateRowHeight={setRowHeight}
-                services={services}
-              />
-            )}
-          </CellActionsProvider>
+            <EuiFlexItem
+              grow
+              css={css`
+                min-width: 0;
+              `}
+            >
+              <CellActionsProvider
+                getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
+              >
+                <EuiScreenReaderOnly>
+                  <span id="alertingEpisodesTableAriaLabel">
+                    {i18n.EPISODES_LIST_TABLE_ARIA_LABEL}
+                  </span>
+                </EuiScreenReaderOnly>
+                {!dataView ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  <UnifiedDataTable
+                    ariaLabelledBy="alertingEpisodesTableAriaLabel"
+                    settings={ALERT_EPISODES_TABLE_SETTINGS}
+                    css={getTableCss(euiTheme)}
+                    gridStyleOverride={{
+                      stripes: false,
+                      cellPadding: 'l',
+                    }}
+                    dataView={dataView}
+                    columns={columns}
+                    onSetColumns={onSetColumns}
+                    canDragAndDropColumns
+                    showTimeCol={!!dataView.timeFieldName}
+                    customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
+                    externalCustomRenderers={externalCustomRenderers}
+                    rows={rows}
+                    totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
+                    loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+                    isPaginationEnabled
+                    paginationMode="singlePage"
+                    sampleSizeState={PAGE_SIZE}
+                    isSortEnabled
+                    sort={sort}
+                    onSort={onSort}
+                    rowHeightState={rowHeight}
+                    onUpdateRowHeight={setRowHeight}
+                    configRowHeight={rowHeight}
+                    customBulkActions={customBulkActions}
+                    rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                    visibleRowLeadingControls={3}
+                    enableComparisonMode={false}
+                    services={services}
+                    expandedDoc={expandedDoc}
+                    setExpandedDoc={setExpandedDoc}
+                    renderDocumentView={renderDocumentView}
+                  />
+                )}
+              </CellActionsProvider>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

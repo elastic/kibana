@@ -26,7 +26,6 @@ import type {
   UpdateObservableRequest,
   UserActionInternalFindResponse,
   FindCasesContainingAllAlertsResponse,
-  BulkAddObservablesRequest,
   FindCasesContainingAllDocumentsRequest,
   UpdateSummary,
   CasesPatchResponse,
@@ -64,7 +63,6 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseSimilarCasesUrl,
-  getBulkCreateObservablesUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -300,6 +298,7 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
     to: DEFAULT_TO_DATE,
   },
@@ -330,6 +329,9 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
+      ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
+      : {}),
     ...(filterOptions.from ? { from: filterOptions.from } : {}),
     ...(filterOptions.to ? { to: filterOptions.to } : {}),
     ...queryParams,
@@ -386,6 +388,7 @@ export const patchCase = async ({
     | 'category'
     | 'customFields'
     | 'extended_fields'
+    | 'template'
   >;
   version: string;
   signal?: AbortSignal;
@@ -700,21 +703,6 @@ export const deleteObservable = async (
     method: 'DELETE',
     signal,
   });
-};
-
-export const bulkPostObservables = async (
-  request: BulkAddObservablesRequest,
-  signal?: AbortSignal
-): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(
-    getBulkCreateObservablesUrl(request.caseId),
-    {
-      method: 'POST',
-      body: JSON.stringify({ caseId: request.caseId, observables: request.observables }),
-      signal,
-    }
-  );
-  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getSimilarCases = async ({

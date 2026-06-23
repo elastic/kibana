@@ -7,14 +7,15 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiConfirmModal,
-  EuiIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiIcon,
   EuiPopover,
   EuiTextColor,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,13 +43,17 @@ export const ManageIntegrationActions: React.FC<{
   onDelete: (integrationId: string) => Promise<void>;
   DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (
+  onApproveAndInstall: (
     integrationId: string,
     version: string,
-    categories: string[]
+    categories: string[],
+    autoInstallAfterApproval: boolean
   ) => Promise<void>;
   onDownloadZip?: (integrationId: string) => Promise<void>;
-  onInstallToCluster?: (integrationId: string) => Promise<void>;
+  onInstallToCluster?: (
+    integrationId: string,
+    options?: { skipSuccessToast?: boolean }
+  ) => Promise<void>;
 }> = ({
   integration,
   isPackageReady,
@@ -59,7 +64,7 @@ export const ManageIntegrationActions: React.FC<{
   onDelete,
   DataStreamResultsFlyoutComponent,
   onFetchReviewDetails,
-  onApproveAndDeploy,
+  onApproveAndInstall,
   onDownloadZip,
   onInstallToCluster,
 }) => {
@@ -119,9 +124,9 @@ export const ManageIntegrationActions: React.FC<{
     setShowReviewModal(true);
     (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
       'automatic_import_review_approve_menu_clicked',
-      {}
+      { integrationId: integration.integrationId, version: integration.version ?? '' }
     );
-  }, [automaticImport]);
+  }, [automaticImport, integration.integrationId, integration.version]);
 
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
@@ -203,23 +208,30 @@ export const ManageIntegrationActions: React.FC<{
           anchorPosition="downRight"
           panelPaddingSize="none"
           button={
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              color="text"
-              style={{ color: euiTheme.colors.textSubdued }}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
                 { defaultMessage: 'Open actions menu' }
               )}
-              onClick={togglePopover}
-              data-test-subj="manageIntegrationActionsBtn"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="boxesVertical"
+                color="text"
+                style={{ color: euiTheme.colors.textSubdued }}
+                aria-label={i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
+                  { defaultMessage: 'Open actions menu' }
+                )}
+                onClick={togglePopover}
+                data-test-subj="manageIntegrationActionsBtn"
+              />
+            </EuiToolTip>
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
         >
           <EuiContextMenuPanel
-            size="s"
             items={[
               <EuiContextMenuItem
                 key="review"
@@ -346,7 +358,8 @@ export const ManageIntegrationActions: React.FC<{
         onClose={closeReviewModal}
         onEdit={onEdit}
         onFetchReviewDetails={onFetchReviewDetails}
-        onApproveAndDeploy={onApproveAndDeploy}
+        onApproveAndInstall={onApproveAndInstall}
+        onInstallToCluster={onInstallToCluster}
         DataStreamResultsFlyoutComponent={DataStreamResultsFlyoutComponent}
       />
     </>

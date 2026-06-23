@@ -55,11 +55,19 @@ describe('Breadcrumbs', () => {
       beforeEach(() => {
         jest.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(true);
         jest
-          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueInput')
+          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
           .mockReturnValue({ label: 'Mock Label' } as DiscoverSessionTab);
       });
 
-      it('should set the breadcrumbs to reflect Dashboards connection', () => {
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should set the breadcrumbs to reflect Dashboards connection when editting', () => {
+        jest
+          .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
+          .mockReturnValue('mock-embeddable-id');
+
         setBreadcrumbs({
           services: discoverServiceMock,
           titleBreadcrumbText: 'Saved Search',
@@ -76,14 +84,42 @@ describe('Breadcrumbs', () => {
           { text: 'Editing Mock Label' },
         ]);
       });
+
+      it('should set the breadcrumbs to reflect Discover when creating a new session', () => {
+        jest
+          .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
+          .mockReturnValue(undefined);
+        jest
+          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
+          .mockReturnValue({ label: 'New Discover session' } as DiscoverSessionTab);
+
+        setBreadcrumbs({
+          services: discoverServiceMock,
+          titleBreadcrumbText: 'Saved Search',
+          rootBreadcrumbPath: '#/custom-path',
+        });
+
+        expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+          {
+            text: 'Dashboards',
+            href: undefined,
+            deepLinkId: 'dashboards',
+            onClick: expect.any(Function),
+          },
+          { text: 'New Discover session' },
+        ]);
+      });
     });
 
     describe('By Reference', () => {
       beforeEach(() => {
         jest.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(false);
         jest
-          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueInput')
+          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
           .mockReturnValue(undefined);
+        jest
+          .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
+          .mockReturnValue('mock-embeddable-id');
       });
 
       it('should set the breadcrumbs to reflect Dashboards connection', () => {

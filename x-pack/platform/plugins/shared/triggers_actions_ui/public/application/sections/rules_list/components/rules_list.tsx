@@ -8,7 +8,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import type { EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
-import { EuiButtonIcon, EuiDescriptionList, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDescriptionList,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import type { KueryNode } from '@kbn/es-query';
@@ -74,6 +80,7 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { ManageLicenseModal } from './manage_license_modal';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
+import { RulesListUiamApiKeyBanner } from './rules_list_uiam_api_key_banner';
 import { RulesListPrompts } from './rules_list_prompts';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 
@@ -756,6 +763,9 @@ export const RulesList = ({
 
   return (
     <>
+      {kibanaServices.isServerless && config.apiKeyType === 'uiam' ? (
+        <RulesListUiamApiKeyBanner />
+      ) : null}
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
@@ -948,13 +958,18 @@ export const RulesList = ({
                   _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
 
                 return isLicenseError || hasErrorMessage ? (
-                  <EuiButtonIcon
-                    onClick={() => toggleErrorMessage(_executionStatus, rule)}
-                    aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-                    iconType={
-                      itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
-                    }
-                  />
+                  <EuiToolTip
+                    content={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      onClick={() => toggleErrorMessage(_executionStatus, rule)}
+                      aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                      iconType={
+                        itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
+                      }
+                    />
+                  </EuiToolTip>
                 ) : null;
               }}
               renderSelectAllDropdown={() => {

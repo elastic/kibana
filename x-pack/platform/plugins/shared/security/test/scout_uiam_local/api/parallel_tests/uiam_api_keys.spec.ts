@@ -20,10 +20,9 @@ apiTest.describe(
   () => {
     let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
 
-    apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
+    apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
       userSessionCookieFactory = async () => {
         const samlResponse = await createSAMLResponse({
-          kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
           username: '1234567890',
           email: 'elastic_admin@elastic.co',
           roles: ['admin'],

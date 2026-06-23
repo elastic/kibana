@@ -49,7 +49,7 @@ describe('Index privileges', () => {
         response: {
           body: {
             message:
-              'Missing [read, view_index_metadata] privileges for the [.alerts-security.attack.discovery.alerts, .internal.alerts-security.attack.discovery.alerts, .adhoc.alerts-security.attack.discovery.alerts, .internal.adhoc.alerts-security.attack.discovery.alerts] indices. Without these privileges you cannot read the Attack Discovery alerts.',
+              'Missing [read, view_index_metadata] privileges for the [.alerts-security.attack.discovery.alerts, .adhoc.alerts-security.attack.discovery.alerts] indices. Without these privileges you cannot read the Attack Discovery alerts.',
           },
         },
       });
@@ -66,14 +66,6 @@ describe('Index privileges', () => {
               'view_index_metadata',
             ],
             '.alerts-security.attack.discovery.alerts-space1': ['read', 'view_index_metadata'],
-            '.internal.adhoc.alerts-security.attack.discovery.alerts-space1': [
-              'read',
-              'view_index_metadata',
-            ],
-            '.internal.alerts-security.attack.discovery.alerts-space1': [
-              'read',
-              'view_index_metadata',
-            ],
           },
           cluster: [],
         },
@@ -95,7 +87,7 @@ describe('Index privileges', () => {
         response: {
           body: {
             message:
-              'Missing [read, view_index_metadata, write, maintenance] privileges for the [.alerts-security.attack.discovery.alerts, .internal.alerts-security.attack.discovery.alerts, .adhoc.alerts-security.attack.discovery.alerts, .internal.adhoc.alerts-security.attack.discovery.alerts] indices. Without these privileges you cannot create, read, update or delete the Attack Discovery alerts.',
+              'Missing [read, view_index_metadata, write, maintenance] privileges for the [.alerts-security.attack.discovery.alerts, .adhoc.alerts-security.attack.discovery.alerts] indices. Without these privileges you cannot create, read, update or delete the Attack Discovery alerts.',
           },
         },
       });
@@ -114,18 +106,6 @@ describe('Index privileges', () => {
               'maintenance',
             ],
             '.alerts-security.attack.discovery.alerts-space1': [
-              'read',
-              'view_index_metadata',
-              'write',
-              'maintenance',
-            ],
-            '.internal.adhoc.alerts-security.attack.discovery.alerts-space1': [
-              'read',
-              'view_index_metadata',
-              'write',
-              'maintenance',
-            ],
-            '.internal.alerts-security.attack.discovery.alerts-space1': [
               'read',
               'view_index_metadata',
               'write',

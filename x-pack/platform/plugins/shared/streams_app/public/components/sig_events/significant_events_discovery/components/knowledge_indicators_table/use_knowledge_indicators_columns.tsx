@@ -6,9 +6,17 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../spark_plot';
 import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
@@ -19,7 +27,8 @@ import {
   TITLE_COLUMN_LABEL,
   EVENTS_COLUMN_LABEL,
   TYPE_COLUMN_LABEL,
-  QUERY_TYPE_LABEL,
+  MATCH_QUERY_TYPE_LABEL,
+  STATS_QUERY_TYPE_LABEL,
   STREAM_COLUMN_LABEL,
   ACTIONS_COLUMN_LABEL,
   VIEW_DETAILS_ARIA_LABEL,
@@ -49,8 +58,6 @@ export const useKnowledgeIndicatorsColumns = ({
     () => [
       {
         name: TITLE_COLUMN_LABEL,
-        truncateText: true,
-        width: '20em',
         render: (ki: KnowledgeIndicator) => {
           const title = getKnowledgeIndicatorTitle(ki);
           const isExpanded = selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki);
@@ -58,12 +65,17 @@ export const useKnowledgeIndicatorsColumns = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="knowledgeIndicatorsDetailsButton"
-                  iconType={isExpanded ? 'minimize' : 'expand'}
-                  aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
-                  onClick={() => toggleSelectedKnowledgeIndicator(ki)}
-                />
+                <EuiToolTip
+                  content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="knowledgeIndicatorsDetailsButton"
+                    iconType={isExpanded ? 'minimize' : 'expand'}
+                    aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                    onClick={() => toggleSelectedKnowledgeIndicator(ki)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink onClick={() => toggleSelectedKnowledgeIndicator(ki)}>{title}</EuiLink>
@@ -74,7 +86,8 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: EVENTS_COLUMN_LABEL,
-        width: '7em',
+        width: '160px',
+        align: 'center',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'query' || !ki.rule.backed) {
             return null;
@@ -99,7 +112,7 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: TYPE_COLUMN_LABEL,
-        width: '7.5em',
+        width: '192px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind === 'feature') {
             return (
@@ -108,19 +121,23 @@ export const useKnowledgeIndicatorsColumns = ({
               </EuiBadge>
             );
           }
-          return <EuiBadge color="hollow">{QUERY_TYPE_LABEL}</EuiBadge>;
+          return (
+            <EuiBadge color="hollow">
+              {ki.query.type === QUERY_TYPE_STATS ? STATS_QUERY_TYPE_LABEL : MATCH_QUERY_TYPE_LABEL}
+            </EuiBadge>
+          );
         },
       },
       {
         name: STREAM_COLUMN_LABEL,
-        width: '9.5em',
+        width: '192px',
         render: (ki: KnowledgeIndicator) => {
           return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
         },
       },
       {
         name: ACTIONS_COLUMN_LABEL,
-        width: '4em',
+        width: '96px',
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell

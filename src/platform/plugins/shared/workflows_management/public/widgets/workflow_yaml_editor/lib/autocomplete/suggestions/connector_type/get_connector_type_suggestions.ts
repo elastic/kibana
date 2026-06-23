@@ -12,7 +12,6 @@ import type { BuiltInStepType, ConnectorTypeInfo, WorkflowOutput } from '@kbn/wo
 import {
   DataSetStepSchema,
   ForEachStepSchema,
-  getBuiltInStepStability,
   IfStepSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
@@ -81,9 +80,10 @@ export function getConnectorTypeSuggestions(
     // Only use display names for dynamic connectors (not elasticsearch.* or kibana.*)
     const isDynamicConnector =
       !connectorType.startsWith('elasticsearch.') && !connectorType.startsWith('kibana.');
+    const shortName = connector?.summary || connector?.description;
     const displayName =
-      isDynamicConnector && connector?.description
-        ? connector.description.replace(' connector', '').replace(' (no instances configured)', '')
+      isDynamicConnector && shortName
+        ? shortName.replace(' connector', '').replace(' (no instances configured)', '')
         : connectorType;
 
     return {
@@ -97,7 +97,7 @@ export function getConnectorTypeSuggestions(
         ? `Elasticsearch API - ${connectorType.replace('elasticsearch.', '')}`
         : connectorType.startsWith('kibana.')
         ? `Kibana API - ${connectorType.replace('kibana.', '')}`
-        : connector?.description || `Workflow connector - ${connectorType}`,
+        : connector?.description || connector?.summary || `Workflow connector - ${connectorType}`,
       filterText: connectorType,
       sortText: `!${connectorType}`, // Priority prefix to sort before default suggestions
       preselect: false,
@@ -138,12 +138,6 @@ export function getConnectorTypeSuggestions(
         endColumn: Math.max(range.endColumn, 1000),
       };
 
-      const stability = getBuiltInStepStability(stepType.type);
-      const detail =
-        stability === 'tech_preview'
-          ? 'Built-in workflow step (Tech Preview)'
-          : 'Built-in workflow step';
-
       suggestions.push({
         label: stepType.type,
         kind: stepType.icon,
@@ -153,7 +147,7 @@ export function getConnectorTypeSuggestions(
         documentation: stepType.description,
         filterText: stepType.type,
         sortText: `!${stepType.type}`,
-        detail,
+        detail: 'Built-in workflow step',
         preselect: false,
       });
     });

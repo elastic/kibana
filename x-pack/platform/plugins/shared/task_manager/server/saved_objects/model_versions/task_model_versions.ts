@@ -15,7 +15,20 @@ import {
   taskSchemaV6,
   taskSchemaV7,
   taskSchemaV8,
+  taskSchemaV9,
+  taskSchemaV10,
+  taskSchemaV11,
 } from '../schemas/task';
+
+import { InstanceTaskCost } from '../../task';
+
+// the valid task costs baked into the v8 schema
+const V9Costs = new Set([
+  undefined, // to handle case of cost not set
+  `${InstanceTaskCost.Tiny}`,
+  `${InstanceTaskCost.Normal}`,
+  `${InstanceTaskCost.ExtraLarge}`,
+]);
 
 // IMPORTANT!!!
 // When adding new model versions, make sure to manually test
@@ -113,6 +126,47 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: taskSchemaV8.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV8,
+    },
+  },
+  '9': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          userScope: {
+            properties: {
+              uiamApiKeyId: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: taskSchemaV9.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV9,
+    },
+  },
+  '10': {
+    changes: [],
+    schemas: {
+      // set cost to normal if it is not in the version 8 costs literals
+      forwardCompatibility: (attributes) => {
+        const costable = attributes as { cost?: string };
+        if (V9Costs.has(costable.cost)) return attributes;
+
+        return {
+          ...(attributes as unknown as Record<string, unknown>),
+          cost: InstanceTaskCost.Normal,
+        };
+      },
+      create: taskSchemaV10,
+    },
+  },
+  '11': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: taskSchemaV11.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV11,
     },
   },
 };

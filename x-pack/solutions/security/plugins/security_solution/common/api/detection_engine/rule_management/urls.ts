@@ -9,3 +9,7 @@ import { INTERNAL_DETECTION_ENGINE_URL } from '../../../constants';
 
 export const RULE_MANAGEMENT_FILTERS_URL = `${INTERNAL_DETECTION_ENGINE_URL}/rules/_rule_management_filters`;
 export const RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL = `${INTERNAL_DETECTION_ENGINE_URL}/rules/_coverage_overview`;
+export const RULE_MANAGEMENT_RULES_URL_SEARCH =
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/_search` as const;
+export const RULE_HISTORY_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/history/_list` as const;

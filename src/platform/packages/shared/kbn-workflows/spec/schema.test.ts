@@ -9,16 +9,20 @@
 
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
-  BaseEventSchema,
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
   EventTimestampSchema,
+  LIQUID_MEMORY_LIMIT_MAX,
+  LIQUID_PARSE_LIMIT_MAX,
+  LIQUID_RENDER_LIMIT_MAX,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
   WorkflowSettingsSchema,
 } from './schema';
+import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -537,6 +541,52 @@ describe('WorkflowSettingsSchema', () => {
     });
   });
 
+  describe('liquid', () => {
+    const validLiquidSettings = {
+      parseLimit: 200_000,
+      renderLimit: 2_000,
+      memoryLimit: 30_000_000,
+    };
+
+    it('should accept valid liquid limit settings', () => {
+      const result = WorkflowSettingsSchema.safeParse({
+        liquid: validLiquidSettings,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.liquid).toEqual(validLiquidSettings);
+      }
+    });
+
+    it.each([
+      ['parseLimit below minimum', { ...validLiquidSettings, parseLimit: 0 }],
+      ['parseLimit not integer', { ...validLiquidSettings, parseLimit: 1.5 }],
+      [
+        'parseLimit above maximum',
+        { ...validLiquidSettings, parseLimit: LIQUID_PARSE_LIMIT_MAX + 1 },
+      ],
+      ['renderLimit below minimum', { ...validLiquidSettings, renderLimit: 0 }],
+      ['renderLimit not integer', { ...validLiquidSettings, renderLimit: 1.5 }],
+      [
+        'renderLimit above maximum',
+        { ...validLiquidSettings, renderLimit: LIQUID_RENDER_LIMIT_MAX + 1 },
+      ],
+      ['memoryLimit below minimum', { ...validLiquidSettings, memoryLimit: 0 }],
+      ['memoryLimit not integer', { ...validLiquidSettings, memoryLimit: 1.5 }],
+      [
+        'memoryLimit above maximum',
+        { ...validLiquidSettings, memoryLimit: LIQUID_MEMORY_LIMIT_MAX + 1 },
+      ],
+    ])('should reject liquid settings with %s', (_, liquid) => {
+      const result = WorkflowSettingsSchema.safeParse({
+        liquid,
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('CollisionStrategySchema', () => {
     it('should accept all valid strategy values', () => {
       expect(CollisionStrategySchema.safeParse('cancel-in-progress').success).toBe(true);
@@ -650,32 +700,42 @@ describe('JsonModelSchema', () => {
     const workflow = {
       version: '1',
       name: 'test',
-      triggers: [{ type: 'manual' }],
-      steps: [{ name: 'step1', type: 'console' }],
-      inputs: {
-        properties: {
-          username: {
-            type: 'string',
-            description: "User's username",
-          },
-          age: {
-            type: 'number',
-            description: "User's age",
-            default: 18,
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
+            properties: {
+              username: {
+                type: 'string',
+                description: "User's username",
+              },
+              age: {
+                type: 'number',
+                description: "User's age",
+                default: 18,
+              },
+            },
+            required: ['username'],
+            additionalProperties: false,
           },
         },
-        required: ['username'],
-        additionalProperties: false,
-      },
+      ],
+      steps: [{ name: 'step1', type: 'console' }],
     };
     const result = WorkflowSchema.safeParse(workflow);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.inputs?.properties?.username).toEqual({
+      const manualTrigger = result.data.triggers?.find((trigger) => isManualTrigger(trigger));
+      if (!manualTrigger) {
+        fail('Manual trigger should be defined');
+      }
+      const inputs = manualTrigger.inputs;
+      const jsonSchemaInputs = JsonModelSchema.parse(inputs);
+      expect(jsonSchemaInputs?.properties?.username).toEqual({
         type: 'string',
         description: "User's username",
       });
-      expect(result.data.inputs?.required).toEqual(['username']);
+      expect(jsonSchemaInputs?.required).toEqual(['username']);
     }
   });
 
@@ -720,21 +780,25 @@ describe('JsonModelSchema', () => {
     const workflow = {
       name: 'New workflow',
       enabled: false,
-      triggers: [{ type: 'manual' }],
-      inputs: {
-        properties: {
-          fields: {
-            type: 'object',
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
             properties: {
-              email: { type: 'string' },
-              name: { type: 'string' },
+              fields: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string' },
+                  name: { type: 'string' },
+                },
+                required: ['email', 'name'],
+              },
             },
-            required: ['email', 'name'],
+            required: ['fields'],
+            additionalProperties: false,
           },
         },
-        required: ['fields'],
-        additionalProperties: false,
-      },
+      ],
       steps: [
         {
           name: 'first-step',
@@ -748,28 +812,30 @@ describe('JsonModelSchema', () => {
     const result = WorkflowSchemaForAutocomplete.safeParse(workflow);
     expect(result.success).toBe(true);
     if (result.success) {
-      // Type guard: inputs can be either JSON Schema format (object with properties) or legacy array format
-      const inputs = result.data.inputs;
-      if (
-        inputs &&
-        typeof inputs === 'object' &&
-        !Array.isArray(inputs) &&
-        'properties' in inputs
-      ) {
-        expect(inputs.properties?.fields).toBeDefined();
+      const manualTrigger = result.data.triggers?.find((trigger) => isManualTrigger(trigger));
+      if (!manualTrigger) {
+        fail('Manual trigger should be defined');
       }
+      const inputs = manualTrigger.inputs;
+      const jsonSchemaInputs = JsonModelSchema.parse(inputs);
+      expect(jsonSchemaInputs?.properties?.fields).toBeDefined();
+      expect(jsonSchemaInputs?.required).toEqual(['fields']);
     }
   });
 
   it('should accept legacy array format in WorkflowSchemaForAutocomplete (backward compatibility)', () => {
     const workflow = {
       name: 'Legacy workflow',
-      triggers: [{ type: 'manual' }],
-      inputs: [
+      triggers: [
         {
-          name: 'username',
-          type: 'string',
-          required: true,
+          type: 'manual',
+          inputs: [
+            {
+              name: 'username',
+              type: 'string',
+              required: true,
+            },
+          ],
         },
       ],
       steps: [{ name: 'step1', type: 'console' }],

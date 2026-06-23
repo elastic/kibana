@@ -190,6 +190,7 @@ const DEV_PATTERNS = [
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
   'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/kbn-ui/_tooling/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -395,6 +396,79 @@ const RESTRICTED_IMPORTS = [
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
   },
+  {
+    name: 'axios',
+    message:
+      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
+  },
+];
+
+/**
+ * Files that already import axios. New axios imports must not be added here;
+ * this list is expected to shrink as consumers migrate to the native `fetch` API.
+ * Globs are scoped to existing feature boundaries to keep the leak surface small.
+ */
+const AXIOS_LEGACY_CONSUMERS = [
+  '.buildkite/**/*.{js,mjs,ts,tsx,jsx}',
+  'packages/kbn-ci-stats-performance-metrics/**/*.{js,mjs,ts,tsx}',
+  'packages/kbn-generate/**/*.{js,mjs,ts,tsx}',
+  'src/dev/build/lib/**/*.{js,mjs,ts,tsx}',
+  'src/dev/build/tasks/**/*.{js,mjs,ts,tsx}',
+  'src/dev/prs/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/private/kbn-ci-stats-reporter/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-cypress-test-helper/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-dev-utils/src/axios/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
+  'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
+  'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/shared/kbn-evals/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/canvas/common/lib/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/data_usage/server/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/indices_metadata/server/lib/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/actions/server/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/cloud_connect/server/routes/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/cloud_connect/server/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/dataset_quality/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/fleet/server/services/agents/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/fleet/server/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/screenshotting/server/browsers/download/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
+  'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
+  'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
+  'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/fleet_cypress/agent.ts',
+  'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
+  'x-pack/platform/test/fleet_cypress/fleet_server.ts',
+  'x-pack/platform/test/fleet_multi_cluster/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/ui_capabilities/common/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/alerting-test-data/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/kbn-synthetics-forge/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/apm/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/apm/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/observability_onboarding/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/test/api_integration/profiling/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
 ];
 
 /**
@@ -407,6 +481,11 @@ const DEPRECATED_IMPORTS = [
     name: 'enzyme',
     message:
       'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
+  },
+  {
+    name: '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib',
+    message:
+      '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
   },
 ];
 
@@ -943,8 +1022,21 @@ module.exports = {
       rules: {
         '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
+        '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
-        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': [
+          'warn',
+          {
+            paths: DEPRECATED_IMPORTS,
+            patterns: [
+              {
+                group: ['@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/**'],
+                message:
+                  '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
+              },
+            ],
+          },
+        ],
         'no-restricted-modules': [
           'error',
           {
@@ -1148,7 +1240,11 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/search/**/*.tsx'],
+      files: [
+        'x-pack/solutions/search/**/*.tsx',
+        'x-pack/platform/plugins/shared/content_connectors/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/search_inference_endpoints/**/*.{ts,tsx}',
+      ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
@@ -1845,6 +1941,15 @@ module.exports = {
       ],
     },
     /**
+     * Alerting V2 rule form — require compressed prop on EUI form controls
+     */
+    {
+      files: ['x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/**/*.{ts,tsx}'],
+      rules: {
+        '@kbn/alerting-v2/require_eui_form_compressed': 'error',
+      },
+    },
+    /**
      * Stack Connectors Specs package
      * This package contains common code for public and server side
      */
@@ -1968,6 +2073,53 @@ module.exports = {
     {
       files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
       excludedFiles: ['x-pack/solutions/search/**/*.test.tsx'],
+      rules: {
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+      },
+    },
+
+    /**
+     * Visualization team overrides
+     */
+
+    {
+      files: [
+        // src/platform/plugins
+        'src/platform/plugins/shared/visualizations',
+        'src/platform/plugins/shared/visualization_listing',
+        'src/platform/plugins/shared/data',
+        'src/platform/plugins/shared/expressions',
+        'src/platform/plugins/shared/charts',
+        'src/platform/plugins/shared/vis_types/timeseries',
+        'src/platform/plugins/shared/chart_expressions',
+        'src/platform/plugins/private/vis_types',
+        'src/platform/plugins/private/event_annotation',
+        'src/platform/plugins/private/event_annotation_listing',
+        'src/platform/plugins/private/vis_default_editor',
+
+        // src/platform/packages
+        'src/platform/packages/shared/kbn-visualization-listing-components',
+        'src/platform/packages/shared/kbn-visualizations-common',
+        'src/platform/packages/shared/kbn-visualization-utils',
+        'src/platform/packages/shared/kbn-visualization-ui-components',
+        'src/platform/packages/shared/kbn-palettes',
+        'src/platform/packages/shared/kbn-event-annotation-components',
+        'src/platform/packages/shared/kbn-dom-drag-drop',
+        'src/platform/packages/shared/kbn-coloring',
+        'src/platform/packages/shared/kbn-chart-icons',
+        'src/platform/packages/shared/chart-test-jest-helpers',
+        'src/platform/packages/private/kbn-test-eui-helpers',
+
+        // x-pack/platform/plugins
+        'x-pack/platform/plugins/shared/lens',
+        'x-pack/platform/plugins/private/graph',
+
+        // x-pack/platform/packages
+        'x-pack/platform/packages/private/kbn-random-sampling',
+      ].map(
+        (path) => `${path}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)`
+      ),
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
@@ -2807,6 +2959,7 @@ module.exports = {
         '@kbn/eslint/scout_no_deprecated_tags': 'error',
         '@kbn/eslint/scout_no_at_in_test_titles': 'warn',
         '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
+        '@kbn/eslint/scout_no_promise_all_with_playwright_apis': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
@@ -2877,6 +3030,71 @@ module.exports = {
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
           },
         ],
+      },
+    },
+
+    /**
+     * kbn-ui dependency allowlist — packages under `src/platform/kbn-ui/**` must be
+     * portable outside Kibana (e.g. Cloud UI). They may only import from the
+     * baseline peer deps (`@elastic/eui`, `@emotion/*`, `react`, `react-dom`) plus
+     * the `@kbn/*` modules that are stubbed at packaging time. Packaging, tests,
+     * and stories are excluded because they reference Kibana-only tooling.
+     */
+    {
+      files: ['src/platform/kbn-ui/**/*.{ts,tsx}'],
+      excludedFiles: [
+        'src/platform/kbn-ui/**/*.test.*',
+        'src/platform/kbn-ui/**/*.stories.*',
+        'src/platform/kbn-ui/**/__stories__/**',
+        'src/platform/kbn-ui/**/__tests__/**',
+        'src/platform/kbn-ui/**/packaging/**',
+        'src/platform/kbn-ui/_tooling/**',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              '@kbn/*',
+              '!@kbn/i18n',
+              '!@kbn/i18n-react',
+              '!@kbn/ui-chrome-layout-constants',
+              '!@kbn/ui-chrome-layout-utils',
+            ],
+          },
+        ],
+      },
+    },
+    {
+      // Allow axios in files that already use it. New axios imports are blocked
+      // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
+      // as consumers migrate to the native `fetch` API. Placed last so it wins
+      // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
+      // security_solution and workflows_management blocks). The trade-off: the
+      // allowlisted files that overlap with those blocks lose their `*legacy*`
+      // pattern check; verified that none of them currently import any path
+      // matching `*legacy*`. The js-yaml freeze is handled separately via
+      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
+      // so it does not interact with this override.
+      files: AXIOS_LEGACY_CONSUMERS,
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
+        ],
+      },
+    },
+    {
+      // These files are allowed to reference 'npx playwright' — either because they define
+      // the rule itself, test it with invalid-code fixtures, or mention it in an error message
+      // to explain what went wrong.
+      files: [
+        'src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.js',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.test.js',
+      ],
+      rules: {
+        '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
   ],

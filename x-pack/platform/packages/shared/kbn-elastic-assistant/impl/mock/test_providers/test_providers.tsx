@@ -103,6 +103,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
     settings: {
       client: {
         get: jest.fn(),
+        get$: jest.fn().mockReturnValue(of(undefined)),
+        getUpdate$: jest.fn().mockReturnValue(of()),
       },
     } as unknown as SettingsStart,
   } as AssistantProviderProps;

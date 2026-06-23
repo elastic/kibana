@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/265592
+issues:
+- https://github.com/elastic/kibana/issues/263954
+- https://github.com/elastic/kibana/issues/263955
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- Kibana platform
+title: Add default repository setting
+description: Adds support in Snapshot and Restore to view and set the default repository via cluster setting.

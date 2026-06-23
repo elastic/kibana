@@ -72,6 +72,11 @@ export const DEFAULT_ESQL_PROPERTY_NAMES = ['base'];
 export interface YamlRuleEditorProps {
   value: string;
   onChange: (value: string) => void;
+  /**
+   * Called when the editor text loses focus. Useful for "user paused editing"
+   * triggers like syncing parsed YAML back into a parent form's state.
+   */
+  onBlur?: () => void;
   esqlCallbacks: ESQLCallbacks;
   /**
    * Property names in YAML that should be treated as ES|QL queries.
@@ -82,4 +87,11 @@ export interface YamlRuleEditorProps {
   isReadOnly?: boolean;
   height?: number | string;
   dataTestSubj?: string;
+  /**
+   * Called whenever the editor re-runs YAML schema validation. `hasErrors` is
+   * true if any Monaco marker was set by the editor's schema validator (YAML
+   * syntax errors or zod schema issues). Lets the parent block submission
+   * while the buffer is invalid.
+   */
+  onValidate?: (hasErrors: boolean) => void;
 }

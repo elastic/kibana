@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JsonValue } from '@kbn/utility-types';
-
 import {
   compressionMimeTypes,
   IMAGE_MIME_TYPES,
   pdfMimeTypes,
   textMimeTypes,
 } from '../../../../common/constants/mime_types';
-import { basicFileMock } from '../../../containers/mock';
-import { isImage, isValidFileExternalReferenceMetadata, parseMimeType } from './utils';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import { basicComment } from '../../../containers/mock';
+import { makeFileComment } from './case_view_files.test';
+import { getFileIdsFromComments, isImage, parseMimeType } from './utils';
 
 const imageMimeTypes = Array.from(IMAGE_MIME_TYPES);
 
@@ -68,32 +68,39 @@ describe('parseMimeType', () => {
   });
 });
 
-describe('isValidFileExternalReferenceMetadata', () => {
-  it('should return false for empty objects', () => {
-    expect(isValidFileExternalReferenceMetadata({})).toBeFalsy();
+describe('getFileIdsFromComments', () => {
+  const owner = SECURITY_SOLUTION_OWNER;
+
+  it('returns an empty set when there are no file comments', () => {
+    expect(getFileIdsFromComments([basicComment], owner)).toEqual(new Set());
   });
 
-  it('should return false if the files property is missing', () => {
-    expect(isValidFileExternalReferenceMetadata({ foo: 'bar' })).toBeFalsy();
+  it('extracts a single file id from a string attachmentId', () => {
+    const result = getFileIdsFromComments([makeFileComment('c1', 'file-1', owner)], owner);
+    expect(result).toEqual(new Set(['file-1']));
   });
 
-  it('should return false if the files property is not an array', () => {
-    expect(isValidFileExternalReferenceMetadata({ files: 'bar' })).toBeFalsy();
+  it('expands array-shaped attachmentId values into individual ids', () => {
+    const result = getFileIdsFromComments(
+      [makeFileComment('c1', ['file-1', 'file-2'], owner)],
+      owner
+    );
+    expect(result).toEqual(new Set(['file-1', 'file-2']));
   });
 
-  it('should return false if files is not an array of file metadata', () => {
-    expect(isValidFileExternalReferenceMetadata({ files: [3] })).toBeFalsy();
+  it('deduplicates ids across multiple file comments', () => {
+    const result = getFileIdsFromComments(
+      [makeFileComment('c1', 'file-1', owner), makeFileComment('c2', 'file-1', owner)],
+      owner
+    );
+    expect(result).toEqual(new Set(['file-1']));
   });
 
-  it('should return false if files is not an array of file metadata 2', () => {
-    expect(
-      isValidFileExternalReferenceMetadata({ files: [{ name: 'foo', mimeType: 'bar' }] })
-    ).toBeFalsy();
-  });
-
-  it('should return true if the metadata is as expected', () => {
-    expect(
-      isValidFileExternalReferenceMetadata({ files: [basicFileMock as unknown as JsonValue] })
-    ).toBeTruthy();
+  it('ignores non-file comments', () => {
+    const result = getFileIdsFromComments(
+      [basicComment, makeFileComment('c1', 'file-1', owner)],
+      owner
+    );
+    expect(result).toEqual(new Set(['file-1']));
   });
 });

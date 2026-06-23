@@ -12,10 +12,22 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import { useContentListFilters, getIncludeExcludeFlag } from '@kbn/content-list-provider';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
 import { StarredCell } from './starred_cell';
 
+/**
+ * Locked width for the starred column.
+ *
+ * The header and cell render a single 16px `EuiIcon`; `40px` gives the icon
+ * a small centered gutter on both sides without wasting horizontal space.
+ * Both `minWidth` and `maxWidth` default to the same value so the column
+ * stays pinned at exactly the icon footprint regardless of available table
+ * width. No `'max-content'` floor needed because the header is iconic, not
+ * textual, and so has no locale exposure.
+ */
 const DEFAULT_WIDTH = '40px';
 
 /**
@@ -35,7 +47,8 @@ const StarredColumnHeader = () => {
 /**
  * Props for the `Column.Starred` preset component.
  */
-export interface StarredColumnProps {
+export interface StarredColumnProps
+  extends Pick<ColumnLayoutProps, 'width' | 'minWidth' | 'maxWidth'> {
   /** Column width (CSS value). Defaults to `'40px'`. */
   width?: string;
 }
@@ -55,15 +68,17 @@ export const buildStarredColumn = (
     return undefined;
   }
 
-  const { width = DEFAULT_WIDTH } = attributes;
-
   return {
     field: 'id',
     name: <StarredColumnHeader />,
     align: 'center' as const,
     sortable: false,
-    width,
-    'data-test-subj': 'content-list-table-column-starred',
+    ...getColumnLayoutProps({
+      width: pickAttribute(attributes, 'width', DEFAULT_WIDTH),
+      minWidth: pickAttribute(attributes, 'minWidth', DEFAULT_WIDTH),
+      maxWidth: pickAttribute(attributes, 'maxWidth', DEFAULT_WIDTH),
+    }),
+    'data-test-subj': CONTENT_LIST_TEST_SUBJECTS.columnStarred,
     render: (_value: string, item: ContentListItem) => {
       return <StarredCell id={item.id} />;
     },
@@ -87,7 +102,16 @@ export const buildStarredColumn = (
  * </ContentListTable>
  * ```
  */
+/** Star glyph is square-ish and small; a narrow centered rectangle reads
+ *  as an icon placeholder without pretending to be a perfect circle. */
+const STARRED_SKELETON_SIZE = 16;
+
 export const StarredColumn = column.createPreset({
   name: 'starred',
   resolve: buildStarredColumn,
+  skeleton: () => ({
+    shape: 'rectangle',
+    width: STARRED_SKELETON_SIZE,
+    height: STARRED_SKELETON_SIZE,
+  }),
 });

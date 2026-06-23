@@ -75,7 +75,11 @@ export function DeleteTableItemsModal({
   );
 
   return (
-    <EuiModal onClose={onCancel} aria-label={MODAL_ARIA_LABEL} maxWidth={600}>
+    <EuiModal
+      onClose={isLoading ? () => {} : onCancel}
+      aria-label={MODAL_ARIA_LABEL}
+      maxWidth={600}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>

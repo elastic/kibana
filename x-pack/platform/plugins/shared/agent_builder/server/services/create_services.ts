@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
@@ -20,7 +21,6 @@ import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
-import { createSmlService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import {
@@ -39,7 +39,6 @@ interface ServiceInstances {
   skills: SkillService;
   plugins: PluginsService;
   metering: MeteringService;
-  sml: SmlServiceInstance;
   consumption: ConsumptionService;
 }
 
@@ -67,7 +66,6 @@ export class ServiceManager {
       skills: createSkillService(),
       plugins: createPluginsService(),
       metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
-      sml: createSmlService(),
       consumption: createConsumptionService(),
     };
 
@@ -85,7 +83,6 @@ export class ServiceManager {
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
-      sml: this.services.sml.setup({ logger: logger.get('sml') }),
     };
 
     return this.internalSetup;
@@ -105,6 +102,7 @@ export class ServiceManager {
     securityPlugin,
     trackingService,
     analyticsService,
+    searchInferenceEndpoints,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -119,13 +117,18 @@ export class ServiceManager {
       return runner;
     };
 
+    // eslint-disable-next-line prefer-const
+    let executionService: AgentExecutionService | undefined;
+    const getExecutionService = () => {
+      if (!executionService) {
+        throw new Error('Execution service not yet initialized');
+      }
+      return executionService;
+    };
+
     const attachments = this.services.attachments.start({
       spaces,
       savedObjects,
-    });
-    const sml = this.services.sml.start({
-      logger: logger.get('sml'),
-      securityAuthz: securityPlugin?.authz,
     });
 
     const tools = this.services.tools.start({
@@ -163,6 +166,8 @@ export class ServiceManager {
       spaces,
       config: this.config,
       getToolRegistry: tools.getRegistry,
+      analyticsService,
+      trackingService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -182,6 +187,8 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       hooks,
+      getExecutionService,
+      searchInferenceEndpoints,
     });
     runner = runnerFactory.getRunner();
 
@@ -210,9 +217,10 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
     });
 
-    const execution = createAgentExecutionService({
+    executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
       taskManager,
@@ -227,6 +235,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
@@ -239,14 +248,13 @@ export class ServiceManager {
       conversations,
       runnerFactory,
       auditLogService,
-      execution,
+      execution: executionService,
       taskHandler,
       hooks,
       spaces,
       featureFlags,
       uiSettings,
       savedObjects,
-      sml,
       plugins,
       consumption,
     };

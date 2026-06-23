@@ -152,13 +152,14 @@ describe('Cases Ui Plugin', () => {
         },
         config: {
           templatesEnabled: false,
+          attachmentsEnabled: false,
+          casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {
           canUseCases: expect.any(Function),
           getRuleIdFromEvent: expect.any(Function),
           getUICapabilities: expect.any(Function),
           groupAlertsByRule: expect.any(Function),
-          getObservablesFromEcs: expect.any(Function),
         },
         hooks: {
           useCasesAddToExistingCaseModal: expect.any(Function),

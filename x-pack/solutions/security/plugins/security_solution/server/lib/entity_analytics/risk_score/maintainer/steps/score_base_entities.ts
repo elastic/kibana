@@ -16,13 +16,12 @@ import {
   getBaseScoreESQL,
   type EuidCompositeAggregation,
 } from '../../calculate_esql_risk_scores';
+import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
-import type { ScoredEntityPage, StepResult } from './pipeline_types';
-import { categorizePhase1Entities } from './categorize_phase1_entities';
+import type { RiskScoreModifierEntity, ScoredEntityPage, StepResult } from './pipeline_types';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
-import { syncLookupIndexForCategorizedPage } from '../lookup/sync_lookup_index';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 
 interface ScoreBaseEntitiesParams {
@@ -37,20 +36,17 @@ interface ScoreBaseEntitiesParams {
   now: string;
   watchlistConfigs: Map<string, WatchlistObject>;
   calculationRunId: string;
+  abortSignal?: AbortSignal;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
-  lookupIndex: string;
 }
 
 export interface Phase1BaseScoringSummary extends StepResult {
-  writeNowCount: number;
-  deferToPhase2Count: number;
-  notInStoreCount: number;
-  lookupDocsUpserted: number;
-  lookupDocsDeleted: number;
+  pagesProcessed: number;
+  scoresWritten: number;
 }
 
 interface EuidPageBounds {
@@ -64,10 +60,15 @@ interface EuidPageResult {
 }
 
 /**
- * Computes base risk scores for one entity type and streams paginated results.
+ * Streams base risk scores for one entity type, one page per yield.
  *
- * Each page is scored from alert inputs, enriched with entity-derived modifiers,
- * and returned without persistence.
+ * Each page: a composite aggregation over the alerts index (paginating by EUID
+ * via a Painless runtime mapping) discovers the next page's upper-bound EUID,
+ * then a single ES|QL query scores every alert in the half-open EUID range
+ * `(previousUpper, currentUpper]`. The Phase-0 lookup index is unused here —
+ * Phase 2 (resolution scoring) is its only reader.
+ *
+ * Modifier entities are fetched only for IDs that produced scores.
  */
 export const calculateBaseEntityScores = async function* ({
   esClient,
@@ -81,12 +82,17 @@ export const calculateBaseEntityScores = async function* ({
   now,
   watchlistConfigs,
   calculationRunId,
+  abortSignal,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
 
   do {
-    // Per page: find this page's start/end IDs for scoring, then apply entity modifiers.
+    if (abortSignal?.aborted) {
+      logger.info('Base scoring aborted between pages');
+      return;
+    }
+
     const pageResult = await fetchNextEuidPage({
       esClient,
       entityType,
@@ -95,7 +101,9 @@ export const calculateBaseEntityScores = async function* ({
       pageSize,
       afterKey,
     });
-    if (!pageResult) break;
+    if (!pageResult) {
+      return;
+    }
 
     afterKey = pageResult.afterKey;
     const scores = await scorePageFromAlerts({
@@ -110,10 +118,17 @@ export const calculateBaseEntityScores = async function* ({
     previousPageUpperBound = pageResult.upperBound;
 
     if (scores.length > 0) {
-      yield await enrichWithModifiers({
+      const entities = await fetchEntitiesByIds({
         crudClient,
+        entityIds: scores.map((score) => score.entity_id),
         logger,
+        errorContext:
+          'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
+      });
+
+      yield applyBaseScoreModifiers({
         scores,
+        entities,
         now,
         entityType,
         calculationRunId,
@@ -126,82 +141,46 @@ export const calculateBaseEntityScores = async function* ({
 export const scoreBaseEntities = async ({
   writer,
   idBasedRiskScoringEnabled,
-  lookupIndex,
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
-  // Persist using categorized write groups to keep routing explicit.
-  let writeNowCount = 0;
-  let deferToPhase2Count = 0;
-  let notInStoreCount = 0;
   let pagesProcessed = 0;
   let scoresWritten = 0;
-  let lookupDocsUpserted = 0;
-  let lookupDocsDeleted = 0;
 
   for await (const page of calculateBaseEntityScores(params)) {
-    // Per page: split docs by write path, sync lookup docs, then write scores.
     pagesProcessed += 1;
-    const categorized = categorizePhase1Entities(page);
-    const lookupSyncResult = await syncLookupIndexForCategorizedPage({
-      esClient: params.esClient,
-      index: lookupIndex,
-      page,
-      categorized,
-      now: params.now,
-    });
-
-    writeNowCount += categorized.write_now.length;
-    deferToPhase2Count += categorized.defer_to_phase_2.length;
-    notInStoreCount += categorized.not_in_store.length;
-    lookupDocsUpserted += lookupSyncResult.upserted;
-    lookupDocsDeleted += lookupSyncResult.deleted;
-
-    params.logger.debug(
-      `[page:${pagesProcessed}] categorization: write_now=${categorized.write_now.length}, defer_to_phase_2=${categorized.defer_to_phase_2.length}, not_in_store=${categorized.not_in_store.length}`
-    );
-    params.logger.debug(
-      `[page:${pagesProcessed}] lookup sync: upserts=${lookupSyncResult.upserted}, deletes=${lookupSyncResult.deleted}`
-    );
-
-    // Keep dual-write semantics from phase 1 categorization:
-    // `defer_to_phase_2` remains persisted to the risk index for continuity.
-    const riskIndexWrites = [...categorized.write_now, ...categorized.defer_to_phase_2];
+    // Drop scores for entities that aren't in the entity store. The composite
+    // aggregation discovers EUIDs from alerts, which can include identifiers
+    // with no canonical store entity (host.id variations, synthetic identifiers,
+    // alerts that name an entity the entity store has no record of). Writing
+    // those to the risk index produces phantom score documents that have no
+    // anchor on the entity, no place on the entity flyout, and bloat trend
+    // graphs. The V1 maintainer dropped them in `categorizePhase1Entities`;
+    // do the same here.
+    const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
+    if (inStoreScores.length < page.scores.length) {
+      params.logger.debug(
+        `dropped ${page.scores.length - inStoreScores.length} not_in_store scores ` +
+          `from page (kept ${inStoreScores.length})`
+      );
+    }
     scoresWritten += await persistScoresToRiskIndex({
       writer,
       entityType: params.entityType,
-      scores: riskIndexWrites,
+      scores: inStoreScores,
       logger: params.logger,
     });
     await persistScoresToEntityStore({
       crudClient: params.crudClient,
       logger: params.logger,
       entityType: params.entityType,
-      scores: riskIndexWrites,
+      scores: inStoreScores,
       enabled: idBasedRiskScoringEnabled,
     });
-
-    if (categorized.not_in_store.length > 0) {
-      params.logger.debug(
-        `[page:${pagesProcessed}] skipped writes for ${categorized.not_in_store.length} not_in_store entities`
-      );
-    }
   }
-
-  params.logger.debug(
-    `categorization totals: pages=${pagesProcessed}, write_now=${writeNowCount}, defer_to_phase_2=${deferToPhase2Count}, not_in_store=${notInStoreCount}`
-  );
-  params.logger.debug(
-    `lookup sync totals: upserts=${lookupDocsUpserted}, deletes=${lookupDocsDeleted}`
-  );
 
   return {
     pagesProcessed,
-    writeNowCount,
-    deferToPhase2Count,
-    notInStoreCount,
     scoresWritten,
-    lookupDocsUpserted,
-    lookupDocsDeleted,
   };
 };
 
@@ -220,7 +199,6 @@ const fetchNextEuidPage = async ({
   pageSize: number;
   afterKey: Record<string, string> | undefined;
 }): Promise<EuidPageResult | null> => {
-  // Composite paging gives stable ID boundaries for each score query.
   const compositeResponse = await esClient.search(
     getEuidCompositeQuery(entityType, alertFilters, {
       index: alertsIndex,
@@ -259,7 +237,7 @@ const scorePageFromAlerts = async ({
   pageSize: number;
   alertsIndex: string;
   alertFilters: QueryDslQueryContainer[];
-}) => {
+}): Promise<ParsedRiskScore[]> => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
   const esqlResponse = await esClient.esql.query({
     query,
@@ -269,32 +247,21 @@ const scorePageFromAlerts = async ({
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
 };
 
-const enrichWithModifiers = async ({
-  crudClient,
-  logger,
+const applyBaseScoreModifiers = ({
   scores,
+  entities,
   now,
   entityType,
   calculationRunId,
   watchlistConfigs,
 }: {
-  crudClient: EntityUpdateClient;
-  logger: ScopedLogger;
-  scores: ReturnType<ReturnType<typeof parseEsqlBaseScoreRow>>[];
+  scores: ParsedRiskScore[];
+  entities: Map<string, RiskScoreModifierEntity>;
   now: string;
   entityType: EntityType;
   calculationRunId: string;
   watchlistConfigs: Map<string, WatchlistObject>;
-}): Promise<ScoredEntityPage> => {
-  const euidValues = scores.map((score) => score.entity_id);
-  const entityMap = await fetchEntitiesByIds({
-    crudClient,
-    entityIds: euidValues,
-    logger,
-    errorContext:
-      'Error fetching entities for modifier application. Scoring will proceed without modifiers',
-  });
-
+}): ScoredEntityPage => {
   const finalScores = applyScoreModifiersFromEntities({
     now,
     identifierType: entityType,
@@ -305,9 +272,9 @@ const enrichWithModifiers = async ({
       scores,
       identifierField: 'entity.id',
     },
-    entities: entityMap,
+    entities,
     watchlistConfigs,
   });
 
-  return { entityIds: euidValues, scores: finalScores, entities: entityMap };
+  return { entityIds: scores.map((score) => score.entity_id), scores: finalScores, entities };
 };

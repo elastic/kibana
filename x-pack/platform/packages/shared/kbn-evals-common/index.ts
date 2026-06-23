@@ -8,17 +8,21 @@
 export * from './impl/schemas';
 export * from './constants';
 export { goldenClusterPrivileges } from './golden_cluster_privileges';
-export { buildRouteValidationWithZod } from './impl/schemas/common';
 export {
-  buildRunFilterQuery,
+  buildExperimentFilterQuery,
   buildExampleScoresQuery,
   buildDatasetExampleScoresQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
-  buildRunsListingFilterQuery,
-  buildRunsListingAggregation,
-  parseRunsListingResponse,
+  buildExperimentsListingFilterQuery,
+  buildExperimentsListingAggregation,
+  parseExperimentsListingResponse,
   buildModelDisplayId,
 } from './impl/query_builders';
-export type { RunsListingResult, RunDetailEvaluatorStat } from './impl/query_builders';
+export type {
+  ExperimentsListingResult,
+  ExperimentDetailEvaluatorStat,
+} from './impl/query_builders';
+export { pairScores, computePairedTTestResults } from './impl/statistical_analysis';
+export type { PairedScore } from './impl/statistical_analysis';

@@ -65,16 +65,29 @@ export function parseByteSize(value: string | number): number {
 
 /**
  * Safely measures the serialized size of an output value.
- * Returns the byte count on success, or -1 if the value is not serializable
- * (e.g., streams, circular references, functions).
+ * For Buffer outputs (binary HTTP responses) uses the raw byte length directly,
+ * avoiding the ~4x amplification from JSON.stringify({ type: "Buffer", data: [...] }).
+ * Returns the byte count on success, or `null` if the value is not serializable
+ * to JSON. This covers both the throwing cases (circular references, BigInt)
+ * and the silent ones — `JSON.stringify(undefined)` and `JSON.stringify(fn)`
+ * return `undefined` rather than throwing, and would otherwise be mis-sized
+ * as the 9-byte string "undefined" by `Buffer.byteLength`. A `null` result is
+ * a hard signal: the value cannot be persisted to ES, so callers must fail
+ * closed (refuse the output / treat as oversized) rather than silently allow
+ * it through.
  */
-export function safeOutputSize(output: unknown): number {
+export function safeOutputSize(output: unknown): number | null {
+  if (Buffer.isBuffer(output)) {
+    return output.byteLength;
+  }
   try {
     const json = JSON.stringify(output);
+    if (typeof json !== 'string') {
+      return null;
+    }
     return Buffer.byteLength(json, 'utf8');
   } catch {
-    // Circular references, BigInt, or other non-serializable values
-    return -1;
+    return null;
   }
 }
 
@@ -83,16 +96,47 @@ export function safeOutputSize(output: unknown): number {
  * Used by both Layer 1 (pre-emptive I/O enforcement) and Layer 2 (base class output guard).
  */
 export class ResponseSizeLimitError extends ExecutionError {
-  constructor(limitBytes: number, stepName: string) {
+  constructor(
+    limitBytes: number,
+    stepName: string,
+    options: {
+      actualBytes?: number;
+      contentLengthBytes?: number;
+      estimatedOutputBytes?: number;
+    } = {}
+  ) {
+    const { actualBytes, contentLengthBytes, estimatedOutputBytes } = options;
+    const candidates = [actualBytes, estimatedOutputBytes, contentLengthBytes];
+    const suggestedLimitBytes = candidates.find(
+      (n): n is number => typeof n === 'number' && n > limitBytes
+    );
+    const actualSizeMessage = actualBytes
+      ? `Actual serialized output size was ${formatBytes(actualBytes)}. `
+      : '';
+    const contentLengthMessage =
+      contentLengthBytes !== undefined && contentLengthBytes >= limitBytes
+        ? `The response advertised a content length of ${formatBytes(contentLengthBytes)}. `
+        : '';
+    const estimatedOutputMessage = estimatedOutputBytes
+      ? `Estimated step output size is ${formatBytes(estimatedOutputBytes)}. `
+      : '';
+    const suggestedLimitMessage = suggestedLimitBytes
+      ? `Set 'max-step-size' to at least ${formatBytes(
+          suggestedLimitBytes
+        )}, or reduce the response size.`
+      : `Configure 'max-step-size' at the step or workflow level to increase the limit, or reduce the response size (e.g., filter fields, limit results).`;
+
     super({
       type: 'StepSizeLimitExceeded',
-      message:
-        `Step "${stepName}" output exceeded the ` +
-        `${formatBytes(limitBytes)} size limit. ` +
-        `Configure 'max-step-size' at the step or workflow level to increase the limit, ` +
-        `or reduce the response size (e.g., filter fields, limit results).`,
+      message: `Step "${stepName}" output exceeded the ${formatBytes(
+        limitBytes
+      )} size limit. ${actualSizeMessage}${contentLengthMessage}${estimatedOutputMessage}${suggestedLimitMessage}`,
       details: {
         limitBytes,
+        ...(actualBytes ? { actualBytes } : {}),
+        ...(contentLengthBytes ? { contentLengthBytes } : {}),
+        ...(estimatedOutputBytes ? { estimatedOutputBytes } : {}),
+        ...(suggestedLimitBytes ? { suggestedLimitBytes } : {}),
       },
     });
   }

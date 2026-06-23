@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export { esqlResponseToJson, extractEsqlQueries, executeEsql, interpolateEsqlQuery } from './esql';
+export {
+  esqlResponseToJson,
+  extractEsqlQueries,
+  executeEsql,
+  interpolateEsqlQuery,
+  validateEsqlQuery,
+} from './esql';
 export {
   flattenMapping,
   cleanupMapping,
@@ -25,6 +31,7 @@ export {
   getBatchedFieldsFromFieldCaps,
   getIndexFields,
   type IndexFieldsResult,
+  type IndexFieldType,
 } from './ccs';
 export { generateXmlTree, type XmlNode } from './formatting';
 export { errorResult, otherResult } from './results';

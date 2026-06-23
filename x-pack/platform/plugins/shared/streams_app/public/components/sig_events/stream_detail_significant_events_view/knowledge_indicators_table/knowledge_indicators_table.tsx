@@ -17,9 +17,10 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { type Streams, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
@@ -29,6 +30,7 @@ import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SparkPlot } from '../../../spark_plot';
 import { TableTitle } from '../../stream_detail_systems/table_title';
 import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
+import { getKnowledgeIndicatorType } from '../utils/get_knowledge_indicator_type';
 
 interface KnowledgeIndicatorsTableProps {
   definition: Streams.all.Definition;
@@ -70,16 +72,14 @@ export function KnowledgeIndicatorsTable({
     return knowledgeIndicators.filter((knowledgeIndicator) => {
       const matchesStatusFilter =
         statusFilter === 'active'
-          ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded_at
-          : knowledgeIndicator.kind === 'feature' &&
-            Boolean(knowledgeIndicator.feature.excluded_at);
+          ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded
+          : knowledgeIndicator.kind === 'feature' && Boolean(knowledgeIndicator.feature.excluded);
 
       if (!matchesStatusFilter) {
         return false;
       }
 
-      const type =
-        knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.type : 'query';
+      const type = getKnowledgeIndicatorType(knowledgeIndicator);
       const matchesType = selectedTypes.length === 0 || selectedTypes.includes(type);
 
       if (!matchesType) {
@@ -140,11 +140,16 @@ export function KnowledgeIndicatorsTable({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={isExpanded ? 'minimize' : 'expand'}
-                  aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
-                  onClick={() => onViewDetails(knowledgeIndicator)}
-                />
+                <EuiToolTip
+                  content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType={isExpanded ? 'minimize' : 'expand'}
+                    aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                    onClick={() => onViewDetails(knowledgeIndicator)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink onClick={() => onViewDetails(knowledgeIndicator)}>{title}</EuiLink>
@@ -198,7 +203,13 @@ export function KnowledgeIndicatorsTable({
             );
           }
 
-          return <EuiBadge color="hollow">{SIGNIFICANT_EVENTS_TABLE_QUERY_TYPE_LABEL}</EuiBadge>;
+          return (
+            <EuiBadge color="hollow">
+              {knowledgeIndicator.query.type === QUERY_TYPE_STATS
+                ? SIGNIFICANT_EVENTS_TABLE_STATS_QUERY_TYPE_LABEL
+                : SIGNIFICANT_EVENTS_TABLE_MATCH_QUERY_TYPE_LABEL}
+            </EuiBadge>
+          );
         },
       },
       {
@@ -302,10 +313,17 @@ const SIGNIFICANT_EVENTS_TABLE_TYPE_COLUMN_LABEL = i18n.translate(
   }
 );
 
-const SIGNIFICANT_EVENTS_TABLE_QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.columns.queryTypeLabel',
+const SIGNIFICANT_EVENTS_TABLE_MATCH_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.columns.matchQueryTypeLabel',
   {
-    defaultMessage: 'Query',
+    defaultMessage: 'Match query',
+  }
+);
+
+const SIGNIFICANT_EVENTS_TABLE_STATS_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.columns.statsQueryTypeLabel',
+  {
+    defaultMessage: 'Stats query',
   }
 );
 

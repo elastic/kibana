@@ -30,6 +30,7 @@ const toEntitySourceFormValues = (
   enabled: source.enabled,
   integrationName: source.integrationName,
   matchers: source.matchers,
+  range: source.range,
 });
 
 const toWatchlistFormValues = (
@@ -93,9 +94,15 @@ export const useGetWatchlistFormData = (watchlistId?: string) => {
     return toWatchlistFormValues(watchlistQuery.data, ruleBasedSources);
   }, [watchlistQuery.data, ruleBasedSources]);
 
+  const indexSourceWithMissingApiKey = useMemo(
+    () => ruleBasedSources.find((s) => s.type === 'index' && !s.apiKeyId),
+    [ruleBasedSources]
+  );
+
   return {
     initialWatchlist,
     ruleBasedSourceIds,
+    indexSourceWithMissingApiKey,
     isLoading: watchlistQuery.isLoading || entitySourcesQuery.isLoading,
     isError: watchlistQuery.isError || entitySourcesQuery.isError,
   };

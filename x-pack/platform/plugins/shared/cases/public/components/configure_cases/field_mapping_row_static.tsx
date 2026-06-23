@@ -40,7 +40,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
             <EuiCode data-test-subj="field-mapping-source">{casesField}</EuiCode>
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
-            <EuiIcon type="sortRight" />
+            <EuiIcon type="sortRight" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

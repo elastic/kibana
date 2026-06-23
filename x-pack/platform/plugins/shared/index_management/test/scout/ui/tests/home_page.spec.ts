@@ -7,11 +7,32 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
+import type { EnrichSummary } from '@elastic/elasticsearch/lib/api/types';
+import { getPolicyType } from '../../../../common/lib';
 import { test } from '../fixtures';
 
 const testIndexName = `index-test-${Math.random()}`;
+const byteUnitsDataStreamName = `byte-units-data-stream-${Math.random().toString(36).slice(2)}`;
+const byteUnitsTemplateName = `${byteUnitsDataStreamName}-template`;
 
 test.describe('Home page', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ esClient, log }) => {
+    const { policies } = await esClient.enrich.getPolicy();
+    for (const policy of policies as EnrichSummary[]) {
+      const policyType = getPolicyType(policy);
+      const name = policy.config[policyType]?.name;
+      if (!name) {
+        continue;
+      }
+      try {
+        await esClient.enrich.deletePolicy({ name }, { ignore: [404] });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        log.debug(`Enrich policy cleanup failed for ${name}: ${message}`);
+      }
+    }
+  });
+
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.goto();
@@ -22,6 +43,23 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
       await esClient.indices.delete({ index: testIndexName });
     } catch (e: any) {
       log.debug(`Index cleanup failed for ${testIndexName}: ${e.message}`);
+    }
+
+    try {
+      await esClient.indices.deleteDataStream({ name: byteUnitsDataStreamName }, { ignore: [404] });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      log.debug(`Data stream cleanup failed for ${byteUnitsDataStreamName}: ${message}`);
+    }
+
+    try {
+      await esClient.indices.deleteIndexTemplate(
+        { name: byteUnitsTemplateName },
+        { ignore: [404] }
+      );
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      log.debug(`Template cleanup failed for ${byteUnitsTemplateName}: ${message}`);
     }
   });
 
@@ -73,6 +111,60 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
 
     // Verify content - wait for table to be visible
     await expect(page.testSubj.locator('dataStreamTable')).toBeVisible();
+  });
+
+  test('Data streams - renders storage size units in uppercase', async ({
+    esClient,
+    pageObjects,
+    page,
+  }) => {
+    await esClient.indices.putIndexTemplate({
+      name: byteUnitsTemplateName,
+      index_patterns: [byteUnitsDataStreamName],
+      data_stream: {},
+      template: {
+        mappings: {
+          properties: {
+            '@timestamp': {
+              type: 'date',
+            },
+          },
+        },
+      },
+    });
+    await esClient.index({
+      index: byteUnitsDataStreamName,
+      op_type: 'create',
+      refresh: true,
+      document: {
+        '@timestamp': new Date().toISOString(),
+        message: 'byte unit verification',
+      },
+    });
+
+    await pageObjects.indexManagement.changeTabs('data_streamsTab');
+    const dataStreamTable = page.testSubj.locator('dataStreamTable');
+    await expect(dataStreamTable).toBeVisible();
+    await page
+      .getByRole('searchbox', {
+        name: 'This is a search bar. As you type, the results lower in the page will automatically filter.',
+      })
+      .fill(byteUnitsDataStreamName);
+    await page.testSubj.locator('includeStatsSwitch').click();
+
+    const dataStreamRow = dataStreamTable.getByRole('row', {
+      name: new RegExp(byteUnitsDataStreamName),
+    });
+    await expect(dataStreamRow).toBeVisible();
+
+    const uppercaseByteSizePattern = /\d+(?:\.\d+)?\s?(?:B|KB|MB|GB|TB|PB)\b/;
+    const lowercaseByteSizePattern = /\d+(?:\.\d+)?\s?(?:b|kb|mb|gb|tb|pb)\b/;
+    const storageSizeCell = dataStreamRow.getByRole('cell').filter({
+      hasText: uppercaseByteSizePattern,
+    });
+
+    await expect(storageSizeCell).toBeVisible();
+    await expect(storageSizeCell).not.toContainText(lowercaseByteSizePattern);
   });
 
   test('Index templates - renders the index templates tab', async ({ pageObjects, page }) => {

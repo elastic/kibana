@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
@@ -39,7 +40,6 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
@@ -87,7 +87,12 @@ import {
   getStepsData,
   redirectToDetections,
 } from '../../../common/helpers';
-import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
+import {
+  CreatedBy,
+  UpdatedBy,
+  RuleVersion,
+  RuleRevision,
+} from '../../../../detections/components/rules/rule_info';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -99,13 +104,11 @@ import { SecurityPageName } from '../../../../app/types';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
-
 import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
@@ -119,9 +122,7 @@ import {
 import { ExecutionResultsTable } from './execution_results/execution_results_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
-
 import * as ruleI18n from '../../../common/translations';
-
 // eslint-disable-next-line no-restricted-imports
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import * as i18n from './translations';
@@ -130,7 +131,7 @@ import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/compo
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
-import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
+import { type RuleResponse, type Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -236,13 +237,15 @@ export const RuleDetailsPage = connector(
     clearEventsLoading,
     clearSelected,
   }: DetectionEngineComponentProps) {
-    const { application, cps, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled(
+      'ruleChangesHistoryEnabled'
+    );
+
+    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
     } = application;
-
-    useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
@@ -284,13 +287,7 @@ export const RuleDetailsPage = connector(
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
-    const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-      useSourcererDataView(PageScope.alerts);
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
-    const isLoadingIndexPattern = newDataViewPickerEnabled
-      ? status !== 'ready'
-      : oldIsLoadingIndexPattern;
+    const { dataView, status } = useDataView(PageScope.alerts);
 
     const loading = userInfoLoading || listsConfigLoading;
     const { detailName: ruleId } = useParams<{
@@ -319,6 +316,7 @@ export const RuleDetailsPage = connector(
 
     const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, canReadAlerts });
 
+    const confirmModalTitleId = useGeneratedHtmlId();
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
 
@@ -370,8 +368,8 @@ export const RuleDetailsPage = connector(
     useLegacyUrlRedirect({ rule, spacesApi });
 
     const showUpdating = useMemo(
-      () => isLoadingIndexPattern || isAlertsLoading || loading,
-      [isLoadingIndexPattern, isAlertsLoading, loading]
+      () => status !== 'ready' || isAlertsLoading || loading,
+      [status, isAlertsLoading, loading]
     );
 
     const title = useMemo(
@@ -396,17 +394,23 @@ export const RuleDetailsPage = connector(
       () =>
         rule ? (
           [
-            <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />,
-            rule?.updated_by != null ? (
-              <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
+            <CreatedBy createdBy={rule.created_by} createdAt={rule.created_at} />,
+            rule.updated_by != null ? (
+              <UpdatedBy updatedBy={rule.updated_by} updatedAt={rule.updated_at} />
             ) : (
               ''
             ),
-          ]
+            isRuleChangesHistoryEnabled && rule.rule_source.type === 'external' ? (
+              <RuleVersion version={rule.version} />
+            ) : (
+              ''
+            ),
+            isRuleChangesHistoryEnabled ? <RuleRevision revision={rule.revision} /> : '',
+          ].filter(Boolean)
         ) : ruleLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : null,
-      [rule, ruleLoading]
+      [rule, ruleLoading, isRuleChangesHistoryEnabled]
     );
 
     // Callback for when open/closed filter changes
@@ -463,14 +467,16 @@ export const RuleDetailsPage = connector(
             </EuiFlexItem>
           ) : (
             <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-              <EuiButtonIcon
-                data-test-subj="ruleLastExecutionStatusRefreshButton"
-                color="primary"
-                onClick={refreshRule}
-                iconType="refresh"
-                aria-label={ruleI18n.REFRESH}
-                isDisabled={!isExistingRule}
-              />
+              <EuiToolTip content={ruleI18n.REFRESH} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj="ruleLastExecutionStatusRefreshButton"
+                  color="primary"
+                  onClick={refreshRule}
+                  iconType="refresh"
+                  aria-label={ruleI18n.REFRESH}
+                  isDisabled={!isExistingRule}
+                />
+              </EuiToolTip>
             </RuleStatus>
           )}
           <EuiFlexItem grow={false}>
@@ -595,7 +601,6 @@ export const RuleDetailsPage = connector(
     const deprecationCallout = useDeprecatedRuleDetailsCallout({
       rule,
       confirmDeletion,
-      showBulkDuplicateExceptionsConfirmation: showBulkDuplicateConfirmation,
     });
 
     const {
@@ -662,6 +667,7 @@ export const RuleDetailsPage = connector(
         {isDeleteConfirmationVisible && (
           <EuiConfirmModal
             title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
+            aria-label={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
             onCancel={handleDeletionCancel}
             onConfirm={() => handleDeletionConfirm()}
             confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}
@@ -669,6 +675,8 @@ export const RuleDetailsPage = connector(
             buttonColor="danger"
             defaultFocusedButton="confirm"
             data-test-subj="deleteRulesConfirmationModal"
+            aria-labelledby={confirmModalTitleId}
+            titleProps={{ id: confirmModalTitleId }}
           >
             {i18n.DELETE_CONFIRMATION_BODY}
           </EuiConfirmModal>
@@ -857,10 +865,9 @@ export const RuleDetailsPage = connector(
                       <>
                         <FiltersGlobal>
                           <SiemSearchBar
-                            dataView={experimentalDataView}
+                            dataView={dataView}
                             pollForSignalIndex={pollForSignalIndex}
                             id={InputsModelId.global}
-                            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
                           />
                         </FiltersGlobal>
                         <EuiSpacer />
@@ -887,8 +894,7 @@ export const RuleDetailsPage = connector(
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                            dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
-                            dataView={experimentalDataView}
+                            dataView={dataView}
                             defaultFilters={alertMergedFilters}
                             defaultGroupingOptions={defaultGroupingOptions}
                             from={from}

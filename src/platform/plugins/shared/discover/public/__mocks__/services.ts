@@ -22,6 +22,7 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -236,9 +237,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings: uiSettingsMock,
+    settings: corePluginMock.settings,
     http: {
       basePath: '/',
-      get: jest.fn((path: string) => {
+      post: jest.fn((path: string) => {
         // Mock ES|QL timefield endpoint so an ES|QL data view can be created
         if (path.startsWith('/internal/esql/get_timefield')) {
           return Promise.resolve({ timeField: '@timestamp' });
@@ -263,6 +265,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     metadata: {
       branch: 'test',
+      version: 'major.minor.patch',
     },
     theme,
     storage: new LocalStorageMock({}) as unknown as Storage,
@@ -319,13 +322,16 @@ export function createDiscoverServicesMock(): DiscoverServices {
       isEmbeddedEditor: jest.fn(() => false),
       canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
-      getByValueInput: jest.fn(),
+      getByValueTab: jest.fn(),
+      getEmbeddableId: jest.fn(() => undefined),
+      getOriginatingPath: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
     alertingVTwo: {
-      DynamicRuleFormFlyout: jest.fn(() => null),
+      CreateRuleOptionsFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
+    logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;
 }
 

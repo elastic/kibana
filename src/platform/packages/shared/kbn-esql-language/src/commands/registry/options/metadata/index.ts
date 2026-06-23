@@ -12,8 +12,13 @@ import { isColumn, isOptionNode } from '@elastic/esql';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
-import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
+import {
+  commaCompleteItem,
+  newLineAndPipeCompleteItems,
+  pipeCompleteItem,
+} from '../../complete_items';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
+import { endsWithNonWhitespace } from '../../../definitions/utils/regex';
 
 export const METADATA_FIELDS = [
   '_version',
@@ -61,7 +66,7 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
   // FROM something METADATA /
   // FROM something METADATA field/
   // FROM something METADATA field, /
-  if (/(?:,|METADATA)\s+$/i.test(innerText) || /\S$/.test(innerText)) {
+  if (/(?:,|METADATA)\s+$/i.test(innerText) || endsWithNonWhitespace(innerText)) {
     const prefix = getMetadataFragment(innerText);
 
     if (prefix && METADATA_FIELDS.includes(prefix)) {
@@ -92,7 +97,7 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
       if (filteredMetaFields.length > 0) {
         suggestions.push(commaCompleteItem);
       }
-      suggestions.push(pipeCompleteItem);
+      suggestions.push(...newLineAndPipeCompleteItems);
     }
   }
 

@@ -14,74 +14,41 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
+
+import {
+  SavedQueryId,
+  SavedQueryDescriptionOrUndefined,
+  Query,
+  SnapshotOrUndefined,
+  RemovedOrUndefined,
+  PlatformOrUndefined,
+  ECSMappingOrUndefined,
+} from '../model/schema/common_attributes.gen';
 
 /**
  * The response for copying a saved query.
  */
-export type CopySavedQueryResponse = z.infer<typeof CopySavedQueryResponse>;
-export const CopySavedQueryResponse = z.object({
-  /**
-   * The copied saved query.
-   */
-  data: z
-    .object({
-      /**
-       * The saved object ID of the copied saved query.
-       */
-      saved_object_id: z.string().optional(),
-      /**
-       * The saved query ID.
-       */
-      id: z.string().optional(),
-      /**
-       * The saved query description.
-       */
-      description: z.string().optional(),
-      /**
-       * The SQL query.
-       */
-      query: z.string().optional(),
-      /**
-       * The query interval in seconds.
-       */
-      interval: z.string().optional(),
-      /**
-       * The query timeout in seconds.
-       */
+export const CopySavedQueryResponse = lazySchema(() =>
+  z.object({
+    data: z.object({
+      saved_object_id: z.string(),
+      id: SavedQueryId,
+      description: SavedQueryDescriptionOrUndefined.optional(),
+      query: Query.optional(),
+      interval: z.union([z.number().int(), z.string()]).optional(),
       timeout: z.number().int().optional(),
-      /**
-       * Whether the query is a snapshot query.
-       */
-      snapshot: z.boolean().optional(),
-      /**
-       * Whether to include results for removed processes.
-       */
-      removed: z.boolean().optional(),
-      /**
-       * The target platform(s).
-       */
-      platform: z.string().optional(),
-      /**
-       * The ECS mapping configuration.
-       */
-      ecs_mapping: z.object({}).optional(),
-      /**
-       * The creation timestamp.
-       */
-      created_at: z.string().optional(),
-      /**
-       * The user who created the copy.
-       */
-      created_by: z.string().optional(),
-      /**
-       * The last update timestamp.
-       */
-      updated_at: z.string().optional(),
-      /**
-       * The user who last updated the saved query.
-       */
-      updated_by: z.string().optional(),
-    })
-    .optional(),
-});
+      snapshot: SnapshotOrUndefined.optional(),
+      removed: RemovedOrUndefined.optional(),
+      platform: PlatformOrUndefined.optional(),
+      ecs_mapping: ECSMappingOrUndefined.optional(),
+      created_at: z.string().datetime().optional(),
+      created_by: z.string().nullable().optional(),
+      created_by_profile_uid: z.string().optional(),
+      updated_at: z.string().datetime().optional(),
+      updated_by: z.string().nullable().optional(),
+      updated_by_profile_uid: z.string().optional(),
+    }),
+  })
+);
+export type CopySavedQueryResponse = z.infer<typeof CopySavedQueryResponse>;

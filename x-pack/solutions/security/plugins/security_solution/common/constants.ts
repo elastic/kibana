@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   RULES_FEATURE_LATEST,
@@ -56,11 +55,13 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults' as const;
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults' as const;
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
+export const ALERTS_BATCH_MAX_SIZE = 20 as const;
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
-export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
+export const DEFAULT_RISK_SCORE_PAGE_SIZE = 10_000 as const;
+export const MAX_RISK_SCORE_PAGE_SIZE = 10_000 as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/platform/plugins/shared/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;
@@ -115,12 +116,14 @@ export const ATTACKS_PATH = '/attacks' as const;
 export const ALERT_DETECTIONS = '/alert_detections' as const;
 
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ATTACK_DETAILS_REDIRECT_PATH = `${ATTACKS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
+export const RULES_CHANGES_HISTORY_PATH = `${RULES_PATH}/id/:ruleId/changes-history` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -335,6 +338,18 @@ export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
+ * Detection Engine attacks routes (public)
+ */
+export const DETECTION_ENGINE_ATTACKS_URL = `${DETECTION_ENGINE_URL}/attacks` as const;
+export const DETECTION_ENGINE_ATTACKS_SEARCH_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/search` as const;
+export const DETECTION_ENGINE_ATTACKS_STATUS_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/status` as const;
+export const DETECTION_ENGINE_ATTACKS_TAGS_URL = `${DETECTION_ENGINE_ATTACKS_URL}/tags` as const;
+export const DETECTION_ENGINE_ATTACKS_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/assignees` as const;
+
+/**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
  *   curl http//localhost:5601/internal/security_solution/telemetry
@@ -345,6 +360,7 @@ export const SECURITY_TELEMETRY_URL = `/internal/security_solution/telemetry` as
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
+export const INTERNAL_TIMELINES_BY_IDS_URL = '/internal/timelines/_by_ids' as const;
 export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite' as const;
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft` as const;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export` as const;
@@ -471,11 +487,7 @@ export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 
 /**
- * Max number of rules to display on UI in table, max number of rules that can be edited in a single bulk edit API request
- * We limit number of rules in bulk edit API, because rulesClient doesn't support bulkGet of rules by ids.
- * Given this limitation, current implementation fetches each rule separately through rulesClient.resolve method.
- * As max number of rules displayed on a page is 100, max 100 rules can be bulk edited by passing their ids to API.
- * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
+ * Max number of rules to display on UI in table (one page of results).
  */
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 
@@ -490,7 +502,6 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
-  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3.default',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -539,12 +550,6 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
  * Max notes count per document in security solution
  */
 export const MAX_NOTES_PER_DOCUMENT = 100;
-
-/**
- * Cases attachment IDs
- */
-export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
-export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**
  * Rule gaps
@@ -718,10 +723,15 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
+  alerts = 'security.alerts',
   entity = 'security.entity',
+  entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',
+  rulePreview = 'security.rule.preview',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
 
-export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
+  'securitySolution.registerAlertValidationStepsEnabled' as const;
+export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;

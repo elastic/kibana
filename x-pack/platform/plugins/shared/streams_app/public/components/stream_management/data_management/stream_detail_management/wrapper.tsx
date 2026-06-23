@@ -18,7 +18,14 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
-import { Streams, ROOT_STREAM_NAMES, type RootStreamName } from '@kbn/streams-schema';
+import {
+  Streams,
+  LOGS_ROOT_STREAM_NAME,
+  ROOT_STREAM_NAMES,
+  type RootStreamName,
+  isDraftGetResponse,
+  isRoot,
+} from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -34,12 +41,14 @@ import { calculateDataQuality } from '../../../../util/calculate_data_quality';
 import {
   ClassicStreamBadge,
   DiscoverBadgeButton,
+  DraftStreamBadge,
   LifecycleBadge,
   TimeSeriesBadge,
   WiredStreamBadge,
 } from '../../../stream_badges';
 import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../../streams_tour';
+import { StreamDetailActionsMenu } from './stream_detail_actions_menu';
 
 export type ManagementTabs = Record<
   string,
@@ -108,18 +117,32 @@ export function Wrapper({
     })
   );
 
+  const isDraft = isDraftGetResponse(definition);
+
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: false,
-    canReadFailureStore: Streams.ingest.all.GetResponse.is(definition)
-      ? definition.privileges.read_failure_store
-      : true,
+    getCanReadFailureStore: () =>
+      Streams.ingest.all.GetResponse.is(definition)
+        ? definition.privileges.read_failure_store
+        : false,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
-  const docCountsFetch = getStreamDocCounts(streamId);
 
-  const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
-  const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
-  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
+  // Draft streams have no backing data stream so doc_counts endpoints return 404.
+  const docCountsFetch = isDraft ? undefined : getStreamDocCounts(streamId);
+
+  const countResult = useAsync(
+    () => docCountsFetch?.docCount ?? Promise.resolve([]),
+    [docCountsFetch]
+  );
+  const failedDocsResult = useAsync(
+    () => docCountsFetch?.failedDocCount ?? Promise.resolve([]),
+    [docCountsFetch]
+  );
+  const degradedDocsResult = useAsync(
+    () => docCountsFetch?.degradedDocCount ?? Promise.resolve([]),
+    [docCountsFetch]
+  );
 
   const docCount = countResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
   const degradedDocCount =
@@ -141,6 +164,7 @@ export function Wrapper({
   if (Streams.ClassicStream.GetResponse.is(definition)) {
     streamBadges.push({ key: 'classic', node: <ClassicStreamBadge /> });
   }
+
   if (Streams.WiredStream.GetResponse.is(definition)) {
     if (ROOT_STREAM_NAMES.includes(definition.stream.name as RootStreamName)) {
       streamBadges.push({
@@ -161,8 +185,11 @@ export function Wrapper({
       });
     }
     streamBadges.push({ key: 'wired', node: <WiredStreamBadge /> });
+    if (isDraft) {
+      streamBadges.push({ key: 'draft', node: <DraftStreamBadge /> });
+    }
   }
-  if (Streams.ingest.all.GetResponse.is(definition)) {
+  if (Streams.ingest.all.GetResponse.is(definition) && !isDraft) {
     if (definition.index_mode === 'time_series') {
       streamBadges.push({ key: 'timeSeries', node: <TimeSeriesBadge /> });
     }
@@ -176,17 +203,27 @@ export function Wrapper({
       ),
     });
   }
-  streamBadges.push({
-    key: 'quality',
-    node: (
-      <DatasetQualityIndicator
-        quality={quality}
-        isLoading={isQualityLoading}
-        verbose={true}
-        showTooltip={true}
-      />
-    ),
-  });
+  if (!isDraft) {
+    streamBadges.push({
+      key: 'quality',
+      node: (
+        <DatasetQualityIndicator
+          quality={quality}
+          isLoading={isQualityLoading}
+          verbose={true}
+          showTooltip={true}
+        />
+      ),
+    });
+  }
+
+  const canDeleteStream =
+    (Streams.ClassicStream.GetResponse.is(definition) &&
+      definition.privileges.manage &&
+      !definition.replicated) ||
+    (Streams.WiredStream.GetResponse.is(definition) &&
+      definition.privileges.manage &&
+      (!isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME));
 
   return (
     <>
@@ -197,32 +234,40 @@ export function Wrapper({
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="spaceBetween"
-            wrap
-          >
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap>
-              <EuiFlexItem grow={false}>{streamId}</EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
-                {streamBadges.map(({ key, node }) => (
-                  <EuiFlexItem key={key} grow={false}>
-                    {node}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap>
+            <EuiFlexItem grow={false}>{streamId}</EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
+              {streamBadges.map(({ key, node }) => (
+                <EuiFlexItem key={key} grow={false}>
+                  {node}
+                </EuiFlexItem>
+              ))}
             </EuiFlexGroup>
-            {Streams.ingest.all.GetResponse.is(definition) && (
-              <DiscoverBadgeButton
-                stream={definition.stream}
-                hasDataStream={definition.data_stream_exists}
-                indexMode={definition.index_mode ?? 'standard'}
-                spellOut
-              />
-            )}
           </EuiFlexGroup>
+        }
+        rightSideItems={
+          Streams.ingest.all.GetResponse.is(definition)
+            ? [
+                <EuiFlexGroup
+                  key="streamDetailActions"
+                  alignItems="center"
+                  gutterSize="xs"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <DiscoverBadgeButton
+                      stream={definition.stream}
+                      hasDataStream={definition.data_stream_exists || isDraft}
+                      indexMode={definition.index_mode ?? 'standard'}
+                      spellOut
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <StreamDetailActionsMenu canDelete={canDeleteStream} definition={definition} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>,
+              ]
+            : []
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
           const tourStepId = TAB_TO_TOUR_STEP_ID[tabKey];

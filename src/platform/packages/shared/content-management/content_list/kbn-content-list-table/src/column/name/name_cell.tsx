@@ -9,9 +9,10 @@
 
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
+
+import { WIDE_VIEWPORT_NAME_BREAKPOINT_PX } from '../../breakpoints';
 
 import { StarButton } from '../starred/star_button';
 import { NameCellTitle as Title } from './cell_title';
@@ -42,6 +43,17 @@ export interface NameCellProps {
    */
   showStarred?: boolean;
   /**
+   * Optional click handler for the title.
+   * When provided, the provider-level `item.getHref` is ignored unless
+   * `shouldUseHref` is explicitly `true`.
+   */
+  onClick?: (item: ContentListItem) => void;
+  /**
+   * Whether to use the provider-level `item.getHref` for the title link.
+   * Defaults to `true` unless `onClick` is provided.
+   */
+  shouldUseHref?: boolean;
+  /**
    * Optional click handler for tag badges.
    * When omitted, the built-in handler in {@link NameCellTags} toggles
    * include/exclude filters via `useContentListFilters`.
@@ -68,21 +80,13 @@ export const NameCell = memo(
     showDescription = true,
     showTags = false,
     showStarred = false,
+    onClick,
+    shouldUseHref,
     onTagClick,
   }: NameCellProps) => {
     const { tags: tagIds } = item;
     const hasTags = showTags && tagIds && tagIds.length > 0;
     const { euiTheme } = useEuiTheme();
-
-    // Aligns title and star button on the same row.
-    const titleRowCss = useMemo(
-      () => css`
-        display: flex;
-        align-items: center;
-        gap: ${euiTheme.size.xxs};
-      `,
-      [euiTheme]
-    );
 
     // Vertical margin compensation matches `TableListView`'s `ItemDetails` component.
     // Memoized so `StarButton` receives a stable css reference across re-renders.
@@ -94,15 +98,53 @@ export const NameCell = memo(
       [euiTheme]
     );
 
+    // At ≥ 2560px (~4K), pull title/description/tags onto a shared row so
+    // sparse rows don't strand the populated cells in a tiny pocket on the
+    // left of an otherwise empty Name column. `flex-wrap: wrap` lets rich
+    // rows fall back to the column stack — a long description (or a long
+    // title) wraps to the next line instead of being squeezed by a sibling
+    // ({@link https://github.com/elastic/kibana/issues/271707}). `row-gap: 0`
+    // preserves the original column-stack visual when wrapping kicks in.
+    const wideRowCss = useMemo(
+      () => css`
+        @media (min-width: ${WIDE_VIEWPORT_NAME_BREAKPOINT_PX}px) {
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-items: center;
+          column-gap: ${euiTheme.size.s};
+          row-gap: 0;
+        }
+      `,
+      [euiTheme]
+    );
+
     return (
-      <div>
-        <div css={showStarred ? titleRowCss : undefined}>
-          <Title item={item} />
-          {showStarred && <StarButton id={item.id} wrapperCss={inlineStarCss} />}
-        </div>
-        {showDescription && <Description item={item} />}
-        {hasTags && <Tags tagIds={tagIds} onTagClick={onTagClick} />}
-      </div>
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="none" css={wideRowCss}>
+        <EuiFlexItem grow={false}>
+          {showStarred ? (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <Title {...{ item, onClick, shouldUseHref }} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <StarButton id={item.id} wrapperCss={inlineStarCss} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <Title {...{ item, onClick, shouldUseHref }} />
+          )}
+        </EuiFlexItem>
+        {showDescription && (
+          <EuiFlexItem grow={false}>
+            <Description item={item} />
+          </EuiFlexItem>
+        )}
+        {hasTags && (
+          <EuiFlexItem grow={false}>
+            <Tags tagIds={tagIds} onTagClick={onTagClick} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     );
   }
 );

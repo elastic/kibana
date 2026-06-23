@@ -102,6 +102,8 @@ const getIntegrations = async (
 /** Fetches ESQL sources including indices, aliases, data streams, and integrations.
  * @param core The core start contract to make HTTP requests and access application capabilities.
  * @param getLicense An optional function to retrieve the current license information.
+ * @param enrichSources Optional function to enrich or transform the list of sources before
+ *   returning them (e.g. to add stream descriptions, links, or custom types).
  * @param signal Optional AbortSignal to cancel the request.
  * @param projectRouting Optional CPS project routing value forwarded to the server so that index
  *   resolution reflects the project picker selection or an explicit `SET project_routing`
@@ -111,6 +113,7 @@ const getIntegrations = async (
 export const getESQLSources = async (
   core: Pick<CoreStart, 'application' | 'http'>,
   getLicense: (() => Promise<ILicense | undefined>) | undefined,
+  enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>,
   signal?: AbortSignal,
   projectRouting?: string
 ): Promise<ESQLSourceResult[]> => {
@@ -121,5 +124,11 @@ export const getESQLSources = async (
     getIndicesList(core, areRemoteIndicesAvailable, signal, projectRouting),
     getIntegrations(core, signal),
   ]);
-  return [...allIndices, ...integrations];
+  let sources = [...allIndices, ...integrations];
+
+  if (enrichSources) {
+    sources = await enrichSources(sources);
+  }
+
+  return sources;
 };

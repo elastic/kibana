@@ -9,19 +9,19 @@
 
 import { euiMarkdownLinkValidator, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
+  initializeStateApi,
   getViewModeSubject,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type {
   MarkdownEmbeddableState,
@@ -34,18 +34,16 @@ import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
-import { loadFromLibrary } from './markdown_client/load_from_library';
-import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
+import { hasLibraryItemWithTitle } from './markdown_client/has_library_item_with_title';
 import { markdownClient } from './markdown_client/markdown_client';
-import type { MarkdownAttributes } from '../server/markdown_saved_object';
-import type { MarkdownSettingsState } from '../server/schemas';
+import type { MarkdownSettingsState } from '../server/embeddable/schemas';
 
 const flexCss = css({
   display: 'flex',
   flex: '1 1 100%',
 });
 
-export const markdownEmbeddableFactory: EmbeddableFactory<
+export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
   MarkdownEmbeddableState,
   MarkdownEditorApi
 > = {
@@ -54,33 +52,27 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const libraryId = (initialState as MarkdownByReferenceState).ref_id;
     const isByReference = libraryId !== undefined;
     const initialLibraryState = isByReference
-      ? await loadFromLibrary(libraryId)
-      : ({
-          title: '',
-          description: '',
-          content: '',
-        } as MarkdownAttributes);
+      ? (await markdownClient.get(libraryId)).data
+      : undefined;
 
     const titleManager = initializeTitleManager(initialState);
     const content$ = new BehaviorSubject<string>(
-      isByReference ? initialLibraryState.content : (initialState as MarkdownByValueState).content
+      initialLibraryState
+        ? initialLibraryState.content
+        : (initialState as MarkdownByValueState).content
     );
-    const defaultTitle$ = new BehaviorSubject<string | undefined>(
-      isByReference ? initialLibraryState.title : undefined
-    );
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(initialLibraryState?.title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
-      isByReference ? initialLibraryState.description : undefined
+      initialLibraryState?.description
     );
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
 
     const settings$ = new BehaviorSubject<MarkdownSettingsState>(
-      (isByReference
+      initialLibraryState
         ? initialLibraryState.settings
-        : (initialState as MarkdownByValueState).settings) ?? {
-        open_links_in_new_tab: true,
-      }
+        : (initialState as MarkdownByValueState).settings
     );
 
     const overrideHoverActions$ = new BehaviorSubject<boolean>(false);
@@ -98,9 +90,6 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       };
     };
 
-    const serializeState = () =>
-      isByReference ? serializeByReference(libraryId) : serializeByValue();
-
     const resetEditingState = () => {
       isEditing$.next(false);
       overrideHoverActions$.next(false);
@@ -110,15 +99,21 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       }
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<MarkdownEmbeddableState>({
+    const stateApi = initializeStateApi<MarkdownEmbeddableState>({
       uuid,
       parentApi,
-      serializeState,
+      serializeState: () => (isByReference ? serializeByReference(libraryId) : serializeByValue()),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        content$.pipe(map(() => undefined)),
-        settings$.pipe(map(() => undefined))
-      ).pipe(map(() => undefined)),
+        content$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        settings$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      ),
       getComparators: () => {
         return {
           ...titleComparators,
@@ -127,27 +122,22 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           ref_id: 'skip',
         };
       },
-      onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved);
+      applySerializedState: (nextState) => {
+        titleManager.reinitializeState(nextState);
         // There are no unsaved changes to reset for
         // by reference 'content' or 'settings' since they are saved on apply.
         if (!isByReference) {
-          content$.next((initialState as MarkdownByValueState).content);
-          settings$.next(
-            (initialState as MarkdownByValueState).settings ?? {
-              open_links_in_new_tab: true,
-            }
-          );
+          content$.next((nextState as MarkdownByValueState).content);
+          settings$.next((nextState as MarkdownByValueState).settings);
         }
       },
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...stateApi,
       ...titleManager.api,
       defaultTitle$,
       defaultDescription$,
-      serializeState,
       onEdit: async ({ isNewPanel = false } = {}) => {
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
         isEditing$.next(true);
@@ -185,19 +175,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       getSerializedStateByReference: serializeByReference,
       canLinkToLibrary: async () => !isByReference,
       canUnlinkFromLibrary: async () => isByReference,
-      checkForDuplicateTitle: async (
-        newTitle: string,
-        isTitleDuplicateConfirmed: boolean,
-        onTitleDuplicate: () => void
-      ) => {
-        await checkForDuplicateTitle({
-          title: newTitle,
-          copyOnSave: false,
-          lastSavedTitle: '',
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        });
-      },
+      hasLibraryItemWithTitle,
     });
 
     return {
@@ -264,9 +242,12 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 if (libraryId) {
                   await markdownClient.update(libraryId, {
                     content: value,
-                    title: titleManager.api.title$.getValue() ?? initialLibraryState.title,
+                    title:
+                      titleManager.api.title$.getValue() ??
+                      initialLibraryState?.title ??
+                      'new markdown',
                     description:
-                      titleManager.api.description$.getValue() ?? initialLibraryState.description,
+                      titleManager.api.description$.getValue() ?? initialLibraryState?.description,
                     settings: settings$.getValue(),
                   });
                 }

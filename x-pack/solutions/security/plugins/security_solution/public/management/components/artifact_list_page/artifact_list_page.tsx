@@ -58,7 +58,7 @@ import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../commo
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
-import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
+import { BackToExternalAppLink } from '../back_to_external_app_link';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ArtifactImportFlyout } from './components/artifact_import_flyout';
@@ -204,9 +204,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const memoizedRouteState = useMemoizedRouteState(routeState);
 
-    const backButtonEmptyComponent = useMemo(() => {
+    const backLinkComponent = useMemo(() => {
       if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
-        return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+        return <BackToExternalAppLink {...memoizedRouteState} />;
       }
     }, [memoizedRouteState]);
 
@@ -443,7 +443,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               aboutInfo={labels.emptyStateInfo}
               primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
               importButtonLabel={labels.emptyStateImportButtonLabel}
-              backComponent={backButtonEmptyComponent}
+              backComponent={backLinkComponent}
               data-test-subj={getTestId('emptyState')}
               secondaryAboutInfo={secondaryPageInfo}
               canCreateItems={allowCardCreateAction}

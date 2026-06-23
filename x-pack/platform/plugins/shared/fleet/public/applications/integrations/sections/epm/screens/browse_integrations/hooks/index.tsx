@@ -13,26 +13,37 @@ import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { IntegrationCardItem } from '../../home';
 
 import { useUrlFilters } from './url_filters';
-import { useUrlCategories, useSetUrlCategory } from './url_categories';
+import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
 
 export function useBrowseIntegrationHook({
   prereleaseIntegrationsEnabled,
 }: {
   prereleaseIntegrationsEnabled: boolean;
 }) {
-  const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
+  const { category: urlCategory, subCategory: selectedSubCategory } = useUrlCategories();
+  const urlDefaultCategories = useUrlDefaultCategories();
   const setUrlCategory = useSetUrlCategory();
+
+  // Priority: path-based single category (sidebar click) > URL query params (multi-default).
+  // Config defaults are written to the URL once on first load (in BrowseIntegrationsPage) and
+  // are not re-applied here so that navigating to "All categories" or clicking X clears them.
+  const effectiveCategories = useMemo<string[]>(() => {
+    if (urlCategory) return [urlCategory];
+    return urlDefaultCategories;
+  }, [urlCategory, urlDefaultCategories]);
+
+  // Single string used for subcategory lookup; first of effective categories, or empty for "All".
+  const selectedCategory = effectiveCategories[0] || '';
   const {
     initialSelectedCategory,
     allCategories,
-    mainCategories,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    filteredCards: originalFilteredCards,
+    allCards: originalFilteredCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const urlFilters = useUrlFilters();
@@ -45,25 +56,21 @@ export function useBrowseIntegrationHook({
 
     if (sortKey === 'a-z') {
       return [...originalFilteredCards].sort((a, b) => {
-        return a.name.localeCompare(b.name);
+        return a.title.localeCompare(b.title);
       });
     } else if (sortKey === 'z-a') {
       return [...originalFilteredCards].sort((a, b) => {
-        return b.name.localeCompare(a.name);
+        return b.title.localeCompare(a.title);
       });
     } else {
       // TODO implement recent-old and old-recent sorting when we have a date field
       return originalFilteredCards;
     }
-
-    return sortedCards;
   }, [originalFilteredCards, urlFilters.sort]);
 
-  const availableSubCategories = useMemo(() => {
-    return allCategories?.filter((c) => c.parent_id === selectedCategory);
-  }, [allCategories, selectedCategory]);
-
-  const filteredCards = useMemo(() => {
+  // Cards filtered by non-category filters (search, status, setup method, signal).
+  // Used to compute accurate category counts in the sidebar.
+  const nonCategoryFilteredCards = useMemo(() => {
     const searchResults = searchTerm
       ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
           (match) => match[searchIdField]
@@ -73,17 +80,6 @@ export function useBrowseIntegrationHook({
     let cards = searchTerm
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
-
-    if (selectedCategory || selectedSubCategory) {
-      cards = cards.filter((c) => {
-        if (selectedCategory === '') {
-          return true;
-        }
-        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
-
-        return c.categories.includes(selectedSubCategory);
-      });
-    }
 
     // Apply status filters
     const statusFilters = urlFilters.status;
@@ -120,17 +116,57 @@ export function useBrowseIntegrationHook({
       cards = cards.filter((card) => signalFilters.some((s) => card.signalTypes?.includes(s)));
     }
 
+    // Hide content packs by default; only show when the user has explicitly enabled the filter
+    if (!urlFilters.showContent) {
+      cards = cards.filter((card) => card.type !== 'content');
+    }
+
     return cards;
   }, [
-    selectedCategory,
-    selectedSubCategory,
     localSearch,
     searchTerm,
     sortedCards,
     urlFilters.status,
     urlFilters.setupMethod,
     urlFilters.signal,
+    urlFilters.showContent,
   ]);
+
+  // Apply category filter on top of non-category filters.
+  // When multiple effective categories are active, show cards matching ANY of them (OR logic).
+  const filteredCards = useMemo(() => {
+    if (effectiveCategories.length > 0 || selectedSubCategory) {
+      return nonCategoryFilteredCards.filter((c) => {
+        if (selectedSubCategory) return c.categories.includes(selectedSubCategory);
+        return effectiveCategories.some((cat) => c.categories.includes(cat));
+      });
+    }
+    return nonCategoryFilteredCards;
+  }, [nonCategoryFilteredCards, effectiveCategories, selectedSubCategory]);
+
+  // Recompute category counts based on non-category filtered cards so
+  // sidebar counts reflect active filters (e.g. agentless, search, signal).
+  const filteredAllCategories = useMemo(() => {
+    return allCategories.map((category) => {
+      if (category.id === '') {
+        return { ...category, count: nonCategoryFilteredCards.length };
+      }
+      const count = nonCategoryFilteredCards.filter((card) =>
+        card.categories.includes(category.id)
+      ).length;
+      return { ...category, count };
+    });
+  }, [allCategories, nonCategoryFilteredCards]);
+
+  const filteredMainCategories = useMemo(() => {
+    return filteredAllCategories.filter((category) => category.parent_id === undefined);
+  }, [filteredAllCategories]);
+
+  const availableSubCategories = useMemo(() => {
+    return filteredAllCategories?.filter(
+      (c) => c.parent_id !== undefined && effectiveCategories.includes(c.parent_id)
+    );
+  }, [filteredAllCategories, effectiveCategories]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
@@ -144,8 +180,9 @@ export function useBrowseIntegrationHook({
   return {
     initialSelectedCategory,
     selectedCategory,
-    allCategories,
-    mainCategories,
+    selectedCategories: effectiveCategories,
+    allCategories: filteredAllCategories,
+    mainCategories: filteredMainCategories,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,

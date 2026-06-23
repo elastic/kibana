@@ -182,6 +182,23 @@ export const getRecommendedQueriesTemplates = ({
           },
         ]
       : []),
+    ...(fromCommand
+      ? [
+          {
+            label: i18n.translate('kbn-esql-language.recommendedQueries.loadUnmappedFields.label', {
+              defaultMessage: 'Load unmapped fields',
+            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.loadUnmappedFields.description',
+              {
+                defaultMessage:
+                  'Allows querying unmapped fields, loading their values from the _source if present.',
+              }
+            ),
+            queryString: `SET unmapped_fields = "LOAD"; ${fromCommand} `,
+          },
+        ]
+      : []),
   ];
 
   // prettify the query string
@@ -190,6 +207,7 @@ export const getRecommendedQueriesTemplates = ({
     const formattedQuery = fromCommand
       ? prettifyQuery(query.queryString)
       : prettifyQueryTemplate(`FROM index ${query.queryString}`);
+
     query.queryString = formattedQuery;
   });
   return queries;

@@ -29,11 +29,12 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RULES, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { RuleActionsMenu } from './rule_actions_menu';
 
 const labelsContainerStyle = css`
   display: flex;
@@ -61,105 +62,7 @@ const descriptionTextStyle = css`
   word-break: break-word;
 `;
 
-interface RuleActionsMenuProps {
-  rule: RuleApiResponse;
-  onEdit: (rule: RuleApiResponse) => void;
-  onClone: (rule: RuleApiResponse) => void;
-  onDelete: (rule: RuleApiResponse) => void;
-  onToggleEnabled: (rule: RuleApiResponse) => void;
-}
-
 export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata';
-
-const RuleActionsMenu = ({
-  rule,
-  onEdit,
-  onClone,
-  onDelete,
-  onToggleEnabled,
-}: RuleActionsMenuProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const menuItems = [
-    <EuiContextMenuItem
-      key="edit"
-      icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onEdit(rule);
-      }}
-      data-test-subj={`editRule-${rule.id}`}
-    >
-      {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="clone"
-      icon={<EuiIcon type="copy" size="m" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onClone(rule);
-      }}
-      data-test-subj={`cloneRule-${rule.id}`}
-    >
-      {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="toggleEnabled"
-      icon={<EuiIcon type={rule.enabled ? 'bellSlash' : 'bell'} size="m" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onToggleEnabled(rule);
-      }}
-      data-test-subj={`toggleEnabledRule-${rule.id}`}
-    >
-      {rule.enabled
-        ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
-            defaultMessage: 'Disable',
-          })
-        : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
-            defaultMessage: 'Enable',
-          })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="delete"
-      icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onDelete(rule);
-      }}
-      data-test-subj={`deleteRule-${rule.id}`}
-    >
-      {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-        defaultMessage: 'Delete',
-      })}
-    </EuiContextMenuItem>,
-  ];
-
-  return (
-    <EuiPopover
-      button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
-            defaultMessage: 'More actions',
-          })}
-          color="text"
-          onClick={() => setIsOpen((open) => !open)}
-          data-test-subj={`ruleActionsButton-${rule.id}`}
-        />
-      }
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downRight"
-      aria-label={i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
-        defaultMessage: 'Rule actions',
-      })}
-    >
-      <EuiContextMenuPanel size="s" items={menuItems} />
-    </EuiPopover>
-  );
-};
 
 export interface RulesListTableProps {
   items: RuleApiResponse[];
@@ -189,6 +92,8 @@ export interface RulesListTableProps {
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
+  onExpand: (rule: RuleApiResponse) => void;
+  onQuickEdit: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
@@ -220,6 +125,8 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkDisable,
   onBulkDelete,
   onNavigateToDetails,
+  onExpand,
+  onQuickEdit,
   onEdit,
   onClone,
   onDelete,
@@ -292,6 +199,28 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         ),
       },
       {
+        name: '',
+        width: '32px',
+        render: (rule: RuleApiResponse) => (
+          <EuiToolTip
+            content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
+              defaultMessage: 'Open rule summary',
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="expand"
+              color="text"
+              onClick={() => onExpand(rule)}
+              aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
+                defaultMessage: 'Open rule summary',
+              })}
+              data-test-subj={`expandRule-${rule.id}`}
+            />
+          </EuiToolTip>
+        ),
+      },
+      {
         field: 'metadata',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
@@ -315,14 +244,16 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         ),
       },
       {
-        field: 'evaluation',
+        field: 'query',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
         ),
         width: '18%',
         truncateText: true,
-        render: (evaluation: RuleApiResponse['evaluation']) => {
-          const source = getIndexPatternFromESQLQuery(evaluation?.query?.base) || undefined;
+        render: (query: RuleApiResponse['query']) => {
+          const source = query
+            ? getIndexPatternFromESQLQuery(getRootEsqlQuery(query)) || undefined
+            : undefined;
           return source ? (
             <EuiBadge color="hollow">{source}</EuiBadge>
           ) : (
@@ -383,24 +314,26 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         width: '10%',
         sortable: true,
         render: (kind: string) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                type={kind === 'alert' ? 'bell' : 'securitySignalResolved'}
-                size="m"
-                aria-hidden={true}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('xpack.alertingV2.rulesList.modeTooltip', {
+              defaultMessage: 'Mode can be changed in the rule edit form',
+            })}
+          >
+            <EuiBadge
+              color="hollow"
+              iconType={kind === 'alert' ? 'bell' : 'radar'}
+              iconSide="left"
+              tabIndex={0}
+            >
               {kind === 'alert'
-                ? i18n.translate('xpack.alertingV2.rulesList.modeAlerting', {
-                    defaultMessage: 'Alerting',
+                ? i18n.translate('xpack.alertingV2.rulesList.modeAlert', {
+                    defaultMessage: 'Alert',
                   })
-                : i18n.translate('xpack.alertingV2.rulesList.modeDetectOnly', {
-                    defaultMessage: 'Detect only',
+                : i18n.translate('xpack.alertingV2.rulesList.modeSignal', {
+                    defaultMessage: 'Signal',
                   })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </EuiBadge>
+          </EuiToolTip>
         ),
       },
       {
@@ -432,16 +365,43 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             defaultMessage="Actions"
           />
         ),
-        width: '6%',
+        width: '8%',
         align: 'right',
         render: (rule: RuleApiResponse) => (
-          <RuleActionsMenu
-            rule={rule}
-            onEdit={onEdit}
-            onClone={onClone}
-            onDelete={onDelete}
-            onToggleEnabled={onToggleEnabled}
-          />
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            justifyContent="flexEnd"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                  defaultMessage: 'Quick edit rule',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="pencil"
+                  color="text"
+                  onClick={() => onQuickEdit(rule)}
+                  aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                    defaultMessage: 'Quick edit rule',
+                  })}
+                  data-test-subj={`quickEditRule-${rule.id}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RuleActionsMenu
+                rule={rule}
+                onEdit={onEdit}
+                onClone={onClone}
+                onDelete={onDelete}
+                onToggleEnabled={onToggleEnabled}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
     ],
@@ -451,6 +411,8 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       onSelectPage,
       onSelectRow,
       onNavigateToDetails,
+      onExpand,
+      onQuickEdit,
       onEdit,
       onClone,
       onDelete,
@@ -523,7 +485,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 })}
               >
                 <EuiContextMenuPanel
-                  size="s"
                   items={[
                     <EuiContextMenuItem
                       key="enable"

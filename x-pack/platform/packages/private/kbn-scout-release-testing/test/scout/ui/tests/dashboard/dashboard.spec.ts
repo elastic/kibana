@@ -9,26 +9,12 @@ import { expect } from '@kbn/scout/ui';
 import { test, tags } from '@kbn/scout';
 import fs from 'fs';
 import os from 'os';
-import {
-  SavedObjectsTracker,
-  cleanupDownloadedFile,
-  installLogsSampleData,
-  removeLogsSampleData,
-} from '../../helpers';
-
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
+import { SavedObjectsTracker, cleanupDownloadedFile } from '../../helpers';
 
 const tracker = new SavedObjectsTracker();
 let downloadedFilePath: string | null = null;
 
 test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
@@ -42,11 +28,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await tracker.cleanup(kbnClient);
   });
 
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
-  });
-
-  test('should create dashboard with ES|QL, Lens, and Custom visualization panels', async ({
+  test('should create dashboard with ES|QL, Lens, and Vega panels', async ({
     page,
     pageObjects,
   }) => {
@@ -56,20 +38,20 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await pageObjects.dashboard.openNewDashboard();
 
     await test.step('add ES|QL panel', async () => {
-      await pageObjects.dashboard.addNewPanel('ES|QL');
+      await pageObjects.dashboard.addNewESQLPanel();
       await pageObjects.dashboard.applyAndCloseESQLPanel();
       await expect(page.testSubj.locator('lnsVisualizationContainer')).toBeVisible();
     });
 
     await test.step('add Lens panel', async () => {
-      await pageObjects.dashboard.addNewPanel('Lens');
+      await pageObjects.dashboard.addNewLensPanel();
       await pageObjects.lens.dragFieldToWorkspace('records');
       await pageObjects.lens.saveAndReturn();
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
     });
 
-    await test.step('add Custom visualization panel', async () => {
-      await pageObjects.dashboard.addNewPanel('Custom visualization');
+    await test.step('add Vega panel', async () => {
+      await pageObjects.dashboard.addNewPanel('Vega');
       await pageObjects.dashboard.clickVisualizeSaveAndReturn();
       await pageObjects.dashboard.expectPanelCount(3);
     });
@@ -79,9 +61,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await expect(heading).toHaveText('Editing ' + dashboardName);
   });
 
-  test('should edit existing dashboard and add map and custom visualization panels', async ({
-    pageObjects,
-  }) => {
+  test('should edit existing dashboard and add map and Vega panels', async ({ pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
@@ -95,8 +75,8 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await pageObjects.dashboard.expectPanelCount(13);
     });
 
-    await test.step('add a Custom visualization panel', async () => {
-      await pageObjects.dashboard.addNewPanel('Custom visualization');
+    await test.step('add a Vega panel', async () => {
+      await pageObjects.dashboard.addNewPanel('Vega');
       await pageObjects.dashboard.clickVisualizeSaveAndReturn();
       await pageObjects.dashboard.expectPanelCount(14);
     });
@@ -194,7 +174,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await pageObjects.dashboard.openNewDashboard();
 
     await test.step('add a Lens panel with a title', async () => {
-      await pageObjects.dashboard.addNewPanel('Lens');
+      await pageObjects.dashboard.addNewLensPanel();
       await pageObjects.lens.dragFieldToWorkspace('records');
       await pageObjects.lens.saveAndReturn();
 
@@ -236,6 +216,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await pageObjects.dashboard.exitFullscreen();
     });
 
+    await page.testSubj.click('app-menu-overflow-button');
     await expect(page.testSubj.locator('dashboardFullScreenMode')).toBeVisible();
   });
 
@@ -421,7 +402,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
     await test.step('save a lens panel to the library', async () => {
       await pageObjects.dashboard.openNewDashboard();
-      await pageObjects.dashboard.addNewPanel('Lens');
+      await pageObjects.dashboard.addNewLensPanel();
       await pageObjects.lens.dragFieldToWorkspace('records');
       await pageObjects.lens.saveAndReturn();
 
@@ -454,7 +435,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await pageObjects.dashboard.openNewDashboard();
 
     await test.step('create a Lens panel with a title', async () => {
-      await pageObjects.dashboard.addNewPanel('Lens');
+      await pageObjects.dashboard.addNewLensPanel();
       await pageObjects.lens.dragFieldToWorkspace('records');
       await pageObjects.lens.saveAndReturn();
 

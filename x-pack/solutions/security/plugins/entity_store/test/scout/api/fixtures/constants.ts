@@ -46,7 +46,6 @@ export const ENTITY_STORE_ROUTES = {
     START: `${PUBLIC_BASE}/start`,
     STOP: `${PUBLIC_BASE}/stop`,
     UNINSTALL: `${PUBLIC_BASE}/uninstall`,
-    CHECK_PRIVILEGES: `${PUBLIC_BASE}/check_privileges`,
     CRUD_CREATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
     CRUD_UPDATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
     CRUD_BULK_UPDATE: `${PUBLIC_BASE}/entities/bulk`,
@@ -57,10 +56,11 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_GROUP: `${PUBLIC_BASE}/resolution/group`,
   },
   internal: {
+    CHECK_PRIVILEGES: `${INTERNAL_BASE}/check_privileges`,
     FORCE_LOG_EXTRACTION: (entityType: string) =>
       `${INTERNAL_BASE}/${entityType}/force_log_extraction`,
-    FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>
-      `${INTERNAL_BASE}/${entityType}/force_ccs_extract_to_updates`,
+    FORCE_REMOTE_EXTRACT_TO_UPDATES: (entityType: string) =>
+      `${INTERNAL_BASE}/${entityType}/force_remote_extract_to_updates`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE}/force_history_snapshot`,
     ENTITY_MAINTAINERS_INIT: `${INTERNAL_BASE}/entity_maintainers/init`,
     ENTITY_MAINTAINERS_GET: `${INTERNAL_BASE}/entity_maintainers`,

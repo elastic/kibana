@@ -11,17 +11,21 @@ export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
 
 export const LOG_EXTRACTION_DELAY_DEFAULT = '1m';
 export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = '3h';
-export const LOG_EXTRACTION_FREQUENCY_DEFAULT = '30s';
+export const LOG_EXTRACTION_FREQUENCY_DEFAULT = '1m';
 // Max amount of entities to extract in one ESQL query
 export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
 // Max raw log documents per logs to be processed in a query (inside elastic search)
-export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT = 40000;
-export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '25s';
+export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT = 50_000;
+export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '59s';
+export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
+// Max total raw log documents to process per task run; 0 = no cap
+export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
+export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
-  filter: z.string().default(''),
   additionalIndexPatterns: z.array(z.string()).default([]),
+  excludedIndexPatterns: z.array(z.string()).default([]),
   fieldHistoryLength: z.number().int().default(10),
   lookbackPeriod: z
     .string()
@@ -31,8 +35,8 @@ export const LogExtractionConfig = z.object({
     .string()
     .regex(/[smdh]$/)
     .default(LOG_EXTRACTION_DELAY_DEFAULT),
-  docsLimit: z.number().int().positive().default(LOG_EXTRACTION_DOCS_LIMIT_DEFAULT),
-  maxLogsPerPage: z.number().int().positive().default(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT),
+  docsLimit: z.number().int().min(1).default(LOG_EXTRACTION_DOCS_LIMIT_DEFAULT),
+  maxLogsPerPage: z.number().int().min(1).default(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT),
   timeout: z
     .string()
     .regex(/[smdh]$/)
@@ -41,6 +45,14 @@ export const LogExtractionConfig = z.object({
     .string()
     .regex(/[smdh]$/)
     .default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
+  maxTimeWindowSize: z
+    .string()
+    .regex(/[smdh]$/)
+    .default(LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT),
+  maxLogsPerWindow: z.number().int().min(0).default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
+  maxLogsPerWindowCapBehavior: z
+    .enum(['defer', 'drop'])
+    .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
 });
 
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;

@@ -20,7 +20,7 @@ import { suggestForExpression } from '../../definitions/utils';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
-  pipeCompleteItem,
+  newLineAndPipeCompleteItems,
   assignCompletionItem,
   getNewUserDefinedColumnSuggestion,
   withCompleteItem,
@@ -45,8 +45,7 @@ import {
   type ICommandCallbacks,
 } from '../types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
-
-const ENDS_WITH_NON_WHITESPACE = /\S$/;
+import { endsWithNonWhitespace } from '../../definitions/utils/regex';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -112,7 +111,7 @@ export async function autocomplete(
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
-  const hasTypedFragment = ENDS_WITH_NON_WHITESPACE.test(innerText);
+  const hasTypedFragment = endsWithNonWhitespace(innerText);
   const { prompt } = command as ESQLAstCompletionCommand;
   const isExistingColumn = columnExists(prompt?.text, context);
   const { position, expressionRoot } = getPosition(innerText, command, isExistingColumn);
@@ -239,7 +238,7 @@ export async function autocomplete(
       return getCommandMapExpressionSuggestions(innerText, availableParameters);
 
     case CompletionPosition.AFTER_COMMAND:
-      return [pipeCompleteItem];
+      return newLineAndPipeCompleteItems;
 
     default:
       return [];

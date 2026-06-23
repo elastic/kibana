@@ -126,6 +126,13 @@ export const ALERTS_TABLE_UNKNOWN_ERROR_TITLE = i18n.translate(
   }
 );
 
+export const ALERTS_TABLE_SHOW_ERROR_DETAILS = i18n.translate(
+  'responseOpsAlertsTable.alertsTable.showErrorDetails',
+  {
+    defaultMessage: 'Show details',
+  }
+);
+
 export const ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE = i18n.translate(
   'responseOpsAlertsTable.alertsTable.unknownErrorBody',
   {
@@ -244,6 +251,10 @@ export const ADD_TO_EXISTING_CASE = i18n.translate(
   }
 );
 
+export const ADD_TO_CHAT = i18n.translate('xpack.responseOpsAlertsTable.actions.addChat', {
+  defaultMessage: 'Add to chat',
+});
+
 export const ADD_TO_NEW_CASE = i18n.translate('xpack.responseOpsAlertsTable.actions.addToNewCase', {
   defaultMessage: 'Add to new case',
 });
@@ -340,3 +351,10 @@ export const getAlertFlyoutAriaLabel = (alertDescription: string) =>
     defaultMessage: 'Details for alert "{alertDescription}"',
     values: { alertDescription },
   });
+
+export const BULK_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.bulkActionsAriaLabel',
+  {
+    defaultMessage: 'Bulk actions',
+  }
+);

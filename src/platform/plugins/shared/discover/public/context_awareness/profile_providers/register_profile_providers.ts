@@ -15,6 +15,7 @@ import type {
   RootProfileService,
 } from '../profiles';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
+import { createChangePointDataSourceProfileProvider } from './common/change_point_data_source_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs_data_source_profile';
 import { createPatternsDataSourceProfileProvider } from './common/patterns_data_source_profile';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
@@ -34,6 +35,7 @@ import type {
 } from './profile_provider_services';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import { createMetricsDataSourceProfileProvider } from './common/metrics_data_source_profile';
+import { createSparklineDataSourceProfileProvider } from './common/sparkline_data_source_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -120,10 +122,12 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
   createPatternsDataSourceProfileProvider(providerServices),
+  createChangePointDataSourceProfileProvider(),
   createDeprecationLogsDataSourceProfileProvider(),
+  createMetricsDataSourceProfileProvider(),
+  createSparklineDataSourceProfileProvider(providerServices),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
-  createMetricsDataSourceProfileProvider(),
 ];
 
 /**

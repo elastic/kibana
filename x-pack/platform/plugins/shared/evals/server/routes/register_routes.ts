@@ -9,10 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EvalsRouter } from '../types';
-import { registerGetRunsRoute } from './runs/get_runs';
-import { registerGetRunRoute } from './runs/get_run';
-import { registerGetRunScoresRoute } from './runs/get_run_scores';
-import { registerGetRunDatasetExamplesRoute } from './runs/get_run_dataset_examples';
+import { registerGetExperimentsRoute } from './experiments/get_experiments';
+import { registerGetExperimentRoute } from './experiments/get_experiment';
+import { registerGetExperimentScoresRoute } from './experiments/get_experiment_scores';
+import { registerGetExperimentDatasetExamplesRoute } from './experiments/get_experiment_dataset_examples';
+import { registerCompareExperimentsRoute } from './experiments/compare_experiments';
 import { registerGetExampleScoresRoute } from './examples/get_example_scores';
 import { registerGetTraceRoute } from './traces/get_trace';
 import { registerListDatasetsRoute } from './datasets/list_datasets';
@@ -27,6 +28,7 @@ import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
 import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
+import { registerIngestScoresRoute } from './scores/ingest_scores';
 
 export interface RouteDependencies {
   router: EvalsRouter;
@@ -37,14 +39,16 @@ export interface RouteDependencies {
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
-  registerGetRunsRoute(dependencies);
-  registerGetRunRoute(dependencies);
-  registerGetRunScoresRoute(dependencies);
-  registerGetRunDatasetExamplesRoute(dependencies);
+  registerGetExperimentsRoute(dependencies);
+  registerGetExperimentRoute(dependencies);
+  registerGetExperimentScoresRoute(dependencies);
+  registerGetExperimentDatasetExamplesRoute(dependencies);
+  registerCompareExperimentsRoute(dependencies);
   registerGetExampleScoresRoute(dependencies);
   registerGetTraceRoute(dependencies);
   registerGetTracingProjectsRoute(dependencies);
   registerGetProjectTracesRoute(dependencies);
+  registerIngestScoresRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);
   registerGetDatasetRoute(dependencies);

@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 
 import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
   InferenceInferenceEndpointInfo,
@@ -17,16 +18,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
-import {
-  ENDPOINT,
-  ENDPOINT_COPY_ID_ACTION_LABEL,
-  ENDPOINT_DELETE_ACTION_LABEL,
-  ENDPOINT_VIEW_ACTION_LABEL,
-  MODEL,
-  SERVICE_PROVIDER,
-} from '../../../common/translations';
-
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
@@ -44,13 +37,12 @@ import { DeleteAction } from './render_table_columns/render_actions/actions/dele
 
 import { EndpointsTable } from './endpoints_table';
 import { GroupedEndpointsTables } from './grouped_endpoints/grouped_endpoints_tables';
-import { EisCallouts } from './eis_callouts';
 
 const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
 `;
 
-const DEFAULT_GROUP_BY = GroupByOptions.Model;
+const DEFAULT_GROUP_BY = GroupByOptions.None;
 
 const initializeGroupBy = (): GroupByOptions => {
   const params = new URLSearchParams(window.location.search);
@@ -61,8 +53,6 @@ const initializeGroupBy = (): GroupByOptions => {
       return GroupByOptions.None;
     case GroupByOptions.Service:
       return GroupByOptions.Service;
-    case GroupByOptions.Model:
-      return GroupByOptions.Model;
     default:
       // Fallback to default group by setting
       return DEFAULT_GROUP_BY;
@@ -71,16 +61,13 @@ const initializeGroupBy = (): GroupByOptions => {
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
-  isEisEnabled?: boolean;
 }
 
-export const TabularPage: React.FC<TabularPageProps> = ({
-  inferenceEndpoints,
-  isEisEnabled = false,
-}) => {
+export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
+  const { canManage } = useInferenceCapabilities();
 
   const {
     showDeleteAction,
@@ -116,7 +103,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({
       {
         id: 'inference_id-column',
         field: 'inference_id',
-        name: ENDPOINT,
+        name: i18n.translate('xpack.searchInferenceEndpoints.endpoint', {
+          defaultMessage: 'Endpoint',
+        }),
         'data-test-subj': 'endpointCell',
 
         render: (
@@ -134,7 +123,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({
       },
       {
         id: 'model-column',
-        name: MODEL,
+        name: i18n.translate('xpack.searchInferenceEndpoints.model', { defaultMessage: 'Model' }),
         'data-test-subj': 'modelCell',
         render: (endpointInfo: InferenceInferenceEndpointInfo) => {
           return <Model endpointInfo={endpointInfo} />;
@@ -145,7 +134,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({
       {
         id: 'service-column',
         field: 'service',
-        name: SERVICE_PROVIDER,
+        name: i18n.translate('xpack.searchInferenceEndpoints.serviceProvider', {
+          defaultMessage: 'Service',
+        }),
         'data-test-subj': 'providerCell',
         render: (service: ServiceProviderKeys, endpointInfo: InferenceInferenceEndpointInfo) => {
           if (service) {
@@ -160,26 +151,40 @@ export const TabularPage: React.FC<TabularPageProps> = ({
       {
         actions: [
           {
-            name: ENDPOINT_VIEW_ACTION_LABEL,
-            description: ENDPOINT_VIEW_ACTION_LABEL,
+            name: i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpooint', {
+              defaultMessage: 'View endpoint',
+            }),
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpooint', {
+              defaultMessage: 'View endpoint',
+            }),
             icon: 'eye',
             type: 'icon',
+            available: () => canManage,
             onClick: (item) => displayInferenceFlyout(item),
             'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
           },
           {
-            name: ENDPOINT_COPY_ID_ACTION_LABEL,
-            description: ENDPOINT_COPY_ID_ACTION_LABEL,
+            name: i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {
+              defaultMessage: 'Copy endpoint ID',
+            }),
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {
+              defaultMessage: 'Copy endpoint ID',
+            }),
             icon: 'copy',
             type: 'icon',
             onClick: (item) => copyContent(item.inference_id),
             'data-test-subj': 'inference-endpoints-action-copy-id-label',
           },
           {
-            name: ENDPOINT_DELETE_ACTION_LABEL,
-            description: ENDPOINT_DELETE_ACTION_LABEL,
+            name: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
+              defaultMessage: 'Delete endpoint',
+            }),
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
+              defaultMessage: 'Delete endpoint',
+            }),
             icon: 'trash',
             type: 'icon',
+            available: () => canManage,
             enabled: (item) => !isEndpointPreconfigured(item.inference_id),
             onClick: (item) => displayDeleteActionItem(item),
             'data-test-subj': (item) =>
@@ -191,13 +196,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionItem, displayInferenceFlyout]
+    [canManage, copyContent, displayDeleteActionItem, displayInferenceFlyout]
   );
 
   return (
     <>
       <EuiFlexGroup direction="column">
-        {!isEisEnabled && <EisCallouts />}
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem css={searchContainerStyles} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />

@@ -10,7 +10,7 @@ import { every, map, mapKeys, pick, reduce } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   GetLiveQueryDetailsRequestParamsSchema,
   GetLiveQueryDetailsRequestQuerySchema,
@@ -30,6 +30,7 @@ import {
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getLiveQueryDetailsResponseSchema } from './response_schemas';
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -58,6 +59,11 @@ export const getLiveQueryDetailsRoute = (
               typeof getLiveQueryDetailsRequestQuerySchema,
               GetLiveQueryDetailsRequestQuerySchema
             >(getLiveQueryDetailsRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => getLiveQueryDetailsResponseSchema,
+            },
           },
         },
       },

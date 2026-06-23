@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -21,23 +21,28 @@ import {
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  PROJECT_ROUTING_ALL,
+  PROJECT_ROUTING_ORIGIN,
+  type ProjectRouting,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
+import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
 import {
   ALERT_PREVIEW_BANNER,
   EVENT_PREVIEW_BANNER,
   GENERIC_ENTITY_PREVIEW_BANNER,
 } from '../../document_details/preview/constants';
-import { useToasts } from '../../../common/lib/kibana';
-import { GenericEntityPanelKey, EntityPanelKeyByType } from '../../entity_details/shared/constants';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { extractTimelineCapabilities } from '../../../common/utils/timeline_capabilities';
+import { EntityPanelKeyByType, GenericEntityPanelKey } from '../../entity_details/shared/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
@@ -72,12 +77,7 @@ interface EntityGraphVisualizationProps {
   entityId: string;
 }
 
-export type GraphVisualizationProps = (
-  | EventGraphVisualizationProps
-  | EntityGraphVisualizationProps
-) & {
-  height?: number | string;
-};
+export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
 
 /**
  * Full-screen graph investigation view for use in left-panel flyout tabs.
@@ -88,15 +88,40 @@ export type GraphVisualizationProps = (
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
   const { scopeId } = props;
 
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const height = useFlyoutBodyAvailableHeight(wrapperRef);
+
+  const {
+    application: { capabilities },
+    cps,
+  } = useKibana().services;
+  const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
+
+  // CPS project routing for cross-project events. Security pages do not host a CPS
+  // picker — routing is locked to the active space NPRE (see kfirpeled comment on
+  // security-team#16998). Read the space's default routing rather than the picker
+  // observable (which is gated by per-app `ProjectRoutingAccess` and returns
+  // undefined when no app has registered the route as READONLY/EDITABLE).
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(undefined);
+  useEffect(() => {
+    const manager = cps?.cpsManager;
+    if (!manager) return;
+    let cancelled = false;
+    manager.whenReady().then(() => {
+      if (cancelled) return;
+      const routing = manager.getDefaultProjectRouting();
+      setProjectRouting(
+        routing === PROJECT_ROUTING_ALL || routing === PROJECT_ROUTING_ORIGIN ? routing : undefined
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [cps?.cpsManager]);
+
   const toasts = useToasts();
-  const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: PageScope.default,
-  });
 
-  const { dataView: experimentalDataView } = useDataView(PageScope.default);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView, status } = useDataView(PageScope.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
@@ -291,14 +316,14 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
   return (
     <div
+      ref={wrapperRef}
       data-test-subj={GRAPH_VISUALIZATION_TEST_ID}
       css={css`
-        height: ${props.height ?? 'calc(100vh - 250px)'};
-        min-height: 400px;
+        height: ${height}px;
         width: 100%;
       `}
     >
-      {dataView && (
+      {status === 'ready' && (
         <React.Suspense fallback={<EuiLoadingSpinner />}>
           <GraphInvestigationLazy
             scopeId={scopeId}
@@ -311,6 +336,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                       from: `${props.timestamp}||-30m`,
                       to: `${props.timestamp}||+30m`,
                     },
+                    projectRouting,
                   }
                 : {
                     dataView,
@@ -319,9 +345,10 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                       from: 'now-30d',
                       to: 'now',
                     },
+                    projectRouting,
                   }
             }
-            showInvestigateInTimeline={true}
+            showInvestigateInTimeline={hasTimelineAccess}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}

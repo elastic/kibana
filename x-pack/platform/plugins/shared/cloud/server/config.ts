@@ -25,6 +25,10 @@ const apmConfigSchema = schema.object({
   ),
 });
 
+const managedOtlpConfigSchema = schema.object({
+  url: schema.maybe(schema.string()),
+});
+
 /**
  * Builds a nested conditional schema for product tiers based on the project type.
  * Something like
@@ -73,6 +77,7 @@ const configSchema = schema.object({
   region: schema.maybe(schema.string()),
   deployments_url: schema.string({ defaultValue: '/deployments' }),
   deployment_url: schema.maybe(schema.string()),
+  create_deployment_url: schema.string({ defaultValue: '/deployments/create' }),
   id: schema.maybe(schema.string()),
   isSaasContainer: schema.maybe(schema.boolean()),
   organization_id: schema.maybe(schema.string()),
@@ -82,8 +87,12 @@ const configSchema = schema.object({
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
   projects_url: offeringBasedSchema({ serverless: schema.string({ defaultValue: '/projects/' }) }),
+  create_project_url: offeringBasedSchema({
+    serverless: schema.string({ defaultValue: '/projects/create' }),
+  }),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
+  managed_otlp: schema.maybe(managedOtlpConfigSchema),
   onboarding: schema.maybe(
     schema.object({
       default_solution: schema.maybe(schema.string()),
@@ -121,6 +130,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     region: true,
     deployments_url: true,
     deployment_url: true,
+    create_deployment_url: true,
     id: true,
     isSaasContainer: true,
     organization_id: true,
@@ -130,8 +140,12 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     organization_url: true,
     profile_url: true,
     projects_url: true,
+    create_project_url: true,
     trial_end_date: true,
     is_elastic_staff_owned: true,
+    managed_otlp: {
+      url: true,
+    },
     serverless: {
       project_id: true,
       project_name: true,

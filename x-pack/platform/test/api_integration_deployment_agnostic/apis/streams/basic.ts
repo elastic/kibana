@@ -129,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await kibanaServer.uiSettings.update({
             [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
           });
+          await kibanaServer.uiSettings.waitForEventualCacheRefresh();
         }
       }
     });
@@ -138,6 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
         });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       }
     });
 
@@ -161,6 +163,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           undefined,
           500
         );
+      });
+
+      it(`does not materialize backing data streams for wired root streams`, async () => {
+        for (const streamName of ['logs.ecs', 'logs.otel']) {
+          await esClient.indices.getDataStream({ name: streamName }).then(
+            () => {
+              throw new Error(`Expected ${streamName} data stream to not exist`);
+            },
+            (err) => {
+              expect(err.meta?.body?.error?.type).to.eql('index_not_found_exception');
+            }
+          );
+        }
       });
 
       describe('after enabling', () => {
@@ -191,6 +206,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(wiredStatus['logs.ecs']).to.eql(true);
         });
 
+        it(`materializes backing data streams for wired root streams`, async () => {
+          for (const streamName of ['logs.ecs', 'logs.otel']) {
+            const response = await esClient.indices.getDataStream({ name: streamName });
+            expect(response.data_streams).to.have.length(1);
+            expect(response.data_streams[0].name).to.be(streamName);
+          }
+        });
+
         it('includes create_snapshot_repository in stream privileges', async () => {
           const stream = await getStream(apiClient, 'logs.otel');
           const parsed = Streams.WiredStream.GetResponse.parse(stream);
@@ -213,7 +236,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   });
                   expect(response.views).to.have.length(1);
                   expect(response.views[0].name).to.eql(`$.${streamName}`);
-                  expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+                  expect(response.views[0].query).to.eql(`FROM ${streamName} METADATA _source`);
                 }
               },
               undefined,
@@ -424,7 +447,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(response.views).to.have.length(1);
           expect(response.views[0].name).to.eql(`$.${childStreamName}`);
-          expect(response.views[0].query).to.eql(`FROM ${childStreamName}`);
+          expect(response.views[0].query).to.eql(`FROM ${childStreamName} METADATA _source`);
         });
 
         it(`updates parent $.${rootStream} view to reference the forked child's view`, async () => {
@@ -437,7 +460,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(response.views).to.have.length(1);
           expect(response.views[0].name).to.eql(`$.${rootStream}`);
-          expect(response.views[0].query).to.eql(`FROM ${rootStream}, $.${rootStream}.nginx`);
+          expect(response.views[0].query).to.eql(
+            `FROM ${rootStream}, $.${rootStream}.nginx METADATA _source`
+          );
         });
       }
 
@@ -1392,7 +1417,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('fails to create a wired stream with angle brackets in the name', async () => {
           const response = await putStream(apiClient, 'logs.with<brackets>', validStreamBody, 400);
           expect((response as unknown as { message: string }).message).to.contain(
-            'Stream name cannot contain "<".'
+            'Stream name cannot contain "<", ">".'
           );
         });
 

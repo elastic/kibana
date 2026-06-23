@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
 
-const EVALS_SUITES_METADATA_RELATIVE_PATH =
-  'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 export interface EvalsSuiteMetadataEntry {
   id: string;
@@ -20,6 +20,20 @@ export interface EvalsSuiteMetadataEntry {
   configPath?: string;
   serverConfigSet?: string;
   weeklyEisModelGroups?: string[];
+  defaultModelGroups?: string[];
+}
+
+function pathExistsInGitTree(repoRelativePath: string): boolean {
+  try {
+    const output = execFileSync('git', ['ls-tree', '--name-only', 'HEAD', repoRelativePath], {
+      cwd: process.cwd(),
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return output.length > 0;
+  } catch {
+    return false;
+  }
 }
 
 function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
@@ -30,11 +44,7 @@ function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
     const suites = Array.isArray(parsed.suites) ? parsed.suites : [];
     return suites.filter((suite) => {
       if (!suite?.configPath) return true;
-      try {
-        return Fs.existsSync(Path.resolve(process.cwd(), suite.configPath));
-      } catch {
-        return false;
-      }
+      return pathExistsInGitTree(suite.configPath);
     });
   } catch {
     return [];
@@ -226,11 +236,17 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
     .filter((value) => value !== WEEKLY_EIS_MODELS_ALIAS)
     .flatMap((value) => MODEL_GROUP_ALIASES[value] ?? [value]);
 
+  const hasGlobalModelSelection = explicitModelGroups.length > 0 || useWeeklyEisModels;
+
   const resolveModelGroups = (suite: EvalsSuiteMetadataEntry): string[] => {
     const weeklyModels = useWeeklyEisModels
       ? suite.weeklyEisModelGroups ?? DEFAULT_WEEKLY_EIS_MODELS
       : [];
-    return [...new Set([...explicitModelGroups, ...weeklyModels])];
+    const resolved = [...new Set([...explicitModelGroups, ...weeklyModels])];
+    if (resolved.length > 0) {
+      return resolved;
+    }
+    return suite.defaultModelGroups ?? [];
   };
 
   const hasEisJudge =
@@ -242,12 +258,19 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 
   // Require explicit model selection — without models:* labels, evals are skipped
   // to avoid accidentally running against all models (which is expensive).
-  if (explicitModelGroups.length === 0 && !useWeeklyEisModels) {
+  // Suites with `defaultModelGroups` in evals.suites.json are exempt: they use
+  // their pinned defaults when no models:* labels are present.
+  const suitesWithDefaults = selectedEvalSuites.filter(
+    (suite) => suite.defaultModelGroups && suite.defaultModelGroups.length > 0
+  );
+  if (!hasGlobalModelSelection && suitesWithDefaults.length === 0) {
     return null;
   }
 
+  const runnableSuites = hasGlobalModelSelection ? selectedEvalSuites : suitesWithDefaults;
+
   return buildEvalsYaml({
-    selectedSuites: selectedEvalSuites,
+    selectedSuites: runnableSuites,
     resolveModelGroups,
     evaluationConnectorId,
     hasEisJudge,

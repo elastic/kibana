@@ -22,13 +22,13 @@ import type {
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
+import { FieldActionsProvider } from '@kbn/unified-doc-viewer';
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import { LogsOverviewHeader } from './logs_overview_header';
-import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
 import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_section';
@@ -41,6 +41,7 @@ import {
   TraceWaterfall,
   type TraceWaterfallRestorableState,
 } from '../observability/traces/components/trace_waterfall';
+import { LOGS_DOC_VIEWER_EBT_DETAILS } from './ebt_constants';
 import { DataSourcesProvider } from '../../hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
 import { hasErrorFields } from './utils/has_error_fields';
@@ -52,10 +53,11 @@ export type LogsOverviewProps = DocViewRenderProps &
     renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
     renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
     renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
-    renderCpsWarning?: boolean;
+    cpsHasLinkedProjects?: boolean;
     indexes: ObservabilityIndexes;
     showTraceWaterfall?: boolean;
     docViewActions?: DocViewActions;
+    profileId: string;
   };
 
 export interface LogsOverviewApi {
@@ -76,12 +78,13 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderAIInsight,
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
-      renderCpsWarning,
+      cpsHasLinkedProjects,
       indexes,
       showTraceWaterfall = true,
       docViewActions,
       initialState,
       onInitialStateChange,
+      profileId,
     },
     ref
   ) => {
@@ -138,18 +141,22 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             formattedDoc={parsedDoc}
             hit={hit}
             renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-            renderCpsWarning={renderCpsWarning}
+            cpsHasLinkedProjects={cpsHasLinkedProjects}
             filter={filter}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             dataView={dataView}
           />
-          <DataSourcesProvider indexes={indexes}>
+          <DataSourcesProvider indexes={indexes} profileId={profileId}>
             <DocViewerExtensionActionsProvider actions={docViewActions}>
               {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
               <div>
                 {renderFlyoutStreamField &&
-                  renderFlyoutStreamField({ dataView, doc: hit, renderCpsWarning })}
+                  renderFlyoutStreamField({
+                    dataView,
+                    doc: hit,
+                    cpsHasLinkedProjects,
+                  })}
               </div>
               <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
               {isStacktraceAvailable && (
@@ -165,6 +172,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
                   docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
                   serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                   dataView={dataView}
+                  ebtDetail={LOGS_DOC_VIEWER_EBT_DETAILS.LOG_DOC}
                   initialState={initialState}
                   onInitialStateChange={onInitialStateChange}
                 />

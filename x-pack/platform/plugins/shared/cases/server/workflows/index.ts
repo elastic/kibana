@@ -11,7 +11,7 @@ import type { CasesClient } from '../client';
 
 import { getCaseStepDefinition } from './steps/get_case';
 import { createCaseStepDefinition } from './steps/create_case';
-// import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
+import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
 import { updateCaseStepDefinition } from './steps/update_case';
 import { updateCasesStepDefinition } from './steps/update_cases';
 import { addCommentStepDefinition } from './steps/add_comment';
@@ -23,10 +23,12 @@ import { addEventsStepDefinition } from './steps/add_events';
 import { findSimilarCasesStepDefinition } from './steps/find_similar_cases';
 import { addObservablesStepDefinition } from './steps/add_observables';
 import { addTagsStepDefinition } from './steps/add_tags';
+import { removeTagsStepDefinition } from './steps/remove_tags';
 import { getCasesByAlertIdStepDefinition } from './steps/get_cases_by_alert_id';
 import { getAllAttachmentsStepDefinition } from './steps/get_all_attachments';
 import { updateObservableStepDefinition } from './steps/update_observable';
 import { deleteObservableStepDefinition } from './steps/delete_observable';
+import { setCustomFieldStepDefinition } from './steps/set_custom_field';
 import { getCasesStepDefinition } from './steps/get_cases';
 import {
   assignCaseStepDefinition,
@@ -48,9 +50,8 @@ export function registerCaseWorkflowSteps(
 
   workflowsExtensions.registerStepDefinition(getCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(createCaseStepDefinition(getCasesClient));
-  // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
-  // workflowsExtensions.registerStepDefinition(createCaseFromTemplateStepDefinition(getCasesClient));
-  // workflowsExtensions.registerStepDefinition(setCustomFieldStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(createCaseFromTemplateStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(setCustomFieldStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(updateCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(updateCasesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addCommentStepDefinition(getCasesClient));
@@ -68,6 +69,7 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(setTitleStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addObservablesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addTagsStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(removeTagsStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setCategoryStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(getCasesByAlertIdStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(getAllAttachmentsStepDefinition(getCasesClient));

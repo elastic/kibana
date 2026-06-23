@@ -5,37 +5,42 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-  EuiLoadingSpinner,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import { useIsMutating } from '@kbn/react-query';
+import React, { useCallback, useMemo } from 'react';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
-import { useUnbackedQueriesCount } from '../../../hooks/sig_events/use_unbacked_queries_count';
+import { useSignificantEventsAvailability } from '../../../hooks/sig_events/use_significant_events_availability';
 import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
+import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { KnowledgeIndicatorsTable } from './components/knowledge_indicators_table';
+import {
+  KnowledgeIndicatorsTable,
+  KiGenerationProvider,
+} from './components/knowledge_indicators_table';
+import { SignificantEventsDiscoveryProvider } from './context/significant_events_discovery_context';
+import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
-import { InsightsTab } from './components/insights/tab';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
+import { DetectionsTab } from './components/detections_tab';
+import { DiscoveriesTab } from './components/discoveries_tab';
+import { SigEventsTab } from './components/sig_events_tab';
 
 const discoveryTabs = [
   'streams',
   'knowledge_indicators',
   'queries',
+  'detections',
+  'discoveries',
   'significant_events',
   'memory',
   'settings',
@@ -52,15 +57,47 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsAppParams('/_discovery/{tab}');
 
   const router = useStreamsAppRouter();
+  const {
+    core: {
+      application: { getUrlForApp },
+      notifications: { toasts },
+    },
+    dependencies: {
+      start: { agentBuilder },
+    },
+  } = useKibana();
 
   const {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
-  const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
 
-  const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
-  const isPromotingQueries = useIsMutating({ mutationKey: ['promoteAll'] }) > 0;
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+
+  const onOnboardingFailed = useCallback(
+    (error: string) => {
+      toasts.addError(getFormattedError(new Error(error)), {
+        title: ONBOARDING_FAILURE_TITLE,
+      });
+    },
+    [toasts]
+  );
+
+  const { isMemoryEnabled } = useDiscoverySettings();
+
+  const handleOpenSystemOnboarding = useCallback(() => {
+    agentBuilder?.openChat({
+      newConversation: true,
+      initialMessage: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.onboardingInitialMessage',
+        {
+          defaultMessage:
+            'Start the significant-events-onboarding skill. First check whether there is already memory about my system. If there is, summarise what you know and ask whether I have something specific to add or correct, or whether I want a general review of the gaps. If memory is empty, go straight into gathering information.',
+        }
+      ),
+      autoSendInitialMessage: true,
+    });
+  }, [agentBuilder]);
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -96,13 +133,25 @@ export function SignificantEventsDiscoveryPage() {
         label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
           defaultMessage: 'Rules',
         }),
-        append: isPromotingQueries ? (
-          <EuiLoadingSpinner />
-        ) : unbackedQueriesCount > 0 ? (
-          <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
-        ) : undefined,
         href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
         isSelected: tab === 'queries',
+      },
+
+      {
+        id: 'detections',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.detectionsTab', {
+          defaultMessage: 'Detections',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'detections' } }),
+        isSelected: tab === 'detections',
+      },
+      {
+        id: 'discoveries',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.discoveriesTab', {
+          defaultMessage: 'Discoveries',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'discoveries' } }),
+        isSelected: tab === 'discoveries',
       },
       {
         id: 'significant_events',
@@ -135,10 +184,10 @@ export function SignificantEventsDiscoveryPage() {
     });
 
     return baseTabs;
-  }, [tab, router, unbackedQueriesCount, isMemoryEnabled, isPromotingQueries]);
+  }, [tab, router, isMemoryEnabled]);
 
-  if (significantEventsDiscovery === undefined) {
-    // Waiting to load license
+  if (significantEventsDiscovery === undefined || isAvailabilityLoading) {
+    // Waiting to load license / availability
     return <EuiLoadingElastic size="xxl" />;
   }
 
@@ -146,14 +195,19 @@ export function SignificantEventsDiscoveryPage() {
     return <RedirectTo path="/" />;
   }
 
+  if (availability && !availability.available) {
+    return (
+      <StreamsAppPageTemplate.Body grow>
+        <SignificantEventsNotEnabledPrompt reason={availability.reason} />
+      </StreamsAppPageTemplate.Body>
+    );
+  }
+
   if (!isValidDiscoveryTab(tab)) {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
   if (tab === 'memory' && !isMemoryEnabled) {
-    if (isSettingsLoading) {
-      return <EuiLoadingElastic size="xxl" />;
-    }
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
@@ -178,18 +232,49 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={getUrlForApp('observability', { path: '/nightshift' })}
+                iconType="moon"
+                size="s"
+              >
+                {i18n.translate('xpack.streams.significantEventsDiscovery.nightshiftButtonLabel', {
+                  defaultMessage: 'Nightshift',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            {isMemoryEnabled && agentBuilder && (
+              <EuiFlexItem grow={false}>
+                <AiButton
+                  iconType="sparkles"
+                  onClick={handleOpenSystemOnboarding}
+                  data-test-subj="significantEventsSystemOnboardingButton"
+                >
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
+                    { defaultMessage: 'Tell us about your system' }
+                  )}
+                </AiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         tabs={tabs}
       />
-      <StreamsAppPageTemplate.Body grow>
-        {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
-        {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
-        {tab === 'queries' && <QueriesTable />}
-        {tab === 'significant_events' && <InsightsTab />}
-        {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
-        {tab === 'settings' && <SettingsTab />}
-      </StreamsAppPageTemplate.Body>
+      <KiGenerationProvider onFailed={onOnboardingFailed}>
+        <SignificantEventsDiscoveryProvider>
+          <StreamsAppPageTemplate.Body grow>
+            {tab === 'streams' && <StreamsView />}
+            {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+            {tab === 'queries' && <QueriesTable />}
+            {tab === 'detections' && <DetectionsTab />}
+            {tab === 'discoveries' && <DiscoveriesTab />}
+            {tab === 'significant_events' && <SigEventsTab />}
+            {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+            {tab === 'settings' && <SettingsTab />}
+          </StreamsAppPageTemplate.Body>
+        </SignificantEventsDiscoveryProvider>
+      </KiGenerationProvider>
     </>
   );
 }

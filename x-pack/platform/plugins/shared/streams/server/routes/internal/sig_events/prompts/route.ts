@@ -26,9 +26,9 @@ export const setStreamsPromptRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      featurePromptOverride: z.string().optional(),
-      significantEventsPromptOverride: z.string().optional(),
-      descriptionPromptOverride: z.string().optional(),
+      featurePromptOverride: z.string().max(50_000).optional(),
+      significantEventsPromptOverride: z.string().max(50_000).optional(),
+      descriptionPromptOverride: z.string().max(50_000).optional(),
     }),
   }),
   handler: async ({

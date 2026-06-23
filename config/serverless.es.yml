@@ -8,6 +8,7 @@ xpack.osquery.enabled: false
 
 # Enable fleet on search projects for agentless features
 xpack.fleet.enabled: true
+xpack.fleet.experimentalFeatures.installIntegrationsKnowledge: false
 xpack.fleet.packages:
   # fleet_server package installed to publish agent metrics
   - name: fleet_server
@@ -43,6 +44,8 @@ xpack.fleet.internal.registry.excludePackages: [
 xpack.features.overrides:
   ### Agent Builder feature is moved from Analytics category to the Search one.
   agentBuilder.category: 'enterpriseSearch'
+  ### Agent Context Layer should match Agent Builder for role management.
+  agentContextLayer.category: 'enterpriseSearch'
   ### Workflows Management should be moved from Analytics category to the Search one.
   workflowsManagement.category: 'enterpriseSearch'
   ### Dashboards feature is moved from Analytics category to the Search one.
@@ -70,6 +73,7 @@ xpack.serverless.search.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
+
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: search

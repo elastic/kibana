@@ -7,7 +7,7 @@
 
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
-import type { AgentVisibility } from './visibility';
+import type { AgentAccessControl } from './access_control/types';
 
 /**
  * The type of an agent.
@@ -48,9 +48,9 @@ export interface AgentDefinition {
    */
   readonly: boolean;
   /**
-   * Visibility controls who can read and write this agent.
+   * Access control controls who can read, run, write, delete, and manage this agent.
    */
-  visibility?: AgentVisibility;
+  access_control?: AgentAccessControl;
   /**
    * Agent owner metadata.
    */
@@ -116,6 +116,13 @@ export interface AgentConfiguration {
    * Skills contributed by these plugins will be available to the agent during execution.
    */
   plugin_ids?: string[];
+
+  /**
+   * Optional list of connector IDs associated with this agent.
+   * When set, SML search filters connector results to only those in this list.
+   * When undefined, all connectors remain visible (backward compatibility).
+   */
+  connector_ids?: string[];
 
   /**
    * Custom configuration for the research step of the agent.

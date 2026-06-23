@@ -52,7 +52,6 @@ import {
   SEARCH_INDEX_MANAGEMENT_APP_ID,
   SEARCH_INDEX_MANAGEMENT_APP_BASE,
 } from '../common/constants';
-import { registerLocators } from '../common/locators';
 import type { ClientConfigType, InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
@@ -149,7 +148,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { cloud, share } = plugins;
+    const { cloud } = plugins;
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,
@@ -237,8 +236,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    registerLocators(share!);
-
     core.application.register({
       appRoute: '/app/enterprise_search',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -305,9 +302,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
       return plugins.navigation.addSolutionNavigation(
         getNavigationTreeDefinition({
+          core,
           dynamicItems$: this.sideNavDynamicItems$,
           isCloudEnabled: plugins.cloud?.isCloudEnabled,
-          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
         })
       );
     });

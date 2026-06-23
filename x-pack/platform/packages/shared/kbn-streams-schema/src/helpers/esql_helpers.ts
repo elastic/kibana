@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter, Builder, Parser, walk, type WalkerAstNode } from '@elastic/esql';
+import {
+  BasicPrettyPrinter,
+  Builder,
+  isBinaryExpression,
+  Parser,
+  walk,
+  type WalkerAstNode,
+} from '@elastic/esql';
 import type {
   ESQLAstItem,
+  ESQLAstQueryExpression,
+  ESQLBinaryExpression,
+  ESQLColumn,
   ESQLCommand,
+  ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
   ESQLSource,
@@ -34,6 +45,25 @@ function isIndexSource(arg: ESQLCommand['args'][number]): arg is ESQLSource {
     arg.type === 'source' &&
     (arg as ESQLSource).sourceType === 'index'
   );
+}
+
+type MetadataOption = ESQLCommandOption & { name: 'metadata' };
+
+function isMetadataOption(arg: ESQLAstItem): arg is MetadataOption {
+  return !Array.isArray(arg) && arg.type === 'option' && arg.name === 'metadata';
+}
+
+/**
+ * Reads the column identifier name out of a single METADATA option argument
+ * (e.g. `_id` from `column(_id)`). Returns `undefined` for parameterized columns
+ * or unexpected shapes so callers can leave them untouched.
+ */
+function getMetadataIdentifierName(arg: ESQLAstItem): string | undefined {
+  if (Array.isArray(arg) || arg.type !== 'column') return undefined;
+  const column: ESQLColumn = arg;
+  const inner = column.args[0];
+  if (!inner || inner.type !== 'identifier') return undefined;
+  return inner.name;
 }
 
 function printWithUpdatedFrom(
@@ -113,6 +143,17 @@ function tryParseEsql(esql: string) {
 // Public API
 // ---------------------------------------------------------------------------
 
+const UNMAPPED_FIELDS_DIRECTIVE = 'SET unmapped_fields="LOAD";\n';
+
+/**
+ * Prepends the `SET unmapped_fields="LOAD";` directive to an ES|QL query.
+ * This tells ES|QL to load unmapped fields from `_source` as keyword
+ * instead of raising "Unknown column" errors.
+ */
+export function withUnmappedFieldsDirective(query: string): string {
+  return `${UNMAPPED_FIELDS_DIRECTIVE}${query}`;
+}
+
 /**
  * Builds the ES|QL AST node for `METADATA _id, _source`.
  * Shared across all locations that construct or augment FROM commands.
@@ -151,18 +192,74 @@ export function ensureMetadata(esql: string): string {
   const { root, fromCmd } = parseFromCommand(esql);
   if (!fromCmd) return esql;
 
-  const hasMetadata = fromCmd.args.some(
-    (arg) =>
-      !Array.isArray(arg) &&
-      'type' in arg &&
-      arg.type === 'option' &&
-      'name' in arg &&
-      arg.name === 'metadata'
-  );
-
-  if (hasMetadata) return esql;
+  if (fromCmd.args.some(isMetadataOption)) return esql;
 
   return printWithUpdatedFrom(root, fromCmd, [...fromCmd.args, buildMetadataOption()]);
+}
+
+/**
+ * Removes METADATA columns from the FROM clause.
+ *
+ * - `stripMetadata(esql)` — drops the entire METADATA option (inverse of
+ *   {@link ensureMetadata}).
+ * - `stripMetadata(esql, ['_source'])` — drops only the listed identifiers from
+ *   METADATA, preserving any others (e.g. `_id`). When no identifiers remain,
+ *   the METADATA option itself is dropped.
+ *
+ * Returns the input unchanged when:
+ *   - the query has no FROM clause,
+ *   - the query has no METADATA option (or none of the listed identifiers),
+ *   - the input cannot be parsed.
+ *
+ * Parse failures are swallowed so a corrupted persisted query passes through
+ * untouched and surfaces a precise error at execution time, rather than
+ * crashing rule create/update flows with an opaque parser stack.
+ */
+export function stripMetadata(esql: string, identifiersToStrip?: string[]): string {
+  let parsed: ReturnType<typeof parseFromCommand>;
+  try {
+    parsed = parseFromCommand(esql);
+  } catch {
+    return esql;
+  }
+  const { root, fromCmd } = parsed;
+  if (!fromCmd) return esql;
+
+  const stripSet = identifiersToStrip ? new Set(identifiersToStrip) : null;
+
+  let changed = false;
+  const newArgs: ESQLCommand['args'] = [];
+
+  for (const arg of fromCmd.args) {
+    if (!isMetadataOption(arg)) {
+      newArgs.push(arg);
+      continue;
+    }
+
+    // No identifiers list provided → drop the entire METADATA option.
+    if (stripSet === null) {
+      changed = true;
+      continue;
+    }
+
+    const filtered = arg.args.filter((opt) => {
+      const name = getMetadataIdentifierName(opt);
+      return name === undefined || !stripSet.has(name);
+    });
+
+    if (filtered.length === arg.args.length) {
+      newArgs.push(arg);
+      continue;
+    }
+
+    changed = true;
+    if (filtered.length > 0) {
+      newArgs.push({ ...arg, args: filtered });
+    }
+  }
+
+  if (!changed) return esql;
+  return printWithUpdatedFrom(root, fromCmd, newArgs);
 }
 
 /**
@@ -174,6 +271,138 @@ export function ensureMetadata(esql: string): string {
 export function normalizeEsqlQuery(esql: string): string {
   const { root } = Parser.parse(esql);
   return BasicPrettyPrinter.print(root);
+}
+
+// ---------------------------------------------------------------------------
+// Commutative normalization — sorts AND/OR operands so that
+// `WHERE a AND b` and `WHERE b AND a` produce the same canonical string.
+// ---------------------------------------------------------------------------
+
+function printItem(item: ESQLAstItem): string {
+  if (Array.isArray(item)) {
+    return item.length === 1 ? printItem(item[0]) : item.map(printItem).join(', ');
+  }
+  return BasicPrettyPrinter.expression(item);
+}
+
+function isCommutativeOp(node: unknown): node is ESQLBinaryExpression<'and' | 'or'> {
+  return isBinaryExpression(node) && (node.name === 'and' || node.name === 'or');
+}
+
+/**
+ * Flattens a left-associative AND/OR chain into its leaf operands.
+ * E.g. `AND(AND(a, b), c)` → `[a, b, c]`.
+ */
+function flattenCommutativeChain(
+  node: ESQLBinaryExpression<'and' | 'or'>,
+  opName: string
+): ESQLAstItem[] {
+  const operands: ESQLAstItem[] = [];
+  for (const arg of node.args) {
+    const item = Array.isArray(arg) ? arg[0] : arg;
+    if (isCommutativeOp(item) && item.name === opName) {
+      operands.push(...flattenCommutativeChain(item, opName));
+    } else {
+      operands.push(arg);
+    }
+  }
+  return operands;
+}
+
+/**
+ * Collects all binary-expression nodes in a commutative AND/OR tree
+ * so they can be re-wired with sorted operands. Walks both children
+ * to handle right-nested trees (e.g. `AND(a, AND(b, c))`) in addition
+ * to the default left-associative parse trees.
+ */
+function collectChainSpine(
+  node: ESQLBinaryExpression<'and' | 'or'>,
+  opName: string
+): ESQLBinaryExpression<'and' | 'or'>[] {
+  const spine: ESQLBinaryExpression<'and' | 'or'>[] = [node];
+  for (const arg of node.args) {
+    const child = Array.isArray(arg) ? arg[0] : arg;
+    if (isCommutativeOp(child) && child.name === opName) {
+      spine.push(...collectChainSpine(child, opName));
+    }
+  }
+  return spine;
+}
+
+/**
+ * Sorts the operands of a commutative AND/OR chain in-place.
+ * After sorting, the existing AST spine nodes are re-wired so that
+ * `BasicPrettyPrinter.print` produces a deterministic operand order.
+ */
+function sortChainInPlace(node: ESQLBinaryExpression<'and' | 'or'>): void {
+  const opName = node.name;
+  const operands = flattenCommutativeChain(node, opName);
+  if (operands.length <= 1) return;
+
+  operands.sort((a, b) => {
+    return printItem(a).localeCompare(printItem(b));
+  });
+
+  const spine = collectChainSpine(node, opName);
+  // spine is [outermost, …, innermost]; reverse so index 0 is innermost
+  spine.reverse();
+
+  // Innermost node gets the first two operands
+  spine[0].args = [operands[0], operands[1]];
+  // Each subsequent node gets [previous spine node, next operand]
+  for (let i = 1; i < spine.length; i++) {
+    spine[i].args = [spine[i - 1], operands[i + 1]];
+  }
+}
+
+/**
+ * Bottom-up walk of an AST item: recurse into children first, then
+ * sort commutative ops at the current level. This ensures inner
+ * AND/OR expressions are canonicalized before being used as sort
+ * keys for outer expressions.
+ */
+function sortCommutativeItem(item: ESQLAstItem): void {
+  if (Array.isArray(item)) {
+    item.forEach(sortCommutativeItem);
+    return;
+  }
+  if ('args' in item && Array.isArray(item.args)) {
+    item.args.forEach(sortCommutativeItem);
+  }
+  if (isCommutativeOp(item)) {
+    sortChainInPlace(item);
+  }
+}
+
+function sortCommutativeOps(root: ESQLAstQueryExpression): void {
+  for (const cmd of root.commands) {
+    cmd.args.forEach(sortCommutativeItem);
+  }
+}
+
+/**
+ * Like {@link normalizeEsqlQuery} but never throws and additionally
+ * sorts commutative AND/OR operands so that `WHERE a AND b` and
+ * `WHERE b AND a` produce the same canonical string. Falls back to
+ * whitespace normalization when the parser cannot handle the input.
+ */
+export function normalizeEsqlSafe(esql: string): string {
+  try {
+    const { root } = Parser.parse(esql);
+    sortCommutativeOps(root);
+    return BasicPrettyPrinter.print(root);
+  } catch {
+    return esql.replace(/\s+/g, ' ').trim();
+  }
+}
+
+/**
+ * Returns `true` when two ES|QL query strings are semantically
+ * equivalent after deep AST-based normalization (including
+ * commutative AND/OR operand ordering).
+ */
+export function hasSameEsql(a: string, b: string): boolean {
+  return normalizeEsqlSafe(a) === normalizeEsqlSafe(b);
 }
 
 /**

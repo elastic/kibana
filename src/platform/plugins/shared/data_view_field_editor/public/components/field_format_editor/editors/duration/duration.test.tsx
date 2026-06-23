@@ -8,143 +8,138 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
+import { createFieldFormatMock } from '../test_utils';
 import { DurationFormatEditor } from './duration';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { EuiSwitch } from '@elastic/eui';
+import { formatId } from './constants';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 const fieldType = 'number';
-const format = {
-  getConverterFor: jest
-    .fn()
-    .mockImplementation(() => (input: string) => `converted duration for ${input}`),
-  getParamDefaults: jest.fn().mockImplementation(() => {
-    return {
-      inputFormat: 'seconds',
-      outputFormat: 'humanize',
-      outputPrecision: 10,
-      includeSpaceWithSuffix: true,
-    };
-  }),
-  isHuman: () => true,
-  isHumanPrecise: () => false,
-  type: {
-    inputFormats: [
-      {
-        text: 'Seconds',
-        kind: 'seconds',
-      },
-    ],
-    outputFormats: [
-      {
-        text: 'Human Readable',
-        method: 'humanize',
-      },
-      {
-        text: 'Minutes',
-        method: 'asMinutes',
-      },
-    ],
-  },
-};
+
+const createDurationFormat = ({
+  outputFormat = 'humanize',
+  outputPrecision = 10,
+  isHuman = true,
+  isHumanPrecise = false,
+} = {}) =>
+  createFieldFormatMock({
+    getParamDefaults: jest.fn().mockImplementation(() => {
+      return {
+        includeSpaceWithSuffix: true,
+        inputFormat: 'seconds',
+        outputFormat,
+        outputPrecision,
+      };
+    }),
+    isHuman: () => isHuman,
+    isHumanPrecise: () => isHumanPrecise,
+    convertToReact: jest
+      .fn()
+      .mockImplementation((input: string) => `converted duration for ${input}`),
+    type: {
+      inputFormats: [
+        {
+          kind: 'seconds',
+          text: 'Seconds',
+        },
+      ],
+      outputFormats: [
+        {
+          method: 'humanize',
+          text: 'Human Readable',
+        },
+        {
+          method: 'asMinutes',
+          text: 'Minutes',
+        },
+      ],
+    },
+  });
+
+const format = createDurationFormat();
+
 const formatParams = {
-  outputPrecision: 2,
   inputFormat: '',
   outputFormat: '',
+  outputPrecision: 2,
 };
+
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderDurationFormatEditor = ({
+  newFormat = format,
+  newFormatParams = formatParams,
+}: {
+  newFormat?: typeof format;
+  newFormatParams?: typeof formatParams;
+} = {}) =>
+  renderWithI18n(
+    <DurationFormatEditor
+      fieldType={fieldType}
+      format={newFormat}
+      formatParams={newFormatParams}
+      onChange={onChange}
+      onError={onError}
+    />
+  );
+
 describe('DurationFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(DurationFormatEditor.formatId).toEqual('duration');
+    expect(DurationFormatEditor.formatId).toEqual(formatId);
   });
 
-  it('should render human readable output normally', async () => {
-    const component = shallow(
-      <DurationFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-    expect(component).toMatchSnapshot();
+  it('should render human readable output normally', () => {
+    renderDurationFormatEditor();
+
+    expect(screen.getByText('Input format')).toBeVisible();
+    expect(screen.getByText('Output format')).toBeVisible();
+    expect(screen.getByText('converted duration for -123')).toBeVisible();
+    expect(screen.queryByText('Decimal places')).not.toBeInTheDocument();
+    expect(screen.queryByText('Show suffix')).not.toBeInTheDocument();
   });
 
-  it('should render non-human readable output normally', async () => {
-    const newFormat = {
-      ...format,
-      getParamDefaults: jest.fn().mockImplementation(() => {
-        return {
-          inputFormat: 'seconds',
-          outputFormat: 'asMinutes',
-          outputPrecision: 10,
-          includeSpaceWithSuffix: true,
-        };
-      }),
-      isHuman: () => false,
-    };
-    const component = shallow(
-      <DurationFormatEditor
-        fieldType={fieldType}
-        format={newFormat as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-    const labels = component.find(EuiSwitch);
-    expect(labels.length).toEqual(3);
-    expect(labels.get(0).props.label.props.defaultMessage).toEqual('Show suffix');
-    expect(labels.get(1).props.label.props.defaultMessage).toEqual('Use short suffix');
-    expect(labels.get(2).props.label.props.defaultMessage).toEqual(
-      'Include space between suffix and value'
-    );
+  it('should render non-human readable output normally', () => {
+    const newFormat = createDurationFormat({
+      outputFormat: 'asMinutes',
+      isHuman: false,
+    });
 
-    expect(component).toMatchSnapshot();
+    renderDurationFormatEditor({ newFormat });
+
+    expect(screen.getByText('Input format')).toBeVisible();
+    expect(screen.getByText('Output format')).toBeVisible();
+    expect(screen.getByText('Decimal places')).toBeVisible();
+    expect(screen.getByText('Show suffix')).toBeVisible();
+    expect(screen.getByText('Use short suffix')).toBeVisible();
+    expect(screen.getByText('Include space between suffix and value')).toBeVisible();
+    expect(screen.getByText('converted duration for -123')).toBeVisible();
   });
 
-  it('should not render show suffix on dynamic output', async () => {
-    const newFormat = {
-      ...format,
-      getParamDefaults: jest.fn().mockImplementation(() => {
-        return {
-          inputFormat: 'seconds',
-          outputFormat: 'dynamic',
-          outputPrecision: 2,
-          includeSpaceWithSuffix: true,
-        };
-      }),
-      isHuman: () => false,
-      isHumanPrecise: () => true,
-    };
-    const component = shallow(
-      <DurationFormatEditor
-        fieldType={fieldType}
-        format={newFormat as unknown as FieldFormat}
-        formatParams={{ ...formatParams, outputFormat: 'dynamic' }}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  it('should not render show suffix on dynamic output', () => {
+    const newFormat = createDurationFormat({
+      outputFormat: 'dynamic',
+      outputPrecision: 2,
+      isHuman: false,
+      isHumanPrecise: true,
+    });
 
-    const labels = component.find(EuiSwitch);
-    expect(labels.length).toEqual(2);
-    const useShortSuffixSwitch = labels.get(0);
+    renderDurationFormatEditor({
+      newFormat,
+      newFormatParams: { ...formatParams, outputFormat: 'dynamic' },
+    });
 
-    expect(useShortSuffixSwitch.props.label.props.defaultMessage).toEqual('Use short suffix');
-    expect(useShortSuffixSwitch.props.disabled).toEqual(false);
+    expect(screen.getByText('Input format')).toBeVisible();
+    expect(screen.getByText('Output format')).toBeVisible();
+    expect(screen.getByText('Decimal places')).toBeVisible();
+    expect(screen.queryByText('Show suffix')).not.toBeInTheDocument();
+    expect(screen.getByText('Use short suffix')).toBeVisible();
+    expect(screen.getByText('Include space between suffix and value')).toBeVisible();
+    expect(screen.getByText('converted duration for -123')).toBeVisible();
 
-    const includeSpaceSwitch = labels.get(1);
-
-    expect(includeSpaceSwitch.props.disabled).toEqual(false);
-    expect(includeSpaceSwitch.props.label.props.defaultMessage).toEqual(
-      'Include space between suffix and value'
-    );
-
-    expect(component).toMatchSnapshot();
+    const switches = screen.getAllByRole('switch');
+    expect(switches).toHaveLength(2);
+    expect(switches[0]).toBeEnabled();
+    expect(switches[1]).toBeEnabled();
   });
 });

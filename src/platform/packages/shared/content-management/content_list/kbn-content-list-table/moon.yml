@@ -18,12 +18,14 @@ project:
   sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-table
 dependsOn:
   - '@kbn/content-list-assembly'
+  - '@kbn/content-list-common'
   - '@kbn/content-list-provider'
   - '@kbn/content-management-tags'
   - '@kbn/content-management-favorites-public'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/user-profile-components'
+  - '@kbn/shared-ux-utility'
 tags:
   - shared-browser
   - package

@@ -150,22 +150,11 @@ function fixAdditionalPropertiesInSchema(
     objRecord.additionalProperties = false;
   }
 
-  // Remove additionalProperties: false from objects inside allOf arrays
-  // In allOf, each schema should be permissive to allow the union of all properties
+  // Remove additionalProperties: false from objects inside allOf arrays.
+  // In allOf, each conjunct is validated independently; additionalProperties: false
+  // on one conjunct would reject properties defined by sibling conjuncts.
   if (objRecord.type === 'object' && objRecord.additionalProperties === false) {
-    // Check if this object is nested inside an allOf clause.
-    // The original logic split the path by '.' and checked for 'allOf' followed by a numeric segment.
-    // Since array indices use bracket notation (e.g. "allOf[0]"), this check only triggers when
-    // the path contains a literal ".allOf." segment followed by a numeric-only segment — which
-    // doesn't happen with our current path format, so this is effectively a no-op that preserves
-    // backward compatibility.
-    const pathParts = path.split('.');
-    const isInAllOf = pathParts.some(
-      (part, index) =>
-        part === 'allOf' && pathParts[index + 1] && /^\d+$/.test(pathParts[index + 1])
-    );
-
-    if (isInAllOf) {
+    if (/\ballOf\[/.test(path)) {
       delete objRecord.additionalProperties;
     }
   }
@@ -342,10 +331,7 @@ function enhanceActionSchema(
     const anyOf = actionUnionSchema.anyOf as Array<Record<string, unknown>> | undefined;
     if (Array.isArray(anyOf)) {
       actionUnionSchema.anyOf = anyOf.filter((option) => {
-        const actionConst = (option?.properties as Record<string, unknown>)?.action as
-          | { const?: string }
-          | undefined;
-        return actionConst?.const !== 'manual_ingest_pipeline';
+        return extractActionConstFromOption(option) !== 'manual_ingest_pipeline';
       });
     }
   }
@@ -359,24 +345,16 @@ function enhanceActionSchema(
   const actionEnumValues = Array.from(
     new Set(
       (anyOfOptions ?? [])
-        .map((option) => {
-          const actionConst = (option?.properties as Record<string, unknown>)?.action as
-            | { const?: string }
-            | undefined;
-          return actionConst?.const;
-        })
+        .map(extractActionConstFromOption)
         .filter((value): value is string => typeof value === 'string')
     )
   );
 
   (anyOfOptions ?? []).forEach((option: Record<string, unknown>) => {
-    const optionProps = option?.properties as Record<string, unknown> | undefined;
-    const actionConst = optionProps?.action as { const?: string } | undefined;
-    const actionName = actionConst?.const;
+    const actionName = extractActionConstFromOption(option);
     if (!actionName) {
       return;
     }
-    // Check if actionName is a known processor type
     const metadata =
       actionName in ACTION_METADATA_MAP
         ? ACTION_METADATA_MAP[actionName as keyof typeof ACTION_METADATA_MAP]
@@ -515,6 +493,28 @@ function enhanceConditionBlockSchema(
 }
 
 /**
+ * Extract the `action` const value from a processor schema option.
+ * Handles both flat objects (`properties.action.const`) and `allOf` schemas
+ * produced by `z.intersection()` (e.g. `network_direction`).
+ */
+function extractActionConstFromOption(option: Record<string, unknown>): string | undefined {
+  const directAction = (option?.properties as Record<string, unknown> | undefined)?.action as
+    | { const?: string }
+    | undefined;
+  if (directAction?.const) return directAction.const;
+
+  if (Array.isArray(option?.allOf)) {
+    for (const item of option.allOf as Array<Record<string, unknown>>) {
+      const itemAction = (item?.properties as Record<string, unknown> | undefined)?.action as
+        | { const?: string }
+        | undefined;
+      if (itemAction?.const) return itemAction.const;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Helper to ensure a property is in the required array.
  */
 function ensureRequiredProperty(schema: Record<string, unknown>, propertyName: string): void {
@@ -543,22 +543,20 @@ function enhanceConditionPropertyForEditor(
   whereBlockOption: Record<string, unknown>
 ): void {
   const properties = whereBlockOption?.properties as Record<string, unknown> | undefined;
-  const conditionProperty = properties?.condition as Record<string, unknown> | undefined;
+  let conditionProperty = properties?.condition as Record<string, unknown> | undefined;
 
-  // Resolve $ref if the condition property is a reference (Zod v4 may emit $ref for named schemas)
+  // Zod v4 emits $ref for schemas with .meta({ id }); resolve and inline so we
+  // can inspect and flatten the underlying allOf intersection.
   if (conditionProperty && typeof conditionProperty.$ref === 'string') {
     const resolved = resolveJsonPointer(rootSchema, conditionProperty.$ref) as
       | Record<string, unknown>
       | undefined;
     if (resolved) {
-      // Replace the $ref with the resolved schema (mutate in-place so Monaco sees the full schema)
-      const resolvedClone = JSON.parse(JSON.stringify(resolved)) as Record<string, unknown>;
-      Object.keys(conditionProperty).forEach((k) => delete conditionProperty![k]);
-      Object.assign(conditionProperty, resolvedClone);
+      conditionProperty = JSON.parse(JSON.stringify(resolved));
+      (properties as Record<string, unknown>).condition = conditionProperty;
     }
   }
 
-  // Validate the condition property has the expected allOf structure
   if (!isAllOfIntersection(conditionProperty)) {
     return;
   }
@@ -566,19 +564,16 @@ function enhanceConditionPropertyForEditor(
   const allOf = conditionProperty.allOf as unknown[];
   const [conditionRefCandidate, stepsSchemaCandidate] = allOf;
 
-  // Extract and validate the condition reference
   const conditionRef = extractConditionRef(conditionRefCandidate);
   if (!conditionRef) {
     return;
   }
 
-  // Extract and validate the steps schema
   const stepsInfo = extractStepsInfo(stepsSchemaCandidate);
   if (!stepsInfo) {
     return;
   }
 
-  // Resolve the condition schema from the reference
   const conditionSchema = resolveJsonPointer(rootSchema, conditionRef) as
     | Record<string, unknown>
     | undefined;
@@ -586,38 +581,83 @@ function enhanceConditionPropertyForEditor(
     return;
   }
 
-  // Clone and augment the condition schema with the steps property
-  const augmentedConditionSchema = cloneAndAddStepsToCondition(
-    rootSchema,
-    conditionSchema,
-    stepsInfo.stepsPropertySchema,
-    stepsInfo.elsePropertySchema,
-    stepsInfo.shouldRequireSteps
-  );
+  // Merge all condition variant properties into a single flat object, then add
+  // the `steps` and `else` properties. This mirrors the `flattenConditionOneOf`
+  // approach used by the standalone condition editor. Keeping `anyOf` with strict
+  // variants causes Monaco to report errors from every non-matching branch (e.g.
+  // the AND variant rejecting `field`), so we flatten into one permissive object.
+  const clonedCondition = deepClone(conditionSchema);
 
-  if (!augmentedConditionSchema) {
-    return;
+  // Resolve top-level $ref nodes (e.g. FilterCondition) so that
+  // addFilterConditionSnippets can inspect variant properties.
+  if (Array.isArray(clonedCondition.anyOf)) {
+    clonedCondition.anyOf = (clonedCondition.anyOf as Array<Record<string, unknown>>).map(
+      (variant) => {
+        if (typeof variant?.$ref === 'string') {
+          const resolved = resolveJsonPointer(rootSchema, variant.$ref) as
+            | Record<string, unknown>
+            | undefined;
+          return resolved ? deepClone(resolved) : variant;
+        }
+        return variant;
+      }
+    );
   }
 
-  // Replace the allOf intersection with a flattened union/object
-  const conditionProp = conditionProperty as Record<string, unknown>;
-  flattenIntersectionToUnion(conditionProp, augmentedConditionSchema);
+  addFilterConditionSnippets(clonedCondition);
 
-  // Add steps and else properties to the flattened schema
-  const conditionProps = conditionProp.properties as Record<string, unknown> | undefined;
+  const mergedProperties: Record<string, unknown> = {};
+  const mergedSnippets: unknown[] = [];
+
+  function collectConditionProperties(node: unknown): void {
+    if (!node || typeof node !== 'object') return;
+    const nodeRecord = node as Record<string, unknown>;
+    if (typeof nodeRecord.$ref === 'string') {
+      const resolved = resolveJsonPointer(rootSchema, nodeRecord.$ref);
+      if (resolved) collectConditionProperties(resolved);
+      return;
+    }
+    if (nodeRecord.anyOf) {
+      (nodeRecord.anyOf as unknown[]).forEach(collectConditionProperties);
+      return;
+    }
+    if (nodeRecord.oneOf) {
+      (nodeRecord.oneOf as unknown[]).forEach(collectConditionProperties);
+      return;
+    }
+    const nodeProps = nodeRecord.properties as Record<string, unknown> | undefined;
+    if (nodeProps) {
+      for (const [key, value] of Object.entries(nodeProps)) {
+        if (!mergedProperties[key]) {
+          mergedProperties[key] = value;
+        }
+      }
+    }
+    if (Array.isArray(nodeRecord.defaultSnippets)) {
+      mergedSnippets.push(...nodeRecord.defaultSnippets);
+    }
+  }
+
+  collectConditionProperties(clonedCondition);
+
+  mergedProperties.steps = stepsInfo.stepsPropertySchema;
+  if (stepsInfo.elsePropertySchema) {
+    mergedProperties.else = stepsInfo.elsePropertySchema;
+  }
+
+  const conditionProp = conditionProperty as Record<string, unknown>;
+  delete conditionProp.allOf;
   conditionProp.type = 'object';
-  conditionProp.properties = {
-    ...(conditionProps ?? {}),
-    steps: stepsInfo.stepsPropertySchema,
-    ...(stepsInfo.elsePropertySchema ? { else: stepsInfo.elsePropertySchema } : {}),
-  };
+  conditionProp.properties = mergedProperties;
+  conditionProp.additionalProperties = false;
 
   if (stepsInfo.shouldRequireSteps) {
     ensureRequiredProperty(conditionProp, 'steps');
   }
 
-  // Remove the original allOf intersection now that we've flattened it
-  delete (conditionProp as { allOf?: unknown[] }).allOf;
+  if (mergedSnippets.length > 0) {
+    conditionProp.defaultSnippets = mergedSnippets;
+  }
 }
 
 /**
@@ -665,22 +705,6 @@ function extractStepsInfo(candidate: unknown):
   };
 }
 
-/**
- * Replace an allOf intersection with a flattened union structure.
- */
-function flattenIntersectionToUnion(
-  targetProperty: Record<string, unknown>,
-  augmentedSchema: Record<string, unknown>
-): void {
-  if (Array.isArray(augmentedSchema.anyOf)) {
-    targetProperty.anyOf = augmentedSchema.anyOf;
-  } else if (Array.isArray(augmentedSchema.oneOf)) {
-    targetProperty.oneOf = augmentedSchema.oneOf;
-  } else {
-    targetProperty.anyOf = [augmentedSchema];
-  }
-}
-
 function resolveJsonPointer(root: unknown, pointer: string): unknown {
   if (!pointer.startsWith('#/')) {
     return undefined;
@@ -701,37 +725,6 @@ function resolveJsonPointer(root: unknown, pointer: string): unknown {
   }
 
   return current;
-}
-
-/**
- * Clone the condition schema and add the `steps` property to every variant.
- * Conditions can be composed via anyOf/oneOf/allOf, so we need to recursively
- * add `steps` to each branch for Monaco to show proper autocomplete.
- */
-function cloneAndAddStepsToCondition(
-  rootSchema: StreamlangJsonSchema,
-  conditionSchema: Record<string, unknown>,
-  stepsPropertySchema: Record<string, unknown>,
-  elsePropertySchema: Record<string, unknown> | undefined,
-  shouldRequireSteps: boolean
-): Record<string, unknown> | undefined {
-  if (!conditionSchema || typeof conditionSchema !== 'object') {
-    return undefined;
-  }
-
-  const clonedSchema = deepClone(conditionSchema);
-  const enhanced = recursivelyAddStepsProperty(
-    clonedSchema,
-    stepsPropertySchema,
-    elsePropertySchema,
-    shouldRequireSteps,
-    rootSchema
-  );
-
-  // Add defaultSnippets for filter condition operators to help Monaco suggest them
-  addFilterConditionSnippets(enhanced);
-
-  return enhanced;
 }
 
 /**
@@ -1065,68 +1058,6 @@ function addOperatorSnippetsToFilterCondition(
 }
 
 /**
- * Recursively add the `steps` property to every object variant in the condition schema.
- */
-function recursivelyAddStepsProperty(
-  node: Record<string, unknown>,
-  stepsPropertySchema: Record<string, unknown>,
-  elsePropertySchema: Record<string, unknown> | undefined,
-  shouldRequireSteps: boolean,
-  rootSchema?: StreamlangJsonSchema
-): Record<string, unknown> {
-  if (!node || typeof node !== 'object') {
-    return node;
-  }
-
-  // Resolve $ref pointers so we can add steps/else to the referenced schema
-  if (typeof node.$ref === 'string' && rootSchema) {
-    const resolved = resolveJsonPointer(rootSchema, node.$ref) as
-      | Record<string, unknown>
-      | undefined;
-    if (resolved) {
-      return recursivelyAddStepsProperty(
-        JSON.parse(JSON.stringify(resolved)),
-        stepsPropertySchema,
-        elsePropertySchema,
-        shouldRequireSteps,
-        rootSchema
-      );
-    }
-  }
-
-  // Recursively process union/intersection schemas
-  const unionType = getUnionType(node);
-  if (unionType) {
-    const options = node[unionType] as Array<Record<string, unknown>> | undefined;
-    return {
-      ...node,
-      [unionType]: (options ?? []).map((option) =>
-        recursivelyAddStepsProperty(
-          option,
-          stepsPropertySchema,
-          elsePropertySchema,
-          shouldRequireSteps,
-          rootSchema
-        )
-      ),
-    };
-  }
-
-  // Only add steps to object-shaped schemas
-  if (!isObjectSchema(node)) {
-    return node;
-  }
-
-  // Add the steps and else properties to this object variant
-  return addStepsPropertyToObject(
-    node,
-    stepsPropertySchema,
-    elsePropertySchema,
-    shouldRequireSteps
-  );
-}
-
-/**
  * Check if a node is a union/intersection and return the type (anyOf, oneOf, or allOf).
  */
 function getUnionType(node: Record<string, unknown>): 'anyOf' | 'oneOf' | 'allOf' | undefined {
@@ -1134,46 +1065,6 @@ function getUnionType(node: Record<string, unknown>): 'anyOf' | 'oneOf' | 'allOf
   if (Array.isArray(node.oneOf)) return 'oneOf';
   if (Array.isArray(node.allOf)) return 'allOf';
   return undefined;
-}
-
-/**
- * Check if a node represents an object schema.
- */
-function isObjectSchema(node: Record<string, unknown>): boolean {
-  return (
-    node.type === 'object' ||
-    Boolean(node.properties) ||
-    Array.isArray(node.required) ||
-    node.additionalProperties !== undefined
-  );
-}
-
-/**
- * Add the steps property to an object schema node.
- */
-function addStepsPropertyToObject(
-  node: Record<string, unknown>,
-  stepsPropertySchema: Record<string, unknown>,
-  elsePropertySchema: Record<string, unknown> | undefined,
-  shouldRequireSteps: boolean
-): Record<string, unknown> {
-  const nodeProps = node.properties as Record<string, unknown> | undefined;
-  const updatedNode: Record<string, unknown> = {
-    ...node,
-    properties: {
-      ...(nodeProps ?? {}),
-      steps: stepsPropertySchema,
-      ...(elsePropertySchema ? { else: elsePropertySchema } : {}),
-    },
-  };
-
-  if (shouldRequireSteps) {
-    ensureRequiredProperty(updatedNode, 'steps');
-  }
-
-  ensureObjectType(updatedNode);
-
-  return updatedNode;
 }
 
 /**
@@ -1307,6 +1198,18 @@ function flattenConditionOneOf(schema: StreamlangJsonSchema): void {
     return;
   }
 
+  // Resolve $ref nodes in the anyOf array so addFilterConditionSnippets can
+  // inspect variant properties (e.g. FilterCondition emitted as $ref by Zod v4).
+  conditionDef.anyOf = (conditionDef.anyOf as Array<Record<string, unknown>>).map((variant) => {
+    if (typeof variant?.$ref === 'string') {
+      const resolved = resolveJsonPointer(schema, variant.$ref) as
+        | Record<string, unknown>
+        | undefined;
+      return resolved ? (JSON.parse(JSON.stringify(resolved)) as Record<string, unknown>) : variant;
+    }
+    return variant;
+  });
+
   addFilterConditionSnippets(conditionDef as Record<string, unknown>);
 
   const excludedProperties = new Set(['always', 'never']);
@@ -1316,6 +1219,11 @@ function flattenConditionOneOf(schema: StreamlangJsonSchema): void {
   function collect(node: unknown): void {
     if (!node || typeof node !== 'object') return;
     const nodeRecord = node as Record<string, unknown>;
+    if (typeof nodeRecord.$ref === 'string') {
+      const resolved = resolveJsonPointer(schema, nodeRecord.$ref);
+      if (resolved) collect(resolved);
+      return;
+    }
     if (nodeRecord.anyOf) {
       (nodeRecord.anyOf as unknown[]).forEach((v) => collect(v));
       return;

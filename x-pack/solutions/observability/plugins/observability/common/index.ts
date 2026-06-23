@@ -23,6 +23,7 @@ export { ElapsedTimestampTooltip } from './components/elapsed_timestamp_tooltip'
 
 export {
   enableInspectEsQueries,
+  searchExcludedDataTiers,
   maxSuggestions,
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
@@ -43,7 +44,6 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
-  apmUseUnifiedTraceWaterfall,
   enableDiagnosticMode,
 } from './ui_settings_keys';
 

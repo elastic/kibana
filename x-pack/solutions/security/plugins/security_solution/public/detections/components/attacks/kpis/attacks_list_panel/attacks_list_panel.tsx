@@ -22,16 +22,27 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { useStore } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
 import { SeverityBar } from '../../../../../entity_analytics/components/severity/severity_bar';
 import { useAttacksListData } from './use_attacks_list_data';
 import type { AttacksListItem } from './types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
+import { AttackFlyoutWrapper } from '../../../../../flyout_v2/attack/main/attack_flyout_wrapper';
+import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 
 const PAGE_SIZE = 10;
 const TABLE_WIDTH = 385;
 const TABLE_HEIGHT = 200;
+export const ATTACKS_LIST_PANEL_TEST_ID = 'attacksListPanel';
+export const ATTACKS_LIST_TABLE_TEST_ID = 'attacksListTable';
+export const ATTACKS_LIST_ATTACK_NAME_COLUMN_TEST_ID = 'attacksListAttackNameColumn';
+export const ATTACKS_LIST_ALERTS_COUNT_COLUMN_TEST_ID = 'attacksListAlertsCountColumn';
 
 const TableContainer = styled.div`
   flex: 1;
@@ -63,11 +74,14 @@ export interface AttacksListPanelProps {
 export const AttacksListPanel = React.memo<AttacksListPanelProps>(
   ({ filters, query, dataView }) => {
     const { openFlyout } = useExpandableFlyoutApi();
-    const {
-      services: { telemetry },
-    } = useKibana();
+    const { services } = useKibana();
+    const { telemetry, overlays } = services;
+    const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const store = useStore();
+    const history = useHistory();
 
-    const { items, isLoading, pageIndex, setPageIndex, pageSize, setPageSize, total } =
+    const { items, isLoading, pageIndex, setPageIndex, pageSize, setPageSize, total, refetch } =
       useAttacksListData({
         filters,
         query,
@@ -78,6 +92,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
       () => [
         {
           field: 'name',
+          'data-test-subj': ATTACKS_LIST_ATTACK_NAME_COLUMN_TEST_ID,
           name: i18n.translate(
             'xpack.securitySolution.attacksPage.attacksListPanel.attackNameColumn',
             {
@@ -88,15 +103,37 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
             <EuiLink
               className="eui-textTruncate"
               onClick={() => {
-                openFlyout({
-                  right: {
-                    id: AttackDetailsRightPanelKey,
-                    params: {
-                      attackId: item.id,
-                      indexName: dataView.getIndexPattern(),
+                if (newFlyoutSystemEnabled) {
+                  overlays.openSystemFlyout(
+                    flyoutProviders({
+                      services,
+                      store,
+                      history,
+                      children: (
+                        <AttackFlyoutWrapper
+                          attackId={item.id}
+                          indexName={dataView.getIndexPattern()}
+                          onAttackUpdated={refetch}
+                        />
+                      ),
+                    }),
+                    {
+                      ...defaultFlyoutProperties,
+                      historyKey: documentFlyoutHistoryKey,
+                      session: 'start',
+                    }
+                  );
+                } else {
+                  openFlyout({
+                    right: {
+                      id: AttackDetailsRightPanelKey,
+                      params: {
+                        attackId: item.id,
+                        indexName: dataView.getIndexPattern(),
+                      },
                     },
-                  },
-                });
+                  });
+                }
                 telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
                   id: item.id,
                   source: 'attacks_page_summary_kpi',
@@ -110,6 +147,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
         },
         {
           field: 'alertsCount',
+          'data-test-subj': ATTACKS_LIST_ALERTS_COUNT_COLUMN_TEST_ID,
           name: i18n.translate(
             'xpack.securitySolution.attacksPage.attacksListPanel.alertCountColumn',
             {
@@ -130,7 +168,18 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
           ),
         },
       ],
-      [dataView, openFlyout, telemetry]
+      [
+        dataView,
+        defaultFlyoutProperties,
+        history,
+        newFlyoutSystemEnabled,
+        openFlyout,
+        overlays,
+        refetch,
+        services,
+        store,
+        telemetry,
+      ]
     );
 
     const pagination = {
@@ -149,6 +198,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
     return (
       <EuiPanel
         hasBorder
+        data-test-subj={ATTACKS_LIST_PANEL_TEST_ID}
         style={{
           width: TABLE_WIDTH,
           height: TABLE_HEIGHT,
@@ -170,6 +220,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
             <EuiLoadingChart size="xl" />
           ) : (
             <EuiBasicTable<AttacksListItem>
+              data-test-subj={ATTACKS_LIST_TABLE_TEST_ID}
               items={items}
               columns={columns}
               pagination={pagination}

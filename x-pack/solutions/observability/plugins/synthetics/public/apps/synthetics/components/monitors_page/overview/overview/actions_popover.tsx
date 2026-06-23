@@ -39,7 +39,9 @@ import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locato
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
-import { selectOverviewState } from '../../../../state';
+import { selectOverviewView } from '../../../../state';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_monitor_urls';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -75,6 +77,7 @@ interface Props {
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
   locationId: string;
+  renderButton?: (onClick: () => void) => NonNullable<React.ReactNode>;
 }
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -107,17 +110,22 @@ export function ActionsPopover({
   iconHasPanel = true,
   iconSize = 's',
   locationId,
+  renderButton,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const locationName = useLocationName(monitor);
+  const isRemote = Boolean(monitor.remote);
+  const { space } = useKibanaSpace();
 
   const { http } = useKibana().services;
+  const locationLabel = monitor.locations[0]?.label ?? '';
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId ?? monitor.locationId,
+    locationId: locationId || monitor.locations[0]?.id || '',
     spaces: monitor.spaces,
+    remoteName: monitor.remote?.remoteName,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
 
@@ -154,7 +162,7 @@ export function ActionsPopover({
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
@@ -173,10 +181,10 @@ export function ActionsPopover({
       if (locationName) {
         dispatch(
           setFlyoutConfig({
+            locationId,
             configId: monitor.configId,
             location: locationName,
             id: monitor.configId,
-            locationId: monitor.locationId,
           })
         );
         setIsPopoverOpen(false);
@@ -190,143 +198,183 @@ export function ActionsPopover({
       filters: {
         monitor_ids: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
-        locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
+        locations: [{ label: locationLabel, value: locationId }],
         monitor_types: [],
         projects: [],
       },
       view,
     },
-    documentTitle: `${monitor.name} - ${monitor.locationLabel}`,
+    documentTitle: `${monitor.name} - ${locationLabel}`,
     objectType: i18n.translate('xpack.synthetics.overview.actions.addToDashboard.objectTypeLabel', {
       defaultMessage: 'Monitor Overview',
     }),
   });
 
+  const remoteMonitorUrl = useMemo(
+    () =>
+      createRemoteMonitorDetailUrl({
+        monitor,
+        locationId: locationId || monitor.locations[0]?.id,
+        spaceId: space?.id,
+      }),
+    [monitor, locationId, space?.id]
+  );
+
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
-  let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: actionsMenuGoToMonitorName,
-      icon: 'sortRight',
-      href: detailUrl,
-      'data-test-subj': 'actionsPopoverGoToMonitor',
-    },
-    quickInspectPopoverItem,
-    {
-      name: testInProgress ? (
-        <EuiToolTip content={TEST_SCHEDULED_LABEL}>
-          <span tabIndex={0}>{runTestManually}</span>
-        </EuiToolTip>
-      ) : (
-        <NoPermissionsTooltip
-          canUsePublicLocations={canUsePublicLocations}
-          canEditSynthetics={canEditSynthetics}
-        >
-          {runTestManually}
-        </NoPermissionsTooltip>
-      ),
-      icon: 'flask',
-      disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
-      onClick: () => {
-        dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
-        dispatch(setFlyoutConfig(null));
-        setIsPopoverOpen(false);
+
+  // For remote monitors, only show: Go to monitor (links to the local detail
+  // page with `?remoteName=<alias>`, which is CCS-aware), Quick Inspect, and
+  // View on remote cluster. All management actions are local-only.
+  let popoverItems: EuiContextMenuPanelItemDescriptor[];
+
+  if (isRemote) {
+    popoverItems = [
+      {
+        name: actionsMenuGoToMonitorName,
+        icon: 'sortRight',
+        href: detailUrl,
+        'data-test-subj': 'actionsPopoverGoToMonitor',
       },
-    },
-    {
-      name: (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
-          {actionsMenuEditMonitorName}
-        </NoPermissionsTooltip>
-      ),
-      icon: 'pencil',
-      disabled: !canEditSynthetics || !isServiceAllowed,
-      href: editUrl,
-      'data-test-subj': 'editMonitorLink',
-    },
-    {
-      name: (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
-          {actionsMenuCloneMonitorName}
-        </NoPermissionsTooltip>
-      ),
-      icon: 'copy',
-      disabled: !canEditSynthetics || !isServiceAllowed,
-      href: http?.basePath.prepend(`synthetics/add-monitor?cloneId=${monitor.configId}`),
-      'data-test-subj': 'cloneMonitorLink',
-    },
-    {
-      name: (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
-          {CREATE_SLO}
-        </NoPermissionsTooltip>
-      ),
-      icon: 'chartGauge',
-      disabled: !canEditSynthetics || !isServiceAllowed,
-      onClick: () => {
-        setIsPopoverOpen(false);
-        setIsSLOFlyoutOpen(true);
-      },
-      'data-test-subj': 'createSLOBtn',
-    },
-    {
-      name: (
-        <NoPermissionsTooltip
-          canEditSynthetics={canEditSynthetics}
-          canUsePublicLocations={canUsePublicLocations}
-        >
-          {enableLabel}
-        </NoPermissionsTooltip>
-      ),
-      icon: 'contrast',
-      disabled: !canEditSynthetics || !canUsePublicLocations,
-      onClick: () => {
-        if (status !== FETCH_STATUS.LOADING) {
-          updateMonitorEnabledState(!monitor.isEnabled);
-        }
-      },
-    },
-    {
-      name: (
-        <NoPermissionsTooltip
-          canEditSynthetics={canEditSynthetics}
-          canUsePublicLocations={canUsePublicLocations}
-        >
-          {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
-        </NoPermissionsTooltip>
-      ),
-      disabled: !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed,
-      icon: alertLoading ? (
-        <EuiLoadingSpinner size="s" />
-      ) : monitor.isStatusAlertEnabled ? (
-        'bellSlash'
-      ) : (
-        'bell'
-      ),
-      onClick: () => {
-        if (!alertLoading) {
-          updateAlertEnabledState({
-            monitor: {
-              [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
-                status: {
-                  enabled: monitor.isStatusAlertEnabled,
-                },
-              }),
+      quickInspectPopoverItem,
+      ...(remoteMonitorUrl
+        ? [
+            {
+              name: viewOnRemoteClusterName,
+              icon: 'popout' as const,
+              href: remoteMonitorUrl,
+              target: '_blank',
+              'data-test-subj': 'actionsPopoverViewOnRemoteCluster',
             },
-            configId: monitor.configId,
-            name: monitor.name,
-          });
-        }
+          ]
+        : []),
+    ];
+  } else {
+    popoverItems = [
+      {
+        name: actionsMenuGoToMonitorName,
+        icon: 'sortRight',
+        href: detailUrl,
+        'data-test-subj': 'actionsPopoverGoToMonitor',
       },
-    },
-    {
-      name: addMonitorToDashboardLabel,
-      icon: 'dashboardApp',
-      onClick: () => {
-        setIsPopoverOpen(false);
-        setDashboardAttachmentReady(true);
+      quickInspectPopoverItem,
+      {
+        name: testInProgress ? (
+          <EuiToolTip content={TEST_SCHEDULED_LABEL}>
+            <span tabIndex={0}>{runTestManually}</span>
+          </EuiToolTip>
+        ) : (
+          <NoPermissionsTooltip
+            canUsePublicLocations={canUsePublicLocations}
+            canEditSynthetics={canEditSynthetics}
+          >
+            {runTestManually}
+          </NoPermissionsTooltip>
+        ),
+        icon: 'flask',
+        disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
+        onClick: () => {
+          dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
+          dispatch(setFlyoutConfig(null));
+          setIsPopoverOpen(false);
+        },
       },
-    },
-  ];
+      {
+        name: (
+          <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+            {actionsMenuEditMonitorName}
+          </NoPermissionsTooltip>
+        ),
+        icon: 'pencil',
+        disabled: !canEditSynthetics || !isServiceAllowed,
+        href: editUrl,
+        'data-test-subj': 'editMonitorLink',
+      },
+      {
+        name: (
+          <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+            {actionsMenuCloneMonitorName}
+          </NoPermissionsTooltip>
+        ),
+        icon: 'copy',
+        disabled: !canEditSynthetics || !isServiceAllowed,
+        href: http?.basePath.prepend(`synthetics/add-monitor?cloneId=${monitor.configId}`),
+        'data-test-subj': 'cloneMonitorLink',
+      },
+      {
+        name: (
+          <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+            {CREATE_SLO}
+          </NoPermissionsTooltip>
+        ),
+        icon: 'chartGauge',
+        disabled: !canEditSynthetics || !isServiceAllowed,
+        onClick: () => {
+          setIsPopoverOpen(false);
+          setIsSLOFlyoutOpen(true);
+        },
+        'data-test-subj': 'createSLOBtn',
+      },
+      {
+        name: (
+          <NoPermissionsTooltip
+            canEditSynthetics={canEditSynthetics}
+            canUsePublicLocations={canUsePublicLocations}
+          >
+            {enableLabel}
+          </NoPermissionsTooltip>
+        ),
+        icon: 'contrast',
+        disabled: !canEditSynthetics || !canUsePublicLocations,
+        onClick: () => {
+          if (status !== FETCH_STATUS.LOADING) {
+            updateMonitorEnabledState(!monitor.isEnabled);
+          }
+        },
+      },
+      {
+        name: (
+          <NoPermissionsTooltip
+            canEditSynthetics={canEditSynthetics}
+            canUsePublicLocations={canUsePublicLocations}
+          >
+            {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
+          </NoPermissionsTooltip>
+        ),
+        disabled: !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed,
+        icon: alertLoading ? (
+          <EuiLoadingSpinner size="s" />
+        ) : monitor.isStatusAlertEnabled ? (
+          'bellSlash'
+        ) : (
+          'bell'
+        ),
+        onClick: () => {
+          if (!alertLoading) {
+            updateAlertEnabledState({
+              monitor: {
+                [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
+                  status: {
+                    enabled: monitor.isStatusAlertEnabled,
+                  },
+                }),
+              },
+              configId: monitor.configId,
+              name: monitor.name,
+            });
+          }
+        },
+      },
+      {
+        name: addMonitorToDashboardLabel,
+        icon: 'dashboardApp',
+        onClick: () => {
+          setIsPopoverOpen(false);
+          setDashboardAttachmentReady(true);
+        },
+      },
+    ];
+  }
+
   if (isInspectView) popoverItems = popoverItems.filter((i) => i !== quickInspectPopoverItem);
 
   return (
@@ -334,24 +382,32 @@ export function ActionsPopover({
       <Container boxShadow={euiShadow} position={position}>
         <EuiPopover
           button={
-            <IconPanel hasPanel={iconHasPanel}>
-              <EuiButtonIcon
-                data-test-subj="syntheticsActionsPopoverButton"
-                aria-label={openActionsMenuAria}
-                iconType="boxesVertical"
-                color="primary"
-                size={iconSize}
-                display="empty"
-                onClick={() => setIsPopoverOpen((b: boolean) => !b)}
-                title={openActionsMenuAria}
-              />
-            </IconPanel>
+            renderButton ? (
+              renderButton(() => setIsPopoverOpen((b: boolean) => !b))
+            ) : (
+              <IconPanel hasPanel={iconHasPanel}>
+                <EuiToolTip content={openActionsMenuAria} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="syntheticsActionsPopoverButton"
+                    aria-label={openActionsMenuAria}
+                    iconType="boxesVertical"
+                    color="primary"
+                    size={iconSize}
+                    display="empty"
+                    onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+                  />
+                </EuiToolTip>
+              </IconPanel>
+            )
           }
           color="lightestShade"
           isOpen={isPopoverOpen}
           closePopover={() => setIsPopoverOpen(false)}
           anchorPosition="rightUp"
           panelPaddingSize="none"
+          aria-label={i18n.translate('xpack.synthetics.actionsPopover.popoverAriaLabel', {
+            defaultMessage: 'Actions menu',
+          })}
         >
           <EuiContextMenu
             initialPanelId={0}
@@ -481,3 +537,10 @@ export const enabledFailLabel = (name: string) =>
     defaultMessage: 'Unable to update monitor "{name}".',
     values: { name },
   });
+
+const viewOnRemoteClusterName = i18n.translate(
+  'xpack.synthetics.overview.actions.viewOnRemoteCluster.name',
+  {
+    defaultMessage: 'View on remote cluster',
+  }
+);

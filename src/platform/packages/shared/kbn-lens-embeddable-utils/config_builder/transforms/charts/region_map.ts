@@ -17,12 +17,13 @@ import type {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type {
-  LensApiState,
-  RegionMapState,
+  LensApiConfig,
+  RegionMapConfig,
   LensApiBucketOperations,
-  RegionMapStateESQL,
-  RegionMapStateNoESQL,
+  RegionMapConfigESQL,
+  RegionMapConfigNoESQL,
   LensApiFieldMetricOrFormulaOperation,
 } from '../../schema';
 import type { LensAttributes } from '../../types';
@@ -53,7 +54,7 @@ function getAccessorName(type: 'metric' | 'region') {
   return `${ACCESSOR}_${type}`;
 }
 
-function buildVisualizationState(config: RegionMapState): ChoroplethChartState {
+function buildVisualizationState(config: RegionMapConfig): ChoroplethChartState {
   const layer = config;
 
   return {
@@ -72,7 +73,7 @@ function getRegionMapDataset(
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
-): RegionMapState['data_source'] {
+): RegionMapConfig['data_source'] {
   const dataSource = buildDataSourceState(
     layer,
     layerId,
@@ -91,7 +92,7 @@ function getRegionMapDataset(
 function getRegionMapMetric(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: ChoroplethChartState
-): RegionMapState['metric'] {
+): RegionMapConfig['metric'] {
   if (visualization.valueAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
@@ -107,7 +108,7 @@ function getRegionMapMetric(
 function getRegionMapRegion(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: ChoroplethChartState
-): RegionMapState['region'] {
+): RegionMapConfig['region'] {
   if (visualization.regionAccessor == null) {
     throw new Error('Region accessor is missing in the visualization state');
   }
@@ -129,7 +130,7 @@ function reverseBuildVisualizationState(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): RegionMapState {
+): RegionMapConfig {
   const dataSource = getRegionMapDataset(
     layer,
     adHocDataViews,
@@ -146,10 +147,10 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     metric,
     region,
-  } as RegionMapState;
+  } as RegionMapConfig;
 }
 
-function buildFormBasedLayer(layer: RegionMapStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: RegionMapConfigNoESQL): FormBasedPersistedState['layers'] {
   const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -165,7 +166,7 @@ function buildFormBasedLayer(layer: RegionMapStateNoESQL): FormBasedPersistedSta
   return layers;
 }
 
-function getValueColumns(layer: RegionMapStateESQL) {
+function getValueColumns(layer: RegionMapConfigESQL) {
   return [
     getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
     getValueColumn(getAccessorName('region'), layer.region),
@@ -182,10 +183,10 @@ type RegionMapAttributesWithoutFiltersAndQuery = Omit<RegionMapAttributes, 'stat
 };
 
 export function fromAPItoLensState(
-  config: RegionMapState
+  config: RegionMapConfig
 ): RegionMapAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as RegionMapStateNoESQL);
+    buildFormBasedLayer(cfg as RegionMapConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -209,12 +210,13 @@ export function fromAPItoLensState(
       visualization,
       adHocDataViews,
     },
+    version: LENS_ITEM_LATEST_VERSION,
   };
 }
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'region_map' }> {
+): Extract<LensApiConfig, { type: 'region_map' }> {
   const { state } = config;
   const visualization = state.visualization as ChoroplethChartState;
   const layers = getDatasourceLayers(state);

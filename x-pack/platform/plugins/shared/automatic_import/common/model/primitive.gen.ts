@@ -14,37 +14,51 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 /**
  * A string that does not contain only whitespace characters
  */
+export const NonEmptyString = lazySchema(() =>
+  z.string().min(1).max(100000).superRefine(isNonEmptyString)
+);
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
+
+/**
+ * A string that contains a valid ingest pipeline up to 10MiB
+ */
+export const NonEmptyIngestPipeline = lazySchema(() =>
+  z.string().min(1).max(10485760).superRefine(isNonEmptyString)
+);
+export type NonEmptyIngestPipeline = z.infer<typeof NonEmptyIngestPipeline>;
 
 /**
  * An identifier containing only alphanumeric characters and underscores
  */
+export const SafeIdentifier = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/^[a-zA-Z0-9_]+$/)
+);
 export type SafeIdentifier = z.infer<typeof SafeIdentifier>;
-export const SafeIdentifier = z
-  .string()
-  .min(1)
-  .max(255)
-  .regex(/^[a-zA-Z0-9_]+$/);
 
 /**
  * A semantic version string (e.g. 1.0.0 or 1.0.0-beta).
  */
+export const SemVer = lazySchema(() =>
+  z
+    .string()
+    .min(5)
+    .max(20)
+    .regex(/^\d+\.\d+\.\d+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$/)
+);
 export type SemVer = z.infer<typeof SemVer>;
-export const SemVer = z
-  .string()
-  .min(5)
-  .max(20)
-  .regex(/^\d+\.\d+\.\d+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$/);
 
 /**
  * A universally unique identifier
  */
+export const UUID = lazySchema(() => z.string().max(36).uuid());
 export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();

@@ -1,6 +1,17 @@
 {
-  "sha1": "957c11724392cdec3d62b2e63a3130e413f18b54",
+  "sha1": "1ccdbd5f89482c98bf9144539064cb8b60fba572",
   "tests": [
+    {
+      "id": "a9aac16ca7b74c5-fdc7ad74ecc4681",
+      "title": "Teardown Discover Enhanced tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    },
     {
       "id": "448e82090e00e69-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -42,7 +53,9 @@
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
@@ -60,7 +73,9 @@
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
@@ -156,7 +171,9 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
@@ -182,7 +199,9 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
@@ -208,7 +227,9 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",

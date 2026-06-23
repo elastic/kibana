@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceMapGraph } from './graph';
 import type { ServiceMapNode } from '../../../../common/service_map';
@@ -27,6 +27,10 @@ jest.mock('./use_keyboard_navigation', () => ({
   })),
 }));
 
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -35,26 +39,25 @@ jest.mock('@xyflow/react', () => {
       <div data-test-subj="react-flow">{children}</div>
     ),
     Background: () => <div data-test-subj="react-flow-background" />,
+    Panel: ({ children }: { children?: React.ReactNode }) => (
+      <div data-test-subj="serviceMapOptionsPanelHost">{children}</div>
+    ),
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-test-subj="serviceMapControls">{children}</div>
     ),
-    ControlButton: ({
-      children,
-      onClick,
-      'data-test-subj': dataTestSubj,
-      ...rest
-    }: {
-      children?: React.ReactNode;
-      onClick?: () => void;
-      'data-test-subj'?: string;
-    }) => (
-      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
-        {children}
-      </button>
-    ),
     useNodesState: jest.fn((initialNodes: unknown) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges: unknown) => [initialEdges, jest.fn()]),
-    useReactFlow: jest.fn(() => ({ fitView: jest.fn() })),
+    useStore: jest.fn((selector: (state: { width: number; height: number }) => unknown) =>
+      selector({ width: 1200, height: 600 })
+    ),
+    useReactFlow: jest.fn(() => ({
+      fitView: jest.fn(),
+      zoomIn: jest.fn(),
+      zoomOut: jest.fn(),
+      setCenter: jest.fn(),
+      getNodes: jest.fn(() => []),
+      getNodesBounds: jest.fn(() => ({ x: 0, y: 0, width: 0, height: 0 })),
+    })),
   };
 });
 
@@ -77,12 +80,28 @@ jest.mock('./popover', () => ({
   MapPopover: () => <div data-testid="service-map-popover" />,
 }));
 
-jest.mock('./layout', () => ({
+jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes: unknown) => nodes),
+  applyServiceMapLayout: jest.fn((nodes: unknown) => nodes),
 }));
 
 jest.mock('./service_map_minimap', () => ({
   ServiceMapMinimap: () => <div data-testid="react-flow-minimap" />,
+}));
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
 }));
 
 const createMockNode = (id: string, label: string): ServiceMapNode => ({
@@ -126,6 +145,22 @@ function ServiceMapGraphWithFullscreenState(
   );
 }
 
+const expectButtonTooltip = async (button: HTMLElement, content: string) => {
+  expect(button).toHaveAccessibleName(content);
+  expect(button).not.toHaveAttribute('title');
+
+  const tooltipAnchor = button.closest('.euiToolTipAnchor') ?? button;
+  fireEvent.mouseEnter(tooltipAnchor);
+  fireEvent.mouseOver(tooltipAnchor);
+
+  await waitFor(() => {
+    expect(screen.getByRole('tooltip')).toHaveTextContent(content);
+  });
+
+  fireEvent.mouseLeave(tooltipAnchor);
+  fireEvent.mouseOut(tooltipAnchor);
+};
+
 describe('ServiceMapGraph - Controls', () => {
   it('renders the controls container', () => {
     render(
@@ -158,14 +193,13 @@ describe('ServiceMapGraph - Controls', () => {
 
     const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
     expect(fullscreenButton).toBeInTheDocument();
-    expect(fullscreenButton).toHaveAttribute('title', 'Enter fullscreen');
+    await expectButtonTooltip(fullscreenButton, 'Enter fullscreen');
 
     await act(async () => {
       fullscreenButton.click();
     });
     await waitFor(() => {
-      expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAttribute(
-        'title',
+      expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAccessibleName(
         'Exit fullscreen (esc)'
       );
     });
@@ -179,20 +213,19 @@ describe('ServiceMapGraph - Controls', () => {
     );
 
     const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
-    expect(fullscreenButton).toHaveAttribute('title', 'Exit fullscreen (esc)');
+    await expectButtonTooltip(fullscreenButton, 'Exit fullscreen (esc)');
 
     await act(async () => {
       fullscreenButton.click();
     });
     await waitFor(() => {
-      expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAttribute(
-        'title',
+      expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAccessibleName(
         'Enter fullscreen'
       );
     });
   });
 
-  it('renders "View full service map" button when fullMapHref is provided', () => {
+  it('renders "View full service map" button when fullMapHref is provided', async () => {
     const fullMapHref = '/app/apm/service-map?rangeFrom=now-24h&rangeTo=now';
     render(
       <ReactFlowProvider>
@@ -203,7 +236,7 @@ describe('ServiceMapGraph - Controls', () => {
     const viewFullMapButton = screen.getByTestId('serviceMapViewFullMapButton');
     expect(viewFullMapButton).toBeInTheDocument();
     expect(viewFullMapButton).toHaveAttribute('href', fullMapHref);
-    expect(viewFullMapButton).toHaveAttribute('title', 'View full service map');
+    await expectButtonTooltip(viewFullMapButton, 'View full service map');
   });
 
   it('does not render "View full service map" button when fullMapHref is not provided', () => {
@@ -234,5 +267,76 @@ describe('ServiceMapGraph - Controls', () => {
 
     expect(controls).toContainElement(viewFullMapButton);
     expect(controls).toContainElement(fullscreenButton);
+  });
+
+  it('focuses find in page on Ctrl+K when focus is on document body (e.g. after load)', async () => {
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph {...defaultProps} />
+      </ReactFlowProvider>
+    );
+
+    await act(async () => {
+      document.body.focus();
+    });
+
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('serviceMapControlsSearch')).toHaveFocus();
+    });
+  });
+
+  it('expands the options panel and focuses find on Ctrl+K when the panel was collapsed', async () => {
+    render(
+      <ReactFlowProvider>
+        <ServiceMapGraph {...defaultProps} />
+      </ReactFlowProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('serviceMapHideControlsButton'));
+    });
+    expect(screen.queryByTestId('serviceMapControlsSearch')).not.toBeInTheDocument();
+
+    await act(async () => {
+      document.body.focus();
+    });
+
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('serviceMapControlsSearch')).toBeInTheDocument();
+      expect(screen.getByTestId('serviceMapControlsSearch')).toHaveFocus();
+    });
+  });
+
+  it('does not hijack Ctrl+K when focus is in an input outside the service map', async () => {
+    render(
+      <>
+        <input data-test-subj="outsideServiceMapField" aria-label="Outside field" />
+        <ReactFlowProvider>
+          <ServiceMapGraph {...defaultProps} />
+        </ReactFlowProvider>
+      </>
+    );
+
+    const outside = screen.getByTestId('outsideServiceMapField');
+
+    await act(async () => {
+      outside.focus();
+    });
+    expect(outside).toHaveFocus();
+
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    });
+
+    expect(outside).toHaveFocus();
+    expect(screen.getByTestId('serviceMapControlsSearch')).not.toHaveFocus();
   });
 });

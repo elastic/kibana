@@ -102,9 +102,14 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
 
 export const parameterHintEntityTypes = ['inference_endpoint'] as const;
 export type ParameterHintEntityType = (typeof parameterHintEntityTypes)[number];
+
+export const parameterHintKinds = ['entity', 'aggregation'] as const;
+export type ParameterHintKind = (typeof parameterHintKinds)[number];
+
 export interface ParameterHint {
-  entityType: ParameterHintEntityType;
+  entityType?: ParameterHintEntityType;
   constraints?: Record<string, string>;
+  kind?: ParameterHintKind;
 }
 
 export interface FunctionParameter {
@@ -180,6 +185,7 @@ export interface FunctionDefinition {
   type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
+  tsdbCompatible?: boolean;
   name: string;
   alias?: string[];
   description: string;
@@ -197,6 +203,7 @@ export interface FunctionFilterPredicates {
   returnTypes?: string[];
   ignored?: string[];
   allowed?: string[];
+  isTimeseriesSource?: boolean;
 }
 
 // PromQL Function Definition Types
@@ -210,6 +217,8 @@ export enum PromQLFunctionDefinitionTypes {
   OPERATOR = 'operator',
   LABEL_MATCHING_OPERATOR = 'label_matching_operator',
   SCALAR_CONVERSION = 'scalar_conversion',
+  TIME = 'time',
+  HISTOGRAM = 'histogram',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -352,6 +361,10 @@ export interface ValidationErrors {
     message: string;
     type: { parentName: string; name: string };
   };
+  expectedAggregationArgument: {
+    message: string;
+    type: { parentName: string };
+  };
   unknownAggregateFunction: {
     message: string;
     type: { type: string; value: string };
@@ -359,6 +372,10 @@ export interface ValidationErrors {
   unsupportedFieldType: {
     message: string;
     type: { field: string };
+  };
+  columnTypeConflict: {
+    message: string;
+    type: { columnName: string; types?: string };
   };
   unsupportedMode: {
     message: string;
@@ -452,15 +469,7 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  forkTooFewBranches: {
-    message: string;
-    type: {};
-  };
   forkNotAllowedWithSubqueries: {
-    message: string;
-    type: {};
-  };
-  inlineStatsNotAllowedAfterLimit: {
     message: string;
     type: {};
   };
@@ -488,16 +497,27 @@ export interface ValidationErrors {
     message: string;
     type: { type: string };
   };
+  tsdbIncompatibleFunction: {
+    message: string;
+    type: { fnName: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
+
+export type ESQLDiagnosticData = ColumnTypeConflictDiagnosticData;
+interface ColumnTypeConflictDiagnosticData {
+  columnName: string;
+  types: string[];
+}
 
 export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;
   location: ESQLLocation;
   code: string;
+  data?: ESQLDiagnosticData; // Dynamic parameters used to build quick fixes.
   errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
   underlinedWarning?: boolean;

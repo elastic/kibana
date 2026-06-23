@@ -100,7 +100,7 @@ components:
 
 
     PackId:
-      description: 'The ID of the pack you want to run, retrieve, update, or delete.'
+      description: 'The ID of the pack.'
       example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 
@@ -159,6 +159,26 @@ components:
       $ref: '#/components/schemas/ECSMapping'
       nullable: true
 
+    ECSMappingArrayItem:
+      description: 'ECS mapping item in saved-object storage format (key-value pair).'
+      type: object
+      properties:
+        key:
+          description: 'The ECS field name.'
+          type: string
+        value:
+          $ref: '#/components/schemas/ECSMappingItem'
+
+    ECSMappingArray:
+      description: 'ECS mapping in saved-object storage format (array of key-value pairs). The find and copy pack endpoints return this format. The read endpoint returns object format (ECSMapping).'
+      type: array
+      items:
+        $ref: '#/components/schemas/ECSMappingArrayItem'
+
+    ECSMappingArrayOrUndefined:
+      $ref: '#/components/schemas/ECSMappingArray'
+      nullable: true
+
     ArrayQueriesItem:
       type: object
       properties:
@@ -202,6 +222,10 @@ components:
           $ref: '#/components/schemas/RemovedOrUndefined'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
 
     ObjectQueries:
       type: object
@@ -264,3 +288,83 @@ components:
       type: object
       properties: { }
       example: { }
+
+    ScheduleType:
+      description: |
+        Discriminator for the pack's schedule mode. `interval` uses native
+        osqueryd interval scheduling (seconds). `rrule` uses osquerybeat's
+        RRULE-based recurrence scheduling. Per-query overrides MUST use the
+        same mode as the pack — cross-mode overrides are rejected with 400.
+      example: 'rrule'
+      type: string
+      enum:
+        - interval
+        - rrule
+
+    ScheduleTypeOrUndefined:
+      $ref: '#/components/schemas/ScheduleType'
+      nullable: true
+
+    RRuleScheduleConfig:
+      description: |
+        RRULE schedule configuration consumed by osquerybeat. Loose date
+        forms like `"2024-01-01"` are rejected with 400. DTSTART is NOT
+        embedded in `rrule`; the separate `start_date` field is the
+        schedule anchor.
+      type: object
+      required:
+        - rrule
+        - start_date
+      properties:
+        rrule:
+          description: |
+            Fully serialized RFC 5545 RRULE string (e.g.
+            `"FREQ=WEEKLY;BYDAY=MO,WE,FR"`). The Kibana UI writes only a
+            subset of parts — `FREQ`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`,
+            `BYMONTH` — but the server accepts and round-trips any
+            well-formed parts (other recognized parts like `BYHOUR`,
+            `BYMINUTE`, `BYSETPOS`, `WKST`, `COUNT`, `UNTIL` are preserved
+            verbatim).
+          example: 'FREQ=WEEKLY;BYDAY=MO,WE,FR'
+          type: string
+          maxLength: 2048
+        start_date:
+          description: 'RFC 3339 datetime string for the schedule''s start.'
+          example: '2024-01-01T00:00:00Z'
+          type: string
+          format: date-time
+          maxLength: 64
+        end_date:
+          description: 'Optional RFC 3339 datetime string for the schedule''s end. MUST be after `start_date`.'
+          example: '2024-12-31T23:59:59Z'
+          type: string
+          format: date-time
+          maxLength: 64
+        splay:
+          description: |
+            Optional Go duration string for splay (random execution delay),
+            e.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit
+            values only; compound durations (`"1h30m"`) are tolerated on
+            read for round-trip safety with osquerybeat's writer. Maximum
+            12 hours (43200 seconds).
+          example: '5m'
+          type: string
+          maxLength: 64
+        timeout:
+          description: 'Optional query execution timeout, in seconds. Defaults to 60 in osquerybeat when unset.'
+          example: 60
+          type: number
+
+    RRuleScheduleConfigOrUndefined:
+      $ref: '#/components/schemas/RRuleScheduleConfig'
+      nullable: true
+
+    PackInterval:
+      description: 'Pack-level interval, in seconds. Used when `schedule_type` is `interval`. Mutually exclusive with `rrule_schedule`.'
+      example: 60
+      type: integer
+      minimum: 1
+
+    PackIntervalOrUndefined:
+      $ref: '#/components/schemas/PackInterval'
+      nullable: true

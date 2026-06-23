@@ -15,11 +15,11 @@ import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
   CanExpandPanels,
+  CanIndicateRelatedChildren,
   CanPinPanels,
   HasLastSavedChildState,
   HasSections,
   HasSerializedChildState,
-  PassThroughContext,
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
@@ -92,9 +92,6 @@ export interface DashboardCreationOptions {
    */
   getInitialInput?: () => DashboardInitializationState;
 
-  /** Returns context to pass through to child embeddables. */
-  getPassThroughContext?: PassThroughContext['getPassThroughContext'];
-
   /** Returns embeddables to add to the dashboard on load. */
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
@@ -150,6 +147,7 @@ export interface DashboardCreationOptions {
  * This type combines multiple capability interfaces to provide full dashboard functionality.
  */
 export type DashboardApi = CanExpandPanels &
+  CanIndicateRelatedChildren &
   CanPinPanels &
   HasSections &
   HasAppContext &
@@ -158,7 +156,6 @@ export type DashboardApi = CanExpandPanels &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
-  PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
@@ -178,6 +175,12 @@ export type DashboardApi = CanExpandPanels &
   TrackContentfulRender &
   TracksOverlays &
   PublishesOnSave & {
+    /*
+     * Emits on any dashboard state change
+     *
+     * Recommend to debounce when subscribing
+     */
+    anyStateChange$: Observable<void>;
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
@@ -189,13 +192,14 @@ export type DashboardApi = CanExpandPanels &
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
-      grid: GridData;
+      grid?: GridData;
       serializedState: object;
     };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
+    blurredPanelIds$: PublishingSubject<string[]>;
     isEmbeddedExternally: boolean;
     isEditableByUser: boolean;
     isManaged: boolean;
@@ -234,8 +238,16 @@ export type DashboardApi = CanExpandPanels &
     changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
     createdBy?: string;
     user?: DashboardUser;
+    userActivity$: Subject<UserActivity>;
     isAccessControlEnabled?: boolean;
+
+    addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
   };
+
+type ActivityType = 'view' | 'refresh';
+export type UserActivity =
+  | { type: ActivityType; start: number; end?: undefined }
+  | { type: ActivityType; start?: undefined; end: number };
 
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
@@ -246,7 +258,6 @@ export interface DashboardInternalApi {
   publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
-  arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
 }
 
 export interface DashboardUser {

@@ -183,18 +183,19 @@ export const useListDetailsView = (exceptionListId: string) => {
   const onEditListDetails = useCallback(
     async (listDetails: ListDetails) => {
       try {
-        if (list)
-          await updateList({
-            http,
-            list: {
-              id: list.id,
-              list_id: exceptionListId,
-              type: list.type,
-              name: listDetails.name,
-              description: listDetails.description ?? '',
-              namespace_type: list.namespace_type,
-            },
-          });
+        if (!list) return;
+        const updated = await updateList({
+          http,
+          list: {
+            id: list.id,
+            list_id: exceptionListId,
+            type: list.type,
+            name: listDetails.name,
+            description: listDetails.description ?? '',
+            namespace_type: list.namespace_type,
+          },
+        });
+        setList(updated);
       } catch (error) {
         handleErrorStatus(error);
       }

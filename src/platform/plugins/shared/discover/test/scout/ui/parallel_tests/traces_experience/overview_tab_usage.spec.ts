@@ -46,7 +46,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
       await page.evaluate(() => localStorage.setItem('fullscreenWaterfallTourDismissed', 'true'));
     });
 
@@ -164,7 +164,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click waterfall preview to open expanded timeline flyout',
           async () => {
-            await flyout.traceSummary.waterfallClickArea.click();
+            await flyout.traceSummary.clickWaterfallPreview();
             await expect(flyout.waterfallFlyout.container).toBeVisible();
             await flyout.waterfallFlyout.backButton.click();
             await expect(flyout.waterfallFlyout.container).toBeHidden();
@@ -250,7 +250,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('switch back to original tab', async () => {
-          await pageObjects.discover.navigateToTabByName('Untitled');
+          await pageObjects.unifiedTabs.navigateToTabByName('Untitled');
         });
 
         await spaceTest.step(
@@ -335,7 +335,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('switch back to original tab', async () => {
-          await pageObjects.discover.navigateToTabByName('Untitled');
+          await pageObjects.unifiedTabs.navigateToTabByName('Untitled');
         });
 
         await spaceTest.step(
@@ -350,7 +350,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('switch back to original tab', async () => {
-          await pageObjects.discover.navigateToTabByName('Untitled');
+          await pageObjects.unifiedTabs.navigateToTabByName('Untitled');
         });
 
         await spaceTest.step(
@@ -365,7 +365,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('switch back to original tab', async () => {
-          await pageObjects.discover.navigateToTabByName('Untitled');
+          await pageObjects.unifiedTabs.navigateToTabByName('Untitled');
         });
 
         await spaceTest.step(

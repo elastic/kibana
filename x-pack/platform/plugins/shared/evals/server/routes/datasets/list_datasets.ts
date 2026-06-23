@@ -10,9 +10,9 @@ import {
   EVALS_DATASETS_URL,
   GetEvaluationDatasetsRequestQuery,
   INTERNAL_API_ACCESS,
-  buildRouteValidationWithZod,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   forwardToRemoteKibana,
@@ -32,7 +32,7 @@ export const registerListDatasetsRoute = ({
       path: EVALS_DATASETS_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'List evaluation datasets',
     })
@@ -77,10 +77,8 @@ export const registerListDatasetsRoute = ({
           }
 
           const { page, per_page: perPage } = request.query;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
           const datasets = await datasetClient.list({ page, perPage });
 
           return response.ok({

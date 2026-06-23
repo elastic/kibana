@@ -8,11 +8,11 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { datatableStateSchema } from '../../schema';
-import type { DatatableState } from '../../schema';
+
+import type { DatatableConfig } from '../../schema';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
-import { validateAPIConverter, validateConverter } from '../validate';
+import { validator } from '../utils/validator';
 import {
   singleMetricDatatableAttributes,
   singleMetricRowSplitDatatableAttributes,
@@ -47,105 +47,103 @@ import {
 } from './lens_api_config_esql.mock';
 
 describe('Datatable', () => {
-  describe('validateConverter', () => {
+  describe('state transform validation', () => {
     it('should convert a datatable chart with single metric column', () => {
-      validateConverter(singleMetricDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(singleMetricDatatableAttributes);
     });
 
     it('should convert a datatable chart with single metric, row, split by columns', () => {
-      validateConverter(singleMetricRowSplitDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(singleMetricRowSplitDatatableAttributes);
     });
 
     it('should convert a datatable chart with multiple metrics, rows, split by columns', () => {
-      validateConverter(multiMetricRowSplitDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(multiMetricRowSplitDatatableAttributes);
     });
 
     it('should convert a datatable chart with full config', () => {
-      validateConverter(fullConfigDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(fullConfigDatatableAttributes);
     });
 
     it('should convert a datatable chart sorted by a transposed metric column', () => {
-      validateConverter(sortedByTransposedMetricColumnDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(sortedByTransposedMetricColumnDatatableAttributes);
     });
 
     it('should convert a datatable chart sorted by a row', () => {
-      validateConverter(sortedByRowDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(sortedByRowDatatableAttributes);
     });
 
     it('should convert an ESQL datatable chart with single metric column', () => {
-      validateConverter(singleMetricESQLDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(singleMetricESQLDatatableAttributes);
     });
 
     it('should convert an ESQL datatable chart with single metric, row, split by columns', () => {
-      validateConverter(singleMetricRowSplitESQLDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(singleMetricRowSplitESQLDatatableAttributes);
     });
 
     it('should convert an ESQL datatable chart with multiple metrics, rows, split by columns', () => {
-      validateConverter(multipleMetricRowSplitESQLDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(multipleMetricRowSplitESQLDatatableAttributes);
     });
 
     it('should convert an ESQL datatable chart with full config', () => {
-      validateConverter(fullConfigESQLDatatableAttributes, datatableStateSchema);
+      validator.data_table.fromState(fullConfigESQLDatatableAttributes);
     });
 
     it('should convert an ESQL datatable chart sorted by a transposed metric column', () => {
-      validateConverter(
-        sortedByTransposedMetricColumnESQLDatatableAttributes,
-        datatableStateSchema
-      );
+      validator.data_table.fromState(sortedByTransposedMetricColumnESQLDatatableAttributes);
     });
 
     it('should convert a default color by value palette', () => {
-      validateConverter(defaultColorByValueAttributes, datatableStateSchema);
+      validator.data_table.fromState(defaultColorByValueAttributes);
     });
 
     it('should convert a selector color by value palette', () => {
-      validateConverter(selectorColorByValueAttributes, datatableStateSchema);
+      validator.data_table.fromState(selectorColorByValueAttributes);
     });
   });
-  describe('validateAPIConverter ', () => {
+
+  describe('api transform validation', () => {
     it('should convert a datatable chart with single metric column', () => {
-      validateAPIConverter(singleMetricDatatableWithAdhocDataView, datatableStateSchema);
+      validator.data_table.fromApi(singleMetricDatatableWithAdhocDataView);
     });
 
     it('should convert a datatable chart with multiple metrics, rows, split by columns', () => {
-      validateAPIConverter(multiMetricRowSplitByDatatableWithAdhocDataView, datatableStateSchema);
+      validator.data_table.fromApi(multiMetricRowSplitByDatatableWithAdhocDataView);
     });
 
     it('should convert a datatable chart with full config and ad hoc dataView', () => {
-      validateAPIConverter(fullConfigDatatableWithAdhocDataView, datatableStateSchema);
+      validator.data_table.fromApi(fullConfigDatatableWithAdhocDataView);
     });
 
     it('should convert a datatable chart with full config and dataView', () => {
-      validateAPIConverter(fullConfigDatatableWithDataView, datatableStateSchema);
+      validator.data_table.fromApi(fullConfigDatatableWithDataView);
     });
 
     it('should convert a datatable chart sorted by a transposed column', () => {
-      validateAPIConverter(sortedByPivotedMetricColumnDatatable, datatableStateSchema);
+      validator.data_table.fromApi(sortedByPivotedMetricColumnDatatable);
     });
 
     it('should convert a datatable chart sorted by a row column', () => {
-      validateAPIConverter(sortedByRowDatatable, datatableStateSchema);
+      validator.data_table.fromApi(sortedByRowDatatable);
     });
 
     it('should convert an ESQL datatable chart with single metric column', () => {
-      validateAPIConverter(singleMetricESQLDatatable, datatableStateSchema);
+      validator.data_table.fromApi(singleMetricESQLDatatable);
     });
 
     it('should convert an ESQL datatable chart with multiple metrics, rows, split by columns', () => {
-      validateAPIConverter(multipleMetricRowSplitESQLDatatable, datatableStateSchema);
+      validator.data_table.fromApi(multipleMetricRowSplitESQLDatatable);
     });
 
     it('should convert an ESQL datatable chart with full config', () => {
-      validateAPIConverter(fullConfigESQLDatatable, datatableStateSchema);
+      validator.data_table.fromApi(fullConfigESQLDatatable);
     });
 
     it('should convert an ESQL datatable chart sorted by a transposed column', () => {
-      validateAPIConverter(sortedByPivotedMetricColumnESQLDatatable, datatableStateSchema);
+      validator.data_table.fromApi(sortedByPivotedMetricColumnESQLDatatable);
     });
 
     it('should convert an ESQL datatable chart sorted by a row column', () => {
-      validateAPIConverter(sortedByRowColumnESQLDatatable, datatableStateSchema);
+      validator.data_table.fromApi(sortedByRowColumnESQLDatatable);
     });
   });
 
@@ -172,11 +170,11 @@ describe('Datatable', () => {
             apply_color_to: 'value',
           },
         ],
-      } satisfies DatatableState;
+      } satisfies DatatableConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as DatatableState;
+      const apiOutput = builder.toAPIFormat(lensState) as DatatableConfig;
 
       expect(apiOutput.metrics?.[0].color).toEqual(AUTO_COLOR);
       expect(apiOutput.metrics?.[0].apply_color_to).toBe('value');
@@ -194,11 +192,11 @@ describe('Datatable', () => {
             apply_color_to: 'background',
           },
         ],
-      } satisfies DatatableState;
+      } satisfies DatatableConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as DatatableState;
+      const apiOutput = builder.toAPIFormat(lensState) as DatatableConfig;
 
       expect(apiOutput.rows?.[0].color).toEqual(AUTO_COLOR);
       expect(apiOutput.rows?.[0].apply_color_to).toBe('background');
@@ -213,11 +211,11 @@ describe('Datatable', () => {
             empty_as_null: false,
           },
         ],
-      } satisfies DatatableState;
+      } satisfies DatatableConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as DatatableState;
+      const apiOutput = builder.toAPIFormat(lensState) as DatatableConfig;
 
       expect(apiOutput.metrics?.[0].color).not.toBeDefined();
       expect(apiOutput.metrics?.[0].apply_color_to).not.toBeDefined();

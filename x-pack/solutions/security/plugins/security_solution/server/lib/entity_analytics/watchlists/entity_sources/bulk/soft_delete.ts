@@ -11,6 +11,7 @@ import type { EntityType } from '@kbn/entity-store/common';
 import type { WatchlistsByEuid } from '../../entities/service';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
 import { removeWatchlistAttributeFromStore } from '../sync/entity_store_sync';
+import { extractEuidFromDocId } from '../../entities/utils';
 
 export interface StaleEntity {
   docId: string;
@@ -100,7 +101,7 @@ export const applyBulkRemoveSource = async ({
 
   const chunkSize = 500;
   const buildOps = bulkRemoveSourceOperationsFactory(logger);
-  const hardDeletedEuids: string[] = [];
+  const hardDeletedDocIds: string[] = [];
 
   for (let start = 0; start < staleEntities.length; start += chunkSize) {
     const chunk = staleEntities.slice(start, start + chunkSize);
@@ -116,21 +117,24 @@ export const applyBulkRemoveSource = async ({
         const item = resp.items[i];
         const result = item?.update?.result;
         if (result === 'deleted') {
-          hardDeletedEuids.push(chunk[i].docId);
+          hardDeletedDocIds.push(chunk[i].docId);
         }
       }
     }
   }
 
-  if (hardDeletedEuids.length > 0) {
+  if (hardDeletedDocIds.length > 0) {
     await removeWatchlistAttributeFromStore({
       crudClient,
       logger,
-      entityRefs: hardDeletedEuids.map((euid) => ({
-        euid,
-        type: euid.split(':')[0] as EntityType,
-        currentWatchlists: watchlistsByEuid.get(euid),
-      })),
+      entityRefs: hardDeletedDocIds.map((docId) => {
+        const euid = extractEuidFromDocId(docId);
+        return {
+          euid,
+          type: euid.split(':')[0] as EntityType,
+          currentWatchlists: watchlistsByEuid.get(euid),
+        };
+      }),
       watchlistId: watchlist.id,
     });
   }
