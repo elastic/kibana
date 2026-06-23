@@ -396,7 +396,7 @@ describe('generateOpenApiDocument', () => {
           { title: 'test', baseUrl: 'https://test.oas', version: '99.99.99' }
         );
 
-      it('drops extension keys when extends() inherits meta.id from the base', async () => {
+      it('throws when extends() inherits meta.id from the base', async () => {
         const base = schema.object(
           { id: schema.string(), success: schema.boolean() },
           { meta: { id: 'package_policy_status_response' } }
@@ -410,21 +410,9 @@ describe('generateOpenApiDocument', () => {
           output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         });
 
-        const oas = await buildOas(base, extended);
-        const component = get(oas, ['components', 'schemas', 'package_policy_status_response']) as
-          | { properties?: Record<string, unknown> }
-          | undefined;
-
-        // Today, the bare base wins (registered last) and the extension keys
-        // are silently lost. This assertion documents the buggy behaviour so
-        // any future improvement that fixes it (e.g. config-schema no longer
-        // inheriting meta.id, or the OAS bundler detecting collisions) will
-        // surface here as a deliberate update rather than an accidental
-        // regression.
-        expect(component?.properties).toEqual({
-          id: { type: 'string' },
-          success: { type: 'boolean' },
-        });
+        await expect(buildOas(base, extended)).rejects.toThrowError(
+          /OAS shared schema collision for id "package_policy_status_response"/
+        );
       });
 
       it('preserves all keys when the extension declares a distinct meta.id', async () => {
