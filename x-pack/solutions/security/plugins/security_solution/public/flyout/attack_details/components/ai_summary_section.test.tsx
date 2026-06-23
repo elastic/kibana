@@ -57,9 +57,6 @@ describe('AISummarySection (legacy bridge)', () => {
 
   it('passes the built hit to the v2 component', () => {
     render(<AISummarySection />);
-    expect(screen.getByTestId('v2-ai-summary-section')).toHaveAttribute(
-      'data-hit-id',
-      'attack-1'
-    );
+    expect(screen.getByTestId('v2-ai-summary-section')).toHaveAttribute('data-hit-id', 'attack-1');
   });
 });

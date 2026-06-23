@@ -40,14 +40,9 @@ jest.mock('../../../shared/components/expandable_section', () => ({
   ),
 }));
 
-jest.mock(
-  '../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
-  () => ({
-    AttackDiscoveryMarkdownFormatter: ({ markdown }: { markdown: string }) => (
-      <div>{markdown}</div>
-    ),
-  })
-);
+jest.mock('../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({
+  AttackDiscoveryMarkdownFormatter: ({ markdown }: { markdown: string }) => <div>{markdown}</div>,
+}));
 
 const mockedUseExpandSection = jest.mocked(useExpandSection);
 

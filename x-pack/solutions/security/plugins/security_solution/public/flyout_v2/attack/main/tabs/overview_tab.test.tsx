@@ -41,22 +41,21 @@ describe('<OverviewTab />', () => {
   });
 
   it('renders AISummarySection', () => {
-    render(
-      <OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
-    );
+    render(<OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />);
     expect(screen.getByTestId('mock-ai-summary-section')).toBeInTheDocument();
   });
 
   it('renders the overview tab container', () => {
-    render(
-      <OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
-    );
+    render(<OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />);
     expect(screen.getByTestId('attack-flyout-overview-tab')).toBeInTheDocument();
   });
 
   it('passes hit to AISummarySection', () => {
     const hit = buildHit();
     render(<OverviewTab hit={hit} attack={mockAttack} onAttackUpdated={jest.fn()} />);
-    expect(screen.getByTestId('mock-ai-summary-section')).toHaveAttribute('data-hit-id', 'attack-1');
+    expect(screen.getByTestId('mock-ai-summary-section')).toHaveAttribute(
+      'data-hit-id',
+      'attack-1'
+    );
   });
 });
