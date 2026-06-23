@@ -14,6 +14,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@kbn/react-query';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import {
   EXECUTION_TABLE_SORT_FIELD_MAP,
   type ExecutionTableSortOrder,
@@ -23,8 +24,6 @@ import {
   getWorkflowExecutionsFetchErrorMessage,
 } from './workflow_executions_search_query';
 import { useKibana } from '../../hooks/use_kibana';
-
-const WORKFLOWS_EXECUTIONS_API_VERSION = '2023-10-31';
 
 export interface UseWorkflowExecutionsSearchParams {
   dataView: DataView;
@@ -55,7 +54,8 @@ export const useWorkflowExecutionsSearch = ({
   sort,
   enabled = true,
 }: UseWorkflowExecutionsSearchParams) => {
-  const { http, uiSettings } = useKibana().services;
+  const { uiSettings } = useKibana().services;
+  const api = useWorkflowsApi();
   const timeField = dataView.timeFieldName ?? 'startedAt';
 
   const searchFilters = useMemo(
@@ -98,15 +98,12 @@ export const useWorkflowExecutionsSearch = ({
       esQuery,
     ],
     queryFn: () =>
-      http.get<WorkflowExecutionListDto>('/api/workflows/executions', {
-        version: WORKFLOWS_EXECUTIONS_API_VERSION,
-        query: {
-          query: JSON.stringify(esQuery),
-          from: pageIndex * pageSize,
-          size: pageSize,
-          sort: JSON.stringify(sortParam),
-          trackTotalHits: true,
-        },
+      api.searchExecutions({
+        query: JSON.stringify(esQuery),
+        from: pageIndex * pageSize,
+        size: pageSize,
+        sort: JSON.stringify(sortParam),
+        trackTotalHits: true,
       }),
     enabled,
     retry: false,

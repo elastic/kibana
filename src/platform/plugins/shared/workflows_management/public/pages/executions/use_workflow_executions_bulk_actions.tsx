@@ -130,6 +130,8 @@ export const useWorkflowExecutionsBulkActions = ({
         return;
       }
 
+      // TODO: replace with backend bulk re-run API
+      // https://github.com/elastic/security-team/issues/17909
       const results = await Promise.allSettled(
         executionsToRerun.map(async ({ executionId, workflowId }) => {
           const { context } = await api.getExecution(executionId);

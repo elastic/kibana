@@ -60,14 +60,9 @@ const numberField = (name: string): FieldSpec => ({
   scripted: false,
 });
 
-export const WORKFLOW_EXECUTIONS_VIRTUAL_COLUMN_FIELD_SPECS: Record<string, FieldSpec> = {
-  workflow: keywordField('workflow'),
-  tags: keywordField('tags'),
-  triggers: keywordField('triggers'),
-};
-
+// Table column ids `workflow`, `tags`, and `triggers` are UI-only. Use workflowId,
+// triggeredBy, and EXECUTION_TABLE_SORT_FIELD_MAP for query/sort; tags are not indexed.
 export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
-  ...WORKFLOW_EXECUTIONS_VIRTUAL_COLUMN_FIELD_SPECS,
   startedAt: dateField('startedAt'),
   createdAt: dateField('createdAt'),
   finishedAt: dateField('finishedAt'),
