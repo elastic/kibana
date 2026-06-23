@@ -346,7 +346,12 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
       <div
         css={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
       >
-        <EuiIcon type={getSpanIcon(icon) ?? icon} size="l" color={color ?? 'primary'} />
+        <EuiIcon
+          type={getSpanIcon(icon) ?? icon}
+          size="l"
+          color={color ?? 'primary'}
+          aria-hidden={true}
+        />
       </div>
     </foreignObject>
   );

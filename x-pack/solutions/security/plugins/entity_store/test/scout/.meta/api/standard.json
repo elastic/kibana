@@ -1,5 +1,5 @@
 {
-  "sha1": "24a69e7014e8283ef4484248bd373aba9cdd149a",
+  "sha1": "1214f62326f5473d6221033e3a9dbdf66df51c3a",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -1741,7 +1741,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_broken_mapping.spec.ts",
-        "line": 323,
+        "line": 401,
+        "column": 10
+      }
+    },
+    {
+      "id": "5384aa0c0712e1f-bbd3312f425bf1f",
+      "title": "Entity Store logs extraction broken mapping should collect new field values on subsequent extractions when entity already exists and field has multi-field sub-fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 446,
         "column": 10
       }
     },
@@ -1757,7 +1773,39 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_broken_mapping.spec.ts",
-        "line": 368,
+        "line": 534,
+        "column": 10
+      }
+    },
+    {
+      "id": "5384aa0c0712e1f-64fa84ccac38380",
+      "title": "Entity Store logs extraction broken mapping should extract hosts successfully when timestamp is date_nanos (lifecycle COALESCE datetime/date_nanos type fix)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 582,
+        "column": 10
+      }
+    },
+    {
+      "id": "5384aa0c0712e1f-3a88530356b96b0",
+      "title": "Entity Store logs extraction broken mapping should extract service successfully when service.name is mapped as long (triggers castField ambiguity fix)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 699,
         "column": 10
       }
     },

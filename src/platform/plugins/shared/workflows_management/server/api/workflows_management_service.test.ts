@@ -4672,6 +4672,7 @@ steps:
 
     it("should unschedule tasks per page with only that page's disabled IDs", async () => {
       const mockTaskScheduler = {
+        bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
         unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
         scheduleWorkflowTask: jest.fn(),
       };
@@ -4706,17 +4707,21 @@ steps:
 
       await service.disableAllWorkflows();
 
-      expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledTimes(1002);
+      expect(mockTaskScheduler.bulkUnscheduleWorkflowTasks).toHaveBeenCalledTimes(2);
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
 
-      const page1Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(0, 1000);
-      const page2Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(1000);
-
-      expect(page1Calls.map((c: any) => c[0])).toEqual(page1Hits.map((h) => h._id));
-      expect(page2Calls.map((c: any) => c[0])).toEqual(['wf-1000', 'wf-1001']);
+      expect(mockTaskScheduler.bulkUnscheduleWorkflowTasks.mock.calls[0][0]).toEqual(
+        page1Hits.map((h) => h._id)
+      );
+      expect(mockTaskScheduler.bulkUnscheduleWorkflowTasks.mock.calls[1][0]).toEqual([
+        'wf-1000',
+        'wf-1001',
+      ]);
     });
 
     it('should not call unschedule when no workflows were disabled', async () => {
       const mockTaskScheduler = {
+        bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
         unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
         scheduleWorkflowTask: jest.fn(),
       };
@@ -4728,6 +4733,7 @@ steps:
 
       await service.disableAllWorkflows();
 
+      expect(mockTaskScheduler.bulkUnscheduleWorkflowTasks).not.toHaveBeenCalled();
       expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     });
   });

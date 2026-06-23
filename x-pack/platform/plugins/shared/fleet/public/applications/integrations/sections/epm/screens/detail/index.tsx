@@ -49,7 +49,6 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
-import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
@@ -64,7 +63,6 @@ import { PermissionsError } from '../../../../layouts';
 import { wrapTitleWithDeprecated } from '../../components/utils';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
-import { useIsFirstTimeAgentUserQuery } from './hooks';
 
 import { getInstallPkgRouteOptions } from './utils';
 import {
@@ -163,7 +161,6 @@ export function Detail() {
   const userCanInstallPackages = canInstallPackages && permissionCheck?.success;
 
   const services = useStartServices();
-  const isCloud = !!services?.cloud?.cloudId;
   const agentPolicyIdFromContext = getAgentPolicyId();
   // edit readme state
 
@@ -230,38 +227,58 @@ export function Detail() {
     }
   );
 
-  const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
-  const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
+  // The no-version endpoint returns the installed version when the package is installed,
+  // not the latest available. Use packageInfo.latestVersion (always registry-sourced) as
+  // the primary source for both GA and prerelease latest versions.
 
-  // fetch latest GA version (prerelease=false)
-  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(pkgName, '', {
-    prerelease: false,
-  });
+  // When prerelease is disabled, packageInfo.latestVersion is the latest GA.
+  // When prerelease is enabled and a newer prerelease exists, packageInfo.latestVersion
+  // is that prerelease — fall back to the GA query's latestVersion in that case.
+  // Both queries use a specific version (pkgVersion from the URL) so the server returns
+  // registry data rather than the installed version.
+  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    { prerelease: false },
+    { enabled: Boolean(pkgVersion), refetchOnMount: 'always' }
+  );
 
-  useEffect(() => {
-    const pkg = packageInfoLatestGAData?.item;
-    const isGAVersion = pkg && !isPackagePrerelease(pkg.version);
-    if (isGAVersion) {
-      setLatestGAVersion(pkg.version);
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    { prerelease: true },
+    { enabled: Boolean(pkgVersion), refetchOnMount: 'always' }
+  );
+
+  const latestGAVersion = useMemo(() => {
+    if (packageInfo?.latestVersion && !isPackagePrerelease(packageInfo.latestVersion)) {
+      return packageInfo.latestVersion;
     }
-  }, [packageInfoLatestGAData?.item]);
+    // packageInfo.latestVersion is a prerelease (prerelease enabled + newer prerelease exists):
+    // use the GA query's latestVersion as fallback.
+    const ver = packageInfoLatestGAData?.item?.latestVersion;
+    if (ver && !isPackagePrerelease(ver)) {
+      return ver;
+    }
+    return undefined;
+  }, [packageInfo?.latestVersion, packageInfoLatestGAData?.item?.latestVersion]);
 
-  // fetch latest Prerelease version (prerelease=true)
-  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
-    prerelease: true,
-  });
-
-  useEffect(() => {
-    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
-  }, [packageInfoLatestPrereleaseData?.item.version]);
-
-  const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUserQuery();
+  const latestPrereleaseVersion = useMemo(() => {
+    const ver = packageInfoLatestPrereleaseData?.item?.latestVersion;
+    if (ver && isPackagePrerelease(ver)) {
+      return ver;
+    }
+    return undefined;
+  }, [packageInfoLatestPrereleaseData?.item?.latestVersion]);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
 
   useEffect(() => {
+    if (oldPackageInstallStatus === 'installed' && packageInstallStatus === 'not_installed') {
+      setOldPackageStatus(packageInstallStatus);
+      refetchPackageInfo();
+    }
     if (packageInstallStatus === 'not_installed') {
       setOldPackageStatus(packageInstallStatus);
     }
@@ -272,10 +289,7 @@ export function Detail() {
   }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
   const isLoading =
-    packageInfoLoading ||
-    isPermissionCheckLoading ||
-    firstTimeUserLoading ||
-    !packageInfoIsFetchedAfterMount;
+    packageInfoLoading || isPermissionCheckLoading || !packageInfoIsFetchedAfterMount;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
@@ -443,21 +457,13 @@ export function Detail() {
         integration ?? undefined
       );
 
-      const isAgentlessByDefault =
-        agentlessStatus.isAgentless &&
-        (isOnlyAgentlessIntegration(packageInfo ?? undefined, integration ?? undefined) ||
-          agentlessStatus.isDefaultDeploymentMode);
-
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
-        isCloud,
-        isFirstTimeAgentUser,
         pkgkey,
         prerelease,
         isAgentlessIntegration: agentlessStatus.isAgentless,
-        isAgentlessByDefault,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -488,8 +494,6 @@ export function Detail() {
       hash,
       agentPolicyIdFromContext,
       integration,
-      isCloud,
-      isFirstTimeAgentUser,
       pkgkey,
       prerelease,
       getAgentlessStatusForPackage,
@@ -500,30 +504,34 @@ export function Detail() {
     ]
   );
 
-  const showVersionSelect = useMemo(
-    () =>
-      latestGAVersion &&
-      latestPrereleaseVersion &&
-      latestGAVersion !== latestPrereleaseVersion &&
-      (!packageInfo?.version ||
-        packageInfo.version === latestGAVersion ||
-        packageInfo.version === latestPrereleaseVersion),
-    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
-  );
+  const installedVersion =
+    packageInfo && 'installationInfo' in packageInfo
+      ? packageInfo.installationInfo?.version
+      : undefined;
 
-  const versionOptions = useMemo(
-    () => [
-      {
-        value: latestPrereleaseVersion,
-        text: latestPrereleaseVersion,
-      },
-      {
-        value: latestGAVersion,
-        text: latestGAVersion,
-      },
-    ],
-    [latestPrereleaseVersion, latestGAVersion]
-  );
+  const versionOptions = useMemo(() => {
+    const options: Array<{ value: string; text: string }> = [];
+    if (latestPrereleaseVersion && latestPrereleaseVersion !== latestGAVersion) {
+      options.push({ value: latestPrereleaseVersion, text: latestPrereleaseVersion });
+    }
+    if (latestGAVersion) {
+      options.push({ value: latestGAVersion, text: latestGAVersion });
+    }
+    if (
+      installedVersion &&
+      installedVersion !== latestGAVersion &&
+      installedVersion !== latestPrereleaseVersion
+    ) {
+      options.push({ value: installedVersion, text: installedVersion });
+    }
+    // Include the currently viewed version if it isn't already listed (e.g. old pinned URL)
+    if (packageInfo?.version && !options.some((o) => o.value === packageInfo.version)) {
+      options.push({ value: packageInfo.version, text: packageInfo.version });
+    }
+    return options;
+  }, [latestPrereleaseVersion, latestGAVersion, installedVersion, packageInfo?.version]);
+
+  const showVersionSelect = Boolean(latestGAVersion) && versionOptions.length > 1;
 
   const versionLabel = i18n.translate('xpack.fleet.epm.versionLabel', {
     defaultMessage: 'Version',
@@ -549,7 +557,7 @@ export function Detail() {
               {
                 label: showVersionSelect ? undefined : versionLabel,
                 content: (
-                  <EuiFlexGroup gutterSize="s">
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem>
                       {showVersionSelect ? (
                         <EuiSelect

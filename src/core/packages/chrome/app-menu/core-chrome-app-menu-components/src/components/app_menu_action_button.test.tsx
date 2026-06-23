@@ -135,7 +135,6 @@ describe('AppMenuActionButton', () => {
   });
 
   it('should not call secondary run when split button secondary is disabled', async () => {
-    const user = userEvent.setup();
     const splitButtonPropsDisabled = {
       ...splitButtonProps,
       isSecondaryButtonDisabled: true,
@@ -149,7 +148,7 @@ describe('AppMenuActionButton', () => {
       />
     );
 
-    await user.click(screen.getByLabelText('More options'));
+    expect(screen.getByLabelText('More options')).toBeDisabled();
 
     expect(splitButtonProps.run).not.toHaveBeenCalled();
   });

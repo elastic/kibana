@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpServiceSetup, RequestHandlerContext } from '@kbn/core/server';
+import type { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { registerCreateRoute } from './create';
@@ -17,7 +17,11 @@ import { registerSearchRoute } from './search';
 import { registerReadRoute } from './read';
 import { registerSanitizeRoute } from './sanitize';
 
-export function registerRoutes(http: HttpServiceSetup, usageCounter?: UsageCounter) {
+export function registerRoutes(
+  http: HttpServiceSetup,
+  usageCounter: UsageCounter | undefined,
+  logger: Logger
+) {
   const { versioned: versionedRouter } = http.createRouter<RequestHandlerContext>();
 
   //
@@ -25,12 +29,12 @@ export function registerRoutes(http: HttpServiceSetup, usageCounter?: UsageCount
   // Only allows panel.type value with registered embeddable schema
   // Validate panel.config at route level
   //
-  registerCreateRoute(versionedRouter, usageCounter, false);
-  registerReadRoute(versionedRouter, usageCounter, false);
-  registerUpdateRoute(versionedRouter, usageCounter, false);
-  registerDeleteRoute(versionedRouter, usageCounter);
-  registerSearchRoute(versionedRouter, usageCounter);
-  registerSanitizeRoute(versionedRouter);
+  registerCreateRoute(versionedRouter, usageCounter, false, logger);
+  registerReadRoute(versionedRouter, usageCounter, false, logger);
+  registerUpdateRoute(versionedRouter, usageCounter, false, logger);
+  registerDeleteRoute(versionedRouter, usageCounter, logger);
+  registerSearchRoute(versionedRouter, usageCounter, logger);
+  registerSanitizeRoute(versionedRouter, logger);
 
   //
   // Dashboard application specific routes
@@ -40,7 +44,7 @@ export function registerRoutes(http: HttpServiceSetup, usageCounter?: UsageCount
   //
   // TODO remove these routes when all embeddable schemas are registered
   //
-  registerCreateRoute(versionedRouter, undefined, true);
-  registerReadRoute(versionedRouter, undefined, true);
-  registerUpdateRoute(versionedRouter, undefined, true);
+  registerCreateRoute(versionedRouter, undefined, true, logger);
+  registerReadRoute(versionedRouter, undefined, true, logger);
+  registerUpdateRoute(versionedRouter, undefined, true, logger);
 }
