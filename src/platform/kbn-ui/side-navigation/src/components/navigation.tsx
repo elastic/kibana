@@ -184,10 +184,14 @@ export const Navigation = ({
     setWidth,
   });
 
-  // Create the collapse button if a toggle callback is provided or if the navigation is not forced to be collapsed (e.g. on mobile)
-  const collapseButton =
+  // Create the collapse button if a toggle callback is provided and the navigation is not forced to be collapsed (e.g. on mobile)
+  const renderCollapseButton = (excludeFromRovingFocus = false) =>
     onToggleCollapsed && !forcedCollapsed ? (
-      <SideNavCollapseButton isCollapsed={isCollapsed} toggle={onToggleCollapsed} />
+      <SideNavCollapseButton
+        excludeFromRovingFocus={excludeFromRovingFocus}
+        isCollapsed={isCollapsedProp}
+        toggle={onToggleCollapsed}
+      />
     ) : null;
 
   return (
@@ -245,6 +249,7 @@ export const Navigation = ({
                         title={item.label}
                         badgeType={item.badgeType}
                         isNew={getIsNewSecondary(item.id)}
+                        collapseButton={renderCollapseButton(true)}
                       >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
@@ -395,6 +400,7 @@ export const Navigation = ({
                               <SideNav.NestedSecondaryMenu.Header
                                 title={item.label}
                                 aria-describedby={panelNavigationInstructionsId}
+                                collapseButton={renderCollapseButton(true)}
                               />
                               {item.sections?.map((section) => (
                                 <SideNav.NestedSecondaryMenu.Section
@@ -431,7 +437,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer hidePrimaryLabels={hidePrimaryLabels} collapseButton={collapseButton}>
+        <SideNav.Footer hidePrimaryLabels={hidePrimaryLabels}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
@@ -464,6 +470,7 @@ export const Navigation = ({
                         title={item.label}
                         badgeType={item.badgeType}
                         isNew={getIsNewSecondary(item.id)}
+                        collapseButton={renderCollapseButton(true)}
                       >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
@@ -535,6 +542,7 @@ export const Navigation = ({
                 isPanel
                 title={renderedOpenerNode.label}
                 isNew={getIsNewSecondary(renderedOpenerNode.id)}
+                collapseButton={renderCollapseButton()}
               >
                 {renderedOpenerNode.sections?.map((section, sectionIndex) => (
                   <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
