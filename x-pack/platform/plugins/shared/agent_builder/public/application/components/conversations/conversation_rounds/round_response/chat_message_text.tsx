@@ -15,7 +15,6 @@ import {
   EuiTableHeaderCell,
   EuiMarkdownFormat,
   EuiSpacer,
-  EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
@@ -235,15 +234,14 @@ export function ChatMessageText({
 
   return (
     <>
-      <EuiText size="m" className={containerClassName}>
-        <EuiMarkdownFormat
-          textSize="m"
-          parsingPluginList={parsingPluginList}
-          processingPluginList={processingPluginList}
-        >
-          {content}
-        </EuiMarkdownFormat>
-      </EuiText>
+      <EuiMarkdownFormat
+        textSize="m"
+        className={containerClassName}
+        parsingPluginList={parsingPluginList}
+        processingPluginList={processingPluginList}
+      >
+        {content}
+      </EuiMarkdownFormat>
       <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
     </>
   );

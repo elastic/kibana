@@ -107,15 +107,20 @@ export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachm
 };
 
 export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
-  try {
-    const parsed = JSON.parse(attachment.data.text);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return null;
-    }
-    return parsed as RuleResponse;
-  } catch {
+  const text = attachment?.data?.text;
+  if (!text) {
     return null;
   }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch (e) {
+    throw new Error(`Failed to parse rule attachment JSON: ${(e as Error).message}`);
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return null;
+  }
+  return parsed as RuleResponse;
 };
 
 export const getRuleName = (attachment: RuleAttachment): string | undefined => {

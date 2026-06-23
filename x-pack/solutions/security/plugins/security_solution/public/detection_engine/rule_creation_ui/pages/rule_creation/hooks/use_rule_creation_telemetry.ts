@@ -58,28 +58,29 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
     }
 
     return () => {
-      if (ruleSavedRef.current) {
-        return;
+      const aiSessionOnUnmount = aiRuleCreation.getSession();
+
+      if (!ruleSavedRef.current) {
+        const isAi = aiSessionOnUnmount != null && aiSessionOnUnmount.applyCount > 0;
+        const sessionId = isAi
+          ? aiSessionOnUnmount.sessionId
+          : manualSessionRef.current?.sessionId ?? '';
+        const sessionStart = isAi
+          ? aiSessionOnUnmount.startTimestamp
+          : manualSessionRef.current?.startTimestamp ?? Date.now();
+
+        telemetry.reportEvent(RuleCreationEventTypes.CreationAbandoned, {
+          creationSource: isAi ? 'ai' : 'manual',
+          sessionId,
+          ruleType: ruleTypeRef.current ?? 'unknown',
+          numberOfAiEdits: isAi ? aiSessionOnUnmount.applyCount : 0,
+          durationSinceSessionStartMs: Date.now() - sessionStart,
+        });
       }
 
-      const aiSessionOnUnmount = aiRuleCreation.getSession();
-      const isAi = aiSessionOnUnmount != null && aiSessionOnUnmount.applyCount > 0;
-      const sessionId = isAi
-        ? aiSessionOnUnmount.sessionId
-        : manualSessionRef.current?.sessionId ?? '';
-      const sessionStart = isAi
-        ? aiSessionOnUnmount.startTimestamp
-        : manualSessionRef.current?.startTimestamp ?? Date.now();
-
-      telemetry.reportEvent(RuleCreationEventTypes.CreationAbandoned, {
-        creationSource: isAi ? 'ai' : 'manual',
-        sessionId,
-        ruleType: ruleTypeRef.current ?? 'unknown',
-        numberOfAiEdits: isAi ? aiSessionOnUnmount.applyCount : 0,
-        durationSinceSessionStartMs: Date.now() - sessionStart,
-      });
-
-      if (isAi) {
+      // Always clear the AI session when the form closes — even a zero-edit or saved session —
+      // so its id/start time can't bleed into the next creation.
+      if (aiSessionOnUnmount) {
         aiRuleCreation.clearSession();
       }
     };

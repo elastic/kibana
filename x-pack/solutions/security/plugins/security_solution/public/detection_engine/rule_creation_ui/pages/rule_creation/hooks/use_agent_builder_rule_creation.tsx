@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -55,6 +55,13 @@ const SYNC_DEBOUNCE_MS = 500;
 // Must match server-side tool registrations (create_detection_rule_tool.ts + platform builtin).
 const RULE_CREATE_TOOL_ID = 'security.create_detection_rule';
 const ATTACHMENT_UPDATE_TOOL_ID = 'attachments.update';
+
+// Adapts a `VersionedAttachment` (data lives under `versions[]`) to the `{ data }` shape the rule
+// helpers read.
+const versionedAttachmentView = (attachment: { versions?: unknown; origin?: string }) => ({
+  data: getLatestVersion(attachment as never)?.data,
+  origin: attachment.origin,
+});
 
 interface UseAgentBuilderRuleCreationParams {
   defineStepForm: FormHook<DefineStepRule, DefineStepRule>;
@@ -107,14 +114,31 @@ export const useAgentBuilderRuleCreation = ({
     return syncRuleIdRef.current ?? existingRuleIdRef.current ?? undefined;
   }, []);
 
+  // Activate form→chat sync while the rule form is open, and reset it on close. Scoping activation
+  // to the page lifetime (rather than to a button click) means nothing leaks if the user never
+  // reaches the form, and writes no-op until a chat sidebar is actually open.
   useEffect(() => {
     const subscription = aiRuleCreation.formSyncActive$.subscribe(setIsSyncActive);
+    aiRuleCreation.activateFormSync();
     return () => {
       subscription.unsubscribe();
       aiRuleCreation.deactivateFormSync();
       aiRuleCreation.releaseBind();
     };
   }, [aiRuleCreation]);
+
+  // Edit pages have no telemetry-hook session cleanup (the create page does), so release any AI
+  // session when the edit form closes — otherwise it bleeds its id/start time into the next one.
+  useEffect(() => {
+    if (!existingRuleId) {
+      return;
+    }
+    return () => {
+      if (aiRuleCreation.getSession()) {
+        aiRuleCreation.clearSession();
+      }
+    };
+  }, [existingRuleId, aiRuleCreation]);
 
   useEffect(() => {
     if (!agentBuilder?.events?.ui?.activeConversation$) {
@@ -135,13 +159,26 @@ export const useAgentBuilderRuleCreation = ({
         intentRef.current = existingRuleIdRef.current ? 'update' : 'create';
         return;
       }
-      intentRef.current = getRuleAttachmentIntent(ruleAttachment as never);
-      const ruleId = getRuleIdFromAttachment(ruleAttachment as never);
+      const attachmentView = versionedAttachmentView(ruleAttachment as never);
+      intentRef.current = getRuleAttachmentIntent(attachmentView as never);
+      const ruleId = getRuleIdFromAttachment(attachmentView as never);
       if (intentRef.current === 'create') {
         syncRuleIdRef.current = ruleId;
         return;
       }
       syncRuleIdRef.current = ruleId ?? existingRuleIdRef.current;
+
+      // Keep the form→chat bind aligned with the rule being edited.
+      const matchesThisRule = ruleId === existingRuleIdRef.current;
+      if (existingRuleIdRef.current && !matchesThisRule) {
+        // Different rule's attachment — don't sync this form into it.
+        aiRuleCreation.deactivateFormSync();
+        aiRuleCreation.releaseBind();
+      } else if (existingRuleIdRef.current && matchesThisRule && boundId === null) {
+        // This rule's card, not yet bound (e.g. reached the form without going through the card).
+        aiRuleCreation.setBoundAttachment(ruleAttachment.id);
+        aiRuleCreation.activateFormSync();
+      }
     });
     return () => subscription.unsubscribe();
   }, [agentBuilder, aiRuleCreation]);
@@ -307,8 +344,9 @@ export const useAgentBuilderRuleCreation = ({
       } catch {
         return;
       }
-      intentRef.current = getRuleAttachmentIntent(ruleAttachment as never);
-      const savedRuleId = getRuleIdFromAttachment(ruleAttachment as never) ?? undefined;
+      const versionedView = versionedAttachmentView(ruleAttachment as never);
+      intentRef.current = getRuleAttachmentIntent(versionedView as never);
+      const savedRuleId = getRuleIdFromAttachment(versionedView as never) ?? undefined;
       const ruleToApply =
         intentRef.current === 'update' && savedRuleId ? { ...parsed, id: savedRuleId } : parsed;
       updateFormFromChatRef.current(ruleToApply, { silent: true });
@@ -316,15 +354,37 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [agentBuilder, aiRuleCreation]);
 
+  // Latest form inputs, read inside the debounce so the effect doesn't need them as deps.
+  const formInputsRef = useRef({
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+  });
+  formInputsRef.current = { defineStepData, aboutStepData, scheduleStepData, actionsStepData };
+
+  // Value-stable signature so the debounce re-arms on content change, not on every render
+  // (step-data objects get a fresh identity each render and would otherwise starve the timer).
+  const formSignature = useMemo(
+    () => JSON.stringify({ defineStepData, aboutStepData, scheduleStepData, actionsStepData }),
+    [defineStepData, aboutStepData, scheduleStepData, actionsStepData]
+  );
+
   // FORM -> CHAT
   useEffect(() => {
+    const {
+      defineStepData: define,
+      aboutStepData: about,
+      scheduleStepData: schedule,
+      actionsStepData: actions,
+    } = formInputsRef.current;
     if (
       !isSyncActive ||
       !agentBuilder?.addAttachment ||
-      !defineStepData ||
-      !aboutStepData ||
-      !scheduleStepData ||
-      !actionsStepData ||
+      !define ||
+      !about ||
+      !schedule ||
+      !actions ||
       !actionTypeRegistry
     ) {
       return;
@@ -337,10 +397,10 @@ export const useAgentBuilderRuleCreation = ({
     debounceTimerRef.current = setTimeout(() => {
       try {
         const formattedRule = formatRule<RuleCreateProps>(
-          defineStepData,
-          aboutStepData,
-          scheduleStepData,
-          actionsStepData,
+          define,
+          about,
+          schedule,
+          actions,
           actionTypeRegistry
         );
         const isUpdateIntent = intentRef.current === 'update';
@@ -373,10 +433,7 @@ export const useAgentBuilderRuleCreation = ({
   }, [
     isSyncActive,
     agentBuilder,
-    defineStepData,
-    aboutStepData,
-    scheduleStepData,
-    actionsStepData,
+    formSignature,
     actionTypeRegistry,
     addRuleAttachment,
     getRuleIdForSync,
