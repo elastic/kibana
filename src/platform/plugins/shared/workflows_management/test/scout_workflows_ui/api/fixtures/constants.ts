@@ -11,9 +11,6 @@ export const COMMON_HEADERS = {
   'kbn-xsrf': 'true',
 };
 
-/** Must match externalResumeServerArgs in kbn-scout workflows_ui config sets */
-export const SCOUT_EXTERNAL_RESUME_SIGNING_KEY = 'scout-external-resume-signing-key-min-32-chars';
-
 export const SIMPLE_WORKFLOW_YAML = `name: ImportTest Workflow
 description: A simple test workflow for import
 enabled: false

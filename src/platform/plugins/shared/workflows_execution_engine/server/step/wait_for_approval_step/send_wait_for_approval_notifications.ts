@@ -8,13 +8,8 @@
  */
 
 import type { WaitForApprovalStep } from '@kbn/workflows';
-import {
-  buildExternalResumeUrl,
-  createExternalResumeTokenPayload,
-  signExternalResumeToken,
-} from '@kbn/workflows/server';
+import { buildExternalResumeUrl } from '@kbn/workflows/server';
 import type { ConnectorExecutor } from '../../connector_executor';
-import { parseDuration } from '../../utils';
 
 type WaitForApprovalChannels = NonNullable<NonNullable<WaitForApprovalStep['with']>['channels']>;
 
@@ -41,28 +36,14 @@ export function buildWaitForApprovalResumeLinks({
   kibanaUrl,
   spaceId,
   executionId,
-  stepId,
-  timeout,
-  signingKey,
-  apiKeyId,
+  encodedApiKey,
 }: {
   kibanaUrl: string;
   spaceId: string;
   executionId: string;
-  stepId: string;
-  timeout: string;
-  signingKey: string;
-  apiKeyId: string;
+  encodedApiKey: string;
 }): WaitForApprovalResumeLinks {
-  const payload = createExternalResumeTokenPayload({
-    spaceId,
-    executionId,
-    stepId,
-    apiKeyId,
-    ttlMs: parseDuration(timeout),
-  });
-  const token = signExternalResumeToken(payload, signingKey);
-  const baseParams = { kibanaUrl, spaceId, executionId, token };
+  const baseParams = { kibanaUrl, spaceId, executionId, apiKey: encodedApiKey };
 
   return {
     approveUrl: buildExternalResumeUrl({ ...baseParams, approved: true }),

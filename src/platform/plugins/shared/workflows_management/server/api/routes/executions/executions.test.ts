@@ -697,15 +697,15 @@ describe('Execution Routes', () => {
       expect(handler('GET', path)).toBeDefined();
     });
 
-    it('should resume via signed token and return HTML', async () => {
+    it('should resume via API key and return HTML', async () => {
       mockApi.resumeWorkflowExecutionExternally.mockResolvedValue({
-        resumedBy: 'api_key:token-jti',
+        resumedBy: 'api_key:api-key-id',
       });
       const h = handler('GET', path)!;
       const request = {
         params: { executionId: 'ex-1' },
         query: {
-          token: 'signed-token',
+          apiKey: 'encoded-api-key',
           approved: 'true',
         },
       };
@@ -713,8 +713,8 @@ describe('Execution Routes', () => {
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.resumeWorkflowExecutionExternally).toHaveBeenCalledWith({
-        token: 'signed-token',
-        approved: 'true',
+        apiKey: 'encoded-api-key',
+        approved: true,
         executionId: 'ex-1',
         spaceId: 'default',
       });
@@ -728,12 +728,12 @@ describe('Execution Routes', () => {
 
     it('should return HTML error page when resume fails', async () => {
       mockApi.resumeWorkflowExecutionExternally.mockRejectedValue(
-        new ExternalResumeError('Invalid resume token', 401)
+        new ExternalResumeError('Invalid external resume API key', 401)
       );
       const h = handler('GET', path)!;
       const request = {
         params: { executionId: 'ex-1' },
-        query: { token: 'bad-token', approved: 'false' },
+        query: { apiKey: 'bad-api-key', approved: 'false' },
       };
 
       const result = await h(mockContext, request as any, mockResponse as any);

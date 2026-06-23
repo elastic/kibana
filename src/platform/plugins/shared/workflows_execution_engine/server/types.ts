@@ -114,7 +114,7 @@ export type ResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   input: Record<string, unknown>,
-  request: KibanaRequest,
+  request?: KibanaRequest,
   options?: {
     resumedBy?: string;
   }
@@ -124,7 +124,7 @@ export type InternalResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   context: Record<string, unknown> | undefined,
-  request: KibanaRequest
+  request?: KibanaRequest
 ) => Promise<void>;
 
 export type ScheduleWorkflow = (

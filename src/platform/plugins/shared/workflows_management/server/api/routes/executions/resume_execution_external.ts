@@ -24,13 +24,11 @@ import { withAvailabilityCheck } from '../utils/with_availability_check';
 const EXTERNAL_RESUME_SECURITY = {
   authc: {
     enabled: false,
-    reason:
-      'External resume uses a signed token containing an API key id instead of a Kibana session.',
+    reason: 'External resume uses a short-lived API key token instead of a Kibana session.',
   },
   authz: {
     enabled: false,
-    reason:
-      'External resume authorizes by verifying a signed token and validating the bound API key by id.',
+    reason: 'External resume authorizes by matching the API key metadata to the execution.',
   },
 } as const;
 
@@ -44,7 +42,7 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
       security: EXTERNAL_RESUME_SECURITY,
       summary: 'Resume a workflow execution from an external link',
       description:
-        'Resume a paused workflow execution using a signed external resume token. Returns an HTML confirmation page.',
+        'Resume a paused workflow execution using an external resume API key. Returns an HTML confirmation page.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -57,11 +55,8 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
           request: {
             params: executionIdParamSchema,
             query: schema.object({
-              token: schema.string({
-                meta: {
-                  description:
-                    'Signed external resume capability token containing the bound API key id.',
-                },
+              apiKey: schema.string({
+                meta: { description: 'External resume API key credential.' },
               }),
               approved: schema.oneOf(
                 [schema.boolean(), schema.literal('true'), schema.literal('false')],
@@ -76,9 +71,9 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
-          const { token, approved } = request.query;
+          const { apiKey, approved } = request.query;
           const { resumedBy } = await api.resumeWorkflowExecutionExternally({
-            token,
+            apiKey,
             approved: parseApprovedQueryParam(approved),
             executionId,
             spaceId: spaces.getSpaceId(request),
@@ -112,15 +107,23 @@ function htmlOk(response: KibanaResponseFactory, body: string) {
 
 function handleExternalResumeError(response: KibanaResponseFactory, error: unknown) {
   if (error instanceof ExternalResumeError) {
-    return response.custom({
-      statusCode: error.statusCode,
-      bypassErrorFormat: true,
-      body: renderExternalResumeErrorPage(error.message),
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-      },
-    });
+    return htmlError(response, error.statusCode, error.message);
   }
 
-  throw error;
+  const message =
+    error instanceof Error
+      ? error.message
+      : 'An unexpected error occurred while resuming the workflow.';
+  return htmlError(response, 500, message);
+}
+
+function htmlError(response: KibanaResponseFactory, statusCode: number, message: string) {
+  return response.custom({
+    statusCode,
+    bypassErrorFormat: true,
+    body: renderExternalResumeErrorPage(message),
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+    },
+  });
 }

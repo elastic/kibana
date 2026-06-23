@@ -47,6 +47,7 @@ export async function createExternalResumeApiKey({
       workflow_execution_id: executionId,
       workflow_id: workflowId,
       workflow_space_id: spaceId,
+      workflow_step_id: stepId,
     },
   });
 }

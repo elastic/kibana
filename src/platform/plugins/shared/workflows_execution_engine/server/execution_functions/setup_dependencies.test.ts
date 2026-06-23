@@ -63,7 +63,6 @@ describe('setupDependencies', () => {
       minPayloadSize: new ByteSizeValue(10 * 1024),
     },
     collectQueueMetrics: false,
-    externalResume: {},
   };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;

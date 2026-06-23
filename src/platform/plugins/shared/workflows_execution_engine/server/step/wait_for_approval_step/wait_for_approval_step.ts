@@ -14,14 +14,13 @@ import {
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
-import { createExternalResumeApiKey, WORKFLOW_EXTERNAL_CRED_PURPOSE } from '@kbn/workflows/server';
+import { createExternalResumeApiKey } from '@kbn/workflows/server';
 import {
   buildWaitForApprovalResumeLinks,
   hasExternalApprovalChannels,
   sendWaitForApprovalNotifications,
 } from './send_wait_for_approval_notifications';
 import type { ConnectorExecutor } from '../../connector_executor';
-import { parseDuration } from '../../utils';
 import { getKibanaUrl } from '../../utils/get_kibana_url';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
@@ -80,47 +79,42 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
         ? String(ctx.renderValueAccordingToContext(withConfig.message))
         : '';
 
-    this.stepExecutionRuntime.setInput({
+    const stepInput: Record<string, unknown> = {
       ...(message.length > 0 && { message }),
       approveLabel,
       rejectLabel,
       schema: WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
-    });
+    };
 
-    const signingKey = this.dependencies.externalResumeSigningKey;
-    const execution = this.workflowRuntime.getWorkflowExecution();
-    const spaceId = this.dependencies.spaceId ?? execution.spaceId;
-    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+    const channels = withConfig?.channels;
+    if (hasExternalApprovalChannels(channels)) {
+      const execution = this.workflowRuntime.getWorkflowExecution();
+      const spaceId = this.dependencies.spaceId ?? execution.spaceId;
+      if (!spaceId) {
+        throw new Error('External approval notifications require a space');
+      }
 
-    let apiKeyId: string | undefined;
-    if (signingKey && spaceId) {
-      apiKeyId = await this.mintExternalResumeApiKey({
+      const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
+      const apiKey = await this.mintExternalResumeApiKey({
         execution,
         spaceId,
         timeout,
       });
-    }
 
-    const channels = withConfig?.channels;
-    if (hasExternalApprovalChannels(channels)) {
-      if (!signingKey || !spaceId || !apiKeyId) {
-        throw new Error(
-          'External approval notifications require a configured signing key and space'
-        );
-      }
+      stepInput.externalResumeApiKeyId = apiKey.id;
 
       await this.sendExternalNotifications({
         channels,
         message,
         approveLabel,
         rejectLabel,
-        apiKeyId,
-        signingKey,
-        timeout,
+        encodedApiKey: apiKey.encoded,
         execution,
         spaceId,
       });
     }
+
+    this.stepExecutionRuntime.setInput(stepInput);
 
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for approval`, {
       event: { action: 'hitl:waiting' },
@@ -135,9 +129,9 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
     spaceId: string;
     timeout: string;
-  }): Promise<string> {
+  }): Promise<{ id: string; encoded: string }> {
     const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
-    const apiKey = await createExternalResumeApiKey({
+    return createExternalResumeApiKey({
       esClient,
       executionId: execution.id,
       stepId: this.node.stepId,
@@ -145,20 +139,6 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       spaceId,
       expiration: timeout,
     });
-
-    const externalCredsStore = this.dependencies.externalCredsStore;
-    if (!externalCredsStore) {
-      throw new Error('External credentials store is not configured');
-    }
-
-    await externalCredsStore.put({
-      id: apiKey.id,
-      purpose: WORKFLOW_EXTERNAL_CRED_PURPOSE.EXTERNAL_RESUME,
-      secret: apiKey.encoded,
-      expiresAt: new Date(Date.now() + parseDuration(timeout)).toISOString(),
-    });
-
-    return apiKey.id;
   }
 
   private async sendExternalNotifications({
@@ -166,9 +146,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     message,
     approveLabel,
     rejectLabel,
-    apiKeyId,
-    signingKey,
-    timeout,
+    encodedApiKey,
     execution,
     spaceId,
   }: {
@@ -178,9 +156,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
     message: string;
     approveLabel: string;
     rejectLabel: string;
-    apiKeyId: string;
-    signingKey: string;
-    timeout: string;
+    encodedApiKey: string;
     execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
     spaceId: string;
   }): Promise<void> {
@@ -188,10 +164,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       kibanaUrl: getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup),
       spaceId,
       executionId: execution.id,
-      stepId: this.node.stepId,
-      timeout,
-      signingKey,
-      apiKeyId,
+      encodedApiKey,
     });
 
     await sendWaitForApprovalNotifications({

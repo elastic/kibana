@@ -23,7 +23,7 @@ import {
   createManagedWorkflowsSystemApiProvider,
   createWorkflowsClientProvider,
 } from './client/workflows_client';
-import { resolveExternalResumeSigningKey, type WorkflowsManagementConfig } from './config';
+import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
@@ -81,16 +81,7 @@ export class WorkflowsPlugin
     );
     this.workflowsService = workflowsService;
 
-    const externalResumeSigningKey = resolveExternalResumeSigningKey(
-      this.config.externalResume.signingKey,
-      this.logger
-    );
-
-    const api = new WorkflowsManagementApi(
-      workflowsService,
-      this.config.available,
-      externalResumeSigningKey
-    );
+    const api = new WorkflowsManagementApi(workflowsService, this.config.available);
     this.api = api;
 
     if (plugins.actions) {

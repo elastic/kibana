@@ -10,7 +10,6 @@
 import { createIndexes } from './create_indexes';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_EXTERNAL_CREDS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './mappings';
@@ -34,11 +33,7 @@ describe('createIndexes', () => {
   it('creates all workflow indices via createOrUpdateIndex', async () => {
     await createIndexes({ esClient, logger });
 
-    // The bootstrap path uses `createOrUpdateIndex` for all indices
-    // so additive mapping changes flow into already-deployed clusters
-    // via `putMapping`. `createIndexWithMappings` is reused internally
-    // for the cold-install branch, not invoked directly from here.
-    expect(createOrUpdateIndex).toHaveBeenCalledTimes(3);
+    expect(createOrUpdateIndex).toHaveBeenCalledTimes(2);
     expect(createIndexWithMappings).not.toHaveBeenCalled();
 
     expect(createOrUpdateIndex).toHaveBeenCalledWith(
@@ -46,9 +41,6 @@ describe('createIndexes', () => {
     );
     expect(createOrUpdateIndex).toHaveBeenCalledWith(
       expect.objectContaining({ indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX })
-    );
-    expect(createOrUpdateIndex).toHaveBeenCalledWith(
-      expect.objectContaining({ indexName: WORKFLOWS_EXTERNAL_CREDS_INDEX })
     );
   });
 
@@ -67,10 +59,6 @@ describe('createIndexes', () => {
     );
     expect(stepCall).toBeDefined();
     const [{ mappings }] = stepCall;
-    // The mapping object reaches `createOrUpdateIndex` by reference,
-    // making `WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS` the single
-    // source of truth for the index. Detailed shape assertions live
-    // alongside that constant in `mappings.test.ts`.
     expect(mappings).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS);
   });
 });

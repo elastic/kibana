@@ -28,7 +28,6 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import { resolveExternalResumeSigningKey, WorkflowExternalCredsStore } from '@kbn/workflows/server';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -136,21 +135,12 @@ export class WorkflowsExecutionEnginePlugin
   >;
   private meteringService?: WorkflowsMeteringService;
   private initializePromise?: Promise<void>;
-  private externalCredsStore?: WorkflowExternalCredsStore;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-  }
-
-  private getExternalResumeSigningKey(): string {
-    return resolveExternalResumeSigningKey(
-      this.config.externalResume?.signingKey,
-      this.logger,
-      'workflowsExecutionEngine.externalResume.signingKey'
-    );
   }
 
   public setup(
@@ -239,10 +229,6 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
-                externalResumeSigningKey: this.getExternalResumeSigningKey(),
-                externalCredsStore:
-                  this.externalCredsStore ??
-                  new WorkflowExternalCredsStore(coreStart.elasticsearch.client.asInternalUser),
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -354,10 +340,6 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
-                externalResumeSigningKey: this.getExternalResumeSigningKey(),
-                externalCredsStore:
-                  this.externalCredsStore ??
-                  new WorkflowExternalCredsStore(coreStart.elasticsearch.client.asInternalUser),
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -477,10 +459,6 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
-                externalResumeSigningKey: this.getExternalResumeSigningKey(),
-                externalCredsStore:
-                  this.externalCredsStore ??
-                  new WorkflowExternalCredsStore(coreStart.elasticsearch.client.asInternalUser),
               };
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -651,7 +629,6 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    this.externalCredsStore = new WorkflowExternalCredsStore(esClient);
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
 
     // Initialize ConcurrencyManager with dependencies
@@ -670,8 +647,6 @@ export class WorkflowsExecutionEnginePlugin
       taskManager: plugins.taskManager,
       workflowsExtensions: plugins.workflowsExtensions,
       config: this.config,
-      externalResumeSigningKey: this.getExternalResumeSigningKey(),
-      externalCredsStore: this.externalCredsStore,
     };
 
     // Re-check that a workflow is still enabled right before persisting an
@@ -1285,7 +1260,9 @@ export class WorkflowsExecutionEnginePlugin
 
       const resumedBy =
         options?.resumedBy ??
-        (await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client));
+        (request
+          ? await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client)
+          : 'unknown');
       const resumedAt = new Date().toISOString();
 
       const resumeContext = {
@@ -1311,6 +1288,14 @@ export class WorkflowsExecutionEnginePlugin
           id: executionId,
           context,
         });
+      }
+
+      if (!request) {
+        // External resume: wake the idle-timeout task created when entering WAITING_FOR_INPUT.
+        // That task retains the workflow runner API key; ad-hoc tasks scheduled without a
+        // request cannot be executed by workflow:resume (no fakeRequest at run time).
+        await plugins.taskManager.runSoon(getWorkflowGlobalTimeoutResumeTaskId(executionId));
+        return;
       }
 
       await workflowTaskManager.scheduleImmediateResume({

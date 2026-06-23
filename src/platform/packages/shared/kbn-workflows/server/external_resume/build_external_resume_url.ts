@@ -13,19 +13,19 @@ export function buildExternalResumeUrl({
   kibanaUrl,
   spaceId,
   executionId,
-  token,
+  apiKey,
   approved,
 }: {
   kibanaUrl: string;
   spaceId: string;
   executionId: string;
-  token: string;
+  apiKey: string;
   approved?: boolean;
 }): string {
   const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
   const path = EXTERNAL_RESUME_API_PATH.replace('{executionId}', executionId);
   const url = new URL(`${kibanaUrl}${spacePrefix}${path}`);
-  url.searchParams.set('token', token);
+  url.searchParams.set('apiKey', apiKey);
   if (approved !== undefined) {
     url.searchParams.set('approved', String(approved));
   }

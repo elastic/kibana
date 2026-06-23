@@ -11,11 +11,6 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { WorkflowExecutionInvalidStatusError } from '@kbn/workflows/common/errors';
-import {
-  createExternalResumeTokenPayload,
-  signExternalResumeToken,
-  WORKFLOW_EXTERNAL_CRED_PURPOSE,
-} from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { ExternalResumeError } from './external_resume_error';
 import {
@@ -24,55 +19,31 @@ import {
 } from './external_resume_service';
 import type { WorkflowsService } from '../workflows_management_service';
 
-const SIGNING_KEY = 'test-signing-key-with-at-least-32-characters';
 const ENCODED_API_KEY = Buffer.from('api-key-id:secret').toString('base64');
 
 describe('resumeWorkflowExecutionExternally', () => {
-  const externalCredsStore = {
-    get: jest.fn(),
-    delete: jest.fn(),
-  };
-  const invalidateApiKey = jest.fn();
+  const invalidateAsInternalUser = jest.fn();
 
   const workflowsService = {
     getCoreStart: jest.fn(),
-    getExternalCredsStore: jest.fn().mockResolvedValue(externalCredsStore),
     getWorkflowExecution: jest.fn(),
     getWorkflowsExecutionEngine: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsService>;
 
-  const token = signExternalResumeToken(
-    createExternalResumeTokenPayload({
-      spaceId: 'default',
-      executionId: 'exec-1',
-      stepId: 'request-approval',
-      apiKeyId: 'api-key-id',
-      ttlMs: 60_000,
-      jti: 'token-jti',
-    }),
-    SIGNING_KEY
-  );
-
   beforeEach(() => {
     jest.clearAllMocks();
-    externalCredsStore.get.mockResolvedValue(ENCODED_API_KEY);
-    workflowsService.getExternalCredsStore.mockResolvedValue(externalCredsStore as never);
 
     const coreStart = coreMock.createStart();
-    invalidateApiKey.mockResolvedValue({});
+    invalidateAsInternalUser.mockResolvedValue({});
+    coreStart.security.authc.apiKeys.invalidateAsInternalUser = invalidateAsInternalUser;
     coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
       asCurrentUser: {
         security: {
           authenticate: jest.fn().mockResolvedValue({
-            api_key: { id: 'api-key-id' },
+            api_key: {
+              id: 'api-key-id',
+            },
           }),
-        },
-      },
-    });
-    Object.assign(coreStart.elasticsearch.client, {
-      asInternalUser: {
-        security: {
-          invalidateApiKey,
         },
       },
     });
@@ -86,6 +57,9 @@ describe('resumeWorkflowExecutionExternally', () => {
           stepId: 'request-approval',
           stepType: 'waitForApproval',
           status: ExecutionStatus.WAITING_FOR_INPUT,
+          input: {
+            externalResumeApiKeyId: 'api-key-id',
+          },
         } as unknown as WorkflowStepExecutionDto,
       ],
     } as unknown as WorkflowExecutionDto);
@@ -94,18 +68,16 @@ describe('resumeWorkflowExecutionExternally', () => {
     } as unknown as WorkflowsExecutionEnginePluginStart);
   });
 
-  it('resumes a waiting step after validating the token and authenticating the API key', async () => {
+  it('resumes a waiting step after authenticating the API key', async () => {
     await resumeWorkflowExecutionExternally(workflowsService, {
       approved: true,
       executionId: 'exec-1',
-      signingKey: SIGNING_KEY,
       spaceId: 'default',
-      token,
+      apiKey: ENCODED_API_KEY,
     });
 
-    expect(externalCredsStore.get).toHaveBeenCalledWith({
-      id: 'api-key-id',
-      expectedPurpose: WORKFLOW_EXTERNAL_CRED_PURPOSE.EXTERNAL_RESUME,
+    expect(workflowsService.getWorkflowExecution).toHaveBeenCalledWith('exec-1', 'default', {
+      includeInput: true,
     });
 
     const engine = await workflowsService.getWorkflowsExecutionEngine();
@@ -113,30 +85,11 @@ describe('resumeWorkflowExecutionExternally', () => {
       'exec-1',
       'default',
       { approved: true },
-      expect.objectContaining({
-        headers: { authorization: `ApiKey ${ENCODED_API_KEY}` },
-      }),
+      undefined,
       { resumedBy: 'api_key:api-key-id' }
     );
 
-    expect(invalidateApiKey).toHaveBeenCalledWith({ ids: ['api-key-id'] });
-    expect(externalCredsStore.delete).toHaveBeenCalledWith('api-key-id');
-  });
-
-  it('rejects when stored credentials are missing', async () => {
-    externalCredsStore.get.mockResolvedValue(undefined);
-
-    await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
-        executionId: 'exec-1',
-        signingKey: SIGNING_KEY,
-        spaceId: 'default',
-        token,
-      })
-    ).rejects.toEqual(
-      new ExternalResumeError('This workflow response link is no longer valid', 409)
-    );
+    expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
   });
 
   it('rejects when API key authentication fails', async () => {
@@ -153,11 +106,51 @@ describe('resumeWorkflowExecutionExternally', () => {
       resumeWorkflowExecutionExternally(workflowsService, {
         approved: true,
         executionId: 'exec-1',
-        signingKey: SIGNING_KEY,
         spaceId: 'default',
-        token,
+        apiKey: ENCODED_API_KEY,
       })
     ).rejects.toEqual(new ExternalResumeError('Invalid external resume API key', 401));
+  });
+
+  it('rejects when the API key does not match a waiting step', async () => {
+    workflowsService.getWorkflowExecution.mockResolvedValue(null);
+
+    await expect(
+      resumeWorkflowExecutionExternally(workflowsService, {
+        approved: true,
+        executionId: 'other-exec',
+        spaceId: 'default',
+        apiKey: ENCODED_API_KEY,
+      })
+    ).rejects.toEqual(new ExternalResumeError('Workflow execution not found', 404));
+  });
+
+  it('rejects when the API key does not match any waiting step on the execution', async () => {
+    workflowsService.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        {
+          workflowRunId: 'exec-1',
+          stepType: 'waitForApproval',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          input: {
+            externalResumeApiKeyId: 'different-api-key-id',
+          },
+        } as unknown as WorkflowStepExecutionDto,
+      ],
+    } as unknown as WorkflowExecutionDto);
+
+    await expect(
+      resumeWorkflowExecutionExternally(workflowsService, {
+        approved: true,
+        executionId: 'exec-1',
+        spaceId: 'default',
+        apiKey: ENCODED_API_KEY,
+      })
+    ).rejects.toEqual(
+      new ExternalResumeError('API key does not match this workflow execution', 403)
+    );
   });
 
   it('maps engine invalid-status errors to ExternalResumeError', async () => {
@@ -173,26 +166,11 @@ describe('resumeWorkflowExecutionExternally', () => {
       resumeWorkflowExecutionExternally(workflowsService, {
         approved: true,
         executionId: 'exec-1',
-        signingKey: SIGNING_KEY,
         spaceId: 'default',
-        token,
+        apiKey: ENCODED_API_KEY,
       })
     ).rejects.toEqual(
       new ExternalResumeError('Workflow execution is not waiting for external input', 409)
-    );
-  });
-
-  it('throws when the token does not match the execution id', async () => {
-    await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
-        executionId: 'other-exec',
-        signingKey: SIGNING_KEY,
-        spaceId: 'default',
-        token,
-      })
-    ).rejects.toEqual(
-      new ExternalResumeError('Resume token does not match this workflow execution', 403)
     );
   });
 });

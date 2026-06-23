@@ -240,8 +240,7 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    public readonly isWorkflowsAvailable: boolean,
-    private readonly externalResumeSigningKey: string
+    public readonly isWorkflowsAvailable: boolean
   ) {}
 
   private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
@@ -885,12 +884,9 @@ export class WorkflowsManagementApi {
   }
 
   public async resumeWorkflowExecutionExternally(
-    params: Omit<ExternalResumeWorkflowExecutionParams, 'signingKey'>
+    params: ExternalResumeWorkflowExecutionParams
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    return resumeWorkflowExecutionExternally(this.workflowsService, {
-      ...params,
-      signingKey: this.externalResumeSigningKey,
-    });
+    return resumeWorkflowExecutionExternally(this.workflowsService, params);
   }
 
   /**

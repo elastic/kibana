@@ -14,9 +14,4 @@ export const WORKFLOW_EXTERNAL_RESUME_ROLE = 'workflow_external_resume' as const
 
 export const WORKFLOW_EXTERNAL_RESUME_APPLICATION = 'kibana-workflows' as const;
 
-/** Execution context key tracking one-time external resume token JTIs. */
-export const EXTERNAL_RESUME_CONSUMED_JTIS_CONTEXT_KEY = 'externalResumeConsumedJtis' as const;
-
-export const EXTERNAL_RESUME_RESUMED_BY_PREFIX = 'external_resume:' as const;
-
 export { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';

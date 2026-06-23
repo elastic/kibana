@@ -12,7 +12,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowRepository } from '@kbn/workflows';
-import type { WorkflowExternalCredsStoreContract } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowLogEvent } from '../repositories/logs_repository';
@@ -27,8 +26,6 @@ export interface ContextDependencies {
   taskManager: TaskManagerStartContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   config: WorkflowsExecutionEngineConfig;
-  externalResumeSigningKey?: string;
-  externalCredsStore?: WorkflowExternalCredsStoreContract;
   workflowRepository?: WorkflowRepository;
   workflowExecutionRepository?: WorkflowExecutionRepository;
   stepExecutionRepository?: StepExecutionRepository;

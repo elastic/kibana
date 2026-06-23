@@ -9,8 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { Logger, PluginConfigDescriptor } from '@kbn/core/server';
-import { resolveExternalResumeSigningKey as resolveSigningKey } from '@kbn/workflows/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -30,31 +29,9 @@ const configSchema = schema.object({
   globalExecutionsView: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
-  externalResume: schema.object({
-    signingKey: schema.maybe(
-      schema.string({
-        minLength: 32,
-        meta: {
-          description:
-            'HMAC signing key for external waitForInput resume links. Use bin/kibana-encryption-keys generate in production.',
-        },
-      })
-    ),
-  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
-
-export function resolveExternalResumeSigningKey(
-  configuredSigningKey: string | undefined,
-  logger: Logger
-): string {
-  return resolveSigningKey(
-    configuredSigningKey,
-    logger,
-    'workflowsManagement.externalResume.signingKey'
-  );
-}
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,

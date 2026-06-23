@@ -180,8 +180,3 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     usage: TOKEN_USAGE_MAPPING,
   },
 };
-
-export {
-  WORKFLOWS_EXTERNAL_CREDS_INDEX,
-  WORKFLOWS_EXTERNAL_CREDS_INDEX_MAPPINGS,
-} from '@kbn/workflows/server';

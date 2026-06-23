@@ -12,8 +12,6 @@ import { createOrUpdateIndex } from './create_index';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-  WORKFLOWS_EXTERNAL_CREDS_INDEX,
-  WORKFLOWS_EXTERNAL_CREDS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './mappings';
@@ -36,12 +34,6 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
       esClient,
       indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-      logger,
-    }),
-    createOrUpdateIndex({
-      esClient,
-      indexName: WORKFLOWS_EXTERNAL_CREDS_INDEX,
-      mappings: WORKFLOWS_EXTERNAL_CREDS_INDEX_MAPPINGS,
       logger,
     }),
   ]);

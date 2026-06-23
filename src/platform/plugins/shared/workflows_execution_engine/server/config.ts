@@ -65,17 +65,6 @@ const configSchema = schema.object({
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
   }),
-  externalResume: schema.object({
-    signingKey: schema.maybe(
-      schema.string({
-        minLength: 32,
-        meta: {
-          description:
-            'HMAC signing key for waitForApproval external resume links. Must match workflowsManagement.externalResume.signingKey.',
-        },
-      })
-    ),
-  }),
 });
 
 export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;

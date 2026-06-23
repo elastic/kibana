@@ -32,10 +32,6 @@ jest.mock('@kbn/workflows/server', () => ({
 const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
   .createExternalResumeApiKey as jest.Mock;
 
-const externalCredsStore = {
-  put: jest.fn().mockResolvedValue(undefined),
-};
-
 jest.mock('./send_wait_for_approval_notifications', () => ({
   hasExternalApprovalChannels: jest.fn().mockReturnValue(false),
   buildWaitForApprovalResumeLinks: jest.fn().mockReturnValue({
@@ -95,7 +91,12 @@ describe('WaitForApprovalStepImpl', () => {
 
     mockWorkflowRuntime = {
       navigateToNextNode: jest.fn(),
-      getWorkflowExecution: jest.fn().mockReturnValue({ id: 'exec-abc', context: {} }),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'exec-abc',
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        context: {},
+      }),
     } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
 
     workflowLogger = {
@@ -104,9 +105,8 @@ describe('WaitForApprovalStepImpl', () => {
 
     connectorExecutor = { execute: jest.fn() } as unknown as ConnectorExecutor;
     dependencies = {
-      externalResumeSigningKey: 'test-signing-key-with-at-least-32-characters',
       spaceId: 'default',
-      externalCredsStore,
+      coreStart: {},
     } as unknown as ContextDependencies;
 
     underTest = new WaitForApprovalStepImpl(
@@ -132,20 +132,37 @@ describe('WaitForApprovalStepImpl', () => {
     });
   });
 
-  it('stores external resume credentials without exposing secrets in step input', async () => {
+  it('does not mint an external resume API key without channels', async () => {
+    await underTest.run();
+
+    expect(mockCreateExternalResumeApiKey).not.toHaveBeenCalled();
+    expect(mockSendWaitForApprovalNotifications).not.toHaveBeenCalled();
+  });
+
+  it('mints an API key and sends notifications when channels are configured', async () => {
+    mockHasExternalApprovalChannels.mockReturnValue(true);
+    node.configuration = {
+      ...node.configuration,
+      with: {
+        ...node.configuration.with,
+        channels: {
+          slack: { 'connector-id': 'slack-1' },
+        },
+      },
+    } as WaitForApprovalStep;
+
     await underTest.run();
 
     expect(mockCreateExternalResumeApiKey).toHaveBeenCalled();
-    expect(externalCredsStore.put).toHaveBeenCalledWith(
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'api-key-id',
-        secret: 'encoded-api-key',
-        purpose: 'external_resume',
+        externalResumeApiKeyId: 'api-key-id',
       })
     );
-    expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalledWith(
-      expect.objectContaining({ externalResumeEncodedApiKey: expect.anything() })
+    expect(mockBuildWaitForApprovalResumeLinks).toHaveBeenCalledWith(
+      expect.objectContaining({ encodedApiKey: 'encoded-api-key' })
     );
+    expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
   });
 
   it('finishes with approval output shape on resume', async () => {
@@ -164,6 +181,24 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
   });
 
+  it('records external api key responder on resume', async () => {
+    mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
+    mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+      id: 'exec-abc',
+      context: {
+        resumeInput: { approved: false },
+        resumedBy: 'api_key:api-key-id',
+      },
+    } as unknown as ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>);
+
+    await underTest.run();
+
+    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+      response: { approved: false },
+      respondedBy: 'api_key:api-key-id',
+    });
+  });
+
   it('uses workflow execution spaceId when dependencies.spaceId is missing', async () => {
     mockHasExternalApprovalChannels.mockReturnValue(true);
     node.configuration = {
@@ -176,9 +211,7 @@ describe('WaitForApprovalStepImpl', () => {
       },
     } as WaitForApprovalStep;
     dependencies = {
-      externalResumeSigningKey: 'test-signing-key-with-at-least-32-characters',
       coreStart: {},
-      externalCredsStore,
     } as unknown as ContextDependencies;
     mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
       id: 'exec-abc',
@@ -200,6 +233,5 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockBuildWaitForApprovalResumeLinks).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'custom-space' })
     );
-    expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
   });
 });

@@ -37,23 +37,18 @@ describe('send_wait_for_approval_notifications', () => {
   });
 
   describe('buildWaitForApprovalResumeLinks', () => {
-    it('builds approve and reject URLs with signed tokens only', () => {
+    it('builds approve and reject URLs with encoded apiKey', () => {
       const links = buildWaitForApprovalResumeLinks({
         kibanaUrl: 'https://kibana.example',
         spaceId: 'default',
         executionId: 'exec-1',
-        stepId: 'request-approval',
-        timeout: '1h',
-        signingKey: 'test-signing-key-with-at-least-32-characters',
-        apiKeyId: 'api-key-id',
+        encodedApiKey: 'encoded-api-key',
       });
 
       expect(links.approveUrl).toContain('approved=true');
       expect(links.rejectUrl).toContain('approved=false');
-      expect(links.approveUrl).toContain('token=');
-      expect(links.rejectUrl).toContain('token=');
-      expect(links.approveUrl).not.toContain('apiKey=');
-      expect(links.rejectUrl).not.toContain('apiKey=');
+      expect(links.approveUrl).toContain('apiKey=encoded-api-key');
+      expect(links.rejectUrl).toContain('apiKey=encoded-api-key');
     });
   });
 
@@ -66,8 +61,8 @@ describe('send_wait_for_approval_notifications', () => {
     it('sends webhook slack notification with mrkdwn-safe resume links', async () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });
       const resumeLinksWithQuery = {
-        approveUrl: 'https://kibana.example/approve?token=abc.def&approved=true',
-        rejectUrl: 'https://kibana.example/reject?token=abc.def&approved=false',
+        approveUrl: 'https://kibana.example/approve?apiKey=abc&approved=true',
+        rejectUrl: 'https://kibana.example/reject?apiKey=abc&approved=false',
       };
 
       await sendWaitForApprovalNotifications({
@@ -86,7 +81,7 @@ describe('send_wait_for_approval_notifications', () => {
       expect(execute.mock.calls[0][0].connectorType).toBe('slack');
       expect(execute.mock.calls[0][0].input.message).toContain('&amp;approved=true');
       expect(execute.mock.calls[0][0].input.message).toContain(
-        '<https://kibana.example/approve?token=abc.def&amp;approved=true|Approve>'
+        '<https://kibana.example/approve?apiKey=abc&amp;approved=true|Approve>'
       );
     });
 
