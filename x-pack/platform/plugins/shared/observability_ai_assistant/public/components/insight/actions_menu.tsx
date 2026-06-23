@@ -94,17 +94,14 @@ export function ActionsMenu({
     },
   ];
 
+  const openActionsLabel = i18n.translate('xpack.observabilityAiAssistant.insight.openActions', {
+    defaultMessage: 'Open insight actions',
+  });
+
   const button = (
-    <EuiToolTip
-      content={i18n.translate('xpack.observabilityAiAssistant.insight.openActions', {
-        defaultMessage: 'Open insight actions',
-      })}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={openActionsLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.openActions', {
-          defaultMessage: 'Open insight actions',
-        })}
+        aria-label={openActionsLabel}
         data-test-subj="observabilityAiAssistantInsightActionsButtonIcon"
         iconType="boxesVertical"
         onClick={onButtonClick}

@@ -211,6 +211,13 @@ function PromptEdit({
 }) {
   const [prompt, setPrompt] = useState(initialPrompt);
 
+  const cancelLabel = i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
+    defaultMessage: 'Cancel',
+  });
+  const sendPromptLabel = i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
+    defaultMessage: 'Send prompt',
+  });
+
   return (
     <EuiFlexGroup alignItems={'center'}>
       <EuiFlexItem grow={true}>
@@ -229,16 +236,9 @@ function PromptEdit({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
-            defaultMessage: 'Cancel',
-          })}
-          disableScreenReaderOutput
-        >
+        <EuiToolTip content={cancelLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
-              defaultMessage: 'Cancel',
-            })}
+            aria-label={cancelLabel}
             data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
             iconType="cross"
             display="base"
@@ -249,16 +249,9 @@ function PromptEdit({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
-            defaultMessage: 'Send prompt',
-          })}
-          disableScreenReaderOutput
-        >
+        <EuiToolTip content={sendPromptLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
-              defaultMessage: 'Send prompt',
-            })}
+            aria-label={sendPromptLabel}
             data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
             iconType="kqlFunction"
             display="fill"

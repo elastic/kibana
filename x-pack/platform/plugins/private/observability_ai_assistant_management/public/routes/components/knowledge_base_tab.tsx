@@ -81,20 +81,23 @@ export function KnowledgeBaseTab() {
         </EuiScreenReaderOnly>
       ),
       render: (category: KnowledgeBaseEntryCategory) => {
+        const isSelected = category.categoryKey === selectedCategory?.categoryKey;
+        const label = isSelected
+          ? i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.collapseRowButtonLabel',
+              { defaultMessage: 'Collapse' }
+            )
+          : i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.expandRowButtonLabel',
+              { defaultMessage: 'Expand' }
+            );
         return (
-          <EuiToolTip
-            content={category.categoryKey === selectedCategory?.categoryKey ? 'Collapse' : 'Expand'}
-            disableScreenReaderOutput
-          >
+          <EuiToolTip content={label} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="pluginsColumnsButton"
               onClick={() => setSelectedCategory(category)}
-              aria-label={
-                category.categoryKey === selectedCategory?.categoryKey ? 'Collapse' : 'Expand'
-              }
-              iconType={
-                category.categoryKey === selectedCategory?.categoryKey ? 'minimize' : 'expand'
-              }
+              aria-label={label}
+              iconType={isSelected ? 'minimize' : 'expand'}
             />
           </EuiToolTip>
         );

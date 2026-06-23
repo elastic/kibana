@@ -58,6 +58,10 @@ export function InsightBase({
     setIsActionsPopover(!isActionsPopoverOpen);
   };
 
+  const actionsLabel = i18n.translate('xpack.observabilityAiAssistant.insight.actions', {
+    defaultMessage: 'Actions',
+  });
+
   return (
     <EuiPanel hasBorder hasShadow={false}>
       <EuiAccordion
@@ -101,23 +105,12 @@ export function InsightBase({
                   <EuiPopover
                     anchorPosition="downLeft"
                     button={
-                      <EuiToolTip
-                        content={i18n.translate('xpack.observabilityAiAssistant.insight.actions', {
-                          defaultMessage: 'Actions',
-                        })}
-                        disableScreenReaderOutput
-                      >
+                      <EuiToolTip content={actionsLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
-                          aria-label={i18n.translate(
-                            'xpack.observabilityAiAssistant.insight.actions',
-                            {
-                              defaultMessage: 'Actions',
-                            }
-                          )}
+                          aria-label={actionsLabel}
                           color="text"
                           css={{ alignSelf: 'flex-start' }}
                           data-test-subj="observabilityAiAssistantInsightBaseButtonIcon"
-                          disabled={actions?.length === 0}
                           display="empty"
                           iconType="boxesVertical"
                           size="s"
