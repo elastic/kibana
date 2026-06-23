@@ -31,11 +31,11 @@ export const getFriendlyRuleHttpErrorToastMessage = (error: Error): string => {
       });
     case 403:
       return i18n.translate('xpack.alertingV2.httpError.forbidden', {
-        defaultMessage: "You don't have permission to save this rule.",
+        defaultMessage: "Your role needs additional privileges to save rules. Contact your administrator for help.",
       });
     case 404:
       return i18n.translate('xpack.alertingV2.httpError.notFound', {
-        defaultMessage: 'The rule could not be found. It may have been deleted by someone else.',
+        defaultMessage: 'This rule no longer exists. Go back to view all rules.',
       });
     case 408:
     case 504:

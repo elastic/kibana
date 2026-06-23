@@ -36,7 +36,7 @@ export const useUpdateRule = () => {
     onError: (error: Error) => {
       toasts.addError(enrichHttpErrorMessage(error), {
         title: i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
-          defaultMessage: 'Failed to update rule',
+          defaultMessage: 'Edits not saved',
         }),
         toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
       });

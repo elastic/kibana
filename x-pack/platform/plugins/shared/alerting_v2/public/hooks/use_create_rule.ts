@@ -34,7 +34,7 @@ export const useCreateRule = () => {
     onError: (error: Error) => {
       toasts.addError(enrichHttpErrorMessage(error), {
         title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
-          defaultMessage: 'Failed to create rule',
+          defaultMessage: 'Rule not created',
         }),
         toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
       });

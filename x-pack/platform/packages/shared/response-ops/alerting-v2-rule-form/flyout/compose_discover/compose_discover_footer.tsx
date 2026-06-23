@@ -122,7 +122,7 @@ export const ComposeDiscoverFooter = ({
     const yamlSaveDisabled = hasValidationErrors || yamlHasErrors;
     const yamlSaveDisabledTooltip = yamlHasErrors
       ? i18n.translate('xpack.alertingV2.composeDiscover.flyout.yamlSaveDisabledTooltip', {
-          defaultMessage: 'Resolve YAML errors highlighted in the editor before saving',
+          defaultMessage: 'Fix the errors highlighted in the YAML editor, then save the rule.',
         })
       : undefined;
     return (
