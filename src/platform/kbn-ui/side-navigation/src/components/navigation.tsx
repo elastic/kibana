@@ -231,6 +231,10 @@ export const Navigation = ({
       />
     ) : null;
 
+  // When the secondary panel is collapsed it is unmounted, so the header button is not
+  // available. Keep a footer affordance in that state so users can expand it again.
+  const footerCollapseButton = isCollapsedProp ? renderCollapseButton() : null;
+
   return (
     <div
       css={navigationWrapperStyles}
@@ -470,7 +474,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer hidePrimaryLabels={hidePrimaryLabels}>
+        <SideNav.Footer hidePrimaryLabels={hidePrimaryLabels} collapseButton={footerCollapseButton}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
