@@ -6,6 +6,7 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
+import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -121,7 +122,7 @@ export class PackagePolicyService {
     policiesToUpdate,
     spaceId,
   }: {
-    policiesToUpdate: NewPackagePolicyWithId[];
+    policiesToUpdate: UpdatePackagePolicyWithId[];
     spaceId: string;
   }) {
     if (policiesToUpdate.length === 0) {
@@ -137,7 +138,7 @@ export class PackagePolicyService {
       this.server.fleet.packagePolicyService.bulkUpdate(
         client,
         this.getInternalEsClient(),
-        policies,
+        policies as UpdatePackagePolicyWithId[],
         {
           force: true,
           asyncDeploy: true,
