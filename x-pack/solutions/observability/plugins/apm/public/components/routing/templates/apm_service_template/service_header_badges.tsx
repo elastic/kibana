@@ -25,7 +25,6 @@ interface ServiceHeaderBadgesProps {
   end: string;
   onSloClick: () => void;
   alertsTabHref: string;
-  overviewTabHref: string;
 }
 
 export function ServiceHeaderBadges({
@@ -35,7 +34,6 @@ export function ServiceHeaderBadges({
   end,
   onSloClick,
   alertsTabHref,
-  overviewTabHref,
 }: ServiceHeaderBadgesProps) {
   const { euiTheme } = useEuiTheme();
   const { core, plugins } = useApmPluginContext();
@@ -160,7 +158,6 @@ export function ServiceHeaderBadges({
           <AnomaliesBadge
             score={anomalyData?.anomalyScore}
             detectorType={anomalyData?.detectorType}
-            href={overviewTabHref}
           />
         </EuiFlexItem>
       )}

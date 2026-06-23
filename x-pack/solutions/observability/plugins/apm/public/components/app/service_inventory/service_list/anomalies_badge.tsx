@@ -92,7 +92,11 @@ export function AnomaliesBadge({ score, href, onClick, detectorType }: Anomalies
 
   // `EuiBadge` exposes anchor (`href`) and button (`onClick`) variants as a
   // mutually exclusive union, so the interaction props are resolved up front.
-  const interactionProps = onClick ? { onClick, onClickAriaLabel: text } : href ? { href } : {};
+  const interactionProps = onClick
+    ? { onClick, onClickAriaLabel: text }
+    : href
+    ? { href }
+    : { role: 'img', 'aria-label': text };
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
