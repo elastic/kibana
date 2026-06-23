@@ -10,16 +10,15 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { EsqlKnowledgeBase } from '../../../../../common/task/util/esql_knowledge_base';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
+import type { translateRuleState } from './state';
 import type { migrateRuleConfigSchema } from '../../state';
 import type { MigrateRuleGraphParams } from '../../types';
-import type { translateRuleState } from './state';
 
 export type TranslateRuleState = typeof translateRuleState.State;
-export type TranslateRuleConfigSchema = (typeof migrateRuleConfigSchema)['State'];
-export type TranslateRuleConfig = RunnableConfig<TranslateRuleConfigSchema>;
+export type TranslateRuleGraphConfig = RunnableConfig<(typeof migrateRuleConfigSchema)['State']>;
 export type GraphNode = (
   state: TranslateRuleState,
-  config: TranslateRuleConfig
+  config: TranslateRuleGraphConfig
 ) => Promise<Partial<TranslateRuleState>>;
 
 export interface TranslateRuleGraphParams {
