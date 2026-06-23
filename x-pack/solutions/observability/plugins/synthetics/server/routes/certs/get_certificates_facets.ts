@@ -13,6 +13,7 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { CertFacets } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import { getSyntheticsCertsFacets } from '../../queries/get_certs_facets';
+import { isCCSEnabled } from '../../lib/remote_result_utils';
 
 const EMPTY_FACETS: CertFacets = {
   monitorTypes: [],
@@ -34,16 +35,23 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
     query: schema.object({
       from: schema.maybe(schema.string({ maxLength: 256 })),
       to: schema.maybe(schema.string({ maxLength: 256 })),
+      remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
     }),
   },
-  handler: async ({ request, syntheticsEsClient, monitorConfigRepository }) => {
-    const { from, to } = request.query;
+  handler: async ({ request, syntheticsEsClient, monitorConfigRepository, server, spaceId }) => {
+    const { from, to, remoteNames } = request.query;
+
+    const ccsEnabled = isCCSEnabled(server);
+    const remoteNameList = remoteNames ? remoteNames.split(',').filter(Boolean) : undefined;
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
     });
 
-    if (monitors.length === 0) {
+    // Same rationale as the cert list route: without CCS, no local monitors
+    // means no certs to facet over. With CCS on, remote-only monitors may
+    // still contribute counts so the search must run.
+    if (!ccsEnabled && monitors.length === 0) {
       return { data: EMPTY_FACETS };
     }
 
@@ -54,6 +62,9 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
       to,
       syntheticsEsClient,
       monitorIds: enabledMonitorQueryIds,
+      ccsEnabled,
+      remoteNames: remoteNameList,
+      spaceId,
     });
 
     return { data };
