@@ -365,6 +365,22 @@ for _ in {1..180}; do
   sleep 5
 done
 
+# Weekly/on-demand CI must export scores to the golden cluster — not ephemeral Scout ES.
+if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
+  if [[ -z "${EVALUATIONS_KBN_URL:-}" ]]; then
+    echo "KBN_EVALS was set but EVALUATIONS_KBN_URL is missing."
+    echo "Scores would ingest only into local Scout Kibana and never reach the golden cluster."
+    echo "Ensure Vault kbn-evals config includes evaluationsKbn.url (see kbn-evals README golden cluster section)."
+    exit 1
+  fi
+  if [[ -z "${EVALUATIONS_KBN_API_KEY:-}" ]]; then
+    echo "KBN_EVALS was set but EVALUATIONS_KBN_API_KEY is missing."
+    echo "Ensure Vault kbn-evals config includes evaluationsKbn.apiKey with evals:all privileges."
+    exit 1
+  fi
+  echo "Score ingest target host: $(node -e 'try{console.log(new URL(process.argv[1]).host)}catch{console.log(process.argv[1])}' "${EVALUATIONS_KBN_URL}")"
+fi
+
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
 # If EVAL_GREP is set, pass Playwright --grep to filter tests by name/pattern.
