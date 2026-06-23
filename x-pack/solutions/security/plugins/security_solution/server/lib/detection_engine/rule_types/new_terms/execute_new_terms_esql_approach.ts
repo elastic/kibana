@@ -9,6 +9,7 @@ import { chunk, sum } from 'lodash';
 import { performance } from 'perf_hooks';
 
 import type { estypes } from '@elastic/elasticsearch';
+import { esql } from '@elastic/esql';
 
 import type { NewTermsRuleParams } from '../../rule_schema';
 import type { SecurityExecutorOptions, SignalSource } from '../types';
@@ -44,14 +45,14 @@ type NewTermsExecutorOptions = SecurityExecutorOptions<
   { isLoggedRequestsEnabled?: boolean }
 >;
 
-type NewTermsCombination = Record<string, string | number | boolean>;
+type NewTermsCombination = Record<string, string | number>;
 
 interface BuildNewTermsEsqlQueryParams {
-  inputIndex: string[] | undefined;
+  inputIndex: string[];
   newTermsFields: string[];
   aggregatableTimestampField: string;
   primaryTimestamp: string;
-  secondaryTimestamp: string;
+  secondaryTimestamp: string | undefined;
   ruleIntervalFrom: string;
 }
 
@@ -63,25 +64,34 @@ const buildNewTermsEsqlQuery = ({
   secondaryTimestamp,
   ruleIntervalFrom,
 }: BuildNewTermsEsqlQueryParams): string => {
-  const byFields = newTermsFields.join(', ');
-  const timestampField = aggregatableTimestampField;
-  const nullFilters = newTermsFields.map((field) => `\`${field}\` IS NOT NULL`).join(' AND ');
-  const mvExpandCommands = newTermsFields.map((field) => `| MV_EXPAND \`${field}\``).join(' ');
-  const timestampOverrideCommand =
-    aggregatableTimestampField === 'kibana.combined_timestamp'
-      ? `| EVAL ${aggregatableTimestampField} = CASE(${primaryTimestamp} IS NOT NULL, ${primaryTimestamp}, ${secondaryTimestamp})`
-      : '';
+  let query = esql.from(inputIndex);
 
-  return [
-    `FROM ${(inputIndex ?? []).join(', ')}`,
-    timestampOverrideCommand,
-    `| WHERE ${nullFilters}`,
-    mvExpandCommands,
-    `| STATS first_seen = MIN(\`${timestampField}\`) BY ${byFields}`,
-    `| WHERE first_seen > "${ruleIntervalFrom}"`,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  // Timestamp override: synthesize a combined timestamp from primary/secondary
+  if (aggregatableTimestampField === 'kibana.combined_timestamp' && secondaryTimestamp) {
+    query = query
+      .pipe`EVAL ${esql.col(aggregatableTimestampField)} = CASE(${esql.col(primaryTimestamp)} IS NOT NULL, ${esql.col(primaryTimestamp)}, ${esql.col(secondaryTimestamp)})`;
+  }
+
+  // Null filters: exclude documents where any new terms field is null.
+  // We chain individual WHERE commands (ES|QL treats consecutive WHERE as AND).
+  for (const field of newTermsFields) {
+    query = query.where`${esql.col(field)} IS NOT NULL`;
+  }
+
+  // MV_EXPAND each field to handle multi-valued fields
+  for (const field of newTermsFields) {
+    query = query.mv_expand(field);
+  }
+
+  // Aggregate: compute first_seen per unique terms combination
+  const byColumns = newTermsFields.map((f) => esql.col(f));
+  query = query
+    .pipe`STATS first_seen = MIN(${esql.col(aggregatableTimestampField)}) BY ${byColumns}`;
+
+  // Keep only combinations first seen after the rule interval start (genuinely new)
+  query = query.pipe`WHERE first_seen > ${ruleIntervalFrom}`;
+
+  return query.print('basic');
 };
 
 const parseNewTermsCombinationsFromEsqlResponse = (
@@ -98,7 +108,9 @@ const parseNewTermsCombinationsFromEsqlResponse = (
       const fieldIndex = newTermsFieldIndices[i];
       const fieldValue = fieldIndex >= 0 ? row[fieldIndex] : null;
       if (fieldValue != null) {
-        combination[newTermsFields[i]] = fieldValue as string | number | boolean;
+        // Coerce booleans to strings since the alert schema only supports string | number
+        combination[newTermsFields[i]] =
+          typeof fieldValue === 'boolean' ? String(fieldValue) : (fieldValue as string | number);
       }
     }
     if (Object.keys(combination).length === newTermsFields.length) {
@@ -112,13 +124,13 @@ const parseNewTermsCombinationsFromEsqlResponse = (
 interface BuildMsearchSearchesParams {
   batch: NewTermsCombination[];
   newTermsFields: string[];
-  inputIndex: string[] | undefined;
+  inputIndex: string[];
   tupleFrom: string;
   tupleTo: string;
   esFilter: estypes.QueryDslQueryContainer | undefined;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
-  secondaryTimestamp: string;
+  secondaryTimestamp: string | undefined;
 }
 
 const buildMsearchSearchesForCombinationBatch = ({
@@ -183,7 +195,7 @@ const processMsearchResponsesToEventsAndTerms = ({
   ruleExecutionLogger,
 }: {
   batch: NewTermsCombination[];
-  responses: estypes.MsearchMultiSearchItem[];
+  responses: estypes.MsearchResponseItem<SignalSource>[];
   newTermsFields: string[];
   result: ReturnType<typeof createSearchAfterReturnType>;
   ruleExecutionLogger: NewTermsExecutorOptions['sharedParams']['ruleExecutionLogger'];
