@@ -189,11 +189,27 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  async saveSearch(name: string) {
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
+    if (storeTimeRange !== undefined) {
+      const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
+      await switchControl.waitFor({ state: 'visible' });
+      const isChecked = (await switchControl.getAttribute('aria-checked')) === 'true';
+      if (isChecked !== storeTimeRange) {
+        await switchControl.click();
+      }
+    }
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+  }
+
+  async hasUnsavedChangesIndicator(): Promise<boolean> {
+    return await this.page.testSubj
+      .locator('split-button-notification-indicator')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
   }
 
   async saveSearchAsNew(name: string) {

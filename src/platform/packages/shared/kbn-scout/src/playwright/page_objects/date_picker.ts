@@ -17,6 +17,12 @@ export enum DateUnitSelector {
   Hours = 'h',
 }
 
+const DATE_UNIT_LABELS: Record<DateUnitSelector, string> = {
+  [DateUnitSelector.Seconds]: 'Seconds',
+  [DateUnitSelector.Minutes]: 'Minutes',
+  [DateUnitSelector.Hours]: 'Hours',
+};
+
 export class DatePicker {
   private readonly quickMenuButton;
   private readonly toggleRefreshButton;
@@ -174,6 +180,39 @@ export class DatePicker {
     await this.page.testSubj.locator('dateRangePickerCustomRangePanel').waitFor();
   }
 
+  private async openSettingsPanel() {
+    const settingsPanel = this.page.testSubj.locator('dateRangePickerSettingsPanel');
+    const isSettingsPanelOpen = await settingsPanel
+      .waitFor({ state: 'visible', timeout: 500 })
+      .then(() => true)
+      .catch(() => false);
+    if (isSettingsPanelOpen) {
+      return;
+    }
+
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+    await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor();
+    await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
+    await settingsPanel.waitFor();
+  }
+
+  private async closeSettingsPanel() {
+    const backButton = this.page.testSubj.locator('dateRangePickerSubPanelBackButton');
+    const isSubPanelOpen = await backButton
+      .waitFor({ state: 'visible', timeout: 500 })
+      .then(() => true)
+      .catch(() => false);
+    if (isSubPanelOpen) {
+      await backButton.click();
+      await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor();
+    }
+
+    await this.page.testSubj.locator('dateRangePickerInput').click();
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('dateRangePickerPopoverPanel').waitFor({ state: 'hidden' });
+    await this.page.keyboard.press('Escape');
+  }
+
   private async setDatePart(side: 'Start' | 'End', value: string) {
     // Dialog elements render as a portal at the page root
     await this.page.testSubj.locator(`dateRangePicker${side}AbsoluteTab`).click();
@@ -316,6 +355,44 @@ export class DatePicker {
     return { start, end };
   }
 
+  async getRefreshConfig(): Promise<{ interval: string; units: string; isPaused: boolean }> {
+    if (await this.isNewDateRangePicker()) {
+      await this.openSettingsPanel();
+
+      const interval =
+        (await this.page.testSubj
+          .locator('dateRangePickerAutoRefreshIntervalCount')
+          .getAttribute('value')) ?? '';
+      const unit = (await this.page.testSubj
+        .locator('dateRangePickerAutoRefreshIntervalUnit')
+        .inputValue()) as DateUnitSelector;
+      const toggleChecked =
+        (await this.page.testSubj
+          .locator('dateRangePickerAutoRefreshToggle')
+          .getAttribute('aria-checked')) === 'true';
+
+      await this.closeSettingsPanel();
+
+      return {
+        interval,
+        units: DATE_UNIT_LABELS[unit],
+        isPaused: !toggleChecked,
+      };
+    }
+
+    await this.quickMenuButton.click();
+    const interval = (await this.refreshIntervalInput.getAttribute('value')) ?? '';
+    const unit = (await this.refreshIntervalUnitSelect.inputValue()) as DateUnitSelector;
+    const toggleChecked = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
+    await this.quickMenuButton.click();
+
+    return {
+      interval,
+      units: DATE_UNIT_LABELS[unit],
+      isPaused: !toggleChecked,
+    };
+  }
+
   /**
    * Returns the human-readable time range label shown by whichever picker is
    * active.
@@ -353,9 +430,7 @@ export class DatePicker {
 
   async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
     if (await this.isNewDateRangePicker()) {
-      await this.page.testSubj.locator('dateRangePickerControlButton').click();
-      await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
-      await this.page.testSubj.locator('dateRangePickerSettingsPanel').waitFor();
+      await this.openSettingsPanel();
 
       const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
       const isPaused = (await toggle.getAttribute('aria-checked')) !== 'true';
@@ -370,7 +445,7 @@ export class DatePicker {
         .locator('dateRangePickerAutoRefreshIntervalUnit')
         .selectOption({ value: dateUnit });
 
-      await this.page.keyboard.press('Escape');
+      await this.closeSettingsPanel();
     } else {
       await this.quickMenuButton.click();
       const isPaused = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'false';
