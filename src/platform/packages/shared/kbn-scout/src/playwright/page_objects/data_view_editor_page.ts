@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 
 // Detail page URL after a data view is saved: /app/management/kibana/dataViews/dataView/<id>
 export const DATA_VIEW_DETAIL_URL_PATTERN = /\/management\/kibana\/dataViews\/.+/;
@@ -53,6 +54,7 @@ export class DataViewEditorPage {
   }
 
   async save(): Promise<void> {
+    await expect(this.saveButton).toBeEnabled({ timeout: 30_000 });
     await this.saveButton.click();
     await this.flyout.waitFor({ state: 'hidden' });
   }
