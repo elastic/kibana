@@ -45,25 +45,45 @@ spaceTest.describe(
       await teardownSecurityExperience(scoutSpace);
     });
 
-    spaceTest('lists the alert actions and hides timeline (Discover)', async ({ pageObjects }) => {
-      const { securityDiscoverFlyout } = pageObjects;
-      await securityDiscoverFlyout.openTakeActionMenu();
+    spaceTest(
+      'lists the alert actions and swaps timeline for explore (Discover)',
+      async ({ pageObjects }) => {
+        const { securityDiscoverFlyout } = pageObjects;
+        await securityDiscoverFlyout.openTakeActionMenu();
 
-      // Alert-specific actions are present
-      await expect.soft(securityDiscoverFlyout.takeActionItem(TA.STATUS_CLOSE)).toBeVisible();
-      await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ALERT_TAGS)).toBeVisible();
-      await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ALERT_ASSIGNEES)).toBeVisible();
-      await expect.soft(securityDiscoverFlyout.takeActionItem(TA.RUN_WORKFLOW)).toBeVisible();
-      await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ADD_TO_NEW_CASE)).toBeVisible();
-      await expect
-        .soft(securityDiscoverFlyout.takeActionItem(TA.ADD_TO_EXISTING_CASE))
-        .toBeVisible();
+        // Alert-specific actions are present
+        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.STATUS_CLOSE)).toBeVisible();
+        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ALERT_TAGS)).toBeVisible();
+        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ALERT_ASSIGNEES)).toBeVisible();
+        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.RUN_WORKFLOW)).toBeVisible();
+        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ADD_TO_NEW_CASE)).toBeVisible();
+        await expect
+          .soft(securityDiscoverFlyout.takeActionItem(TA.ADD_TO_EXISTING_CASE))
+          .toBeVisible();
 
-      // Investigate in Timeline is hidden outside the security app (i.e. in Discover)
-      await expect(securityDiscoverFlyout.takeActionItem(TA.INVESTIGATE_IN_TIMELINE)).toHaveCount(
-        0
-      );
-    });
+        // Outside the security app (i.e. in Discover), investigate-in-timeline is replaced by the
+        // explore action ("Explore in Alerts" for an alert).
+        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.EXPLORE)).toBeVisible();
+        await expect(securityDiscoverFlyout.takeActionItem(TA.INVESTIGATE_IN_TIMELINE)).toHaveCount(
+          0
+        );
+      }
+    );
+
+    spaceTest(
+      'explore action opens the security alerts page in a new tab',
+      async ({ page, pageObjects }) => {
+        const { securityDiscoverFlyout } = pageObjects;
+        await securityDiscoverFlyout.openTakeActionMenu();
+
+        // The explore action opens the relevant security page in a new browser tab (window.open).
+        const newTabPromise = page.context().waitForEvent('page');
+        await securityDiscoverFlyout.clickTakeActionItem(TA.EXPLORE);
+        const newTab = await newTabPromise;
+        await expect(newTab).toHaveURL(/app\/security\/alerts/, { timeout: 30_000 });
+        await newTab.close();
+      }
+    );
 
     spaceTest('apply alert tags opens the tags sub-panel', async ({ pageObjects }) => {
       const { securityDiscoverFlyout } = pageObjects;

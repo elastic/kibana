@@ -53,6 +53,7 @@ spaceTest.describe(
         .soft(securityDiscoverFlyout.takeActionItem(TA.ADD_TO_EXISTING_CASE))
         .toBeVisible();
       await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ADD_NOTE)).toBeVisible();
+      await expect.soft(securityDiscoverFlyout.takeActionItem(TA.EXPLORE)).toBeVisible();
 
       // Alert-only actions must NOT be present for an event
       await expect.soft(securityDiscoverFlyout.takeActionItem(TA.STATUS_CLOSE)).toHaveCount(0);
@@ -76,5 +77,20 @@ spaceTest.describe(
       await securityDiscoverFlyout.clickTakeActionItem(TA.ADD_TO_EXISTING_CASE);
       await expect(securityDiscoverFlyout.allCasesModal).toBeVisible();
     });
+
+    spaceTest(
+      'explore action opens the security page in a new tab',
+      async ({ page, pageObjects }) => {
+        const { securityDiscoverFlyout } = pageObjects;
+        await securityDiscoverFlyout.openTakeActionMenu();
+
+        // "Explore in Timeline" opens the security alerts page (with a timeline flyout) in a new tab.
+        const newTabPromise = page.context().waitForEvent('page');
+        await securityDiscoverFlyout.clickTakeActionItem(TA.EXPLORE);
+        const newTab = await newTabPromise;
+        await expect(newTab).toHaveURL(/app\/security\/alerts/, { timeout: 30_000 });
+        await newTab.close();
+      }
+    );
   }
 );

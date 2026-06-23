@@ -130,6 +130,9 @@ export const TAKE_ACTION_TEST_SUBJECTS = {
   RUN_WORKFLOW: 'run-workflow-action',
   ADD_NOTE: 'add-note-action',
   INVESTIGATE_IN_TIMELINE: 'investigate-in-timeline-action-item',
+  // Shown only outside the security app (i.e. in Discover) in place of investigate-in-timeline.
+  // Label is "Explore in Alerts" for alerts and "Explore in Timeline" for events; same test subject.
+  EXPLORE: 'explore-in-alerts-or-timeline',
   // Sub-panels / modals opened from the document menu
   ALERT_TAGS_PANEL: 'alert-tags-selectable-menu',
   ALERT_ASSIGNEES_PANEL: 'alert-assignees-selectable-menu',
