@@ -49,7 +49,8 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
     const { monitorTypes, browserResourceTypes, party, tags, issuers, ...queryParams } =
       request.query;
 
-    const toList = (value?: string) => (value ? value.split(',').filter(Boolean) : undefined);
+    const toList = (value?: string) =>
+      value ? value.split(',').map((s) => s.trim()).filter(Boolean) : undefined;
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
