@@ -146,6 +146,25 @@ export class IndicatorSearcher {
           query: this.buildKeywordQuery(queryText, filter, options.types),
         },
       };
+    } else if (mode === 'semantic') {
+      retriever = {
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: { match: { search_embedding: queryText } },
+                  filter: { bool: { filter } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: limit,
+          min_score: this.config.semantic_min_score,
+        },
+      };
     } else {
       retriever = {
         rrf: {

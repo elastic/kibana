@@ -48,7 +48,8 @@ const memorySearchSchema = z.object({
       'Search mode — omit for the default "hybrid" behaviour, which combines keyword and semantic ' +
         'matching and finds pages that are thematically related even when they share no keywords with the query. ' +
         '"keyword": fast fuzzy/wildcard match only — use when you know the exact name, tag, or category and want ' +
-        'to avoid false positives from semantic drift.'
+        'to avoid false positives from semantic drift. ' +
+        '"semantic": vector-similarity only — rarely the right choice because it ignores exact matches; prefer hybrid.'
     ),
 });
 
