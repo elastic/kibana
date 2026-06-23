@@ -16,9 +16,9 @@ import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
+import { firstValueFrom, type Subscription } from 'rxjs';
 import type { FeedbackFormData } from '../common';
 import { getAppDetails } from './src/utils';
-import { firstValueFrom, type Subscription } from 'rxjs';
 
 interface FeedbackPluginSetupDependencies {
   cloud?: CloudSetup;
