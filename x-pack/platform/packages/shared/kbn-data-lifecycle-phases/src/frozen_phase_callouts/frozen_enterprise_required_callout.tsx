@@ -27,23 +27,17 @@ export const FrozenEnterpriseRequiredCallout = ({
       size="s"
       color="warning"
       announceOnMount={false}
-      title={i18n.translate(
-        'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.title',
-        {
-          defaultMessage: 'Enterprise license required for frozen phase',
-        }
-      )}
+      title={i18n.translate('xpack.dataLifecyclePhases.frozen.enterpriseRequiredCallout.title', {
+        defaultMessage: 'Enterprise license required for frozen phase',
+      })}
       data-test-subj={calloutTestSubj}
       css={calloutCss}
     >
       <EuiText size="s" color="subdued">
-        {i18n.translate(
-          'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.body',
-          {
-            defaultMessage:
-              'Your current subscription tier does not support the frozen phase. This phase will be ignored until you remove it or upgrade your license.',
-          }
-        )}
+        {i18n.translate('xpack.dataLifecyclePhases.frozen.enterpriseRequiredCallout.body', {
+          defaultMessage:
+            'Your current subscription tier does not support the frozen phase. This phase will be ignored until you remove it or upgrade your license.',
+        })}
       </EuiText>
 
       {onUpgradeEnterprise && (
@@ -51,13 +45,12 @@ export const FrozenEnterpriseRequiredCallout = ({
           <EuiSpacer size="m" />
           <EuiButton
             size="s"
-            fill
             color="warning"
             onClick={onUpgradeEnterprise}
             data-test-subj={upgradeButtonTestSubj}
           >
             {i18n.translate(
-              'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.upgradeButton',
+              'xpack.dataLifecyclePhases.frozen.enterpriseRequiredCallout.upgradeButton',
               {
                 defaultMessage: 'Upgrade to enterprise',
               }
