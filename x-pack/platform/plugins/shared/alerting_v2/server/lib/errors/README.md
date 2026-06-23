@@ -74,9 +74,10 @@ backwards compatible. Renaming or removing a code is a breaking change.
 
 ### Alert actions (`server/lib/alert_actions_client/`)
 
-| Code                    | Status | When                                                                     | `details`                     |
-| ----------------------- | ------ | ------------------------------------------------------------------------ | ----------------------------- |
-| `ALERT_EVENT_NOT_FOUND` | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`) | `{ group_hash, episode_id? }` |
+| Code                         | Status | When                                                                                                | `details`                                                                  |
+| ---------------------------- | ------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `ALERT_EVENT_NOT_FOUND`      | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`). Also surfaces on `activate` when the pre-deactivate `.rule-events` doc cannot be located. | `{ group_hash, episode_id? }`                                              |
+| `INVALID_EPISODE_STATE_TRANSITION` | 400    | The requested action is incompatible with the episode's lifecycle: deactivate of an already-`inactive` or `pending` episode, activate of a non-`inactive` episode (no superseding episode check), or activate of an episode whose most recent `.alert-actions` row is not `deactivate` (natural recovery / double-activate). | `{ group_hash, episode_id, episode_status, action_type, last_action? }` (`last_action` is set on activate-precondition rejections; `null` when the episode has no prior actions) |
 
 ### Rule doctor insights (`server/lib/rule_doctor_insights_client/`)
 
