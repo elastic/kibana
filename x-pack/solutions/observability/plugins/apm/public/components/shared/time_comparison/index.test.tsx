@@ -152,8 +152,8 @@ describe('TimeComparison component', () => {
       expect(spy).not.toHaveBeenCalled();
       const expectedBoundsOption = component.getByTestId(
         EXPECTED_BOUNDS_TEST_SUBJ.allEnvironmentsDisabled
-      ) as HTMLOptionElement;
-      expect(expectedBoundsOption.disabled).toBe(true);
+      );
+      expect(expectedBoundsOption).toBeDisabled();
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);
@@ -180,10 +180,8 @@ describe('TimeComparison component', () => {
         wrapper: Wrapper,
       });
       expect(spy).not.toHaveBeenCalled();
-      const expectedBoundsOption = component.getByTestId(
-        EXPECTED_BOUNDS_TEST_SUBJ.enabled
-      ) as HTMLOptionElement;
-      expect(expectedBoundsOption.disabled).toBe(false);
+      const expectedBoundsOption = component.getByTestId(EXPECTED_BOUNDS_TEST_SUBJ.enabled);
+      expect(expectedBoundsOption).not.toBeDisabled();
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);

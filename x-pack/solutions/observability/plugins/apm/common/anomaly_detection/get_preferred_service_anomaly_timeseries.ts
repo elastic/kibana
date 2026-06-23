@@ -49,9 +49,17 @@ function mergeAllEnvironmentsAnomalyTimeseries(
 
   // The "Open anomalies" link requires a single jobId. We use the job that
   // holds the highest scored anomaly across all environments so the single
-  // metric viewer opens on the most relevant environment.
-  const seriesWithHighestScore = seriesForType.reduce((highest, current) =>
-    getMaxAnomalyScore(current) > getMaxAnomalyScore(highest) ? current : highest
+  // metric viewer opens on the most relevant environment. The max score is
+  // cached alongside the series to avoid recomputing it on every iteration.
+  const { serie: seriesWithHighestScore } = seriesForType.reduce<{
+    serie: ServiceAnomalyTimeseries;
+    score: number;
+  }>(
+    (highest, current) => {
+      const score = getMaxAnomalyScore(current);
+      return score > highest.score ? { serie: current, score } : highest;
+    },
+    { serie: seriesForType[0], score: getMaxAnomalyScore(seriesForType[0]) }
   );
 
   // Tag every anomaly with the environment it belongs to so it can be surfaced

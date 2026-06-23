@@ -55,15 +55,22 @@ export function AnomalyChartTooltip({
       )}
       <TooltipTable gridTemplateColumns={`${COLOR_COLUMN_WIDTH} auto auto`}>
         <TooltipTableBody>
-          {visibleValues.map((value) => {
+          {visibleValues.map((value, index) => {
             const { color, label, formattedValue, seriesIdentifier, datum } = value;
             const environment = (datum as { environment?: string } | undefined)?.environment;
             const environmentSuffix =
               environment != null ? ` (${getEnvironmentLabel(environment)})` : '';
             const fullLabel = `${label}${environmentSuffix}`;
 
+            // In the combined "all environments" view several anomalies (from
+            // different environments) can share the same x bucket within the same
+            // severity series, so `seriesIdentifier.key` is not unique across rows.
+            // Including the environment and index keeps React keys unique and
+            // avoids reconciliation glitches that duplicated rows on hover.
+            const rowKey = `${seriesIdentifier.key}-${environment ?? ''}-${index}`;
+
             return (
-              <TooltipTableRow key={seriesIdentifier.key}>
+              <TooltipTableRow key={rowKey}>
                 <TooltipTableColorCell color={color} />
                 <TooltipTableCell truncate title={fullLabel}>
                   {fullLabel}

@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -27,6 +25,13 @@
  *      and a smaller MAJOR anomaly in `development` (later sub-window). Both
  *      render in the combined chart at different times, but the badge / open
  *      anomalies link must still surface the production (highest) score.
+ *
+ *   2b. Identical anomalies side by side (same value across environments):
+ *      `synth-anomaly-side-by-side` gets the SAME critical latency spike in both
+ *      `production` and `development`, optionally offset in time by
+ *      `sideBySideOffsetMinutes`. In the combined "all environments" view this
+ *      renders two identical anomalies next to each other, exercising the tooltip
+ *      when side-by-side values are the same.
  *
  *   3. Detector coverage across environments:
  *      a dedicated service trips each detector (latency, throughput, failure
@@ -98,9 +103,15 @@
  *
  * SCENARIO OPTS
  * -------------
- * --scenarioOpts.anomalyWindowHours=2   Trailing hours that are anomalous
- *                                       (split in half across the two envs).
- * --scenarioOpts.baselineRate=10        Transactions per minute during baseline.
+ * --scenarioOpts.anomalyWindowHours=2       Trailing hours that are anomalous
+ *                                           (split in half across the two envs).
+ * --scenarioOpts.baselineRate=10            Transactions per minute during baseline.
+ * --scenarioOpts.sideBySideOffsetMinutes=0  Time offset applied to the
+ *                                           `synth-anomaly-side-by-side` service's
+ *                                           development environment. Both envs get
+ *                                           the SAME anomaly, so the combined view
+ *                                           shows identical anomalies side by side
+ *                                           (0 = exact same time bucket).
  *
  * VALIDATE + ML SETUP
  * -------------------
@@ -113,8 +124,8 @@
 
 import type { ApmFields, Instance } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
-import type { Scenario } from '../cli/scenario';
-import { withClient } from '../lib/utils/with_client';
+import type { Scenario } from '@kbn/synthtrace';
+import { withClient } from '@kbn/synthtrace';
 
 const TRANSACTION_NAME = 'GET /api/orders';
 
@@ -129,6 +140,12 @@ const DEFAULT_SCENARIO_OPTS = {
   // 10 tx/min gives the transaction-metrics aggregations enough samples per
   // bucket for ML to build a stable baseline (2/min is too sparse and noisy).
   baselineRate: 10,
+  // Time offset (in minutes) applied to the `synth-anomaly-side-by-side`
+  // service's development environment relative to production. Both environments
+  // get the SAME anomaly shape, so in the combined "all environments" view they
+  // render as identical anomalies side by side, offset by this amount. Use `0`
+  // to make them land on the exact same time bucket.
+  sideBySideOffsetMinutes: 15,
 };
 
 type AnomalyPredicate = (timestamp: number) => boolean;
@@ -143,7 +160,7 @@ interface AllMetricsWindows {
 }
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
-  const { anomalyWindowHours, baselineRate } = {
+  const { anomalyWindowHours, baselineRate, sideBySideOffsetMinutes } = {
     ...DEFAULT_SCENARIO_OPTS,
     ...(runOptions.scenarioOpts || {}),
   };
@@ -161,6 +178,19 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
   const isProductionAnomaly: AnomalyPredicate = (timestamp) =>
     timestamp >= productionWindowStart && timestamp < developmentWindowStart;
   const isDevelopmentAnomaly: AnomalyPredicate = (timestamp) => timestamp >= developmentWindowStart;
+
+  // Same anomaly shape in BOTH environments, optionally offset in time by
+  // `sideBySideOffsetMinutes`. Both windows sit in the earlier (production) half
+  // of the span so they cluster together, producing identical anomalies side by
+  // side in the combined "all environments" view. With an offset of `0` the two
+  // environments land on the exact same time bucket.
+  const sideBySideOffsetMs = Number(sideBySideOffsetMinutes) * 60 * 1000;
+  const sideBySideWindowEnd = productionWindowStart + totalWindowMs / 2;
+  const isSideBySideProductionAnomaly: AnomalyPredicate = (timestamp) =>
+    timestamp >= productionWindowStart && timestamp < sideBySideWindowEnd;
+  const isSideBySideDevelopmentAnomaly: AnomalyPredicate = (timestamp) =>
+    timestamp >= productionWindowStart + sideBySideOffsetMs &&
+    timestamp < sideBySideWindowEnd + sideBySideOffsetMs;
 
   // OVERLAPPING sub-windows over the anomaly span, used by the
   // `synth-anomaly-all-metrics` service so a single service trips ALL THREE
@@ -302,6 +332,24 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         ),
       ];
 
+      // 2b) Same anomaly in BOTH environments, offset by
+      //     `sideBySideOffsetMinutes`. A CRITICAL latency spike of identical
+      //     magnitude in production and development, so the combined chart shows
+      //     two identical anomalies side by side (exercises the multi-environment
+      //     tooltip when the side-by-side values are the same).
+      const sideBySideEvents = [
+        latencyEvents(
+          instanceFor('synth-anomaly-side-by-side', PRODUCTION),
+          isSideBySideProductionAnomaly,
+          6000
+        ),
+        latencyEvents(
+          instanceFor('synth-anomaly-side-by-side', DEVELOPMENT),
+          isSideBySideDevelopmentAnomaly,
+          6000
+        ),
+      ];
+
       // 3) Throughput anomaly across environments at different times. A ~20x
       //    burst (CRITICAL) in production (earlier) and a ~8x burst (MAJOR) in
       //    development (later).
@@ -368,6 +416,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       return withClient(apmEsClient, [
         ...detectorsEvents,
         ...environmentsEvents,
+        ...sideBySideEvents,
         ...throughputEventsByEnv,
         ...allMetricsEventsByEnv,
       ]);
