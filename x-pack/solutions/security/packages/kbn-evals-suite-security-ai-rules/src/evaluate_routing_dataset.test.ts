@@ -9,10 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ruleRoutingExamples } from '../datasets/routing_examples';
-import {
-  buildRuleRoutingEvaluators,
-  toRoutingDatasetExample,
-} from './evaluate_routing_dataset';
+import { buildRuleRoutingEvaluators, toRoutingDatasetExample } from './evaluate_routing_dataset';
 
 const stubTraceEvaluator = (name: string): Evaluator => ({
   name,

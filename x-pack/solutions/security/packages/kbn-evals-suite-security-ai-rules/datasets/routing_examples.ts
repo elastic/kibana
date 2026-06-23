@@ -115,8 +115,7 @@ const distractorExamples: RuleRoutingExample[] = [
     id: 'routing-distractor-dashboards',
     input: { question: 'Show me the available dashboards in Kibana.' },
     expected: {
-      reference:
-        'Platform query — should not load find-security-rules or create a detection rule.',
+      reference: 'Platform query — should not load find-security-rules or create a detection rule.',
       shouldNotActivateSkill: 'find-security-rules',
     },
     metadata: {

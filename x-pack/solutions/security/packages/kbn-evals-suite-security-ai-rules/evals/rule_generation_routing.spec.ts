@@ -6,9 +6,9 @@
  */
 
 import { tags } from '@kbn/scout';
+import { seedFindRulesFixtures } from '@kbn/evals-suite-security-skills/src/fixtures/find_rules_fixtures';
 import { evaluate } from '../src/evaluate';
 import { ruleRoutingExamples } from '../datasets/routing_examples';
-import { seedFindRulesFixtures } from '../../kbn-evals-suite-security-skills/src/fixtures/find_rules_fixtures';
 
 const DATASET_NAME = 'security-ai-rules: rule-generation-routing';
 const DATASET_DESCRIPTION =

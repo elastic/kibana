@@ -89,7 +89,9 @@ function collectUniqueExpectedSkills(examples: DatasetExample[]): string[] {
 }
 
 function hasShouldNotActivateExamples(examples: DatasetExample[]): boolean {
-  return examples.some((example) => Boolean(getStringMeta(example.metadata, 'shouldNotActivateSkill')));
+  return examples.some((example) =>
+    Boolean(getStringMeta(example.metadata, 'shouldNotActivateSkill'))
+  );
 }
 
 function resolveTrajectoryGolden(metadata?: DatasetExample['metadata']): string[] {
