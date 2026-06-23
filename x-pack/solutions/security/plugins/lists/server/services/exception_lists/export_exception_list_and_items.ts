@@ -80,7 +80,7 @@ export const exportExceptionListAndItems = async ({
     namespaceType: exceptionList.namespace_type,
     perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     savedObjectsClient,
-    sortField: 'exception-list.created_at',
+    sortField: `${savedObjectPrefix}.created_at`,
     sortOrder: 'desc',
   });
   const { exportData } = getExport([exceptionList, ...exceptionItems]);
