@@ -342,7 +342,9 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
           });
         }
       } else if ('status' in response && response.status !== 200) {
-        const errorMsg = `Failed to fetch document for new term combination ${JSON.stringify(batch[i])}: status ${response.status}`;
+        const errorMsg = `Failed to fetch document for new term combination ${JSON.stringify(
+          batch[i]
+        )}: status ${response.status}`;
         result.errors.push(errorMsg);
         ruleExecutionLogger.warn(errorMsg);
       }
