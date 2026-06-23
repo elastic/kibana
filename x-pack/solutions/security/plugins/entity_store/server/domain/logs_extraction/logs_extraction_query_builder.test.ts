@@ -64,6 +64,45 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  it('excludes skipExtraction:true fields from STATS, merge EVAL, and produces a valid query', async () => {
+    const base = getEntityDefinition('host', 'default');
+    // Inject a synthetic skipExtraction field alongside a normal one to verify orthogonality.
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: {
+        ...base,
+        fields: [
+          ...base.fields,
+          {
+            source: 'test.api_only_field',
+            destination: 'test.api_only_field',
+            mapping: { type: 'keyword' },
+            retention: { operation: 'prefer_newest_value' },
+            allowAPIUpdate: true,
+            skipExtraction: true,
+          },
+          {
+            source: 'test.log_field',
+            destination: 'test.log_field',
+            mapping: { type: 'keyword' },
+            retention: { operation: 'prefer_newest_value' },
+            skipExtraction: false,
+          },
+        ],
+      },
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+    });
+    // skipExtraction:true field must not appear in STATS or the merge EVAL
+    expect(query).not.toContain('test.api_only_field');
+    // skipExtraction:false field must be present
+    expect(query).toContain('test.log_field');
+    // Query must remain syntactically valid (no dangling recent.* references)
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
+
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
     const base = getEntityDefinition('host', 'default');
     const query = buildLogsExtractionEsqlQuery({

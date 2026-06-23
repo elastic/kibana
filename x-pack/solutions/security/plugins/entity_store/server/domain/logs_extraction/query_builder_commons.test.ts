@@ -169,6 +169,35 @@ describe('aggregationStats', () => {
     } as unknown as EntityField;
     expect(() => aggregationStats([invalidField])).toThrow('unknown field operation');
   });
+
+  describe('skipExtraction × allowAPIUpdate matrix', () => {
+    // The 2×2 matrix: skipExtraction controls ESQL inclusion; allowAPIUpdate is orthogonal.
+    it('skipExtraction:false allowAPIUpdate:false — field is included in STATS (normal log field)', () => {
+      const field = keywordField({ skipExtraction: false, allowAPIUpdate: false });
+      expect(aggregationStats([field], false)).toContain('host.name');
+    });
+
+    it('skipExtraction:false allowAPIUpdate:true — field is included in STATS (API-updatable + from logs)', () => {
+      const field = keywordField({ skipExtraction: false, allowAPIUpdate: true });
+      expect(aggregationStats([field], false)).toContain('host.name');
+    });
+
+    it('skipExtraction:true allowAPIUpdate:false — field is excluded from STATS (maintainer-written)', () => {
+      const field = keywordField({ skipExtraction: true, allowAPIUpdate: false });
+      expect(aggregationStats([field], false)).toBe('');
+    });
+
+    it('skipExtraction:true allowAPIUpdate:true — field is excluded from STATS (pure API-only)', () => {
+      const field = keywordField({ skipExtraction: true, allowAPIUpdate: true });
+      expect(aggregationStats([field], false)).toBe('');
+    });
+
+    it('allowAPIUpdate alone does not affect STATS output', () => {
+      const withoutAPIUpdate = keywordField({ skipExtraction: false, allowAPIUpdate: false });
+      const withAPIUpdate = keywordField({ skipExtraction: false, allowAPIUpdate: true });
+      expect(aggregationStats([withoutAPIUpdate], false)).toBe(aggregationStats([withAPIUpdate], false));
+    });
+  });
 });
 
 describe('fieldsToKeep', () => {
@@ -189,6 +218,16 @@ describe('fieldsToKeep', () => {
       { source: 's', destination: 'name', retention: { operation: 'prefer_newest_value' } },
     ];
     expect(fieldsToKeep(definitionFields, ['id'])).toBe('name,\nid');
+  });
+
+  it('should omit skipExtraction:true fields from KEEP patterns', () => {
+    const definitionFields: EntityField[] = [
+      { source: 'a', destination: 'included.field', retention: { operation: 'prefer_newest_value' }, skipExtraction: false },
+      { source: 'b', destination: 'skipped.field', retention: { operation: 'prefer_newest_value' }, skipExtraction: true },
+    ];
+    const result = fieldsToKeep(definitionFields, []);
+    expect(result).toContain('included*');
+    expect(result).not.toContain('skipped*');
   });
 });
 
@@ -445,6 +484,16 @@ describe('statsFieldDestinations', () => {
     expect(dest.has('event.kind')).toBe(true);
     expect(dest.has('user.name')).toBe(true);
     expect(dest.has('entity.name')).toBe(true);
+  });
+
+  it('should exclude skipExtraction:true fields from the destination set', () => {
+    const fields: EntityField[] = [
+      { source: 'a', destination: 'included.field', retention: { operation: 'prefer_newest_value' }, skipExtraction: false },
+      { source: 'b', destination: 'skipped.field', retention: { operation: 'prefer_newest_value' }, skipExtraction: true },
+    ];
+    const dest = statsFieldDestinations(fields);
+    expect(dest.has('included.field')).toBe(true);
+    expect(dest.has('skipped.field')).toBe(false);
   });
 });
 
