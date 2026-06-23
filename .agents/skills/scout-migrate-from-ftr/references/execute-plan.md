@@ -123,6 +123,13 @@ For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, 
 
 - Handlers that call **`core.security.authc.apiKeys.create`** (nested API keys) often **fail with HTTP 500** when the incoming request uses an API key. Use **`samlAuth.asInteractiveUser('admin')`** (or the role FTR used with cookies) for those routes.
 - **Negative / least-privilege tests** that in FTR used a **custom role + cookie** (e.g. empty `kibana: []` privileges) and expect **404** from scoped saved-object access: use **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`**. **`requestAuth.getApiKeyForCustomRole(...)`** can resolve **200** for the same role shape because API-key privilege resolution differs from an interactive session.
+- **Serverless ES role name divergence:** the `editor` role does not exist in serverless ES projects — `developer` is its equivalent. Specs tagged `deploymentAgnostic` or that must run on serverless must guard against this or CI will fail with a role-not-found error after merge:
+  ```typescript
+  const privilegedRoleName =
+    config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
+  ({ cookieHeader } = await samlAuth.asInteractiveUser(privilegedRoleName));
+  ```
+- **Minimal permissions for "second user" identity:** when you add a second SAML session purely to get a distinct `profile_uid` for cross-user isolation checks, audit what that second user actually _does_ — not just "it needs to be a different identity." If its only operations are reading a list or adding a favorite (viewer-level), provision `viewer`, not `admin`. Using an over-privileged role here adds no test signal and violates Scout's minimal-permissions principle. A test that already verifies `viewer` can perform an action in one step implicitly proves `viewer` works as a second-user session too.
 
 ### 5) Split loadTestFile suites
 
@@ -207,6 +214,26 @@ Once the new specs typecheck and run, control returns to the parent skill. Step 
 - When FTR used rison-encoded query params, replicate with `@kbn/rison` and add **`@kbn/rison`** to **`kbn_references`** on the `tsconfig.json` that includes the Scout UI files (plugin root under **Pattern A**, or `test/scout/ui/tsconfig.json` under **Pattern B**).
 - Add stable `data-test-subj` attributes when selectors are unstable.
 - Centralize deep links + page-ready waits in page objects.
+- **Telemetry / stats tests — delta-based pattern:** FTR telemetry tests often assert absolute counts (`total: 3`) that silently break if the cluster isn't clean. Replace with a snapshot-delta approach: (1) capture a `beforeStats` snapshot, (2) add a known, deterministic set of items across distinct user/space combinations, (3) assert `afterStats.total === beforeStats.total + N`, (4) verify each combination directly via the list API rather than relying solely on the aggregate count. Wrap additions + assertions in `try/finally` (see below) so the cleanup runs even when assertions fail. Add a comment for any aggregate field you cannot assert as a delta (e.g. a count of saved-object documents that doesn't shrink on item deletion).
+- **`try/finally` for per-test API side-effect cleanup:** when a single `test(...)` or `apiTest(...)` body creates server-side state that must be removed after the test (favorites, saved objects, ES documents), wrap the additions and assertions in `try/finally` with cleanup in the `finally` block. `afterAll` alone cannot know which items were created mid-test when an assertion fails partway through, and leaked items silently inflate aggregate counts in subsequent runs:
+  ```typescript
+  try {
+    await apiClient.post(`${PATH}/${idA}/favorite`, { headers });
+    // ...assertions...
+  } finally {
+    await apiClient.post(`${PATH}/${idA}/unfavorite`, { headers });
+  }
+  ```
+- **Space creation in API tests:** when cross-space isolation is under test, create the custom space in `beforeAll` and delete it in `afterAll` using `kbnClient`:
+  ```typescript
+  beforeAll(async ({ kbnClient }) => {
+    await kbnClient.spaces.create({ id: 'custom', name: 'Custom Space', disabledFeatures: [] });
+  });
+  afterAll(async ({ kbnClient }) => {
+    await kbnClient.spaces.delete('custom');
+  });
+  ```
+  Reference the space in API paths via a constant: `s/${CUSTOM_SPACE_ID}/${API_PATH}/...`.
 
 ## Common mistakes
 
@@ -228,3 +255,7 @@ Once the new specs typecheck and run, control returns to the parent skill. Step 
 - Using **`getApiKeyForCustomRole`** for FTR parity on **scoped saved-object / RBAC** assertions that used **cookie + custom role**—prefer **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`** so outcomes match FTR (e.g. **404** vs **200**).
 - **Pattern B** + relative imports from `test/scout*/api/` into **`server/`** / **`public/`** (e.g. `server/saved_objects/...`). Fix by **Pattern A** (`test/scout/**/*` in the plugin `tsconfig` + Scout `kbn_references`) or duplicate constants in **`api/fixtures/constants.ts`** (step 6).
 - **Pattern A** but forgetting to add **`test/scout/**/*`** to **`include`** or omitting **`@kbn/scout-oblt`** / synthtrace **`kbn_references`**—Scout files won't typecheck in **`check_types`**.
+- **Omitting the serverless ES role guard** for deployment-agnostic specs: `asInteractiveUser('editor')` throws on serverless ES because the `editor` role doesn't exist there. Apply the guard (`config.serverless && config.projectType === 'es' ? 'developer' : 'editor'`) whenever the spec may run on serverless ES.
+- **Using `admin` as a second-user identity for cross-user isolation** when the second user only does viewer-level operations (listing, adding a favorite, reading a saved object). Provision `viewer` instead — it's sufficient and already distinct from `editor`/`developer`. This is a common source of bot-review comments on migration PRs.
+- **Asserting absolute telemetry counts** instead of snapshot deltas — absolute counts are fragile because they depend on the cluster being clean. Always snapshot before, add a known set, and assert `after === before + delta`.
+- **Skipping `try/finally` around per-test API mutations when assertions might fail mid-test** — without it, partially-created state leaks into subsequent runs and silently skews aggregate counts (especially telemetry tests).
