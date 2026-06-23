@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { stringify as yamlStringify } from 'yaml';
+import type SuperTest from 'supertest';
 import { CASES_URL, CASE_EXTENDED_FIELDS } from '@kbn/cases-plugin/common/constants';
 import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -16,10 +17,7 @@ import { getPostCaseRequest } from '../../../../common/lib/mock';
 const FIELD_DEFINITIONS_URL = '/internal/cases/field_definitions';
 const TEMPLATES_URL = '/internal/cases/templates';
 
-const createGlobalFieldDefinition = async (
-  supertest: ReturnType<FtrProviderContext['getService']>,
-  name: string
-) => {
+const createGlobalFieldDefinition = async (supertest: SuperTest.Agent, name: string) => {
   await supertest
     .post(FIELD_DEFINITIONS_URL)
     .set('kbn-xsrf', 'true')
@@ -38,10 +36,7 @@ const createGlobalFieldDefinition = async (
     .expect(200);
 };
 
-const createTemplate = async (
-  supertest: ReturnType<FtrProviderContext['getService']>,
-  fields: object[] = []
-) => {
+const createTemplate = async (supertest: SuperTest.Agent, fields: object[] = []) => {
   const { body } = await supertest
     .post(TEMPLATES_URL)
     .set('kbn-xsrf', 'true')
