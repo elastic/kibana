@@ -35,22 +35,6 @@ If you use the latter method, you must provide a valid list of Slack channels. D
 
 When you create a rule, each action can communicate with one of the specified channels. For Slack setup details, go to [Configure a Slack account](#configuring-slack).
 
-### Connector configuration [slack-connector-configuration]
-
-Slack connectors have the following configuration properties:
-
-Webhook URL
-:   The incoming webhook URL. This is required for webhook-based Slack connectors.
-
-Bot User OAuth Token
-:   The Slack bot user OAuth token. This is required for Web API Slack connectors.
-
-Allowed channel names
-:   {applies_to}`stack: ga 9.3+` The Slack channel names that the Web API connector can send messages to. Channel names must start with `#`, for example `#alert-notifications`. If you don't specify allowed channels, the connector can send messages to any channel name.
-
-Channel IDs
-:   {applies_to}`stack: ga 9.0-9.2` The Slack channel IDs that the Web API connector can send messages to.
-
 ## Test connectors [slack-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}. For the webhook type of connector, its message text cannot contain Markdown, images, or other advanced formatting:
@@ -96,9 +80,7 @@ Validate channel ID
 :   Validate whether a Slack channel ID can be used by the connector.
     - `channelId` (optional): Slack channel ID to validate.
 
-## Workflow examples [slack-workflow-examples]
-
-In workflow YAML, the Slack Web API action is part of the step `type`. Put the action parameters directly under `with`; don't add `subAction` or `subActionParams`.
+## Workflows examples [slack-workflow-examples]
 
 Send a plain text message:
 
