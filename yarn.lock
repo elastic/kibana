@@ -2336,9 +2336,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic-eui-upstream-main.tgz":
+"@elastic/eui@file:./elastic_eui_upstream_main.tgz":
   version "116.3.1"
-  resolved "file:./elastic-eui-upstream-main.tgz#b8bc3fbc42340ce607cc55f01934198e99bea2a2"
+  resolved "file:./elastic_eui_upstream_main.tgz#b8bc3fbc42340ce607cc55f01934198e99bea2a2"
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
