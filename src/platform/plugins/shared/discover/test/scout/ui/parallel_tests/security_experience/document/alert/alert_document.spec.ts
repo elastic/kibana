@@ -72,7 +72,7 @@ spaceTest.describe(
     spaceTest(
       'highlighted field hover actions: shows all buttons and each works',
       async ({ page, pageObjects }) => {
-        const { securityDiscoverFlyout, filterBar } = pageObjects;
+        const { securityDiscoverFlyout, filterBar, discover } = pageObjects;
         const field = 'host.name';
         const value = SECURITY_TEST_DATA.HOST_NAME;
 
@@ -88,21 +88,6 @@ spaceTest.describe(
           await expect(securityDiscoverFlyout.cellActionCopy).toBeVisible();
         });
 
-        await spaceTest.step('filter for adds an enabled, non-negated filter', async () => {
-          await securityDiscoverFlyout.cellActionFilterIn.click();
-          expect(await filterBar.hasFilter({ field, value, enabled: true, negated: false })).toBe(
-            true
-          );
-          await filterBar.removeFilter(field);
-        });
-
-        await spaceTest.step('filter exists adds a filter for the field', async () => {
-          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
-          await securityDiscoverFlyout.cellActionFilterExists.click();
-          expect(await filterBar.getFilterCount()).toBeGreaterThan(0);
-          await filterBar.removeFilter(field);
-        });
-
         await spaceTest.step('copy to clipboard copies the field value', async () => {
           await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
           await securityDiscoverFlyout.cellActionCopy.click();
@@ -110,7 +95,27 @@ spaceTest.describe(
           expect(clipboard).toContain(value);
         });
 
+        await spaceTest.step('filter for adds an enabled, non-negated filter', async () => {
+          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
+          await securityDiscoverFlyout.cellActionFilterIn.click();
+          expect(await filterBar.hasFilter({ field, value, enabled: true, negated: false })).toBe(
+            true
+          );
+          await filterBar.removeFilter(field);
+          await discover.waitUntilSearchingHasFinished();
+        });
+
+        await spaceTest.step('filter exists adds a filter for the field', async () => {
+          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
+          await securityDiscoverFlyout.cellActionFilterExists.click();
+          expect(await filterBar.getFilterCount()).toBeGreaterThan(0);
+          await filterBar.removeFilter(field);
+          await discover.waitUntilSearchingHasFinished();
+        });
+
         await spaceTest.step('filter out adds a negated filter', async () => {
+          // Re-open from a fresh flyout: the negated filter will exclude the only document, so start
+          // from a clean, stable flyout before hovering.
           await securityDiscoverFlyout.openAlertFlyoutFromDiscover();
           await securityDiscoverFlyout.waitForDocumentHeader();
           await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
