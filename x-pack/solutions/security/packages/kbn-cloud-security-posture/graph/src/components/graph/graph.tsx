@@ -12,34 +12,38 @@ import {
   Panel,
   Position,
   ReactFlow,
+  SelectionMode,
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
 import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
-import { useGeneratedHtmlId } from '@elastic/eui';
+import { useGeneratedHtmlId, useEuiTheme } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { SvgDefsMarker } from '../edge/markers';
-import {
-  HexagonNode,
-  PentagonNode,
-  EllipseNode,
-  RectangleNode,
-  DiamondNode,
-  LabelNode,
-  EdgeGroupNode,
-  RelationshipNode,
-} from '../node';
+import { CardNode, LabelNode, EdgeGroupNode, RelationshipNode } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
+import { mapEdgeViewModelToReactFlowEdge } from '../edge/edge_processing';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { isConnectorShape } from '../utils';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
-import { Controls } from '../controls/controls';
+import { Controls, CONTROL_PANEL_MARGIN_RIGHT } from '../controls/controls';
+import {
+  GraphInteractionToolContext,
+  type GraphInteractionTool,
+} from '../controls/graph_interaction_tool_context';
 import { GRAPH_ID } from '../test_ids';
+import { useGraphFullscreen } from '../../hooks/use_graph_fullscreen';
+import { withZoomInvariant } from '../zoom/with_zoom_invariant';
+import { ZoomNodeInternalsSync } from '../zoom/zoom_node_internals_sync';
+import { GraphSelectionHandlers } from './graph_selection_handlers';
+import { useGraphInteractionKeyboardShortcuts } from '../../hooks/use_graph_interaction_keyboard_shortcuts';
+import { GraphFullscreenContext } from './graph_fullscreen_context';
+import { GRAPH_ORIGIN_NODE_CLASS, isOriginEntityOrEventNode } from './graph_origin_utils';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -78,17 +82,21 @@ export interface GraphProps extends CommonProps {
    * - Returning list of existent node ids will center the graph on those nodes
    */
   onCenterGraphAfterRefresh?: (newNodes: NodeViewModel[]) => 'fit-view' | string[] | void;
+  /**
+   * When true, origin entities and events are outlined with a dashed border.
+   */
+  highlightOriginsOnly?: boolean;
 }
 
 const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
-  label: LabelNode,
-  group: EdgeGroupNode,
-  relationship: RelationshipNode,
+  hexagon: withZoomInvariant(CardNode),
+  pentagon: withZoomInvariant(CardNode),
+  ellipse: withZoomInvariant(CardNode),
+  rectangle: withZoomInvariant(CardNode),
+  diamond: withZoomInvariant(CardNode),
+  label: withZoomInvariant(LabelNode),
+  group: withZoomInvariant(EdgeGroupNode),
+  relationship: withZoomInvariant(RelationshipNode),
 };
 
 const edgeTypes = {
@@ -127,19 +135,30 @@ export const Graph = memo<GraphProps>(
     showMinimap = false,
     children,
     onCenterGraphAfterRefresh,
+    highlightOriginsOnly = false,
+    css: containerCss,
+    onPointerDown,
     ...rest
   }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
+    const { euiTheme } = useEuiTheme();
+    const graphContainerRef = useRef<HTMLDivElement>(null);
+    const overlayContainerRef = useRef<HTMLDivElement>(null);
+    const { isFullscreen, toggleFullscreen } = useGraphFullscreen(graphContainerRef);
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const isInitialRenderRef = useRef(true);
     const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
+    const [interactionTool, setInteractionTool] = useState<GraphInteractionTool>('select');
+    const applyFiltersToggleRef = useRef<(() => void) | null>(null);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
     const [reactFlowKey, setReactFlowKey] = useState(0);
+    const prevHighlightOriginsOnlyRef = useRef(highlightOriginsOnly);
 
-    // Sync isGraphInteractive with interactive prop and re-process nodes when it changes
+    // Sync isGraphInteractive with interactive prop and re-process nodes when it changes.
+    // Highlight-only updates are handled separately to preserve viewport zoom/pan.
     useEffect(() => {
       setIsGraphInteractive(interactive);
 
@@ -148,11 +167,11 @@ export const Graph = memo<GraphProps>(
         const { initialNodes, initialEdges } = processGraph(
           currNodesRef.current,
           currEdgesRef.current,
-          interactive
+          interactive,
+          highlightOriginsOnly
         );
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-        // Force ReactFlow to remount to apply new className
         setReactFlowKey((prev) => prev + 1);
 
         setTimeout(() => {
@@ -160,7 +179,7 @@ export const Graph = memo<GraphProps>(
           setEdges(initialEdges);
         }, 0);
       }
-    }, [interactive, setNodes, setEdges]);
+    }, [interactive, setEdges, setNodes]);
 
     // Filter the ids of those nodes that are origin events
     const originNodeIds = useMemo(
@@ -169,94 +188,162 @@ export const Graph = memo<GraphProps>(
     );
 
     useEffect(() => {
-      // On nodes or edges changes, or interactive state changes, reset the graph and re-layout
-      if (
-        !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
-        !isArrayOfObjectsEqual(edges, currEdgesRef.current)
-      ) {
-        // Identify new nodes by comparing node IDs
-        const previousNodeIds = new Set<NodeViewModel['id']>(
-          currNodesRef.current.map((node) => node.id)
+      const nodesChanged = !isArrayOfObjectsEqual(nodes, currNodesRef.current);
+      const edgesChanged = !isArrayOfObjectsEqual(edges, currEdgesRef.current);
+      const highlightChanged = prevHighlightOriginsOnlyRef.current !== highlightOriginsOnly;
+      prevHighlightOriginsOnlyRef.current = highlightOriginsOnly;
+
+      if (!nodesChanged && !edgesChanged && !highlightChanged) {
+        return;
+      }
+
+      const applyHighlightOnlyUpdate = () => {
+        const { initialNodes, initialEdges } = processGraph(
+          nodes,
+          edges,
+          isGraphInteractive,
+          highlightOriginsOnly
         );
-        const newNodes = nodes.filter((node) => !previousNodeIds.has(node.id));
 
-        const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
-        const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
-        // Force ReactFlow to remount by changing the key first
-        setReactFlowKey((prev) => prev + 1);
+        setNodes((currentNodes) =>
+          initialNodes.map((node) => {
+            const existing = currentNodes.find((current) => current.id === node.id);
+            if (!existing) {
+              return node;
+            }
 
-        // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
-        setTimeout(() => {
-          setNodes(layoutedNodes);
-          setEdges(initialEdges);
-        }, 0);
+            return {
+              ...node,
+              position: existing.position,
+              width: existing.width,
+              height: existing.height,
+              measured: existing.measured,
+            };
+          })
+        );
+        setEdges(initialEdges);
+      };
+
+      if (!nodesChanged && !edgesChanged && highlightChanged && currNodesRef.current.length > 0) {
+        applyHighlightOnlyUpdate();
+        return;
+      }
+
+      if (!nodesChanged && !edgesChanged) {
+        return;
+      }
+
+      const sameStructure = hasSameGraphStructure(
+        nodes,
+        currNodesRef.current,
+        edges,
+        currEdgesRef.current
+      );
+
+      // Metadata-only updates (e.g. filter toggles) keep viewport zoom/pan and mounted panels.
+      if (sameStructure && currNodesRef.current.length > 0) {
+        applyHighlightOnlyUpdate();
 
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
-
-        const fitIntoView = () => {
-          fitViewRef.current?.(fitViewOptions);
-        };
-
-        const centerGraphOn = async (nodeIds: string[]) => {
-          await fitViewRef.current?.({
-            ...fitViewOptions,
-            nodes: nodeIds.map((nodeId) => ({ id: nodeId })),
-          });
-        };
-
-        const filterExistingNodeIds = (nodeIds: string[]) => {
-          const existingNodeIds = new Set(nodes.map((node) => node.id));
-          return nodeIds.filter((nodeId) => existingNodeIds.has(nodeId));
-        };
-
-        setTimeout(() => {
-          if (isInitialRenderRef.current) {
-            isInitialRenderRef.current = false;
-            return;
-          }
-
-          // If nodes haven't changed, do nothing
-          if (newNodes.length === 0) {
-            return;
-          }
-
-          // If nodes have changed but callback is undefined, default to center on new nodes
-          if (!onCenterGraphAfterRefresh) {
-            centerGraphOn(newNodes.map((node) => node.id));
-            return;
-          }
-
-          // Get node IDs given by consumer to center the graph on
-          const callbackRetValue = onCenterGraphAfterRefresh(newNodes);
-
-          // If callback returns undefined, default to center on new nodes
-          if (callbackRetValue === undefined) {
-            centerGraphOn(newNodes.map((node) => node.id));
-            return;
-          }
-
-          if (callbackRetValue === 'fit-view') {
-            fitIntoView();
-            return;
-          }
-
-          if (!Array.isArray(callbackRetValue) || callbackRetValue.length === 0) {
-            // With empty array or non-array return value, do nothing
-            return;
-          }
-
-          const nodeIdsToCenterOn = filterExistingNodeIds(callbackRetValue);
-
-          // if client specified only node ids that do not exist, do nothing
-          // Otherwise, center graph on given nodes
-          if (nodeIdsToCenterOn.length > 0) {
-            // Center graph on specified nodes by client
-            centerGraphOn(nodeIdsToCenterOn);
-          }
-        }, 30);
+        return;
       }
-    }, [nodes, edges, setNodes, setEdges, isGraphInteractive, onCenterGraphAfterRefresh]);
+
+      // Identify new nodes by comparing node IDs
+      const previousNodeIds = new Set<NodeViewModel['id']>(
+        currNodesRef.current.map((node) => node.id)
+      );
+      const newNodes = nodes.filter((node) => !previousNodeIds.has(node.id));
+
+      const { initialNodes, initialEdges } = processGraph(
+        nodes,
+        edges,
+        isGraphInteractive,
+        highlightOriginsOnly
+      );
+      const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
+      // Force ReactFlow to remount by changing the key first
+      setReactFlowKey((prev) => prev + 1);
+
+      // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
+      setTimeout(() => {
+        setNodes(layoutedNodes);
+        setEdges(initialEdges);
+      }, 0);
+
+      currNodesRef.current = nodes;
+      currEdgesRef.current = edges;
+
+      const fitIntoView = () => {
+        fitViewRef.current?.(fitViewOptions);
+      };
+
+      const centerGraphOn = async (nodeIds: string[]) => {
+        await fitViewRef.current?.({
+          ...fitViewOptions,
+          nodes: nodeIds.map((nodeId) => ({ id: nodeId })),
+        });
+      };
+
+      const filterExistingNodeIds = (nodeIds: string[]) => {
+        const existingNodeIds = new Set(nodes.map((node) => node.id));
+        return nodeIds.filter((nodeId) => existingNodeIds.has(nodeId));
+      };
+
+      setTimeout(() => {
+        if (isInitialRenderRef.current) {
+          isInitialRenderRef.current = false;
+          return;
+        }
+
+        // If nodes haven't changed, do nothing
+        if (newNodes.length === 0) {
+          return;
+        }
+
+        // If nodes have changed but callback is undefined, default to center on new nodes
+        if (!onCenterGraphAfterRefresh) {
+          centerGraphOn(newNodes.map((node) => node.id));
+          return;
+        }
+
+        // Get node IDs given by consumer to center the graph on
+        const callbackRetValue = onCenterGraphAfterRefresh(newNodes);
+
+        // If callback returns undefined, default to center on new nodes
+        if (callbackRetValue === undefined) {
+          centerGraphOn(newNodes.map((node) => node.id));
+          return;
+        }
+
+        if (callbackRetValue === 'fit-view') {
+          fitIntoView();
+          return;
+        }
+
+        if (!Array.isArray(callbackRetValue) || callbackRetValue.length === 0) {
+          // With empty array or non-array return value, do nothing
+          return;
+        }
+
+        const nodeIdsToCenterOn = filterExistingNodeIds(callbackRetValue);
+
+        // if client specified only node ids that do not exist, do nothing
+        // Otherwise, center graph on given nodes
+        if (nodeIdsToCenterOn.length > 0) {
+          // Center graph on specified nodes by client
+          centerGraphOn(nodeIdsToCenterOn);
+        }
+      }, 30);
+    }, [
+      nodes,
+      edges,
+      setNodes,
+      setEdges,
+      isGraphInteractive,
+      highlightOriginsOnly,
+      onCenterGraphAfterRefresh,
+    ]);
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
@@ -279,49 +366,199 @@ export const Graph = memo<GraphProps>(
       [interactive]
     );
 
+    const onToggleFullScreen = useCallback(() => {
+      void toggleFullscreen().then(() => {
+        setTimeout(() => fitViewRef.current?.(fitViewOptions), 100);
+      });
+    }, [toggleFullscreen]);
+
+    const registerApplyFiltersToggle = useCallback((toggle: (() => void) | null) => {
+      applyFiltersToggleRef.current = toggle;
+    }, []);
+
+    const handleSelectToolShortcut = useCallback(() => {
+      setInteractionTool('select');
+    }, []);
+
+    const handlePanToolShortcut = useCallback(() => {
+      setInteractionTool('pan');
+    }, []);
+
+    const handleToggleApplyFiltersShortcut = useCallback(() => {
+      applyFiltersToggleRef.current?.();
+    }, []);
+
+    useGraphInteractionKeyboardShortcuts({
+      enabled: interactive,
+      onSelectTool: handleSelectToolShortcut,
+      onPanTool: handlePanToolShortcut,
+      onToggleApplyFiltersPanel: handleToggleApplyFiltersShortcut,
+    });
+
+    useEffect(() => {
+      if (!interactive) {
+        return;
+      }
+
+      graphContainerRef.current?.focus({ preventScroll: true });
+    }, [interactive]);
+
+    const focusGraphContainer = useCallback(() => {
+      if (interactive) {
+        graphContainerRef.current?.focus({ preventScroll: true });
+      }
+    }, [interactive]);
+
+    const handleGraphPointerDown = useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        focusGraphContainer();
+        onPointerDown?.(event);
+      },
+      [focusGraphContainer, onPointerDown]
+    );
+
+    const interactionToolContextValue = useMemo(
+      () => ({
+        interactionTool,
+        setInteractionTool,
+        registerApplyFiltersToggle,
+      }),
+      [interactionTool, registerApplyFiltersToggle]
+    );
+
+    const canDragInteract = isGraphInteractive && !isLocked;
+    const isPanTool = interactionTool === 'pan';
+    const isSelectTool = canDragInteract && !isPanTool;
+
+    useEffect(() => {
+      if (!isPanTool) {
+        return;
+      }
+
+      setNodes((currentNodes) => {
+        if (!currentNodes.some((node) => node.selected)) {
+          return currentNodes;
+        }
+
+        return currentNodes.map((node) => (node.selected ? { ...node, selected: false } : node));
+      });
+    }, [isPanTool, setNodes]);
+
+    const reactFlowClassName = useMemo(
+      () =>
+        [
+          isPanTool ? 'graph-tool-pan' : 'graph-tool-select',
+          highlightOriginsOnly ? 'graph-highlight-origins-only' : null,
+        ]
+          .filter(Boolean)
+          .join(' '),
+      [highlightOriginsOnly, isPanTool]
+    );
+
+    const fullscreenContainerCss = css`
+      &:fullscreen {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+
+        .react-flow {
+          flex: 1;
+          min-height: 0;
+          width: 100%;
+        }
+      }
+    `;
+
+    const overlayPortalCss = css`
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: ${euiTheme.levels.menu};
+      overflow: visible;
+    `;
+
+    const fullscreenContextValue = useMemo(
+      () => ({
+        isFullscreen,
+        overlayContainerRef,
+      }),
+      [isFullscreen]
+    );
+
     return (
-      <div {...rest}>
-        <SvgDefsMarker />
-        <ReactFlow
-          key={reactFlowKey}
-          data-test-subj={GRAPH_ID}
-          fitView={true}
-          fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
-          onInit={onInitCallback}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          nodes={nodesState}
-          edges={edgesState}
-          nodesConnectable={false}
-          edgesFocusable={false}
-          onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
-          snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-          snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          proOptions={{ hideAttribution: true }}
-          panOnDrag={isGraphInteractive && !isLocked}
-          zoomOnScroll={isGraphInteractive && !isLocked}
-          zoomOnPinch={isGraphInteractive && !isLocked}
-          zoomOnDoubleClick={isGraphInteractive && !isLocked}
-          preventScrolling={interactive}
-          nodesDraggable={interactive && isGraphInteractive && !isLocked}
-          maxZoom={1.3}
-          minZoom={0.1}
+      <GraphInteractionToolContext.Provider value={interactionToolContextValue}>
+        <GraphFullscreenContext.Provider value={fullscreenContextValue}>
+        <div
+          ref={graphContainerRef}
+          css={[fullscreenContainerCss, containerCss]}
+          {...rest}
+          tabIndex={interactive ? -1 : undefined}
+          onPointerDown={handleGraphPointerDown}
         >
-          {interactive && (
-            <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
-            </Panel>
-          )}
-          {children}
-          <Background id={backgroundId} />
-          {interactive && showMinimap && (
-            <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
-          )}
-        </ReactFlow>
-        <GlobalGraphStyles />
-      </div>
+          <SvgDefsMarker />
+          <ReactFlow
+            key={reactFlowKey}
+            data-test-subj={GRAPH_ID}
+            className={reactFlowClassName}
+            fitView={true}
+            fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
+            onInit={onInitCallback}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            nodes={nodesState}
+            edges={edgesState}
+            nodesConnectable={false}
+            edgesFocusable={false}
+            onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
+            snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
+            snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            proOptions={{ hideAttribution: true }}
+            panOnDrag={canDragInteract && isPanTool}
+            panActivationKeyCode={null}
+            selectionOnDrag={isSelectTool}
+            selectionMode={SelectionMode.Partial}
+            selectionKeyCode={isPanTool ? null : 'Shift'}
+            multiSelectionKeyCode={isPanTool ? null : undefined}
+            selectNodesOnDrag={isSelectTool}
+            elementsSelectable={isSelectTool}
+            zoomOnScroll={isGraphInteractive && !isLocked}
+            zoomOnPinch={isGraphInteractive && !isLocked}
+            zoomOnDoubleClick={isGraphInteractive && !isLocked}
+            preventScrolling={interactive}
+            nodesDraggable={interactive && isSelectTool}
+            maxZoom={1.3}
+            minZoom={0.1}
+          >
+            <GraphSelectionHandlers />
+            <ZoomNodeInternalsSync />
+            {interactive && (
+              <Panel
+                position="bottom-right"
+                style={{ marginRight: CONTROL_PANEL_MARGIN_RIGHT, overflow: 'visible' }}
+              >
+                <Controls
+                  fitViewOptions={fitViewOptions}
+                  nodeIdsToCenterOn={originNodeIds}
+                  isFullScreen={isFullscreen}
+                  onToggleFullScreen={onToggleFullScreen}
+                />
+              </Panel>
+            )}
+            {children}
+            <Background id={backgroundId} />
+            {interactive && showMinimap && (
+              <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+            )}
+          </ReactFlow>
+          <GlobalGraphStyles />
+          <div ref={overlayContainerRef} css={overlayPortalCss} data-test-subj="graphFullscreenOverlay" />
+        </div>
+        </GraphFullscreenContext.Provider>
+      </GraphInteractionToolContext.Provider>
     );
   }
 );
@@ -331,7 +568,8 @@ Graph.displayName = 'Graph';
 const processGraph = (
   nodesModel: NodeViewModel[],
   edgesModel: EdgeViewModel[],
-  interactive: boolean
+  interactive: boolean,
+  highlightOriginsOnly: boolean
 ): {
   initialNodes: Array<Node<NodeViewModel>>;
   initialEdges: Array<Edge<EdgeViewModel>>;
@@ -341,12 +579,23 @@ const processGraph = (
   const initialNodes = nodesModel.map((nodeData) => {
     nodesById[nodeData.id] = nodeData;
 
+    const classNames = [
+      interactive ? undefined : 'non-interactive',
+      highlightOriginsOnly && isOriginEntityOrEventNode(nodeData)
+        ? GRAPH_ORIGIN_NODE_CLASS
+        : undefined,
+    ].filter(Boolean);
+
     const node: Node<NodeViewModel> = {
       id: nodeData.id,
       type: nodeData.shape,
-      data: { ...nodeData, interactive },
+      data: {
+        ...nodeData,
+        interactive,
+        highlightAsOrigin: highlightOriginsOnly && isOriginEntityOrEventNode(nodeData),
+      },
       position: { x: 0, y: 0 }, // Default position, should be updated later
-      className: interactive ? undefined : 'non-interactive',
+      className: classNames.length > 0 ? classNames.join(' ') : undefined,
     };
 
     if (node.type === 'group' && nodeData.shape === 'group') {
@@ -368,38 +617,34 @@ const processGraph = (
   });
 
   const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel
-    .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
-    .map((edgeData) => {
-      const sourceShape = nodesById[edgeData.source].shape;
-      const targetShape = nodesById[edgeData.target].shape;
-
-      const isIn = !isConnectorShape(sourceShape) && targetShape === 'group';
-      const isInside = sourceShape === 'group' && isConnectorShape(targetShape);
-      const isOut = isConnectorShape(sourceShape) && targetShape === 'group';
-      const isOutside = sourceShape === 'group' && !isConnectorShape(targetShape);
-
-      return {
-        id: edgeData.id,
-        type: 'default',
-        source: edgeData.source,
-        sourceHandle: isInside ? 'inside' : isOutside ? 'outside' : undefined,
-        target: edgeData.target,
-        targetHandle: isIn ? 'in' : isOut ? 'out' : undefined,
-        focusable: false,
-        selectable: false,
-        deletable: false,
-        data: {
-          ...edgeData,
-          sourceShape: nodesById[edgeData.source].shape,
-          sourceColor: nodesById[edgeData.source].color,
-          targetShape: nodesById[edgeData.target].shape,
-          targetColor: nodesById[edgeData.target].color,
-        },
-      };
-    });
+    .map((edgeData) => mapEdgeViewModelToReactFlowEdge(edgeData, nodesById))
+    .filter((edge): edge is Edge<EdgeViewModel> => edge !== null);
 
   return { initialNodes, initialEdges };
 };
 
 const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
   size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));
+
+const hasSameGraphStructure = (
+  nextNodes: NodeViewModel[],
+  prevNodes: NodeViewModel[],
+  nextEdges: EdgeViewModel[],
+  prevEdges: EdgeViewModel[]
+): boolean => {
+  if (nextNodes.length !== prevNodes.length || nextEdges.length !== prevEdges.length) {
+    return false;
+  }
+
+  const prevNodeIds = new Set(prevNodes.map((node) => node.id));
+  if (nextNodes.some((node) => !prevNodeIds.has(node.id))) {
+    return false;
+  }
+
+  const prevEdgeIds = new Set(prevEdges.map((edge) => edge.id));
+  if (nextEdges.some((edge) => !prevEdgeIds.has(edge.id))) {
+    return false;
+  }
+
+  return true;
+};

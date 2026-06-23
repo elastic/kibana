@@ -15,15 +15,28 @@ import {
   STACK_NODE_VERTICAL_PADDING,
   STACK_NODE_HORIZONTAL_PADDING,
   NODE_HEIGHT,
-  ENTITY_NODE_TOTAL_HEIGHT,
   NODE_LABEL_TOTAL_HEIGHT,
   NODE_WIDTH,
   NODE_LABEL_WIDTH,
   NODE_LABEL_HEIGHT,
   NODE_LABEL_DETAILS,
 } from '../constants';
+import { CARD_NODE_DEFAULT_HEIGHT, CARD_NODE_WIDTH } from '../node/card_node';
+import { alignOriginSpineInPlace } from './layout_origin_spine';
 
 const GRID_SIZE_OFFSET = GRID_SIZE * 2;
+
+/** Dagre minimum separation between ranks (horizontal gaps in LR layout). */
+const GRAPH_RANK_SEP = GRID_SIZE_OFFSET * 8;
+
+/** Dagre minimum separation between nodes in the same rank (vertical gaps in LR layout). */
+const GRAPH_NODE_SEP = GRID_SIZE_OFFSET * 10;
+
+/**
+ * Layout height for entity cards when DOM measurement is unavailable.
+ * Sized for fully expanded cards with grouped metadata.
+ */
+const CARD_NODE_LAYOUT_HEIGHT = CARD_NODE_DEFAULT_HEIGHT + GRID_SIZE_OFFSET * 4;
 
 export const layoutGraph = (
   nodes: Array<Node<NodeViewModel>>,
@@ -39,7 +52,8 @@ export const layoutGraph = (
     .setGraph({
       rankdir: 'LR',
       align: 'UL',
-      ranksep: GRID_SIZE_OFFSET * 3,
+      ranksep: GRAPH_RANK_SEP,
+      nodesep: GRAPH_NODE_SEP,
     })
     .setDefaultEdgeLabel(() => ({}));
 
@@ -61,7 +75,10 @@ export const layoutGraph = (
     }
   });
   nodes.forEach((node) => {
-    let size = { width: NODE_WIDTH, height: node.measured?.height ?? NODE_HEIGHT };
+    let size = {
+      width: isEntityNode(node.data) ? CARD_NODE_WIDTH : NODE_WIDTH,
+      height: node.measured?.height ?? NODE_HEIGHT,
+    };
 
     if (isConnectorNode(node.data)) {
       size = {
@@ -82,7 +99,7 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
-      size.height = ENTITY_NODE_TOTAL_HEIGHT;
+      size.height = node.measured?.height ?? CARD_NODE_LAYOUT_HEIGHT;
     }
 
     if (!nodesById[node.id]) {
@@ -108,6 +125,17 @@ export const layoutGraph = (
       return node && isStackedLabel(node);
     },
     nodesById
+  );
+
+  alignOriginSpineInPlace(
+    g,
+    nodesById,
+    edges,
+    stackedNodeIds,
+    (nodeId: string) => {
+      const node = nodesById[nodeId]?.data;
+      return node !== undefined && isStackedLabel(node);
+    }
   );
 
   const layoutedNodes = nodes.map((node) => {

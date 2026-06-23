@@ -39,7 +39,7 @@ describe('Minimap', () => {
     expect(minimap.firstChild?.firstChild?.childNodes).toHaveLength(2); // only <title> and <path> for mask
   });
 
-  it('should be at the bottom-left corner and have "backgroundBasePlain" viewport over a "backgroundBaseFormsControlDisabled" frame', async () => {
+  it('should be at the bottom-left corner with subdued viewport over a plain frame', async () => {
     render(
       <ReactFlow>
         <Minimap />
@@ -48,8 +48,8 @@ describe('Minimap', () => {
 
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
     expect(minimap.firstChild).toHaveStyle({
-      'background-color': '#FFFFFF',
-      '--xy-minimap-mask-background-color-props': 'rgba(202,211,226,0.75)',
+      '--xy-minimap-background-color-props': '#F6F9FC',
+      '--xy-minimap-mask-background-color-props': '#FFFFFF',
     });
     expect(minimap.firstChild).toHaveClass('bottom left');
   });
@@ -211,11 +211,10 @@ describe('Minimap integrated with Graph', () => {
       // 3 label nodes: IndividualLabel, StackedLabel1, StackedLabel2
       // 2 relationship nodes: Owns, Communicates_with
       // 1 stack node: Stack(StackedLabel1, StackedLabel2)
-      // 12 edges:
+      // 10 edges (stack return paths are not rendered):
       //   A->IndividualLabel, IndividualLabel->B
       //   B->Stack
-      //   Stack->StackedLabel1, StackedLabel1->Stack
-      //   Stack->StackedLabel2, StackedLabel2->Stack
+      //   Stack->StackedLabel1, Stack->StackedLabel2
       //   Stack->C
       //   A->Owns, Owns->D
       //   A->Communicates_with, Communicates_with->E
@@ -228,7 +227,7 @@ describe('Minimap integrated with Graph', () => {
       const graphStackNodes = screen.getAllByTestId(GRAPH_STACK_NODE_ID);
       expect(graphStackNodes).toHaveLength(1);
       const graphEdgeNodes = screen.getAllByTestId(GRAPH_EDGE_ID);
-      expect(graphEdgeNodes).toHaveLength(12);
+      expect(graphEdgeNodes).toHaveLength(10);
 
       // Check Minimap contains the same number of entity, label, and relationship nodes as Graph
       // Check it does not render stack nodes or edges

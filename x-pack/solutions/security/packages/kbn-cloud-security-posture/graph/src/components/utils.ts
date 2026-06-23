@@ -24,6 +24,7 @@ import type {
   RelationshipNodeViewModel,
   EdgeViewModel,
 } from './types';
+import { mapEdgeViewModelToReactFlowEdge } from './edge/edge_processing';
 
 export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =>
   node.shape === 'ellipse' ||
@@ -233,35 +234,8 @@ export const buildGraphFromViewModels = (
   });
 
   const edges: Array<Edge<EdgeViewModel>> = edgesModel
-    .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
-    .map((edgeData) => {
-      const sourceShape = nodesById[edgeData.source].shape;
-      const targetShape = nodesById[edgeData.target].shape;
-
-      const isIn = !isConnectorShape(sourceShape) && targetShape === 'group';
-      const isInside = sourceShape === 'group' && isConnectorShape(targetShape);
-      const isOut = isConnectorShape(sourceShape) && targetShape === 'group';
-      const isOutside = sourceShape === 'group' && !isConnectorShape(targetShape);
-
-      return {
-        id: edgeData.id,
-        type: 'default',
-        source: edgeData.source,
-        sourceHandle: isInside ? 'inside' : isOutside ? 'outside' : undefined,
-        target: edgeData.target,
-        targetHandle: isIn ? 'in' : isOut ? 'out' : undefined,
-        focusable: false,
-        selectable: false,
-        deletable: false,
-        data: {
-          ...edgeData,
-          sourceShape: nodesById[edgeData.source].shape,
-          sourceColor: nodesById[edgeData.source].color,
-          targetShape: nodesById[edgeData.target].shape,
-          targetColor: nodesById[edgeData.target].color,
-        },
-      };
-    });
+    .map((edgeData) => mapEdgeViewModelToReactFlowEdge(edgeData, nodesById))
+    .filter((edge): edge is Edge<EdgeViewModel> => edge !== null);
 
   return { nodes, edges };
 };

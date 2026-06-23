@@ -32,6 +32,9 @@ export const STACK_NODE_HORIZONTAL_PADDING = 20;
  */
 export const GRAPH_SCOPE_ID = 'graph';
 
+/** Viewport zoom below which nodes render in simplified form (pill-only, icon-only). */
+export const GRAPH_SIMPLIFIED_ZOOM_THRESHOLD = 0.75;
+
 export const i18nNamespaceKey = 'securitySolutionPackages.csp.graph.flyout.networkPreviewPanel';
 
 export const NETWORK_PREVIEW_BANNER = {

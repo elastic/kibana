@@ -169,6 +169,19 @@ export const entityNodeDataSchema = schema.allOf([
     ips: schema.maybe(schema.arrayOf(schema.string())),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
+    // Risk and criticality fields — populated by the entity store when available
+    assetCriticality: schema.maybe(schema.string()),
+    assetCriticalityCounts: schema.maybe(
+      schema.object({
+        extreme: schema.maybe(schema.number()),
+        high: schema.maybe(schema.number()),
+        medium: schema.maybe(schema.number()),
+        low: schema.maybe(schema.number()),
+      })
+    ),
+    riskScore: schema.maybe(schema.number()),
+    riskScoreMin: schema.maybe(schema.number()),
+    riskScoreMax: schema.maybe(schema.number()),
   }),
 ]);
 

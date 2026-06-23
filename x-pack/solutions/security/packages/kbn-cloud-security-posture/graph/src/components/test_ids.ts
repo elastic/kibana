@@ -43,9 +43,17 @@ export const GRAPH_CONTROLS_ZOOM_IN_ID = `${GRAPH_INVESTIGATION_TEST_ID}ZoomIn` 
 export const GRAPH_CONTROLS_ZOOM_OUT_ID = `${GRAPH_INVESTIGATION_TEST_ID}ZoomOut` as const;
 export const GRAPH_CONTROLS_CENTER_ID = `${GRAPH_INVESTIGATION_TEST_ID}Center` as const;
 export const GRAPH_CONTROLS_FIT_VIEW_ID = `${GRAPH_INVESTIGATION_TEST_ID}FitView` as const;
+export const GRAPH_CONTROLS_FULL_SCREEN_ID = `${GRAPH_INVESTIGATION_TEST_ID}FullScreen` as const;
+
+export const GRAPH_BOTTOM_BAR_SELECT_TOOL_ID = `${GRAPH_INVESTIGATION_TEST_ID}SelectTool` as const;
+export const GRAPH_BOTTOM_BAR_PAN_TOOL_ID = `${GRAPH_INVESTIGATION_TEST_ID}PanTool` as const;
+export const GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}ApplyFilters` as const;
 
 export const GRAPH_ID = `${GRAPH_INVESTIGATION_TEST_ID}Graph` as const;
 export const GRAPH_ENTITY_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityNode` as const;
+export const GRAPH_ORIGIN_NODE_OUTLINE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}OriginNodeOutline` as const;
 export const GRAPH_LABEL_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}LabelNode` as const;
 export const GRAPH_RELATIONSHIP_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNode` as const;
 export const GRAPH_STACK_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackNode` as const;
@@ -71,6 +79,8 @@ export const GRAPH_ENTITY_NODE_BUTTON_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeButton` as const;
 export const GRAPH_ENTITY_NODE_DETAILS_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeDetails` as const;
+export const GRAPH_ENTITY_NODE_SIMPLIFIED_LABEL_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeSimplifiedLabel` as const;
 
 export const GRAPH_IPS_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsText` as const;
 export const GRAPH_IPS_BUTTON_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsButton` as const;

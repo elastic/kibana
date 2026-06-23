@@ -6,14 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
+import { BaseEdge } from '@xyflow/react';
 import type { EdgeProps, EdgeViewModel } from '../types';
 import { getShapeHandlePosition } from './utils';
 import { getMarkerEnd } from './markers';
 import { useEdgeColor } from './styles';
-import { STACK_NODE_HORIZONTAL_PADDING } from '../constants';
 import { GRAPH_EDGE_ID } from '../test_ids';
-import { isConnectorShape } from '../utils';
+import { getGraphEdgePath } from './get_graph_edge_path';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -36,9 +35,6 @@ export const DefaultEdge = memo(
     data,
   }: EdgeProps) => {
     const color: EdgeColor = data?.color || 'primary';
-    const entityToConnector = data?.sourceShape !== 'group' && isConnectorShape(data?.targetShape);
-    const connectorToEntity = isConnectorShape(data?.sourceShape) && data?.targetShape !== 'group';
-    const isExtraAlignment = entityToConnector || connectorToEntity;
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
     const markerEnd =
@@ -51,25 +47,13 @@ export const DefaultEdge = memo(
     const tX = Math.round(targetX + targetMargin);
     const tY = Math.round(targetY);
 
-    const xOffset = Math.abs(targetX - sourceX) / 2;
-    const centerX =
-      targetX < sourceX
-        ? targetX + xOffset
-        : targetX -
-          xOffset +
-          (isExtraAlignment ? STACK_NODE_HORIZONTAL_PADDING / 2 : 0) * (connectorToEntity ? 1 : -1);
-
-    const [edgePath] = getSmoothStepPath({
-      // sourceX and targetX are adjusted to account for the shape handle position
+    const edgePath = getGraphEdgePath({
       sourceX: sX,
       sourceY: sY,
       sourcePosition,
       targetX: tX,
       targetY: tY,
       targetPosition,
-      borderRadius: 15,
-      centerX,
-      offset: 0,
     });
 
     return (

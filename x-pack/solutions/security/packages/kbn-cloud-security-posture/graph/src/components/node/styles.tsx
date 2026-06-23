@@ -205,15 +205,20 @@ export const getLabelColors = (
 };
 
 /**
- * Gets the background, border and text colors for relationship nodes
- * Relationship nodes have fixed colors (dark background with light text)
+ * Relationship pill colors per Figma event component (Relationship variant).
  */
 export const getRelationshipColors = (
   euiTheme: EuiThemeComputed
-): { backgroundColor: string; borderColor: string; textColor: string } => {
+): {
+  backgroundColor: string;
+  emphasizedBackgroundColor: string;
+  borderColor: string;
+  textColor: string;
+} => {
   return {
     backgroundColor: euiTheme.colors.backgroundLightText,
-    borderColor: euiTheme.colors.borderBaseProminent,
+    emphasizedBackgroundColor: euiTheme.colors.backgroundBaseFormsControlDisabled,
+    borderColor: euiTheme.colors.borderBasePlain,
     textColor: euiTheme.colors.textParagraph,
   };
 };

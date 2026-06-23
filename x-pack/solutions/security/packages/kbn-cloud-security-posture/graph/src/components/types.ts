@@ -25,6 +25,8 @@ export interface Size {
 
 interface BaseNodeDataViewModel {
   interactive?: boolean;
+  /** When true, render a dashed outline using the node border color. */
+  highlightAsOrigin?: boolean;
 }
 
 export type NodeClickCallback = (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
@@ -49,6 +51,7 @@ export interface EntityNodeViewModel
   nodeClick?: NodeClickCallback;
   ipClickHandler?: IpClickCallback;
   countryClickHandler?: CountryClickCallback;
+  showEntityId?: boolean;
 }
 
 export interface GroupNodeViewModel
@@ -72,7 +75,9 @@ export interface LabelNodeViewModel
 export interface RelationshipNodeViewModel
   extends Record<string, unknown>,
     RelationshipNodeDataModel,
-    BaseNodeDataViewModel {}
+    BaseNodeDataViewModel {
+  expandButtonClick?: ExpandButtonClickCallback;
+}
 
 export type NodeViewModel =
   | EntityNodeViewModel

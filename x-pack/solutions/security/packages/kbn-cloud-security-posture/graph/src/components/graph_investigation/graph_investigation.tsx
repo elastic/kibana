@@ -18,6 +18,7 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
+import { GraphExpandPopoverSync } from '../graph/graph_expand_popover_sync';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
@@ -27,6 +28,9 @@ import type { DocumentAnalysisOutput } from '../node/label_node/analyze_document
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
+import { BottomBar } from '../controls/bottom_bar';
+import { DEFAULT_GRAPH_FILTERS } from '../controls/apply_filters_popover';
+import type { GraphFiltersState } from '../controls/apply_filters_popover';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
@@ -257,6 +261,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
+    const [graphFilters, setGraphFilters] = useState<GraphFiltersState>(DEFAULT_GRAPH_FILTERS);
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -351,6 +356,21 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+
+    const closeGraphExpandPopovers = useCallback(() => {
+      nodeExpandPopover.actions.closePopover();
+      labelExpandPopover.actions.closePopover();
+      ipPopover.actions.closePopover();
+      countryFlagsPopover.actions.closePopover();
+      eventPopover.actions.closePopover();
+    }, [
+      nodeExpandPopover,
+      labelExpandPopover,
+      ipPopover,
+      countryFlagsPopover,
+      eventPopover,
+    ]);
+
     const isPopoverOpen = [
       nodeExpandPopover,
       labelExpandPopover,
@@ -435,15 +455,30 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           if (isEntityNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
+            const { nodeMetadata } = graphFilters;
             return {
               ...node,
+              isOrigin: originEntityIdsSet.has(node.id),
+              showEntityId: nodeMetadata.entityId,
+              ips: nodeMetadata.ipAddress ? node.ips : undefined,
+              countryCodes: nodeMetadata.geolocation ? node.countryCodes : undefined,
+              assetCriticality: nodeMetadata.assetCriticality ? node.assetCriticality : undefined,
+              assetCriticalityCounts: nodeMetadata.assetCriticality
+                ? node.assetCriticalityCounts
+                : undefined,
+              riskScore: nodeMetadata.riskScore ? node.riskScore : undefined,
+              riskScoreMin: nodeMetadata.riskScore ? node.riskScoreMin : undefined,
+              riskScoreMax: nodeMetadata.riskScore ? node.riskScoreMax : undefined,
               expandButtonClick: nodeExpandButtonClickHandler,
-              ipClickHandler: createIpClickHandler(nodeIps),
-              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
+              ipClickHandler: createIpClickHandler(nodeMetadata.ipAddress ? nodeIps : []),
+              countryClickHandler: createCountryClickHandler(
+                nodeMetadata.geolocation ? nodeCountryCodes : []
+              ),
             };
           } else if (isLabelNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
+            const { eventAlertMetadata } = graphFilters;
             const numEvents = node.uniqueEventsCount ?? 0;
             const numAlerts = node.uniqueAlertsCount ?? 0;
             const analysis = analyzeDocuments({
@@ -457,11 +492,17 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                 : [];
             return {
               ...node,
+              ips: eventAlertMetadata.sourceIpAddress ? node.ips : undefined,
+              countryCodes: eventAlertMetadata.sourceGeolocation ? node.countryCodes : undefined,
               isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
-              ipClickHandler: createIpClickHandler(nodeIps),
-              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
+              ipClickHandler: createIpClickHandler(
+                eventAlertMetadata.sourceIpAddress ? nodeIps : []
+              ),
+              countryClickHandler: createCountryClickHandler(
+                eventAlertMetadata.sourceGeolocation ? nodeCountryCodes : []
+              ),
               eventClickHandler: createEventClickHandler(analysis, text),
             };
           } else if (isRelationshipNode(node)) {
@@ -471,6 +512,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
             return {
               ...node,
               ...(isOrigin && { isOrigin }),
+              expandButtonClick: labelExpandButtonClickHandler,
             };
           }
 
@@ -484,6 +526,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originAlertIdsSet,
       originEntityIdsSet,
       relationshipNodeSources,
+      graphFilters,
     ]);
 
     const searchFilterCounter = useMemo(() => {
@@ -522,8 +565,20 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           css={css`
             height: 100%;
 
-            .react-flow__panel {
+            .react-flow__panel.top.right {
               margin-right: 8px;
+            }
+
+            .react-flow__panel.bottom {
+              overflow: visible;
+            }
+
+            .react-flow__panel.bottom.center {
+              overflow: visible;
+            }
+
+            .react-flow__panel.bottom.right {
+              overflow: visible;
             }
           `}
         >
@@ -579,16 +634,25 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               interactive={true}
               isLocked={isPopoverOpen}
               showMinimap={true}
+              highlightOriginsOnly={graphFilters.highlightOriginsOnly}
             >
+              <GraphExpandPopoverSync onClosePopovers={closeGraphExpandPopovers} />
               <Panel position="top-right">
                 <Actions
-                  showInvestigateInTimeline={showInvestigateInTimeline}
+                  showInvestigateInTimeline={false}
                   showToggleSearch={showToggleSearch}
-                  onInvestigateInTimeline={onInvestigateInTimelineCallback}
                   onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
                   searchFilterCounter={searchFilterCounter}
                   searchToggled={searchToggled}
                   searchWarningMessage={searchWarningMessage}
+                />
+              </Panel>
+              <Panel position="bottom-center" style={{ overflow: 'visible' }}>
+                <BottomBar
+                  showInvestigateInTimeline={showInvestigateInTimeline}
+                  onInvestigateInTimeline={onInvestigateInTimelineCallback}
+                  filtersState={graphFilters}
+                  onFiltersChange={setGraphFilters}
                 />
               </Panel>
             </Graph>

@@ -11,16 +11,25 @@ import userEvent from '@testing-library/user-event';
 import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
-import { getLabelColors } from '../styles';
-import { GRAPH_FLAGS_BADGE_ID, GRAPH_IPS_TEXT_ID, GRAPH_LABEL_NODE_ID } from '../../test_ids';
+import { GRAPH_LABEL_NODE_ID } from '../../test_ids';
+import { getEventPillColors, getEventPillTone } from './event_pill_styles';
+import { analyzeDocuments } from './analyze_documents';
 import {
   LabelNode,
   TEST_SUBJ_EXPAND_BTN,
   TEST_SUBJ_HANDLE,
-  TEST_SUBJ_HOVER_OUTLINE,
   TEST_SUBJ_LABEL_TEXT,
   TEST_SUBJ_TOOLTIP,
 } from './label_node';
+import { TEST_SUBJ_GEO_ROW, TEST_SUBJ_IP_ROW } from './label_node_details';
+
+jest.mock('../../../hooks/use_viewport_zoom', () => ({
+  useViewportZoom: jest.fn(() => 1),
+}));
+
+import { useViewportZoom } from '../../../hooks/use_viewport_zoom';
+
+const useViewportZoomMock = useViewportZoom as jest.Mock;
 
 jest.mock('./label_node_badges', () => {
   // Use the actual exports, except override LIMIT
@@ -58,6 +67,10 @@ describe('LabelNode', () => {
     draggable: true,
   };
 
+  beforeEach(() => {
+    useViewportZoomMock.mockReturnValue(1);
+  });
+
   test('renders basic label node', () => {
     render(
       <ReactFlow>
@@ -69,7 +82,7 @@ describe('LabelNode', () => {
     expect(screen.getAllByTestId(TEST_SUBJ_HANDLE)).toHaveLength(2);
   });
 
-  test('renders expand button and outline on hover if interactive', async () => {
+  test('renders expand button on hover if interactive', async () => {
     render(
       <ReactFlow>
         <LabelNode {...baseProps} />
@@ -80,11 +93,10 @@ describe('LabelNode', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ_HOVER_OUTLINE)).toBeInTheDocument();
     });
   });
 
-  test('does not render expand button and outline on hover if no interactive', async () => {
+  test('does not render expand button on hover if not interactive', async () => {
     const props = {
       ...baseProps,
       data: {
@@ -103,11 +115,44 @@ describe('LabelNode', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ_HOVER_OUTLINE)).not.toBeInTheDocument();
     });
   });
 
-  test('renders ips when present', () => {
+  test('does not render expand button when multiple nodes are selected', async () => {
+    render(
+      <ReactFlow
+        nodes={[
+          {
+            id: 'test-label-node',
+            type: 'label',
+            selected: true,
+            data: baseProps.data,
+            position: { x: 0, y: 0 },
+          },
+          {
+            id: 'other-label-node',
+            type: 'label',
+            selected: true,
+            data: {
+              ...baseProps.data,
+              id: 'other-label-node',
+              label: 'Other Label',
+            },
+            position: { x: 100, y: 0 },
+          },
+        ]}
+        nodeTypes={{ label: LabelNode }}
+      />
+    );
+
+    await userEvent.hover(screen.getAllByTestId(GRAPH_LABEL_NODE_ID)[0]);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).not.toBeInTheDocument();
+    });
+  });
+
+  test('renders ip metadata when ips are present', () => {
     const props = {
       ...baseProps,
       data: {
@@ -121,11 +166,33 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
-    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_IP_ROW)).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_GEO_ROW)).not.toBeInTheDocument();
   });
 
-  test('renders country flags when present', () => {
+  test('hides metadata when zoomed out below simplified threshold', () => {
+    useViewportZoomMock.mockReturnValue(0.5);
+
+    const props = {
+      ...baseProps,
+      data: {
+        ...baseProps.data,
+        ips: ['127.0.0.1'],
+        countryCodes: ['us'],
+      },
+    };
+
+    render(
+      <ReactFlow>
+        <LabelNode {...props} />
+      </ReactFlow>
+    );
+
+    expect(screen.queryByTestId(TEST_SUBJ_IP_ROW)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_GEO_ROW)).not.toBeInTheDocument();
+  });
+
+  test('renders geolocation metadata when country codes are present', () => {
     const props = {
       ...baseProps,
       data: {
@@ -139,11 +206,11 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_IP_ROW)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_GEO_ROW)).toBeInTheDocument();
   });
 
-  test('renders ips and country flags when present', () => {
+  test('renders ip and geolocation metadata when both are present', () => {
     const props = {
       ...baseProps,
       data: {
@@ -158,8 +225,8 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
-    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_IP_ROW)).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_GEO_ROW)).toBeInTheDocument();
   });
 
   describe('Tooltip', () => {
@@ -223,33 +290,39 @@ describe('LabelNode', () => {
     });
   });
 
-  describe('Shape colors', () => {
+  describe('Pill colors', () => {
     const mockEuiTheme = {
       colors: {
-        danger: '#FF0000',
-        backgroundBasePrimary: '#0000FF',
-        borderStrongPrimary: '#0000DD',
-        textInverse: '#FFFFFF',
-        textPrimary: '#000000',
+        backgroundBaseDanger: '#fff3f1',
+        backgroundLightDanger: '#fdddd8',
+        borderBaseDanger: '#ffc9c2',
+        borderStrongDanger: '#c61e25',
+        backgroundBasePlain: '#ffffff',
+        backgroundBaseSubdued: '#f6f9fc',
+        borderBasePlain: '#cad3e2',
+        textParagraph: '#1d2a3e',
       },
-    };
+    } as EuiThemeComputed;
 
-    it('should return danger colors when color prop is "danger"', () => {
-      const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.danger,
-        borderColor: mockEuiTheme.colors.danger,
-        textColor: mockEuiTheme.colors.textInverse,
-      });
+    it('returns alert colors for alert-only nodes', () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 2 });
+      const colors = getEventPillColors(getEventPillTone(analysis), false, mockEuiTheme);
+      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBaseDanger);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBaseDanger);
     });
 
-    it('should return primary colors when color prop is "primary"', () => {
-      const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
-        borderColor: mockEuiTheme.colors.borderStrongPrimary,
-        textColor: mockEuiTheme.colors.textPrimary,
-      });
+    it('returns active alert colors when selected', () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 2 });
+      const colors = getEventPillColors(getEventPillTone(analysis), true, mockEuiTheme);
+      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundLightDanger);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderStrongDanger);
+    });
+
+    it('returns event colors for event-only nodes', () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
+      const colors = getEventPillColors(getEventPillTone(analysis), false, mockEuiTheme);
+      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBasePlain);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBasePlain);
     });
   });
 });

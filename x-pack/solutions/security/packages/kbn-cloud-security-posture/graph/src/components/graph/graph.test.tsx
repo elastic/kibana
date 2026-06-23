@@ -271,6 +271,48 @@ describe('<Graph />', () => {
       });
     });
 
+    it('should preserve viewport when node metadata changes without structural changes', async () => {
+      const props = {
+        nodes: initialNodes,
+        edges: initialEdges,
+        interactive: true,
+      };
+
+      const { container, rerender } = render(
+        <TestProviders>
+          <Graph {...props} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(
+          initialNodes.length
+        );
+      });
+
+      const fitViewCallsAfterInitialRender = mockFitView.mock.calls.length;
+
+      const updatedNodes = initialNodes.map((node) =>
+        node.id === 'entity1' ? { ...node, showEntityId: false } : node
+      );
+
+      rerender(
+        <TestProviders>
+          <Graph {...props} nodes={updatedNodes} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(
+          initialNodes.length
+        );
+      });
+
+      await waitFor(() => {
+        expect(mockFitView.mock.calls.length).toBe(fitViewCallsAfterInitialRender);
+      });
+    });
+
     it('should center on new nodes when onCenterGraphAfterRefresh is undefined', async () => {
       const props = {
         nodes: initialNodes,

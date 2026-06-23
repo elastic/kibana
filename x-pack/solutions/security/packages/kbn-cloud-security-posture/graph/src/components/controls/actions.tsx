@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiNotificationBadge,
   EuiToolTip,
   EuiTourStep,
   useEuiTheme,
@@ -23,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { GraphNotificationBadge } from '../graph_notification_badge';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
@@ -201,7 +201,7 @@ export const Actions = ({
                   />
                 )}
                 {searchFilterCounter > 0 && (
-                  <EuiNotificationBadge
+                  <GraphNotificationBadge
                     css={css`
                       position: absolute;
                       right: ${-4.5 + (searchToggled ? 1 : 0)}px;
@@ -211,7 +211,7 @@ export const Actions = ({
                     `}
                   >
                     {searchFilterCounter > 99 ? '99+' : searchFilterCounter}
-                  </EuiNotificationBadge>
+                  </GraphNotificationBadge>
                 )}
               </EuiButton>
             </EuiToolTip>

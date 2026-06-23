@@ -7,7 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { MiniMap, type Node, type MiniMapNodeProps } from '@xyflow/react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 import {
   GRAPH_MINIMAP_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
@@ -148,6 +149,7 @@ export const Minimap = ({
   nodesState,
 }: MinimapProps) => {
   const { euiTheme } = useEuiTheme();
+  const minimapShadow = useEuiShadow('s');
 
   // Create a mapping of node ids to their data for easy lookup
   const nodeDataMap = React.useMemo(() => {
@@ -182,14 +184,28 @@ export const Minimap = ({
   const defaultStyle: React.CSSProperties = {
     height: 120,
     width: 200,
-    // NOTE MiniMap's `bgColor` prop affects the mask so we need to pass our custom bgColor within the `style` prop
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    borderRadius: 4,
+    overflow: 'hidden',
   };
 
+  const minimapWrapperCss = css`
+    & > .react-flow__minimap {
+      ${minimapShadow}
+    }
+
+    .react-flow__minimap-mask {
+      vector-effect: non-scaling-stroke;
+      stroke-width: 4px !important;
+    }
+  `;
+
   return (
-    <div data-test-subj={GRAPH_MINIMAP_ID}>
+    <div data-test-subj={GRAPH_MINIMAP_ID} css={minimapWrapperCss}>
       <MiniMap<Node<NodeViewModel>>
-        maskColor={transparentize(euiTheme.colors.backgroundBaseFormsControlDisabled, 0.75)}
+        bgColor={euiTheme.colors.backgroundBaseSubdued}
+        maskColor={euiTheme.colors.backgroundBasePlain}
+        maskStrokeColor={euiTheme.colors.borderBasePlain}
+        maskStrokeWidth={4}
         nodeComponent={NodeRenderer}
         style={{ ...defaultStyle, ...style }}
         zoomable={zoomable}
