@@ -437,27 +437,27 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
       // Test skipped document (where fails)
       expectDefined(skipWhereDoc);
-      expect(skipWhereDoc['client.ip']).toBeNull();
-      expect(skipWhereDoc['user.name']).toBeNull();
-      expect(skipWhereDoc['http.response.body.bytes']).toBeNull();
-      expect(skipWhereDoc['http.response.status']).toBeNull();
-      expect(skipWhereDoc['event.duration']).toBeNull();
+      expect(skipWhereDoc['client.ip']).toBe('1.1.1.1');
+      expect(skipWhereDoc['user.name']).toBe('bob');
+      expect(skipWhereDoc['http.response.body.bytes']).toBe(123);
+      expect(skipWhereDoc['http.response.status']).toBe('UNCHANGED');
+      expect(skipWhereDoc['event.duration']).toBeCloseTo(7); // mapped type is long
 
       // Test skipped document (missing message)
       expectDefined(skipMissingDoc);
-      expect(skipMissingDoc['client.ip']).toBeNull();
-      expect(skipMissingDoc['user.name']).toBeNull();
-      expect(skipMissingDoc['http.response.body.bytes']).toBeNull();
-      expect(skipMissingDoc['http.response.status']).toBeNull();
-      expect(skipMissingDoc['event.duration']).toBeNull();
+      expect(skipMissingDoc['client.ip']).toBe('2.2.2.2');
+      expect(skipMissingDoc['user.name']).toBe('carol');
+      expect(skipMissingDoc['http.response.body.bytes']).toBe(456);
+      expect(skipMissingDoc['http.response.status']).toBe('LEGACY');
+      expect(skipMissingDoc['event.duration']).toBeCloseTo(3); // mapped type is long
 
       // Test skipped document (both skip conditions)
       expectDefined(skipBothDoc);
-      expect(skipBothDoc['client.ip']).toBeNull();
-      expect(skipBothDoc['user.name']).toBeNull();
-      expect(skipBothDoc['http.response.body.bytes']).toBeNull();
-      expect(skipBothDoc['http.response.status']).toBeNull();
-      expect(skipBothDoc['event.duration']).toBeNull();
+      expect(skipBothDoc['client.ip']).toBe('999999');
+      expect(skipBothDoc['user.name']).toBe('dave');
+      expect(skipBothDoc['http.response.body.bytes']).toBe(789);
+      expect(skipBothDoc['http.response.status']).toBe('NOOP');
+      expect(skipBothDoc['event.duration']).toBeCloseTo(6); // mapped type is long
     }
   );
 
@@ -496,7 +496,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
       // Test skipped document
       expectDefined(skippedDoc);
-      expect(skippedDoc.size).toBeNull();
+      expect(skippedDoc.size).toBe(88); // mapped type is long
     }
   );
 
