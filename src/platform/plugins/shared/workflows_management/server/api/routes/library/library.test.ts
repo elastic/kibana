@@ -266,7 +266,7 @@ describe('Library Routes', () => {
   });
 
   describe(`GET ${HEALTH_PATH}`, () => {
-    it('should return 200 with the diagnostic payload when the library is enabled', async () => {
+    it('should return 200 with the diagnostic payload + toggle state when enabled', async () => {
       setToggle(true);
       mockLibraryService.getHealth.mockReturnValue({
         sourceMode: 'http',
@@ -283,12 +283,17 @@ describe('Library Routes', () => {
 
       expect(mockLibraryService.getHealth).toHaveBeenCalledTimes(1);
       expect(response.ok).toHaveBeenCalledWith({
-        body: { sourceMode: 'http', lastRefreshAt: '2026-06-01T12:00:00.000Z' },
+        body: {
+          sourceMode: 'http',
+          lastRefreshAt: '2026-06-01T12:00:00.000Z',
+          enabled: true,
+        },
       });
     });
 
-    it('should short-circuit with 503 when the toggle is off', async () => {
+    it('should still return 200 (with `enabled: false`) when the toggle is off — diagnostics are not gated', async () => {
       setToggle(false);
+      mockLibraryService.getHealth.mockReturnValue({ sourceMode: 'http' });
 
       const response = httpServerMock.createResponseFactory();
 
@@ -298,11 +303,11 @@ describe('Library Routes', () => {
         response
       );
 
-      expect(mockLibraryService.getHealth).not.toHaveBeenCalled();
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 503,
-        body: { message: expect.stringMatching(/disabled/i) },
+      expect(mockLibraryService.getHealth).toHaveBeenCalledTimes(1);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { sourceMode: 'http', enabled: false },
       });
+      expect(response.customError).not.toHaveBeenCalled();
     });
   });
 });
