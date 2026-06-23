@@ -124,14 +124,7 @@ export const InstallationInfoSchema = schema.object(
     namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     installed_kibana: schema.arrayOf(KibanaAssetReferenceSchema, { maxSize: 10000 }),
     additional_spaces_installed_kibana: schema.maybe(
-      // Each additional space holds the same kind of Kibana asset list as the
-      // primary-space `installed_kibana` above, so it must allow the same number
-      // of assets (10000). A single integration can install >100 Kibana assets
-      // (dashboards, visualizations, saved searches, ...) in one space.
-      schema.recordOf(
-        schema.string(),
-        schema.arrayOf(KibanaAssetReferenceSchema, { maxSize: 10000 })
-      )
+      schema.recordOf(schema.string(), schema.arrayOf(KibanaAssetReferenceSchema, { maxSize: 100 }))
     ),
     installed_es: schema.arrayOf(EsAssetReferenceSchema, { maxSize: 10000 }),
     name: schema.string(),
