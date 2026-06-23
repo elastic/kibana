@@ -23,6 +23,5 @@ export {
 export type { ProviderPermissions } from './aws_provider_permissions';
 export { AWS_SERVICE_PROVIDER_PERMISSIONS } from './aws_provider_permissions';
 
-
 export type { GetIamPermissionsResponse } from './iam_permissions_api';
 export { IAM_PERMISSIONS_API_PATH } from './iam_permissions_api';
