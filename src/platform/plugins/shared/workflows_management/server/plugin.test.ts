@@ -39,7 +39,7 @@ describe('WorkflowsPlugin', () => {
       logging: { console: false },
       available: true,
       globalExecutionsView: { enabled: false },
-      library: { refreshIntervalMs: 600_000 },
+      library: { ttlMs: 600_000 },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);

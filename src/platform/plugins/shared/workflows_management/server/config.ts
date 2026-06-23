@@ -26,7 +26,7 @@ const librarySchema = schema.object(
      */
     bundlePath: schema.maybe(schema.string({ minLength: 1 })),
     /** Interval between background catalog refreshes (HTTP source mode). */
-    refreshIntervalMs: schema.number({
+    ttlMs: schema.number({
       defaultValue: 10 * 60 * 1000,
       min: 10 * 1000,
     }),

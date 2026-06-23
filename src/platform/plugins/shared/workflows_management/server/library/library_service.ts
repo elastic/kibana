@@ -44,7 +44,7 @@ export class LibraryService {
       registryUrl: deps.config.library.registryUrl,
       kibanaVersion: deps.kibanaVersion,
       isServerless: deps.isServerless,
-      ttlMs: deps.config.library.refreshIntervalMs,
+      ttlMs: deps.config.library.ttlMs,
       logger,
     });
   }

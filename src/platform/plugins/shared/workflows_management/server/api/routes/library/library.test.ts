@@ -110,7 +110,7 @@ describe('Library Routes', () => {
     const routeDependencies: RouteDependencies = {
       router: mockRouter,
       config: {
-        library: { refreshIntervalMs: 600_000 },
+        library: { ttlMs: 600_000 },
       },
       workflowsService: {
         kibanaVersion: '9.5.0',

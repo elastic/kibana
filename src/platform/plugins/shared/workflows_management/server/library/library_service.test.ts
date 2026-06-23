@@ -44,7 +44,7 @@ const buildService = (templates: Template[]) => {
 
   return new LibraryService({
     config: {
-      library: { refreshIntervalMs: 60_000 },
+      library: { ttlMs: 60_000 },
     } as unknown as WorkflowsManagementConfig,
     logger: loggerMock.create(),
     kibanaVersion: '9.5.0',
