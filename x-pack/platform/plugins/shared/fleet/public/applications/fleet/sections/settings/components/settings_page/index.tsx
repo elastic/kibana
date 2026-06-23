@@ -17,7 +17,8 @@ import { AgentBinarySection } from './agent_binary_section';
 import { FleetProxiesSection } from './fleet_proxies_section';
 import { AdvancedSection } from './advanced_section';
 
-// Matches EUI's default restricted page width (1200px).
+// EUI's default restricted page width is 1200px (PAGE_MAX_WIDTH), but it is not
+// exported publicly. Named const for reuse within this file.
 const PAGE_CONTENT_MAX_WIDTH = 1200;
 
 const settingsPageContentWrapperCss = css`
