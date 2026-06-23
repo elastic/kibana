@@ -200,7 +200,7 @@ export const ComposeDiscoverForm = ({
       <ModeSelect
         value={isAlert ? 'alert' : 'signal'}
         onChange={onKindChange}
-        disabled={!state.queryCommitted || isEditing}
+        disabled={(!builderType && !state.queryCommitted) || isEditing}
         compressed
         data-test-subj="composeDiscoverModeSelect"
       />
