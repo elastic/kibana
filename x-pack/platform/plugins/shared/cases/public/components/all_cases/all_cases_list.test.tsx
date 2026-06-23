@@ -243,7 +243,11 @@ describe('AllCasesListGeneric', () => {
       )[0]
     );
 
-    expect(await screen.findByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(
+        'Damaged Raccoon (damaged_raccoon@elastic.co)'
+      );
+    });
   });
 
   it('should show a tooltip with all tags when hovered', async () => {
