@@ -56,7 +56,9 @@ describe('bindServices - Elasticsearch client routing', () => {
     const client = container.get(EsServiceScopedSpaceRoutingToken);
 
     expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, {
+      projectRouting: 'space',
+    });
     expect(client).toBe(elasticsearch.client.asScoped.mock.results[0].value.asCurrentUser);
   });
 
@@ -71,6 +73,8 @@ describe('bindServices - Elasticsearch client routing', () => {
     container.get(QueryServiceScopedSpaceRoutingToken);
 
     expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, {
+      projectRouting: 'space',
+    });
   });
 });
