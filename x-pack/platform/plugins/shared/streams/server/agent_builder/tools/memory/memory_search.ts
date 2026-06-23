@@ -45,9 +45,11 @@ const memorySearchSchema = z.object({
     .enum(SEARCH_MODES)
     .optional()
     .describe(
-      'Search mode: "hybrid" (default) combines keyword and semantic matching for best recall, ' +
-        '"semantic" uses vector similarity only, "keyword" uses fuzzy text matching only. ' +
-        'Use "semantic" or "hybrid" when looking for conceptually related pages rather than exact keyword matches.'
+      'Search mode — omit for the default "hybrid" behaviour, which combines keyword and semantic ' +
+        'matching and finds pages that are thematically related even when they share no keywords with the query. ' +
+        '"keyword": fast fuzzy/wildcard match only — use when you know the exact name, tag, or category and want ' +
+        'to avoid false positives from semantic drift. ' +
+        '"semantic": vector-similarity only — rarely the right choice because it ignores exact matches; prefer hybrid.'
     ),
 });
 
