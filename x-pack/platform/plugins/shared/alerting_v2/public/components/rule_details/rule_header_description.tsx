@@ -8,7 +8,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { React, useState } from 'react';
+import React, { useState } from 'react';
 import { useRule } from './rule_context';
 
 const KIND_LABELS: Record<string, string> = {

@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { RuleSidebarConditionsTab } from './rule_sidebar_conditions_tab';
 import { RuleSidebarPreviewTab } from './rule_sidebar_preview_tab';
 import { RuleSidebarRunbookTab } from './rule_sidebar_runbook_tab';
-import { RuleHeaderDescription } from '../rule_header_description';
 
 const CONDITIONS_TAB = {
   id: 'conditions',
@@ -85,8 +84,6 @@ export const RuleSidebar: React.FC<RuleSidebarProps> = ({ showQueryPreview = fal
       {selectedTab === 'conditions' && <RuleSidebarConditionsTab />}
       {selectedTab === 'queryPreview' && <RuleSidebarPreviewTab />}
       {selectedTab === 'runbook' && <RuleSidebarRunbookTab />}
-      <EuiHorizontalRule margin="m" />
-      <RuleHeaderDescription />
     </div>
   );
 };

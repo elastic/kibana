@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
-  useGeneratedHtmlId,
   EuiFilterGroup,
   type Criteria,
 } from '@elastic/eui';
@@ -62,7 +61,6 @@ export const RulesListPage = () => {
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
 
-  const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
   const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
     useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
