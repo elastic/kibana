@@ -8,7 +8,8 @@
 import { every, isUndefined } from 'lodash';
 import type { LogChangeHistoryOptions } from '@kbn/change-history';
 import type { RuleChangeTrackingMetadata } from '@kbn/alerting-types';
-import type { Logger, SavedObject } from '@kbn/core/server';
+import type { Logger, SavedObjectBulkResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { RuleChange } from '../../../../rules_client/lib/change_tracking';
 import type { RawRule, RuleTypeRegistry } from '../../../../types';
 import type { RulesClientContext } from '../../../../rules_client/types';
@@ -18,7 +19,7 @@ interface LogRuleChanges {
   /**
    * Rule saved objects after applying the changes
    */
-  ruleSOs: Array<SavedObject<RawRule>>;
+  ruleSOs: Array<SavedObjectBulkResult<RawRule>>;
   /**
    * Context information describing the changes
    */
@@ -51,7 +52,7 @@ export async function logRuleChanges({
   const changes: RuleChange[] = [];
 
   for (const ruleSO of ruleSOs) {
-    if (ruleSO.error) {
+    if (isSavedObjectErrorResult(ruleSO)) {
       continue;
     }
 
