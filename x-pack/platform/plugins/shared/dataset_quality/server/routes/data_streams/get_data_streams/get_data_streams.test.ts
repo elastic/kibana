@@ -78,7 +78,7 @@ describe('getDataStreams', () => {
     expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
   });
 
-  it('requests view_index_metadata privilege per stream and maps it to canMonitor', async () => {
+  it('requests both monitor and view_index_metadata per stream, mapping canMonitor from monitor', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const result = await getDataStreams({
       esClient: esClientMock,
@@ -90,14 +90,8 @@ describe('getDataStreams', () => {
     expect(datasetQualityPrivileges.getHasIndexPrivileges).toHaveBeenCalledWith(
       expect.anything(),
       expect.any(Array),
-      expect.arrayContaining(['view_index_metadata']),
+      expect.arrayContaining(['monitor', 'view_index_metadata']),
       true
-    );
-    expect(datasetQualityPrivileges.getHasIndexPrivileges).not.toHaveBeenCalledWith(
-      expect.anything(),
-      expect.any(Array),
-      expect.arrayContaining(['monitor']),
-      expect.anything()
     );
 
     result.dataStreams.forEach((stream) => {
@@ -105,10 +99,13 @@ describe('getDataStreams', () => {
     });
   });
 
-  it('sets canMonitor true when view_index_metadata is granted but monitor is not', async () => {
+  it('sets canMonitor from monitor privilege (not view_index_metadata)', async () => {
     mockGetMockDataStreamPrivileges.mockResolvedValueOnce(
       Object.fromEntries(
-        MATCHING_DATA_STREAMS.map(({ name }) => [name, { view_index_metadata: true }])
+        MATCHING_DATA_STREAMS.map(({ name }) => [
+          name,
+          { monitor: true, view_index_metadata: false },
+        ])
       )
     );
 
@@ -262,6 +259,6 @@ const MATCHING_DATA_STREAMS = [
 ];
 
 const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce((acc, stream) => {
-  acc[stream.name] = { view_index_metadata: true };
+  acc[stream.name] = { monitor: true, view_index_metadata: true };
   return acc;
-}, {} as Record<string, { view_index_metadata: boolean }>);
+}, {} as Record<string, { monitor: boolean; view_index_metadata: boolean }>);

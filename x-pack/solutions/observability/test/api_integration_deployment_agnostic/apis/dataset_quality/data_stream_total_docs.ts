@@ -311,11 +311,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // When no type filter is set the client queries all known types (logs, metrics,
-    // traces, synthetics). A user with only logs access should get 200 for every
-    // type: a non-empty result for logs and a clean empty result (not a 403) for
-    // the other types, because the server only 403s when no streams are accessible
-    // AND the wildcard read check also fails.
+    // A user with only logs access gets 403 when requesting a non-log type: no
+    // accessible streams are found and the wildcard read check also fails.
     describe('Read-only logs user requesting non-log types', () => {
       let supertestReadWithCookieCredentials: SupertestWithRoleScopeType;
       let roleAuthc: RoleCredentials;
@@ -336,14 +333,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       for (const nonLogType of ['metrics', 'traces', 'synthetics'] as const) {
-        it(`returns 200 with empty totalDocs for type="${nonLogType}" without errors`, async () => {
+        it(`returns 403 for type="${nonLogType}" when the user only has logs access`, async () => {
           const res = await callApiAs({
             roleScopedSupertestWithCookieCredentials: supertestReadWithCookieCredentials,
             apiParams: { type: nonLogType, start: from, end: to },
           });
 
-          expect(res.statusCode).to.be(200);
-          expect(res.body.totalDocs).to.eql([]);
+          expect(res.statusCode).to.be(403);
         });
       }
     });
