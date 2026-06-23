@@ -11,12 +11,13 @@ import type { ComponentProps } from 'react';
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import type { NavExtensionPointContext } from '../types';
 import type { ListTemplateConfig } from './list_template';
 import { ListTemplate } from './list_template';
 
-interface TestRow {
+interface TestRow extends SerializableRecord {
   id: string;
   label: string;
   href: string;
@@ -32,11 +33,6 @@ const defaultContext: NavExtensionPointContext = {
 };
 
 const defaultConfig: ListTemplateConfig<TestRow> = {
-  item: {
-    idField: 'id',
-    labelField: 'label',
-    hrefField: 'href',
-  },
   emptyMessage: 'No dashboards yet',
 };
 
@@ -212,12 +208,6 @@ describe('ListTemplate', () => {
         },
       ],
       config: {
-        item: {
-          idField: 'id',
-          labelField: 'label',
-          hrefField: 'href',
-          iconField: 'iconType',
-        },
         emptyMessage: 'No dashboards yet',
       },
     });
