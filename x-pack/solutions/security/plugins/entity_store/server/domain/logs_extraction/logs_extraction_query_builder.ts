@@ -226,6 +226,7 @@ export function extractMainPaginationParams(
 
 function mergedFieldStats(idFieldName: string, fields: EntityField[]): string {
   return fields
+    .filter((field) => !field.skipExtraction)
     .map((field) => {
       const { retention, destination: dest } = field;
       const recentDest = recentData(dest);

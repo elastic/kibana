@@ -18,12 +18,14 @@ export const collectValues = ({
   source,
   mapping = { type: 'keyword' },
   allowAPIUpdate = false,
+  skipExtraction = false,
 }: Operation): EntityField => ({
   destination: destination ?? source,
   source,
   retention: { operation: 'collect_values' },
   mapping,
   allowAPIUpdate,
+  skipExtraction,
 });
 
 export const newestValue = ({
@@ -31,12 +33,14 @@ export const newestValue = ({
   mapping = { type: 'keyword' },
   source,
   allowAPIUpdate = false,
+  skipExtraction = false,
 }: Operation): EntityField => ({
   destination: destination ?? source,
   source,
   retention: { operation: 'prefer_newest_value' },
   mapping,
   allowAPIUpdate,
+  skipExtraction,
 });
 
 export const oldestValue = ({
@@ -49,4 +53,5 @@ export const oldestValue = ({
   retention: { operation: 'prefer_oldest_value' },
   mapping,
   allowAPIUpdate: false, // oldest value should never be updated
+  skipExtraction: false,
 });
