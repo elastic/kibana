@@ -47,7 +47,20 @@ function sleep(ms: number): Promise<void> {
 }
 
 function toErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
+  if (error instanceof Error) {
+    // Fold in error.cause so nested undici socket codes (ECONNRESET, UND_ERR_SOCKET, etc.)
+    // are visible to the retryable-pattern regex even when the top-level message is generic
+    // ("fetch failed"). Include both the cause message and its code property when present.
+    const causeMsg =
+      error.cause instanceof Error
+        ? error.cause.message
+        : error.cause != null
+        ? String(error.cause)
+        : '';
+    const causeCode: string = (error.cause as any)?.code ?? '';
+    const extras = [causeMsg, causeCode].filter(Boolean).join(' ');
+    return extras ? `${error.message} (${extras})` : error.message;
+  }
   try {
     return JSON.stringify(error);
   } catch {
@@ -116,13 +129,13 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
   }
 
   // Common transient network issues (best-effort).
-  // "other side closed" / "fetch failed" are SocketError signatures from undici when a
-  // keep-alive connection is closed by the server (e.g. Kibana's Node.js keepAliveTimeout)
-  // while the eval worker is busy with a long ES replay operation.
+  // Includes undici/Node socket codes and Kibana OOM-induced connection-drop messages.
+  // `toErrorMessage` now folds in error.cause so nested codes become visible here.
   if (
-    /ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|other side closed|socket hang up|fetch failed/i.test(
+    /ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|EPIPE|UND_ERR_SOCKET|UND_ERR_CONNECT_TIMEOUT/i.test(
       message
-    )
+    ) ||
+    /fetch failed|other side closed|socket hang ?up|SocketError/i.test(message)
   ) {
     return { retry: true, retryAfterMs };
   }

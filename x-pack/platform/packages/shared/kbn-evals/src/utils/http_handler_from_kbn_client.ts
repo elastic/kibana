@@ -65,9 +65,40 @@ export function httpHandlerFromKbnClient({
 
     const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
     const retryStatuses = new Set([429, 503, 504]);
+    // Network-drop retries are independent of KBN_EVALS_HTTP_RETRIES (which defaults to 0 and
+    // only handles rate-limit/server-error status codes). A separate budget handles TCP-level
+    // failures (Kibana OOM crash, socket reset) which have no HTTP status code.
+    // Use parseInt + isFinite to correctly honour `KBN_EVALS_NETWORK_RETRIES=0` (|| would
+    // coerce 0 to the default because 0 is falsy).
+    const parsedNetworkRetries = parseInt(process.env.KBN_EVALS_NETWORK_RETRIES ?? '', 10);
+    const networkRetries = Number.isFinite(parsedNetworkRetries) ? parsedNetworkRetries : 3;
 
     async function sleep(ms: number) {
       await new Promise((r) => setTimeout(r, ms));
+    }
+
+    /**
+     * Returns true when the error is a TCP/socket-level connection drop with no HTTP response.
+     * Kibana can drop the socket mid-request when OOM; undici surfaces this as a TypeError with
+     * message "fetch failed" and the real code (ECONNRESET, etc.) buried in `error.cause`.
+     */
+    function isConnectionDrop(error: unknown): boolean {
+      if (!(error instanceof Error)) return false;
+      // Must have no numeric HTTP status — a genuine connection drop never produced a response.
+      if (typeof (error as any).status === 'number') return false;
+      const msg = error.message ?? '';
+      const causeMsg =
+        (error.cause instanceof Error ? error.cause.message : String(error.cause ?? '')) ?? '';
+      const causeCode: string = (error.cause as any)?.code ?? '';
+      const networkTokens =
+        /fetch failed|other side closed|socket hang ?up|terminated|SocketError/i;
+      const networkCodes = /ECONNRESET|ECONNREFUSED|EPIPE|UND_ERR_SOCKET|UND_ERR_CONNECT_TIMEOUT/i;
+      return (
+        networkTokens.test(msg) ||
+        networkTokens.test(causeMsg) ||
+        networkCodes.test(causeCode) ||
+        networkCodes.test(causeMsg)
+      );
     }
 
     function parseRetryAfterMsFromHeaders(
@@ -95,8 +126,11 @@ export function httpHandlerFromKbnClient({
     }
 
     let lastError: unknown;
+    let networkAttemptsMade = 0;
+    // Loop bound covers both status-retry and network-retry budgets independently.
+    const maxAttempts = Math.max(maxRetries, networkRetries);
 
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= maxAttempts; attempt++) {
       try {
         const response = await kbnClient.request({
           path: options.path,
@@ -140,32 +174,52 @@ export function httpHandlerFromKbnClient({
         const error = err as KbnClientRequesterError;
         const status = error.status;
 
-        lastError = error;
-
-        const shouldRetry =
+        const statusShouldRetry =
           attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
+        const networkDrop = isConnectionDrop(error);
+        const networkShouldRetry = networkDrop && networkAttemptsMade < networkRetries;
+        const shouldRetry = statusShouldRetry || networkShouldRetry;
+
+        lastError = error;
 
         if (!shouldRetry) {
           throw error;
         }
 
-        const retryAfterMs =
-          parseRetryAfterMsFromHeaders(error.headers) ??
-          parseRetryAfterMsFromMessage(error.message);
+        let delayMs: number;
+        if (networkShouldRetry) {
+          // Exponential backoff gives Kibana time to GC/recover after an OOM-induced drop.
+          // Use the network-attempt counter so the delay grows correctly across multiple drops.
+          const baseBackoffMs = 1000 * Math.pow(2, networkAttemptsMade);
+          const jitterMs = Math.floor(
+            Math.random() * Math.min(1000, Math.max(100, baseBackoffMs * 0.15))
+          );
+          delayMs = baseBackoffMs + jitterMs;
+          networkAttemptsMade++;
+          log.warning(
+            `Connection drop from Kibana (fetch failed / socket closed); retrying in ${Math.round(
+              delayMs / 1000
+            )}s (network attempt ${networkAttemptsMade}/${networkRetries})`
+          );
+        } else {
+          const retryAfterMs =
+            parseRetryAfterMsFromHeaders(error.headers) ??
+            parseRetryAfterMsFromMessage(error.message);
 
-        // Exponential backoff (1s, 2s, 4s, ...) with jitter, but never sooner than retry-after.
-        const baseBackoffMs = 1000 * Math.pow(2, attempt);
-        const baseDelayMs = retryAfterMs ? Math.max(baseBackoffMs, retryAfterMs) : baseBackoffMs;
-        const jitterMs = Math.floor(
-          Math.random() * Math.min(1000, Math.max(100, baseDelayMs * 0.15))
-        );
-        const delayMs = baseDelayMs + jitterMs;
+          // Exponential backoff (1s, 2s, 4s, ...) with jitter, but never sooner than retry-after.
+          const baseBackoffMs = 1000 * Math.pow(2, attempt);
+          const baseDelayMs = retryAfterMs ? Math.max(baseBackoffMs, retryAfterMs) : baseBackoffMs;
+          const jitterMs = Math.floor(
+            Math.random() * Math.min(1000, Math.max(100, baseDelayMs * 0.15))
+          );
+          delayMs = baseDelayMs + jitterMs;
 
-        log.warning(
-          `HTTP ${status} from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
-            attempt + 1
-          }/${maxRetries + 1})`
-        );
+          log.warning(
+            `HTTP ${status} from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
+              attempt + 1
+            }/${maxRetries + 1})`
+          );
+        }
         await sleep(delayMs);
       }
     }
