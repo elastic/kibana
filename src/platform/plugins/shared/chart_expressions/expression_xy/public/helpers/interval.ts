@@ -8,33 +8,12 @@
  */
 
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
-import { ESQL_TABLE_TYPE, type DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { type DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
-import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
-import moment from 'moment';
 import type { XYChartProps } from '../../common';
 import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
 import { getDataLayers, isDataLayer } from './visualization';
-
-const ESQL_UNITS = [
-  'millisecond',
-  'second',
-  'minute',
-  'hour',
-  'day',
-  'week',
-  'month',
-  'quarter',
-  'year',
-] as const satisfies readonly moment.unitOfTime.DurationConstructor[];
-
-type Unit = (typeof ESQL_UNITS)[number];
-
-const isUnit = (s: string): s is Unit => (ESQL_UNITS as readonly string[]).includes(s);
-
-const esqlTimeBucketToMs = (interval: number, unit: string): number | undefined =>
-  isUnit(unit) ? moment.duration(interval, unit).asMilliseconds() : undefined;
 
 export function calculateMinInterval(
   datatableUtilities: DatatableUtilitiesService,
@@ -43,7 +22,6 @@ export function calculateMinInterval(
   const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
   const isTimeViz = isTimeChart(getDataLayers(filteredLayers));
-  const isEsqlMode = filteredLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
 
   const xColumn =
     isDataLayer(filteredLayers[0]) &&
@@ -51,13 +29,6 @@ export function calculateMinInterval(
     getColumnByAccessor(filteredLayers[0].xAccessor, filteredLayers[0].table.columns);
 
   if (!xColumn) return;
-
-  if (isEsqlMode && xColumn.meta.sourceParams && isSourceParamsESQL(xColumn.meta.sourceParams)) {
-    const bucket = xColumn.meta.sourceParams.bucket;
-    if (!bucket) return undefined;
-    const { interval, unit } = bucket;
-    return unit ? esqlTimeBucketToMs(interval, unit) : interval;
-  }
 
   if (minTimeBarInterval) {
     return search.aggs.parseInterval(minTimeBarInterval)?.as('milliseconds');

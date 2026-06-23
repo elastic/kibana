@@ -10,13 +10,15 @@
 import type { DataView, DataViewsContract, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { FieldFormatsStartCommon, FieldFormat } from '@kbn/field-formats-plugin/common';
-import type {
-  AggsCommonStart,
-  AggConfig,
-  AggParamsDateHistogram,
-  AggParamsHistogram,
-  CreateAggConfigParams,
-  IAggType,
+import { isSourceParamsESQL } from '@kbn/expressions-plugin/common';
+import type { Unit } from '@kbn/datemath';
+import {
+  type AggsCommonStart,
+  type AggConfig,
+  type AggParamsDateHistogram,
+  type AggParamsHistogram,
+  type CreateAggConfigParams,
+  type IAggType,
 } from '../search';
 import { BUCKET_TYPES } from '../search/aggs/buckets/bucket_agg_types';
 import type { TimeRange } from '../types';
@@ -25,7 +27,24 @@ interface DateHistogramMeta {
   interval?: string;
   timeZone?: string;
   timeRange?: TimeRange;
+  dropPartials?: boolean;
 }
+
+const ESQL_UNITS = ['millisecond', 'second', 'minute', 'hour', 'day', 'week', 'month', 'year'];
+type ESQLUnit = (typeof ESQL_UNITS)[number];
+const isESQLUnit = (s: string): s is ESQLUnit => (ESQL_UNITS as readonly string[]).includes(s);
+
+const ESQL_UNIT_TO_DATEMATH: Record<string, Unit> = {
+  millisecond: 'ms',
+  second: 's',
+  minute: 'm',
+  hour: 'h',
+  day: 'd',
+  week: 'w',
+  month: 'M',
+  year: 'y',
+  // quarter: not supported by datemath / parseInterval
+};
 
 export class DatatableUtilitiesService {
   constructor(
@@ -65,7 +84,7 @@ export class DatatableUtilitiesService {
   /**
    * Helper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.
    * "auto" will get expanded to the actually used interval.
-   * If the column is not a column created by a date_histogram aggregation of the esaggs data source,
+   * If the column is not a column created by a date_histogram aggregation of the esaggs data source, or if it's not a bucketed ES|QL column,
    * this function will return undefined.
    */
   getDateHistogramMeta(
@@ -74,22 +93,33 @@ export class DatatableUtilitiesService {
       timeZone: string;
     }> = {}
   ): DateHistogramMeta | undefined {
-    if (!column.meta.sourceParams || !column.meta.sourceParams.params) {
+    if (!column.meta.sourceParams) {
       return;
     }
 
-    const params = column.meta.sourceParams.params as AggParamsDateHistogram;
-
-    let interval: string | undefined;
-    if (params.used_interval && params.used_interval !== 'auto') {
-      interval = params.used_interval;
+    if (isSourceParamsESQL(column.meta.sourceParams)) {
+      const bucket = column.meta.sourceParams.bucket;
+      if (bucket) {
+        if (!bucket.unit || !isESQLUnit(bucket.unit)) {
+          return;
+        }
+        return {
+          interval: `${bucket.interval}${ESQL_UNIT_TO_DATEMATH[bucket.unit]}`,
+          timeZone: defaults.timeZone,
+          timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
+        };
+      }
+    } else if (column.meta.sourceParams.params) {
+      const params = column.meta.sourceParams.params as AggParamsDateHistogram;
+      if (params.used_interval && params.used_interval !== 'auto') {
+        return {
+          interval: params.used_interval,
+          timeZone: params.used_time_zone || defaults.timeZone,
+          timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
+          dropPartials: params.drop_partials,
+        };
+      }
     }
-
-    return {
-      interval,
-      timeZone: params.used_time_zone || defaults.timeZone,
-      timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
-    };
   }
 
   async getDataView(column: DatatableColumn): Promise<DataView | undefined> {
@@ -126,10 +156,17 @@ export class DatatableUtilitiesService {
   /**
    * Helper function returning the used interval for data table column created by the histogramm agg type.
    * "auto" will get expanded to the actually used interval.
-   * If the column is not a column created by a histogram aggregation of the esaggs data source,
+   * If the column is not a column created by a histogram aggregation of the esaggs data source, or if it's not a bucketed ES|QL column,
    * this function will return undefined.
    */
   getNumberHistogramInterval(column: DatatableColumn): number | undefined {
+    if (column.meta.sourceParams && isSourceParamsESQL(column.meta.sourceParams)) {
+      const bucket = column.meta.sourceParams.bucket;
+      if (bucket) {
+        return bucket.interval;
+      }
+    }
+
     if (column.meta.source !== 'esaggs') {
       return;
     }

@@ -656,7 +656,7 @@ export type InferSearchResponseOf<
 
 export interface ESQLBucketMetadata {
   interval: number;
-  unit?: string;
+  unit?: 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
 }
 
 export type ESQLColumnMetadata = {

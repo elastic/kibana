@@ -88,6 +88,7 @@ export {
   uiSetting,
   boolean,
   isExpressionValueError,
+  isSourceParamsESQL,
   getType,
   unboxExpressionValue,
   isDatatable,
