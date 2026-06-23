@@ -14,7 +14,7 @@ import * as i18n from './translations';
 
 const FlyoutHeader = styled(EuiFlyoutHeader)`
   ${({ theme }) => `
-    border-bottom: 1px solid ${theme.euiTheme.colors.backgroundBaseSubdued};
+    border-bottom: 1px solid ${theme.euiTheme.colors.borderBasePlain};
   `}
 `;
 
