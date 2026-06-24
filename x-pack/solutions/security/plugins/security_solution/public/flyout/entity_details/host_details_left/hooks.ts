@@ -15,6 +15,7 @@ import {
   getResolutionGroupTab,
   getAnomaliesTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
+import { useHasAnomalies } from '../../../entity_analytics/api/hooks/use_has_anomalies';
 import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
@@ -63,6 +64,11 @@ export const useTabs = ({
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
+  const hasAnomalies = useHasAnomalies({
+    entityId: entityStoreEntityId ?? '',
+    entityType: EntityType.host,
+    enabled: !!(entityStoreEntityId && isAnomalyDetailsEnabled),
+  });
 
   return useMemo(() => {
     const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
@@ -107,7 +113,7 @@ export const useTabs = ({
         : [];
 
     const anomaliesTab =
-      entityStoreEntityId && isAnomalyDetailsEnabled
+      entityStoreEntityId && isAnomalyDetailsEnabled && hasAnomalies
         ? [
             getAnomaliesTab({
               entityId: entityStoreEntityId,
@@ -128,5 +134,6 @@ export const useTabs = ({
     entityId,
     hasEntityResolutionLicense,
     isAnomalyDetailsEnabled,
+    hasAnomalies,
   ]);
 };
