@@ -295,7 +295,6 @@ await client.log(change, {
   spaceId,
   // High-entropy secrets only — see warning above
   fieldsToHash: {
-    api: { key: true, token: true },
     apiKey: true,
   },
 });
