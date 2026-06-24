@@ -9,6 +9,7 @@ import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/publ
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { SetupDependencies, StartDependencies, FederatedDataPluginStart } from './types';
+import { PLUGIN_ID } from '../common';
 
 const PLUGIN_NAME = i18n.translate('dataFederation.pluginName', {
   defaultMessage: 'ES|QL Data Federation',
@@ -47,33 +48,42 @@ export class FederatedDataPlugin
     const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
     const enableAzureDataSourceType = this.enableAzureDataSourceType;
-    management.sections.section.data.registerApp({
-      id: 'federated_data',
-      title: PLUGIN_NAME,
-      order: 2,
-      async mount(params: ManagementAppMountParams) {
-        const { mountManagementSection } = await import('./mount_management_section');
-        const [coreStart, pluginsStart] = await core.getStartServices();
+    void core.getStartServices().then(([coreStart]) => {
+      const canManageFederatedData =
+        coreStart.application.capabilities?.[PLUGIN_ID]?.manageFederatedData === true;
 
-        const { docTitle } = coreStart.chrome;
-        docTitle.change(PLUGIN_NAME);
+      if (!canManageFederatedData) {
+        return;
+      }
 
-        const { setBreadcrumbs } = params;
-        setBreadcrumbs(LIST_BREADCRUMB);
+      management.sections.section.data.registerApp({
+        id: PLUGIN_ID,
+        title: PLUGIN_NAME,
+        order: 2,
+        async mount(params: ManagementAppMountParams) {
+          const { mountManagementSection } = await import('./mount_management_section');
+          const [nextCoreStart, pluginsStart] = await core.getStartServices();
 
-        const unmountAppCallback = mountManagementSection(coreStart, params, {
-          cloud: pluginsStart.cloud,
-          featureFlags: {
-            enableFederatedIdentityAuth,
-            enableGoogleCloudStorageDataSourceType,
-            enableAzureDataSourceType,
-          },
-        });
-        return () => {
-          docTitle.reset();
-          unmountAppCallback();
-        };
-      },
+          const { docTitle } = nextCoreStart.chrome;
+          docTitle.change(PLUGIN_NAME);
+
+          const { setBreadcrumbs } = params;
+          setBreadcrumbs(LIST_BREADCRUMB);
+
+          const unmountAppCallback = mountManagementSection(nextCoreStart, params, {
+            cloud: pluginsStart.cloud,
+            featureFlags: {
+              enableFederatedIdentityAuth,
+              enableGoogleCloudStorageDataSourceType,
+              enableAzureDataSourceType,
+            },
+          });
+          return () => {
+            docTitle.reset();
+            unmountAppCallback();
+          };
+        },
+      });
     });
   }
 

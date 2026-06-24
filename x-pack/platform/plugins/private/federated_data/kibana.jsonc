@@ -16,7 +16,8 @@
       "federatedData"
     ],
     "requiredPlugins": [
-      "management"
+      "management",
+      "features"
     ],
     "optionalPlugins": [
       "cloud"

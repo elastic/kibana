@@ -6,17 +6,34 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { PLUGIN_ID } from '../common';
 import { registerDataSetsRoutes } from './routes/register_routes';
 import type { FederatedDataConfigType } from './config';
 
-export class FederatedDataServerPlugin implements Plugin<void, void> {
+export class FederatedDataServerPlugin
+  implements Plugin<void, void, { features: FeaturesPluginSetup }>
+{
   private readonly config: FederatedDataConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<FederatedDataConfigType>();
   }
 
-  public setup({ http }: CoreSetup) {
+  public setup({ http }: CoreSetup, { features }: { features: FeaturesPluginSetup }) {
+    features.registerElasticsearchFeature({
+      id: PLUGIN_ID,
+      management: {
+        data: [PLUGIN_ID],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage'],
+          ui: ['manageFederatedData'],
+        },
+      ],
+    });
+
     registerDataSetsRoutes(http.createRouter(), this.config);
   }
 
