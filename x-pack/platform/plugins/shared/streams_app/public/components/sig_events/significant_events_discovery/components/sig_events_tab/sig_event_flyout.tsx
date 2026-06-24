@@ -8,18 +8,20 @@
 import React, { useEffect } from 'react';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +32,8 @@ import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSigEventStatusColor } from '../shared/status_display';
 import { SIG_EVENT_STATUS_LABELS } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
+import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import { SigEventDetails } from '../../../sig_event_details/sig_event_details';
 
 const LIFECYCLE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecycleTitle', {
@@ -38,14 +42,14 @@ const LIFECYCLE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecy
 const LIFECYCLE_ERROR = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecycleError', {
   defaultMessage: 'Failed to load lifecycle data',
 });
-const CLOSE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.close', {
+const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.closeAriaLabel', {
   defaultMessage: 'Close',
+});
+const STATUS_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.statusLabel', {
+  defaultMessage: 'Status',
 });
 const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
   defaultMessage: 'Criticality',
-});
-const CONFIDENCE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.confidenceLabel', {
-  defaultMessage: 'Confidence',
 });
 
 interface SigEventFlyoutProps {
@@ -74,24 +78,62 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
   }, [event, focusedSignificantEventService]);
 
   return (
-    <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      type="push"
+      ownFocus={false}
+      size="40%"
+      hideCloseButton
+    >
+      <FlyoutToolbarHeader>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="streamsSigEventFlyoutCloseButton"
+              iconType="cross"
+              aria-label={CLOSE_BUTTON_ARIA_LABEL}
+              onClick={onClose}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </FlyoutToolbarHeader>
+
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+        <EuiTitle size="s">
+          <h2 id={flyoutTitleId}>{event.title}</h2>
+        </EuiTitle>
+        <EuiText size="xs" color="subdued">
+          {formatTimestamp(event['@timestamp'])}
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={STATUS_LABEL}>
               <EuiBadge color={getSigEventStatusColor(event.status)}>
                 {SIG_EVENT_STATUS_LABELS[event.status]}
               </EuiBadge>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+          {event.criticality != null && (
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={CRITICALITY_LABEL}>
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  responsive={false}
+                  data-test-subj="streamsSigEventCriticalityBullseye"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="bullseye" size="s" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">{event.criticality}</EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </FlyoutMetadataCard>
             </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiTitle size="m">
-            <h2 id={flyoutTitleId}>{event.title}</h2>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            {formatTimestamp(event['@timestamp'])}
-            {event.criticality != null && ` · ${CRITICALITY_LABEL}: ${event.criticality}`}
-            {event.confidence != null && ` · ${CONFIDENCE_LABEL}: ${event.confidence}%`}
-          </EuiText>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
@@ -121,10 +163,6 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
           </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={onClose}>{CLOSE_LABEL}</EuiButtonEmpty>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

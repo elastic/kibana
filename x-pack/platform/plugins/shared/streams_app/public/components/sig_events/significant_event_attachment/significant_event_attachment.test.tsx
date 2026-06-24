@@ -141,6 +141,7 @@ describe('significantEventAttachmentDefinition', () => {
       </I18nProvider>
     );
 
+    expect(screen.getByText('Payment outage')).toBeInTheDocument();
     expect(screen.getByText('Payments are failing.')).toBeInTheDocument();
     expect(screen.getByText('Payment gateway timeout.')).toBeInTheDocument();
     expect(screen.getByText('logs.payment')).toBeInTheDocument();

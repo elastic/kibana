@@ -15,12 +15,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SigEvent } from '@kbn/streams-schema';
+import { InfoPanel } from '../../info_panel';
+import { RootCauseCard } from './root_cause_card';
 
-const ROOT_CAUSE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.rootCause', {
-  defaultMessage: 'Root Cause',
+const SUMMARY_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.summaryTitle', {
+  defaultMessage: 'Summary',
 });
 const RECOMMENDATIONS_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.recommendations', {
   defaultMessage: 'Recommendations',
@@ -34,10 +35,6 @@ const STREAMS_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.streams'
 const RULES_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.rules', {
   defaultMessage: 'Rules',
 });
-
-const evidencePanelCss = css`
-  margin-bottom: 4px;
-`;
 
 const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => (
   <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
@@ -59,23 +56,14 @@ export const SigEventDetails = ({ event }: SigEventDetailsProps) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       {event.summary && (
-        <EuiText size="s">
-          <p>{event.summary}</p>
-        </EuiText>
+        <InfoPanel title={SUMMARY_TITLE}>
+          <EuiText size="s">
+            <p>{event.summary}</p>
+          </EuiText>
+        </InfoPanel>
       )}
 
-      {event.root_cause && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiTitle size="xs">
-            <h3>{ROOT_CAUSE_TITLE}</h3>
-          </EuiTitle>
-          <EuiPanel color="plain" hasBorder paddingSize="s">
-            <EuiText size="s">
-              <p>{event.root_cause}</p>
-            </EuiText>
-          </EuiPanel>
-        </EuiFlexGroup>
-      )}
+      <RootCauseCard event={event} />
 
       {event.recommendations && event.recommendations.length > 0 && (
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -93,49 +81,6 @@ export const SigEventDetails = ({ event }: SigEventDetailsProps) => {
               maxWidth={false}
             />
           </EuiPanel>
-        </EuiFlexGroup>
-      )}
-
-      {event.evidences && event.evidences.length > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.streams.sigEventsTab.flyout.evidence', {
-                defaultMessage: 'Evidence ({count})',
-                values: { count: event.evidences.length },
-              })}
-            </h3>
-          </EuiTitle>
-          {event.evidences.map((ev, idx) => (
-            <EuiPanel key={idx} color="plain" hasBorder paddingSize="s" css={evidencePanelCss}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-                {ev.rule_name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{ev.rule_name}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
-                {ev.stream_name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{ev.stream_name}</EuiBadge>
-                  </EuiFlexItem>
-                )}
-                {ev.result && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={ev.result === 'anomaly' ? 'warning' : 'hollow'}>
-                      {ev.result}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-              {ev.description && (
-                <EuiText size="xs" color="subdued">
-                  {ev.description}
-                </EuiText>
-              )}
-            </EuiPanel>
-          ))}
         </EuiFlexGroup>
       )}
 
