@@ -39,6 +39,7 @@ export const MAP_ATTACHMENT_TYPE = 'map';
  * management `_find` API.
  */
 export const DASHBOARD_SO_TYPE = 'dashboard';
+export const LENS_SO_TYPE = 'lens';
 export const MAP_SO_TYPE = 'map';
 export const DISCOVER_SESSION_SO_TYPE = 'search';
 

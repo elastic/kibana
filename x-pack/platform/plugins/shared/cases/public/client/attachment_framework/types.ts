@@ -18,6 +18,7 @@ import type { CaseUI, CaseUser } from '../../containers/types';
 import { AttachmentActionType } from '../../../common/utils/attachment_actions';
 
 export { AttachmentActionType };
+export { defineAttachment } from './define_attachment';
 
 interface BaseAttachmentAction {
   type: AttachmentActionType;
@@ -85,34 +86,44 @@ export interface RowContext {
   euiTheme: EuiThemeComputed<{}>;
 }
 
-/**
- * View props for reference-based unified attachments (e.g., alerts, events).
- * These attachments reference external entities by id and may optionally
- * carry an inline `data` snapshot
- */
-export interface UnifiedReferenceAttachmentViewProps<
-  Metadata = UnifiedReferenceAttachmentPayload['metadata'],
-  AttachmentId = UnifiedReferenceAttachmentPayload['attachmentId'],
-  Data = UnifiedReferenceAttachmentPayload['data']
-> extends CommonAttachmentViewProps {
-  attachmentId: AttachmentId;
-  metadata?: Metadata;
-  data?: Data;
+type AttachmentId = UnifiedReferenceAttachmentPayload['attachmentId'];
+type ReferenceMetadata = UnifiedReferenceAttachmentPayload['metadata'];
+export type ReferenceData = UnifiedReferenceAttachmentPayload['data'];
+type ValueData = UnifiedValueAttachmentPayload['data'];
+type HybridData = ValueData | ReferenceData;
+
+interface UnifiedAttachmentViewPropsBase extends CommonAttachmentViewProps {
   createdBy: CaseUser;
   version: string;
   rowContext: RowContext;
 }
 
-/**
- * View props for value-based unified attachments (e.g., lens, user comments)
- * These attachments contain data/content directly
- */
-export interface UnifiedValueAttachmentViewProps<Data = UnifiedValueAttachmentPayload['data']>
-  extends CommonAttachmentViewProps {
+/** Reference attachments point at another entity and may include a cached snapshot. */
+export interface UnifiedReferenceAttachmentViewProps<
+  Metadata = ReferenceMetadata,
+  Id = AttachmentId,
+  Data = ReferenceData
+> extends UnifiedAttachmentViewPropsBase {
+  attachmentId: Id;
+  data?: Data;
+  metadata?: Metadata;
+}
+
+/** Value attachments store all renderable content directly on the case comment. */
+export interface UnifiedValueAttachmentViewProps<Data = ValueData>
+  extends UnifiedAttachmentViewPropsBase {
   data: Data;
-  createdBy: CaseUser;
-  version: string;
-  rowContext: RowContext;
+}
+
+/** Hybrid attachments support value and reference payloads under one attachment type id. */
+export interface UnifiedHybridAttachmentViewProps<
+  Data = HybridData,
+  Metadata = ReferenceMetadata,
+  Id = AttachmentId
+> extends UnifiedAttachmentViewPropsBase {
+  attachmentId?: Id;
+  metadata?: Metadata;
+  data?: Data;
 }
 
 export interface AttachmentType<Props> {
@@ -134,14 +145,29 @@ interface UnifiedAttachmentSchema {
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
 export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
+
+type UnifiedAttachmentRegistration<Props> = AttachmentType<Props> & UnifiedAttachmentSchema;
 export type UnifiedReferenceAttachmentType<
-  Metadata = UnifiedReferenceAttachmentPayload['metadata'],
-  AttachmentId = UnifiedReferenceAttachmentPayload['attachmentId'],
-  Data = UnifiedReferenceAttachmentPayload['data']
-> = AttachmentType<UnifiedReferenceAttachmentViewProps<Metadata, AttachmentId, Data>> &
-  UnifiedAttachmentSchema;
-export type UnifiedValueAttachmentType<Data = UnifiedValueAttachmentPayload['data']> =
-  AttachmentType<UnifiedValueAttachmentViewProps<Data>> & UnifiedAttachmentSchema;
+  Metadata = ReferenceMetadata,
+  Id = AttachmentId,
+  Data = ReferenceData
+> = UnifiedAttachmentRegistration<UnifiedReferenceAttachmentViewProps<Metadata, Id, Data>>;
+
+export type UnifiedValueAttachmentType<Data = ValueData> = UnifiedAttachmentRegistration<
+  UnifiedValueAttachmentViewProps<Data>
+>;
+
+export type UnifiedHybridAttachmentType<
+  Data = HybridData,
+  Metadata = ReferenceMetadata,
+  Id = AttachmentId
+> = UnifiedAttachmentRegistration<UnifiedHybridAttachmentViewProps<Data, Metadata, Id>>;
+
+export type RegisteredUnifiedAttachmentType =
+  | UnifiedReferenceAttachmentType
+  | UnifiedValueAttachmentType
+  | UnifiedHybridAttachmentType;
+
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
@@ -149,37 +175,5 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentType
   ) => void;
-  registerUnified: (
-    unifiedAttachmentType: UnifiedReferenceAttachmentType | UnifiedValueAttachmentType
-  ) => void;
+  registerUnified: (unifiedAttachmentType: RegisteredUnifiedAttachmentType) => void;
 }
-
-/** A payload with `attachmentId` is a reference attachment; otherwise it's value. */
-type IsReferenceSchema<S extends z.ZodType> = z.infer<S> extends { attachmentId: unknown }
-  ? true
-  : false;
-
-/** Narrow registration type — renderers see typed `data`/`metadata`/`attachmentId` from `schema`. */
-type UnifiedAttachmentTypeFromSchema<S extends z.ZodType> = IsReferenceSchema<S> extends true
-  ? UnifiedReferenceAttachmentType<
-      z.infer<S> extends { metadata?: infer M } ? M : never,
-      z.infer<S> extends { attachmentId: infer A } ? A : never,
-      z.infer<S> extends { data?: infer D } ? D : UnifiedReferenceAttachmentPayload['data']
-    >
-  : z.infer<S> extends { data: infer D }
-  ? UnifiedValueAttachmentType<D>
-  : never;
-
-/** Broad registration type returned to callers; avoids a union (contravariant intersection on view props). */
-type UnifiedAttachmentTypeForRegistry<S extends z.ZodType> = IsReferenceSchema<S> extends true
-  ? UnifiedReferenceAttachmentType
-  : UnifiedValueAttachmentType;
-
-/**
- * Defines a unified attachment. Renderer prop narrowing (`data` / `metadata`)
- * is inferred from `schema`, which the registry also uses for full-payload validation.
- */
-export const defineAttachment = <S extends z.ZodType>(
-  attachmentType: UnifiedAttachmentTypeFromSchema<S> & { schema: S }
-): UnifiedAttachmentTypeForRegistry<S> =>
-  attachmentType as unknown as UnifiedAttachmentTypeForRegistry<S>;

@@ -30,9 +30,12 @@ export {
   useCaseViewParams,
 } from './common/navigation';
 export type {
+  RegisteredUnifiedAttachmentType,
+  UnifiedHybridAttachmentType,
   UnifiedReferenceAttachmentType,
   UnifiedValueAttachmentType,
   CommonAttachmentTabViewProps,
+  UnifiedHybridAttachmentViewProps,
   UnifiedReferenceAttachmentViewProps,
   UnifiedValueAttachmentViewProps,
 } from './client/attachment_framework/types';

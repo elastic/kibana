@@ -17,7 +17,13 @@ export interface SavedObjectReferenceMetadata {
   soType: string;
 }
 
-export const TimeRangeSchema = z.object({ from: z.string(), to: z.string() }).strict();
+export const TimeRangeSchema = z
+  .object({
+    from: z.string(),
+    to: z.string(),
+    mode: z.enum(['absolute', 'relative']).optional(),
+  })
+  .strict();
 
 export const buildSavedObjectMetadataSchema = <SoType extends string>(soType: SoType) =>
   z

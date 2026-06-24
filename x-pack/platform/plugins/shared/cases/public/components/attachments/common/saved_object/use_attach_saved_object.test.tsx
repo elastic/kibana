@@ -41,6 +41,7 @@ describe('useAttachSavedObject', () => {
   const addSuccess = jest.fn();
   const findById = jest.fn();
   const cmGet = jest.fn();
+  const getTime = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,8 +51,10 @@ describe('useAttachSavedObject', () => {
       services: {
         dashboard: { findDashboardsService: jest.fn().mockResolvedValue({ findById }) },
         contentManagement: { client: { get: cmGet } },
+        data: { query: { timefilter: { timefilter: { getTime } } } },
       },
     });
+    getTime.mockReturnValue({ from: 'now-24h', to: 'now', mode: 'relative' });
   });
 
   const render = () =>
@@ -179,6 +182,58 @@ describe('useAttachSavedObject', () => {
         ],
       })
     );
+  });
+
+  it('snapshots lens attributes and always uses the current timefilter as the view time range', async () => {
+    // Lens SOs do not persist a view time range by design; the surrounding
+    // context (here: the attach action) owns it, so any `time_range` on the
+    // SO is ignored in favor of the live timefilter at attach time.
+    cmGet.mockResolvedValue({
+      item: {
+        attributes: { state: { query: {} }, time_range: { from: 'now-15m', to: 'now' } },
+        references: [{ type: 'index-pattern', id: 'data-view-1', name: 'indexpattern-datasource' }],
+      },
+    });
+    const { result } = render();
+    await act(async () => {
+      await result.current.attach(buildSO({ id: 'lens-1', type: 'lens' }));
+    });
+    expect(mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            attachmentId: 'lens-1',
+            data: {
+              attributes: {
+                state: { query: {} },
+                time_range: { from: 'now-15m', to: 'now' },
+                references: [
+                  { type: 'index-pattern', id: 'data-view-1', name: 'indexpattern-datasource' },
+                ],
+              },
+              timeRange: { from: 'now-24h', to: 'now', mode: 'relative' },
+            },
+            metadata: { title: 'My title', soType: 'lens' },
+          }),
+        ],
+      })
+    );
+  });
+
+  it('degrades a lens to title-only when the snapshot is too large to embed', async () => {
+    cmGet.mockResolvedValue({
+      item: { attributes: { state: { query: {} }, payload: 'x'.repeat(250_000) } },
+    });
+    const { result } = render();
+    await act(async () => {
+      await result.current.attach(buildSO({ id: 'lens-1', type: 'lens' }));
+    });
+    const sent = mutateAsync.mock.calls[0][0].attachments[0];
+    expect(sent).not.toHaveProperty('data');
+    expect(sent).toMatchObject({
+      attachmentId: 'lens-1',
+      metadata: { title: 'My title', soType: 'lens' },
+    });
   });
 
   it('falls back to the id when the SO has no title', async () => {

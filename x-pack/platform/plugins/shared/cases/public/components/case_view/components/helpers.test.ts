@@ -9,6 +9,7 @@ import { alertComment, eventComment, basicCase, basicComment } from '../../../co
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   DISCOVER_SESSION_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
   MAP_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -101,6 +102,27 @@ describe('Case view helpers', () => {
 
     it('counts a basic user comment as 1', () => {
       expect(getAttachmentItemCount(basicComment as unknown as AttachmentUIV2)).toBe(1);
+    });
+
+    it('does not count persistable lens attachments for saved-object tabs', () => {
+      expect(
+        getAttachmentItemCount({
+          ...basicComment,
+          type: LENS_ATTACHMENT_TYPE,
+          data: { state: {} },
+        } as unknown as AttachmentUIV2)
+      ).toBe(0);
+    });
+
+    it('counts saved-object lens attachments', () => {
+      expect(
+        getAttachmentItemCount({
+          ...basicComment,
+          type: LENS_ATTACHMENT_TYPE,
+          attachmentId: 'lens-1',
+          metadata: { title: 'Lens', soType: 'lens' },
+        } as unknown as AttachmentUIV2)
+      ).toBe(1);
     });
   });
 

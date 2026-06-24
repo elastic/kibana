@@ -10,6 +10,7 @@ import type { AttachmentUIV2 } from '../../../../../common/ui/types';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   DISCOVER_SESSION_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
   MAP_ATTACHMENT_TYPE,
 } from '../../../../../common/constants/attachments';
 import {
@@ -46,13 +47,14 @@ describe('saved_object/helpers', () => {
       expect(ATTACHMENT_TYPE_TO_SO_TYPE).toEqual({
         [DASHBOARD_ATTACHMENT_TYPE]: 'dashboard',
         [DISCOVER_SESSION_ATTACHMENT_TYPE]: 'search',
+        [LENS_ATTACHMENT_TYPE]: 'lens',
         [MAP_ATTACHMENT_TYPE]: 'map',
       });
     });
 
     it('inverts cleanly into SO_TYPE_TO_ATTACHMENT_TYPE', () => {
       for (const [attachmentType, soType] of Object.entries(ATTACHMENT_TYPE_TO_SO_TYPE)) {
-        expect(SO_TYPE_TO_ATTACHMENT_TYPE[soType as 'dashboard' | 'map' | 'search']).toBe(
+        expect(SO_TYPE_TO_ATTACHMENT_TYPE[soType as 'dashboard' | 'lens' | 'map' | 'search']).toBe(
           attachmentType
         );
       }
@@ -66,6 +68,7 @@ describe('saved_object/helpers', () => {
 
     it('exposes the attachment-type ids via SAVED_OBJECT_ATTACHMENT_TYPES', () => {
       expect(SAVED_OBJECT_ATTACHMENT_TYPES.has(DASHBOARD_ATTACHMENT_TYPE)).toBe(true);
+      expect(SAVED_OBJECT_ATTACHMENT_TYPES.has(LENS_ATTACHMENT_TYPE)).toBe(true);
       expect(SAVED_OBJECT_ATTACHMENT_TYPES.has(MAP_ATTACHMENT_TYPE)).toBe(true);
       expect(SAVED_OBJECT_ATTACHMENT_TYPES.has(DISCOVER_SESSION_ATTACHMENT_TYPE)).toBe(true);
       expect(SAVED_OBJECT_ATTACHMENT_TYPES.has('user')).toBe(false);
@@ -97,6 +100,17 @@ describe('saved_object/helpers', () => {
           metadata: { title: 'A map', soType: 'map' },
         } as unknown as AttachmentUIV2)
       ).toEqual({ attachmentId: 'map-1', soType: 'map', title: 'A map' });
+    });
+
+    it('extracts attributes for a lens attachment', () => {
+      expect(
+        extractAttributes({
+          ...baseComment,
+          type: LENS_ATTACHMENT_TYPE,
+          attachmentId: 'lens-1',
+          metadata: { title: 'A Lens visualization', soType: 'lens' },
+        } as unknown as AttachmentUIV2)
+      ).toEqual({ attachmentId: 'lens-1', soType: 'lens', title: 'A Lens visualization' });
     });
 
     it('extracts attributes for a discover-session attachment', () => {
@@ -149,12 +163,14 @@ describe('saved_object/helpers', () => {
         soAttachment('a', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
         soAttachment('b', MAP_ATTACHMENT_TYPE, 'map-1', 'map'),
         soAttachment('c', DISCOVER_SESSION_ATTACHMENT_TYPE, 'search-1', 'search'),
+        soAttachment('d', LENS_ATTACHMENT_TYPE, 'lens-1', 'lens'),
       ]);
       expect(keys).toEqual(
         new Set([
           getSavedObjectKey('dashboard', 'dash-1'),
           getSavedObjectKey('map', 'map-1'),
           getSavedObjectKey('search', 'search-1'),
+          getSavedObjectKey('lens', 'lens-1'),
         ])
       );
     });
