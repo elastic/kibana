@@ -222,28 +222,21 @@ type AppMenuItemTypeBase = AppMenuItemCommon & {
   separator?: 'above' | 'below';
 };
 
-type AppMenuItemTopLevel = AppMenuItemTypeBase & {
-  overflow?: boolean;
-  isDestructive?: never;
-};
-
-type AppMenuItemOverflow = AppMenuItemTypeBase & {
+/**
+ * Full item type for use in `config.items` arrays.
+ */
+export type AppMenuItemType = AppMenuItemTypeBase & {
   /**
    * The item will be moved to the "More" menu. Only used in top-level items, not in popover items.
    */
-  overflow: true;
+  overflow?: boolean;
   /**
    * Marks the item as destructive (e.g. delete) by rendering in danger/red color.
+   * Only takes effect for items rendered inside the overflow ("More") menu;
+   * ignored for top-level, non-overflow items.
    */
   isDestructive?: boolean;
 };
-
-/**
- * Full item type for use in `config.items` arrays.
- * Can be a top-level item or an overflow item.
- *
- */
-export type AppMenuItemType = AppMenuItemTopLevel | AppMenuItemOverflow;
 
 export type AppMenuStaticItem = AppMenuItemType & {
   /**
