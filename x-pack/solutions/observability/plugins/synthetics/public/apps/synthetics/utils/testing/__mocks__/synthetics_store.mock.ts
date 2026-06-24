@@ -94,6 +94,7 @@ export const mockState: SyntheticsAppState = {
   },
   overview: {
     pageState: {
+      page: 1,
       perPage: 10,
       sortOrder: 'asc',
       sortField: 'name.keyword',

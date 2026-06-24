@@ -31,7 +31,7 @@ export const OverviewGrid = memo(
   ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
     const dispatch = useDispatch();
 
-    const { status, loaded: isInitialized, loading } = useOverviewStatusState();
+    const { status, loaded: isInitialized, loading, total } = useOverviewStatusState();
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
 
     const setFlyoutConfigCallback = useCallback(
@@ -64,7 +64,9 @@ export const OverviewGrid = memo(
           wrap={true}
         >
           <EuiFlexItem grow={true}>
-            <OverviewPaginationInfo total={status ? monitorsSortedByStatus.length : undefined} />
+            <OverviewPaginationInfo
+              total={status ? total ?? monitorsSortedByStatus.length : undefined}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ShowAllSpaces />

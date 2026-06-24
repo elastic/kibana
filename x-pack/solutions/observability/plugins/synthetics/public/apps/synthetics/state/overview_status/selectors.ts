@@ -10,12 +10,13 @@ import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_man
 import type {
   OverviewStatusMetaData,
   OverviewStatusState,
+  PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 import type { SyntheticsAppState } from '../root_reducer';
 
 export const getStatusByConfig = (
   configId: string,
-  status?: OverviewStatusState | null,
+  status?: PaginatedOverviewStatus | null,
   locId?: string
 ) => {
   if (!status) {
@@ -50,6 +51,29 @@ export const selectOverviewStatus = createSelector(
     if (!overviewStatus.status) {
       return overviewStatus;
     }
+
+    const isPaginated = overviewStatus.status.configs != null;
+
+    // When paginated, the server already sorted and sliced the data. The
+    // config maps contain only the current page's items so counts are global
+    // (from the server) rather than derived from the maps.
+    if (isPaginated) {
+      const status =
+        groupByField === 'monitor'
+          ? overviewStatus.status
+          : formatStatus(overviewStatus.status, groupByField);
+      return {
+        ...overviewStatus,
+        status: {
+          ...status,
+          up: overviewStatus.status.up,
+          down: overviewStatus.status.down,
+          pending: overviewStatus.status.pending,
+          disabledCount: overviewStatus.status.disabledCount,
+        },
+      };
+    }
+
     const status =
       groupByField === 'monitor'
         ? overviewStatus.status

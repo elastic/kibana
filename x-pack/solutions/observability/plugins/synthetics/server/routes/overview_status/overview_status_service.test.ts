@@ -1960,6 +1960,297 @@ describe('current status route', () => {
       expect(result.upConfigs.id1.remote).toBeUndefined();
     });
   });
+  describe('paginateConfigs', () => {
+    const makeMeta = (
+      id: string,
+      overrides: Partial<{
+        overallStatus: string;
+        name: string;
+        urls: string;
+        type: string;
+        updated_at: string;
+      }> = {}
+    ): any => ({
+      configId: id,
+      monitorQueryId: id,
+      name: overrides.name ?? `monitor-${id}`,
+      schedule: '3',
+      tags: [],
+      isEnabled: overrides.overallStatus !== 'disabled',
+      isStatusAlertEnabled: false,
+      type: overrides.type ?? 'http',
+      overallStatus: overrides.overallStatus ?? 'up',
+      locations: [{ id: 'loc1', label: 'Loc 1', status: overrides.overallStatus ?? 'up' }],
+      urls: overrides.urls,
+      updated_at: overrides.updated_at,
+    });
+
+    const upConfigs: Record<string, any> = {
+      m1: makeMeta('m1', {
+        name: 'Alpha',
+        urls: 'https://alpha.io',
+        updated_at: '2025-01-01T00:00:00Z',
+      }),
+      m2: makeMeta('m2', {
+        name: 'Beta',
+        urls: 'https://beta.io',
+        updated_at: '2025-03-01T00:00:00Z',
+      }),
+      m3: makeMeta('m3', { name: 'Gamma', updated_at: '2025-02-01T00:00:00Z' }),
+    };
+    const downConfigs: Record<string, any> = {
+      m4: makeMeta('m4', {
+        overallStatus: 'down',
+        name: 'Delta',
+        urls: 'https://delta.io',
+        updated_at: '2025-04-01T00:00:00Z',
+      }),
+      m5: makeMeta('m5', {
+        overallStatus: 'down',
+        name: 'Epsilon',
+        updated_at: '2025-05-01T00:00:00Z',
+      }),
+    };
+    const pendingConfigs: Record<string, any> = {
+      m6: makeMeta('m6', { overallStatus: 'pending', name: 'Zeta' }),
+    };
+    const disabledConfigs: Record<string, any> = {
+      m7: makeMeta('m7', { overallStatus: 'disabled', name: 'Eta' }),
+    };
+
+    const allBuckets = { upConfigs, downConfigs, pendingConfigs, disabledConfigs };
+
+    const createService = (query: Record<string, any> = {}) => {
+      const routeContext: any = {
+        request: { query },
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      return new OverviewStatusService(routeContext);
+    };
+
+    it('returns the first page with correct total', () => {
+      const service = createService({ page: 1, perPage: 3 });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(7);
+      expect(result.configs).toHaveLength(3);
+    });
+
+    it('returns the second page', () => {
+      const service = createService({ page: 2, perPage: 3 });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(7);
+      expect(result.configs).toHaveLength(3);
+    });
+
+    it('returns a partial last page', () => {
+      const service = createService({ page: 3, perPage: 3 });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(7);
+      expect(result.configs).toHaveLength(1);
+    });
+
+    it('returns empty configs when page is beyond range', () => {
+      const service = createService({ page: 10, perPage: 3 });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(7);
+      expect(result.configs).toHaveLength(0);
+    });
+
+    it('sorts by status asc: down first, then up, disabled, pending', () => {
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'status',
+        sortOrder: 'asc',
+      });
+      const result = service.paginateConfigs(allBuckets);
+
+      const statuses = result.configs.map((c: any) => c.overallStatus);
+      expect(statuses).toEqual(['down', 'down', 'up', 'up', 'up', 'disabled', 'pending']);
+    });
+
+    it('sorts by status desc: up first, then down, disabled, pending', () => {
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'status',
+        sortOrder: 'desc',
+      });
+      const result = service.paginateConfigs(allBuckets);
+
+      const statuses = result.configs.map((c: any) => c.overallStatus);
+      expect(statuses).toEqual(['up', 'up', 'up', 'down', 'down', 'disabled', 'pending']);
+    });
+
+    it('sorts by name ascending', () => {
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'name.keyword',
+        sortOrder: 'asc',
+      });
+      const result = service.paginateConfigs(allBuckets);
+
+      const names = result.configs.map((c: any) => c.name);
+      expect(names).toEqual(['Alpha', 'Beta', 'Delta', 'Epsilon', 'Eta', 'Gamma', 'Zeta']);
+    });
+
+    it('sorts by name descending', () => {
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'name.keyword',
+        sortOrder: 'desc',
+      });
+      const result = service.paginateConfigs(allBuckets);
+
+      const names = result.configs.map((c: any) => c.name);
+      expect(names).toEqual(['Zeta', 'Gamma', 'Eta', 'Epsilon', 'Delta', 'Beta', 'Alpha']);
+    });
+
+    it('sorts by updated_at ascending', () => {
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'updated_at',
+        sortOrder: 'asc',
+      });
+      const result = service.paginateConfigs(allBuckets);
+
+      const names = result.configs.map((c: any) => c.name);
+      // Monitors without updated_at (0) sort first in asc, then by date
+      expect(names.indexOf('Alpha')).toBeLessThan(names.indexOf('Beta'));
+      expect(names.indexOf('Beta')).toBeLessThan(names.indexOf('Delta'));
+    });
+
+    it('sorts by urls with empty urls last', () => {
+      const service = createService({ page: 1, perPage: 20, sortField: 'urls', sortOrder: 'asc' });
+      const result = service.paginateConfigs(allBuckets);
+
+      const urls = result.configs.map((c: any) => c.urls ?? '(none)');
+      const withUrls = urls.filter((u: string) => u !== '(none)');
+      const withoutUrls = urls.filter((u: string) => u === '(none)');
+      // URLs are sorted alphabetically, then entries without URLs come last
+      expect(withUrls).toEqual(['https://alpha.io', 'https://beta.io', 'https://delta.io']);
+      expect(withoutUrls).toHaveLength(4);
+      // All url-less entries are at the end
+      expect(urls.indexOf(withoutUrls[0])).toBeGreaterThan(
+        urls.lastIndexOf(withUrls[withUrls.length - 1])
+      );
+    });
+
+    it('sorts by type ascending', () => {
+      const mixedTypes = {
+        upConfigs: {
+          t1: makeMeta('t1', { type: 'http', name: 'HTTP Mon' }),
+          t2: makeMeta('t2', { type: 'browser', name: 'Browser Mon' }),
+        },
+        downConfigs: {
+          t3: makeMeta('t3', { overallStatus: 'down', type: 'tcp', name: 'TCP Mon' }),
+        },
+        pendingConfigs: {},
+        disabledConfigs: {},
+      };
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'type.keyword',
+        sortOrder: 'asc',
+      });
+      const result = service.paginateConfigs(mixedTypes);
+
+      const types = result.configs.map((c: any) => c.type);
+      expect(types).toEqual(['browser', 'http', 'tcp']);
+    });
+
+    it('filters by statusFilter=down', () => {
+      const service = createService({ page: 1, perPage: 20, statusFilter: 'down' });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(2);
+      expect(result.configs.every((c: any) => c.overallStatus === 'down')).toBe(true);
+    });
+
+    it('filters by statusFilter=up', () => {
+      const service = createService({ page: 1, perPage: 20, statusFilter: 'up' });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(3);
+      expect(result.configs.every((c: any) => c.overallStatus === 'up')).toBe(true);
+    });
+
+    it('filters by statusFilter=disabled', () => {
+      const service = createService({ page: 1, perPage: 20, statusFilter: 'disabled' });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(1);
+      expect(result.configs[0].configId).toBe('m7');
+    });
+
+    it('filters by statusFilter=pending', () => {
+      const service = createService({ page: 1, perPage: 20, statusFilter: 'pending' });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(1);
+      expect(result.configs[0].configId).toBe('m6');
+    });
+
+    it('populates page config maps matching the page items', () => {
+      const service = createService({ page: 1, perPage: 3, sortField: 'status', sortOrder: 'asc' });
+      const result = service.paginateConfigs(allBuckets);
+
+      // Page 1 with status asc: first 3 items are m4 (down), m5 (down), then one up
+      expect(Object.keys(result.pageDownConfigs)).toHaveLength(2);
+      expect(result.pageDownConfigs.m4).toBeDefined();
+      expect(result.pageDownConfigs.m5).toBeDefined();
+      expect(Object.keys(result.pageUpConfigs)).toHaveLength(1);
+      expect(Object.keys(result.pagePendingConfigs)).toHaveLength(0);
+      expect(Object.keys(result.pageDisabledConfigs)).toHaveLength(0);
+    });
+
+    it('combines statusFilter with pagination', () => {
+      const service = createService({ page: 1, perPage: 2, statusFilter: 'up' });
+      const result = service.paginateConfigs(allBuckets);
+
+      expect(result.total).toBe(3);
+      expect(result.configs).toHaveLength(2);
+      expect(result.configs.every((c: any) => c.overallStatus === 'up')).toBe(true);
+    });
+
+    it('combines statusFilter with sort by name', () => {
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        statusFilter: 'up',
+        sortField: 'name.keyword',
+        sortOrder: 'asc',
+      });
+      const result = service.paginateConfigs(allBuckets);
+
+      const names = result.configs.map((c: any) => c.name);
+      expect(names).toEqual(['Alpha', 'Beta', 'Gamma']);
+    });
+
+    it('handles empty config maps', () => {
+      const service = createService({ page: 1, perPage: 20 });
+      const result = service.paginateConfigs({
+        upConfigs: {},
+        downConfigs: {},
+        pendingConfigs: {},
+        disabledConfigs: {},
+      });
+
+      expect(result.total).toBe(0);
+      expect(result.configs).toHaveLength(0);
+    });
+  });
 });
 
 function getEsResponse({ buckets, after }: { buckets: any[]; after?: any }) {

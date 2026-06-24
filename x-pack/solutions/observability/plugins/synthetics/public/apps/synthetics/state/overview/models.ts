@@ -13,6 +13,7 @@ import type { ConfigKey } from '../../../../../common/runtime_types';
 import type { MonitorFilterState } from '../monitor_list';
 
 export interface MonitorOverviewPageState extends MonitorFilterState {
+  page: number;
   perPage: number;
   sortOrder: 'asc' | 'desc';
   sortField: MonitorListSortField;

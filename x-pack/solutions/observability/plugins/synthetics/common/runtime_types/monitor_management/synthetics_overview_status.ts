@@ -97,7 +97,18 @@ export const OverviewStatusCodec = t.interface({
   allIds: t.array(t.string),
 });
 
+export const PaginatedOverviewStatusCodec = t.intersection([
+  OverviewStatusCodec,
+  t.partial({
+    configs: t.array(OverviewStatusMetaDataCodec),
+    total: t.number,
+    page: t.number,
+    perPage: t.number,
+  }),
+]);
+
 export type OverviewPing = t.TypeOf<typeof OverviewPingCodec>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusCodec>;
+export type PaginatedOverviewStatus = t.TypeOf<typeof PaginatedOverviewStatusCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;

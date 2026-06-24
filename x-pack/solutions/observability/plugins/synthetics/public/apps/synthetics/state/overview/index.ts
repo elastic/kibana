@@ -24,7 +24,8 @@ export const DEFAULT_OVERVIEW_VIEW = overviewViews[0];
 
 const initialState: MonitorOverviewState = {
   pageState: {
-    perPage: 16,
+    page: 1,
+    perPage: 20,
     sortOrder: 'asc',
     sortField: 'status',
     showFromAllSpaces: getInitialShowFromAllSpaces(),
@@ -43,11 +44,23 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       // ShowAllSpaces re-sending the same value, or [] filter arrays from
       // mount effects) don't create a new pageState reference and re-trigger
       // the useDebounce fetch in useOverviewStatus.
+      const paginationKeys = new Set(['page', 'perPage']);
+      let hasNonPaginationChange = false;
+
       for (const key of Object.keys(action.payload) as Array<keyof typeof action.payload>) {
         const value = action.payload[key];
         if (!isPageStateSlotEqual((state.pageState as Record<string, unknown>)[key], value)) {
           (state.pageState as Record<string, unknown>)[key] = value;
+          if (!paginationKeys.has(key)) {
+            hasNonPaginationChange = true;
+          }
         }
+      }
+
+      // Reset to first page when any non-pagination field changes (e.g.
+      // filters, sort, query) unless the caller already set page explicitly.
+      if (hasNonPaginationChange && !('page' in action.payload)) {
+        state.pageState.page = 1;
       }
     })
     .addCase(setOverviewGroupByAction, (state, action) => {
