@@ -267,7 +267,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   }
                   description={
                     <p>
-                      {isPermissionsBased ? (
+                      {true ? (
                         <FormattedMessage
                           id="genAiSettings.solutionViewDescriptionLabel"
                           defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."

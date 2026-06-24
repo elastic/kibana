@@ -219,8 +219,10 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
 
   const handleFieldChange: OnFieldChangeFn = (id, change) => {
     if (!change) {
-      const { [id]: unsavedChange, ...rest } = unsavedChanges;
-      setUnsavedChanges(rest);
+      setUnsavedChanges((changes) => {
+        const { [id]: unsavedChange, ...rest } = changes;
+        return rest;
+      });
       return;
     }
     setUnsavedChanges((changes) => ({ ...changes, [id]: change }));

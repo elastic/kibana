@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import type { BooleanUnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
+import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
@@ -24,9 +26,18 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
+
+const dependentTracingSettingIds = [
+  AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
+  AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
+  AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
+  AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
+  AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+] as const;
 
 export const AgentBuilderTracingSection: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
@@ -35,10 +46,14 @@ export const AgentBuilderTracingSection: React.FC = () => {
   } = useKibana();
 
   const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
+  const isExperimentalFeaturesEnabled = settings.client.get(
+    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+    false
+  );
 
   const tracingEnabledField = fields[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID];
 
-  if (!tracingEnabledField) {
+  if (!tracingEnabledField || !isExperimentalFeaturesEnabled) {
     return null;
   }
 
@@ -51,6 +66,29 @@ export const AgentBuilderTracingSection: React.FC = () => {
     tracingEnabledUnsaved?.unsavedValue !== undefined
       ? Boolean(tracingEnabledUnsaved.unsavedValue)
       : Boolean(tracingEnabledField.savedValue ?? tracingEnabledField.defaultValue);
+
+  const handleTracingEnabledChange: OnFieldChangeFn = (id, change) => {
+    handleFieldChange(id, change);
+
+    if (change?.unsavedValue !== false) {
+      return;
+    }
+
+    dependentTracingSettingIds.forEach((settingId) => {
+      const field = fields[settingId];
+
+      if (!field || field.type !== 'boolean' || field.isOverridden) {
+        return;
+      }
+
+      const update: BooleanUnsavedFieldChange = {
+        type: field.type,
+        unsavedValue: false,
+      };
+
+      handleFieldChange(field.id, hasUnsavedChange(field, update) ? update : undefined);
+    });
+  };
 
   return (
     <>
@@ -77,7 +115,7 @@ export const AgentBuilderTracingSection: React.FC = () => {
             <FieldRow
               field={tracingEnabledField}
               isSavingEnabled={!!canEditAdvancedSettings}
-              onFieldChange={handleFieldChange}
+              onFieldChange={handleTracingEnabledChange}
               unsavedChange={unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]}
             />
 
@@ -85,23 +123,29 @@ export const AgentBuilderTracingSection: React.FC = () => {
               <>
                 <EuiSpacer size="s" />
                 <EuiText size="s" color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.genAiSettings.agentBuilderTracing.accessControl"
-                      defaultMessage="Trace data is stored in {index} and is not access-restricted by default. Configure index-level permissions in {rolesLink}."
-                      values={{
-                        index: <code>traces-agent_builder.otel-*</code>,
-                        rolesLink: (
-                          <EuiLink href={rolesUrl}>
-                            <FormattedMessage
-                              id="xpack.genAiSettings.agentBuilderTracing.rolesLink"
-                              defaultMessage="Stack Management → Security → Roles"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
+                  <FormattedMessage
+                    id="xpack.genAiSettings.agentBuilderTracing.accessControl"
+                    defaultMessage="Trace data is readable by anyone with index access. To restrict it, configure index-level permissions in {rolesLink}."
+                    values={{
+                      rolesLink: (
+                        <EuiLink href={rolesUrl}>
+                          <FormattedMessage
+                            id="xpack.genAiSettings.agentBuilderTracing.rolesLink"
+                            defaultMessage="Stack Management > Roles"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                  <br />
+                  <FormattedMessage
+                    id="xpack.genAiSettings.agentBuilderTracing.indices"
+                    defaultMessage="Traces are stored in {index1} and {index2}"
+                    values={{
+                      index1: <code>traces-agent_builder.otel-*</code>,
+                      index2: <code>logs-agent_builder.otel-*</code>,
+                    }}
+                  />
                 </EuiText>
                 <EuiSpacer size="m" />
 
@@ -120,7 +164,7 @@ export const AgentBuilderTracingSection: React.FC = () => {
                     <p>
                       <FormattedMessage
                         id="xpack.genAiSettings.agentBuilderTracing.contentDescription"
-                        defaultMessage="By default, traces contain only structural metadata (token counts, latency, model identifiers). Enable the options below to include conversation content or real identifiers."
+                        defaultMessage="Choose what sensitive content is included in Agent Builder traces."
                       />
                     </p>
                   </EuiText>
