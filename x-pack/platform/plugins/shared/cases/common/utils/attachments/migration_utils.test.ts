@@ -6,12 +6,15 @@
  */
 
 import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
   LEGACY_ACTIONS_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
+  MAP_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
@@ -285,8 +288,11 @@ describe('migration_utils', () => {
 
   describe('isUnifiedOnlyAttachmentType', () => {
     it('is true for unified types with no legacy equivalent', () => {
-      expect(isUnifiedOnlyAttachmentType(SECURITY_TIMELINE_ATTACHMENT_TYPE)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(SECURITY_TIMELINE_ATTACHMENT_TYPE)).toBe(true)
       expect(isUnifiedOnlyAttachmentType(SECURITY_ENTITY_ATTACHMENT_TYPE)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(DASHBOARD_ATTACHMENT_TYPE)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(MAP_ATTACHMENT_TYPE)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(DISCOVER_SESSION_ATTACHMENT_TYPE)).toBe(true);
     });
 
     it('is false for unified types that map back to a legacy type', () => {
