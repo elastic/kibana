@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export type {
-  AiSummaryPanelEmbeddableState,
-  AiSummaryPanelState,
-  AiDashboardSummaryEmbeddableState,
-} from './embeddable/schemas';
+export type { AiSummaryPanelEmbeddableState, AiSummaryPanelState } from './embeddable/schemas';
 export { AI_SUMMARY_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 
 export const plugin = async () => {

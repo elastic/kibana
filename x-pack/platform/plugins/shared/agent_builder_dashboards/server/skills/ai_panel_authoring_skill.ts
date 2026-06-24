@@ -25,7 +25,6 @@ Use this skill when the user asks for a dashboard panel that Lens cannot produce
 - Mixed layouts combining text, numbers, and charts in one panel
 - Any panel the user describes that does not map to a standard Lens chart type
 - Any panel explicitly described as "AI-generated" or "custom"
-- **Dashboard summary**: when the user asks to summarise the dashboard or highlight what to focus on — use \`type: "ai_dashboard_summary"\`
 
 Do **not** use this skill for standard Lens chart types (line, bar, area, pie, histogram, data table) — use the dashboard-management skill instead.
 
@@ -50,28 +49,9 @@ All panels in \`add_panels\` use \`source: "config"\` with a \`type\` discrimina
 - \`config.prompt\` (required): the more specific, the better. Bad: "show error counts". Good: "A horizontal bar chart of the top 10 services by error count. Bars colored red (#D36086)."
 - \`config.esqlQuery\` (optional): live data context. Generate with \`${platformCoreTools.generateEsql}\` when the panel should reflect real index data.
 
-### \`type: "ai_dashboard_summary"\` — Dashboard summary
-
-Use when the user asks to summarise the dashboard, highlight key metrics, or say what to focus on.
-
-The panel **automatically discovers** all ES|QL panels on the dashboard and generates a concise narrative. No query needed.
-
-\`\`\`json
-{
-  "source": "config",
-  "type": "ai_dashboard_summary",
-  "config": {
-    "customInstructions": "Focus on anomalies and flag anything below target."
-  },
-  "grid": { "x": 0, "y": 0, "w": 48, "h": 8 }
-}
-\`\`\`
-
-Place it at the top of the dashboard, full width (\`w: 48\`). \`config.customInstructions\` is optional.
-
 ## Core Instructions
 
-### Step 1 — Decide if live data is needed (ai_panel only)
+### Step 1 — Decide if live data is needed
 
 If the panel should reflect real index data, use \`${platformCoreTools.generateEsql}\` to produce the ES|QL query, then pass it as \`config.esqlQuery\`.
 
@@ -83,7 +63,7 @@ Call \`${dashboardTools.generateDashboard}\` with:
 - A \`set_metadata\` operation first (title + description)
 - An \`add_panels\` operation with the panel items
 
-You may mix \`type: "ai_panel"\`, \`type: "ai_dashboard_summary"\`, \`type: "vis"\` (Lens), and \`type: "markdown"\` in the same \`add_panels\` call.
+You may mix \`type: "ai_panel"\`, \`type: "vis"\` (Lens), and \`type: "markdown"\` in the same \`add_panels\` call.
 
 The connector is resolved automatically — do not ask the user for a connector ID.
 `,

@@ -7,10 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import {
-  AI_SUMMARY_PANEL_EMBEDDABLE_TYPE,
-  AI_DASHBOARD_SUMMARY_EMBEDDABLE_TYPE,
-} from '../common/constants';
+import { AI_SUMMARY_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 import { setServices } from './services';
 
 interface SetupDeps {
@@ -23,15 +20,6 @@ export class AiSummaryPanelPlugin implements Plugin<void, void, SetupDeps> {
       const { aiSummaryPanelEmbeddableFactory } = await import('./async_services');
       return aiSummaryPanelEmbeddableFactory;
     });
-    embeddable.registerEmbeddablePublicDefinition(
-      AI_DASHBOARD_SUMMARY_EMBEDDABLE_TYPE,
-      async () => {
-        const { aiDashboardSummaryEmbeddableFactory } = await import(
-          './ai_dashboard_summary_embeddable'
-        );
-        return aiDashboardSummaryEmbeddableFactory;
-      }
-    );
   }
 
   start(core: CoreStart) {
