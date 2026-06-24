@@ -65,6 +65,15 @@ describe('region_policy lib', () => {
       });
       expect(result).toEqual(response);
     });
+
+    it('propagates errors from the ES client', async () => {
+      const error = Object.assign(new Error('Forbidden'), { statusCode: 403 });
+      mockClient.transport.request.mockRejectedValue(error);
+
+      await expect(
+        putRegionPolicy(mockClient, { allowed_regions: [{ csp: 'aws', region: 'us-east-1' }] })
+      ).rejects.toMatchObject({ statusCode: 403 });
+    });
   });
 
   describe('deleteRegionPolicy', () => {
