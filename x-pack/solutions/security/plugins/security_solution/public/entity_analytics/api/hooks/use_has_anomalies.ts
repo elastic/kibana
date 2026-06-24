@@ -28,5 +28,5 @@ export const useHasAnomalies = ({
 }: UseHasAnomaliesParams) => {
   const { data } = useAnomalyOverview({ entityId, entityType, enabled });
   if (data === undefined) return undefined;
-  return data.totalAnomalyCount > 0;
+  return data.totalAnomaliesCount > 0;
 };
