@@ -10,13 +10,36 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
+import type {
+  DocumentLocatorsById,
+  DocumentUpdate,
+  LocatedDocument,
+} from '../../server/repositories/document_version';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
+
+const TEST_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
+const createLocator = (index = TEST_INDEX) => ({
+  index,
+  seqNo: 1,
+  primaryTerm: 1,
+});
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
   public workflowExecutions = new Map<string, EsWorkflowExecution>();
 
   public resolveWriteIndex(): Promise<string> {
-    return Promise.resolve('.ds-.workflows-executions-2026.06.22-000001');
+    return Promise.resolve(TEST_INDEX);
+  }
+
+  public getWorkflowExecutionWithLocatorById(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<LocatedDocument<EsWorkflowExecution> | null> {
+    const doc = this.workflowExecutions.get(workflowExecutionId);
+    if (!doc || doc.spaceId !== spaceId) {
+      return Promise.resolve(null);
+    }
+    return Promise.resolve({ doc, locator: createLocator() });
   }
 
   public getWorkflowExecutionById(
@@ -29,19 +52,24 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   public createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>,
     _options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<void> {
+  ): Promise<LocatedDocument<Partial<EsWorkflowExecution>>> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
 
     this.workflowExecutions.set(workflowExecution.id, workflowExecution as EsWorkflowExecution);
-    return Promise.resolve();
+    return Promise.resolve({ doc: workflowExecution, locator: createLocator() });
   }
 
   public async bulkCreateWorkflowExecutions(
     executions: Array<Partial<EsWorkflowExecution>>,
     _options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<Array<{ id: string } | { id: string; error: string }>> {
+  ): Promise<
+    Array<
+      | { id: string; result: LocatedDocument<Partial<EsWorkflowExecution>> }
+      | { id: string; error: string }
+    >
+  > {
     if (executions.length === 0) {
       return [];
     }
@@ -55,11 +83,14 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return executions.map((execution) => {
       const id = execution.id as string;
       this.workflowExecutions.set(id, execution as EsWorkflowExecution);
-      return { id };
+      return { id, result: { doc: execution, locator: createLocator() } };
     });
   }
 
-  public updateWorkflowExecution(workflowExecution: Partial<EsWorkflowExecution>): Promise<void> {
+  public updateWorkflowExecution({
+    doc: workflowExecution,
+    locator,
+  }: DocumentUpdate<Partial<EsWorkflowExecution>>): Promise<DocumentLocatorsById> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for update');
     }
@@ -72,7 +103,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       ...this.workflowExecutions.get(workflowExecution.id),
       ...(workflowExecution as EsWorkflowExecution),
     });
-    return Promise.resolve();
+    return Promise.resolve({ [workflowExecution.id]: createLocator(locator.index) });
   }
 
   public async searchWorkflowExecutions(
@@ -249,14 +280,14 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   }
 
   public async bulkUpdateWorkflowExecutions(
-    updates: Array<Partial<EsWorkflowExecution>>
-  ): Promise<void> {
+    updates: Array<DocumentUpdate<Partial<EsWorkflowExecution>>>
+  ): Promise<DocumentLocatorsById> {
     if (updates.length === 0) {
-      return;
+      return {};
     }
 
     // Validate all IDs are present
-    for (const update of updates) {
+    for (const { doc: update } of updates) {
       if (!update.id) {
         throw new Error('Workflow execution ID is required for bulk update');
       }
@@ -264,7 +295,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
 
     // Validate all executions exist (matching Elasticsearch document_missing_exception behavior)
     const missingIds: string[] = [];
-    for (const update of updates) {
+    for (const { doc: update } of updates) {
       if (!this.workflowExecutions.has(update.id!)) {
         missingIds.push(update.id!);
       }
@@ -283,12 +314,15 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     }
 
     // Perform updates
-    for (const update of updates) {
+    const locators: DocumentLocatorsById = {};
+    for (const { doc: update, locator } of updates) {
       const existing = this.workflowExecutions.get(update.id!);
       this.workflowExecutions.set(update.id!, {
         ...existing!,
         ...update,
       } as EsWorkflowExecution);
+      locators[update.id!] = createLocator(locator.index);
     }
+    return locators;
   }
 }

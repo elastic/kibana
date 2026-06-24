@@ -12,7 +12,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
-import type { DocumentVersionsById, EsDocumentVersion } from '../repositories/document_version';
+import type { DocumentLocatorsById, EsDocumentLocator } from '../repositories/document_version';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -63,8 +63,8 @@ export type StepIoStateAccessor = Pick<
   | 'getWorkflowExecutionId'
   | 'getWorkflowExecutionScopeStack'
   | 'getWorkflowExecutionStepExecutionIds'
-  | 'getStepDocumentVersion'
-  | 'setStepDocumentVersions'
+  | 'getStepDocumentLocator'
+  | 'setStepDocumentLocators'
   | 'drainPendingStepChanges'
   | 'ingestLoadedStepDocs'
   | 'flushWorkflowDoc'
@@ -91,8 +91,8 @@ export class WorkflowExecutionState {
   private workflowExecutionRepository: WorkflowExecutionRepository;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<StepExecutionMetadata>> = new Map();
-  private workflowDocumentVersions = new Map<string, EsDocumentVersion>();
-  private stepDocumentVersions = new Map<string, EsDocumentVersion>();
+  private workflowDocumentLocators = new Map<string, EsDocumentLocator>();
+  private stepDocumentLocators = new Map<string, EsDocumentLocator>();
 
   private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
@@ -122,18 +122,18 @@ export class WorkflowExecutionState {
   }
 
   public async load(workflowExecutionId: string, spaceId: string): Promise<void> {
-    const versionedWorkflowExecution =
-      await this.workflowExecutionRepository.getWorkflowExecutionWithVersionById(
+    const locatedWorkflowExecution =
+      await this.workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
         workflowExecutionId,
         spaceId
       );
 
-    if (!versionedWorkflowExecution) {
+    if (!locatedWorkflowExecution) {
       throw new Error(`Workflow execution with ID ${workflowExecutionId} not found`);
     }
 
-    this.workflowExecution = versionedWorkflowExecution.doc;
-    this.setWorkflowDocumentVersion(workflowExecutionId, versionedWorkflowExecution.version);
+    this.workflowExecution = locatedWorkflowExecution.doc;
+    this.setWorkflowDocumentLocator(workflowExecutionId, locatedWorkflowExecution.locator);
   }
 
   public getWorkflowExecution(): EsWorkflowExecution {
@@ -160,22 +160,22 @@ export class WorkflowExecutionState {
     return this.stepIdExecutionIdIndex.get(stepId);
   }
 
-  public setWorkflowDocumentVersion(id: string, version: EsDocumentVersion): void {
-    this.workflowDocumentVersions.set(id, version);
+  public setWorkflowDocumentLocator(id: string, locator: EsDocumentLocator): void {
+    this.workflowDocumentLocators.set(id, locator);
   }
 
-  public getWorkflowDocumentVersion(id: string): EsDocumentVersion | undefined {
-    return this.workflowDocumentVersions.get(id);
+  public getWorkflowDocumentLocator(id: string): EsDocumentLocator | undefined {
+    return this.workflowDocumentLocators.get(id);
   }
 
-  public setStepDocumentVersions(versions: DocumentVersionsById): void {
-    for (const [id, version] of Object.entries(versions)) {
-      this.stepDocumentVersions.set(id, version);
+  public setStepDocumentLocators(locators: DocumentLocatorsById): void {
+    for (const [id, locator] of Object.entries(locators)) {
+      this.stepDocumentLocators.set(id, locator);
     }
   }
 
-  public getStepDocumentVersion(id: string): EsDocumentVersion | undefined {
-    return this.stepDocumentVersions.get(id);
+  public getStepDocumentLocator(id: string): EsDocumentLocator | undefined {
+    return this.stepDocumentLocators.get(id);
   }
 
   public setLastFailedStepContext(ctx: FailedStepContext): void {
@@ -310,18 +310,23 @@ export class WorkflowExecutionState {
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
 
-    const versions = await this.workflowExecutionRepository.updateWorkflowExecution({
+    const locator = this.getWorkflowDocumentLocator(this.workflowExecution.id);
+    if (!locator) {
+      throw new Error(
+        `WorkflowExecutionState: missing document locator for workflow execution ${this.workflowExecution.id}`
+      );
+    }
+
+    const locators = await this.workflowExecutionRepository.updateWorkflowExecution({
       doc: {
         ...changes,
         id: this.workflowExecution.id,
-        executionsIndex: this.workflowExecution.executionsIndex,
       },
-      targetIndex: this.workflowExecution.executionsIndex,
-      ifVersion: this.getWorkflowDocumentVersion(this.workflowExecution.id),
+      locator,
     });
-    const version = versions[this.workflowExecution.id];
-    if (version) {
-      this.setWorkflowDocumentVersion(this.workflowExecution.id, version);
+    const nextLocator = locators[this.workflowExecution.id];
+    if (nextLocator) {
+      this.setWorkflowDocumentLocator(this.workflowExecution.id, nextLocator);
     }
   }
 

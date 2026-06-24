@@ -26,6 +26,8 @@ import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 
 const TEST_STEP_EXECUTIONS_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
+const TEST_WORKFLOW_EXECUTIONS_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
+const WORKFLOW_LOCATOR = { index: TEST_WORKFLOW_EXECUTIONS_INDEX, seqNo: 1, primaryTerm: 1 };
 
 /**
  * Builds a state + service pair backed by jest-mock repositories. Returns
@@ -34,12 +36,35 @@ const TEST_STEP_EXECUTIONS_INDEX = '.ds-.workflows-step-executions-2026.06.22-00
  */
 function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {}) {
   const workflowExecutionRepository = {
-    updateWorkflowExecution: jest.fn(),
+    updateWorkflowExecution: jest.fn().mockResolvedValue({
+      'test-workflow-execution-id': { index: TEST_WORKFLOW_EXECUTIONS_INDEX, seqNo: 2, primaryTerm: 1 },
+    }),
   } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
   const stepExecutionRepository = {
-    bulkUpsert: jest.fn().mockResolvedValue(undefined),
+    bulkUpsert: jest.fn().mockImplementation((writes) =>
+      Promise.resolve(
+        Object.fromEntries(
+          writes.map(({ doc }: { doc: { id: string } }) => [
+            doc.id,
+            { index: TEST_STEP_EXECUTIONS_INDEX, seqNo: 1, primaryTerm: 1 },
+          ])
+        )
+      )
+    ),
     getStepExecutionsByIds: jest.fn().mockResolvedValue([]),
+    getStepExecutionsWithLocatorsByIds: jest.fn().mockImplementation(async (...args) => {
+      const docs = await (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)(...args);
+      return {
+        docs,
+        locators: Object.fromEntries(
+          docs.map((doc: EsWorkflowStepExecution) => [
+            doc.id,
+            { index: TEST_STEP_EXECUTIONS_INDEX, seqNo: 1, primaryTerm: 1 },
+          ])
+        ),
+      };
+    }),
   } as unknown as jest.Mocked<StepExecutionRepository>;
 
   const fakeWorkflowExecution = {
@@ -52,6 +77,7 @@ function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {})
   } as EsWorkflowExecution;
 
   const state = new WorkflowExecutionState(fakeWorkflowExecution, workflowExecutionRepository);
+  state.setWorkflowDocumentLocator(fakeWorkflowExecution.id, WORKFLOW_LOCATOR);
   // The type requires scopeStack but tests construct via the standard `as`
   // cast — set an empty stack here so prepareForRead can read it.
   state.updateWorkflowExecution({ scopeStack: [] });

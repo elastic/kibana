@@ -11,11 +11,21 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
-import type { DocumentVersionsById, DocumentWrite } from './document_version';
-import { getEsDocumentVersion } from './document_version';
+import type { DocumentLocatorsById, EsDocumentLocator } from './document_version';
+import { getEsDocumentLocator } from './document_version';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
+
+const RECENT_BACKING_INDEX_LOOKUP_COUNT = 3;
+
+export type StepExecutionWrite =
+  | { operation: 'create'; doc: Partial<EsWorkflowStepExecution> }
+  | {
+      operation: 'update';
+      doc: Partial<EsWorkflowStepExecution>;
+      locator: EsDocumentLocator;
+    };
 
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
@@ -40,6 +50,19 @@ export class StepExecutionRepository {
     return writeIndex;
   }
 
+  private async getRecentBackingIndices(): Promise<string[]> {
+    const { data_streams: dataStreams } = await this.esClient.indices.getDataStream({
+      name: this.indexName,
+    });
+    return (
+      dataStreams[0]?.indices
+        .map((index) => index.index_name)
+        .filter((indexName): indexName is string => Boolean(indexName))
+        .slice(-RECENT_BACKING_INDEX_LOOKUP_COUNT)
+        .reverse() ?? []
+    );
+  }
+
   /**
    * Searches for step executions by workflow execution ID.
    *
@@ -49,13 +72,13 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const { docs } = await this.searchStepExecutionsWithVersionsByExecutionId(executionId);
+    const { docs } = await this.searchStepExecutionsWithLocatorsByExecutionId(executionId);
     return docs;
   }
 
-  public async searchStepExecutionsWithVersionsByExecutionId(
+  public async searchStepExecutionsWithLocatorsByExecutionId(
     executionId: string
-  ): Promise<{ docs: EsWorkflowStepExecution[]; versions: DocumentVersionsById }> {
+  ): Promise<{ docs: EsWorkflowStepExecution[]; locators: DocumentLocatorsById }> {
     const response = await this.esClient.search<EsWorkflowStepExecution>({
       index: this.indexName,
       seq_no_primary_term: true,
@@ -67,17 +90,18 @@ export class StepExecutionRepository {
     });
 
     const docs: EsWorkflowStepExecution[] = [];
-    const versions: DocumentVersionsById = {};
+    const locators: DocumentLocatorsById = {};
     for (const hit of response.hits.hits) {
       if (hit._source) {
         docs.push(hit._source);
-        versions[hit._source.id] = getEsDocumentVersion({
+        locators[hit._source.id] = getEsDocumentLocator({
+          index: hit._index,
           seqNo: hit._seq_no,
           primaryTerm: hit._primary_term,
         });
       }
     }
-    return { docs, versions };
+    return { docs, locators };
   }
 
   /**
@@ -120,7 +144,7 @@ export class StepExecutionRepository {
     sourceExcludes?: StepExecutionField[],
     stepsExecutionIndex?: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const { docs } = await this.getStepExecutionsWithVersionsByIds(
+    const { docs } = await this.getStepExecutionsWithLocatorsByIds(
       stepExecutionIds,
       sourceIncludes,
       sourceExcludes,
@@ -129,15 +153,26 @@ export class StepExecutionRepository {
     return docs;
   }
 
-  public async getStepExecutionsWithVersionsByIds(
+  public async getStepExecutionsWithLocatorsByIds(
     stepExecutionIds: string[],
     sourceIncludes?: StepExecutionField[],
     sourceExcludes?: StepExecutionField[],
     stepsExecutionIndex?: string
-  ): Promise<{ docs: EsWorkflowStepExecution[]; versions: DocumentVersionsById }> {
+  ): Promise<{ docs: EsWorkflowStepExecution[]; locators: DocumentLocatorsById }> {
+    const backingIndices = stepsExecutionIndex
+      ? [stepsExecutionIndex]
+      : await this.getRecentBackingIndices();
     const response = await this.esClient.mget<EsWorkflowStepExecution>({
-      index: stepsExecutionIndex ?? this.indexName,
-      ids: stepExecutionIds,
+      ...(stepsExecutionIndex
+        ? { index: stepsExecutionIndex, ids: stepExecutionIds }
+        : {
+            docs: backingIndices.flatMap((index) =>
+              stepExecutionIds.map((id) => ({
+                _index: index,
+                _id: id,
+              }))
+            ),
+          }),
       ...(sourceIncludes?.length ? { _source_includes: sourceIncludes } : {}),
       ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
     });
@@ -145,21 +180,83 @@ export class StepExecutionRepository {
     const outputExplicitlyRequested = !!sourceIncludes?.includes('output' as StepExecutionField);
 
     const stepExecutions: EsWorkflowStepExecution[] = [];
-    const versions: DocumentVersionsById = {};
+    const locators: DocumentLocatorsById = {};
     for (const doc of response.docs) {
       if ('found' in doc && doc.found && doc._source) {
         const source = doc._source as EsWorkflowStepExecution;
         if (outputExplicitlyRequested && source.output === undefined) {
           source.output = null;
         }
+        if (locators[source.id]) {
+          throw new Error(
+            `Found duplicate step execution ID ${source.id} in multiple backing indices`
+          );
+        }
         stepExecutions.push(source);
-        versions[source.id] = getEsDocumentVersion({
+        locators[source.id] = getEsDocumentLocator({
+          index: doc._index,
           seqNo: doc._seq_no,
           primaryTerm: doc._primary_term,
         });
       }
     }
-    return { docs: stepExecutions, versions };
+    if (!stepsExecutionIndex && stepExecutions.length < stepExecutionIds.length) {
+      const foundIds = new Set(stepExecutions.map((step) => step.id));
+      const missingIds = stepExecutionIds.filter((id) => !foundIds.has(id));
+      await this.addSearchFallbackResults({
+        ids: missingIds,
+        sourceIncludes,
+        sourceExcludes,
+        outputExplicitlyRequested,
+        stepExecutions,
+        locators,
+      });
+    }
+    return { docs: stepExecutions, locators };
+  }
+
+  private async addSearchFallbackResults({
+    ids,
+    sourceIncludes,
+    sourceExcludes,
+    outputExplicitlyRequested,
+    stepExecutions,
+    locators,
+  }: {
+    ids: string[];
+    sourceIncludes?: StepExecutionField[];
+    sourceExcludes?: StepExecutionField[];
+    outputExplicitlyRequested: boolean;
+    stepExecutions: EsWorkflowStepExecution[];
+    locators: DocumentLocatorsById;
+  }): Promise<void> {
+    const searchResponse = await this.esClient.search<EsWorkflowStepExecution>({
+      index: this.indexName,
+      seq_no_primary_term: true,
+      query: { ids: { values: ids } },
+      size: Math.min(ids.length, 10000),
+      ...(sourceIncludes?.length ? { _source_includes: sourceIncludes } : {}),
+      ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
+    });
+    for (const hit of searchResponse.hits.hits) {
+      if (hit._source) {
+        const source = hit._source;
+        if (outputExplicitlyRequested && source.output === undefined) {
+          source.output = null;
+        }
+        if (locators[source.id]) {
+          throw new Error(
+            `Found duplicate step execution ID ${source.id} in multiple backing indices`
+          );
+        }
+        stepExecutions.push(source);
+        locators[source.id] = getEsDocumentLocator({
+          index: hit._index,
+          seqNo: hit._seq_no,
+          primaryTerm: hit._primary_term,
+        });
+      }
+    }
   }
 
   /**
@@ -170,8 +267,8 @@ export class StepExecutionRepository {
     error: SerializedError,
     stepsExecutionIndex?: string
   ): Promise<void> {
-    const { docs: stepExecutions, versions } =
-      await this.searchStepExecutionsWithVersionsByExecutionId(workflowExecutionId);
+    const { docs: stepExecutions, locators } =
+      await this.searchStepExecutionsWithLocatorsByExecutionId(workflowExecutionId);
     const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
 
     if (nonTerminalSteps.length === 0) {
@@ -181,26 +278,19 @@ export class StepExecutionRepository {
     const finishedAt = new Date().toISOString();
     await this.bulkUpsert(
       nonTerminalSteps.map((step) => ({
+        operation: 'update',
         doc: {
           id: step.id,
           status: ExecutionStatus.FAILED,
           error,
           finishedAt,
         },
-        targetIndex: stepsExecutionIndex,
-        ifVersion: versions[step.id],
+        locator: locators[step.id],
       }))
     );
   }
 
-  /**
-   * @param targetIndex When provided, writes go to this specific backing index
-   *   instead of the alias. Used to pin all step docs for one workflow execution
-   *   to the backing index that was current when the execution started.
-   */
-  public async bulkUpsert(
-    writes: Array<DocumentWrite<Partial<EsWorkflowStepExecution>>>
-  ): Promise<DocumentVersionsById> {
+  public async bulkUpsert(writes: StepExecutionWrite[]): Promise<DocumentLocatorsById> {
     if (writes.length === 0) {
       return {};
     }
@@ -212,7 +302,8 @@ export class StepExecutionRepository {
     });
 
     const operations: object[] = [];
-    for (const { doc, targetIndex, ifVersion } of writes) {
+    for (const write of writes) {
+      const { doc } = write;
       if (!doc.id) {
         throw new Error('Step execution ID is required for upsert');
       }
@@ -223,14 +314,14 @@ export class StepExecutionRepository {
         '@timestamp': timestamp,
       };
 
-      if (ifVersion) {
+      if (write.operation === 'update') {
         operations.push(
           {
             update: {
-              _index: targetIndex ?? this.indexName,
+              _index: write.locator.index,
               _id: id,
-              if_seq_no: ifVersion.seqNo,
-              if_primary_term: ifVersion.primaryTerm,
+              if_seq_no: write.locator.seqNo,
+              if_primary_term: write.locator.primaryTerm,
             },
           },
           {
@@ -271,16 +362,17 @@ export class StepExecutionRepository {
       );
     }
 
-    const versions: DocumentVersionsById = {};
+    const locators: DocumentLocatorsById = {};
     for (const item of bulkResponse.items) {
       const op = item.update ?? item.create;
       if (op?._id && !op.error) {
-        versions[op._id] = getEsDocumentVersion({
+        locators[op._id] = getEsDocumentLocator({
+          index: op._index,
           seqNo: op._seq_no,
           primaryTerm: op._primary_term,
         });
       }
     }
-    return versions;
+    return locators;
   }
 }

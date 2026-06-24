@@ -33,7 +33,7 @@ jest.mock('../../lib/call_kibana_api', () => ({
 
 jest.mock('../../utils', () => ({
   ...jest.requireActual<typeof import('../../utils')>('../../utils'),
-  generateEncodedStepExecutionId: jest.fn().mockImplementation(({ stepId }: { stepId: string }) => {
+  buildStepExecutionId: jest.fn().mockImplementation((_executionId: string, stepId: string) => {
     return `${stepId}_generated`;
   }),
   getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),

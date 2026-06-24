@@ -11,505 +11,223 @@ import { StepExecutionRepository } from './step_execution_repository';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 const TARGET_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
+const NEXT_INDEX = '.ds-.workflows-step-executions-2026.06.22-000002';
+const LOCATOR = { index: TARGET_INDEX, seqNo: 7, primaryTerm: 2 };
 
 describe('StepExecutionRepository', () => {
   let underTest: StepExecutionRepository;
   let esClient: {
-    index: jest.Mock;
-    update: jest.Mock;
     bulk: jest.Mock;
     mget: jest.Mock;
     search: jest.Mock;
-    indices: { exists: jest.Mock; create: jest.Mock; getDataStream: jest.Mock };
+    indices: { getDataStream: jest.Mock };
   };
 
   beforeEach(() => {
     esClient = {
-      index: jest.fn(),
-      update: jest.fn(),
       bulk: jest.fn(),
       mget: jest.fn(),
       search: jest.fn(),
       indices: {
-        exists: jest.fn().mockResolvedValue(false),
-        create: jest.fn().mockResolvedValue({}),
-        getDataStream: jest.fn(),
+        getDataStream: jest.fn().mockResolvedValue({
+          data_streams: [
+            {
+              name: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+              indices: [{ index_name: TARGET_INDEX }, { index_name: NEXT_INDEX }],
+            },
+          ],
+        }),
       },
     };
     underTest = new StepExecutionRepository(esClient as any);
   });
 
   describe('bulkUpsert', () => {
-    it('should successfully upsert multiple step executions', async () => {
-      const stepExecutions = [
-        { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
-        { id: 'step-2', stepId: 'test-step-2', status: 'running' },
-        { id: 'step-3', stepId: 'test-step-3', status: 'pending' },
-      ];
-
+    it('creates new step executions through the data stream alias', async () => {
       esClient.bulk.mockResolvedValue({
         errors: false,
         items: [
-          { update: { _id: 'step-1', status: 200 } },
-          { update: { _id: 'step-2', status: 200 } },
-          { update: { _id: 'step-3', status: 200 } },
+          {
+            create: {
+              _id: 'step-1',
+              _index: NEXT_INDEX,
+              _seq_no: 1,
+              _primary_term: 1,
+            },
+          },
         ],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      const result = await underTest.bulkUpsert([
+        {
+          operation: 'create',
+          doc: { id: 'step-1', stepId: 'my-step', status: 'completed' as any },
+        },
+      ]);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
-        index: expect.any(String),
-        body: [
-          { update: { _id: 'step-1' } },
-          {
-            doc: expect.objectContaining({
-              ...stepExecutions[0],
-              '@timestamp': expect.any(String),
-            }),
-            doc_as_upsert: true,
-          },
-          { update: { _id: 'step-2' } },
-          {
-            doc: expect.objectContaining({
-              ...stepExecutions[1],
-              '@timestamp': expect.any(String),
-            }),
-            doc_as_upsert: true,
-          },
-          { update: { _id: 'step-3' } },
-          {
-            doc: expect.objectContaining({
-              ...stepExecutions[2],
-              '@timestamp': expect.any(String),
-            }),
-            doc_as_upsert: true,
-          },
+        operations: [
+          { create: { _index: WORKFLOWS_STEP_EXECUTIONS_INDEX, _id: 'step-1' } },
+          expect.objectContaining({
+            id: 'step-1',
+            stepId: 'my-step',
+            '@timestamp': expect.any(String),
+          }),
         ],
+      });
+      expect(result).toEqual({
+        'step-1': { index: NEXT_INDEX, seqNo: 1, primaryTerm: 1 },
       });
     });
 
-    it('should handle empty array without making ES call', async () => {
-      await underTest.bulkUpsert([]);
-
-      expect(esClient.bulk).not.toHaveBeenCalled();
-    });
-
-    it('should throw error if step execution does not have an id', async () => {
-      const stepExecutions = [
-        { id: 'step-1', stepId: 'test-step-1' },
-        { stepId: 'test-step-2' }, // Missing id
-      ];
-
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
-        'Step execution ID is required for upsert'
-      );
-
-      expect(esClient.bulk).not.toHaveBeenCalled();
-    });
-
-    it('should throw error with details when bulk operation has errors', async () => {
-      const stepExecutions = [
-        { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
-        { id: 'step-2', stepId: 'test-step-2', status: 'running' },
-        { id: 'step-3', stepId: 'test-step-3', status: 'pending' },
-      ];
-
+    it('updates existing step executions through their tracked locator', async () => {
       esClient.bulk.mockResolvedValue({
-        errors: true,
-        items: [
-          { update: { _id: 'step-1', status: 200 } },
-          {
-            update: {
-              _id: 'step-2',
-              status: 409,
-              error: {
-                type: 'version_conflict_engine_exception',
-                reason: 'version conflict',
-              },
-            },
-          },
-          {
-            update: {
-              _id: 'step-3',
-              status: 400,
-              error: {
-                type: 'mapper_parsing_exception',
-                reason: 'failed to parse field [status]',
-              },
-            },
-          },
-        ],
-      });
-
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
-        'Failed to upsert 2 step executions'
-      );
-
-      expect(esClient.bulk).toHaveBeenCalled();
-    });
-
-    it('should include error details in exception message', async () => {
-      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1' }];
-
-      const errorDetails = {
-        type: 'mapper_parsing_exception',
-        reason: 'failed to parse field [executionTimeMs]',
-      };
-
-      esClient.bulk.mockResolvedValue({
-        errors: true,
+        errors: false,
         items: [
           {
             update: {
               _id: 'step-1',
-              status: 400,
-              error: errorDetails,
+              _index: TARGET_INDEX,
+              _seq_no: 8,
+              _primary_term: 2,
             },
           },
         ],
       });
 
-      try {
-        await underTest.bulkUpsert(stepExecutions as any);
-        fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.message).toContain('Failed to upsert 1 step executions');
-        expect(error.message).toContain('step-1');
-        expect(error.message).toContain('mapper_parsing_exception');
-      }
+      const result = await underTest.bulkUpsert([
+        {
+          operation: 'update',
+          doc: { id: 'step-1', status: 'failed' as any },
+          locator: LOCATOR,
+        },
+      ]);
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        refresh: false,
+        operations: [
+          {
+            update: {
+              _index: TARGET_INDEX,
+              _id: 'step-1',
+              if_seq_no: 7,
+              if_primary_term: 2,
+            },
+          },
+          {
+            doc: expect.objectContaining({
+              id: 'step-1',
+              status: 'failed',
+              '@timestamp': expect.any(String),
+            }),
+          },
+        ],
+      });
+      expect(result).toEqual({
+        'step-1': { index: TARGET_INDEX, seqNo: 8, primaryTerm: 2 },
+      });
     });
 
-    it('should handle partial success by only throwing errors for failed items', async () => {
-      const stepExecutions = [
-        { id: 'step-1', stepId: 'test-step-1' },
-        { id: 'step-2', stepId: 'test-step-2' },
-        { id: 'step-3', stepId: 'test-step-3' },
-      ];
+    it('returns an empty locator map without calling ES for empty writes', async () => {
+      await expect(underTest.bulkUpsert([])).resolves.toEqual({});
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
 
+    it('throws when any write is missing a step execution id', async () => {
+      await expect(
+        underTest.bulkUpsert([{ operation: 'create', doc: { stepId: 'missing-id' } }])
+      ).rejects.toThrow('Step execution ID is required for upsert');
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('throws with per-item details when bulk write has errors', async () => {
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
-          { update: { _id: 'step-1', status: 200 } }, // Success
+          { create: { _id: 'step-1', _index: TARGET_INDEX, _seq_no: 1, _primary_term: 1 } },
           {
             update: {
               _id: 'step-2',
               status: 409,
-              error: { type: 'version_conflict_engine_exception' },
+              error: { type: 'version_conflict_engine_exception', reason: 'version conflict' },
             },
-          }, // Error
-          { update: { _id: 'step-3', status: 201 } }, // Success
-        ],
-      });
-
-      try {
-        await underTest.bulkUpsert(stepExecutions as any);
-        fail('Should have thrown an error');
-      } catch (error: any) {
-        expect(error.message).toContain('Failed to upsert 1 step executions');
-        expect(error.message).toContain('step-2');
-        expect(error.message).not.toContain('step-1');
-        expect(error.message).not.toContain('step-3');
-      }
-    });
-
-    it('should use doc_as_upsert flag for each document', async () => {
-      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1', status: 'completed' }];
-
-      esClient.bulk.mockResolvedValue({
-        errors: false,
-        items: [{ update: { _id: 'step-1', status: 200 } }],
-      });
-
-      await underTest.bulkUpsert(stepExecutions as any);
-
-      const bulkCall = esClient.bulk.mock.calls[0][0];
-      expect(bulkCall.body[1]).toEqual({
-        doc: expect.objectContaining({
-          ...stepExecutions[0],
-          '@timestamp': expect.any(String),
-        }),
-        doc_as_upsert: true,
-      });
-    });
-
-    it('should handle single step execution', async () => {
-      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1', status: 'completed' }];
-
-      esClient.bulk.mockResolvedValue({
-        errors: false,
-        items: [{ update: { _id: 'step-1', status: 200 } }],
-      });
-
-      await underTest.bulkUpsert(stepExecutions as any);
-
-      expect(esClient.bulk).toHaveBeenCalledWith({
-        refresh: false,
-        index: expect.any(String),
-        body: [
-          { update: { _id: 'step-1' } },
-          {
-            doc: expect.objectContaining({
-              ...stepExecutions[0],
-              '@timestamp': expect.any(String),
-            }),
-            doc_as_upsert: true,
           },
         ],
       });
-    });
 
-    it('should preserve all fields in partial updates', async () => {
-      const stepExecutions = [
-        {
-          id: 'step-1',
-          stepId: 'test-step-1',
-          status: 'completed',
-          finishedAt: '2025-10-28T10:00:00Z',
-          executionTimeMs: 5000,
-          output: { result: 'success' },
-        },
-      ];
-
-      esClient.bulk.mockResolvedValue({
-        errors: false,
-        items: [{ update: { _id: 'step-1', status: 200 } }],
-      });
-
-      await underTest.bulkUpsert(stepExecutions as any);
-
-      const bulkCall = esClient.bulk.mock.calls[0][0];
-      expect(bulkCall.body[1].doc).toEqual(
-        expect.objectContaining({
-          ...stepExecutions[0],
-          '@timestamp': expect.any(String),
-        })
-      );
-    });
-
-    it('should handle multiple validation errors', async () => {
-      const stepExecutions = [
-        { stepId: 'test-step-1' }, // Missing id
-        { stepId: 'test-step-2' }, // Missing id
-      ];
-
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
-        'Step execution ID is required for upsert'
-      );
-    });
-
-    it('should use refresh: false to avoid blocking on index refresh', async () => {
-      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1' }];
-
-      esClient.bulk.mockResolvedValue({
-        errors: false,
-        items: [{ update: { _id: 'step-1', status: 200 } }],
-      });
-
-      await underTest.bulkUpsert(stepExecutions as any);
-
-      expect(esClient.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({
-          refresh: false,
-        })
-      );
+      await expect(
+        underTest.bulkUpsert([
+          { operation: 'create', doc: { id: 'step-1' } },
+          { operation: 'update', doc: { id: 'step-2' }, locator: LOCATOR },
+        ])
+      ).rejects.toThrow('Failed to upsert 1 step executions');
     });
   });
 
-  describe('getStepExecutionsByIds', () => {
-    it('should retrieve step executions by their IDs', async () => {
+  describe('getStepExecutionsWithLocatorsByIds', () => {
+    it('checks recent backing indices and returns locators', async () => {
       esClient.mget.mockResolvedValue({
         docs: [
+          { found: false },
           {
-            _id: 'step-1',
             found: true,
-            _source: { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
-          },
-          {
-            _id: 'step-2',
-            found: true,
-            _source: { id: 'step-2', stepId: 'test-step-2', status: 'running' },
+            _index: TARGET_INDEX,
+            _seq_no: 3,
+            _primary_term: 1,
+            _source: { id: 'step-1', stepId: 'my-step', status: 'completed' },
           },
         ],
       });
 
-      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
+      const result = await underTest.getStepExecutionsWithLocatorsByIds(['step-1']);
 
       expect(esClient.mget).toHaveBeenCalledWith({
-        index: expect.any(String),
-        ids: ['step-1', 'step-2'],
-      });
-      expect(result).toEqual([
-        { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
-        { id: 'step-2', stepId: 'test-step-2', status: 'running' },
-      ]);
-    });
-
-    it('should skip documents that were not found', async () => {
-      esClient.mget.mockResolvedValue({
         docs: [
-          { _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 'test-step-1' } },
-          { _id: 'step-2', found: false },
-          { _id: 'step-3', found: true, _source: { id: 'step-3', stepId: 'test-step-3' } },
+          { _index: NEXT_INDEX, _id: 'step-1' },
+          { _index: TARGET_INDEX, _id: 'step-1' },
         ],
       });
-
-      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2', 'step-3']);
-
-      expect(result).toEqual([
-        { id: 'step-1', stepId: 'test-step-1' },
-        { id: 'step-3', stepId: 'test-step-3' },
-      ]);
-    });
-
-    it('should return empty array when no documents are found', async () => {
-      esClient.mget.mockResolvedValue({
-        docs: [
-          { _id: 'step-1', found: false },
-          { _id: 'step-2', found: false },
-        ],
-      });
-
-      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle a single ID', async () => {
-      esClient.mget.mockResolvedValue({
-        docs: [
-          {
-            _id: 'step-1',
-            found: true,
-            _source: { id: 'step-1', stepId: 'test-step-1', status: 'pending' },
-          },
-        ],
-      });
-
-      const result = await underTest.getStepExecutionsByIds(['step-1']);
-
-      expect(result).toEqual([{ id: 'step-1', stepId: 'test-step-1', status: 'pending' }]);
-    });
-
-    it('should skip documents where _source is missing', async () => {
-      esClient.mget.mockResolvedValue({
-        docs: [
-          { _id: 'step-1', found: true, _source: null },
-          { _id: 'step-2', found: true, _source: { id: 'step-2', stepId: 'test-step-2' } },
-        ],
-      });
-
-      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
-
-      expect(result).toEqual([{ id: 'step-2', stepId: 'test-step-2' }]);
-    });
-
-    it('should pass sourceIncludes as _source_includes to mget', async () => {
-      esClient.mget.mockResolvedValue({
-        docs: [
-          { _id: 'step-1', found: true, _source: { id: 'step-1', output: { data: 'value' } } },
-        ],
-      });
-
-      await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
-
-      expect(esClient.mget).toHaveBeenCalledWith({
-        index: expect.any(String),
-        ids: ['step-1'],
-        _source_includes: ['id', 'output'],
+      expect(result).toEqual({
+        docs: [{ id: 'step-1', stepId: 'my-step', status: 'completed' }],
+        locators: { 'step-1': { index: TARGET_INDEX, seqNo: 3, primaryTerm: 1 } },
       });
     });
 
-    it('should not include _source_includes when sourceIncludes is undefined', async () => {
-      esClient.mget.mockResolvedValue({ docs: [] });
-
-      await underTest.getStepExecutionsByIds(['step-1']);
-
-      expect(esClient.mget).toHaveBeenCalledWith({
-        index: expect.any(String),
-        ids: ['step-1'],
-      });
-    });
-
-    it('should not include _source_includes when sourceIncludes is empty', async () => {
-      esClient.mget.mockResolvedValue({ docs: [] });
-
-      await underTest.getStepExecutionsByIds(['step-1'], []);
-
-      expect(esClient.mget).toHaveBeenCalledWith({
-        index: expect.any(String),
-        ids: ['step-1'],
-      });
-    });
-
-    it('normalises missing output to null when output is in the projection', async () => {
-      esClient.mget.mockResolvedValue({
-        docs: [
-          { _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 't' /* no output */ } },
-        ],
+    it('falls back to ids search for documents outside recent backing indices', async () => {
+      esClient.mget.mockResolvedValue({ docs: [{ found: false }] });
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _index: TARGET_INDEX,
+              _seq_no: 4,
+              _primary_term: 1,
+              _source: { id: 'step-1', stepId: 'my-step', status: 'completed' },
+            },
+          ],
+        },
       });
 
-      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
+      const result = await underTest.getStepExecutionsWithLocatorsByIds(['step-1']);
 
-      expect(result[0].output).toBeNull();
-    });
-
-    it('does not invent an output field when output is not in the projection', async () => {
-      esClient.mget.mockResolvedValue({
-        docs: [{ _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 't' } }],
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        seq_no_primary_term: true,
+        query: { ids: { values: ['step-1'] } },
+        size: 1,
       });
-
-      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'stepId']);
-
-      expect('output' in result[0]).toBe(false);
-    });
-
-    it('preserves a legitimate null output (FAILED step)', async () => {
-      esClient.mget.mockResolvedValue({
-        docs: [
-          {
-            _id: 'step-1',
-            found: true,
-            _source: { id: 'step-1', stepId: 't', output: null },
-          },
-        ],
+      expect(result.locators['step-1']).toEqual({
+        index: TARGET_INDEX,
+        seqNo: 4,
+        primaryTerm: 1,
       });
-
-      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
-
-      expect(result[0].output).toBeNull();
-    });
-
-    it('uses the pinned backing index when provided', async () => {
-      esClient.mget.mockResolvedValue({ docs: [] });
-
-      await underTest.getStepExecutionsByIds(['step-1'], undefined, undefined, TARGET_INDEX);
-
-      expect(esClient.mget).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: TARGET_INDEX,
-          ids: ['step-1'],
-        })
-      );
     });
   });
 
   describe('resolveWriteIndex', () => {
     it('returns the latest backing index from the data stream', async () => {
-      esClient.indices.getDataStream.mockResolvedValue({
-        data_streams: [
-          {
-            name: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-            indices: [
-              { index_name: '.ds-.workflows-step-executions-2026.06.22-000001' },
-              { index_name: TARGET_INDEX },
-            ],
-          },
-        ],
-      });
-
-      await expect(underTest.resolveWriteIndex()).resolves.toBe(TARGET_INDEX);
+      await expect(underTest.resolveWriteIndex()).resolves.toBe(NEXT_INDEX);
     });
   });
 });

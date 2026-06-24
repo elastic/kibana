@@ -11,31 +11,17 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { decodeEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
-import type { DocumentVersionsById, DocumentWrite, VersionedDocument } from './document_version';
-import { getEsDocumentVersion } from './document_version';
-import {
-  resolveLegacyWorkflowExecutionBackingIndexFromSuffix,
-  resolveWorkflowExecutionBackingIndexFromSuffix,
-} from './resolve_execution_backing_index';
+import type { DocumentLocatorsById, DocumentUpdate, LocatedDocument } from './document_version';
+import { getEsDocumentLocator } from './document_version';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
-const resolveWorkflowExecutionUpdateIndex = (
-  workflowExecution: Partial<EsWorkflowExecution>,
-  indexSuffix: string
-): string =>
-  workflowExecution.executionsIndex ?? resolveWorkflowExecutionBackingIndexFromSuffix(indexSuffix);
+const RECENT_BACKING_INDEX_LOOKUP_COUNT = 3;
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
 
   constructor(private esClient: ElasticsearchClient) {}
 
-  /**
-   * Resolves the current write backing index for the workflow executions data stream.
-   * Called once when a workflow execution starts so the backing index name
-   * can be pinned on the execution document.
-   */
   public async resolveWriteIndex(): Promise<string> {
     const { data_streams: dataStreams } = await this.esClient.indices.getDataStream({
       name: this.indexName,
@@ -48,35 +34,36 @@ export class WorkflowExecutionRepository {
     return writeIndex;
   }
 
-  private async getWorkflowExecutionDocument(
-    workflowExecutionId: string,
-    index: string
-  ): Promise<VersionedDocument<EsWorkflowExecution> | null> {
-    try {
-      const response = await this.esClient.get<EsWorkflowExecution>({
-        index,
-        id: workflowExecutionId,
-      });
-      if (!response._source) {
-        return null;
-      }
-      return {
-        doc: response._source,
-        version: getEsDocumentVersion({
-          seqNo: response._seq_no,
-          primaryTerm: response._primary_term,
-        }),
-      };
-    } catch (error: unknown) {
-      if (
-        error instanceof Error &&
-        'meta' in error &&
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-      ) {
-        return null;
-      }
-      throw error;
+  private async getRecentBackingIndices(): Promise<string[]> {
+    const { data_streams: dataStreams } = await this.esClient.indices.getDataStream({
+      name: this.indexName,
+    });
+    return (
+      dataStreams[0]?.indices
+        .map((index) => index.index_name)
+        .filter((indexName): indexName is string => Boolean(indexName))
+        .slice(-RECENT_BACKING_INDEX_LOOKUP_COUNT)
+        .reverse() ?? []
+    );
+  }
+
+  private locatedDocumentFromHit(hit: {
+    _index?: string;
+    _source?: EsWorkflowExecution;
+    _seq_no?: number;
+    _primary_term?: number;
+  }): LocatedDocument<EsWorkflowExecution> | null {
+    if (!hit._source) {
+      return null;
     }
+    return {
+      doc: hit._source,
+      locator: getEsDocumentLocator({
+        index: hit._index,
+        seqNo: hit._seq_no,
+        primaryTerm: hit._primary_term,
+      }),
+    };
   }
 
   private isNotFoundError(error: unknown): boolean {
@@ -101,35 +88,54 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    const result = await this.getWorkflowExecutionWithVersionById(workflowExecutionId, spaceId);
+    const result = await this.getWorkflowExecutionWithLocatorById(workflowExecutionId, spaceId);
     return result?.doc ?? null;
   }
 
-  public async getWorkflowExecutionWithVersionById(
+  public async getWorkflowExecutionWithLocatorById(
     workflowExecutionId: string,
     spaceId: string
-  ): Promise<VersionedDocument<EsWorkflowExecution> | null> {
+  ): Promise<LocatedDocument<EsWorkflowExecution> | null> {
     try {
-      const result = decodeEncodedWorkflowExecutionId(workflowExecutionId);
-
-      if (!result.success) {
-        throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
+      const recentBackingIndices = await this.getRecentBackingIndices();
+      if (recentBackingIndices.length > 0) {
+        const response = await this.esClient.mget<EsWorkflowExecution>({
+          docs: recentBackingIndices.map((index) => ({
+            _index: index,
+            _id: workflowExecutionId,
+          })),
+        });
+        const hits = response.docs
+          .map((doc) =>
+            'found' in doc && doc.found
+              ? this.locatedDocumentFromHit(doc as estypes.GetGetResult<EsWorkflowExecution>)
+              : null
+          )
+          .filter((doc): doc is LocatedDocument<EsWorkflowExecution> => doc !== null)
+          .filter((doc) => doc.doc.spaceId === spaceId);
+        if (hits.length === 1) {
+          return hits[0];
+        }
       }
 
-      const { indexSuffix } = result;
-      const dataStreamIndex = resolveWorkflowExecutionBackingIndexFromSuffix(indexSuffix);
-      const legacyIndex = resolveLegacyWorkflowExecutionBackingIndexFromSuffix(indexSuffix);
-
-      const versionedDoc =
-        (await this.getWorkflowExecutionDocument(workflowExecutionId, dataStreamIndex)) ??
-        (legacyIndex !== dataStreamIndex
-          ? await this.getWorkflowExecutionDocument(workflowExecutionId, legacyIndex)
-          : null);
-
-      if (!versionedDoc || versionedDoc.doc.spaceId !== spaceId) {
+      const searchResponse = await this.esClient.search<EsWorkflowExecution>({
+        index: this.indexName,
+        seq_no_primary_term: true,
+        query: {
+          ids: {
+            values: [workflowExecutionId],
+          },
+        },
+        size: 2,
+      });
+      const hits = searchResponse.hits.hits
+        .map((hit) => this.locatedDocumentFromHit(hit))
+        .filter((doc): doc is LocatedDocument<EsWorkflowExecution> => doc !== null)
+        .filter((doc) => doc.doc.spaceId === spaceId);
+      if (hits.length === 0) {
         return null;
       }
-      return versionedDoc;
+      return hits[0];
     } catch (error: unknown) {
       if (this.isNotFoundError(error)) {
         return null;
@@ -161,13 +167,9 @@ export class WorkflowExecutionRepository {
   public async createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>,
     options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<VersionedDocument<Partial<EsWorkflowExecution>>> {
+  ): Promise<LocatedDocument<Partial<EsWorkflowExecution>>> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
-    }
-
-    if (!workflowExecution.executionsIndex) {
-      throw new Error('Workflow execution index is required for creation');
     }
 
     const doc = this.withTimestamp(workflowExecution);
@@ -180,7 +182,8 @@ export class WorkflowExecutionRepository {
 
     return {
       doc,
-      version: getEsDocumentVersion({
+      locator: getEsDocumentLocator({
+        index: response._index,
         seqNo: response._seq_no,
         primaryTerm: response._primary_term,
       }),
@@ -201,7 +204,7 @@ export class WorkflowExecutionRepository {
     options: { refresh?: boolean | 'wait_for' } = {}
   ): Promise<
     Array<
-      | { id: string; result: VersionedDocument<Partial<EsWorkflowExecution>> }
+      | { id: string; result: LocatedDocument<Partial<EsWorkflowExecution>> }
       | { id: string; error: string }
     >
   > {
@@ -232,7 +235,8 @@ export class WorkflowExecutionRepository {
         id,
         result: {
           doc: docs[idx],
-          version: getEsDocumentVersion({
+          locator: getEsDocumentLocator({
+            index: op?._index,
             seqNo: op?._seq_no,
             primaryTerm: op?._primary_term,
           }),
@@ -255,32 +259,23 @@ export class WorkflowExecutionRepository {
    */
   public async updateWorkflowExecution({
     doc: workflowExecution,
-    targetIndex,
-    ifVersion,
-  }: DocumentWrite<Partial<EsWorkflowExecution>>): Promise<DocumentVersionsById> {
+    locator,
+  }: DocumentUpdate<Partial<EsWorkflowExecution>>): Promise<DocumentLocatorsById> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    let index = targetIndex;
-    if (!index) {
-      const result = decodeEncodedWorkflowExecutionId(workflowExecution.id);
-
-      if (!result.success) {
-        throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
-      }
-      index = resolveWorkflowExecutionUpdateIndex(workflowExecution, result.indexSuffix);
-    }
-
     const response = await this.esClient.update<Partial<EsWorkflowExecution>>({
-      index,
+      index: locator.index,
       id: workflowExecution.id,
       refresh: false,
       doc: workflowExecution,
-      ...(ifVersion ? { if_seq_no: ifVersion.seqNo, if_primary_term: ifVersion.primaryTerm } : {}),
+      if_seq_no: locator.seqNo,
+      if_primary_term: locator.primaryTerm,
     });
     return {
-      [workflowExecution.id]: getEsDocumentVersion({
+      [workflowExecution.id]: getEsDocumentLocator({
+        index: response._index,
         seqNo: response._seq_no,
         primaryTerm: response._primary_term,
       }),
@@ -296,34 +291,24 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves when all updates are complete.
    */
   public async bulkUpdateWorkflowExecutions(
-    writes: Array<DocumentWrite<Partial<EsWorkflowExecution>>>
-  ): Promise<DocumentVersionsById> {
+    writes: Array<DocumentUpdate<Partial<EsWorkflowExecution>>>
+  ): Promise<DocumentLocatorsById> {
     if (writes.length === 0) {
       return {};
     }
 
-    const operations = writes.flatMap(({ doc: update, targetIndex, ifVersion }) => {
+    const operations = writes.flatMap(({ doc: update, locator }) => {
       if (!update.id) {
         throw new Error('Workflow execution ID is required for bulk update');
-      }
-
-      let index = targetIndex;
-      if (!index) {
-        const result = decodeEncodedWorkflowExecutionId(update.id);
-        if (!result.success) {
-          throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
-        }
-        index = resolveWorkflowExecutionUpdateIndex(update, result.indexSuffix);
       }
 
       return [
         {
           update: {
-            _index: index,
+            _index: locator.index,
             _id: update.id,
-            ...(ifVersion
-              ? { if_seq_no: ifVersion.seqNo, if_primary_term: ifVersion.primaryTerm }
-              : {}),
+            if_seq_no: locator.seqNo,
+            if_primary_term: locator.primaryTerm,
           },
         },
         { doc: update },
@@ -351,17 +336,18 @@ export class WorkflowExecutionRepository {
       );
     }
 
-    const versions: DocumentVersionsById = {};
+    const locators: DocumentLocatorsById = {};
     bulkResponse.items.forEach((item) => {
       const op = item.update;
       if (op?._id && !op.error) {
-        versions[op._id] = getEsDocumentVersion({
+        locators[op._id] = getEsDocumentLocator({
+          index: op._index,
           seqNo: op._seq_no,
           primaryTerm: op._primary_term,
         });
       }
     });
-    return versions;
+    return locators;
   }
 
   /**

@@ -13,12 +13,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
-import {
-  WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-  WORKFLOWS_EXECUTIONS_INDEX,
-} from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
-import { decodeEncodedWorkflowExecutionId, resolveBackingIndex } from '@kbn/workflows/server/utils';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
 interface GetWorkflowExecutionParams {
@@ -32,14 +27,7 @@ interface GetWorkflowExecutionParams {
   includeOutput?: boolean;
 }
 
-const resolveWorkflowExecutionGetIndex = (indexSuffix: string): string =>
-  resolveBackingIndex({
-    backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-    indexSuffix,
-  });
-
-const resolveLegacyWorkflowExecutionGetIndex = (indexSuffix: string): string =>
-  `${WORKFLOWS_EXECUTIONS_INDEX}-${indexSuffix}`;
+const RECENT_BACKING_INDEX_LOOKUP_COUNT = 3;
 
 export const getWorkflowExecution = async ({
   esClient,
@@ -51,40 +39,48 @@ export const getWorkflowExecution = async ({
   includeInput = false,
   includeOutput = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
-  const result = decodeEncodedWorkflowExecutionId(workflowExecutionId);
-
-  if (!result.success) {
-    logger.error(`Failed to decode workflow execution ID: ${result.error}`);
-    return null;
-  }
-
-  const { indexSuffix } = result;
-  const dataStreamIndex = resolveWorkflowExecutionGetIndex(indexSuffix);
-  const legacyIndex = resolveLegacyWorkflowExecutionGetIndex(indexSuffix);
-
   try {
-    const fetchDoc = async (index: string) => {
-      try {
-        const response = await esClient.get<EsWorkflowExecution>({
-          index,
-          id: workflowExecutionId,
-        });
-        return response._source ?? null;
-      } catch (error: unknown) {
-        if (
-          error instanceof Error &&
-          'meta' in error &&
-          (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
-        ) {
-          return null;
-        }
-        throw error;
-      }
-    };
+    const { data_streams: dataStreams } = await esClient.indices.getDataStream({
+      name: _workflowExecutionIndex,
+    });
+    const recentBackingIndices =
+      dataStreams[0]?.indices
+        .map((index) => index.index_name)
+        .filter((indexName): indexName is string => Boolean(indexName))
+        .slice(-RECENT_BACKING_INDEX_LOOKUP_COUNT)
+        .reverse() ?? [];
+
+    const mgetResponse =
+      recentBackingIndices.length > 0
+        ? await esClient.mget<EsWorkflowExecution>({
+            docs: recentBackingIndices.map((index) => ({
+              _index: index,
+              _id: workflowExecutionId,
+            })),
+          })
+        : { docs: [] };
+
+    const mgetDocs = mgetResponse.docs
+      .map((hit) => ('found' in hit && hit.found ? hit._source ?? null : null))
+      .filter((source): source is EsWorkflowExecution => source !== null)
+      .filter((source) => source.spaceId === spaceId);
+
+    if (mgetDocs.length > 1) {
+      throw new Error(`Found duplicate workflow execution ID ${workflowExecutionId}`);
+    }
 
     const doc =
-      (await fetchDoc(dataStreamIndex)) ??
-      (legacyIndex !== dataStreamIndex ? await fetchDoc(legacyIndex) : null);
+      mgetDocs[0] ??
+      (
+        await esClient.search<EsWorkflowExecution>({
+          index: _workflowExecutionIndex,
+          query: { ids: { values: [workflowExecutionId] } },
+          size: 2,
+        })
+      ).hits.hits
+        .map((hit) => hit._source ?? null)
+        .filter((source): source is EsWorkflowExecution => source !== null)
+        .filter((source) => source.spaceId === spaceId)[0];
 
     if (!doc || doc.spaceId !== spaceId) {
       return null;

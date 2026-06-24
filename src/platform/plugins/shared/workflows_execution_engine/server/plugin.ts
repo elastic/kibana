@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
   CoreStart,
@@ -22,17 +23,11 @@ import type {
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
-import {
-  ExecutionStatus,
-  pickManagedWorkflowFields,
-  WorkflowRepository,
-  WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-} from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -121,14 +116,9 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
 
-const resolvePinnedExecutionWriteIndexes = async (
-  coreStart: CoreStart,
-  stepRepo: StepExecutionRepository,
-  workflowRepo: WorkflowExecutionRepository
-): Promise<[string, string]> => {
+const ensureExecutionWriteDataStreamsReady = async (coreStart: CoreStart): Promise<void> => {
   const esClient = coreStart.elasticsearch.client.asInternalUser;
   await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient);
-  return Promise.all([stepRepo.resolveWriteIndex(), workflowRepo.resolveWriteIndex()]);
 };
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
@@ -550,18 +540,10 @@ export class WorkflowsExecutionEnginePlugin
               );
               span?.end();
 
-              const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] =
-                await resolvePinnedExecutionWriteIndexes(
-                  coreStart,
-                  stepExecutionRepository,
-                  workflowExecutionRepository
-                );
+              await ensureExecutionWriteDataStreamsReady(coreStart);
 
               const workflowExecution: Partial<EsWorkflowExecution> = {
-                id: generateEncodedWorkflowExecutionId({
-                  backingIndexName: resolvedExecutionsIndex,
-                  backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-                }),
+                id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
                 ...pickManagedWorkflowFields(workflow),
@@ -577,8 +559,6 @@ export class WorkflowsExecutionEnginePlugin
                 createdAt: workflowCreatedAt.toISOString(),
                 executedBy,
                 triggeredBy: 'scheduled',
-                stepExecutionsIndex: resolvedStepExecutionsIndex,
-                executionsIndex: resolvedExecutionsIndex,
                 // Store queue delay metrics for observability (only if enabled in config)
                 ...(this.config.collectQueueMetrics
                   ? {
@@ -671,7 +651,6 @@ export class WorkflowsExecutionEnginePlugin
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
     const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-    const stepExecutionRepo = new StepExecutionRepository(esClient);
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
@@ -714,22 +693,11 @@ export class WorkflowsExecutionEnginePlugin
       defaultTriggeredBy: string;
       authenticatedUser: string;
       now: Date;
-      resolvedIndexes?: {
-        stepExecutionsIndex: string;
-        executionsIndex: string;
-      };
     }): Promise<WorkflowExecutionForInputRendering> => {
-      const { workflow, context, defaultTriggeredBy, authenticatedUser, now, resolvedIndexes } =
-        args;
+      const { workflow, context, defaultTriggeredBy, authenticatedUser, now } = args;
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
-      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = resolvedIndexes
-        ? [resolvedIndexes.stepExecutionsIndex, resolvedIndexes.executionsIndex]
-        : await resolvePinnedExecutionWriteIndexes(
-            coreStart,
-            stepExecutionRepo,
-            workflowExecutionRepository
-          );
+      await ensureExecutionWriteDataStreamsReady(coreStart);
       const metadata = context.metadata as Record<string, unknown> | undefined;
       const eventPayload = context.event as Record<string, unknown> | undefined;
       let rootEventChainDepth: number | undefined;
@@ -751,12 +719,7 @@ export class WorkflowsExecutionEnginePlugin
       const dispatchEventId =
         typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
       const workflowExecution: WorkflowExecutionForInputRendering = {
-        id: generateEncodedWorkflowExecutionId({
-          backingIndexName: resolvedExecutionsIndex,
-          backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-        }),
-        stepExecutionsIndex: resolvedStepExecutionsIndex,
-        executionsIndex: resolvedExecutionsIndex,
+        id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
         ...pickManagedWorkflowFields(workflow),
@@ -1024,12 +987,7 @@ export class WorkflowsExecutionEnginePlugin
       }
       const prepared: PreparedItem[] = [];
 
-      const [bulkStepExecutionsIndex, bulkExecutionsIndex] =
-        await resolvePinnedExecutionWriteIndexes(
-          coreStart,
-          stepExecutionRepo,
-          workflowExecutionRepository
-        );
+      await ensureExecutionWriteDataStreamsReady(coreStart);
 
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
@@ -1049,10 +1007,6 @@ export class WorkflowsExecutionEnginePlugin
             defaultTriggeredBy: 'alert',
             authenticatedUser,
             now,
-            resolvedIndexes: {
-              stepExecutionsIndex: bulkStepExecutionsIndex,
-              executionsIndex: bulkExecutionsIndex,
-            },
           });
           prepared.push({ idx, workflowExecution });
         } catch (err) {
@@ -1179,17 +1133,9 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.security,
         coreStart.elasticsearch.client
       );
-      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] =
-        await resolvePinnedExecutionWriteIndexes(
-          coreStart,
-          stepExecutionRepo,
-          workflowExecutionRepository
-        );
+      await ensureExecutionWriteDataStreamsReady(coreStart);
       const workflowExecution: Partial<EsWorkflowExecution> = {
-        id: generateEncodedWorkflowExecutionId({
-          backingIndexName: resolvedExecutionsIndex,
-          backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-        }),
+        id: generateUuid(),
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
@@ -1202,8 +1148,6 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
-        stepExecutionsIndex: resolvedStepExecutionsIndex,
-        executionsIndex: resolvedExecutionsIndex,
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -1359,11 +1303,20 @@ export class WorkflowsExecutionEnginePlugin
       request
     ) => {
       if (context) {
+        const locatedExecution =
+          await workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
+            executionId,
+            spaceId
+          );
+        if (!locatedExecution) {
+          throw new WorkflowExecutionNotFoundError(executionId);
+        }
         await workflowExecutionRepository.updateWorkflowExecution({
           doc: {
             id: executionId,
             context,
           },
+          locator: locatedExecution.locator,
         });
       }
 

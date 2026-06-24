@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ExecutionStatus,
-  WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-} from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { generateEncodedStepExecutionId } from '../utils';
+import { buildStepExecutionId } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -34,14 +31,6 @@ export async function cancelWorkflowIfRequested(
   workflowLogger: IWorkflowEventLogger,
   monitorAbortController?: AbortController
 ): Promise<void> {
-  const stepExecutionsIndex = workflowExecutionState.getWorkflowExecution().stepExecutionsIndex;
-
-  if (!stepExecutionsIndex) {
-    throw new Error(
-      'WorkflowExecutionState: Workflow execution must have step executions index to be loaded'
-    );
-  }
-
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
     try {
       const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -73,13 +62,11 @@ export async function cancelWorkflowIfRequested(
   while (!nodeStack.isEmpty()) {
     const scopeData = nodeStack.getCurrentScope();
     nodeStack = nodeStack.exitScope();
-    const stepExecutionId = generateEncodedStepExecutionId({
-      executionId: workflowExecutionState.getWorkflowExecution().id,
-      stepId: scopeData.stepId,
-      stackFrames: nodeStack.stackFrames,
-      backingIndexName: stepExecutionsIndex,
-      backingIndexPrefix: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-    });
+    const stepExecutionId = buildStepExecutionId(
+      workflowExecutionState.getWorkflowExecution().id,
+      scopeData.stepId,
+      nodeStack.stackFrames
+    );
 
     if (workflowExecutionState.getStepExecution(stepExecutionId)) {
       workflowExecutionState.upsertStep({

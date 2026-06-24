@@ -121,6 +121,14 @@ export class ConcurrencyManager {
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
+      const locatedExecution =
+        await this.workflowExecutionRepository.getWorkflowExecutionWithLocatorById(
+          currentExecutionId,
+          spaceId
+        );
+      if (!locatedExecution) {
+        throw new Error(`Workflow execution ${currentExecutionId} not found for concurrency drop`);
+      }
       await this.workflowExecutionRepository.updateWorkflowExecution({
         doc: {
           id: currentExecutionId,
@@ -130,6 +138,7 @@ export class ConcurrencyManager {
           cancelledAt: skipTimestamp,
           cancelledBy: 'system',
         },
+        locator: locatedExecution.locator,
       });
       return false; // Drop the new execution
     }
@@ -144,8 +153,18 @@ export class ConcurrencyManager {
 
       // Bulk update all executions to cancelled status in a single ES request
       const cancellationTimestamp = new Date().toISOString();
+      const locatedExecutions = await Promise.all(
+        executionIdsToCancel.map((id) =>
+          this.workflowExecutionRepository.getWorkflowExecutionWithLocatorById(id, spaceId)
+        )
+      );
       await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
-        executionIdsToCancel.map((id) => ({
+        locatedExecutions.flatMap((locatedExecution, idx) => {
+          if (!locatedExecution) {
+            return [];
+          }
+          const id = executionIdsToCancel[idx];
+          return {
           doc: {
             id,
             status: ExecutionStatus.CANCELLED,
@@ -154,7 +173,9 @@ export class ConcurrencyManager {
             cancelledAt: cancellationTimestamp,
             cancelledBy: 'system',
           },
-        }))
+            locator: locatedExecution.locator,
+          };
+        })
       );
 
       // Propagate cancellation to running tasks (can be done in parallel)

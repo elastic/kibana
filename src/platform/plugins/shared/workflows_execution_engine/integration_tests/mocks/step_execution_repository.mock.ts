@@ -9,16 +9,25 @@
 
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type { DocumentLocatorsById } from '../../server/repositories/document_version';
 import type {
   StepExecutionField,
   StepExecutionRepository,
+  StepExecutionWrite,
 } from '../../server/repositories/step_execution_repository';
+
+const TEST_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
+const createLocator = (index = TEST_INDEX) => ({
+  index,
+  seqNo: 1,
+  primaryTerm: 1,
+});
 
 export class StepExecutionRepositoryMock implements Required<StepExecutionRepository> {
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
 
   public resolveWriteIndex(): Promise<string> {
-    return Promise.resolve('.ds-.workflows-step-executions-2026.06.22-000001');
+    return Promise.resolve(TEST_INDEX);
   }
 
   public searchStepExecutionsByExecutionId(
@@ -27,6 +36,16 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     return Promise.resolve(
       Array.from(this.stepExecutions.values()).filter((step) => step.workflowRunId === executionId)
     );
+  }
+
+  public async searchStepExecutionsWithLocatorsByExecutionId(
+    executionId: string
+  ): Promise<{ docs: EsWorkflowStepExecution[]; locators: DocumentLocatorsById }> {
+    const docs = await this.searchStepExecutionsByExecutionId(executionId);
+    return {
+      docs,
+      locators: Object.fromEntries(docs.map((doc) => [doc.id, createLocator()])),
+    };
   }
 
   public getStepExecutionsByIds(
@@ -64,6 +83,24 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     return Promise.resolve(results);
   }
 
+  public async getStepExecutionsWithLocatorsByIds(
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[],
+    stepsExecutionIndex?: string
+  ): Promise<{ docs: EsWorkflowStepExecution[]; locators: DocumentLocatorsById }> {
+    const docs = await this.getStepExecutionsByIds(
+      stepExecutionIds,
+      sourceIncludes,
+      sourceExcludes,
+      stepsExecutionIndex
+    );
+    return {
+      docs,
+      locators: Object.fromEntries(docs.map((doc) => [doc.id, createLocator()])),
+    };
+  }
+
   public getStepExecutionsByWorkflowExecution(
     workflowExecutionId: string,
     _stepsExecutionWriteIndex?: string,
@@ -75,7 +112,7 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
   public async markNonTerminalStepsFailed(
     workflowExecutionId: string,
     error: SerializedError,
-    stepsExecutionIndex?: string
+    _stepsExecutionIndex?: string
   ): Promise<void> {
     const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
     const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
@@ -87,29 +124,33 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     const finishedAt = new Date().toISOString();
     await this.bulkUpsert(
       nonTerminalSteps.map((step) => ({
-        id: step.id,
-        status: ExecutionStatus.FAILED,
-        error,
-        finishedAt,
-      })),
-      stepsExecutionIndex
+        operation: 'update',
+        doc: {
+          id: step.id,
+          status: ExecutionStatus.FAILED,
+          error,
+          finishedAt,
+        },
+        locator: createLocator(),
+      }))
     );
   }
 
-  public bulkUpsert(
-    stepExecutions: Partial<EsWorkflowStepExecution>[],
-    _targetIndex?: string
-  ): Promise<void> {
-    for (const stepExecution of stepExecutions) {
-      if (!stepExecution.id) {
+  public bulkUpsert(writes: StepExecutionWrite[]): Promise<DocumentLocatorsById> {
+    const locators: DocumentLocatorsById = {};
+    for (const write of writes) {
+      if (!write.doc.id) {
         throw new Error('Step execution ID is required for upsert');
       }
 
-      this.stepExecutions.set(stepExecution.id, {
-        ...(this.stepExecutions.get(stepExecution.id) || {}),
-        ...(stepExecution as EsWorkflowStepExecution),
+      this.stepExecutions.set(write.doc.id, {
+        ...(this.stepExecutions.get(write.doc.id) || {}),
+        ...(write.doc as EsWorkflowStepExecution),
       });
+      locators[write.doc.id] = createLocator(
+        write.operation === 'update' ? write.locator.index : TEST_INDEX
+      );
     }
-    return Promise.resolve();
+    return Promise.resolve(locators);
   }
 }

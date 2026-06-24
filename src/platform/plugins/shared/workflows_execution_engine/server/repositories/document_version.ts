@@ -7,34 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface EsDocumentVersion {
+export interface EsDocumentLocator {
+  index: string;
   seqNo: number;
   primaryTerm: number;
 }
 
-export interface VersionedDocument<TDocument> {
+export interface LocatedDocument<TDocument> {
   doc: TDocument;
-  version: EsDocumentVersion;
+  locator: EsDocumentLocator;
 }
 
-export interface DocumentWrite<TDocument> {
+export interface DocumentCreate<TDocument> {
   doc: TDocument;
-  targetIndex?: string;
-  ifVersion?: EsDocumentVersion;
 }
 
-export type DocumentVersionsById = Record<string, EsDocumentVersion>;
+export interface DocumentUpdate<TDocument> {
+  doc: TDocument;
+  locator: EsDocumentLocator;
+}
 
-export const getEsDocumentVersion = ({
+export type DocumentLocatorsById = Record<string, EsDocumentLocator>;
+
+export const getEsDocumentLocator = ({
+  index,
   seqNo,
   primaryTerm,
 }: {
+  index: string | undefined;
   seqNo: number | undefined;
   primaryTerm: number | undefined;
-}): EsDocumentVersion => {
-  if (seqNo === undefined || primaryTerm === undefined) {
-    throw new Error('Elasticsearch response did not include document version metadata');
+}): EsDocumentLocator => {
+  if (index === undefined || seqNo === undefined || primaryTerm === undefined) {
+    throw new Error('Elasticsearch response did not include document locator metadata');
   }
 
-  return { seqNo, primaryTerm };
+  return { index, seqNo, primaryTerm };
 };

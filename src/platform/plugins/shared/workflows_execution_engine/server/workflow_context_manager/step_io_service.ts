@@ -455,8 +455,8 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     const stepsExecutionIndex = this.state.getWorkflowExecution().stepExecutionsIndex;
-    const { docs: foundSteps, versions } =
-      await this.stepRepository.getStepExecutionsWithVersionsByIds(
+    const { docs: foundSteps, locators } =
+      await this.stepRepository.getStepExecutionsWithLocatorsByIds(
         stepExecutionIds,
         undefined,
         ['output'],
@@ -484,7 +484,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       metadata.push(stripIo(step));
     }
     this.state.ingestLoadedStepDocs(metadata);
-    this.state.setStepDocumentVersions(versions);
+    this.state.setStepDocumentLocators(locators);
 
     const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
     if (pinnedIdsToFetch.length > 0) {
@@ -900,15 +900,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     const flushedIds = Array.from(merged.keys());
-    const stepExecutionsIndex = this.state.getWorkflowExecution().stepExecutionsIndex;
-    const versions = await this.stepRepository.bulkUpsert(
-      Array.from(merged.values()).map((doc) => ({
-        doc,
-        targetIndex: stepExecutionsIndex,
-        ifVersion: doc.id ? this.state.getStepDocumentVersion(doc.id) : undefined,
-      }))
+    const locators = await this.stepRepository.bulkUpsert(
+      Array.from(merged.values()).map((doc) => {
+        const locator = doc.id ? this.state.getStepDocumentLocator(doc.id) : undefined;
+        return locator ? { operation: 'update', doc, locator } : { operation: 'create', doc };
+      })
     );
-    this.state.setStepDocumentVersions(versions);
+    this.state.setStepDocumentLocators(locators);
     return flushedIds;
   }
 

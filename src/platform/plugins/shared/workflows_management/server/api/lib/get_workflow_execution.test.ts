@@ -9,27 +9,19 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX } from '@kbn/workflows';
-import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { getWorkflowExecution } from './get_workflow_execution';
 
 const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
 
-const createEncodedId = () =>
-  generateEncodedWorkflowExecutionId({
-    backingIndexName: TEST_BACKING_INDEX,
-    backingIndexPrefix: WORKFLOWS_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-  });
-
 describe('getWorkflowExecution', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let encodedExecId: string;
+  let executionId: string;
 
   const getBaseParams = () => ({
     workflowExecutionIndex: '.workflows-executions',
     stepsExecutionIndex: '.workflows-steps',
-    workflowExecutionId: encodedExecId,
+    workflowExecutionId: executionId,
     spaceId: 'default',
   });
 
@@ -45,11 +37,16 @@ describe('getWorkflowExecution', () => {
   };
 
   beforeEach(() => {
-    encodedExecId = createEncodedId();
+    executionId = 'workflow-execution-1';
     mockEsClient = {
       get: jest.fn(),
       mget: jest.fn(),
       search: jest.fn(),
+      indices: {
+        getDataStream: jest.fn().mockResolvedValue({
+          data_streams: [{ indices: [{ index_name: TEST_BACKING_INDEX }] }],
+        }),
+      },
     } as any;
     mockLogger = loggerMock.create();
     jest.clearAllMocks();
@@ -57,10 +54,15 @@ describe('getWorkflowExecution', () => {
 
   describe('source excludes with mget (stepExecutionIds present)', () => {
     beforeEach(() => {
-      mockEsClient.get.mockResolvedValue({
-        _source: baseExecutionDoc,
+      mockEsClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            found: true,
+            _source: baseExecutionDoc,
+          },
+        ],
       } as any);
-      mockEsClient.mget.mockResolvedValue({
+      mockEsClient.mget.mockResolvedValueOnce({
         docs: [
           { found: true, _source: { stepId: 's1', status: 'completed', globalExecutionIndex: 0 } },
           { found: true, _source: { stepId: 's2', status: 'completed', globalExecutionIndex: 1 } },
@@ -147,8 +149,13 @@ describe('getWorkflowExecution', () => {
 
   describe('source excludes with search fallback (no stepExecutionIds)', () => {
     beforeEach(() => {
-      mockEsClient.get.mockResolvedValue({
-        _source: { ...baseExecutionDoc, stepExecutionIds: undefined },
+      mockEsClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _source: { ...baseExecutionDoc, stepExecutionIds: undefined },
+          },
+        ],
       } as any);
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
     });
@@ -188,9 +195,8 @@ describe('getWorkflowExecution', () => {
 
   describe('basic behavior', () => {
     it('should return null when document is not found (404)', async () => {
-      const notFoundError = new Error('Not found');
-      Object.assign(notFoundError, { meta: { statusCode: 404 } });
-      mockEsClient.get.mockRejectedValue(notFoundError);
+      mockEsClient.mget.mockResolvedValue({ docs: [{ found: false }] } as any);
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
 
       const result = await getWorkflowExecution({
         ...getBaseParams(),
@@ -202,9 +208,15 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should return null when spaceId does not match', async () => {
-      mockEsClient.get.mockResolvedValue({
-        _source: { ...baseExecutionDoc, spaceId: 'other-space' },
+      mockEsClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _source: { ...baseExecutionDoc, spaceId: 'other-space' },
+          },
+        ],
       } as any);
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
 
       const result = await getWorkflowExecution({
         ...getBaseParams(),
@@ -216,10 +228,10 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should return the execution DTO with step executions', async () => {
-      mockEsClient.get.mockResolvedValue({
-        _source: baseExecutionDoc,
+      mockEsClient.mget.mockResolvedValueOnce({
+        docs: [{ found: true, _source: baseExecutionDoc }],
       } as any);
-      mockEsClient.mget.mockResolvedValue({
+      mockEsClient.mget.mockResolvedValueOnce({
         docs: [
           {
             found: true,
@@ -249,7 +261,7 @@ describe('getWorkflowExecution', () => {
       });
 
       expect(result).not.toBeNull();
-      expect(result?.id).toBe(encodedExecId);
+      expect(result?.id).toBe(executionId);
       expect(result?.stepExecutions).toHaveLength(2);
       expect(result?.concurrencyGroupKey).toBe('streams-ki-onboarding-my-stream');
     });

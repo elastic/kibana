@@ -10,7 +10,6 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
-import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { StepIoService } from './step_io_service';
@@ -19,7 +18,7 @@ import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import { generateEncodedStepExecutionId } from '../utils';
+import { buildStepExecutionId } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
@@ -108,25 +107,17 @@ export class StepExecutionRuntimeFactory {
     const node = this.params.workflowExecutionGraph.getNode(nodeId);
     const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
 
-    if (!workflowExecution.stepExecutionsIndex) {
-      throw new Error(
-        'WorkflowExecutionState: Workflow execution must have step executions index to be loaded'
-      );
-    }
-
     // Guard against duplicate node entries in stack frames by removing self-references.
     // During workflow execution, a node may call enterScope() for itself before executing,
     // causing the node to appear on top of its own stack frames. This removes such self-references
     // to prevent context resolution issues during step execution.
     const modifiedStackFrames = removeCurrentNodeFromStackFrames(nodeId, stackFrames);
 
-    const stepExecutionId = generateEncodedStepExecutionId({
-      executionId: workflowExecution.id,
-      stepId: node.stepId,
-      stackFrames: modifiedStackFrames,
-      backingIndexName: workflowExecution.stepExecutionsIndex,
-      backingIndexPrefix: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM_BACKING_PREFIX,
-    });
+    const stepExecutionId = buildStepExecutionId(
+      workflowExecution.id,
+      node.stepId,
+      modifiedStackFrames
+    );
 
     const stepLogger = this.params.workflowLogger.createStepLogger(
       stepExecutionId,

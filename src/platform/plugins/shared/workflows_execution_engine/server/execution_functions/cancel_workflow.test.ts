@@ -31,10 +31,23 @@ const buildExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflo
 const buildRepository = (
   execution: EsWorkflowExecution | null
 ): jest.Mocked<
-  Pick<WorkflowExecutionRepository, 'getWorkflowExecutionById' | 'updateWorkflowExecution'>
+  Pick<
+    WorkflowExecutionRepository,
+    'getWorkflowExecutionById' | 'getWorkflowExecutionWithLocatorById' | 'updateWorkflowExecution'
+  >
 > => ({
   getWorkflowExecutionById: jest.fn().mockResolvedValue(execution),
-  updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+  getWorkflowExecutionWithLocatorById: jest.fn().mockResolvedValue(
+    execution
+      ? {
+          doc: execution,
+          locator: { index: '.ds-.workflows-executions-000001', seqNo: 1, primaryTerm: 1 },
+        }
+      : null
+  ),
+  updateWorkflowExecution: jest
+    .fn()
+    .mockResolvedValue({ 'exec-1': { index: '.ds-.workflows-executions-000001', seqNo: 2, primaryTerm: 1 } }),
 });
 
 const buildTaskManager = (): jest.Mocked<Pick<WorkflowTaskManager, 'forceRunIdleTasks'>> => ({
@@ -69,7 +82,7 @@ describe('cancelWorkflow', () => {
       })
     ).rejects.toBeInstanceOf(WorkflowExecutionNotFoundError);
 
-    expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+    expect(workflowExecutionRepository.getWorkflowExecutionWithLocatorById).toHaveBeenCalledWith(
       workflowExecutionId,
       spaceId
     );
@@ -115,7 +128,7 @@ describe('cancelWorkflow', () => {
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
       const updateArg = workflowExecutionRepository.updateWorkflowExecution.mock.calls[0][0];
 
-      expect(updateArg).toEqual(
+      expect(updateArg.doc).toEqual(
         expect.objectContaining({
           id: workflowExecutionId,
           cancelRequested: true,
@@ -128,9 +141,9 @@ describe('cancelWorkflow', () => {
       // Only PENDING flips to CANCELLED synchronously; everything else lets the execution
       // loop finalise the status via cancelWorkflowIfRequested.
       if (status === ExecutionStatus.PENDING) {
-        expect(updateArg.status).toBe(ExecutionStatus.CANCELLED);
+        expect(updateArg.doc.status).toBe(ExecutionStatus.CANCELLED);
       } else {
-        expect(updateArg).not.toHaveProperty('status');
+        expect(updateArg.doc).not.toHaveProperty('status');
       }
 
       expect(workflowTaskManager.forceRunIdleTasks).toHaveBeenCalledTimes(1);
@@ -157,8 +170,8 @@ describe('cancelWorkflow', () => {
     });
 
     const updateArg = workflowExecutionRepository.updateWorkflowExecution.mock.calls[0][0];
-    expect(updateArg).not.toHaveProperty('status');
-    expect(updateArg.cancelRequested).toBe(true);
+    expect(updateArg.doc).not.toHaveProperty('status');
+    expect(updateArg.doc.cancelRequested).toBe(true);
 
     expect(workflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith(workflowExecutionId, {
       spaceId,
