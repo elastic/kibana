@@ -87,6 +87,26 @@ describe('data_source_flyout_initial_values', () => {
       expect(authenticationModeFromDataSource(data)).toBe('access_and_secret_keys');
     });
 
+    it('infers s3 anonymous when no credentials or federated identity present', () => {
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 's3',
+        description: '',
+        settings: {},
+      };
+      expect(authenticationModeFromDataSource(data)).toBe('anonymous');
+    });
+
+    it('infers s3 anonymous when auth is none', () => {
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 's3',
+        description: '',
+        settings: { auth: 'none' },
+      };
+      expect(authenticationModeFromDataSource(data)).toBe('anonymous');
+    });
+
     it('infers gcs federated_identity when sts_audience present', () => {
       const data: DataSourceWithSecrets = {
         type: 'gcs',
@@ -107,6 +127,16 @@ describe('data_source_flyout_initial_values', () => {
       expect(authenticationModeFromDataSource(data)).toBe('access_and_secret_keys');
     });
 
+    it('infers gcs anonymous when no credentials or federated identity present', () => {
+      const data: DataSourceWithSecrets = {
+        type: 'gcs',
+        name: 'gcs',
+        description: '',
+        settings: {},
+      };
+      expect(authenticationModeFromDataSource(data)).toBe('anonymous');
+    });
+
     it('infers azure federated_identity when tenant_id present', () => {
       const data: DataSourceWithSecrets = {
         type: 'azure',
@@ -117,14 +147,14 @@ describe('data_source_flyout_initial_values', () => {
       expect(authenticationModeFromDataSource(data)).toBe('federated_identity');
     });
 
-    it('defaults azure to credentials when empty', () => {
+    it('infers azure anonymous when empty', () => {
       const data: DataSourceWithSecrets = {
         type: 'azure',
         name: 'az',
         description: '',
         settings: {},
       };
-      expect(authenticationModeFromDataSource(data)).toBe('credentials');
+      expect(authenticationModeFromDataSource(data)).toBe('anonymous');
     });
   });
 });

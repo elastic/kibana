@@ -28,17 +28,17 @@ describe('create_data_source_flyout_authentication', () => {
         getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: true }).map(
           (o) => o.value
         )
-      ).toEqual(['access_and_secret_keys', 'federated_identity']);
+      ).toEqual(['access_and_secret_keys', 'federated_identity', 'anonymous']);
       expect(
         getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: true }).map(
           (o) => o.value
         )
-      ).toEqual(['access_and_secret_keys', 'federated_identity']);
+      ).toEqual(['access_and_secret_keys', 'federated_identity', 'anonymous']);
       expect(
         getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: true }).map(
           (o) => o.value
         )
-      ).toEqual(['credentials', 'federated_identity']);
+      ).toEqual(['credentials', 'federated_identity', 'anonymous']);
     });
 
     it('omits Federated Identity when disabled', () => {
@@ -46,17 +46,17 @@ describe('create_data_source_flyout_authentication', () => {
         getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: false }).map(
           (o) => o.value
         )
-      ).toEqual(['access_and_secret_keys']);
+      ).toEqual(['access_and_secret_keys', 'anonymous']);
       expect(
         getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: false }).map(
           (o) => o.value
         )
-      ).toEqual(['access_and_secret_keys']);
+      ).toEqual(['access_and_secret_keys', 'anonymous']);
       expect(
         getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: false }).map(
           (o) => o.value
         )
-      ).toEqual(['credentials']);
+      ).toEqual(['credentials', 'anonymous']);
     });
   });
 
@@ -68,6 +68,12 @@ describe('create_data_source_flyout_authentication', () => {
       expect(showsAuthenticationCredentialFields('federated_identity', 'gcs')).toBe(true);
       expect(showsAuthenticationCredentialFields('credentials', 'azure')).toBe(true);
       expect(showsAuthenticationCredentialFields('federated_identity', 'azure')).toBe(true);
+    });
+
+    it('returns false for anonymous', () => {
+      expect(showsAuthenticationCredentialFields('anonymous', 's3')).toBe(false);
+      expect(showsAuthenticationCredentialFields('anonymous', 'gcs')).toBe(false);
+      expect(showsAuthenticationCredentialFields('anonymous', 'azure')).toBe(false);
     });
   });
 
@@ -132,6 +138,30 @@ describe('create_data_source_flyout_authentication', () => {
       expect(applied.settings).not.toHaveProperty('secret_key');
     });
 
+    it('keeps no credentials or federated fields when anonymous selected (s3)', () => {
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 's3',
+        description: '',
+        settings: {
+          region: 'us-east-1',
+          access_key: 'AKIA',
+          secret_key: 'SECRET',
+          role_arn: 'role',
+          jwt_audience: 'aud',
+        } as any,
+      };
+
+      const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
+      expect(applied.settings).toEqual(
+        expect.objectContaining({ region: 'us-east-1', auth: 'none' })
+      );
+      expect(applied.settings).not.toHaveProperty('access_key');
+      expect(applied.settings).not.toHaveProperty('secret_key');
+      expect(applied.settings).not.toHaveProperty('role_arn');
+      expect(applied.settings).not.toHaveProperty('jwt_audience');
+    });
+
     it('trims and applies gcs credentials when access_and_secret_keys selected', () => {
       const data: DataSourceWithSecrets = {
         type: 'gcs',
@@ -180,6 +210,26 @@ describe('create_data_source_flyout_authentication', () => {
         })
       );
       expect(applied.settings).not.toHaveProperty('credentials');
+    });
+
+    it('keeps no credentials or federated fields when anonymous selected (gcs)', () => {
+      const data: DataSourceWithSecrets = {
+        type: 'gcs',
+        name: 'gcs',
+        description: '',
+        settings: {
+          project_id: 'p',
+          credentials: '{"k":"v"}',
+          jwt_audience: 'aud',
+          sts_audience: 'sts',
+        } as any,
+      };
+
+      const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
+      expect(applied.settings).toEqual(expect.objectContaining({ project_id: 'p', auth: 'none' }));
+      expect(applied.settings).not.toHaveProperty('credentials');
+      expect(applied.settings).not.toHaveProperty('jwt_audience');
+      expect(applied.settings).not.toHaveProperty('sts_audience');
     });
 
     it('applies azure credentials fields when credentials selected', () => {
@@ -236,6 +286,32 @@ describe('create_data_source_flyout_authentication', () => {
       );
       expect(applied.settings).not.toHaveProperty('account');
       expect(applied.settings).not.toHaveProperty('key');
+    });
+
+    it('keeps no credentials or federated fields when anonymous selected (azure)', () => {
+      const data: DataSourceWithSecrets = {
+        type: 'azure',
+        name: 'az',
+        description: '',
+        settings: {
+          endpoint: 'https://example',
+          account: 'a',
+          key: 'k',
+          tenant_id: 't',
+          client_id: 'c',
+          jwt_audience: 'aud',
+        } as any,
+      };
+
+      const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
+      expect(applied.settings).toEqual(
+        expect.objectContaining({ endpoint: 'https://example', auth: 'none' })
+      );
+      expect(applied.settings).not.toHaveProperty('account');
+      expect(applied.settings).not.toHaveProperty('key');
+      expect(applied.settings).not.toHaveProperty('tenant_id');
+      expect(applied.settings).not.toHaveProperty('client_id');
+      expect(applied.settings).not.toHaveProperty('jwt_audience');
     });
   });
 });

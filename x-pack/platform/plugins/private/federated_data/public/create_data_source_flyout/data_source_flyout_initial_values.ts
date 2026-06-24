@@ -69,6 +69,9 @@ export const authenticationModeFromDataSource = (
   const settings = asSettingsRecord(data.settings);
 
   if (data.type === 'azure') {
+    if (typeof settings.auth === 'string' && settings.auth.trim() === 'none') {
+      return 'anonymous';
+    }
     const hasFederatedIdentity =
       (typeof settings.tenant_id === 'string' && settings.tenant_id.trim() !== '') ||
       (typeof settings.client_id === 'string' && settings.client_id.trim() !== '') ||
@@ -82,10 +85,13 @@ export const authenticationModeFromDataSource = (
     ) {
       return 'credentials';
     }
-    return 'credentials';
+    return 'anonymous';
   }
 
   if (data.type === 'gcs') {
+    if (typeof settings.auth === 'string' && settings.auth.trim() === 'none') {
+      return 'anonymous';
+    }
     const { credentials } = settings;
     const hasFederatedIdentity =
       (typeof settings.jwt_audience === 'string' && settings.jwt_audience.trim() !== '') ||
@@ -100,10 +106,13 @@ export const authenticationModeFromDataSource = (
     if (hasCredentials) {
       return 'access_and_secret_keys';
     }
-    return 'access_and_secret_keys';
+    return 'anonymous';
   }
 
   if (data.type === 's3') {
+    if (typeof settings.auth === 'string' && settings.auth.trim() === 'none') {
+      return 'anonymous';
+    }
     if (
       (typeof settings.role_arn === 'string' && settings.role_arn.trim()) ||
       (typeof settings.jwt_audience === 'string' && settings.jwt_audience.trim())
@@ -116,7 +125,7 @@ export const authenticationModeFromDataSource = (
     ) {
       return 'access_and_secret_keys';
     }
-    return 'access_and_secret_keys';
+    return 'anonymous';
   }
 
   // @ts-expect-error - typescript says this should be impossible

@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
 
 /** S3 authentication modes (UI-only). */
-export type S3AuthenticationMode = 'access_and_secret_keys' | 'federated_identity';
+export type S3AuthenticationMode = 'anonymous' | 'access_and_secret_keys' | 'federated_identity';
 
 /** GCS authentication modes (UI-only). */
-export type GcsAuthenticationMode = 'access_and_secret_keys' | 'federated_identity';
+export type GcsAuthenticationMode = 'anonymous' | 'access_and_secret_keys' | 'federated_identity';
 
 /** Azure authentication modes (UI-only; `settings.auth` is never submitted). */
-export type AzureAuthenticationMode = 'credentials' | 'federated_identity';
+export type AzureAuthenticationMode = 'anonymous' | 'credentials' | 'federated_identity';
 
 export type CreateDataSourceAuthenticationMode =
   | S3AuthenticationMode
@@ -63,6 +63,12 @@ export const getCreateDataSourceAuthenticationOptions = (
             },
           ]
         : []),
+      {
+        value: 'anonymous',
+        text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
+          defaultMessage: 'Anonymous',
+        }),
+      },
     ];
   }
 
@@ -84,6 +90,12 @@ export const getCreateDataSourceAuthenticationOptions = (
             },
           ]
         : []),
+      {
+        value: 'anonymous',
+        text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
+          defaultMessage: 'Anonymous',
+        }),
+      },
     ];
   }
 
@@ -105,6 +117,12 @@ export const getCreateDataSourceAuthenticationOptions = (
             },
           ]
         : []),
+      {
+        value: 'anonymous',
+        text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
+          defaultMessage: 'Anonymous',
+        }),
+      },
     ];
   }
 
@@ -113,6 +131,12 @@ export const getCreateDataSourceAuthenticationOptions = (
       value: 'access_and_secret_keys',
       text: i18n.translate('dataSets.createFlyout.authentication.accessAndSecretKeys', {
         defaultMessage: 'Access and Secret Keys',
+      }),
+    },
+    {
+      value: 'anonymous',
+      text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
+        defaultMessage: 'Anonymous',
       }),
     },
   ];
@@ -154,7 +178,7 @@ export const applyAuthenticationModeToDataSource = (
   data: DataSourceWithSecrets,
   mode: CreateDataSourceAuthenticationMode
 ): DataSourceWithSecrets => {
-  const authSettings = {};
+  const authSettings = mode === 'anonymous' ? { auth: 'none' } : {};
 
   switch (data.type) {
     case 's3': {
@@ -258,7 +282,10 @@ export const applyAuthenticationModeToDataSource = (
       }
       return {
         ...data,
-        settings: base,
+        settings: {
+          ...base,
+          ...authSettings,
+        },
       };
     }
     default:
