@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_TIMELINE_TOP_N_DEFAULT } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { buildTopNSeriesQuery } from './top_n_series_query';
 
 const RULE_ID = 'rule-abc';
@@ -38,8 +39,8 @@ describe('buildTopNSeriesQuery', () => {
     expect(queryString).toContain('SORT last_event_ts DESC');
   });
 
-  it('applies a high limit to capture all series', () => {
-    expect(queryString).toContain('LIMIT 10000');
+  it('fetches only as many series as the chart renders', () => {
+    expect(queryString).toContain(`LIMIT ${ALERT_TIMELINE_TOP_N_DEFAULT}`);
   });
 
   it('keeps only group_hash in the output', () => {

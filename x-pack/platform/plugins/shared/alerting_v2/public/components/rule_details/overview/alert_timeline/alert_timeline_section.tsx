@@ -25,10 +25,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  ALERT_TIMELINE_TOP_N_DEFAULT,
-  deriveAlertTimelineData,
-} from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { deriveAlertTimelineData } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
@@ -85,15 +82,13 @@ export const AlertTimelineSection: React.FC = () => {
     return resolveTimeWindow(timeRange.from, timeRange.to);
   }, [timeRange.from, timeRange.to, refreshTick]);
 
-  const { phases, groupingValuesByHash, summary, totalSeriesCount, isLoading, isError } =
-    useFetchRuleEvents({
-      ruleId: rule.id,
-      windowStartMs,
-      windowEndMs,
-      groupingFields,
-      topN: ALERT_TIMELINE_TOP_N_DEFAULT,
-      data,
-    });
+  const { phases, groupingValuesByHash, summary, isLoading, isError } = useFetchRuleEvents({
+    ruleId: rule.id,
+    windowStartMs,
+    windowEndMs,
+    groupingFields,
+    data,
+  });
 
   const timelineData = useMemo(
     () =>
@@ -103,10 +98,9 @@ export const AlertTimelineSection: React.FC = () => {
         'recently_active',
         windowStartMs,
         windowEndMs,
-        summary,
-        totalSeriesCount
+        summary
       ),
-    [phases, groupingValuesByHash, windowStartMs, windowEndMs, summary, totalSeriesCount]
+    [phases, groupingValuesByHash, windowStartMs, windowEndMs, summary]
   );
 
   const discoverHref = useMemo(

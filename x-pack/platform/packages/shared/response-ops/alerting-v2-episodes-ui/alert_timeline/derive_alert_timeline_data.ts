@@ -62,8 +62,7 @@ export const deriveAlertTimelineData = (
   sort: AlertTimelineSortPolicy,
   windowStartMs: number,
   windowEndMs: number,
-  summary: AlertTimelineSummary,
-  totalSeriesCount: number
+  summary: AlertTimelineSummary
 ): AlertTimelineData => {
   const phasesBySeries = new Map<string, ParsedPhase[]>();
 
@@ -176,8 +175,6 @@ export const deriveAlertTimelineData = (
 
   return {
     rows,
-    hiddenRowCount: Math.max(0, totalSeriesCount - rows.length),
-    totalRowCount: totalSeriesCount,
     summary,
   };
 };

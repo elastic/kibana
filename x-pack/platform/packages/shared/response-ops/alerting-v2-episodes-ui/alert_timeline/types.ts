@@ -65,8 +65,6 @@ export interface AlertTimelineSummary {
 
 export interface AlertTimelineData {
   rows: AlertTimelineSeries[];
-  hiddenRowCount: number;
-  totalRowCount: number;
   summary: AlertTimelineSummary;
 }
 

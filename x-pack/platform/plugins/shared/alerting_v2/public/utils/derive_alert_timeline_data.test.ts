@@ -65,7 +65,7 @@ describe('deriveAlertTimelineData', () => {
       }),
     ];
 
-    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY, 1);
+    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY);
     const row = result.rows[0];
 
     // The terminal INACTIVE phase is the recovery marker — no bar drawn for it.
@@ -118,7 +118,7 @@ describe('deriveAlertTimelineData', () => {
       stillOpen: 2,
       medianDurationMs: 0,
     };
-    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, summary, 1);
+    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, summary);
     const row = result.rows[0];
 
     expect(row.hasOpenEpisode).toBe(true);
@@ -161,7 +161,7 @@ describe('deriveAlertTimelineData', () => {
       }),
     ];
 
-    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY, 2);
+    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY);
 
     expect(result.rows).toHaveLength(2);
     expect(result.rows.map((r) => r.groupHash)).toEqual(['gh-A', 'gh-B']);
@@ -184,7 +184,7 @@ describe('deriveAlertTimelineData', () => {
       }),
     ];
 
-    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY, 1);
+    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY);
     const row = result.rows[0];
 
     expect(new Set(row.segments.map((s) => s.episodeId))).toEqual(new Set(['ep-old', 'ep-new']));
@@ -202,32 +202,6 @@ describe('deriveAlertTimelineData', () => {
       x1Ms: NOW,
       trueStartMs: T0 + 10 * HOUR_MS,
     });
-  });
-
-  it('reports hiddenRowCount from totalSeriesCount vs rendered rows', () => {
-    const phases: AlertTimelinePhaseRow[] = [];
-    for (let i = 0; i < 8; i++) {
-      phases.push(
-        phase({
-          episodeId: `ep-${i}`,
-          groupHash: `gh-${i}`,
-          status: ALERT_EPISODE_STATUS.ACTIVE,
-          startMs: T0 + i * HOUR_MS,
-        }),
-        phase({
-          episodeId: `ep-${i}`,
-          groupHash: `gh-${i}`,
-          status: ALERT_EPISODE_STATUS.INACTIVE,
-          startMs: T0 + i * HOUR_MS + 30 * 60_000,
-        })
-      );
-    }
-
-    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY, 12);
-
-    expect(result.rows).toHaveLength(8);
-    expect(result.hiddenRowCount).toBe(4);
-    expect(result.totalRowCount).toBe(12);
   });
 
   it('passes through externally-supplied summary unchanged', () => {
@@ -253,7 +227,7 @@ describe('deriveAlertTimelineData', () => {
       medianDurationMs: 2 * HOUR_MS,
     };
 
-    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, summary, 3);
+    const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, summary);
 
     expect(result.summary).toBe(summary);
   });
@@ -280,8 +254,7 @@ describe('deriveAlertTimelineData', () => {
       'started_asc',
       T0,
       NOW,
-      STUB_SUMMARY,
-      1
+      STUB_SUMMARY
     );
 
     expect(result.rows[0].groupingValues).toEqual({ 'host.name': 'web-01' });
@@ -326,12 +299,12 @@ describe('deriveAlertTimelineData', () => {
     ];
 
     expect(
-      deriveAlertTimelineData(phases, {}, 'recently_active', T0, NOW, STUB_SUMMARY, 3).rows.map(
+      deriveAlertTimelineData(phases, {}, 'recently_active', T0, NOW, STUB_SUMMARY).rows.map(
         (r) => r.groupHash
       )
     ).toEqual(['gh-long-open', 'gh-recent', 'gh-old']);
     expect(
-      deriveAlertTimelineData(phases, {}, 'longest_open', T0, NOW, STUB_SUMMARY, 3).rows.map(
+      deriveAlertTimelineData(phases, {}, 'longest_open', T0, NOW, STUB_SUMMARY).rows.map(
         (r) => r.groupHash
       )[0]
     ).toBe('gh-long-open');
@@ -367,8 +340,7 @@ describe('deriveAlertTimelineData', () => {
       'started_asc',
       WINDOW_START_MS,
       WINDOW_END_MS,
-      STUB_SUMMARY,
-      1
+      STUB_SUMMARY
     );
     const row = result.rows[0];
 
@@ -414,7 +386,7 @@ describe('deriveAlertTimelineData', () => {
         }),
       ];
 
-      const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY, 1);
+      const result = deriveAlertTimelineData(phases, {}, 'started_asc', T0, NOW, STUB_SUMMARY);
       const row = result.rows[0];
 
       expect(row.segments).toEqual([

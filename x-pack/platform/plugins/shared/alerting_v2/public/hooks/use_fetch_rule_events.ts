@@ -11,7 +11,6 @@ import { useQuery } from '@kbn/react-query';
 import { runEsqlAsyncSearch } from '@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search';
 import { esqlResponseToObjectRows } from '@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows';
 import {
-  ALERT_TIMELINE_TOP_N_DEFAULT,
   applyEpisodeStarts,
   makeEpisodeStartKey,
   type AlertTimelinePhaseRow,
@@ -54,7 +53,6 @@ export interface UseFetchRuleEventsOptions {
   windowStartMs: number;
   windowEndMs: number;
   groupingFields?: readonly string[];
-  topN?: number;
   /** Max episodes drawn per series (lane). Defaults to {@link MAX_EPISODES_PER_LANE}. */
   perLaneLimit?: number;
   data: DataPublicPluginStart;
@@ -65,7 +63,6 @@ export const useFetchRuleEvents = ({
   windowStartMs,
   windowEndMs,
   groupingFields = [],
-  topN = ALERT_TIMELINE_TOP_N_DEFAULT,
   perLaneLimit = MAX_EPISODES_PER_LANE,
   data,
 }: UseFetchRuleEventsOptions) => {
@@ -80,9 +77,11 @@ export const useFetchRuleEvents = ({
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildTopNSeriesQuery({ ruleId: ruleId!, windowStartMs, windowEndMs }).print(
-            'basic'
-          ),
+          query: buildTopNSeriesQuery({
+            ruleId: ruleId!,
+            windowStartMs,
+            windowEndMs,
+          }).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
@@ -90,13 +89,11 @@ export const useFetchRuleEvents = ({
     select: (raw) => esqlResponseToObjectRows<TopNSeriesRow>(raw),
   });
 
-  const { topNHashes, totalSeriesCount } = useMemo(() => {
-    const allRows = topNSeriesQuery.data ?? [];
-    return {
-      topNHashes: allRows.slice(0, topN).map((r) => r.group_hash),
-      totalSeriesCount: allRows.length,
-    };
-  }, [topNSeriesQuery.data, topN]);
+  // The query already caps the rows to the rendered lane count, most-recently-active first.
+  const topNHashes = useMemo(
+    () => (topNSeriesQuery.data ?? []).map((r) => r.group_hash),
+    [topNSeriesQuery.data]
+  );
 
   // --- 2. Episode selection (depends on top-N hashes) — the episodes to draw,
   // capped per lane so a busy series can't crowd out its neighbours. ---
@@ -264,7 +261,6 @@ export const useFetchRuleEvents = ({
     phases,
     groupingValuesByHash: groupingValuesQuery.data ?? EMPTY_GROUPING_VALUES,
     summary: summaryQuery.data ?? EMPTY_SUMMARY,
-    totalSeriesCount,
     isLoading,
     isError,
     refetch: () => {
