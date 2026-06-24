@@ -112,7 +112,6 @@ export class ActionPolicyExecutionHistoryClient {
     }
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
-      request,
       spaceId,
       startDate,
       page,
@@ -148,7 +147,6 @@ export class ActionPolicyExecutionHistoryClient {
     }
 
     return this.eventLogService.countActionPolicyExecutionEventsSince({
-      request,
       spaceId,
       since,
       outcome: toOutcomeForService(outcome),

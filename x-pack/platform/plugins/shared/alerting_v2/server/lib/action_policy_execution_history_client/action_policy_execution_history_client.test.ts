@@ -65,6 +65,7 @@ const createMocks = () => {
       total: 0,
     }),
     countActionPolicyExecutionEventsSince: jest.fn().mockResolvedValue({ count: 0 }),
+    findRuleExecutions: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 }),
   };
   const actionPolicyClient = {
     getActionPolicies: jest.fn().mockResolvedValue([]),
@@ -118,7 +119,6 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       await client.listExecutionHistory({ request, page: 2, perPage: 25 });
 
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith({
-        request,
         spaceId: 'default',
         startDate: '2026-10-10T11:00:00.000Z',
         page: 2,
@@ -543,7 +543,6 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       expect(spaces.spacesService.getSpaceId).toHaveBeenCalledWith(request);
       expect(eventLogService.countActionPolicyExecutionEventsSince).toHaveBeenCalledWith({
-        request,
         spaceId: 'my-space',
         since,
         outcome: undefined,

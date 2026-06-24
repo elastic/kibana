@@ -90,11 +90,6 @@ export interface FindRuleExecutionsQuery {
 
 /**
  * Generic paginated response shape used by event-log read methods.
- *
- * `total` is approximate above ES's default `track_total_hits` cap of 10000:
- * the value plateaus at 10000 and ES returns `relation: 'gte'`. Callers (UI)
- * should render "10000+" when this cap is hit. The service does not raise
- * the cap to keep queries cheap; see spec §10.3.
  */
 export interface PaginatedResult<T> {
   items: T[];

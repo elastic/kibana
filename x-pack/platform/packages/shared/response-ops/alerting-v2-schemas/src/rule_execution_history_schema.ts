@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { arrayOrSingleSchema } from './common';
 
 export const RULE_EXECUTIONS_MAX_PER_PAGE = 100;
 export const RULE_EXECUTIONS_DEFAULT_PER_PAGE = 20;
@@ -16,6 +17,12 @@ export const RULE_EXECUTIONS_DEFAULT_PER_PAGE = 20;
  * `search_after` to remove the cap.
  */
 export const RULE_EXECUTIONS_MAX_RESULT_WINDOW = 10_000;
+/**
+ * Maximum number of rule ids accepted by the `ruleId` filter. Caps the
+ * `terms` clause size on the server and keeps the query string within a
+ * reasonable URL length budget (256 chars per id * 10 ids ≈ 2,5KB).
+ */
+export const RULE_EXECUTIONS_MAX_RULE_ID_FILTER = 10;
 
 /**
  * Coarse ECS-aligned outcome (`event.outcome`) for a single rule execution.
@@ -29,29 +36,26 @@ export const ruleExecutionOutcomeSchema = z.enum(['success', 'failure']);
 export type RuleExecutionOutcome = z.infer<typeof ruleExecutionOutcomeSchema>;
 
 /**
- * Accepts a single string or an array. Coerced to an array of outcome values.
- *
- * HTTP query strings can deliver `outcome` either as a single string
- * (`?outcome=success`) or as a repeated key (`?outcome=success&outcome=failure`).
- * The transform normalises both shapes; the trailing `.pipe(...)` re-validates
- * the result against the same enum so the inferred type is the array form.
- *
- * The `max(...)` cap tracks the enum size so a caller can list each value at
- * most once. It auto-extends when new outcome values are added.
+ * Outcome filter. The array cap tracks the enum size — each value can appear
+ * at most once. It auto-extends when new outcome values are added.
  */
-const RULE_EXECUTION_OUTCOMES_MAX = ruleExecutionOutcomeSchema.options.length;
+const outcomeArraySchema = arrayOrSingleSchema(
+  ruleExecutionOutcomeSchema,
+  ruleExecutionOutcomeSchema.options.length
+);
 
-const outcomeArraySchema = z
-  .union([
-    ruleExecutionOutcomeSchema,
-    z.array(ruleExecutionOutcomeSchema).min(1).max(RULE_EXECUTION_OUTCOMES_MAX),
-  ])
-  .transform((value) => (Array.isArray(value) ? value : [value]))
-  .pipe(z.array(ruleExecutionOutcomeSchema).min(1).max(RULE_EXECUTION_OUTCOMES_MAX));
+/**
+ * Rule id filter. Each id must be a non-empty string up to 256 chars; the
+ * array is capped at {@link RULE_EXECUTIONS_MAX_RULE_ID_FILTER}.
+ */
+const ruleIdArraySchema = arrayOrSingleSchema(
+  z.string().min(1).max(256),
+  RULE_EXECUTIONS_MAX_RULE_ID_FILTER
+);
 
 export const getRuleExecutionsQuerySchema = z
   .object({
-    ruleId: z.string().min(1).max(256).optional().describe('Optional rule id to filter on.'),
+    ruleIds: ruleIdArraySchema.optional().describe(`Rule id filter.`),
     outcome: outcomeArraySchema
       .optional()
       .describe('Outcome filter. Pass one or more of success | failure.'),
