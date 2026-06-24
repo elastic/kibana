@@ -293,7 +293,9 @@ export const ListActionPoliciesPage = () => {
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             {tags.map((tag) => (
               <EuiFlexItem grow={false} key={tag}>
-                <EuiBadge color="hollow">{tag}</EuiBadge>
+                <EuiBadge color="hollow" css={{ maxWidth: 150 }}>
+                  {tag}
+                </EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
