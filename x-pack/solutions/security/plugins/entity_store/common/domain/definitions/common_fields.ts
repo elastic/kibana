@@ -7,7 +7,12 @@
 
 import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
-import { collectValues, newestValue, oldestValue, managedValue } from './field_retention_operations';
+import {
+  collectValues,
+  newestValue,
+  oldestValue,
+  managedValue,
+} from './field_retention_operations';
 
 /**
  * Dotted ECS paths collected into `entity.relationships.*.raw_identifiers.<path>`.

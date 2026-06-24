@@ -296,7 +296,9 @@ const RECENT_ESQL_COLUMN_PREFIX = 'recent.';
 
 /** Destinations aggregated under `recent.<destination>` in main logs extraction STATS. */
 export function statsFieldDestinations(fields: EntityField[]): Set<string> {
-  return new Set(fields.filter((f) => f.retention.operation !== 'managed').map((f) => f.destination));
+  return new Set(
+    fields.filter((f) => f.retention.operation !== 'managed').map((f) => f.destination)
+  );
 }
 
 /**
