@@ -95,9 +95,9 @@ const TOP_PADDING = 80;
 const CANVAS_CONTROLS_SHADOW =
   '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
 
-function CanvasZoomControls() {
+function CanvasZoomControls({ onResetView }: { onResetView: () => void }) {
   const { euiTheme } = useEuiTheme();
-  const { zoomIn, zoomOut, getViewport, setViewport } = useReactFlow();
+  const { zoomIn, zoomOut } = useReactFlow();
 
   const zoomOutLabel = i18n.translate('workflowsUi.graph.zoomOut', {
     defaultMessage: 'Zoom out',
@@ -111,10 +111,6 @@ function CanvasZoomControls() {
 
   const handleZoomOut = useCallback(() => zoomOut({ duration: 200 }), [zoomOut]);
   const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
-  const handleResetZoom = useCallback(() => {
-    const { x, y } = getViewport();
-    setViewport({ x, y, zoom: 1 }, { duration: 200 });
-  }, [getViewport, setViewport]);
 
   return (
     <Panel position="bottom-right" style={{ margin: 12 }}>
@@ -155,7 +151,7 @@ function CanvasZoomControls() {
             aria-label={resetZoomLabel}
             color="text"
             size="s"
-            onClick={handleResetZoom}
+            onClick={onResetView}
             data-test-subj="workflowCanvas-reset-zoom"
           />
         </EuiToolTip>
@@ -406,6 +402,26 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     [decoratedNodes, fitViewProp, fitViewOptionsProp, focusStepId]
   );
 
+  // Centers on the graph's top row at the initial zoom — always ignores
+  // focusStepId so the button reliably returns to the trigger-row view.
+  const handleResetView = useCallback(() => {
+    const instance = flowInstanceRef.current;
+    if (!instance || decoratedNodes.length === 0) return;
+
+    const widthOf = (n: (typeof decoratedNodes)[number]) =>
+      typeof n.width === 'number' ? n.width : 200;
+
+    const minY = Math.min(...decoratedNodes.map((n) => n.position.y));
+    const minX = Math.min(...decoratedNodes.map((n) => n.position.x));
+    const maxX = Math.max(...decoratedNodes.map((n) => n.position.x + widthOf(n)));
+    const graphCenterX = (minX + maxX) / 2;
+    const wrapperHeight = wrapperRef.current?.clientHeight ?? 600;
+    instance.setCenter(graphCenterX, minY + wrapperHeight / 2 - TOP_PADDING, {
+      zoom: INITIAL_ZOOM,
+      duration: 200,
+    });
+  }, [decoratedNodes]);
+
   // Position the initial view: if focusStepId matches a node, centre on
   // that node; otherwise centre on the graph's top row.
   const handleInit = useCallback(
@@ -573,7 +589,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                 />
               )}
               {toolbar}
-              {showZoomControls && <CanvasZoomControls />}
+              {showZoomControls && <CanvasZoomControls onResetView={handleResetView} />}
               {showMinimap && (
                 <MiniMap
                   pannable
