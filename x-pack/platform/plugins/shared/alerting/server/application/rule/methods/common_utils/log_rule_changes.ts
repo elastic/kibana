@@ -114,6 +114,10 @@ export async function logRuleChanges({
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: ruleType.solution,
         snapshot: ruleSnapshot,
+        // Rule's revision is a monotonically increasing integer reflecting user edits.
+        // Capture it in object.sequence to be used as a tiebreaker when sorting
+        // rule changes history by @timestamp DESC, object.sequence DESC
+        sequence: ruleSnapshot.revision,
       });
     } catch (e) {
       logger.debug(
