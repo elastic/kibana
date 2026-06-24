@@ -22,6 +22,7 @@ import {
   seedHostEntity,
   triggerMaintainerRun,
   waitForRelationshipIds,
+  waitForEntityStoreRunning,
   assertNoRelationshipId,
 } from '../../fixtures/maintainers/helpers';
 
@@ -99,6 +100,10 @@ const registerRawIdentifiersMaintainerSuite = (
           body: {},
         });
         expect([200, 201]).toContain(installResponse.statusCode);
+
+        // Wait for all engine components to finish provisioning before seeding —
+        // the `running` status flips before the latest alias is ready.
+        await waitForEntityStoreRunning(apiClient, defaultHeaders);
 
         const initResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,

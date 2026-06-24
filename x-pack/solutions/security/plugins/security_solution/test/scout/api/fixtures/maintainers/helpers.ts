@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { EsClient, apiTest } from '@kbn/scout-security';
+import type { EsClient } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
-import type { EntityType } from '@kbn/entity-store/common';
 
 import {
   ENTITY_STORE_ROUTES,
@@ -18,19 +17,72 @@ import {
   UPDATES_INDEX,
 } from './constants';
 
-type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
-type ApiClientFixture = ApiWorkerFixtures['apiClient'];
-type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>;
-
 /**
- * Normalizes values that may be stored as a single keyword or as keyword[] after
- * log extraction (e.g. `entity.relationships.*` bags).
+ * Polls GET /api/security/entity_store/status?include_components=true until the
+ * top-level status is `running` AND every engine's component list shows all
+ * resources `installed: true`, or throws on timeout.
+ *
+ * The plain `running` status flips before engines finish provisioning their
+ * backing indices, aliases, templates, and pipelines. Waiting for component-level
+ * readiness prevents `index_not_found_exception` races in tests that immediately
+ * seed or refresh the latest alias after install.
  */
-export const normalizeKeywordList = (value: unknown): string[] => {
-  if (value == null) {
-    return [];
+export const waitForEntityStoreRunning = async (
+  apiClient: MaintainerApiClient,
+  headers: Record<string, string>,
+  timeoutMs = 60_000
+): Promise<void> => {
+  const start = Date.now();
+  let lastStatus: string | undefined;
+  let lastMissing: string[] = [];
+
+  while (Date.now() - start < timeoutMs) {
+    const response = await apiClient.get(
+      `${ENTITY_STORE_ROUTES.public.STATUS}?include_components=true`,
+      { headers, responseType: 'json' }
+    );
+    const body = response.body as
+      | {
+          status?: string;
+          engines?: Array<{
+            type?: string;
+            status?: string;
+            components?: Array<{ id?: string; installed?: boolean }>;
+          }>;
+        }
+      | undefined;
+    lastStatus = body?.status;
+
+    if (lastStatus === 'running') {
+      const engines = body?.engines ?? [];
+      const missing: string[] = [];
+      let allEnginesHaveComponents = engines.length > 0;
+      for (const engine of engines) {
+        const components = engine.components ?? [];
+        if (components.length === 0) {
+          allEnginesHaveComponents = false;
+          missing.push(`${engine.type}/<no-components-yet>`);
+        } else {
+          for (const component of components) {
+            if (component.installed !== true) {
+              missing.push(`${engine.type}/${component.id}`);
+            }
+          }
+        }
+      }
+      lastMissing = missing;
+      if (allEnginesHaveComponents && missing.length === 0) {
+        return;
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  return Array.isArray(value) ? value.map((v) => String(v)) : [String(value)];
+
+  throw new Error(
+    `Timed out after ${timeoutMs}ms waiting for entity store status=running with all components installed ` +
+      `(last status: ${lastStatus}, missing components: ${lastMissing.join(', ') || '<none>'})`
+  );
 };
 
 /**
@@ -47,10 +99,17 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
 };
 
 /**
- * API client shape required by forceUserExtraction.
+ * API client shape required by triggerMaintainerRun.
  * Use this instead of importing Scout's ApiClient type.
  */
-export interface ForceLogExtractionApiClient {
+export interface MaintainerApiClient {
+  get(
+    url: string,
+    options: {
+      headers: Record<string, string>;
+      responseType: 'json';
+    }
+  ): Promise<{ statusCode: number; body: unknown }>;
   post(
     url: string,
     options: {
@@ -60,66 +119,6 @@ export interface ForceLogExtractionApiClient {
     }
   ): Promise<{ statusCode: number; body: unknown }>;
 }
-
-export const ingestDoc = async (esClient: EsClient, body: Record<string, unknown>) =>
-  esClient.index({
-    index: UPDATES_INDEX,
-    refresh: 'wait_for',
-    body,
-  });
-
-export const searchDocById = async (esClient: EsClient, id: string) => {
-  await esClient.indices.refresh({ index: LATEST_ALIAS });
-  return esClient.search({
-    index: LATEST_ALIAS,
-    version: true,
-    query: {
-      bool: {
-        filter: {
-          term: { 'entity.id': id },
-        },
-      },
-    },
-    size: 2,
-  });
-};
-
-interface SeedUserEntityOptions {
-  entityId: string;
-  namespace: string;
-  email: string | string[];
-  timestamp?: string;
-}
-
-export const seedUserEntity = async (
-  esClient: EsClient,
-  { entityId, namespace, email, timestamp }: SeedUserEntityOptions
-) => {
-  const ts = timestamp ?? new Date().toISOString();
-  await esClient.index({
-    index: LATEST_ALIAS,
-    id: hashEuid(entityId),
-    refresh: 'wait_for',
-    pipeline: '_none',
-    body: {
-      entity: {
-        id: entityId,
-        name: entityId,
-        EngineMetadata: { Type: 'user' },
-        namespace,
-        lifecycle: {
-          first_seen: ts,
-          last_seen: ts,
-        },
-      },
-      user: {
-        email,
-        name: entityId,
-      },
-      '@timestamp': ts,
-    },
-  });
-};
 
 interface SeedHostEntityOptions {
   entityId: string;
@@ -189,35 +188,66 @@ export const seedHostEntity = async (
 const relationshipIdsPath = (relationshipKey: string): string =>
   `entity.relationships.${relationshipKey}.ids`;
 
+const normalizeKeywordList = (value: unknown): string[] => {
+  if (value == null) {
+    return [];
+  }
+  return Array.isArray(value) ? value.map((v) => String(v)) : [String(value)];
+};
+
+const getNestedValue = (obj: Record<string, unknown>, path: string): unknown =>
+  path.split('.').reduce<unknown>((current, key) => {
+    if (current != null && typeof current === 'object') {
+      return (current as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj);
+
 /**
- * Asserts that an entity's `<relationshipKey>.ids` contains the expected target
- * EUID. Callers use `triggerMaintainerRun(..., { sync: true })` so the task has
- * already settled — poll with a short window to absorb ES refresh lag.
+ * Polls until an entity's `<relationshipKey>.ids` contains the expected target
+ * EUID, or throws on timeout. Tolerates per-iteration transient ES errors (e.g.
+ * `already_closed_exception` during fresh-engine replica settling).
+ * Callers use `triggerMaintainerRun(..., { sync: true })` so the task has
+ * already settled — the poll window absorbs ES refresh lag only.
  */
 export const waitForRelationshipIds = async (
   esClient: EsClient,
   relationshipKey: string,
   entityId: string,
-  expectedTargetId: string
+  expectedTargetId: string,
+  timeoutMs = 60_000
 ): Promise<void> => {
   const idsPath = relationshipIdsPath(relationshipKey);
-  await expect
-    .poll(
-      async () => {
-        await esClient.indices.refresh({ index: LATEST_ALIAS });
-        const response = await esClient.search({
-          index: LATEST_ALIAS,
-          query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
-          size: 1,
-        });
-        const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
-        return source
-          ? normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath])
-          : [];
-      },
-      { timeout: 30_000, intervals: [200] }
-    )
-    .toContain(expectedTargetId);
+  const start = Date.now();
+  let lastError: unknown;
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      await esClient.indices.refresh({ index: LATEST_ALIAS });
+      const response = await esClient.search({
+        index: LATEST_ALIAS,
+        query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+        size: 1,
+      });
+      const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+      if (source) {
+        const ids = normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath]);
+        if (ids.includes(expectedTargetId)) {
+          return;
+        }
+      }
+    } catch (e) {
+      lastError = e;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  const lastErrorMsg = lastError instanceof Error ? lastError.message : String(lastError ?? '');
+  const errorSuffix = lastErrorMsg ? ` (last error: ${lastErrorMsg})` : '';
+  throw new Error(
+    `Timed out after ${timeoutMs}ms waiting for '${idsPath}' on entity '${entityId}' to contain '${expectedTargetId}'${errorSuffix}`
+  );
 };
 
 /**
@@ -251,77 +281,6 @@ export const assertNoRelationshipId = async (
     .not.toContain(unexpectedTargetId);
 };
 
-const RESOLVED_TO_PATH = 'entity.relationships.resolution.resolved_to';
-
-export const waitForResolution = async (
-  esClient: EsClient,
-  entityId: string,
-  expectedTarget: string,
-  timeoutMs = 30_000
-): Promise<Record<string, unknown>> => {
-  const start = Date.now();
-  let lastSource: Record<string, unknown> | undefined;
-
-  while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_ALIAS });
-    const response = await esClient.search({
-      index: LATEST_ALIAS,
-      query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
-      size: 1,
-    });
-
-    const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
-    lastSource = source;
-    if (source) {
-      const resolvedTo = getNestedValue(source, RESOLVED_TO_PATH) ?? source[RESOLVED_TO_PATH];
-      if (resolvedTo === expectedTarget) {
-        return source;
-      }
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-
-  // eslint-disable-next-line no-console
-  console.log(
-    `[DEBUG] waitForResolution timeout for '${entityId}'. Last _source:`,
-    JSON.stringify(lastSource, null, 2)
-  );
-
-  throw new Error(
-    `Timed out waiting for entity '${entityId}' to resolve to '${expectedTarget}' after ${timeoutMs}ms`
-  );
-};
-
-export const assertNotResolved = async (
-  esClient: EsClient,
-  entityId: string,
-  timeoutMs = 10_000
-): Promise<void> => {
-  const start = Date.now();
-
-  while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_ALIAS });
-    const response = await esClient.search({
-      index: LATEST_ALIAS,
-      query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
-      size: 1,
-    });
-
-    const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
-    if (source) {
-      const resolvedTo = getNestedValue(source, RESOLVED_TO_PATH) ?? source[RESOLVED_TO_PATH];
-      if (resolvedTo != null) {
-        throw new Error(
-          `Entity '${entityId}' unexpectedly resolved to '${resolvedTo}' — expected it to stay unresolved`
-        );
-      }
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-};
-
 /**
  * Triggers a maintainer run by calling the async `run/{id}` endpoint.
  * The route calls `taskManager.runSoon()` — it does NOT wait for completion.
@@ -331,10 +290,10 @@ export const assertNotResolved = async (
  * "currently running" error in a generic 500 body, so we retry on any 500.
  */
 export const triggerMaintainerRun = async (
-  apiClient: ForceLogExtractionApiClient,
+  apiClient: MaintainerApiClient,
   headers: Record<string, string>,
   maintainerId = 'automated-resolution',
-  { maxRetries = 5, retryDelayMs = 2000, sync = false } = {}
+  { maxRetries = 5, retryDelayMs = 1000, sync = false } = {}
 ) => {
   // Use `sync: true` in tests that need a settled watermark before proceeding.
   const runUrl = sync
@@ -361,87 +320,3 @@ export const triggerMaintainerRun = async (
     await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
   }
 };
-
-function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  return path.split('.').reduce<unknown>((current, key) => {
-    if (current != null && typeof current === 'object') {
-      return (current as Record<string, unknown>)[key];
-    }
-    return undefined;
-  }, obj);
-}
-
-export const forceLogExtraction = async (
-  apiClient: ForceLogExtractionApiClient,
-  headers: Record<string, string>,
-  entityType: EntityType,
-  fromDateISO: string,
-  toDateISO: string
-) =>
-  apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
-    headers,
-    responseType: 'json',
-    body: { fromDateISO, toDateISO },
-  });
-
-export const installAllEntityTypes = (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>
-) =>
-  apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-    headers,
-    responseType: 'json',
-    body: {},
-  });
-
-export const uninstallAllEntityTypes = (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>
-) =>
-  apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-    headers,
-    responseType: 'json',
-    body: {},
-  });
-
-export const getStatus = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
-  apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
-    headers,
-    responseType: 'json',
-  }) as Promise<ApiClientResponse>;
-
-export const startEntityTypes = (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>,
-  entityTypes: EntityType[]
-) =>
-  apiClient.put(ENTITY_STORE_ROUTES.public.START, {
-    headers,
-    responseType: 'json',
-    body: { entityTypes },
-  });
-
-export const stopEntityTypes = (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>,
-  entityTypes: EntityType[]
-) =>
-  apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
-    headers,
-    responseType: 'json',
-    body: { entityTypes },
-  });
-
-export const startAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
-  apiClient.put(ENTITY_STORE_ROUTES.public.START, {
-    headers,
-    responseType: 'json',
-    body: {},
-  });
-
-export const stopAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
-  apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
-    headers,
-    responseType: 'json',
-    body: {},
-  });
