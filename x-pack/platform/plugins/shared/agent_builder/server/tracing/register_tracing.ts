@@ -115,7 +115,6 @@ export const registerTracingExporter = async ({
 
   // Always include the ES exporter so that enabling the uiSetting takes effect
   // within the next polling cycle, without requiring a server restart.
-  // External OTLP endpoints still require explicit yml config.
   const allExporters: tracing.SpanExporter[] = [
     new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser),
     ...tracingConfig.exporters.map(

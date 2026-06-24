@@ -123,7 +123,7 @@ async function getInstalledDashboardVersion(
 }
 
 /**
- * remove the dashboard and its data view from the given space
+ * remove the dashboard from the given space
  */
 async function removeAgentBuilderOverviewDashboard(
   client: SavedObjectsClientContract,
@@ -131,20 +131,23 @@ async function removeAgentBuilderOverviewDashboard(
   spaceId: string,
   namespace: string | undefined
 ): Promise<void> {
-  await client.delete('dashboard', overviewDashboardId(spaceId), { namespace }).catch((error) => {
+  try {
+    await client.delete('dashboard', overviewDashboardId(spaceId), { namespace });
+    logger.debug(`Agent Builder overview dashboard removed from space "${spaceId}"`);
+  } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       logger.debug(`Agent Builder overview dashboard already absent in space "${spaceId}"`);
       return;
     }
     throw error;
-  });
-  logger.debug(`Agent Builder overview dashboard removed from space "${spaceId}"`);
+  }
 }
 
 /**
- * Sync the dashboard (and its companion data view) across all spaces.
- * Pass `install=true` to install, `install=false` to remove.
- * Called on startup and whenever the `agentBuilder:tracing:enabled` uiSetting changes.
+ * sync the dashboard for all spaces. The dashboard visualizes Agent Builder
+ * traces, which are only shipped to the local cluster when
+ * `xpack.agentBuilder.tracing.send_to_self` is enabled, so the dashboard is
+ * installed only when that flag is on and removed from every space otherwise.
  */
 export async function syncAgentBuilderOverviewDashboard(
   coreStart: Pick<CoreStart, 'savedObjects'>,

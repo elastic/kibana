@@ -13,7 +13,10 @@ import { resources, tracing as elasticTracing } from '@elastic/opentelemetry-nod
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
 import { GenAISemanticConventions } from '@kbn/inference-tracing';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_BUILTIN_AGENTS } from '@kbn/agent-builder-server/allow_lists';
+import {
+  AGENT_BUILDER_BUILTIN_AGENTS,
+  AGENT_BUILDER_BUILTIN_TOOLS,
+} from '@kbn/agent-builder-server/allow_lists';
 import {
   AgentBuilderSpanProcessor,
   type TracingPrivacySettings,
@@ -749,6 +752,51 @@ describe('AgentBuilderSpanProcessor', () => {
       expect(exported.attributes[GenAISemanticConventions.GenAIToolDescription]).toBe(
         'My tool description'
       );
+    });
+
+    it('anonymizes custom tool name and execute_tool span name to "custom"', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealNames: false }),
+      });
+
+      const readable: tracing.ReadableSpan = {
+        ...createMockReadableSpan({
+          [SHOULD_TRACK_ATTR]: true,
+          [GenAISemanticConventions.GenAIToolName]: 'my-secret-tool',
+        }),
+        name: 'execute_tool my-secret-tool',
+      };
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[GenAISemanticConventions.GenAIToolName]).toBe('custom');
+      expect(exported.name).toBe('execute_tool custom');
+    });
+
+    it('preserves built-in tool name and execute_tool span name', () => {
+      const builtinToolName = AGENT_BUILDER_BUILTIN_TOOLS[0];
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealNames: false }),
+      });
+
+      const readable: tracing.ReadableSpan = {
+        ...createMockReadableSpan({
+          [SHOULD_TRACK_ATTR]: true,
+          [GenAISemanticConventions.GenAIToolName]: builtinToolName,
+        }),
+        name: `execute_tool ${builtinToolName}`,
+      };
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[GenAISemanticConventions.GenAIToolName]).toBe(builtinToolName);
+      expect(exported.name).toBe(`execute_tool ${builtinToolName}`);
     });
   });
 });

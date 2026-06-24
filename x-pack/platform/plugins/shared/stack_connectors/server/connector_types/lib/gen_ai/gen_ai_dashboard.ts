@@ -67,7 +67,7 @@ export const getDashboard = (
     tokens: uuidv4(),
     totalTokens: uuidv4(),
     tag: uuidv4(),
-};
+  };
   return {
     attributes: {
       description: `Displays ${attributes.provider} token consumption per Kibana user`,

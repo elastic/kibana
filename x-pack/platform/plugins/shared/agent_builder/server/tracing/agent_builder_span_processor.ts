@@ -102,6 +102,12 @@ function anonymizeNames(
   if (toolName != null) {
     const isBuiltin = BUILTIN_TOOL_IDS.has(String(toolName)) || isInternalTool(String(toolName));
     result[GenAISemanticConventions.GenAIToolName] = isBuiltin ? toolName : 'custom';
+    if (!isBuiltin) {
+      const prefix = 'execute_tool ';
+      if (finalSpanName.startsWith(prefix)) {
+        finalSpanName = `${prefix}custom`;
+      }
+    }
   }
 
   const workflowName = result[GenAISemanticConventions.GenAIWorkflowName];
