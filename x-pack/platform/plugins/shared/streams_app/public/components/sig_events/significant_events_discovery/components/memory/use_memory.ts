@@ -31,7 +31,11 @@ export const useMemoryTree = () => {
   const { core } = useKibana();
   return useQuery({
     queryKey: memoryKeys.categories,
-    queryFn: () => core.http.get<{ tree: MemoryCategoryNode[] }>(`${MEMORY_BASE}/categories`),
+    queryFn: () =>
+      core.http.get<{
+        tree: MemoryCategoryNode[];
+        uncategorized: Array<{ id: string; name: string; title: string }>;
+      }>(`${MEMORY_BASE}/categories`),
   });
 };
 
@@ -96,7 +100,13 @@ export const useMemoryMutations = () => {
   };
 
   const createEntry = useMutation({
-    mutationFn: (params: { name: string; title: string; content: string; tags?: string[] }) =>
+    mutationFn: (params: {
+      name: string;
+      title: string;
+      content: string;
+      tags?: string[];
+      categories?: string[];
+    }) =>
       core.http.post<MemoryEntry>(`${MEMORY_BASE}/entries`, {
         body: JSON.stringify(params),
       }),
