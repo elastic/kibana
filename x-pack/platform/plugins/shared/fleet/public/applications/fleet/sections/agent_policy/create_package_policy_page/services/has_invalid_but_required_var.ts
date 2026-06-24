@@ -30,7 +30,7 @@ export const hasInvalidButRequiredVar = (
                 registryVar,
                 registryVar.name,
                 parse,
-                undefined,
+                undefined
               )?.length)
         )
     )

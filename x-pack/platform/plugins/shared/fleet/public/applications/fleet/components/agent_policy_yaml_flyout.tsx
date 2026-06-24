@@ -54,11 +54,7 @@ export const AgentPolicyYamlFlyout = memo<{
   }, []);
 
   const core = useStartServices();
-  const {
-    isLoading: isLoadingYaml,
-    data: yamlData,
-    error,
-  } = useGetOneAgentPolicyFull(policyId);
+  const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
   const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
   const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
     (packagePolicy) => packagePolicy?.secret_references?.length
@@ -112,19 +108,19 @@ export const AgentPolicyYamlFlyout = memo<{
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>
-              {agentPolicyData?.item ? (
-                <FormattedMessage
-                  id="xpack.fleet.policyDetails.yamlflyoutTitleWithName"
-                  defaultMessage="''{name}'' agent policy"
-                  values={{ name: agentPolicyData.item.name }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.policyDetails.yamlflyoutTitleWithoutName"
-                  defaultMessage="Agent policy"
-                />
-              )}
-            </h2>
+            {agentPolicyData?.item ? (
+              <FormattedMessage
+                id="xpack.fleet.policyDetails.yamlflyoutTitleWithName"
+                defaultMessage="''{name}'' agent policy"
+                values={{ name: agentPolicyData.item.name }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.policyDetails.yamlflyoutTitleWithoutName"
+                defaultMessage="Agent policy"
+              />
+            )}
+          </h2>
         </EuiTitle>
         {packagePoliciesContainSecrets && (
           <>

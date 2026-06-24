@@ -9,7 +9,11 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { merge } from 'lodash';
 import yaml, { type Pair } from 'yaml';
 
-import { getNormalizedInputs, getPolicyTemplateDataStreamPaths, createYamlKeysSorter, } from '../../../../common/services';
+import {
+  getNormalizedInputs,
+  getPolicyTemplateDataStreamPaths,
+  createYamlKeysSorter,
+} from '../../../../common/services';
 
 import {
   getStreamsForInputType,
