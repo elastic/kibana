@@ -11,12 +11,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { ToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type {
-  ModelProvider,
-  ScopedModel,
-  ToolEventEmitter,
-  ToolHandlerResult,
-} from '@kbn/agent-builder-server';
+import type { ModelProvider, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createToolCallMessage, extractTextContent, generateFakeToolCallId } from '../../langchain';
@@ -66,7 +61,7 @@ const isPatternTargetEnabled = (state: StateType): state is StateType & { target
       state.targetPattern !== '*'
   );
 
-export const createSearchToolGraph = ({
+export const createSearchToolGraph = async ({
   modelProvider,
   esClient,
   logger,
@@ -79,7 +74,9 @@ export const createSearchToolGraph = ({
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
 }) => {
-  const getTools = (state: StateType, defaultModel: ScopedModel) => {
+  const defaultModel = await modelProvider.getDefaultModel();
+
+  const getTools = (state: StateType) => {
     const relevanceTool = createRelevanceSearchTool({
       model: defaultModel,
       esClient,
@@ -140,8 +137,7 @@ export const createSearchToolGraph = ({
       return { error: NO_MATCHING_RESOURCE_ERROR };
     }
 
-    const defaultModel = await modelProvider.getDefaultModel();
-    const tools = getTools(state, defaultModel);
+    const tools = getTools(state);
     const searchModel = defaultModel.chatModel.bindTools(tools, { tool_choice: 'any' }).withConfig({
       tags: ['agent-builder-search-tool'],
     });
@@ -165,8 +161,7 @@ export const createSearchToolGraph = ({
   };
 
   const executeTool = async (state: StateType) => {
-    const defaultModel = await modelProvider.getDefaultModel();
-    const tools = getTools(state, defaultModel);
+    const tools = getTools(state);
     const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
 
     const toolNodeResult = await toolNode.invoke(state.messages);

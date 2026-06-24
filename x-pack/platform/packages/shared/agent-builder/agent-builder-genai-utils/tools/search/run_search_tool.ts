@@ -40,7 +40,7 @@ export const runSearchTool = async ({
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
 }): Promise<ToolHandlerResult[]> => {
-  const toolGraph = createSearchToolGraph({
+  const toolGraph = await createSearchToolGraph({
     modelProvider,
     esClient,
     logger,
