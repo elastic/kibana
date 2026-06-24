@@ -1,5 +1,5 @@
 {
-  "sha1": "2ed8665d222dd0f9efa48df9dc217e511db4760d",
+  "sha1": "748d5d9878a54c67e3fcad600c34e763015881f5",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -964,8 +964,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 101,
-        "column": 9
+        "line": 105,
+        "column": 24
       }
     },
     {
@@ -980,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 111,
-        "column": 9
+        "line": 115,
+        "column": 24
       }
     },
     {
@@ -996,8 +996,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 140,
-        "column": 9
+        "line": 144,
+        "column": 24
       }
     },
     {
@@ -1012,8 +1012,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 148,
-        "column": 9
+        "line": 152,
+        "column": 24
       }
     },
     {
@@ -1028,8 +1028,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 175,
-        "column": 9
+        "line": 179,
+        "column": 24
       }
     },
     {
@@ -1044,8 +1044,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 183,
-        "column": 9
+        "line": 187,
+        "column": 24
       }
     },
     {
@@ -1060,8 +1060,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 201,
-        "column": 9
+        "line": 205,
+        "column": 24
       }
     },
     {
@@ -3359,15 +3359,15 @@
     {
       "id": "7ce2670a3e19b7c-0f0cfefb9e93b08",
       "title": "Query streams - Create query stream should create a query stream as a child of an ingest stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 80,
-        "column": 7
+        "line": 81,
+        "column": 8
       }
     },
     {
