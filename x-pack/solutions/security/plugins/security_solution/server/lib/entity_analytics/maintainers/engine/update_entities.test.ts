@@ -51,8 +51,20 @@ describe('writeEntityIds', () => {
         relationships: { communicates_with: ['host:D3F5C9B9-foo'] },
       },
     ];
-    const result = await writeEntityIds(crudClient, loggerMock.create(), records, stubEsClient, TEST_NAMESPACE);
-    expect(result).toEqual({ updated: 0, notFound: 0, errors: 0, droppedTargets: 0, relationshipTypeApplied: {} });
+    const result = await writeEntityIds(
+      crudClient,
+      loggerMock.create(),
+      records,
+      stubEsClient,
+      TEST_NAMESPACE
+    );
+    expect(result).toEqual({
+      updated: 0,
+      notFound: 0,
+      errors: 0,
+      droppedTargets: 0,
+      relationshipTypeApplied: {},
+    });
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 
