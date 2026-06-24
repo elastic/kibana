@@ -8,11 +8,7 @@
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
-  ModelProvider,
-  ToolEventEmitter,
-  ToolHandlerResult,
-} from '@kbn/agent-builder-server';
+import type { ModelProvider, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { TopSnippetsConfig } from '../steps/extract_snippets';

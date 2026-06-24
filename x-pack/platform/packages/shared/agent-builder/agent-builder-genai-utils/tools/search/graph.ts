@@ -142,11 +142,9 @@ export const createSearchToolGraph = ({
 
     const defaultModel = await modelProvider.getDefaultModel();
     const tools = getTools(state, defaultModel);
-    const searchModel = defaultModel.chatModel
-      .bindTools(tools, { tool_choice: 'any' })
-      .withConfig({
-        tags: ['agent-builder-search-tool'],
-      });
+    const searchModel = defaultModel.chatModel.bindTools(tools, { tool_choice: 'any' }).withConfig({
+      tags: ['agent-builder-search-tool'],
+    });
 
     const response = await searchModel.invoke(
       getSearchDispatcherPrompt({
