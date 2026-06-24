@@ -24,8 +24,11 @@ jest.mock('../../../../hooks/use_kibana', () => ({
 }));
 
 jest.mock('../../../../hooks/use_conversation', () => ({
-  useConversation: () => ({ conversation: { id: 'conv-1' } }),
   useAgentId: () => 'agent-1',
+}));
+
+jest.mock('../../../../context/conversation/use_conversation_id', () => ({
+  useConversationId: () => 'conv-1',
 }));
 
 const renderWithProviders = (ui: React.ReactElement) =>
