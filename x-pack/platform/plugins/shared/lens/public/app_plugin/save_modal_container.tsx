@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isFilterPinned } from '@kbn/es-query';
+import { isFilterPinned, type TimeRange } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
@@ -67,6 +67,7 @@ export type SaveModalContainerProps = {
     | 'userProfile'
     | 'stateTransfer'
     | 'lensDocumentService'
+    | 'data'
   >;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   // is this visualization managed by the system?
@@ -220,9 +221,11 @@ function fromDocumentToSerializedState(
 const getDocToSave = (
   lastKnownDoc: LensDocument,
   saveProps: SaveProps,
-  references: Reference[]
+  references: Reference[],
+  currentTimeRange: TimeRange | undefined,
+  saveToLibrary: boolean
 ): LensDocument => {
-  const docToSave = {
+  const docToSave: LensDocument = {
     ...removePinnedFilters(lastKnownDoc)!,
     references,
   };
@@ -233,6 +236,12 @@ const getDocToSave = (
 
   if (saveProps.newTitle !== undefined) {
     docToSave.title = saveProps.newTitle;
+  }
+
+  // Persist the current view time range when saving to the library so the SO
+  // can be opened (or referenced from Cases) with its intended window.
+  if (saveToLibrary && currentTimeRange) {
+    docToSave.time_range = currentTimeRange;
   }
 
   return docToSave;
@@ -261,6 +270,7 @@ export type SaveVisualizationProps = Simplify<
       | 'stateTransfer'
       | 'attributeService'
       | 'savedObjectsTagging'
+      | 'data'
     >
 >;
 
@@ -285,6 +295,7 @@ export const runSaveLensVisualization = async (
     switchDatasource,
     application,
     controlsState,
+    data,
   } = props;
 
   if (!lastKnownDoc) {
@@ -304,7 +315,14 @@ export const runSaveLensVisualization = async (
     );
   }
 
-  const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
+  const currentTimeRange = data.query.timefilter.timefilter.getTime();
+  const docToSave = getDocToSave(
+    lastKnownDoc,
+    saveProps,
+    references,
+    currentTimeRange,
+    options.saveToLibrary
+  );
 
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
   const originalSavedObjectId = originalInput?.ref_id;

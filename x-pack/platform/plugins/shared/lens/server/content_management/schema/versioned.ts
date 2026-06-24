@@ -10,6 +10,12 @@ import { savedObjectSchema } from '@kbn/content-management-utils';
 
 import { pickFromObjectSchema } from '../../utils';
 
+const lensTimeRangeSchema = schema.object({
+  from: schema.string(),
+  to: schema.string(),
+  mode: schema.maybe(schema.oneOf([schema.literal('absolute'), schema.literal('relative')])),
+});
+
 /**
  * Builds the Lens schema set for a given item version so callers can opt into
  * different version literals without duplicating schema definitions.
@@ -21,6 +27,7 @@ export function createVersionedLensSchemas<Version extends number>(version: Vers
       description: schema.maybe(schema.string()),
       visualizationType: schema.string(),
       state: schema.maybe(schema.any()),
+      time_range: schema.maybe(lensTimeRangeSchema),
       // TODO make version required
       version: schema.maybe(schema.literal(version)), // pin version explicitly
     },

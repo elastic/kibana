@@ -428,6 +428,7 @@ export interface LensDocument {
   };
   references: Reference[];
   version?: LENS_ITEM_LATEST_VERSION;
+  time_range?: TimeRange;
 }
 
 /**

@@ -252,11 +252,20 @@ async function loadFromSavedObject(
   autoApplyDisabled: boolean,
   inlineEditing?: boolean,
   projectRouting?: ProjectRouting,
-  hideTextBasedEditor?: boolean
+  hideTextBasedEditor?: boolean,
+  skipTimeRangeRestore?: boolean
 ) {
   const { doc, sharingSavedObjectProps, managed } = persisted;
   if (savedObjectId) {
     chrome.recentlyAccessed.add(getFullPath(savedObjectId), doc.title, savedObjectId);
+  }
+
+  // Apply the time range captured at save time so the editor opens with the
+  // window the visualization was authored against. Skipped when an explicit
+  // time range arrived from the URL/locator (handled by the caller) or when
+  // the editor is embedded (parent container owns the time range).
+  if (doc.time_range && !inlineEditing && !skipTimeRangeRestore) {
+    data.query.timefilter.timefilter.setTime(doc.time_range);
   }
 
   const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
@@ -456,6 +465,9 @@ export async function loadInitial(
     const persisted = await getFromPreloaded({ initialInput, lensServices, history });
     if (persisted) {
       try {
+        // An explicit time range coming in via the URL locator should win over
+        // the SO-saved one; the locator branch above already set the timefilter.
+        const skipTimeRangeRestore = Boolean(initialStateFromLocator?.resolvedDateRange);
         return loadFromSavedObject(
           store,
           initialInput.ref_id,
@@ -465,7 +477,8 @@ export async function loadInitial(
           autoApplyDisabled,
           inlineEditing,
           projectRouting,
-          hideTextBasedEditor
+          hideTextBasedEditor,
+          skipTimeRangeRestore
         );
       } catch ({ message }) {
         notifications.toasts.addDanger({

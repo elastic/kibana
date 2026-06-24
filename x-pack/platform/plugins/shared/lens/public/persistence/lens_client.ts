@@ -87,7 +87,7 @@ export class LensClient {
   }
 
   async create(
-    { description, visualizationType, state, title, version }: LooseLensAttributes,
+    { description, visualizationType, state, title, version, time_range }: LooseLensAttributes,
     references: Reference[]
   ): Promise<LensItemResponse> {
     if (visualizationType === null) {
@@ -111,6 +111,7 @@ export class LensClient {
             state,
             title,
             version,
+            time_range,
             references,
           };
 
@@ -150,7 +151,7 @@ export class LensClient {
 
   async update(
     id: string,
-    { description, visualizationType, state, title, version }: LooseLensAttributes,
+    { description, visualizationType, state, title, version, time_range }: LooseLensAttributes,
     references: Reference[],
     options: LensUpdateRequestQuery = {}
   ): Promise<LensItemResponse> {
@@ -175,6 +176,7 @@ export class LensClient {
             state,
             title,
             version,
+            time_range,
             references,
           };
 

@@ -70,6 +70,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
         'visualizationType',
         'version',
         'state',
+        'time_range',
       ],
       logger: params.logger,
       throwOnResultValidationError: params.throwOnResultValidationError,

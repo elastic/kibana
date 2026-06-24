@@ -30,6 +30,23 @@ const lensSOSchemaV1 = lensItemAttributesSchemaV0.extends(
   { unknowns: 'forbid' }
 );
 
+/**
+ * Adds the optional `time_range` attribute persisted alongside the
+ * visualization. Stored shape mirrors `TimeRange` from `@kbn/es-query`.
+ */
+const lensSOSchemaV2 = lensSOSchemaV1.extends(
+  {
+    time_range: schema.maybe(
+      schema.object({
+        from: schema.string(),
+        to: schema.string(),
+        mode: schema.maybe(schema.oneOf([schema.literal('absolute'), schema.literal('relative')])),
+      })
+    ),
+  },
+  { unknowns: 'forbid' }
+);
+
 export function setupSavedObjects(
   core: CoreSetup,
   getFilterMigrations: () => MigrateFunctionsObject,
@@ -69,6 +86,15 @@ export function setupSavedObjects(
         schemas: {
           forwardCompatibility: lensSOSchemaV1.extendsDeep({ unknowns: 'ignore' }),
           create: lensSOSchemaV1,
+        },
+      },
+      [2]: {
+        // No mapping change needed: the SO mapping is `dynamic: false`, so the
+        // optional `time_range` attribute is stored in `_source` only.
+        changes: [],
+        schemas: {
+          forwardCompatibility: lensSOSchemaV2.extendsDeep({ unknowns: 'ignore' }),
+          create: lensSOSchemaV2,
         },
       },
     },
