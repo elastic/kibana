@@ -6,40 +6,59 @@
  */
 
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
-import { useOverviewTabData } from '../hooks/use_overview_tab_data';
-import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';
-import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
+import { AttackDiscoveryMarkdownFormatter } from '../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
+import { ExpandableSection } from '../../../shared/components/expandable_section';
+import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { AISummarySectionSettings } from './ai_summary_section_settings';
 
 const KEY = 'aisummary';
+const STORAGE_KEY = 'securitySolution.attackDetailsFlyout.overviewSectionExpanded.v9.4';
+
+const FIELD_SUMMARY_MARKDOWN = 'kibana.alert.attack_discovery.summary_markdown' as const;
+const FIELD_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
+  'kibana.alert.attack_discovery.summary_markdown_with_replacements' as const;
+const FIELD_DETAILS_MARKDOWN = 'kibana.alert.attack_discovery.details_markdown' as const;
+const FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS =
+  'kibana.alert.attack_discovery.details_markdown_with_replacements' as const;
+
+export interface AISummarySectionProps {
+  hit: DataTableRecord;
+}
 
 /**
- * Renders the AI Summary section in the Overview tab of the Attack Details flyout.
- *
- * Displays an AI-generated summary and background information, with a toggle
- * to switch between anonymized and resolved values. The section is expandable
- * and persists its expanded state.
+ * Prop-driven AI Summary section for the attack flyout overview.
+ * Reads the four markdown fields from hit via getFieldValue.
+ * Manages local state for the anonymized toggle and settings popover.
  */
-export const AISummarySection = memo(() => {
+export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
   const expanded = useExpandSection({
-    storageKey: FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS,
+    storageKey: STORAGE_KEY,
     title: KEY,
     defaultValue: true,
   });
-  const {
-    summaryMarkdown,
-    summaryMarkdownWithReplacements,
-    detailsMarkdown,
-    detailsMarkdownWithReplacements,
-    originalAlertIds,
-  } = useOverviewTabData();
+
+  const summaryMarkdown = useMemo(
+    () => (getFieldValue(hit, FIELD_SUMMARY_MARKDOWN) as string | null) ?? '',
+    [hit]
+  );
+  const summaryMarkdownWithReplacements = useMemo(
+    () => (getFieldValue(hit, FIELD_SUMMARY_MARKDOWN_WITH_REPLACEMENTS) as string | null) ?? '',
+    [hit]
+  );
+  const detailsMarkdown = useMemo(
+    () => (getFieldValue(hit, FIELD_DETAILS_MARKDOWN) as string | null) ?? '',
+    [hit]
+  );
+  const detailsMarkdownWithReplacements = useMemo(
+    () => (getFieldValue(hit, FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS) as string | null) ?? '',
+    [hit]
+  );
 
   const hasAnonymizedContent = useMemo(
     () => summaryMarkdown.trim() !== '' || detailsMarkdown.trim() !== '',
@@ -63,22 +82,12 @@ export const AISummarySection = memo(() => {
     <ExpandableSection
       expanded={expanded}
       title={
-        <>
-          <FormattedMessage
-            id="xpack.securitySolution.attackDetailsFlyout.overview.AISummary.sectionTitle"
-            defaultMessage="Attack Summary"
-          />
-          <EuiIcon
-            css={css`
-              margin-left: 4px;
-            `}
-            type="sparkles"
-            color="primary"
-            aria-hidden={true}
-          />
-        </>
+        <FormattedMessage
+          id="xpack.securitySolution.flyoutV2.attack.overview.AISummary.sectionTitle"
+          defaultMessage="Attack Summary"
+        />
       }
-      localStorageKey={FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS}
+      localStorageKey={STORAGE_KEY}
       sectionId={KEY}
       gutterSize="s"
       data-test-subj={KEY}
@@ -99,7 +108,6 @@ export const AISummarySection = memo(() => {
             scopeId={TableId.alertsOnAttacksPage}
             disableActions={showAnonymized}
             markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
-            alertIds={originalAlertIds}
           />
         </div>
 
@@ -108,7 +116,7 @@ export const AISummarySection = memo(() => {
         <EuiTitle data-test-subj="overview-tab-background-title" size="xs">
           <h2>
             <FormattedMessage
-              id="xpack.securitySolution.attackDetailsFlyout.overview.AISummary.backgroundTitle"
+              id="xpack.securitySolution.flyoutV2.attack.overview.AISummary.backgroundTitle"
               defaultMessage="Background"
             />
           </h2>
@@ -121,7 +129,6 @@ export const AISummarySection = memo(() => {
             disableActions={showAnonymized}
             scopeId={TableId.alertsOnAttacksPage}
             markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
-            alertIds={originalAlertIds}
           />
         </div>
       </EuiPanel>
