@@ -1,0 +1,89 @@
+{
+  "index_patterns": [
+    "github-intel-epic-tickets"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "epic": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "project_item_id": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "keyword"
+            }
+          }
+        },
+        "issue": {
+          "properties": {
+            "ref": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "repo": {
+              "type": "keyword"
+            },
+            "node_id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "delivery": {
+          "properties": {
+            "pr_count": {
+              "type": "integer"
+            },
+            "has_pr": {
+              "type": "boolean"
+            },
+            "pr_refs": {
+              "type": "keyword"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

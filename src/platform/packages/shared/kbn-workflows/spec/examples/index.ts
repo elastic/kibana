@@ -275,6 +275,15 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['scheduled', 'github', 'ingest', 'sdlc', 'epic', 'phases', 'foreach'],
     filename: 'sdlc_github_project_epic_phases.yml',
   },
+  {
+    id: 'sdlc_github_enrich_epic_phases',
+    name: 'SDLC GitHub enrich epic phases',
+    description:
+      'Enriches sdlc-epic-phases with child tickets, rollup coverage, and phase gate summaries',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'epic', 'enrich', 'phases', 'foreach'],
+    filename: 'sdlc_github_enrich_epic_phases.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

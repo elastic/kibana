@@ -1,0 +1,52 @@
+{
+  "attributes": {
+    "description": "Total child tickets linked to epics",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "layer1": {
+              "columnOrder": ["metric-col"],
+              "columns": {
+                "metric-col": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Child tickets",
+                  "operationType": "sum",
+                  "scale": "ratio",
+                  "sourceField": "phases.p4_tickets.total"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "layerId": "layer1",
+        "layerType": "data",
+        "metricAccessor": "metric-col"
+      }
+    },
+    "title": "SDLC epic child tickets",
+    "visualizationType": "lnsMetric"
+  },
+  "id": "sdlc-intel-lens-epic-ticket-total",
+  "references": [
+    {
+      "id": "sdlc-epic-phases",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "sdlc-epic-phases",
+      "name": "indexpattern-datasource-layer-layer1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}

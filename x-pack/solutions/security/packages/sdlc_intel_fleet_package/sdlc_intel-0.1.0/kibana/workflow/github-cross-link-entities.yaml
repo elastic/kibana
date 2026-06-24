@@ -16,6 +16,7 @@ consts:
   orgLogin: elastic
   syncStateIndex: github-intel-sync-state
   projectItemsIndex: github-intel-project-items
+  issuesIndex: github-intel-issues
   pullRequestsIndex: github-intel-pull-requests
   relationshipsIndex: github-intel-relationships
   syncSource: github-cross-link-entities
@@ -124,6 +125,20 @@ steps:
                   repo: '${{ variables.prRepoFullName }}'
                 payload: '${{ foreach.item | json }}'
 
+          - name: count_prs_for_issue
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              size: 0
+              track_total_hits: true
+              query:
+                bool:
+                  must:
+                    - term:
+                        relation: closes
+                    - term:
+                        to: '${{ foreach.item.url }}'
+
           - name: find_project_item_for_issue
             type: elasticsearch.search
             with:
@@ -158,10 +173,11 @@ steps:
                     content_ref: '${{ foreach.item._source.content_ref | json }}'
                     payload: '${{ foreach.item._source.payload | json }}'
                     delivery:
-                      linked_prs:
-                        - '${{ variables.prUrl }}'
+                      linked_prs_count: '${{ steps.count_prs_for_issue.output.hits.total.value }}'
+                      coverage_status: '${{ steps.count_prs_for_issue.output.hits.total.value > 0 ? "in_progress" : "not_started" }}'
+                      coverage_pct: '${{ steps.count_prs_for_issue.output.hits.total.value > 0 ? 50 : 0 }}'
                       pr_summary:
-                        total: 1
+                        total: '${{ steps.count_prs_for_issue.output.hits.total.value }}'
                         merged: '${{ variables.prState == "MERGED" ? 1 : 0 }}'
                         open: '${{ variables.prState == "OPEN" ? 1 : 0 }}'
                         closed_unmerged: '${{ variables.prState == "CLOSED" ? 1 : 0 }}'
@@ -213,6 +229,60 @@ steps:
         type: data.set
         with:
           itemsLinked: '${{ variables.itemsLinked + 1 }}'
+
+  - name: load_issues_with_parents
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.issuesIndex }}'
+      size: '{{ consts.itemBatchSize }}'
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+          filter:
+            - exists:
+                field: hierarchy.parent_issue_ref
+
+  - name: link_issues_to_epics
+    type: foreach
+    foreach: '${{ steps.load_issues_with_parents.output.hits.hits | json }}'
+    steps:
+      - name: upsert_child_of_edge
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.relationshipsIndex }}'
+          id: '${{ foreach.item._source.entity.id }}-child-of-parent'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            from: '${{ foreach.item._source.entity.url }}'
+            to: '${{ foreach.item._source.hierarchy.parent_issue_ref }}'
+            relation: child_of
+            metadata:
+              org: '{{ consts.orgLogin }}'
+              issue_number: '${{ foreach.item._source.entity.number }}'
+            payload: '${{ foreach.item._source.hierarchy | json }}'
+
+      - name: upsert_epic_contains_edge
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.relationshipsIndex }}'
+          id: 'epic-contains-${{ foreach.item._source.entity.id }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            from: '${{ foreach.item._source.hierarchy.parent_issue_ref }}'
+            to: '${{ foreach.item._source.entity.url }}'
+            relation: epic_contains
+            metadata:
+              org: '{{ consts.orgLogin }}'
+              issue_number: '${{ foreach.item._source.entity.number }}'
+            payload: '${{ foreach.item._source.entity | json }}'
 
   - name: finalize_watermark
     type: if

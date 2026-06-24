@@ -101,6 +101,7 @@ steps:
           roadmapStage: ''
           releaseMilestone: ''
           coverageStatus: ''
+          issueOwner: '${{ foreach.item._source.payload.content.author.login ?? foreach.item._source.people.author ?? "" }}'
 
       - name: parse_field_values
         type: foreach
@@ -185,14 +186,18 @@ steps:
               initiative: '${{ variables.productInitiative }}'
               roadmap_stage: '${{ variables.roadmapStage }}'
               release_milestone: '${{ variables.releaseMilestone }}'
+              owner: '${{ variables.issueOwner }}'
               epic_issue_number: '${{ foreach.item._source.entity.number }}'
               roadmap_id: '${{ foreach.item._source.project.id }}'
             team_attribution:
               engineering_team: '${{ variables.projectTeam }}'
               org_teams: '${{ variables.projectTeam }}'
               attribution_source: project_field
+            people:
+              author: '${{ variables.issueOwner }}'
             delivery:
               coverage_status: '${{ variables.coverageStatus }}'
+              coverage_pct: '${{ variables.coverageStatus == "Done" ? 100 : (variables.coverageStatus == "In Progress" ? 50 : 0) }}'
 
       - name: track_batch_progress
         type: data.set

@@ -1,0 +1,26 @@
+{
+  "attributes": {
+    "description": "Epic SDLC phase gates: child ticket coverage, PR linkage, and gate pass rates from sdlc-epic-phases.",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":12,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":12,\"x\":12,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"3\",\"w\":12,\"x\":24,\"y\":0},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"4\",\"w\":12,\"x\":36,\"y\":0},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":8},\"panelIndex\":\"5\",\"panelRefName\":\"panel_4\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"epic.title\",\"epic.teams\",\"phases.p4_tickets.total\",\"phases.p4_tickets.with_prs\",\"rollup.coverage_pct\",\"rollup.status\"],\"sort\":[[\"rollup.coverage_pct\",\"desc\"]]},\"gridData\":{\"h\":18,\"i\":\"6\",\"w\":24,\"x\":0,\"y\":24},\"panelIndex\":\"6\",\"panelRefName\":\"panel_5\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"epic_title\",\"repo\",\"issue_number\",\"issue_title\",\"issue_status\",\"pr_count\"],\"sort\":[[\"epic_title\",\"asc\"]]},\"gridData\":{\"h\":18,\"i\":\"7\",\"w\":24,\"x\":24,\"y\":24},\"panelIndex\":\"7\",\"panelRefName\":\"panel_6\",\"version\":\"8.0.0\"}]",
+    "timeRestore": false,
+    "title": "SDLC Epic phase gates",
+    "version": 1
+  },
+  "id": "sdlc-intel-epic-gates",
+  "references": [
+    { "id": "sdlc-intel-lens-gates-passed-pct", "name": "panel_0", "type": "lens" },
+    { "id": "sdlc-intel-lens-epic-ticket-total", "name": "panel_1", "type": "lens" },
+    { "id": "sdlc-intel-lens-tickets-with-prs", "name": "panel_2", "type": "lens" },
+    { "id": "sdlc-intel-lens-avg-coverage", "name": "panel_3", "type": "lens" },
+    { "id": "sdlc-intel-lens-epic-delivery-coverage", "name": "panel_4", "type": "lens" },
+    { "id": "sdlc-intel-phase-gates-search", "name": "panel_5", "type": "search" },
+    { "id": "sdlc-intel-epic-tickets-search", "name": "panel_6", "type": "search" },
+    { "id": "sdlc-intel-tag", "name": "tag-ref-sdlc-intel-tag", "type": "tag" }
+  ],
+  "type": "dashboard"
+}

@@ -1,0 +1,307 @@
+version: '1'
+name: SDLC GitHub enrich epic phases
+description: >
+  Tier-3 enrichment workflow. Resolves sub-issues for each epic via github-intel-relationships
+  (parent_of edges), indexes child tickets into github-intel-epic-tickets, and updates
+  sdlc-epic-phases with rollup coverage, phase gate summaries, and tickets_by_repo. Run
+  github-project-epic-phases and github-enrich-issues-graph first.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - epic
+  - enrich
+  - phases
+
+consts:
+  orgLogin: elastic
+  syncStateIndex: github-intel-sync-state
+  epicPhasesIndex: sdlc-epic-phases
+  epicTicketsIndex: github-intel-epic-tickets
+  issuesIndex: github-intel-issues
+  relationshipsIndex: github-intel-relationships
+  pullRequestsIndex: github-intel-pull-requests
+  syncSource: github-enrich-epic-phases
+  entityType: epic_phases_enrich
+  batchSize: 25
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-enrich-epic-phases
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 6h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      epicsProcessed: 0
+      lastUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_epics_batch
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.epicPhasesIndex }}'
+      size: '{{ consts.batchSize }}'
+      sort:
+        - '@timestamp':
+            order: asc
+        - epic.project_item_id:
+            order: asc
+      query:
+        bool:
+          must:
+            - range:
+                '@timestamp':
+                  gt: '{{ variables.watermark }}'
+
+  - name: enrich_epics
+    type: foreach
+    foreach: '${{ steps.load_epics_batch.output.hits.hits | json }}'
+    steps:
+      - name: init_epic_context
+        type: data.set
+        with:
+          epicDocId: '${{ foreach.item._id }}'
+          epicProjectItemId: '${{ foreach.item._source.epic.project_item_id }}'
+          epicUrl: '${{ foreach.item._source.epic.url }}'
+          epicTitle: '${{ foreach.item._source.epic.title }}'
+          ticketTotal: 0
+          ticketsWithPrs: 0
+          prTotal: 0
+          mergedPrTotal: 0
+
+      - name: load_sub_issue_edges
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.relationshipsIndex }}'
+          size: 200
+          query:
+            bool:
+              must:
+                - term:
+                    relation: parent_of
+                - term:
+                    from: '${{ variables.epicUrl }}'
+
+      - name: index_child_tickets
+        type: foreach
+        foreach: '${{ steps.load_sub_issue_edges.output.hits.hits | json }}'
+        steps:
+          - name: load_child_issue
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.issuesIndex }}'
+              size: 1
+              query:
+                bool:
+                  must:
+                    - term:
+                        org.login: '{{ consts.orgLogin }}'
+                    - term:
+                        entity.url: '${{ foreach.item._source.to }}'
+
+          - name: skip_when_issue_missing
+            type: if
+            condition: "${{ steps.load_child_issue.output.hits.hits.size > 0 }}"
+            steps:
+              - name: set_child_context
+                type: data.set
+                with:
+                  childIssueUrl: '${{ foreach.item._source.to }}'
+                  childIssueId: '${{ steps.load_child_issue.output.hits.hits[0]._source.entity.id }}'
+                  childIssueNumber: '${{ steps.load_child_issue.output.hits.hits[0]._source.entity.number }}'
+                  childIssueTitle: '${{ steps.load_child_issue.output.hits.hits[0]._source.content.title }}'
+                  childIssueStatus: '${{ steps.load_child_issue.output.hits.hits[0]._source.github.state }}'
+                  childIssueRepo: '${{ steps.load_child_issue.output.hits.hits[0]._source.repository.full_name }}'
+
+              - name: count_prs_for_child
+                type: elasticsearch.search
+                with:
+                  index: '{{ consts.relationshipsIndex }}'
+                  size: 0
+                  track_total_hits: true
+                  query:
+                    bool:
+                      must:
+                        - term:
+                            relation: closes
+                        - term:
+                            to: '${{ variables.childIssueUrl }}'
+
+              - name: set_pr_counts
+                type: data.set
+                with:
+                  childPrCount: '${{ steps.count_prs_for_child.output.hits.total.value }}'
+                  childHasPr: '${{ steps.count_prs_for_child.output.hits.total.value > 0 }}'
+
+              - name: upsert_epic_ticket
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.epicTicketsIndex }}'
+                  id: '${{ variables.epicProjectItemId }}-${{ variables.childIssueId }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    epic:
+                      id: '${{ variables.epicProjectItemId }}'
+                      url: '${{ variables.epicUrl }}'
+                      project_item_id: '${{ variables.epicProjectItemId }}'
+                      title: '${{ variables.epicTitle }}'
+                    issue:
+                      ref: '${{ variables.childIssueUrl }}'
+                      number: '${{ variables.childIssueNumber }}'
+                      title: '${{ variables.childIssueTitle }}'
+                      status: '${{ variables.childIssueStatus }}'
+                      repo: '${{ variables.childIssueRepo }}'
+                      node_id: '${{ variables.childIssueId }}'
+                    delivery:
+                      pr_count: '${{ variables.childPrCount }}'
+                      has_pr: '${{ variables.childHasPr }}'
+
+              - name: accumulate_ticket_stats
+                type: data.set
+                with:
+                  ticketTotal: '${{ variables.ticketTotal + 1 }}'
+                  ticketsWithPrs: '${{ variables.ticketsWithPrs + (variables.childHasPr ? 1 : 0) }}'
+                  prTotal: '${{ variables.prTotal + variables.childPrCount }}'
+
+      - name: compute_coverage
+        type: data.set
+        with:
+          coveragePct: '${{ variables.ticketTotal > 0 ? (variables.ticketsWithPrs * 100 / variables.ticketTotal) : 0 }}'
+          deliveryCoveragePct: '${{ variables.coveragePct }}'
+          gatesApplicable: 2
+          gatesPassed: '${{ (variables.ticketTotal > 0 ? 1 : 0) + (variables.ticketsWithPrs > 0 ? 1 : 0) }}'
+          gatesPassedPct: '${{ variables.gatesPassed * 50 }}'
+          rollupStatus: '${{ variables.coveragePct >= 80 ? "healthy" : (variables.coveragePct >= 40 ? "at_risk" : "blocked") }}'
+
+      - name: upsert_enriched_epic
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.epicPhasesIndex }}'
+          id: '${{ variables.epicDocId }}'
+          document:
+            '@timestamp': '${{ foreach.item._source["@timestamp"] }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            roadmap: '${{ foreach.item._source.roadmap | json }}'
+            epic: '${{ foreach.item._source.epic | json }}'
+            teams: '${{ foreach.item._source.teams | json }}'
+            release: '${{ foreach.item._source.release | json }}'
+            links: '${{ foreach.item._source.links | json }}'
+            payload: '${{ foreach.item._source.payload | json }}'
+            phases:
+              p1_prd:
+                status: pending
+                applicable: true
+              p2_arch:
+                status: pending
+                applicable: true
+              p3_ai_coverage:
+                status: pending
+                applicable: false
+              p4_tickets:
+                status: '${{ variables.ticketTotal > 0 ? "passed" : "pending" }}'
+                applicable: true
+                total: '${{ variables.ticketTotal }}'
+                with_prs: '${{ variables.ticketsWithPrs }}'
+              p5_prs:
+                status: '${{ variables.ticketsWithPrs > 0 ? "passed" : "pending" }}'
+                applicable: true
+                total: '${{ variables.prTotal }}'
+                merged: '${{ variables.mergedPrTotal }}'
+              p6_defects:
+                status: pending
+                applicable: false
+              p7_production:
+                status: pending
+                applicable: false
+              p8_telemetry:
+                status: pending
+                applicable: false
+            rollup:
+              status: '${{ variables.rollupStatus }}'
+              coverage_pct: '${{ variables.coveragePct }}'
+              delivery_coverage_pct: '${{ variables.deliveryCoveragePct }}'
+              gates_applicable: '${{ variables.gatesApplicable }}'
+              gates_passed: '${{ variables.gatesPassed }}'
+              gates_passed_pct: '${{ variables.gatesPassedPct }}'
+
+      - name: track_epic_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '${{ foreach.item._source["@timestamp"] }}'
+          epicsProcessed: '${{ variables.epicsProcessed + 1 }}'
+
+  - name: finalize_watermark
+    type: if
+    condition: 'variables.epicsProcessed : {{ consts.batchSize }}'
+    steps:
+      - name: use_last_updated_watermark
+        type: data.set
+        with:
+          watermark: '${{ variables.lastUpdatedAt }}'
+    else:
+      - name: finalize_if_any_processed
+        type: if
+        condition: "${{ variables.epicsProcessed > 0 }}"
+        steps:
+          - name: use_run_started_watermark
+            type: data.set
+            with:
+              watermark: '${{ variables.runStartedAt }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '${{ variables.watermark }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          epics_processed: '${{ variables.epicsProcessed }}'
+          batch_size: '${{ steps.load_epics_batch.output.hits.hits.size }}'

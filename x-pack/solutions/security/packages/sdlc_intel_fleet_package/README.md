@@ -58,8 +58,9 @@ Workflows use connector ingest actions (`github.runQueryTemplate`, `slack2.listU
 | **build team dimension** | daily | team catalog projection | `sdlc-team-dimension` |
 | **cross-link entities** | every 2h | PR/issue/project edges | `github-intel-relationships`, `github-intel-project-items` |
 | **project epic phases** | every 6h | Epic projection | `sdlc-epic-phases` |
+| **enrich epic phases** | every 6h | Child tickets + rollup | `sdlc-epic-phases`, `github-intel-epic-tickets` |
 
-**Recommended order:** catalog (repos → teams → org members → team members → projects → project items) → **normalize project items** → **build team dimension** → activity (issues → PRs) → enrichment (issues graph → PRs graph) → **cross-link entities** → **project epic phases**.
+**Recommended order:** catalog (repos → teams → org members → team members → projects → project items) → **normalize project items** → **build team dimension** → **project epic phases** → activity (issues → PRs) → enrichment (issues graph → PRs graph) → **cross-link entities** → **enrich epic phases**.
 
 ### Slack workflows
 
@@ -78,8 +79,9 @@ Slack OAuth scopes must include `channels:history`, `groups:history`, `users:rea
 | **SDLC Project item pipeline** | `sdlc-project-items-enriched-view` | Ticket types, teams, roadmap stages from ES\|QL |
 | **SDLC Team dimension** | `sdlc-team-dimension` + `sdlc-epic-phases` | Org teams and epic ownership |
 | **SDLC GitHub sync overview** | `sdlc-github-raw-summary-view` | Raw ingest page/item counts per project |
+| **SDLC Epic phase gates** | `sdlc-epic-phases` + `sdlc-epic-tickets-by-repo-view` | Child ticket coverage, PR linkage, gate pass rates |
 
-Run **catalog project items** → **normalize project items** → **project epic phases** before the executive roadmap dashboard populates. The enriched pipeline dashboard works once project items exist (ES\|QL groks payload fields even before normalization, but normalization improves `hierarchy.*` fields).
+Run **catalog project items** → **normalize** → **project epic phases** → activity/enrich → **cross-link** → **enrich epic phases** before gate dashboards populate.
 
 ## Fleet workflow auto-install
 

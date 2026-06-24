@@ -2,7 +2,8 @@ version: '1'
 name: SDLC GitHub project epic phases
 description: >
   Tier-2 projection workflow. Builds sdlc-epic-phases documents from normalized Epic project
-  items in github-intel-project-items. Run github-normalize-project-items first.
+  items in github-intel-project-items. Run github-normalize-project-items first, then
+  github-enrich-epic-phases for child tickets and rollup coverage.
 enabled: false
 tags:
   - sdlc
@@ -18,7 +19,8 @@ consts:
   epicPhasesIndex: sdlc-epic-phases
   syncSource: github-project-epic-phases
   entityType: epic_phases
-  batchSize: 100
+  batchSize: 50
+  initialWatermark: '2024-01-01T00:00:00Z'
 
 settings:
   timeout: 30m
@@ -34,18 +36,58 @@ triggers:
   - type: manual
 
 steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      epicsProjected: 0
+      lastUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
   - name: load_epic_items
     type: elasticsearch.search
     with:
       index: '{{ consts.projectItemsIndex }}'
       size: '{{ consts.batchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+        - entity.id:
+            order: asc
       query:
         bool:
           must:
             - term:
                 org.login: '{{ consts.orgLogin }}'
-            - term:
-                hierarchy.ticket_type: Epic
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+          filter:
+            - terms:
+                hierarchy.ticket_type:
+                  - Epic
+                  - epic
 
   - name: project_epic_phases
     type: foreach
@@ -94,6 +136,30 @@ steps:
               coverage_pct: '${{ foreach.item._source.delivery.coverage_pct }}'
             payload: '${{ foreach.item._source.payload | json }}'
 
+      - name: track_projection_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '${{ foreach.item._source.github.updated_at }}'
+          epicsProjected: '${{ variables.epicsProjected + 1 }}'
+
+  - name: finalize_watermark
+    type: if
+    condition: 'variables.epicsProjected : {{ consts.batchSize }}'
+    steps:
+      - name: use_last_updated_watermark
+        type: data.set
+        with:
+          watermark: '${{ variables.lastUpdatedAt }}'
+    else:
+      - name: finalize_if_any_processed
+        type: if
+        condition: "${{ variables.epicsProjected > 0 }}"
+        steps:
+          - name: use_run_started_watermark
+            type: data.set
+            with:
+              watermark: '${{ variables.runStartedAt }}'
+
   - name: write_checkpoint
     type: elasticsearch.index
     with:
@@ -107,7 +173,9 @@ steps:
         entity_type: '{{ consts.entityType }}'
         org:
           login: '{{ consts.orgLogin }}'
+        watermark: '${{ variables.watermark }}'
         last_run_at: '{{ execution.startedAt }}'
         last_run_status: success
         stats:
-          epics_projected: '${{ steps.load_epic_items.output.hits.hits.size }}'
+          epics_projected: '${{ variables.epicsProjected }}'
+          batch_size: '${{ steps.load_epic_items.output.hits.hits.size }}'

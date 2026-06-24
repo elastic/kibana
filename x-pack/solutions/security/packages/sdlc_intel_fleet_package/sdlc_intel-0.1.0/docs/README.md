@@ -18,6 +18,7 @@ Fleet integration package that installs Kibana dashboards, Elasticsearch index t
 | SDLC Project item pipeline | `sdlc-intel-phase-pipeline` | `sdlc-project-items-enriched-view` |
 | SDLC Team dimension | `sdlc-intel-team-dimension` | `sdlc-team-dimension`, `sdlc-epic-phases` |
 | SDLC GitHub sync overview | `sdlc-intel-raw-sync` | `sdlc-github-raw-summary-view` |
+| SDLC Epic phase gates | `sdlc-intel-epic-gates` | `sdlc-epic-phases`, `sdlc-epic-tickets-by-repo-view` |
 
 Direct links (default space): `/app/dashboards#/view/sdlc-intel-executive-roadmap` (and analogous paths for the other IDs).
 
