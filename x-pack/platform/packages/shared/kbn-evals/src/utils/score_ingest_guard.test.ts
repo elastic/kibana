@@ -29,7 +29,9 @@ describe('score_ingest_guard', () => {
     expect(isGoldenScoreIngestConfigured(undefined)).toBe(false);
     expect(isGoldenScoreIngestConfigured('   ')).toBe(false);
     expect(
-      isGoldenScoreIngestConfigured('https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud')
+      isGoldenScoreIngestConfigured(
+        'https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud'
+      )
     ).toBe(true);
   });
 
@@ -52,9 +54,9 @@ describe('score_ingest_guard', () => {
   it('throws when CI ingest reports zero landed documents', () => {
     process.env.KBN_EVALS = '1';
 
-    expect(() =>
-      assertScoreIngestLanded([{ ingested: 0, conflicted: 0, failed: [] }])
-    ).toThrow(/no landed documents/);
+    expect(() => assertScoreIngestLanded([{ ingested: 0, conflicted: 0, failed: [] }])).toThrow(
+      /no landed documents/
+    );
   });
 
   it('does not throw when at least one score landed', () => {
