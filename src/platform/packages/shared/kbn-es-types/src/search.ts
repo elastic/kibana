@@ -654,20 +654,11 @@ export type InferSearchResponseOf<
       };
   };
 
-export interface ESQLBucketMetadata {
-  interval: number;
-  unit?: 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
-}
-
-export type ESQLColumnMetadata = {
-  bucket?: ESQLBucketMetadata;
-} & estypes.Metadata;
-
 export interface ESQLColumn {
   name: string;
   type: string;
   original_types?: string[];
-  _meta?: ESQLColumnMetadata;
+  _meta?: estypes.Metadata;
 }
 
 export type ESQLRow = unknown[];

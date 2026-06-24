@@ -153,6 +153,7 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
           type: kibanaFieldType,
           esType: type,
           sourceParams: getSourceParams(column),
+          params: { id: kibanaFieldType },
         },
         isNull: hasEmptyColumns ? !lookup.has(name) : false,
         isComputedColumn: isComputedColumn(name, querySummary),

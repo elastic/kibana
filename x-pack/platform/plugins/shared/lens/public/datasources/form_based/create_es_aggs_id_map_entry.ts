@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type {
+  DateHistogramIndexPatternColumn,
   DateRange,
   FormBasedLayer,
   IndexPattern,
@@ -14,6 +15,7 @@ import type {
   GenericIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { OriginalColumn } from '../../../common/types';
+import { isColumnOfType } from './operations/definitions/helpers';
 import { operationDefinitionMap } from './operations';
 
 export interface CreateEsAggsIdMapEntryParams {
@@ -57,14 +59,20 @@ export function createEsAggsIdMapEntry({
       );
 
   // Build the entry with proper typing for the discriminated union
-  if (col.operationType === 'date_histogram' && 'sourceField' in col && interval !== undefined) {
+  if (
+    isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col) &&
+    interval !== undefined
+  ) {
     return [
       {
         id: colId,
         label,
         operationType: 'date_histogram',
-        sourceField: col.sourceField!,
+        sourceField: col.sourceField,
         interval,
+        ...(col.params?.dropPartials !== undefined
+          ? { dropPartials: col.params.dropPartials }
+          : {}),
         ...(format !== undefined ? { format } : {}),
         ...(col.dataType ? { dataType: col.dataType } : {}),
         ...(col.customLabel ? { customLabel: col.customLabel } : {}),

@@ -95,6 +95,9 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
                   },
                 }
               : {}),
+            ...('dropPartials' in originalColumn
+              ? { dropPartials: originalColumn.dropPartials }
+              : {}),
           },
         },
       }));

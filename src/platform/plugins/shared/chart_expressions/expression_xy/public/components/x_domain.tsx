@@ -80,7 +80,7 @@ const getXValues = (layers: CommonXYDataLayerConfig[]) => {
         return table.rows.map((row) => accessor && row[accessor] && row[accessor].valueOf());
       })
       .filter((v) => !isUndefined(v))
-      .sort()
+      .sort((a, b) => a - b)
   );
 };
 
@@ -159,11 +159,16 @@ export const getXDomain = (
     !!dropPartials
   );
 
-  const domainMin = Math.min(xValues[0], buckets?.min ?? baseDomain.min);
-  const domainMaxValue = Math.max(
-    xValues[xValues.length - 1],
-    buckets?.max ?? baseDomain.max - baseDomain.minInterval
-  );
+  // When dropping partials we clamp strictly to the fully-contained bucket grid.
+  const domainMin = dropPartials
+    ? buckets?.min ?? baseDomain.min
+    : Math.min(xValues[0], buckets?.min ?? baseDomain.min);
+  const domainMaxValue = dropPartials
+    ? buckets?.max ?? baseDomain.max - baseDomain.minInterval
+    : Math.max(
+        xValues[xValues.length - 1],
+        buckets?.max ?? baseDomain.max - baseDomain.minInterval
+      );
   const domainMax = hasBars ? domainMaxValue : domainMaxValue + baseDomain.minInterval;
 
   const duration = moment.duration(baseDomain.minInterval);

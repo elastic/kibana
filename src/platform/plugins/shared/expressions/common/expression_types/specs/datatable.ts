@@ -112,6 +112,11 @@ interface SourceParamsESQL extends Record<string, unknown> {
   operationType: string;
   interval?: number;
   bucket?: ESQLBucketMetadata;
+  dropPartials?: boolean;
+  appliedTimeRange?: {
+    from?: string;
+    to?: string;
+  };
 }
 
 export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceParamsESQL {

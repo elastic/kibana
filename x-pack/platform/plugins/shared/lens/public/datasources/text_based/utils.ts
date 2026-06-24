@@ -6,6 +6,7 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
 import type {
   ValueFormatConfig,
   IndexPatternRef,
@@ -70,6 +71,15 @@ export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
   column?.meta?.type === 'number';
 
 export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
+
+export function isDateHistogram(meta?: DatatableColumn['meta']): boolean {
+  const sourceParams = meta?.sourceParams;
+  if (!sourceParams || !isSourceParamsESQL(sourceParams)) {
+    return false;
+  }
+
+  return Boolean(sourceParams.bucket?.unit && sourceParams.appliedTimeRange);
+}
 
 export function canColumnBeDroppedInMetricDimension(
   columns: TextBasedLayerColumn[] | DatatableColumn[],
@@ -153,7 +163,31 @@ export function updateColumnFormat({
       ...layer.columns.slice(0, currentColumnIndex),
       {
         ...currentColumn,
-        params: { format: value },
+        params: { ...currentColumn.params, format: value },
+      },
+      ...layer.columns.slice(currentColumnIndex + 1),
+    ],
+  };
+}
+
+export function updateColumnDropPartials({
+  layer,
+  columnId,
+  value,
+}: {
+  layer: TextBasedLayer;
+  columnId: string;
+  value: boolean;
+}): TextBasedLayer {
+  const currentColumnIndex = layer.columns.findIndex((c) => c.columnId === columnId);
+  const currentColumn = layer.columns[currentColumnIndex];
+  return {
+    ...layer,
+    columns: [
+      ...layer.columns.slice(0, currentColumnIndex),
+      {
+        ...currentColumn,
+        params: { ...currentColumn.params, dropPartials: value },
       },
       ...layer.columns.slice(currentColumnIndex + 1),
     ],

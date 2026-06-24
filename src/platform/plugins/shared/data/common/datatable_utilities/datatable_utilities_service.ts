@@ -107,6 +107,7 @@ export class DatatableUtilitiesService {
           interval: `${bucket.interval}${ESQL_UNIT_TO_DATEMATH[bucket.unit]}`,
           timeZone: defaults.timeZone,
           timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
+          dropPartials: column.meta.sourceParams.dropPartials,
         };
       }
     } else if (column.meta.sourceParams.params) {
