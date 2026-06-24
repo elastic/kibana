@@ -58,7 +58,12 @@ function getRoutingProcessors(
 
 /** Exact OTTL emitted by Fleet for data_stream.dataset (see otel_collector buildDataStreamStatements). */
 function expectedDatasetOttlStatement(dataset: string): string {
-  return `set(attributes["data_stream.dataset"], "${dataset}")`;
+  return `set(attributes["data_stream.dataset"], "${dataset}") where attributes["data_stream.dataset"] == nil`;
+}
+
+/** Exact OTTL emitted by Fleet for data_stream.namespace (see otel_collector buildDataStreamStatements). */
+function expectedNamespaceOttlStatement(namespace: string): string {
+  return `set(attributes["data_stream.namespace"], "${namespace}") where attributes["data_stream.namespace"] == nil`;
 }
 
 export default function (providerContext: FtrProviderContext) {
