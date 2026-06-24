@@ -96,6 +96,7 @@ export interface CreateMemoryParams {
   references?: string[];
   tags?: string[];
   user: string;
+  changeSummary?: string;
 }
 
 /** Parameters for updating a memory entry */

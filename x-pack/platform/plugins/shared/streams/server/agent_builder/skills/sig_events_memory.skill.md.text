@@ -46,7 +46,7 @@ One of the most important aspects of a wiki is cross-referencing:
 - Search before writing — avoid creating duplicates
 - Use memory_patch for small edits, memory_write for new pages or full rewrites
 - Keep pages focused — one topic per page, split large documents
-- Include context in change summaries so the version history is useful
+- **Always provide a meaningful `change_summary`** for every memory_write and memory_patch call — this is required, not optional. The summary must explain *why* you are making the change (e.g. "Recorded nginx restart pattern observed during incident-42"), not just *what* changed. A vague summary like "Updated page" makes the history useless. This is even more important for agent-generated changes than for human edits, because there is no interactive context: the summary is the only record of the agent's intent.
 - When updating pages, preserve existing content and add to it rather than replacing
 - Never delete pages without explicit user confirmation
 - Page names should be descriptive and unique (e.g. "nginx-prod-overview" not just "nginx")
