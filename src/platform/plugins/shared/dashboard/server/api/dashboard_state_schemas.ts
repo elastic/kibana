@@ -67,7 +67,6 @@ export function getPanelSchema() {
     grid: panelGridSchema,
     id: schema.maybe(
       schema.string({
-        maxLength: MAX_ID_LENGTH,
         meta: { description: 'The unique ID of the panel.' },
       })
     ),
@@ -116,7 +115,6 @@ export function getSectionSchema() {
   return schema.object(
     {
       title: schema.string({
-        maxLength: MAX_TITLE_LENGTH,
         meta: { description: 'The title of the section.' },
       }),
       collapsed: schema.boolean({
@@ -134,7 +132,6 @@ export function getSectionSchema() {
       }),
       id: schema.maybe(
         schema.string({
-          maxLength: MAX_ID_LENGTH,
           meta: { description: 'The unique ID of the section.' },
         })
       ),
@@ -249,7 +246,6 @@ export function getDashboardStateSchema(
       pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest, isReadRequest),
       description: schema.maybe(
         schema.string({
-          maxLength: MAX_DESCRIPTION_LENGTH,
           meta: { description: 'A short description of the dashboard.' },
         })
       ),
@@ -282,7 +278,6 @@ export function getDashboardStateSchema(
       ),
       project_routing: schema.maybe(
         schema.string({
-          maxLength: 100,
           meta: {
             description:
               'Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.',
@@ -298,7 +293,6 @@ export function getDashboardStateSchema(
       time_range: schema.maybe(timeRangeSchema),
       title: schema.string({
         minLength: 1,
-        maxLength: MAX_TITLE_LENGTH,
         meta: { description: 'A human-readable title for the dashboard.' },
       }),
       access_control: accessControlSchema,
