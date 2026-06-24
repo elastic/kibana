@@ -8,7 +8,10 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { AgentBuilderConfig } from './config';
@@ -260,7 +263,14 @@ export class AgentBuilderPlugin
         const tracingEnabled = await coreStart.uiSettings
           .asScopedToClient(internalClient)
           .get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID);
-        await syncAgentBuilderOverviewDashboard(coreStart, tracingEnabled, this.logger);
+        const experimentalFeaturesEnabled = await coreStart.uiSettings
+          .asScopedToClient(internalClient)
+          .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+        await syncAgentBuilderOverviewDashboard(
+          coreStart,
+          tracingEnabled && experimentalFeaturesEnabled,
+          this.logger
+        );
       } catch (error) {
         this.logger.error(
           `Failed to sync Agent Builder overview dashboard: ${(error as Error).message}`

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { syncAgentBuilderOverviewDashboard } from '@kbn/agent-builder-plugin/server';
 import { createGenAiSettingsServerRoute } from '../create_gen_ai_settings_server_route';
 
@@ -25,7 +28,10 @@ const installAgentBuilderTracingDashboardRoute = createGenAiSettingsServerRoute(
     );
 
     const isEnabled = await uiSettingsClient.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID);
-    if (!isEnabled) {
+    const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
+    if (!isEnabled || !experimentalFeaturesEnabled) {
       return { installed: false };
     }
 
