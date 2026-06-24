@@ -49,12 +49,14 @@ interface UseDocCountFetchProps {
   /** When `streamName` is omitted (streams listing), this decides whether to fetch failed-doc counts for all streams. */
   getCanReadFailureStore: (streamName?: string) => boolean;
   numDataPoints: number;
+  fetchIngestionDocCounts: boolean;
 }
 
 export function useStreamDocCountsFetch({
   groupTotalCountByTimestamp: _groupTotalCountByTimestamp,
   getCanReadFailureStore,
   numDataPoints,
+  fetchIngestionDocCounts,
 }: UseDocCountFetchProps): {
   getStreamDocCounts(streamName?: string): StreamDocCountsFetch;
   getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse>;
@@ -161,23 +163,19 @@ export function useStreamDocCountsFetch({
         }
       );
 
-      const ingestionCountPromise = streamsRepositoryClient.fetch(
-        'GET /internal/streams/doc_counts/ingestion',
-        {
-          signal: abortController.signal,
-          params: {
-            query: {
-              start: timeState.start,
-              end: timeState.end,
-              ...(streamName ? { stream: streamName } : {}),
+      const ingestionCountPromise = fetchIngestionDocCounts
+        ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/ingestion', {
+            signal: abortController.signal,
+            params: {
+              query: {
+                start: timeState.start,
+                end: timeState.end,
+                ...(streamName ? { stream: streamName } : {}),
+              },
             },
-          },
-        }
-      );
+          })
+        : Promise.reject(new Error('Ingestion doc counts not requested'));
 
-      // Stream-detail consumers read only some of these promises (not ingestion). Attach a no-op
-      // rejection handler so an abort on unmount does not surface as an unhandled promise rejection.
-      // The listing still attaches its own handlers to the same promise.
       void ingestionCountPromise.catch(() => {});
 
       const docCountsFetch: StreamDocCountsFetch = {

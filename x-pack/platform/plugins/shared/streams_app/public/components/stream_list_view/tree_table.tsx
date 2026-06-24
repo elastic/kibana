@@ -146,6 +146,7 @@ export function StreamsTreeTable({
     getCanReadFailureStore: (streamName: string | undefined) =>
       streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+    fetchIngestionDocCounts: true,
   });
 
   const docCountsFetch = getStreamDocCounts();
