@@ -15,8 +15,8 @@ import { expect } from '@kbn/scout-security/ui';
  * Pre-fix: the "Close all alerts that match this exception..." checkbox was
  * disabled because the gate compared the entry against the alerts wildcard
  * data view, which has no knowledge of source-index runtime fields. The fix
- * (a) drives the gate from the picker's data view and (b) has the server
- * resolve runtime fields from the rule's source indices and attach them as
+ * moves the resolution of runtime fields to has the server.
+ * The runtime fields are resolved from the rule's source indices and attached as
  * `runtime_mappings` on the underlying `updateByQuery`.
  *
  * The setup mirrors the documented workaround in elastic/security-ml#677:
