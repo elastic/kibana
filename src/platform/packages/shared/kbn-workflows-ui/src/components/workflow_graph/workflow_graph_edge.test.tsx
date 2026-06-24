@@ -271,9 +271,10 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
   });
 
   describe('merge edges (no branchType) remain on smooth-step', () => {
-    it('uses smooth-step (midpoint label) when branchType is absent', () => {
-      // Merge edges carry no branchType — they must not accidentally route
-      // through the fork bus. Bus requires a shared source (fan-out only).
+    it('uses smooth-step (midpoint label) when branchType and isMerge are both absent', () => {
+      // An untagged edge (no branchType, no isMerge) must stay on smooth-step.
+      // If it accidentally hit the fork bus or merge bus, the label would land
+      // far from the smooth-step midpoint.
       renderSingleEdge(
         makeEdgeProps({
           id: 'e-merge',
@@ -283,13 +284,125 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
           targetX: 200,
           targetY: 500,
           targetPosition: Position.Top,
-          data: { label: 'irrelevant' }, // no branchType
+          data: { label: 'irrelevant' }, // no branchType, no isMerge
         })
       );
       const y = getLabelY();
 
       // Smooth-step midpoint: (300 + 500) / 2 = 400
       expect(y).toBeCloseTo((300 + 500) / 2, 0);
+    });
+  });
+});
+
+describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
+  // Coordinates from the offline layout probe of the real if_only topology:
+  // placeholder at centerX=200, centerY=300; switch top at y=402.
+  // busY = targetY_top − MERGE_BUS_TRUNK = 402 − 20 = 382.
+  const MERGE_BUS_TRUNK = 20;
+
+  describe('TB — isMerge edge routes via merge bus', () => {
+    it('routes an isMerge edge above gap threshold via merge bus, not smooth-step', () => {
+      // placeholder → switch: sourceY=300, targetY=402, gap=102 > MERGE_BUS_TRUNK(20).
+      // Merge bus busY = 402 − 20 = 382.  smooth-step midY = (300+402)/2 = 351.
+      // The rendered path should NOT land at the smooth-step midpoint.
+      renderSingleEdge(
+        makeEdgeProps({
+          id: 'e-placeholder-merge',
+          sourceX: 200,
+          sourceY: 300,
+          sourcePosition: Position.Bottom,
+          targetX: 100,
+          targetY: 402,
+          targetPosition: Position.Top,
+          data: { isMerge: true }, // no branchType — this is the merge flag
+        })
+      );
+      // The path element should contain the busY (382), not the smooth-step midpoint (351).
+      const path = document.querySelector('path.react-flow__edge-path');
+      expect(path).not.toBeNull();
+      const d = path?.getAttribute('d') ?? '';
+      expect(d).toContain('382');
+      expect(d).not.toContain('351');
+    });
+
+    it('falls back to smooth-step when isMerge gap is below MERGE_BUS_TRUNK', () => {
+      // Gap = 10 < MERGE_BUS_TRUNK (20) → smooth-step.
+      renderSingleEdge(
+        makeEdgeProps({
+          id: 'e-small-merge',
+          sourceX: 100,
+          sourceY: 300,
+          sourcePosition: Position.Bottom,
+          targetX: 100,
+          targetY: 310, // gap = 10
+          targetPosition: Position.Top,
+          data: { isMerge: true, label: 'x' },
+        })
+      );
+      const y = getLabelY();
+      // smooth-step midpoint = (300 + 310) / 2 = 305
+      expect(y).toBeCloseTo((300 + 310) / 2, 0);
+    });
+
+    it('two isMerge edges sharing a target produce the same busY in their paths', () => {
+      const target = { targetX: 100, targetY: 402, targetPosition: Position.Top };
+
+      renderSingleEdge(
+        makeEdgeProps({
+          id: 'e-bye-merge',
+          sourceX: 0,
+          sourceY: 300,
+          sourcePosition: Position.Bottom,
+          ...target,
+          data: { isMerge: true },
+        })
+      );
+      const byePath = document.querySelector('path.react-flow__edge-path')?.getAttribute('d') ?? '';
+
+      cleanup();
+
+      renderSingleEdge(
+        makeEdgeProps({
+          id: 'e-placeholder-merge',
+          sourceX: 200,
+          sourceY: 300,
+          sourcePosition: Position.Bottom,
+          ...target,
+          data: { isMerge: true },
+        })
+      );
+      const placeholderPath =
+        document.querySelector('path.react-flow__edge-path')?.getAttribute('d') ?? '';
+
+      // Both paths must contain busY = 402 − 20 = 382
+      const busY = 402 - MERGE_BUS_TRUNK;
+      expect(byePath).toContain(String(busY));
+      expect(placeholderPath).toContain(String(busY));
+    });
+  });
+
+  describe('hideEndMarker suppresses the arrowhead', () => {
+    it('omits markerEnd when hideEndMarker is true', () => {
+      renderSingleEdge(
+        makeEdgeProps({
+          id: 'e-hidden-arrow',
+          data: { branchType: 'else', label: 'false', hideEndMarker: true },
+        })
+      );
+      const path = document.querySelector('path.react-flow__edge-path');
+      expect(path?.getAttribute('marker-end')).toBeFalsy();
+    });
+
+    it('renders markerEnd when hideEndMarker is absent', () => {
+      renderSingleEdge(
+        makeEdgeProps({
+          id: 'e-visible-arrow',
+          data: { branchType: 'then', label: 'true' },
+        })
+      );
+      const path = document.querySelector('path.react-flow__edge-path');
+      expect(path?.getAttribute('marker-end')).toMatch(/url\(#arrow-/);
     });
   });
 });

@@ -20,6 +20,17 @@ interface WorkflowEdgeData extends Record<string, unknown> {
   readonly points?: ReadonlyArray<{ readonly x: number; readonly y: number }>;
   /** Switch bus routing marker — present on all case/default edges of a switch node. */
   readonly branchType?: EdgeBranchType;
+  /**
+   * True when this edge participates in a fan-in that includes a synthetic
+   * placeholder (empty `if` branch lane). Routes the edge on the merge bus
+   * (symmetric inverted-bus fan-in matching the fork-bus fan-out).
+   */
+  readonly isMerge?: boolean;
+  /**
+   * True when the target node is a synthetic placeholder — suppresses the
+   * arrowhead so the in-edge and out-edge form one continuous line mid-lane.
+   */
+  readonly hideEndMarker?: boolean;
 }
 
 const LABEL_TRUNCATE = 24;
@@ -46,7 +57,16 @@ const TB_LABEL_Y_OFFSET = 30;
 const FORK_BUS_TRUNK = 20;
 const FORK_BUS_LABEL_OFFSET = 20;
 
+// Merge single-bus routing: distance from the shared horizontal bus (TB) or
+// vertical bus (LR) to the target handle. Mirrors FORK_BUS_TRUNK so the
+// fan-in and fan-out bus trunks are the same length.
+const MERGE_BUS_TRUNK = 20;
+
 const EPS = 0.5;
+
+/** Default (non-traversed) edge stroke color. Exported so other renderers
+ *  (e.g. the placeholder node's bridge line) can match the exact same color. */
+export const EDGE_STROKE_DEFAULT = '#a8c5ee';
 
 /**
  * For each pair of consecutive points, if the segment is diagonal (neither
@@ -125,6 +145,52 @@ export function buildForkBusPath(
       CORNER_RADIUS
     );
     return { path, labelX: tx, labelY: busY + FORK_BUS_LABEL_OFFSET };
+  }
+}
+
+/**
+ * Build the SVG path for a merge-edge single-bus routing. The inverse of
+ * `buildForkBusPath`: all fan-in edges sharing the same target meet at a shared
+ * horizontal bus just above the target (TB) or a vertical bus just left of the
+ * target (LR), then one shared trunk descends / advances into the target.
+ * Because all edges share targetX/targetY, their buses and trunks overlap into
+ * one visible bus + one trunk, exactly mirroring the fork bus.
+ *
+ * TB shape: source → drop vertical to busY → bus horizontal to targetX → trunk down to target.
+ * LR shape: source → drop horizontal to busX → bus vertical to targetY → trunk right to target.
+ *
+ * Exported for unit testing.
+ */
+export function buildMergeBusPath(
+  p: { sourceX: number; sourceY: number; targetX: number; targetY: number },
+  isLR: boolean,
+  trunk: number
+): { path: string; labelX: number; labelY: number } {
+  const { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty } = p;
+  if (isLR) {
+    const busX = tx - trunk;
+    const { path, labelX, labelY } = buildRoundedOrthogonalPath(
+      [
+        { x: sx - 2, y: sy },
+        { x: busX, y: sy },
+        { x: busX, y: ty },
+        { x: tx, y: ty },
+      ],
+      CORNER_RADIUS
+    );
+    return { path, labelX, labelY };
+  } else {
+    const busY = ty - trunk;
+    const { path, labelX, labelY } = buildRoundedOrthogonalPath(
+      [
+        { x: sx, y: sy - 2 },
+        { x: sx, y: busY },
+        { x: tx, y: busY },
+        { x: tx, y: ty },
+      ],
+      CORNER_RADIUS
+    );
+    return { path, labelX, labelY };
   }
 }
 
@@ -226,13 +292,20 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   // its own target. Labels sit at a fixed offset below the bus (TB) / right of
   // the bus (LR) so all branch labels align on one row/column regardless of
   // how deep each branch target sits.
-  // Note: merge/fan-in edges (branch tails → next step) carry no branchType
-  // and stay on the smooth-step fallback — the bus requires a shared source.
   const branchType = edgeData?.branchType;
   const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
   const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
   const forkGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useFork = isForkEdge && forkGap > FORK_BUS_TRUNK;
+
+  // Single-bus routing for tagged merge (fan-in) edges: edges that participate
+  // in a fan-in that includes a synthetic placeholder lane. All such edges share
+  // the same targetX/targetY, so their buses and trunks overlap into one visible
+  // bus + one trunk — the symmetric inverse of the fork bus. Fork and merge are
+  // disjoint: fork edges carry a branchType, merge edges don't.
+  const isMergeEdge = edgeData?.isMerge === true;
+  const mergeGap = isLR ? targetX - sourceX : targetY - sourceY;
+  const useMerge = isMergeEdge && mergeGap > MERGE_BUS_TRUNK;
 
   if (useFork) {
     ({
@@ -240,6 +313,12 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
       labelX,
       labelY,
     } = buildForkBusPath({ sourceX, sourceY, targetX, targetY }, isLR, FORK_BUS_TRUNK));
+  } else if (useMerge) {
+    ({
+      path: edgePath,
+      labelX,
+      labelY,
+    } = buildMergeBusPath({ sourceX, sourceY, targetX, targetY }, isLR, MERGE_BUS_TRUNK));
   } else if (dagrePoints && dagrePoints.length >= 2) {
     let middle = dagrePoints.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
 
@@ -385,7 +464,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   const traversed = edgeData?.traversed ?? false;
   // Match the success color used by the node's green checkmark icon (#16c5c0).
   // Non-traversed edges use a muted blue to match the step palette.
-  const stroke = traversed ? '#16c5c0' : '#a8c5ee';
+  const stroke = traversed ? '#16c5c0' : EDGE_STROKE_DEFAULT;
   const strokeWidth = 1;
 
   const fullLabel = edgeData?.label ?? '';
@@ -415,7 +494,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
         style={{ ...style, stroke, strokeWidth, fill: 'none' }}
         className="react-flow__edge-path"
         d={edgePath}
-        markerEnd={`url(#arrow-${id})`}
+        markerEnd={edgeData?.hideEndMarker ? undefined : `url(#arrow-${id})`}
       />
       {fullLabel && (
         <EdgeLabelRenderer>
@@ -462,7 +541,9 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     pd?.traversed === nd?.traversed &&
     pd?.label === nd?.label &&
     pd?.points === nd?.points &&
-    pd?.branchType === nd?.branchType
+    pd?.branchType === nd?.branchType &&
+    pd?.isMerge === nd?.isMerge &&
+    pd?.hideEndMarker === nd?.hideEndMarker
   );
 }
 

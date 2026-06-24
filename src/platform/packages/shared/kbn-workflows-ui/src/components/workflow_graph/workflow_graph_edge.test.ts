@@ -7,9 +7,74 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildForkBusPath } from './workflow_graph_edge';
+import { buildForkBusPath, buildMergeBusPath } from './workflow_graph_edge';
 
 const TRUNK = 20;
+
+describe('buildMergeBusPath', () => {
+  describe('TB (top-to-bottom)', () => {
+    it('busY is targetY − trunk', () => {
+      const r = buildMergeBusPath(
+        { sourceX: 0, sourceY: 100, targetX: 100, targetY: 402 },
+        false,
+        TRUNK
+      );
+      // The path should bend at busY = 402 − 20 = 382
+      expect(r.path).toContain('382');
+    });
+
+    it('two edges sharing a target produce the same busY', () => {
+      const target = { targetX: 100, targetY: 402 };
+      const r1 = buildMergeBusPath({ sourceX: 0, sourceY: 100, ...target }, false, TRUNK);
+      const r2 = buildMergeBusPath({ sourceX: 200, sourceY: 100, ...target }, false, TRUNK);
+      // Both paths contain the shared busY
+      const busY = target.targetY - TRUNK;
+      expect(r1.path).toContain(String(busY));
+      expect(r2.path).toContain(String(busY));
+    });
+
+    it('path starts near source and ends at target', () => {
+      const r = buildMergeBusPath(
+        { sourceX: 0, sourceY: 100, targetX: 100, targetY: 402 },
+        false,
+        TRUNK
+      );
+      expect(r.path).toMatch(/^M 0 /);
+      expect(r.path).toContain('L 100 402');
+    });
+  });
+
+  describe('LR (left-to-right)', () => {
+    it('busX is targetX − trunk', () => {
+      const r = buildMergeBusPath(
+        { sourceX: 100, sourceY: 0, targetX: 402, targetY: 100 },
+        true,
+        TRUNK
+      );
+      const busX = 402 - TRUNK;
+      expect(r.path).toContain(String(busX));
+    });
+
+    it('two edges sharing a target produce the same busX', () => {
+      const target = { targetX: 402, targetY: 100 };
+      const r1 = buildMergeBusPath({ sourceX: 100, sourceY: 0, ...target }, true, TRUNK);
+      const r2 = buildMergeBusPath({ sourceX: 100, sourceY: 200, ...target }, true, TRUNK);
+      const busX = target.targetX - TRUNK;
+      expect(r1.path).toContain(String(busX));
+      expect(r2.path).toContain(String(busX));
+    });
+
+    it('path starts near source and ends at target', () => {
+      const r = buildMergeBusPath(
+        { sourceX: 100, sourceY: 0, targetX: 402, targetY: 100 },
+        true,
+        TRUNK
+      );
+      expect(r.path).toMatch(/^M 98 0/);
+      expect(r.path).toContain('L 402 100');
+    });
+  });
+});
 
 describe('buildForkBusPath', () => {
   describe('TB (top-to-bottom)', () => {

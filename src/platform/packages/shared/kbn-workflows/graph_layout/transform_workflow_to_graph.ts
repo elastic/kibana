@@ -14,11 +14,12 @@ import type {
   NodeRef,
   PreLayoutForeachGroupNode,
   PreLayoutNode,
+  PreLayoutPlaceholderNode,
   PreLayoutStepNode,
   PreLayoutTriggerNode,
   Step,
 } from './types';
-import { DEFAULT_NODE_STYLE } from './types';
+import { DEFAULT_NODE_STYLE, PLACEHOLDER_NODE_STYLE } from './types';
 import type {
   ForEachStep,
   IfStep,
@@ -89,7 +90,8 @@ export function transformWorkflowToGraph(workflow: WorkflowYaml | undefined): Tr
 function transformInternal(
   triggers: WorkflowYaml['triggers'],
   steps: Step[],
-  ids: IdAllocator
+  ids: IdAllocator,
+  placeholderIds: Set<string> = new Set()
 ): InternalTransformResult {
   const nodes: PreLayoutNode[] = [];
   const edges: GraphEdge[] = [];
@@ -135,8 +137,15 @@ function transformInternal(
       }
     } else {
       // Connect from each exit point of the previous sibling.
-      for (const sourceId of dedupeIds(prevExitIds)) {
-        edges.push({ id: `${sourceId}:${id}`, source: sourceId, target: id });
+      const sources = dedupeIds(prevExitIds);
+      const isMerge = sources.length > 1 && sources.some((s) => placeholderIds.has(s));
+      for (const sourceId of sources) {
+        edges.push({
+          id: `${sourceId}:${id}`,
+          source: sourceId,
+          target: id,
+          ...(isMerge ? { isMerge: true } : undefined),
+        });
       }
     }
 
@@ -168,7 +177,7 @@ function transformInternal(
       nodes.push(groupNode);
 
       const childSteps = (foreachStep.steps as Step[]) ?? [];
-      const inner = transformInternal([], childSteps, ids);
+      const inner = transformInternal([], childSteps, ids, placeholderIds);
       Object.assign(nodeRefs, inner.nodeRefs);
       foreachGroups.push({
         id,
@@ -198,10 +207,13 @@ function transformInternal(
       const thenSteps = (ifStep.steps as Step[]) ?? [];
       const elseSteps: Step[] = Array.isArray(ifStep.else) ? (ifStep.else as Step[]) : [];
 
+      const hasThen = thenSteps.length > 0;
+      const hasElse = elseSteps.length > 0;
+
       const branchExits: string[] = [];
 
-      if (thenSteps.length > 0) {
-        const inner = transformInternal([], thenSteps, ids);
+      if (hasThen) {
+        const inner = transformInternal([], thenSteps, ids, placeholderIds);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
@@ -217,13 +229,35 @@ function transformInternal(
           });
         }
         branchExits.push(...inner.leafIds);
+      } else if (hasElse) {
+        // No `then` body but `else` is present — synthesize a thin placeholder
+        // lane for the true path so the graph renders as a balanced diamond
+        // (fan-out → placeholder lane + else lane → fan-in) instead of a
+        // lopsided edge straight down from the gate.
+        const placeholderId = ids.allocate(`${step.name}-then-placeholder`);
+        placeholderIds.add(placeholderId);
+        const placeholderNode: PreLayoutPlaceholderNode = {
+          id: placeholderId,
+          type: 'placeholder',
+          data: { branch: 'then' },
+          style: { ...PLACEHOLDER_NODE_STYLE },
+        };
+        nodes.push(placeholderNode);
+        edges.push({
+          id: `${id}:${placeholderId}-then`,
+          source: id,
+          target: placeholderId,
+          branchType: 'then',
+          label: 'true',
+        });
+        branchExits.push(placeholderId);
       } else {
-        // No `then` body — the true path is "skip and continue".
+        // Both branches empty — the true path falls through via the gate.
         branchExits.push(id);
       }
 
-      if (elseSteps.length > 0) {
-        const inner = transformInternal([], elseSteps, ids);
+      if (hasElse) {
+        const inner = transformInternal([], elseSteps, ids, placeholderIds);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
@@ -239,8 +273,30 @@ function transformInternal(
           });
         }
         branchExits.push(...inner.leafIds);
+      } else if (hasThen) {
+        // No `else` body but `then` is present — synthesize a thin placeholder
+        // lane for the false path so the graph renders as a balanced diamond.
+        const placeholderId = ids.allocate(`${step.name}-else-placeholder`);
+        placeholderIds.add(placeholderId);
+        const placeholderNode: PreLayoutPlaceholderNode = {
+          id: placeholderId,
+          type: 'placeholder',
+          data: { branch: 'else' },
+          style: { ...PLACEHOLDER_NODE_STYLE },
+        };
+        nodes.push(placeholderNode);
+        edges.push({
+          id: `${id}:${placeholderId}-else`,
+          source: id,
+          target: placeholderId,
+          branchType: 'else',
+          label: 'false',
+        });
+        branchExits.push(placeholderId);
       } else {
-        // No `else` body — the false path bypasses the if entirely.
+        // Both branches empty — the false path falls through via the gate.
+        // (Already handled in the then arm above; this else is unreachable but
+        // kept for symmetry and future-proofing.)
         branchExits.push(id);
       }
 
@@ -255,7 +311,7 @@ function transformInternal(
           branchExits.push(id);
           return;
         }
-        const inner = transformInternal([], branch.steps, ids);
+        const inner = transformInternal([], branch.steps, ids, placeholderIds);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
@@ -289,7 +345,7 @@ function transformInternal(
           branchExits.push(id);
           return;
         }
-        const inner = transformInternal([], caseItem.steps as Step[], ids);
+        const inner = transformInternal([], caseItem.steps as Step[], ids, placeholderIds);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
@@ -309,7 +365,7 @@ function transformInternal(
 
       // Rule 2 — `default` branch, labeled 'default'.
       if (hasDefault) {
-        const inner = transformInternal([], defaultSteps as Step[], ids);
+        const inner = transformInternal([], defaultSteps as Step[], ids, placeholderIds);
         Object.assign(nodeRefs, inner.nodeRefs);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
@@ -326,16 +382,33 @@ function transformInternal(
         }
         branchExits.push(...inner.leafIds);
       } else {
-        // Rule 3 — no `default`: push the gate id so the generic sibling-connector
-        // emits a plain (unlabeled) edge from the gate to the next step.
-        branchExits.push(id);
+        // Rule 3 — no explicit `default`: synthesize a thin placeholder lane
+        // labeled 'default' so the implicit fall-through renders as a balanced,
+        // labeled lane aside instead of an unlabeled edge from the gate.
+        const placeholderId = ids.allocate(`${step.name}-default-placeholder`);
+        placeholderIds.add(placeholderId);
+        const placeholderNode: PreLayoutPlaceholderNode = {
+          id: placeholderId,
+          type: 'placeholder',
+          data: { branch: 'default' },
+          style: { ...PLACEHOLDER_NODE_STYLE },
+        };
+        nodes.push(placeholderNode);
+        edges.push({
+          id: `${id}:${placeholderId}-default`,
+          source: id,
+          target: placeholderId,
+          branchType: 'switch',
+          label: 'default',
+        });
+        branchExits.push(placeholderId);
       }
 
       if (branchExits.length > 0) exitIds = dedupeIds(branchExits);
     } else if (step.type === 'merge') {
       const mergeStep = step as MergeStep;
       const childSteps = (mergeStep.steps as Step[]) ?? [];
-      const inner = transformInternal([], childSteps, ids);
+      const inner = transformInternal([], childSteps, ids, placeholderIds);
       Object.assign(nodeRefs, inner.nodeRefs);
       nodes.push(...inner.nodes);
       edges.push(...inner.edges);

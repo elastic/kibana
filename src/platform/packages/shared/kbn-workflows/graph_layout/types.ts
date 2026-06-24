@@ -13,6 +13,13 @@ export type Step = WorkflowYaml['steps'][number];
 
 export const DEFAULT_NODE_STYLE = { width: 300, height: 64 } as const;
 
+/**
+ * Style for a synthetic placeholder node representing an empty `if` branch lane.
+ * The node is kept tiny (1×1) so dagre allocates a thin bypass lane without
+ * creating visible whitespace. No visual content is rendered.
+ */
+export const PLACEHOLDER_NODE_STYLE = { width: 1, height: 1 } as const;
+
 export const FLOW_CONTROL_STEP_TYPES: ReadonlySet<string> = new Set([
   'if',
   'merge',
@@ -37,7 +44,7 @@ export interface NodeStyle {
 
 export interface PreLayoutNodeBase {
   id: string;
-  type: 'step' | 'trigger' | 'foreachGroup';
+  type: 'step' | 'trigger' | 'foreachGroup' | 'placeholder';
   style: NodeStyle;
 }
 
@@ -74,7 +81,28 @@ export interface PreLayoutForeachGroupNode extends PreLayoutNodeBase {
   data: ForeachGroupNodeData;
 }
 
-export type PreLayoutNode = PreLayoutStepNode | PreLayoutTriggerNode | PreLayoutForeachGroupNode;
+export interface PlaceholderNodeData extends Record<string, unknown> {
+  /** Which branch of the parent `if` or `switch` fall-through this placeholder lane represents. */
+  readonly branch: 'then' | 'else' | 'default';
+}
+
+/**
+ * A synthetic invisible node inserted for the missing branch of an `if` step
+ * that has only one branch present, or for the implicit fall-through lane of a
+ * `switch` with no `default`. It lets dagre allocate a parallel lane so the
+ * graph renders as a balanced fan-out / fan-in diamond. The node has no
+ * backing workflow step and is intentionally absent from `nodeRefs`.
+ */
+export interface PreLayoutPlaceholderNode extends PreLayoutNodeBase {
+  type: 'placeholder';
+  data: PlaceholderNodeData;
+}
+
+export type PreLayoutNode =
+  | PreLayoutStepNode
+  | PreLayoutTriggerNode
+  | PreLayoutForeachGroupNode
+  | PreLayoutPlaceholderNode;
 
 export interface GraphEdge {
   id: string;
@@ -84,6 +112,13 @@ export interface GraphEdge {
   branchIndex?: number;
   /** Display label rendered on the edge (e.g. 'true' / 'false' / case value). */
   label?: string;
+  /**
+   * True when this edge is part of a fan-in into a node that has 2+ sources
+   * and at least one source is a synthetic placeholder (empty `if` branch lane).
+   * The renderer uses this to route the edge on the merge bus (symmetric
+   * inverted-bus fan-in matching the fork-bus fan-out).
+   */
+  isMerge?: boolean;
 }
 
 /**
@@ -116,7 +151,7 @@ export type NodeRef =
 export type HandleSide = 'top' | 'right' | 'bottom' | 'left';
 
 export interface LayoutedNode extends PreLayoutNodeBase {
-  data: StepNodeData | TriggerNodeData | ForeachGroupNodeData;
+  data: StepNodeData | TriggerNodeData | ForeachGroupNodeData | PlaceholderNodeData;
   position: { x: number; y: number };
   /** Where the incoming-edge handle should attach (set by `applyGraphLayout`). */
   targetPosition?: HandleSide;

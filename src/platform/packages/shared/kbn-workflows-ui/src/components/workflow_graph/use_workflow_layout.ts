@@ -203,6 +203,8 @@ export function useWorkflowLayout({
       const exec =
         explicitExec ?? (n.type === 'trigger' ? syntheticTriggerExecution ?? undefined : undefined);
 
+      const isPlaceholder = n.type === 'placeholder';
+
       return {
         id: n.id,
         type: n.type,
@@ -211,7 +213,15 @@ export function useWorkflowLayout({
         extent: parentId ? ('parent' as const) : undefined,
         width: pos.width,
         height: pos.height,
-        style: { width: pos.width, height: pos.height },
+        // Placeholder nodes are structural only — no selection ring, no click target.
+        selectable: isPlaceholder ? false : undefined,
+        style: {
+          width: pos.width,
+          height: pos.height,
+          // Let clicks pass through the placeholder wrapper so the canvas
+          // doesn't fire onNodeClick / onStepSelect for a phantom step id.
+          ...(isPlaceholder ? { pointerEvents: 'none' as const } : undefined),
+        },
         targetPosition,
         sourcePosition,
         data: {
@@ -263,6 +273,8 @@ export function useWorkflowLayout({
           traversedStatus,
           points: laid?.points,
           branchType: e.branchType,
+          isMerge: e.isMerge,
+          hideEndMarker: nodeById.get(e.target)?.type === 'placeholder',
         },
       };
     });
