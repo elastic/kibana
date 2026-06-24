@@ -10,6 +10,8 @@ import { measurePerformanceAsync } from '@kbn/scout';
 
 const TIMELINE_URL = '/api/timeline';
 const TIMELINES_URL = '/api/timelines';
+const PINNED_EVENT_URL = '/api/pinned_event';
+const NOTE_URL = '/api/note';
 
 const DEFAULT_COLUMNS = [
   { id: '@timestamp' },
@@ -33,6 +35,10 @@ export interface TimelineInput {
 export interface TimelineApiService {
   createTimeline: (input?: Partial<TimelineInput>) => Promise<string>;
   createTimelineTemplate: (input?: Partial<TimelineInput>) => Promise<string>;
+  /** Pin a document event to a timeline. Returns the pinnedEventId. */
+  pinEvent: (timelineId: string, eventId: string) => Promise<string>;
+  /** Add a timeline-level note. Returns the noteId. */
+  addNote: (timelineId: string, noteMarkdown: string) => Promise<string>;
   deleteAll: () => Promise<void>;
 }
 
@@ -42,6 +48,14 @@ interface CreateTimelineApiResponse {
 
 interface GetTimelinesApiResponse {
   timeline: Array<{ savedObjectId: string }>;
+}
+
+interface PinnedEventApiResponse {
+  pinnedEventId: string;
+}
+
+interface NoteApiResponse {
+  noteId: string;
 }
 
 const DEFAULT_TIMELINE: TimelineInput = {
@@ -123,6 +137,28 @@ export const getTimelineApiService = ({
         });
 
         return response.data.savedObjectId;
+      });
+    },
+
+    pinEvent: async (timelineId, eventId) => {
+      return measurePerformanceAsync(log, 'security.timeline.pinEvent', async () => {
+        const response = await kbnClient.request<PinnedEventApiResponse>({
+          method: 'PATCH',
+          path: `${basePath}${PINNED_EVENT_URL}`,
+          body: { pinnedEventId: null, eventId, timelineId },
+        });
+        return response.data.pinnedEventId;
+      });
+    },
+
+    addNote: async (timelineId, noteMarkdown) => {
+      return measurePerformanceAsync(log, 'security.timeline.addNote', async () => {
+        const response = await kbnClient.request<NoteApiResponse>({
+          method: 'PATCH',
+          path: `${basePath}${NOTE_URL}`,
+          body: { note: { timelineId, noteMarkdown } },
+        });
+        return response.data.noteId;
       });
     },
 
