@@ -120,8 +120,8 @@ describe('getSyntheticsCertsRoute', () => {
     // short-circuit on an empty SO list when CCS is on — the search itself is
     // what surfaces remote certs through the route wrapper's CCS-expanded
     // index pattern.
+    // @ts-expect-error partial implementation for testing
     jest.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
-      // @ts-expect-error partial implementation for testing
       enabledMonitorQueryIds: [],
     });
     const remoteOnlyCerts = {
