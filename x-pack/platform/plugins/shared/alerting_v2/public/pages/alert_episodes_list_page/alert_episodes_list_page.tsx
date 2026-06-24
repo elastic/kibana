@@ -39,6 +39,7 @@ import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
+import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
@@ -65,8 +66,6 @@ import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
-
-const PAGE_SIZE = 1000;
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
@@ -168,7 +167,7 @@ export const AlertEpisodesListPage = () => {
     dataView,
     isLoading,
   } = useFetchAlertingEpisodesQuery({
-    pageSize: PAGE_SIZE,
+    pageSize: ALERT_EPISODES_LIST_PAGE_SIZE,
     services,
     filterState,
     sortState,
@@ -490,11 +489,11 @@ export const AlertEpisodesListPage = () => {
                     customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
                     externalCustomRenderers={externalCustomRenderers}
                     rows={rows}
-                    totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
+                    totalHits={!episodesData?.length ? 0 : ALERT_EPISODES_LIST_PAGE_SIZE + 1}
                     loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
                     isPaginationEnabled
                     paginationMode="singlePage"
-                    sampleSizeState={PAGE_SIZE}
+                    sampleSizeState={ALERT_EPISODES_LIST_PAGE_SIZE}
                     isSortEnabled
                     sort={sort}
                     onSort={onSort}
