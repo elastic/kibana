@@ -134,6 +134,10 @@ export class KnowledgeIndicatorClient {
     return this.reader.findFeaturesByIds(ids);
   }
 
+  getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getStreamNamesWithKnowledgeIndicators();
+  }
+
   findIndicators(
     streams: string | string[],
     query: string,

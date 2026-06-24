@@ -287,6 +287,8 @@ export {
   type SigEvent,
   type KnowledgeIndicator,
   type SigEventStatus,
+  type StreamsSigEventsResetDeletedCounts,
+  type StreamsSigEventsResetResult,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,
