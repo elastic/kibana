@@ -153,17 +153,13 @@ function convertStylingToStateFormat(
   hasSecondary: boolean
 ): Partial<MetricVisualizationState> {
   if (!styling) {
-    return {};
+    return { spacing: DEFAULT_SPACING };
   }
   const primaryStyling = styling.primary;
   const secondaryStyling = styling.secondary;
 
-  if (!primaryStyling && !secondaryStyling && styling.spacing == null) {
-    return {};
-  }
-
   return stripUndefined({
-    spacing: styling.spacing,
+    spacing: styling.spacing ?? DEFAULT_SPACING,
     valueFontMode:
       primaryStyling?.value?.sizing != null
         ? primaryStyling.value.sizing === 'fill'
