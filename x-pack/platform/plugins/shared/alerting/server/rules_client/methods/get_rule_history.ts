@@ -166,24 +166,15 @@ function hydrateDateField(value: unknown): Date | null {
 }
 
 /**
- * Guards against null/undefined and ensures the snapshot at least carries a
- * string `id` before we attempt to hydrate it into a `Rule`.
- *
- * Intentionally minimal — a full field-by-field check (or a Zod schema) is not
- * warranted here for two reasons:
- *
- * 1. **Schema drift.** Snapshots are stored as unmapped JSON in the
- *    `.kibana_change_history` data stream and are never migrated. Any
- *    field-level check must be kept in sync with `RuleChangeHistorySnapshot`
- *    manually; fields added or removed in the future would silently invalidate
- *    otherwise-readable records.
- *
- * 2. **`transformRuleDomainToRule` never throws.** It is a pure structural
- *    copy; missing or wrong-typed fields produce `undefined` values in the
- *    output rather than runtime errors. The `try/catch` in `hydrateRuleSnapshot`
- *    acts as a backstop for any unexpected exception. A corrupt record is
- *    therefore either skipped here (no object / no id) or returned with partial
- *    fields — in neither case does it 500 the request.
+ * Minimal guard on-read. Full field-level validation is omitted.
+ * This is because snapshots are stored as unmapped JSON and never migrated
+ * (stricter checks would silently invalidate records after schema changes),
+ * and `transformRuleDomainToRule` never throws.
+ * Missing fields produce `undefined` output rather than errors.
+ * We may wish to review the logic here later to cater for more complex cases around corrupt records.
+ * In particular, we want to avoid 2 scenarios:
+ * - Returning 500 for whole response on single corrupt record.
+ * - Silently chomping out valid historical records when schema diverges far enough.
  */
 function isRuleDomainSnapshot(
   maybeRuleDomain: unknown
