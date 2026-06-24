@@ -770,7 +770,7 @@ export class AttachmentService {
             if (!requestWithoutType) {
               assertLegacyWriteableAttachmentType(
                 getAttachmentTypeFromAttributes(decodedAttributes),
-                decodedAttributes.owner
+                decodedAttributes.owner ?? ''
               );
             }
             const transformer = getTransformerForPatchAttributes(

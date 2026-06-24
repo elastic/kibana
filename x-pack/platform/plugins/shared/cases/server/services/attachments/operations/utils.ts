@@ -67,7 +67,7 @@ export function transformAttributesForMode({
  * registered (its own feature flag is on) while `xpack.cases.attachments.enabled`
  * is off, so the service still resolves to the legacy SO type.
  */
-export const assertLegacyWriteableAttachmentType = (type: string, owner?: string): void => {
+export const assertLegacyWriteableAttachmentType = (type: string, owner: string): void => {
   if (isUnifiedOnlyAttachmentType(type, owner)) {
     throw Boom.badRequest(
       `Attachment type '${type}' has no legacy representation and requires the unified attachment SO type. Enable xpack.cases.attachments.enabled in your Kibana configuration.`

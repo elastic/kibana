@@ -10,17 +10,17 @@ import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/publ
 import type { EntityAttachmentPayload } from '../../../../../common/cases/attachments/entity';
 import { EntityChildren } from './entity_children';
 
-type Props = UnifiedReferenceAttachmentViewProps<EntityAttachmentPayload['metadata']>;
+type Props = UnifiedReferenceAttachmentViewProps<
+  EntityAttachmentPayload['metadata'],
+  EntityAttachmentPayload['attachmentId']
+>;
 
 /**
  * Component lazy loaded when rendering a unified `security.entity` attachment.
  * Renders the entity summary in the case attachment view.
  */
 const AttachmentChildren = ({ attachmentId, metadata }: Props) => {
-  // `EntityAttachmentPayloadSchema` validates `attachmentId` as a single string,
-  // but the shared `UnifiedReferenceAttachmentViewProps` types it as `string | string[]`
-  // because alert attachments persist arrays. Treat an array as bad data and bail.
-  if (!metadata || Array.isArray(attachmentId)) {
+  if (!metadata) {
     return null;
   }
 

@@ -13,7 +13,10 @@ import AttachmentChildren from './attachment_children';
 import { ENTITY_NAME_TEST_ID, ENTITY_TYPE_TEST_ID } from './test_ids';
 import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
 
-type Props = UnifiedReferenceAttachmentViewProps<EntityAttachmentPayload['metadata']>;
+type Props = UnifiedReferenceAttachmentViewProps<
+  EntityAttachmentPayload['metadata'],
+  EntityAttachmentPayload['attachmentId']
+>;
 
 const baseProps: Props = {
   attachmentId: 'entity-id-1',
@@ -39,16 +42,6 @@ describe('AttachmentChildren', () => {
     const { queryByTestId } = render(
       <TestProvidersComponent>
         <AttachmentChildren {...baseProps} metadata={undefined} />
-      </TestProvidersComponent>
-    );
-
-    expect(queryByTestId(ENTITY_NAME_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('renders null when attachmentId is an array', () => {
-    const { queryByTestId } = render(
-      <TestProvidersComponent>
-        <AttachmentChildren {...baseProps} attachmentId={['entity-id-1']} />
       </TestProvidersComponent>
     );
 
