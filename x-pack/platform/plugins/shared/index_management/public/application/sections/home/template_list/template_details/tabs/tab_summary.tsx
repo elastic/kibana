@@ -65,7 +65,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const { core, url } = useAppContext();
+  const {
+    core,
+    url,
+    config: { enableIndexMode },
+  } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
   const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
 
@@ -260,7 +264,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             )}
 
             {/* Index mode */}
-            {indexMode && (
+            {indexMode && enableIndexMode && (
               <>
                 <EuiDescriptionListTitle>
                   <FormattedMessage

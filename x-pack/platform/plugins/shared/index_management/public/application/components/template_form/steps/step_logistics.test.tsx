@@ -10,6 +10,12 @@ import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { StepLogistics } from './step_logistics';
+import { AppContextProvider } from '../../../app_context';
+import type { AppDependencies } from '../../../app_context';
+
+const ctx = {
+  config: { enableIndexMode: true },
+} as unknown as AppDependencies;
 
 describe('StepLogistics', () => {
   const baseDefaultValue = {
@@ -28,12 +34,14 @@ describe('StepLogistics', () => {
     it('SHOULD disable the name field', async () => {
       render(
         <I18nProvider>
-          <StepLogistics
-            defaultValue={baseDefaultValue}
-            isEditing={true}
-            onChange={jest.fn()}
-            isLegacy={false}
-          />
+          <AppContextProvider value={ctx}>
+            <StepLogistics
+              defaultValue={baseDefaultValue}
+              isEditing={true}
+              onChange={jest.fn()}
+              isLegacy={false}
+            />
+          </AppContextProvider>
         </I18nProvider>
       );
 
@@ -47,12 +55,14 @@ describe('StepLogistics', () => {
     it('SHOULD enable the name field', async () => {
       render(
         <I18nProvider>
-          <StepLogistics
-            defaultValue={baseDefaultValue}
-            isEditing={false}
-            onChange={jest.fn()}
-            isLegacy={false}
-          />
+          <AppContextProvider value={ctx}>
+            <StepLogistics
+              defaultValue={baseDefaultValue}
+              isEditing={false}
+              onChange={jest.fn()}
+              isLegacy={false}
+            />
+          </AppContextProvider>
         </I18nProvider>
       );
 

@@ -62,5 +62,6 @@ export const createMockAppContext = (): AppDependencies =>
       enableSizeAndDocCount: true,
       enableDataStreamStats: true,
       enableTogglingDataRetention: true,
+      enableIndexMode: true,
     },
   } as unknown as AppDependencies);
