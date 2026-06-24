@@ -117,6 +117,30 @@ describe('ProfileStateRegistry', () => {
       })
     ).toEqual({});
   });
+
+  it('ignores sparse and unregistered fields when picking state by type', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.pickStateByType({
+        profileState: {
+          testProfileState: {
+            uiValue: 'ui',
+            unregisteredValue: 'ignored',
+          },
+          unregisteredProfileState: {
+            uiValue: 'ignored',
+          },
+        },
+        stateType: ProfileStateType.Ui,
+      })
+    ).toEqual({
+      testProfileState: {
+        uiValue: 'ui',
+      },
+    });
+  });
 });
 
 describe('createProfileStateAdapterFactory', () => {

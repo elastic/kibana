@@ -170,6 +170,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                     }
                   >
                     <EuiSelect
+                      data-test-subj="exampleProfileStateTimestampColorSelect"
                       aria-label={i18n.translate(
                         'discover.exampleProfile.timestampColorAriaLabel',
                         {

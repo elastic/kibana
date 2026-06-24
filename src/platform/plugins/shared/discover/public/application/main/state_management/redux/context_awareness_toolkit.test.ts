@@ -14,7 +14,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getPersistedTabMock } from './__mocks__/internal_state.mocks';
 import { createContextAwarenessToolkit } from './context_awareness_toolkit';
-import { internalStateActions, selectTab, type TabState } from '.';
+import { createTabItem, internalStateActions, selectAllTabs, selectTab, type TabState } from '.';
 import { type ProfileStateDefinition, ProfileStateType } from '../../../../context_awareness';
 
 interface TestProfileState {
@@ -176,6 +176,7 @@ describe('createContextAwarenessToolkit', () => {
     }).getStateAdapter(TEST_PROFILE_STATE_DEF);
 
     expect(stateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
+    expect(selectTab(internalState.getState(), tabId).profileState).toEqual({});
 
     stateAdapter.setState({ color: 'primary', rowsPerPage: 50 });
     expect(stateAdapter.getState()).toEqual({ color: 'primary', rowsPerPage: 50 });
@@ -207,5 +208,36 @@ describe('createContextAwarenessToolkit', () => {
       { color: 'primary', rowsPerPage: 50 },
       { color: 'primary', rowsPerPage: 100 },
     ]);
+  });
+
+  it('isolates profile state between tabs', async () => {
+    const { internalState, profileStateRegistry, tabId } = await setup();
+    profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    const allTabs = selectAllTabs(internalState.getState());
+    const otherTab = createTabItem(allTabs);
+
+    await internalState.dispatch(
+      internalStateActions.updateTabs({
+        items: [...allTabs, otherTab],
+        selectedItem: otherTab,
+      })
+    );
+
+    const firstTabStateAdapter = createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).getStateAdapter(TEST_PROFILE_STATE_DEF);
+    const otherTabStateAdapter = createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId: otherTab.id,
+    }).getStateAdapter(TEST_PROFILE_STATE_DEF);
+
+    firstTabStateAdapter.setState({ color: 'primary', rowsPerPage: 50 });
+
+    expect(firstTabStateAdapter.getState()).toEqual({ color: 'primary', rowsPerPage: 50 });
+    expect(otherTabStateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
+    expect(selectTab(internalState.getState(), otherTab.id).profileState).toEqual({});
   });
 });
