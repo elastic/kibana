@@ -166,29 +166,31 @@ function hydrateDateField(value: unknown): Date | null {
 }
 
 /**
- * Checks that a deserialized snapshot object has the shape of a {@link RuleChangeHistorySnapshot}.
+ * Guards against null/undefined and ensures the snapshot at least carries a
+ * string `id` before we attempt to hydrate it into a `Rule`.
+ *
+ * Intentionally minimal — a full field-by-field check (or a Zod schema) is not
+ * warranted here for two reasons:
+ *
+ * 1. **Schema drift.** Snapshots are stored as unmapped JSON in the
+ *    `.kibana_change_history` data stream and are never migrated. Any
+ *    field-level check must be kept in sync with `RuleChangeHistorySnapshot`
+ *    manually; fields added or removed in the future would silently invalidate
+ *    otherwise-readable records.
+ *
+ * 2. **`transformRuleDomainToRule` never throws.** It is a pure structural
+ *    copy; missing or wrong-typed fields produce `undefined` values in the
+ *    output rather than runtime errors. The `try/catch` in `hydrateRuleSnapshot`
+ *    acts as a backstop for any unexpected exception. A corrupt record is
+ *    therefore either skipped here (no object / no id) or returned with partial
+ *    fields — in neither case does it 500 the request.
  */
 function isRuleDomainSnapshot(
   maybeRuleDomain: unknown
 ): maybeRuleDomain is RuleChangeHistorySnapshot {
-  if (typeof maybeRuleDomain !== 'object' || maybeRuleDomain === null) {
-    return false;
-  }
-  const v = maybeRuleDomain as Record<string, unknown>;
-
   return (
-    typeof v.id === 'string' &&
-    typeof v.name === 'string' &&
-    typeof v.enabled === 'boolean' &&
-    typeof v.alertTypeId === 'string' &&
-    typeof v.consumer === 'string' &&
-    typeof v.schedule === 'object' &&
-    v.schedule !== null &&
-    typeof v.revision === 'number' &&
-    typeof v.muteAll === 'boolean' &&
-    Array.isArray(v.actions) &&
-    Array.isArray(v.tags) &&
-    typeof v.params === 'object' &&
-    v.params !== null
+    typeof maybeRuleDomain === 'object' &&
+    maybeRuleDomain !== null &&
+    typeof (maybeRuleDomain as Record<string, unknown>).id === 'string'
   );
 }
