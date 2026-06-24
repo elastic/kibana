@@ -12,6 +12,10 @@ import type { StreamsRouteRepository } from './routes';
 import { config } from './config';
 
 export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRouteRepository };
+export type {
+  StreamsKnowledgeIndicatorsReader,
+  StreamsKnowledgeIndicatorsListOptions,
+} from './lib/streams/cross_plugin/knowledge_indicators_reader';
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {

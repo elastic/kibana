@@ -19,10 +19,17 @@ import {
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
+import type { GraphRoleAliasContext } from '@kbn/entity-store/server';
 import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
+import {
+  buildGraphAliasPrelude,
+  type GraphAliasPrelude,
+  KI_PROVENANCE_FEATURE_UUID_FIELD,
+  KI_PROVENANCE_CONFIDENCE_FIELD,
+} from './build_graph_alias_prelude';
 import {
   concatJsonObjectPropertyEsqlExprSafe,
   JSON_OBJECT_START,
@@ -50,6 +57,7 @@ interface BuildEsqlQueryParams {
   originAlertIds: OriginEventId[];
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
+  aliasPrelude: GraphAliasPrelude;
 }
 
 /**
@@ -73,6 +81,7 @@ export const fetchEvents = async ({
   esQuery,
   pinnedIds,
   projectRouting,
+  graphRoleAliases,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -85,6 +94,7 @@ export const fetchEvents = async ({
   esQuery?: EsQuery;
   pinnedIds?: string[];
   projectRouting?: ProjectRouting;
+  graphRoleAliases?: GraphRoleAliasContext[];
 }): Promise<EsqlToRecords<EventEsqlRow>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -102,12 +112,17 @@ export const fetchEvents = async ({
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
 
+  // Off-by-default Streams-KI alias prelude. Empty (the default) ⇒ the query and
+  // DSL filter below are byte-identical to the no-KI path.
+  const aliasPrelude = buildGraphAliasPrelude(graphRoleAliases);
+
   const filter = buildDslFilter(
     originEventIds.map((originEventId) => originEventId.id),
     showUnknownTarget,
     start,
     end,
-    esQuery
+    esQuery,
+    aliasPrelude.targetSourceFields
   );
 
   const params = [
@@ -122,6 +137,7 @@ export const fetchEvents = async ({
     originAlertIds,
     alertsMappingsIncluded,
     pinnedIds,
+    aliasPrelude,
   });
 
   logger.trace(`Executing events query [project_routing: ${projectRouting ?? 'default'}]`);
@@ -142,7 +158,8 @@ const buildDslFilter = (
   showUnknownTarget: boolean,
   start: string | number,
   end: string | number,
-  esQuery?: EsQuery
+  esQuery?: EsQuery,
+  kiTargetSourceFields: string[] = []
 ) => ({
   bool: {
     filter: [
@@ -159,11 +176,15 @@ const buildDslFilter = (
         : [
             {
               bool: {
+                // KI target source paths are added so that events whose target is only
+                // expressed in a non-ECS field (resolved by the alias prelude) survive
+                // this pre-filter. When no alias contexts are present this is a no-op.
                 should: [
                   ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
                   ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
                   ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
                   ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
+                  ...kiTargetSourceFields,
                 ].map((field) => ({
                   exists: { field },
                 })),
@@ -412,18 +433,39 @@ const buildActorSourceFieldsEsql = (): string =>
 const buildTargetSourceFieldsEsql = (): string =>
   buildSourceFieldsJson(GRAPH_TARGET_EUID_SOURCE_FIELDS, 'targetEntityId');
 
+/**
+ * The trailing `,"knowledge_indicator":{...}` arm folded into actor/target/edge
+ * docData JSON. Emits `""` for rows where no KI alias fired (provenance columns
+ * null), so ECS-native rows keep the exact JSON shape of the no-KI path. Only
+ * spliced when the alias prelude produced columns (see {@link GraphAliasPrelude}).
+ */
+const buildKnowledgeIndicatorJsonArm = (): string =>
+  `CASE(\`${KI_PROVENANCE_FEATURE_UUID_FIELD}\` IS NOT NULL, CONCAT(` +
+  `${JSON_OBJECT_SEPARATOR}, "\\"knowledge_indicator\\":", ${JSON_OBJECT_START}, ` +
+  `${concatJsonObjectPropertyEsqlExprAsString(
+    'feature_uuid',
+    `\`${KI_PROVENANCE_FEATURE_UUID_FIELD}\``
+  )}, ${JSON_OBJECT_SEPARATOR}, ` +
+  `CONCAT("\\"confidence\\":", TO_STRING(\`${KI_PROVENANCE_CONFIDENCE_FIELD}\`)), ` +
+  `${JSON_OBJECT_END}), "")`;
+
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
   originAlertIds,
   alertsMappingsIncluded,
   pinnedIds,
+  aliasPrelude,
 }: BuildEsqlQueryParams): string => {
+  // Off-by-default Streams-KI alias prelude. Empty ⇒ byte-identical to the no-KI path.
+  const aliasPreludeEsql = aliasPrelude.hasAliases ? `${aliasPrelude.esql}\n` : '';
+  // Provenance arm folded into each docData JSON object; empty unless aliases fired.
+  const kiArm = aliasPrelude.hasAliases ? `\n    ${buildKnowledgeIndicatorJsonArm()},` : '';
   const query = `SET unmapped_fields="nullify";
 FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
-${buildV2ActorResolution()}
+${aliasPreludeEsql}${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
 ${buildV2TargetResolution()}
 // Save EUID source fields after MV_EXPAND (single-value per row) but before entity enrichment overwrites them
@@ -435,12 +477,12 @@ ${buildPinnedEsql(pinnedIds)}
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
+    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},${kiArm}
   ${JSON_OBJECT_END})
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
+    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},${kiArm}
   ${JSON_OBJECT_END})
 
 // Map host and source values to enriched contextual data
@@ -479,7 +521,7 @@ ${buildPinnedEsql(pinnedIds)}
       "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
     "}"), ""),`
         : ''
-    }
+    }${kiArm}
   "}")
 // Per-triple rows. All grouping (action × actor/target type × origin/pinned)
 // happens in TypeScript via regroupEvents. STATS … BY (action, actorEntityId, targetEntityId, …)

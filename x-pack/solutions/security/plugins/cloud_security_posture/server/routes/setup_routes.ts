@@ -76,7 +76,7 @@ export function setupRoutes({
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
     async (context, request) => {
-      const [, { security, fleet, spaces }] = await core.getStartServices();
+      const [, { security, fleet, spaces, entityStore }] = await core.getStartServices();
       const coreContext = await context.core;
       await fleet.fleetSetupCompleted();
 
@@ -101,6 +101,14 @@ export function setupRoutes({
         agentService: fleet.agentService,
         packagePolicyService: fleet.packagePolicyService,
         packageService: fleet.packageService,
+        getGraphRoleAliases: async () => {
+          const namespace = spaces?.spacesService?.getSpaceId(request) ?? 'default';
+          return entityStore.getGraphRoleAliases(
+            request,
+            coreContext.elasticsearch.client.asCurrentUser,
+            namespace
+          );
+        },
         isPluginInitialized,
       };
     }

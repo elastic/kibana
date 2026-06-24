@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
 import type { Logger } from '@kbn/core/server';
+import type { GraphRoleAliasContext } from '@kbn/entity-store/server';
 import type { OriginEventId, EsQuery, EventEsqlRow } from './types';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
@@ -512,6 +513,111 @@ describe('fetchEvents', () => {
       expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       expect(args).not.toHaveProperty('project_routing');
+    });
+  });
+
+  describe('Streams-KI alias prelude', () => {
+    const AZURE_STREAM = 'logs-azure.signinlogs-default';
+    const azureContext: GraphRoleAliasContext = {
+      streamName: AZURE_STREAM,
+      indexPatterns: [AZURE_STREAM],
+      aliases: new Map<string, readonly string[]>([
+        ['user.email', ['azure.signinlogs.properties.user_principal_name']],
+        ['service.target.name', ['azure.signinlogs.properties.resource_display_name']],
+        ['event.action', ['azure.signinlogs.operation_name']],
+      ]) as GraphRoleAliasContext['aliases'],
+      featureUuid: 'azure-feature-1',
+      confidence: 88,
+    };
+
+    const baseParams = {
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: ['logs-*'],
+      spaceId: 'default',
+      esQuery: undefined as EsQuery | undefined,
+    };
+
+    const runQuery = async (graphRoleAliases?: GraphRoleAliasContext[]): Promise<string> => {
+      await fetchEvents({ esClient, logger, ...baseParams, graphRoleAliases });
+      const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
+      const [args] = calls[calls.length - 1];
+      return args.query as string;
+    };
+
+    it('is byte-identical to the no-KI path when no alias contexts are supplied (knob off)', async () => {
+      const withoutAliases = await runQuery(undefined);
+      const withEmptyAliases = await runQuery([]);
+
+      expect(withoutAliases).toEqual(withEmptyAliases);
+      // The off path never emits prelude/provenance ES|QL.
+      expect(withoutAliases).not.toContain('knowledge_indicator');
+      expect(withoutAliases).not.toContain('_ki_fired_');
+    });
+
+    it('splices guarded slot fills + provenance and folds knowledge_indicator into docData', async () => {
+      const query = await runQuery([azureContext]);
+
+      // Guarded COALESCE slot fills for actor / target / action.
+      expect(query).toContain('| EVAL `user.email` = COALESCE(`user.email`, CASE(');
+      expect(query).toContain('| EVAL `event.action` = COALESCE(`event.action`, CASE(');
+      expect(query).toContain(
+        '| EVAL `service.target.name` = COALESCE(`service.target.name`, CASE('
+      );
+      // Provenance columns.
+      expect(query).toContain('graph.knowledge_indicator.feature_uuid');
+      expect(query).toContain('graph.knowledge_indicator.confidence');
+      // Provenance folded into the docData JSON objects.
+      expect(query).toContain('\\"knowledge_indicator\\":');
+      // The prelude lands before actor resolution / the event.action WHERE gate.
+      expect(query.indexOf('graph.knowledge_indicator.feature_uuid')).toBeLessThan(
+        query.indexOf('WHERE event.action IS NOT NULL')
+      );
+    });
+
+    it('adds KI target source paths to the showUnknownTarget=false exists pre-filter', async () => {
+      await fetchEvents({
+        esClient,
+        logger,
+        ...baseParams,
+        showUnknownTarget: false,
+        graphRoleAliases: [azureContext],
+      });
+
+      const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const filterArg = args.filter as any;
+      const targetFilter = filterArg.bool.filter.find((f: any) =>
+        f.bool?.should?.some(
+          (s: any) => s.exists?.field === 'azure.signinlogs.properties.resource_display_name'
+        )
+      );
+      expect(targetFilter).toBeDefined();
+      // Actor-only sources are NOT added to the target exists list.
+      const hasActorSource = filterArg.bool.filter.some((f: any) =>
+        f.bool?.should?.some(
+          (s: any) => s.exists?.field === 'azure.signinlogs.properties.user_principal_name'
+        )
+      );
+      expect(hasActorSource).toBe(false);
+    });
+
+    it('does not leak alias source paths into the DSL filter when showUnknownTarget is true', async () => {
+      await fetchEvents({
+        esClient,
+        logger,
+        ...baseParams,
+        showUnknownTarget: true,
+        graphRoleAliases: [azureContext],
+      });
+
+      const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const filterArg = args.filter as any;
+      const hasTargetExists = filterArg.bool.filter.some((f: any) =>
+        f.bool?.should?.some((s: any) => s.exists?.field?.startsWith('azure.signinlogs'))
+      );
+      expect(hasTargetExists).toBe(false);
     });
   });
 });

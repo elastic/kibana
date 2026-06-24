@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { RoundedBadge } from '../styles';
+import { InferredKnowledgeIndicatorBadge } from '../inferred_knowledge_indicator_badge';
 import type { DocumentAnalysisOutput } from './analyze_documents';
 
 export const TEST_SUBJ_ALERT_ICON = 'label-node-alert-icon';
@@ -35,6 +36,8 @@ const POPOVER_ALERT_ARIA_LABEL = i18n.translate(
 
 interface LabelNodeBadgesProps {
   analysis: DocumentAnalysisOutput;
+  /** When true, render the "Inferred (KI)" badge (the edge's action was alias-derived). */
+  isInferred?: boolean;
   onEventClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
@@ -141,10 +144,12 @@ const AlertIconBadge: React.FC = () => (
     <AlertIcon color="danger" />
   </RoundedBadge>
 );
-export const LabelNodeBadges = ({ analysis, onEventClick }: LabelNodeBadgesProps) => {
+export const LabelNodeBadges = ({ analysis, isInferred, onEventClick }: LabelNodeBadgesProps) => {
   const { euiTheme } = useEuiTheme();
 
-  if (analysis.isSingleEvent) {
+  // A single-event edge normally renders no badges, but an inferred (KI) edge
+  // must still surface its provenance badge.
+  if (analysis.isSingleEvent && !isInferred) {
     return null;
   }
 
@@ -157,6 +162,7 @@ export const LabelNodeBadges = ({ analysis, onEventClick }: LabelNodeBadgesProps
         gap: ${euiTheme.size.xs};
       `}
     >
+      {isInferred && <InferredKnowledgeIndicatorBadge />}
       {analysis.isSingleAlert && <AlertIconBadge />}
       {analysis.isGroupOfEvents && (
         <EventBadge count={analysis.uniqueEventsCount} onEventClick={onEventClick} />

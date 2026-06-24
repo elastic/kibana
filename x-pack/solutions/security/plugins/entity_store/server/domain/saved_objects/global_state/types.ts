@@ -12,6 +12,7 @@ import {
   LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  KI_GRAPH_ALIAS_MIN_CONFIDENCE_DEFAULT,
 } from './constants';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
@@ -120,11 +121,41 @@ const version3: SavedObjectsFullModelVersion = {
   },
 };
 
+// v4 introduces the `knowledgeIndicators` config block. The single knob,
+// `graphAliasMinConfidence`, is null by default so the cloud-security graph KI
+// alias prelude is opt-in and the graph is byte-identical until a tenant sets it.
+const knowledgeIndicatorsSchemaV4 = schema.object({
+  graphAliasMinConfidence: schema.maybe(schema.nullable(schema.number())),
+});
+
+const globalStateSchemaV4 = globalStateSchemaV3.extends({
+  knowledgeIndicators: schema.maybe(knowledgeIndicatorsSchemaV4),
+});
+
+const version4: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          knowledgeIndicators: {
+            graphAliasMinConfidence: KI_GRAPH_ALIAS_MIN_CONFIDENCE_DEFAULT,
+          },
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV4,
+    forwardCompatibility: globalStateSchemaV4.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
   hiddenFromHttpApis: true,
 };

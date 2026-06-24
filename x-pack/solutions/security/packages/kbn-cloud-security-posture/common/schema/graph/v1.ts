@@ -120,6 +120,17 @@ export const nodeDocumentDataSchema = schema.object({
     })
   ),
   entity: schema.maybe(entitySchema),
+  /**
+   * Streams-Knowledge-Indicators provenance, present only on documents whose
+   * actor / target / action slot was filled by an inferred (non-ECS) alias.
+   * Drives the "Inferred (KI)" badge. Absent on ECS-native documents.
+   */
+  knowledge_indicator: schema.maybe(
+    schema.object({
+      feature_uuid: schema.maybe(schema.string()),
+      confidence: schema.maybe(schema.number()),
+    })
+  ),
 });
 
 export const REACHED_NODES_LIMIT = 'REACHED_NODES_LIMIT';

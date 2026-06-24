@@ -54,6 +54,18 @@ Schema features describe the **log schema family** evident from field names and 
 - **Evidence**: Field names and log structure (e.g. ECS: `@timestamp`, `ecs.version`, `event.*`, `log.*`, `service.name`; OTel: `resource.attributes.*`, `severity_text`, `body.text`). Use only evidence from sample_documents.
 - **Short properties**: For `type: "schema"`, `properties` must be minimal: include `schema_family` (`"ecs"` | `"otel"` | `"custom"`) and optionally `ecs_version` when ECS is detected and version is evident. Do not list all fields or paste long analysis.
 - **Multiple schemas**: If evidence supports more than one schema family (e.g. ECS and OTel both present), emit one schema feature per detected family; list all of them. Each feature keeps short `properties`.
+- **ECS identity & graph-role aliases (entity-extraction + graph correlation support)**: When the stream's documents carry identity-bearing or action fields under non-ECS paths (e.g. `azure.signinlogs.properties.user_principal_name`, `okta.actor.alternateId`, or `aws.cloudtrail.user_identity.user_name` for users; `infoblox_nios.log.dhcp.client_hostname`, `cisco_asa.dhcp.host_name`, or `forescout.asset.hostname` for hosts), include an `ecs_identity_aliases` table in `properties`. The table maps ECS destinations to the non-ECS source paths in this stream that carry the same value. Downstream entity extraction uses the **actor-identity** destinations to project canonical entities, and the cloud-security graph additionally uses the **`.target.*`** and **`event.action`** destinations to correlate non-ECS streams into `actor → action → target` edges — both without per-integration ECS normalization.
+  - **Allowed destination keys (closed vocabulary)** — three groups; any other key is ignored downstream:
+    - **Actor identity**: `user.email`, `user.id`, `user.name`, `user.domain`, `host.id`, `host.name`, `host.hostname`, `service.name`, `entity.id`.
+    - **Target identity (the `.target.*` mirror — the object an actor acts upon)**: `user.target.email`, `user.target.id`, `user.target.name`, `user.target.domain`, `host.target.id`, `host.target.name`, `host.target.hostname`, `service.target.name`, `entity.target.id`.
+    - **Edge action / verb**: `event.action`.
+  - **Values**: arrays of non-ECS field paths in this stream that carry the same role, ordered by preference (highest-quality source first).
+  - **Actor vs. target discipline**: map a path to an **actor** destination only when it identifies who/what initiated the event; map to the **`.target.*`** mirror only when it identifies the object the actor acted upon (the resource signed into, the principal modified, the host connected to). Do not map one value to both an actor and a target destination.
+  - **`event.action` aliasing**: alias `event.action` only from a field that already reads as the event's verb/operation (e.g. `azure.signinlogs.operation_name`, `okta.event.type`). It is a COALESCE-from-source mapping — do not invent a normalized verb taxonomy.
+  - **Evidence-bound emission**: only emit an alias when sample documents directly support the mapping (e.g. the same value appears under both an existing ECS field and the aliased path, or a sample doc shows the non-ECS path carrying a clearly role-shaped value).
+  - **Never alias non-identity fields**: group memberships, role names, permission grants, etc. These look identity-shaped but are neither an actor nor a target identity.
+  - **Filter scoping for one-field-two-semantics cases**: when the same non-ECS path is an actor identity in some docs and a target/object in other docs (e.g. `azure.signinlogs.properties.user_principal_name` in a sign-in event vs. an audit event), use the schema feature's `filter` to scope the alias to docs that match the intended context. The downstream consumer applies aliases only to docs that match the feature's filter.
+  - When in doubt, omit the alias rather than guess.
 
 ## Entity Extraction Guidelines
 
@@ -361,6 +373,80 @@ Version formatting rules (important for vulnerability analysis):
 }
 ```
 
+**Example 8 — Schema: graph actor / target / action aliases (Azure Sign-in Logs)**
+
+Azure Sign-in Logs carry the signing-in user, the resource signed into, and the operation under non-ECS `azure.signinlogs.*` paths. Aliasing the actor (`user.*`), the target (`*.target.*`), and the verb (`event.action`) lets the cloud-security graph render `alice@contoso.com → signed in to → Microsoft Graph` without per-integration ECS normalization.
+```
+{
+  "type": "schema",
+  "subtype": "custom",
+  "id": "azure-signinlogs-schema",
+  "title": "Azure Sign-in Logs schema",
+  "description": "Custom Azure Sign-in Logs schema; the signing-in user lives under azure.signinlogs.properties.user_principal_name, the accessed resource under azure.signinlogs.properties.resource_display_name, and the operation under azure.signinlogs.operation_name rather than ECS user.*, *.target.*, and event.action.",
+  "properties": {
+    "schema_family": "custom",
+    "ecs_identity_aliases": {
+      "user.email": ["azure.signinlogs.properties.user_principal_name"],
+      "user.id": ["azure.signinlogs.properties.user_id"],
+      "user.name": ["azure.signinlogs.identity"],
+      "service.target.name": ["azure.signinlogs.properties.resource_display_name"],
+      "entity.target.id": ["azure.signinlogs.properties.resource_id"],
+      "event.action": ["azure.signinlogs.operation_name"]
+    }
+  },
+  "confidence": 88,
+  "evidence": [
+    "azure.signinlogs.properties.user_principal_name=alice@contoso.com",
+    "azure.signinlogs.properties.resource_display_name=Microsoft Graph",
+    "azure.signinlogs.operation_name=Sign-in activity",
+    "event.dataset=azure.signinlogs"
+  ],
+  "evidence_doc_ids": ["a1b2c3d", "e4f5g6h"],
+  "tags": ["schema", "azure", "identity-alias", "graph-roles"],
+  "filter": {
+    "field": "event.dataset",
+    "eq": "azure.signinlogs"
+  }
+}
+```
+
+**Example 9 — Schema: ECS family with host identity aliases (no co-occurring ECS host.\*)**
+
+Asset-tracking streams (DHCP leases, CMDB/inventory exports, AD computer accounts, network-device discovery) routinely carry the asset's hostname under a vendor-specific non-ECS path while the corresponding ECS `host.*` fields are never populated. The stream's purpose makes the non-ECS path a canonical host identity, so an alias is warranted even without co-occurrence — provided the path identifies the asset the event is *about* (the leasing client, the inventoried device) and not an observer/relay/lookup target.
+```
+{
+  "type": "schema",
+  "subtype": "ecs",
+  "id": "infoblox-nios-log-schema",
+  "title": "Infoblox NIOS log schema",
+  "description": "Infoblox NIOS DHCP/DNS log stream. The leasing client's hostname is carried under the non-ECS path infoblox_nios.log.dhcp.client_hostname; the corresponding ECS host.* fields are not populated on this stream, but the stream's purpose (DHCP lease tracking) makes it a canonical source for host identity. The DHCP relay/server hostname carried elsewhere on the same stream (observer.* / host.domain) is intentionally NOT aliased — it identifies the observer, not the leased asset.",
+  "properties": {
+    "schema_family": "ecs",
+    "ecs_version": "8.11.0",
+    "ecs_identity_aliases": {
+      "host.name": ["infoblox_nios.log.dhcp.client_hostname"],
+      "host.hostname": ["infoblox_nios.log.dhcp.client_hostname"]
+    }
+  },
+  "confidence": 90,
+  "evidence": [
+    "data_stream.dataset=infoblox_nios.log",
+    "infoblox_nios.log.service_name=dhcpd",
+    "infoblox_nios.log.dhcp.client_hostname=MacBook-Pro-16-inch",
+    "event.action=dhcpack",
+    "ecs.version=8.11.0"
+  ],
+  "evidence_doc_ids": ["a1b2c3d"],
+  "tags": ["schema", "ecs", "identity-alias", "host"],
+  "filter": {
+    "and": [
+      { "field": "data_stream.dataset", "eq": "infoblox_nios.log" },
+      { "field": "infoblox_nios.log.type", "eq": "DHCP" }
+    ]
+  }
+}
+```
+
 ## Previously Identified Features
 
 If `previously_identified_features` are provided in the input, they contain features already identified in previous iterations. Follow these rules:
@@ -400,6 +486,6 @@ If `excluded_features` is empty or absent, ignore this section entirely and leav
 - Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
 - Entity threshold: only create entity features when there is clear evidence of a distinct, named system component. When in doubt, omit the entity.
 - Entity filters: for each emitted entity, include a valid `filter` unless there is no stable/selective condition available from evidence.
-- Schema: when multiple schema families are evident (e.g. ECS and OTel), emit one schema feature per family; keep each schema feature's `properties` short (`schema_family`, optional `ecs_version` only).
+- Schema: when multiple schema families are evident (e.g. ECS and OTel), emit one schema feature per family; keep each schema feature's `properties` short (`schema_family`, optional `ecs_version`, optional `ecs_identity_aliases` table when the stream carries identity/action-bearing fields under non-ECS paths).
 
 Build one complete, deduplicated feature list internally, then call **finalize_features** exactly once.

@@ -6,6 +6,7 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import type { GraphRoleAliasContext } from '@kbn/entity-store/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { fetchGraph } from './fetch_graph';
@@ -32,6 +33,11 @@ export interface GetGraphParams {
   };
   showUnknownTarget: boolean;
   nodesLimit?: number;
+  /**
+   * Streams-KI graph-role alias contexts. Empty (the default) means the alias
+   * prelude is not spliced and the query is byte-identical to today.
+   */
+  graphRoleAliases?: GraphRoleAliasContext[];
 }
 
 export const getGraph = async ({
@@ -49,6 +55,7 @@ export const getGraph = async ({
   },
   showUnknownTarget,
   nodesLimit,
+  graphRoleAliases,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
@@ -73,6 +80,7 @@ export const getGraph = async ({
     pinnedIds,
     entityIds,
     projectRouting,
+    graphRoleAliases,
   });
 
   return parseRecords(logger, events, relationships, entities, nodesLimit);

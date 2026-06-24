@@ -226,17 +226,27 @@ const createEntityNode = (
     : undefined;
 
   documentsData?.forEach((doc) => {
-    if (doc.entity?.sourceFields) {
+    // The events-graph ES|QL writes entity source fields at the top level of the
+    // doc JSON (`{ id, type, sourceFields, ... }`), but the response schema and
+    // the UI expect them under `entity.sourceFields`. Relocate them (dropping the
+    // EUID join keys) so the payload both validates and renders. The already
+    // nested shape is tolerated too, so this is safe regardless of the source.
+    const writableDoc = doc as Writable<typeof doc> & {
+      sourceFields?: Record<string, unknown>;
+    };
+    const rawSourceFields = writableDoc.sourceFields ?? doc.entity?.sourceFields;
+    if (rawSourceFields) {
       const currentlySupportedSourceFields = omit(
-        doc.entity.sourceFields,
+        rawSourceFields,
         GRAPH_ACTOR_EUID_SOURCE_FIELDS.all
       );
-      (doc as Writable<typeof doc>).entity = {
+      writableDoc.entity = {
         ...doc.entity,
         sourceFields: EXPAND_DOT_NOTATION
           ? expandDotNotation(currentlySupportedSourceFields)
           : currentlySupportedSourceFields,
       };
+      delete writableDoc.sourceFields;
     }
   });
 

@@ -55,6 +55,22 @@ export const LogExtractionConfig = z.object({
     .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
 });
 
+// `null` => the cloud-security graph KI alias prelude is disabled and the graph
+// stays byte-identical to today. A number (0–100) opts in and is the minimum
+// schema-feature confidence whose `ecs_identity_aliases` the graph will apply.
+export const KI_GRAPH_ALIAS_MIN_CONFIDENCE_DEFAULT = null;
+
+export type KnowledgeIndicatorsConfig = z.infer<typeof KnowledgeIndicatorsConfig>;
+export const KnowledgeIndicatorsConfig = z.object({
+  graphAliasMinConfidence: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .nullable()
+    .default(KI_GRAPH_ALIAS_MIN_CONFIDENCE_DEFAULT),
+});
+
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
 export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
 
@@ -78,4 +94,7 @@ export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;
 export const EntityStoreGlobalState = z.object({
   historySnapshot: HistorySnapshotState,
   logsExtraction: LogExtractionConfig,
+  knowledgeIndicators: KnowledgeIndicatorsConfig.default({
+    graphAliasMinConfidence: KI_GRAPH_ALIAS_MIN_CONFIDENCE_DEFAULT,
+  }),
 });

@@ -26,8 +26,11 @@ import type {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { GraphRoleAliasContext } from './domain/streams_features';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
@@ -51,6 +54,15 @@ export interface EntityStoreStartPlugins {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
+  /**
+   * Optional, declared in `kibana.jsonc` as `optionalPlugins.streams` so the
+   * entity store keeps working in deployments that don't have streams
+   * enabled. Consumers must guard against `undefined` at the call site (the
+   * no-op reader pattern in `createKnowledgeIndicatorsReader` is the canonical
+   * fallback). Used to read Streams Knowledge Indicators for the schema-feature
+   * graph alias contexts exposed via `getGraphRoleAliases`.
+   */
+  streams?: StreamsPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {
@@ -82,6 +94,22 @@ export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 export interface EntityStoreStartContract {
   createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
+  /**
+   * Returns the validated Streams-KI schema-feature alias contexts that the
+   * cloud-security graph splices into its events query to bridge non-ECS
+   * actor / target / action paths onto canonical ECS slots.
+   *
+   * Off by default: reads the entity-store global-state `graphAliasMinConfidence`
+   * knob internally and resolves to `[]` when it is `null` (or when the streams
+   * plugin is not enabled), so the graph stays byte-identical to today unless a
+   * tenant opts in. The `request` is used to build a request-scoped Knowledge
+   * Indicators reader so features are read with the caller's auth / space scope.
+   */
+  getGraphRoleAliases: (
+    request: KibanaRequest,
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => Promise<GraphRoleAliasContext[]>;
 }
 
 export interface EntityStoreSetupContract {

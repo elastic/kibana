@@ -17,6 +17,7 @@ import {
   TEST_SUBJ_EVENT_COUNT_BUTTON,
 } from './label_node_badges';
 import { analyzeDocuments } from './analyze_documents';
+import { GRAPH_INFERRED_KI_BADGE_ID } from '../../test_ids';
 
 describe('LabelNodeBadges', () => {
   test('renders nothing for single event', () => {
@@ -28,6 +29,22 @@ describe('LabelNodeBadges', () => {
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
+  });
+
+  test('renders the Inferred (KI) badge for a single event when isInferred is true', () => {
+    const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
+
+    render(<LabelNodeBadges analysis={analysis} isInferred />);
+
+    expect(screen.getByTestId(GRAPH_INFERRED_KI_BADGE_ID)).toBeInTheDocument();
+  });
+
+  test('does not render the Inferred (KI) badge when isInferred is falsy', () => {
+    const analysis = analyzeDocuments({ uniqueEventsCount: 3, uniqueAlertsCount: 0 });
+
+    render(<LabelNodeBadges analysis={analysis} />);
+
+    expect(screen.queryByTestId(GRAPH_INFERRED_KI_BADGE_ID)).not.toBeInTheDocument();
   });
 
   test('renders alert badge with icon only for single alert', () => {

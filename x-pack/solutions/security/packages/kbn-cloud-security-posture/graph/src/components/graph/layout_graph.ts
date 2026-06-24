@@ -464,8 +464,17 @@ const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): st
       return;
     }
 
+    // The input graph can legitimately contain cycles — e.g. a self-referential
+    // actor that is also the target of its own grouped actions yields
+    // bidirectional entity↔group edges (logon/logoff on the same user). Dagre
+    // already breaks cycles internally during `Dagre.layout()` before this
+    // cosmetic alignment pass runs, so we must tolerate them here too. Hitting a
+    // node that is still on the recursion stack means we followed a back-edge:
+    // skip it to break the cycle. Throwing here is uncaught and aborts the
+    // entire graph render (full-page error boundary) instead of just degrading
+    // the optional vertical-centering of the few nodes in the cycle.
     if (Object.hasOwn(stack, node)) {
-      throw new Error('CycleException');
+      return;
     }
 
     if (!Object.hasOwn(visited, node)) {
