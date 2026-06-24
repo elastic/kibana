@@ -1,0 +1,60 @@
+{
+  "index_patterns": [
+    "github-intel-teams"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "team": {
+          "properties": {
+            "slug": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "org": {
+              "type": "keyword"
+            },
+            "members_count": {
+              "type": "integer"
+            },
+            "members": {
+              "type": "keyword"
+            },
+            "repositories": {
+              "type": "keyword"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

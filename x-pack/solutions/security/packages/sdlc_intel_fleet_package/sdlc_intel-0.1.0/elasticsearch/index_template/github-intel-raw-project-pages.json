@@ -1,0 +1,77 @@
+{
+  "index_patterns": [
+    "github-intel-raw-project-pages"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "org": {
+          "properties": {
+            "login": {
+              "type": "keyword"
+            }
+          }
+        },
+        "project": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            }
+          }
+        },
+        "cursor": {
+          "type": "keyword"
+        },
+        "item_count": {
+          "type": "integer"
+        },
+        "page_info": {
+          "properties": {
+            "has_next_page": {
+              "type": "boolean"
+            },
+            "end_cursor": {
+              "type": "keyword"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

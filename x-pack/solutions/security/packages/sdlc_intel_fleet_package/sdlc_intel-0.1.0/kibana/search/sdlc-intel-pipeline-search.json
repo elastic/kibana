@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "columns": ["org_login", "project_number", "page_count", "items_fetched"],
+    "description": "Raw page counts per GitHub project",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["page_count", "desc"]],
+    "title": "SDLC raw pages by project",
+    "version": 1
+  },
+  "id": "sdlc-intel-pipeline-search",
+  "references": [
+    {
+      "id": "sdlc-github-raw-summary-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

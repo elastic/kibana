@@ -1,0 +1,60 @@
+{
+  "index_patterns": [
+    "github-intel-people"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "person": {
+          "properties": {
+            "login": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "org_teams": {
+              "type": "keyword"
+            },
+            "github_teams": {
+              "type": "keyword"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

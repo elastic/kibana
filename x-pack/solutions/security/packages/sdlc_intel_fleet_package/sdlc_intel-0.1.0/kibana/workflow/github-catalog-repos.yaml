@@ -1,0 +1,138 @@
+version: '1'
+name: SDLC GitHub catalog repos (GraphQL)
+description: >
+  Tier-1 catalog workflow. Reads a sync checkpoint from github-intel-sync-state,
+  pages organization repositories via GitHub GraphQL (orgCatalog.repos template),
+  upserts normalized documents into github-intel-repos, and updates the checkpoint.
+  Requires a configured .github connector with read:org and repo scopes.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - catalog
+  - ingest
+  - graphql
+
+consts:
+  orgLogin: elastic
+  # Replace after creating a GitHub connector instance in Stack Management → Connectors.
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  reposIndex: github-intel-repos
+  syncSource: github-catalog-repos
+  entityType: repo
+  pageSize: 100
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-github-catalog-repos
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_cursor
+    type: data.set
+    with:
+      cursor: '{{ steps.read_checkpoint.output.hits.hits.0._source.cursor }}'
+      pagesFetched: 0
+
+  - name: paginate_repos
+    type: while
+    condition: 'steps.fetch_repos.output.pageInfo.hasNextPage : true'
+    max-iterations: 15
+    steps:
+      - name: fetch_repos
+        type: github.runQueryTemplate
+        connector-id: '{{ consts.githubConnectorId }}'
+        with:
+          templateId: orgCatalog.repos
+          variables:
+            org: '{{ consts.orgLogin }}'
+          first: '{{ consts.pageSize }}'
+          after: '{{ variables.cursor }}'
+
+      - name: backoff_if_needed
+        type: wait
+        if: '{{ steps.fetch_repos.output.shouldBackoff }}'
+        with:
+          duration: 60s
+
+      - name: index_repos
+        type: foreach
+        foreach: '{{ steps.fetch_repos.output.data.organization.repositories.nodes | json }}'
+        steps:
+          - name: upsert_repo
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.reposIndex }}'
+              id: '{{ foreach.item.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                entity:
+                  type: repo
+                  id: '{{ foreach.item.id }}'
+                  url: '{{ foreach.item.url }}'
+                org:
+                  login: '{{ consts.orgLogin }}'
+                repo:
+                  name: '{{ foreach.item.name }}'
+                  full_name: '{{ foreach.item.nameWithOwner }}'
+                  description: '{{ foreach.item.description }}'
+                  default_branch: '{{ foreach.item.defaultBranchRef.name }}'
+                  is_private: '{{ foreach.item.isPrivate }}'
+                github:
+                  created_at: '{{ foreach.item.createdAt }}'
+                  updated_at: '{{ foreach.item.updatedAt }}'
+                payload: '{{ foreach.item | json }}'
+
+      - name: advance_cursor
+        type: data.set
+        with:
+          cursor: '{{ steps.fetch_repos.output.pageInfo.endCursor }}'
+          pagesFetched: '{{ variables.pagesFetched | plus: 1 }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        cursor: '{{ variables.cursor }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pages_fetched: '{{ variables.pagesFetched }}'
+          has_next_page: '{{ steps.fetch_repos.output.pageInfo.hasNextPage }}'
+          rate_limit_remaining: '{{ steps.fetch_repos.output.rateLimit.remaining }}'

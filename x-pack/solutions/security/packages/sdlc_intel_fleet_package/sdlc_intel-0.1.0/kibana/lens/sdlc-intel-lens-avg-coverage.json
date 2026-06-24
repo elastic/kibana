@@ -1,0 +1,52 @@
+{
+  "attributes": {
+    "description": "Total project items in raw page payloads",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "layer1": {
+              "columnOrder": ["metric-col"],
+              "columns": {
+                "metric-col": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Items fetched",
+                  "operationType": "sum",
+                  "scale": "ratio",
+                  "sourceField": "items_fetched"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "layerId": "layer1",
+        "layerType": "data",
+        "metricAccessor": "metric-col"
+      }
+    },
+    "title": "SDLC items fetched",
+    "visualizationType": "lnsMetric"
+  },
+  "id": "sdlc-intel-lens-avg-coverage",
+  "references": [
+    {
+      "id": "sdlc-github-raw-summary-view",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "sdlc-github-raw-summary-view",
+      "name": "indexpattern-datasource-layer-layer1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}

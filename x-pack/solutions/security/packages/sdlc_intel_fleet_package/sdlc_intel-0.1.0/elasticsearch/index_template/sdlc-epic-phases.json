@@ -1,0 +1,261 @@
+{
+  "index_patterns": [
+    "sdlc-epic-phases"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "roadmap": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "product": {
+              "type": "keyword"
+            }
+          }
+        },
+        "epic": {
+          "properties": {
+            "key": {
+              "type": "keyword"
+            },
+            "display_id": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "summary": {
+              "type": "text"
+            },
+            "owner": {
+              "type": "keyword"
+            },
+            "owner_initials": {
+              "type": "keyword"
+            },
+            "teams": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "project_item_id": {
+              "type": "keyword"
+            },
+            "issue_ref": {
+              "properties": {
+                "repo": {
+                  "type": "keyword"
+                },
+                "number": {
+                  "type": "integer"
+                },
+                "node_id": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "teams": {
+          "properties": {
+            "own_org_team": {
+              "type": "keyword"
+            },
+            "own_engineering_team": {
+              "type": "keyword"
+            },
+            "contributing_org_teams": {
+              "type": "keyword"
+            },
+            "contributing_engineering_teams": {
+              "type": "keyword"
+            },
+            "cross_team": {
+              "type": "boolean"
+            },
+            "team_count": {
+              "type": "float"
+            }
+          }
+        },
+        "release": {
+          "properties": {
+            "milestone": {
+              "type": "keyword"
+            },
+            "priority": {
+              "type": "keyword"
+            },
+            "roadmap_stage": {
+              "type": "keyword"
+            },
+            "initiative": {
+              "type": "keyword"
+            },
+            "serverless_iteration": {
+              "type": "keyword"
+            },
+            "deck_feature": {
+              "type": "keyword"
+            },
+            "deck_bucket": {
+              "type": "keyword"
+            }
+          }
+        },
+        "metadata": {
+          "properties": {
+            "seed": {
+              "type": "keyword"
+            },
+            "demo": {
+              "type": "boolean"
+            }
+          }
+        },
+        "links": {
+          "properties": {
+            "project_url": {
+              "type": "keyword"
+            },
+            "prd_url": {
+              "type": "keyword"
+            },
+            "arch_url": {
+              "type": "keyword"
+            }
+          }
+        },
+        "phases": {
+          "properties": {
+            "p1_prd": {
+              "type": "object",
+              "enabled": true
+            },
+            "p2_arch": {
+              "type": "object",
+              "enabled": true
+            },
+            "p3_ai_coverage": {
+              "type": "object",
+              "enabled": true
+            },
+            "p4_tickets": {
+              "type": "object",
+              "enabled": true
+            },
+            "p5_prs": {
+              "type": "object",
+              "enabled": true
+            },
+            "p6_defects": {
+              "type": "object",
+              "enabled": true
+            },
+            "p7_production": {
+              "type": "object",
+              "enabled": true
+            },
+            "p8_telemetry": {
+              "type": "object",
+              "enabled": true
+            }
+          }
+        },
+        "rollup": {
+          "properties": {
+            "coverage_pct": {
+              "type": "integer"
+            },
+            "delivery_coverage_pct": {
+              "type": "integer"
+            },
+            "gates_passed_pct": {
+              "type": "integer"
+            },
+            "gates_applicable": {
+              "type": "integer"
+            },
+            "gates_passed": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "keyword"
+            }
+          }
+        },
+        "tickets_by_repo": {
+          "type": "nested",
+          "properties": {
+            "repo": {
+              "type": "keyword"
+            },
+            "items": {
+              "type": "nested",
+              "properties": {
+                "issue_ref": {
+                  "type": "keyword"
+                },
+                "number": {
+                  "type": "integer"
+                },
+                "title": {
+                  "type": "keyword"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "pr_refs": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

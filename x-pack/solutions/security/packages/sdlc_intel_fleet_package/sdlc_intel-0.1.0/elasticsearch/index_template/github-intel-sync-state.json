@@ -1,0 +1,71 @@
+{
+  "index_patterns": [
+    "github-intel-sync-state"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "entity_type": {
+          "type": "keyword"
+        },
+        "org": {
+          "properties": {
+            "login": {
+              "type": "keyword"
+            }
+          }
+        },
+        "project": {
+          "properties": {
+            "number": {
+              "type": "integer"
+            }
+          }
+        },
+        "cursor": {
+          "type": "keyword"
+        },
+        "watermark": {
+          "type": "date"
+        },
+        "last_run_at": {
+          "type": "date"
+        },
+        "last_run_status": {
+          "type": "keyword"
+        },
+        "stats": {
+          "type": "object",
+          "enabled": true
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

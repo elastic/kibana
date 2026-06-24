@@ -1,0 +1,289 @@
+{
+  "index_patterns": [
+    "github-intel-project-items"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "entity": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "subtype": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "integer"
+            }
+          }
+        },
+        "github": {
+          "properties": {
+            "created_at": {
+              "type": "date"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "closed_at": {
+              "type": "date"
+            },
+            "state": {
+              "type": "keyword"
+            }
+          }
+        },
+        "org": {
+          "properties": {
+            "login": {
+              "type": "keyword"
+            }
+          }
+        },
+        "repository": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "full_name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "labels": {
+          "type": "keyword"
+        },
+        "people": {
+          "properties": {
+            "author": {
+              "type": "keyword"
+            },
+            "assignees": {
+              "type": "keyword"
+            },
+            "reviewers": {
+              "type": "keyword"
+            }
+          }
+        },
+        "project": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            }
+          }
+        },
+        "fields": {
+          "type": "nested",
+          "properties": {
+            "field_id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "value": {
+              "type": "keyword"
+            },
+            "text": {
+              "type": "text"
+            },
+            "option_id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "hierarchy": {
+          "properties": {
+            "ticket_type": {
+              "type": "keyword"
+            },
+            "epic": {
+              "type": "keyword"
+            },
+            "parent_issue": {
+              "type": "keyword"
+            }
+          }
+        },
+        "epic_anchor": {
+          "properties": {
+            "title": {
+              "type": "keyword"
+            },
+            "team": {
+              "type": "keyword"
+            },
+            "initiative": {
+              "type": "keyword"
+            },
+            "roadmap_stage": {
+              "type": "keyword"
+            },
+            "release_milestone": {
+              "type": "keyword"
+            },
+            "owner": {
+              "type": "keyword"
+            },
+            "epic_issue_number": {
+              "type": "integer"
+            },
+            "roadmap_id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "roadmap": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "product": {
+              "type": "keyword"
+            },
+            "stage": {
+              "type": "keyword"
+            },
+            "initiative": {
+              "type": "keyword"
+            },
+            "release_milestone": {
+              "type": "keyword"
+            }
+          }
+        },
+        "content_ref": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "repo": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "url": {
+              "type": "keyword"
+            }
+          }
+        },
+        "team_attribution": {
+          "properties": {
+            "engineering_team": {
+              "type": "keyword"
+            },
+            "org_teams": {
+              "type": "keyword"
+            },
+            "attribution_source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "delivery": {
+          "properties": {
+            "coverage_status": {
+              "type": "keyword"
+            },
+            "coverage_pct": {
+              "type": "integer"
+            },
+            "issue_state": {
+              "type": "keyword"
+            },
+            "linked_prs": {
+              "type": "keyword"
+            },
+            "pr_summary": {
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "open": {
+                  "type": "integer"
+                },
+                "merged": {
+                  "type": "integer"
+                },
+                "closed_unmerged": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "membership": {
+          "properties": {
+            "views": {
+              "type": "integer"
+            }
+          }
+        },
+        "pull_request": {
+          "properties": {
+            "merged": {
+              "type": "boolean"
+            },
+            "draft": {
+              "type": "boolean"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

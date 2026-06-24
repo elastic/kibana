@@ -1,0 +1,84 @@
+{
+  "index_patterns": [
+    "github-intel-projects"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "project": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "url": {
+              "type": "keyword"
+            }
+          }
+        },
+        "fields": {
+          "type": "nested",
+          "properties": {
+            "field_id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "options": {
+              "type": "nested",
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

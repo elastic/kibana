@@ -1,0 +1,52 @@
+{
+  "attributes": {
+    "description": "Total raw project pages stored",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "layer1": {
+              "columnOrder": ["metric-col"],
+              "columns": {
+                "metric-col": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Pages fetched",
+                  "operationType": "sum",
+                  "scale": "ratio",
+                  "sourceField": "page_count"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "layerId": "layer1",
+        "layerType": "data",
+        "metricAccessor": "metric-col"
+      }
+    },
+    "title": "SDLC pages fetched",
+    "visualizationType": "lnsMetric"
+  },
+  "id": "sdlc-intel-lens-epic-count",
+  "references": [
+    {
+      "id": "sdlc-github-raw-summary-view",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "sdlc-github-raw-summary-view",
+      "name": "indexpattern-datasource-layer-layer1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}

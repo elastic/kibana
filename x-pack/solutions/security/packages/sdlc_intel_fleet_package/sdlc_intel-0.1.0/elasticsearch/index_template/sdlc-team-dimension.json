@@ -1,0 +1,54 @@
+{
+  "index_patterns": [
+    "sdlc-team-dimension"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "org_team": {
+          "properties": {
+            "key": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "members_count": {
+              "type": "integer"
+            }
+          }
+        },
+        "subteams": {
+          "type": "keyword"
+        },
+        "aliases": {
+          "properties": {
+            "project_team_values": {
+              "type": "keyword"
+            },
+            "github_labels": {
+              "type": "keyword"
+            },
+            "github_org_slugs": {
+              "type": "keyword"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

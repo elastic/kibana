@@ -1,0 +1,54 @@
+{
+  "index_patterns": [
+    "github-intel-relationships"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "from": {
+          "type": "keyword"
+        },
+        "to": {
+          "type": "keyword"
+        },
+        "relation": {
+          "type": "keyword"
+        },
+        "weight": {
+          "type": "float"
+        },
+        "metadata": {
+          "type": "object",
+          "enabled": true
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

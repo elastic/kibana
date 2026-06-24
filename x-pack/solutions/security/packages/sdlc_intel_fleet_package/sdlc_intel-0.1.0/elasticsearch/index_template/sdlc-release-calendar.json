@@ -1,0 +1,87 @@
+{
+  "index_patterns": [
+    "sdlc-release-calendar"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "release_line": {
+          "type": "keyword"
+        },
+        "product": {
+          "type": "keyword"
+        },
+        "version": {
+          "type": "keyword"
+        },
+        "milestone": {
+          "type": "keyword"
+        },
+        "target_date": {
+          "type": "date"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "release_manager": {
+          "type": "keyword"
+        },
+        "source": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "spreadsheet_id": {
+              "type": "keyword"
+            },
+            "sheet_gid": {
+              "type": "keyword"
+            },
+            "sheet_name": {
+              "type": "keyword"
+            },
+            "slack_channel": {
+              "type": "keyword"
+            },
+            "message_ts": {
+              "type": "keyword"
+            },
+            "permalink": {
+              "type": "keyword"
+            },
+            "raw_text": {
+              "type": "text"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

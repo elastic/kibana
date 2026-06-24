@@ -1,0 +1,23 @@
+{
+  "attributes": {
+    "description": "Raw GitHub project items fetched per board.",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"1\",\"w\":24,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"2\",\"w\":24,\"x\":24,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"project_number\",\"items_fetched\",\"page_count\",\"last_fetched\"],\"sort\":[[\"items_fetched\",\"desc\"]]},\"gridData\":{\"h\":14,\"i\":\"3\",\"w\":24,\"x\":0,\"y\":16},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"org_login\",\"project_number\",\"page_count\",\"items_fetched\"],\"sort\":[[\"items_fetched\",\"desc\"]]},\"gridData\":{\"h\":14,\"i\":\"4\",\"w\":24,\"x\":24,\"y\":16},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"}]",
+    "timeRestore": false,
+    "title": "SDLC Raw items by project",
+    "version": 1
+  },
+  "id": "sdlc-intel-team-dimension",
+  "references": [
+    { "id": "sdlc-intel-lens-team-members", "name": "panel_0", "type": "lens" },
+    { "id": "sdlc-intel-lens-epics-by-team", "name": "panel_1", "type": "lens" },
+    { "id": "sdlc-intel-teams-search", "name": "panel_2", "type": "search" },
+    { "id": "sdlc-intel-epics-search", "name": "panel_3", "type": "search" },
+    { "id": "sdlc-intel-tag", "name": "tag-ref-sdlc-intel-tag", "type": "tag" }
+  ],
+  "type": "dashboard"
+}

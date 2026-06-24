@@ -1,0 +1,12 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "sdlc-project-items-enriched-view"
+  },
+  "id": "sdlc-project-items-enriched-view",
+  "type": "index-pattern",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.0.0"
+}

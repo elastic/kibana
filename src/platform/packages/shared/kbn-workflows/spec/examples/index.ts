@@ -134,6 +134,15 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['alert', 'agent-builder', 'ai', 'console'],
     filename: 'invoke_agent.yml',
   },
+  {
+    id: 'sdlc_github_catalog_repos',
+    name: 'SDLC GitHub catalog repos (GraphQL)',
+    description:
+      'Pages elastic org repositories via GitHub GraphQL, upserts github-intel-repos, and maintains github-intel-sync-state checkpoints',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'foreach', 'while'],
+    filename: 'sdlc_github_catalog_repos.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

@@ -1,0 +1,28 @@
+{
+  "attributes": {
+    "columns": [
+      "org_login",
+      "project_number",
+      "page_count",
+      "items_fetched",
+      "last_fetched"
+    ],
+    "description": "Per-project raw GitHub sync summary",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["items_fetched", "desc"]],
+    "title": "SDLC raw sync by project",
+    "version": 1
+  },
+  "id": "sdlc-intel-epics-search",
+  "references": [
+    {
+      "id": "sdlc-github-raw-summary-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

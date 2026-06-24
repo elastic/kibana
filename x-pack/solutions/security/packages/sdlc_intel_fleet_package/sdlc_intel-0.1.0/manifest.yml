@@ -1,0 +1,26 @@
+format_version: 1.0.0
+name: sdlc_intel
+title: SDLC Intelligence
+description: >
+  Kibana dashboards for SDLC GitHub intelligence: raw sync overview, per-project page
+  counts, and item volume views over the sdlc-github-raw-summary-view ES|QL view. Installs
+  index templates for all SDLC raw pipeline indices. Includes a reference GitHub catalog
+  workflow YAML under kibana/workflow/ (import via Workflows → Examples or manually).
+version: 0.1.0
+data_streams: []
+categories:
+  - security
+release: beta
+type: integration
+license: basic
+owner:
+  github: elastic/security-solution
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+icons:
+  - src: /img/sdlc_intel.svg
+    size: 32x32
+    type: image/svg+xml

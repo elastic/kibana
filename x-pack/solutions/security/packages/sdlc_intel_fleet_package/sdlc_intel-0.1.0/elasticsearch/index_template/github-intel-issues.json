@@ -1,0 +1,172 @@
+{
+  "index_patterns": [
+    "github-intel-issues"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "entity": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "subtype": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "integer"
+            }
+          }
+        },
+        "github": {
+          "properties": {
+            "created_at": {
+              "type": "date"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "closed_at": {
+              "type": "date"
+            },
+            "state": {
+              "type": "keyword"
+            }
+          }
+        },
+        "org": {
+          "properties": {
+            "login": {
+              "type": "keyword"
+            }
+          }
+        },
+        "repository": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "full_name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "labels": {
+          "type": "keyword"
+        },
+        "people": {
+          "properties": {
+            "author": {
+              "type": "keyword"
+            },
+            "assignees": {
+              "type": "keyword"
+            },
+            "reviewers": {
+              "type": "keyword"
+            }
+          }
+        },
+        "content": {
+          "properties": {
+            "title": {
+              "type": "text"
+            },
+            "body": {
+              "type": "text"
+            },
+            "searchable": {
+              "type": "text"
+            }
+          }
+        },
+        "hierarchy": {
+          "properties": {
+            "epic": {
+              "type": "keyword"
+            },
+            "ticket_type": {
+              "type": "keyword"
+            },
+            "parent_issue_ref": {
+              "type": "keyword"
+            }
+          }
+        },
+        "team_attribution": {
+          "properties": {
+            "engineering_team": {
+              "type": "keyword"
+            },
+            "org_teams": {
+              "type": "keyword"
+            },
+            "attribution_source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "delivery": {
+          "properties": {
+            "linked_prs": {
+              "type": "keyword"
+            },
+            "coverage_status": {
+              "type": "keyword"
+            }
+          }
+        },
+        "metrics": {
+          "properties": {
+            "comments_count": {
+              "type": "integer"
+            }
+          }
+        },
+        "flags": {
+          "properties": {
+            "ai_generated": {
+              "type": "boolean"
+            },
+            "eng_validated": {
+              "type": "boolean"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

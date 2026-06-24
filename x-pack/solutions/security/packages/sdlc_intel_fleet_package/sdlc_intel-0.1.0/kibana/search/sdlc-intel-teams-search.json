@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "columns": ["project_number", "items_fetched", "page_count", "last_fetched"],
+    "description": "Items fetched per GitHub project from raw pages",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["items_fetched", "desc"]],
+    "title": "SDLC raw items by project",
+    "version": 1
+  },
+  "id": "sdlc-intel-teams-search",
+  "references": [
+    {
+      "id": "sdlc-github-raw-summary-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}
