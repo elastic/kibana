@@ -58,16 +58,13 @@ describe('formatQuerySchedule', () => {
       ).toBe('Every 2 weeks on Tue');
     });
 
-    it('should default weekdays to Mon–Fri when a weekly rrule omits BYDAY', () => {
-      // `rruleFieldsToRecurrence` seeds the default Mon–Fri weekday set when the
-      // rrule has no BYDAY, so the formatter renders those rather than an empty
-      // clause.
+    it('should render "Daily" when a weekly rrule omits BYDAY', () => {
       expect(
         formatQuerySchedule({
           schedule_type: 'rrule',
           rrule_schedule: { rrule: 'FREQ=WEEKLY;INTERVAL=3', start_date: startDate },
         })
-      ).toBe('Every 3 weeks on Mon, Tue, Wed, Thu, Fri');
+      ).toBe('Daily');
     });
 
     it('should order weekdays Sunday-first regardless of BYDAY order', () => {
