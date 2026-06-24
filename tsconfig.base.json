@@ -1184,8 +1184,6 @@
       "@kbn/es-ui-shared-plugin/*": ["src/platform/plugins/shared/es_ui_shared/*"],
       "@kbn/eslint-config": ["packages/kbn-eslint-config"],
       "@kbn/eslint-config/*": ["packages/kbn-eslint-config/*"],
-      "@kbn/eslint-config-security-tests": ["packages/kbn-eslint-config-security-tests"],
-      "@kbn/eslint-config-security-tests/*": ["packages/kbn-eslint-config-security-tests/*"],
       "@kbn/eslint-plugin-alerting-v2": ["packages/kbn-eslint-plugin-alerting-v2"],
       "@kbn/eslint-plugin-alerting-v2/*": ["packages/kbn-eslint-plugin-alerting-v2/*"],
       "@kbn/eslint-plugin-disable": ["packages/kbn-eslint-plugin-disable"],
