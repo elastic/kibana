@@ -43,6 +43,7 @@ import {
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
+import { ensureExecutionDataStreamsReady } from './lib/execution_data_streams/ensure_execution_data_streams_ready';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
@@ -55,15 +56,9 @@ import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
-import {
-  initializeStepExecutionsClient,
-  initializeStepExecutionsDataStream,
-} from './repositories/step_executions_data_stream';
+import { initializeStepExecutionsDataStream } from './repositories/step_executions_data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import {
-  initializeWorkflowExecutionsClient,
-  initializeWorkflowExecutionsDataStream,
-} from './repositories/workflow_executions_data_stream';
+import { initializeWorkflowExecutionsDataStream } from './repositories/workflow_executions_data_stream';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -126,19 +121,13 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
 
-const ensureExecutionDataStreamsReady = (coreDataStreams: CoreStart['dataStreams']) => {
-  return Promise.all([
-    initializeWorkflowExecutionsClient(coreDataStreams),
-    initializeStepExecutionsClient(coreDataStreams),
-  ]);
-};
-
 const resolvePinnedExecutionWriteIndexes = async (
-  coreDataStreams: CoreStart['dataStreams'],
+  coreStart: CoreStart,
   stepRepo: StepExecutionRepository,
   workflowRepo: WorkflowExecutionRepository
 ): Promise<[string, string]> => {
-  await ensureExecutionDataStreamsReady(coreDataStreams);
+  const esClient = coreStart.elasticsearch.client.asInternalUser;
+  await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient);
   return Promise.all([stepRepo.resolveWriteIndex(), workflowRepo.resolveWriteIndex()]);
 };
 
@@ -162,7 +151,6 @@ export class WorkflowsExecutionEnginePlugin
     WorkflowsExecutionEnginePluginStart
   >;
   private meteringService?: WorkflowsMeteringService;
-  private initializePromise?: Promise<void>;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
@@ -564,7 +552,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] =
                 await resolvePinnedExecutionWriteIndexes(
-                  coreStart.dataStreams,
+                  coreStart,
                   stepExecutionRepository,
                   workflowExecutionRepository
                 );
@@ -671,8 +659,14 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
+    void ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient).catch((error) => {
+      this.logger.error(
+        `Failed to initialize workflow execution data streams on startup: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
-    void ensureExecutionDataStreamsReady(coreStart.dataStreams);
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
@@ -732,7 +726,7 @@ export class WorkflowsExecutionEnginePlugin
       const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = resolvedIndexes
         ? [resolvedIndexes.stepExecutionsIndex, resolvedIndexes.executionsIndex]
         : await resolvePinnedExecutionWriteIndexes(
-            coreStart.dataStreams,
+            coreStart,
             stepExecutionRepo,
             workflowExecutionRepository
           );
@@ -1032,7 +1026,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const [bulkStepExecutionsIndex, bulkExecutionsIndex] =
         await resolvePinnedExecutionWriteIndexes(
-          coreStart.dataStreams,
+          coreStart,
           stepExecutionRepo,
           workflowExecutionRepository
         );
@@ -1187,7 +1181,7 @@ export class WorkflowsExecutionEnginePlugin
       );
       const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] =
         await resolvePinnedExecutionWriteIndexes(
-          coreStart.dataStreams,
+          coreStart,
           stepExecutionRepo,
           workflowExecutionRepository
         );
@@ -1439,10 +1433,8 @@ export class WorkflowsExecutionEnginePlugin
   public stop() {}
 
   private async initialize(coreStart: CoreStart): Promise<void> {
-    if (!this.initializePromise) {
-      this.initializePromise = Promise.resolve();
-    }
-    await this.initializePromise;
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    await ensureExecutionDataStreamsReady(coreStart.dataStreams, esClient);
   }
 
   /**

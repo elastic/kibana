@@ -38,6 +38,7 @@ export class WorkflowExecutionRepository {
     const { data_streams: dataStreams } = await this.esClient.indices.getDataStream({
       name: this.indexName,
     });
+
     const writeIndex = dataStreams[0]?.indices.at(-1)?.index_name;
     if (!writeIndex) {
       throw new Error(`No write backing index found for data stream ${this.indexName}`);
@@ -146,11 +147,16 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.esClient.index({
-      index: this.indexName,
+    if (!workflowExecution.executionsIndex) {
+      throw new Error('Workflow execution index is required for creation');
+    }
+
+    await this.esClient.update<Partial<EsWorkflowExecution>>({
+      index: workflowExecution.executionsIndex as string,
       id: workflowExecution.id,
       refresh: options.refresh ?? false,
-      document: this.withTimestamp(workflowExecution),
+      doc: this.withTimestamp(workflowExecution),
+      doc_as_upsert: true,
     });
   }
 
