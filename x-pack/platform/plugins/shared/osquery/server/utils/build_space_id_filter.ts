@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 /**
@@ -19,7 +20,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
  * responses) may not carry the field. Named spaces match the `space_id` term
  * exactly and never include field-less documents.
  */
-export const buildSpaceIdFilter = (spaceId: string): Record<string, unknown> => {
+export const buildSpaceIdFilter = (spaceId: string): estypes.QueryDslQueryContainer => {
   if (spaceId === DEFAULT_SPACE_ID) {
     return {
       bool: {
