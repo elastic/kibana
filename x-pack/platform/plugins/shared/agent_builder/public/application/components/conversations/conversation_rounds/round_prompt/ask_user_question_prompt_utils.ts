@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { euiShadow } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +19,6 @@ import {
   type ReportHitlPromptShownParams,
   type ReportHitlQuestionAnsweredParams,
 } from '@kbn/agent-builder-common/telemetry';
-import { borderRadiusXlStyles } from '../../../../../common.styles';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useAgentId, useConversation } from '../../../../hooks/use_conversation';
 export { promptContainerStyles as containerStyles } from './prompt_container.styles';
