@@ -34,7 +34,7 @@ export const PageError: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const errorString = error?.error;
-  const cause = error?.cause; // wrapEsError() on the server adds a "cause" array
+  const cause = error?.cause ?? error?.attributes?.causes;
   const message = error?.message;
 
   const errorContent = (
