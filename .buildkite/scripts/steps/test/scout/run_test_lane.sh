@@ -12,6 +12,8 @@ PASSED_INDICES=""
 PASSED=()
 FAILED=()
 SKIPPED=()
+# Failed spec files restored from the previous attempt, populated by restore_failed_specs().
+RETRY_SPEC_FILES=()
 
 # Fail early if any of the given environment variable names are unset or empty
 check_required_env_vars() {
@@ -34,6 +36,80 @@ check_required_env_vars() {
 download_test_lane_loads() {
   echo "--- Downloading test lane loads file"
   download_tmp_artifact "$SCOUT_TEST_LANE_LOADS_PATH" . "$BUILDKITE_BUILD_ID"
+}
+
+# Build a build-scoped, collision-free artifact path for a config's failed-spec snapshot.
+# Keyed by step key + load index (so each config in the lane gets its own snapshot) and stamped
+# with the attempt that produced it, so a later attempt never consumes a stale snapshot.
+failed_specs_artifact_path() {
+  local idx="$1" attempt="$2"
+  local key="${BUILDKITE_STEP_KEY//[^a-zA-Z0-9_-]/_}"
+  echo ".scout/failed-specs-${key}-${idx}-attempt-${attempt}.json"
+}
+
+# Path where we direct Playwright's JSON report for a config, via PLAYWRIGHT_JSON_OUTPUT_FILE.
+# We set it explicitly because the config's reporter path resolves relative to the config's
+# directory (not this script's cwd), so we'd otherwise not know where to read it from. Keyed per
+# load index so configs in the lane don't overwrite each other's report.
+json_report_path() {
+  echo ".scout/test-results-${1}.json"
+}
+
+# After a config fails, persist the list of failed spec files so the next retry attempt can
+# re-run only those files. We retry at the spec-file level (not individual test cases) so that
+# tests sharing state within a file (e.g. describe.serial) are always re-run together.
+snapshot_failed_specs() {
+  local idx="$1"
+
+  local report
+  report="$(json_report_path "$idx")"
+  if [[ ! -f "$report" ]]; then
+    echo "No $report produced for index $idx; whole config will re-run on retry"
+    return
+  fi
+
+  # `|| true` so a non-zero jq exit (e.g. a truncated report after a crash/OOM) does not abort the
+  # lane under `set -e`; the empty-result check below then triggers the whole-config fallback.
+  local failed_specs
+  failed_specs="$(jq -r '[.suites[]? | recurse(.suites[]?) | .specs[]? | select(.ok == false) | .file] | unique[]?' "$report" 2>/dev/null)" || true
+
+  if [[ -z "$failed_specs" ]]; then
+    echo "No failed spec files parsed for index $idx; whole config will re-run on retry"
+    return
+  fi
+
+  local artifact_path
+  artifact_path="$(failed_specs_artifact_path "$idx" "${BUILDKITE_RETRY_COUNT:-0}")"
+  printf '%s\n' "$failed_specs" > "$artifact_path"
+  # Best-effort: an upload failure must not fail the lane — it only means the retry re-runs the
+  # whole config instead of just the failed specs.
+  buildkite-agent artifact upload "$artifact_path" || echo "Failed to upload failed-specs snapshot for index $idx"
+}
+
+# On a retry attempt, load the failed spec files captured by the *immediately preceding* attempt
+# into RETRY_SPEC_FILES. Returns 0 only when that attempt produced a snapshot. Any miss — first
+# attempt, a previous attempt lost before it could snapshot (agent lost), or a download failure —
+# falls back to re-running the whole config, which is the safe default.
+restore_failed_specs() {
+  local idx="$1"
+  RETRY_SPEC_FILES=()
+
+  local retry_count="${BUILDKITE_RETRY_COUNT:-0}"
+  [[ "$retry_count" -gt 0 ]] || return 1
+
+  local artifact_path
+  artifact_path="$(failed_specs_artifact_path "$idx" "$(( retry_count - 1 ))")"
+
+  # The snapshot was uploaded by the previous attempt's job, which Buildkite now treats as a
+  # retried (superseded) job. `buildkite-agent artifact download` excludes retried-job artifacts
+  # by default, so we must pass --include-retried-jobs or the search finds nothing.
+  if ! download_artifact "$artifact_path" . --include-retried-jobs >/dev/null 2>&1; then
+    return 1
+  fi
+  [[ -f "$artifact_path" ]] || return 1
+
+  mapfile -t RETRY_SPEC_FILES < "$artifact_path"
+  [[ ${#RETRY_SPEC_FILES[@]} -gt 0 ]]
 }
 
 # Read the comma-separated list of previously passed load indices from Buildkite metadata
@@ -144,10 +220,21 @@ run_scout_tests() {
   local idx="$1"
   local config_path="$2"
 
-  echo "--- Running: $config_path"
+  # On a retry, re-run only the spec files that failed last time if we have a snapshot for this
+  # config. Failed spec files are passed as positional filters, which Playwright matches against
+  # test file paths.
+  local spec_filter_args=()
+  if restore_failed_specs "$idx"; then
+    echo "--- Retrying ${#RETRY_SPEC_FILES[@]} failed spec file(s): $config_path"
+    printf '  %s\n' "${RETRY_SPEC_FILES[@]}"
+    spec_filter_args=("${RETRY_SPEC_FILES[@]}")
+  else
+    echo "--- Running: $config_path"
+  fi
 
   local pw_args=(
     test
+    "${spec_filter_args[@]+"${spec_filter_args[@]}"}"
     "--config=$config_path"
     "--grep=$PLAYWRIGHT_GREP_TAG"
     "--project=$PLAYWRIGHT_PROJECT"
@@ -158,6 +245,9 @@ run_scout_tests() {
     "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
     "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
     "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/babel-register/install"
+    # Pin the JSON report to a known, per-config path (resolved against this script's cwd) so
+    # snapshot_failed_specs can find it; otherwise Playwright resolves it relative to the config.
+    "PLAYWRIGHT_JSON_OUTPUT_FILE=$(json_report_path "$idx")"
   )
 
   local start_time
@@ -184,6 +274,7 @@ run_scout_tests() {
       ;;
     *)
       upload_report_events "$config_path"
+      snapshot_failed_specs "$idx"
       FAILED+=("$config_path")
       echo "Exited with code $exit_code for $config_path"
       ;;
