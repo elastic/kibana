@@ -84,11 +84,13 @@ export const EpisodeRuleCell = ({
 }: EpisodeRuleCellProps) => {
   const { euiTheme } = useEuiTheme();
 
-  if (!Object.keys(rulesCache).length && isLoadingRules) {
-    return <EuiSkeletonText />;
-  }
   const ruleId = row.flattened[columnId] as string;
   const rule = rulesCache[ruleId];
+
+  if (isLoadingRules && !rule) {
+    return <EuiSkeletonText />;
+  }
+
   if (!rule) {
     return <>{ruleId}</>;
   }
