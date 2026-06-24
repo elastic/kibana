@@ -145,6 +145,9 @@ export const MultiJobActionsMenu: FC<Props> = ({
           void uiActions.executeTriggerActions(UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER, {
             initialJobIds: jobs.map((j) => j.id),
             allowScopeSelection: true,
+            onClose: () => {
+              refreshJobs();
+            },
           });
           closePopover();
         }}

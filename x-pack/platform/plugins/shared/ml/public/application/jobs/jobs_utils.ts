@@ -15,15 +15,3 @@ export const isManagedJob = (job: MlSummaryJob | MlJob) => {
     (isPopulatedObject(job, ['custom_settings']) && job.custom_settings.managed === true)
   );
 };
-
-/**
- * When the jobs summary API includes `projectRouting: null`, show a legacy CPS indicator in the UI.
- */
-export const showCPSLegacyBadge = (job: MlSummaryJob | MlJob): boolean => {
-  // disabled for now while we decide if we want a badge
-  return false;
-  if (!('projectRouting' in job)) {
-    return false;
-  }
-  return (job as MlSummaryJob).projectRouting === null;
-};

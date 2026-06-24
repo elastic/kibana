@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, Fragment, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -219,7 +219,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const jobCreatorTitle = getJobCreatorTitle(jobCreator);
 
   return (
-    <Fragment>
+    <>
       <MlPageHeader>
         <PageTitle
           title={
@@ -266,6 +266,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
           firstWizardStep={firstWizardStep}
         />
       </div>
-    </Fragment>
+    </>
   );
 };

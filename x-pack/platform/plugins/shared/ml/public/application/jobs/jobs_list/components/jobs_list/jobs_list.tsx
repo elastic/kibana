@@ -23,28 +23,22 @@ import {
   EuiButtonIcon,
   EuiScreenReaderOnly,
   EuiToolTip,
-  EuiBadge,
-  EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
   type Direction,
   type EuiBasicTableColumn,
   type EuiBasicTableProps,
   type EuiTableSelectionType,
 } from '@elastic/eui';
-import type { AuditMessageBase } from '@kbn/ml-common-types/audit_message';
 
 import { toLocaleString } from '../../../../util/string_utils';
-import { JobIcon } from '../../../../components/job_message_icon';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { ResultLinks, useActionsMenuContent } from '../job_actions';
-import { JobDescription } from './job_description';
-import { isManagedJob, showCPSLegacyBadge } from '../../../jobs_utils';
+import { JobDetails } from './job_details';
+import { ProjectScope } from './project_scope';
 import { MLSavedObjectsSpacesList } from '../../../../components/ml_saved_objects_spaces_list';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-type MlSummaryJobWithSpaces = MlSummaryJob & {
+export type MlSummaryJobWithSpaces = MlSummaryJob & {
   spaces?: string[];
 };
 
@@ -101,9 +95,10 @@ export const JobsList: FC<JobsListProps> = ({
   onJobsViewStateUpdate,
 }) => {
   const {
-    services: { spaces, application, notifications, share },
+    services: { spaces, application, notifications, share, cps },
   } = useMlKibana();
   const mlApi = useMlApi();
+  const cpsManager = cps?.cpsManager;
 
   const jobActions = useActionsMenuContent({
     toastNotifications: notifications.toasts,
@@ -173,54 +168,6 @@ export const JobsList: FC<JobsListProps> = ({
     [toggleRow]
   );
 
-  const renderJobId = useCallback((id: string, item: MlSummaryJobWithSpaces) => {
-    const showManaged = isManagedJob(item);
-    const showCpsLegacy = showCPSLegacyBadge(item);
-    if (!showManaged && !showCpsLegacy) {
-      return id;
-    }
-
-    return (
-      <>
-        {id}
-        {showManaged && (
-          <>
-            {' '}
-            <EuiToolTip
-              content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
-                defaultMessage:
-                  'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
-              })}
-            >
-              <EuiBadge tabIndex={0} color="hollow" data-test-subj="mlJobListRowManagedLabel">
-                {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
-                  defaultMessage: 'Managed',
-                })}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        )}
-        {showCpsLegacy && (
-          <>
-            {' '}
-            <EuiToolTip
-              content={i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeTooltip', {
-                defaultMessage:
-                  'This job is not using CPS project routing. Consider updating the datafeed project routing.',
-              })}
-            >
-              <EuiBadge tabIndex={0} color="hollow" data-test-subj="mlJobListRowCpsLegacyLabel">
-                {i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeLabel', {
-                  defaultMessage: 'Legacy',
-                })}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        )}
-      </>
-    );
-  }, []);
-
   const columns = useMemo((): Array<EuiBasicTableColumn<MlSummaryJobWithSpaces>> => {
     const tableColumns: Array<EuiBasicTableColumn<MlSummaryJobWithSpaces>> = [
       {
@@ -271,7 +218,7 @@ export const JobsList: FC<JobsListProps> = ({
             />
           </EuiToolTip>
         ),
-        width: '3%',
+        width: '36px',
       },
       {
         field: 'id',
@@ -281,77 +228,38 @@ export const JobsList: FC<JobsListProps> = ({
         }),
         sortable: true,
         truncateText: false,
-        width: '15%',
-        render: renderJobId,
+        render: (id: string, job: MlSummaryJobWithSpaces) => <JobDetails id={id} job={job} />,
       },
-      {
-        'data-test-subj': 'mlJobListColumnIcons',
-        name: (
-          <EuiScreenReaderOnly>
-            <p>
-              <FormattedMessage
-                id="xpack.ml.jobsList.iconsColumn.screenReaderDescription"
-                defaultMessage="This column displays an alert icon when the job has alert rules, or a status icon when there are warnings or errors in the past 24 hours"
-              />
-            </p>
-          </EuiScreenReaderOnly>
-        ),
-        width: '50px',
-        render: (row: MlSummaryJobWithSpaces) => {
-          const showAlertIcon = Array.isArray(row.alertingRules) && row.alertingRules.length > 0;
-          const showAuditIcon = Boolean(row.auditMessage);
-          if (!showAlertIcon && !showAuditIcon) {
-            return null;
-          }
-          return (
-            <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
-              {showAlertIcon && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    position="bottom"
-                    content={
-                      <FormattedMessage
-                        id="xpack.ml.jobsList.alertingRules.tooltipContent"
-                        defaultMessage="Job has {rulesCount} associated alert {rulesCount, plural, one {rule} other {rules}}"
-                        values={{ rulesCount: row.alertingRules?.length }}
-                      />
-                    }
-                    type="bell"
-                    data-test-subj="mlJobListAlertRulesIcon"
-                  />
-                </EuiFlexItem>
-              )}
-              {showAuditIcon && row.auditMessage !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <JobIcon message={row.auditMessage as AuditMessageBase} showTooltip={true} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        name: i18n.translate('xpack.ml.jobsList.descriptionLabel', {
-          defaultMessage: 'Description',
-        }),
-        sortable: true,
-        field: 'description',
-        'data-test-subj': 'mlJobListColumnDescription',
-        render: (_description, item) => <JobDescription job={item} />,
-        textOnly: true,
-        width: '20%',
-      },
+
+      ...(cpsManager
+        ? [
+            {
+              field: 'projectRouting',
+              'data-test-subj': 'mlJobListColumnCpsScope',
+              name: i18n.translate('xpack.ml.jobsList.projectScopeLabel', {
+                defaultMessage: 'Project scope',
+              }),
+              sortable: false,
+              truncateText: false,
+              width: '100px',
+              render: (projectRouting: string | null) => (
+                <ProjectScope projectRouting={projectRouting} />
+              ),
+            },
+          ]
+        : []),
+
       {
         field: 'processed_record_count',
         'data-test-subj': 'mlJobListColumnRecordCount',
         name: i18n.translate('xpack.ml.jobsList.processedRecordsLabel', {
           defaultMessage: 'Processed records',
         }),
-        sortable: true,
+        sortable: false,
         truncateText: false,
         dataType: 'number',
         render: (count: MlSummaryJobWithSpaces['processed_record_count']) => toLocaleString(count),
-        width: '10%',
+        width: '130px',
       },
       {
         field: 'memory_status',
@@ -359,29 +267,20 @@ export const JobsList: FC<JobsListProps> = ({
         name: i18n.translate('xpack.ml.jobsList.memoryStatusLabel', {
           defaultMessage: 'Memory status',
         }),
-        sortable: true,
+        sortable: false,
         truncateText: false,
-        width: '5%',
+        width: '105px',
       },
       {
-        field: 'jobState',
-        'data-test-subj': 'mlJobListColumnJobState',
-        name: i18n.translate('xpack.ml.jobsList.jobStateLabel', {
-          defaultMessage: 'Job state',
-        }),
-        sortable: true,
-        truncateText: false,
-        width: '8%',
-      },
-      {
+        // TODO: change to be a combined job and datafeed state !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         field: 'datafeedState',
         'data-test-subj': 'mlJobListColumnDatafeedState',
         name: i18n.translate('xpack.ml.jobsList.datafeedStateLabel', {
-          defaultMessage: 'Datafeed state',
+          defaultMessage: 'State',
         }),
-        sortable: true,
+        sortable: false,
         truncateText: false,
-        width: '8%',
+        width: '80px',
       },
       {
         name: i18n.translate('xpack.ml.jobsList.latestTimestampLabel', {
@@ -396,7 +295,7 @@ export const JobsList: FC<JobsListProps> = ({
             ? ''
             : moment(item.latestTimestampMs).format(TIME_FORMAT),
         textOnly: true,
-        width: '15%',
+        width: '140px',
       },
     ];
 
@@ -408,7 +307,7 @@ export const JobsList: FC<JobsListProps> = ({
         'data-test-subj': 'mlTableColumnSpaces',
         truncateText: true,
         align: 'right',
-        width: '10%',
+        width: '70px',
         render: (item: MlSummaryJobWithSpaces) => (
           <MLSavedObjectsSpacesList
             disabled={!application?.capabilities?.savedObjectsManagement?.shareIntoSpace}
@@ -435,25 +334,32 @@ export const JobsList: FC<JobsListProps> = ({
           </EuiScreenReaderOnly>
         ),
         render: (item: MlSummaryJobWithSpaces) => <ResultLinks jobs={[item]} />,
-        width: '64px',
+        width: '70px',
       },
       {
-        name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
-          defaultMessage: 'Actions',
-        }),
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.jobActionsColumn.actionsLabel"
+                defaultMessage="Actions"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
         actions: jobActions,
-        width: '5%',
+        width: '40px',
       }
     );
 
     return tableColumns;
   }, [
     application?.capabilities?.savedObjectsManagement?.shareIntoSpace,
+    cpsManager,
     itemIdToExpandedRowMap,
     jobActions,
     onToggleRow,
     refreshJobs,
-    renderJobId,
     spaces,
   ]);
 
