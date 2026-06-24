@@ -445,7 +445,8 @@ ${buildPinnedEsql(pinnedIds)}
   }
 | EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `CASE (event.id IS NOT NULL AND event.id != "", isOrigin AND event.id in (${originAlertIds          .map((_id, idx) => `?og_alrt_id${idx}`)
+      ? `CASE (event.id IS NOT NULL AND event.id != "", isOrigin AND event.id in (${originAlertIds
+          .map((_id, idx) => `?og_alrt_id${idx}`)
           .join(', ')}), false)`
       : 'false'
   }
