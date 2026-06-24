@@ -66,6 +66,7 @@ export function MemoryTab() {
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [selectedChange, setSelectedChange] = useState<MemoryVersionRecord | null>(null);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
+  const [showCreateFlyout, setShowCreateFlyout] = useState(false);
 
   const {
     ui: { manage: canManage },
@@ -80,13 +81,7 @@ export function MemoryTab() {
   const synthesizeMemory = useSynthesizeMemory();
   const detectGaps = useDetectGaps();
 
-  const workflowActions: Array<{
-    key: string;
-    icon: string;
-    label: string;
-    testSubj: string;
-    mutation: { isLoading: boolean; mutate: () => void };
-  }> = [
+  const workflowActions = [
     {
       key: 'scrape',
       icon: 'refresh',
@@ -170,6 +165,18 @@ export function MemoryTab() {
                     data-test-subj="streamsMemorySearch"
                   />
                 </EuiFlexItem>
+                {canManage && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="plusInCircle"
+                      aria-label={i18n.translate('xpack.streams.memory.newEntryButton', {
+                        defaultMessage: 'New memory entry',
+                      })}
+                      onClick={() => setShowCreateFlyout(true)}
+                      data-test-subj="streamsMemoryNewEntryButton"
+                    />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     button={
@@ -323,6 +330,15 @@ export function MemoryTab() {
           onClose={() => setSelectedChange(null)}
           onViewEntry={(id) => {
             setSelectedChange(null);
+            setSelectedEntryId(id);
+          }}
+        />
+      )}
+      {showCreateFlyout && (
+        <CreateEntryFlyout
+          onClose={() => setShowCreateFlyout(false)}
+          onCreated={(id) => {
+            setShowCreateFlyout(false);
             setSelectedEntryId(id);
           }}
         />
@@ -632,7 +648,6 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
         <DiscardChangesModal
           onCancel={() => setShowDiscardModal(false)}
           onConfirm={() => {
-            setShowDiscardModal(false);
             setIsEditing(false);
             onClose();
           }}
@@ -706,6 +721,127 @@ function DiscardChangesModal({
         defaultMessage: 'You have unsaved changes. Are you sure you want to discard them?',
       })}
     </EuiConfirmModal>
+  );
+}
+
+function CreateEntryFlyout({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: (id: string) => void;
+}) {
+  const { createEntry } = useMemoryMutations();
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [tags, setTags] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+
+  const handleCreate = useCallback(() => {
+    if (!title.trim()) return;
+    const name = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '');
+    createEntry.mutate(
+      { name, title: title.trim(), content, tags: tags.map((t) => t.label) },
+      { onSuccess: (entry) => onCreated(entry.id) }
+    );
+  }, [title, content, tags, createEntry, onCreated]);
+
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      data-test-subj="streamsMemoryCreateFlyout"
+      aria-label={i18n.translate('xpack.streams.memory.createFlyoutAriaLabel', {
+        defaultMessage: 'Create memory entry',
+      })}
+    >
+      <EuiFlyoutHeader hasBorder={false}>
+        <EuiTitle size="m">
+          <h2>
+            {i18n.translate('xpack.streams.memory.createFlyoutTitle', {
+              defaultMessage: 'New memory entry',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.streams.memory.titleLabel', { defaultMessage: 'Title' })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiFieldText
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              fullWidth
+              data-test-subj="streamsMemoryCreateTitle"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.streams.memory.contentLabel', {
+                  defaultMessage: 'Content',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiTextArea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              fullWidth
+              rows={18}
+              data-test-subj="streamsMemoryCreateContent"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.streams.memory.tagsLabel', { defaultMessage: 'Tags' })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiComboBox
+              options={[]}
+              selectedOptions={tags}
+              onChange={setTags}
+              onCreateOption={(searchValue) => setTags((prev) => [...prev, { label: searchValue }])}
+              isClearable
+              fullWidth
+              noSuggestions
+              data-test-subj="streamsMemoryCreateTags"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={handleCreate}
+              isLoading={createEntry.isLoading}
+              isDisabled={!title.trim()}
+              data-test-subj="streamsMemoryCreateSaveButton"
+            >
+              {i18n.translate('xpack.streams.memory.createSaveButton', {
+                defaultMessage: 'Create',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose}>
+              {i18n.translate('xpack.streams.memory.cancelButton', { defaultMessage: 'Cancel' })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 }
 
