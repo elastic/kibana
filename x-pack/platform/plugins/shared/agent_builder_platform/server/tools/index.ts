@@ -34,7 +34,7 @@ export const registerTools = ({
 }) => {
   const { agentBuilder } = setupDeps;
 
-  const ignoredTools = [
+  const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
     getDocumentByIdTool(),
     executeEsqlTool(),
@@ -46,11 +46,6 @@ export const registerTools = ({
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),
-  ];
-
-  console.log('temporarily ignored tools', ignoredTools.map((tool) => tool.id));
-
-  const tools: Array<BuiltinToolDefinition<any>> = [
     ...apiTools()
   ];
 
