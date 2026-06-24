@@ -53,13 +53,15 @@ export interface MainProps {
   featureFlags?: {
     enableFederatedIdentityAuth?: boolean;
     enableGoogleCloudStorageDataSourceType?: boolean;
+    enableAzureDataSourceType?: boolean;
   };
 }
 
 export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, featureFlags }) => {
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
-    featureFlags?.enableGoogleCloudStorageDataSourceType ?? false;
+    featureFlags?.enableGoogleCloudStorageDataSourceType;
+  const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
   const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
   const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
@@ -682,6 +684,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
           featureFlags={{
             enableFederatedIdentityAuth,
             enableGoogleCloudStorageDataSourceType,
+            enableAzureDataSourceType,
           }}
           onClose={() => setDataSourceFlyout({ kind: 'closed' })}
           onSave={handleDataSourceSave}

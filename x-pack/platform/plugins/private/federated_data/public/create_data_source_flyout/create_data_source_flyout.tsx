@@ -60,6 +60,7 @@ export interface CreateDataSourceFlyoutProps {
   featureFlags?: {
     enableFederatedIdentityAuth?: boolean;
     enableGoogleCloudStorageDataSourceType?: boolean;
+    enableAzureDataSourceType?: boolean;
   };
   dataSourcesClient: DataSourcesClient;
   toasts: ToastsStart;
@@ -82,6 +83,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
+  const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
   const isEditMode = initialDataSource !== undefined;
 
   const formDefaultValues = useMemo(
@@ -138,10 +140,17 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   });
 
   const enabledDataSourceTypes = useMemo<readonly DataSourceType[]>(() => {
-    const typesToExclude = !enableGoogleCloudStorageDataSourceType ? ['gcs'] : [];
+    const typesToExclude = new Set<DataSourceType>();
+    if (!enableGoogleCloudStorageDataSourceType) {
+      typesToExclude.add('gcs');
+    }
+    if (!enableAzureDataSourceType) {
+      typesToExclude.add('azure');
+    }
 
-    return ALL_DATA_SOURCE_TYPES.filter((t) => !typesToExclude.includes(t));
-  }, [enableGoogleCloudStorageDataSourceType]);
+    const filtered = ALL_DATA_SOURCE_TYPES.filter((t) => !typesToExclude.has(t));
+    return filtered;
+  }, [enableAzureDataSourceType, enableGoogleCloudStorageDataSourceType]);
 
   const dataSourceTypeOptions = useMemo(() => {
     return enabledDataSourceTypes

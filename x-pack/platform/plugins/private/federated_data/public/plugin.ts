@@ -26,20 +26,27 @@ export class FederatedDataPlugin
 {
   private readonly enableFederatedIdentityAuth: boolean;
   private readonly enableGoogleCloudStorageDataSourceType: boolean;
+  private readonly enableAzureDataSourceType: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const { enableFederatedIdentityAuth, enableGoogleCloudStorageDataSourceType } =
-      initializerContext.config.get<{
-        enableFederatedIdentityAuth: boolean;
-        enableGoogleCloudStorageDataSourceType: boolean;
-      }>();
+    const {
+      enableFederatedIdentityAuth,
+      enableGoogleCloudStorageDataSourceType,
+      enableAzureDataSourceType,
+    } = initializerContext.config.get<{
+      enableFederatedIdentityAuth: boolean;
+      enableGoogleCloudStorageDataSourceType: boolean;
+      enableAzureDataSourceType: boolean;
+    }>();
     this.enableFederatedIdentityAuth = enableFederatedIdentityAuth;
     this.enableGoogleCloudStorageDataSourceType = enableGoogleCloudStorageDataSourceType;
+    this.enableAzureDataSourceType = enableAzureDataSourceType;
   }
 
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
+    const enableAzureDataSourceType = this.enableAzureDataSourceType;
     management.sections.section.data.registerApp({
       id: 'federated_data',
       title: PLUGIN_NAME,
@@ -56,7 +63,11 @@ export class FederatedDataPlugin
 
         const unmountAppCallback = mountManagementSection(coreStart, params, {
           cloud: pluginsStart.cloud,
-          featureFlags: { enableFederatedIdentityAuth, enableGoogleCloudStorageDataSourceType },
+          featureFlags: {
+            enableFederatedIdentityAuth,
+            enableGoogleCloudStorageDataSourceType,
+            enableAzureDataSourceType,
+          },
         });
         return () => {
           docTitle.reset();

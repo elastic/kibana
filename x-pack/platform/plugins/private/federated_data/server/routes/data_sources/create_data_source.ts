@@ -48,6 +48,13 @@ export function registerCreateDataSource(router: IRouter, config: FederatedDataC
             },
           });
         }
+        if (request.body.type === 'azure' && !config.enableAzureDataSourceType) {
+          return response.badRequest({
+            body: {
+              message: 'Azure data sources are disabled by configuration.',
+            },
+          });
+        }
         await dataSourcesClient.put(id, request.body);
         return response.ok();
       } catch (error) {

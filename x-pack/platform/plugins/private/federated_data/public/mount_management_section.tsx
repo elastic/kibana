@@ -17,6 +17,7 @@ import { Main } from './main';
 export interface FederatedDataFeatureFlags {
   enableFederatedIdentityAuth?: boolean;
   enableGoogleCloudStorageDataSourceType?: boolean;
+  enableAzureDataSourceType?: boolean;
 }
 
 export const mountManagementSection = (
@@ -25,8 +26,9 @@ export const mountManagementSection = (
   {
     cloud,
     featureFlags: {
-      enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = true,
+      enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = false,
       enableGoogleCloudStorageDataSourceType = false,
+      enableAzureDataSourceType = false,
     } = {},
   }: {
     cloud?: CloudStart;
@@ -45,6 +47,7 @@ export const mountManagementSection = (
           featureFlags={{
             enableFederatedIdentityAuth,
             enableGoogleCloudStorageDataSourceType,
+            enableAzureDataSourceType,
           }}
         />
       </Router>
