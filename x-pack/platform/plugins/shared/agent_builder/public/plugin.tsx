@@ -137,19 +137,28 @@ export class AgentBuilderPlugin
 
     registerWorkflowSteps(deps.workflowsExtensions, core);
 
-    const isAgentFirstChromeAtSetup =
-      isAgentFirst(core.featureFlags) && isNextChrome(core.featureFlags);
+    // Sidebar registration needs FeatureFlagsStart (getBooleanValue); defer until core has started.
+    core.getStartServices()
+      .then(([coreStart]) => {
+        const isAgentFirstChrome =
+          isAgentFirst(coreStart.featureFlags) && isNextChrome(coreStart.featureFlags);
 
-    if (!isAgentFirstChromeAtSetup) {
-      core.chrome.sidebar.registerApp({
-        appId: 'agentBuilder',
-        restoreOnReload: false,
-        loadComponent: async () => {
-          const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
-          return SidebarConversation;
-        },
+        if (isAgentFirstChrome) {
+          return;
+        }
+
+        core.chrome.sidebar.registerApp({
+          appId: 'agentBuilder',
+          restoreOnReload: false,
+          loadComponent: async () => {
+            const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
+            return SidebarConversation;
+          },
+        });
+      })
+      .catch((error) => {
+        this.logger.error('Failed to register Agent Builder sidebar app', error);
       });
-    }
 
     return {};
   }

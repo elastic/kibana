@@ -95,13 +95,18 @@ const createMockInitializerContext = (): PluginInitializerContext<ConfigSchema> 
 
 const createMockSidebarApp = () => ({ open: jest.fn(), close: jest.fn() });
 
-const createMockCoreSetup = (): CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart> =>
-  ({
+const createMockCoreSetup = (
+  coreStart?: CoreStart
+): CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart> => {
+  const start = coreStart ?? createMockCoreStart(createMockSidebarApp());
+  return {
     analytics: { reportEvent: jest.fn() },
     chrome: {
       sidebar: { registerApp: jest.fn() },
     },
-  } as unknown as CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>);
+    getStartServices: jest.fn().mockResolvedValue([start]),
+  } as unknown as CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>;
+};
 
 const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>): CoreStart =>
   ({
@@ -112,6 +117,9 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockReturnValue(false),
     },
     uiSettings: {
       get$: jest.fn(() => new BehaviorSubject(false)),
