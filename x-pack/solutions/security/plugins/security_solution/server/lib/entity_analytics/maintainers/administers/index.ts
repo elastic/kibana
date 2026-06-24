@@ -8,6 +8,7 @@
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 
 import { runRelationshipMaintainer } from '../engine/run_relationship_maintainer';
+import type { RelationshipMaintainerTelemetryCollector } from '../types';
 import { buildAdministersConfigs } from './configs';
 
 export const administersMaintainer: RegisterEntityMaintainerConfig = {
@@ -18,7 +19,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
   interval: '1d',
   timeout: '1h',
   initialState: {},
-  run: async ({ esClient, logger, status, crudClient, abortController }) => {
+  run: async ({ esClient, logger, status, crudClient, abortController, telemetry }) => {
     const namespace = status.metadata.namespace;
     const lastProcessedTimestamp =
       typeof status.state.lastProcessedTimestamp === 'string'
@@ -33,6 +34,11 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
       logger.info('Starting administers maintainer run (full scan — first run)');
     }
 
+    const collector: RelationshipMaintainerTelemetryCollector = {
+      sources: [],
+      relationshipTypeApplied: {},
+    };
+
     const result = await runRelationshipMaintainer({
       esClient,
       logger,
@@ -40,10 +46,32 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       integrations: buildAdministersConfigs(lastProcessedTimestamp),
       abortController,
+      telemetryCollector: collector,
+    });
+
+    telemetry.report({
+      iterations: result.totalIterations,
+      truncated: result.truncated,
+      funnel: {
+        scanned: result.totalBuckets,
+        qualified: result.totalRecords,
+        proposed: result.totalRecords, // engine has no distinct proposal phase; echo qualified
+        applied: result.totalWritten,
+        droppedNotInStore: result.totalNotFound,
+        failed: result.totalWriteErrors,
+        // TODO: extend telemetry schema to include droppedTargets (phantom ID validation)
+      },
+      sources: collector.sources,
+      ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
+        breakdown: Object.entries(collector.relationshipTypeApplied).map(([name, count]) => ({
+          name,
+          count,
+        })),
+      }),
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written`
+      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should

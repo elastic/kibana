@@ -14,6 +14,7 @@ import {
   getLatestEntitiesIndexName,
   getEntityIndexPattern,
   ENTITY_SCHEMA_VERSION_V2,
+  ENTITY_STORE_ROUTES as COMMON_ROUTES,
 } from '@kbn/entity-store/common';
 
 const BASE_HEADERS = {
@@ -32,40 +33,51 @@ export const INTERNAL_HEADERS = {
   'elastic-api-version': '2',
 };
 
-const PUBLIC_BASE = 'api/security/entity_store';
-const INTERNAL_BASE = 'internal/security/entity_store';
+// Strip the leading '/' from common route strings — Scout's apiClient.post/get
+// prepends the Kibana base URL, so paths must not start with '/'.
+const r = (route: string) => route.replace(/^\//, '');
+
+// Dynamic routes: substitute the OpenAPI {param} placeholder with a real value.
+const withId = (route: string, id: string) => r(route.replace('{id}', id));
+const withEntityType = (route: string, entityType: string) =>
+  r(route.replace('{entityType}', entityType));
 
 export const ENTITY_STORE_ROUTES = {
   public: {
-    INSTALL: `${PUBLIC_BASE}/install`,
-    UPDATE: PUBLIC_BASE,
-    STATUS: `${PUBLIC_BASE}/status`,
-    START: `${PUBLIC_BASE}/start`,
-    STOP: `${PUBLIC_BASE}/stop`,
-    UNINSTALL: `${PUBLIC_BASE}/uninstall`,
-    CRUD_CREATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
-    CRUD_UPDATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
-    CRUD_BULK_UPDATE: `${PUBLIC_BASE}/entities/bulk`,
-    CRUD_GET: `${PUBLIC_BASE}/entities`,
-    CRUD_DELETE: `${PUBLIC_BASE}/entities/`,
-    RESOLUTION_LINK: `${PUBLIC_BASE}/resolution/link`,
-    RESOLUTION_UNLINK: `${PUBLIC_BASE}/resolution/unlink`,
-    RESOLUTION_GROUP: `${PUBLIC_BASE}/resolution/group`,
+    INSTALL: r(COMMON_ROUTES.public.INSTALL),
+    UPDATE: r(COMMON_ROUTES.public.UPDATE),
+    STATUS: r(COMMON_ROUTES.public.STATUS),
+    START: r(COMMON_ROUTES.public.START),
+    STOP: r(COMMON_ROUTES.public.STOP),
+    UNINSTALL: r(COMMON_ROUTES.public.UNINSTALL),
+    CRUD_CREATE: (entityType: string) =>
+      withEntityType(COMMON_ROUTES.public.CRUD_CREATE, entityType),
+    CRUD_UPDATE: (entityType: string) =>
+      withEntityType(COMMON_ROUTES.public.CRUD_UPDATE, entityType),
+    CRUD_BULK_UPDATE: r(COMMON_ROUTES.public.CRUD_BULK_UPDATE),
+    CRUD_GET: r(COMMON_ROUTES.public.CRUD_GET),
+    CRUD_DELETE: r(COMMON_ROUTES.public.CRUD_DELETE),
+    RESOLUTION_LINK: r(COMMON_ROUTES.public.RESOLUTION_LINK),
+    RESOLUTION_UNLINK: r(COMMON_ROUTES.public.RESOLUTION_UNLINK),
+    RESOLUTION_GROUP: r(COMMON_ROUTES.public.RESOLUTION_GROUP),
   },
   internal: {
-    CHECK_PRIVILEGES: `${INTERNAL_BASE}/check_privileges`,
+    CHECK_PRIVILEGES: r(COMMON_ROUTES.internal.CHECK_PRIVILEGES),
     FORCE_LOG_EXTRACTION: (entityType: string) =>
-      `${INTERNAL_BASE}/${entityType}/force_log_extraction`,
+      withEntityType(COMMON_ROUTES.internal.FORCE_LOG_EXTRACTION, entityType),
     FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>
-      `${INTERNAL_BASE}/${entityType}/force_ccs_extract_to_updates`,
-    FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE}/force_history_snapshot`,
-    ENTITY_MAINTAINERS_INIT: `${INTERNAL_BASE}/entity_maintainers/init`,
-    ENTITY_MAINTAINERS_GET: `${INTERNAL_BASE}/entity_maintainers`,
-    ENTITY_MAINTAINERS_START: (id: string) => `${INTERNAL_BASE}/entity_maintainers/start/${id}`,
-    ENTITY_MAINTAINERS_STOP: (id: string) => `${INTERNAL_BASE}/entity_maintainers/stop/${id}`,
-    ENTITY_MAINTAINERS_RUN: (id: string) => `${INTERNAL_BASE}/entity_maintainers/run/${id}`,
+      withEntityType(COMMON_ROUTES.internal.FORCE_REMOTE_EXTRACT_TO_UPDATES, entityType),
+    FORCE_HISTORY_SNAPSHOT: r(COMMON_ROUTES.internal.FORCE_HISTORY_SNAPSHOT),
+    ENTITY_MAINTAINERS_INIT: r(COMMON_ROUTES.internal.ENTITY_MAINTAINERS_INIT),
+    ENTITY_MAINTAINERS_GET: r(COMMON_ROUTES.internal.ENTITY_MAINTAINERS_GET),
+    ENTITY_MAINTAINERS_START: (id: string) =>
+      withId(COMMON_ROUTES.internal.ENTITY_MAINTAINERS_START, id),
+    ENTITY_MAINTAINERS_STOP: (id: string) =>
+      withId(COMMON_ROUTES.internal.ENTITY_MAINTAINERS_STOP, id),
+    ENTITY_MAINTAINERS_RUN: (id: string) =>
+      withId(COMMON_ROUTES.internal.ENTITY_MAINTAINERS_RUN, id),
   },
-} as const;
+};
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 

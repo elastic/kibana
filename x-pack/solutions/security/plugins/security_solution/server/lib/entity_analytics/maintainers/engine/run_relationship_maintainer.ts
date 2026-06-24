@@ -253,7 +253,14 @@ async function runIntegration(
 
     // Stream per-integration: write this integration's records before
     // returning so memory does not accumulate across the outer loop.
-    const write = await writeEntityIds(crudClient, logger, records);
+    const write = await writeEntityIds(
+      crudClient,
+      logger,
+      records,
+      esClient,
+      namespace,
+      config.validateTargetIds
+    );
     // When truncated, the final loop pass incremented `iterations` before breaking
     // without fetching a page — clamp to the actual number of pages completed.
     const completedIterations = truncated ? MAX_ITERATIONS : iterations;
@@ -270,7 +277,7 @@ async function runIntegration(
     return {
       buckets: totalBuckets,
       recordsCount: records.length,
-      write: { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} },
+      write: { updated: 0, notFound: 0, errors: 0, droppedTargets: 0, relationshipTypeApplied: {} },
       outcome: 'error',
       iterations,
       truncated: false,
@@ -330,6 +337,8 @@ export const runRelationshipMaintainer = async ({
   totalNotFound: number;
   /** Count of non-404 errors returned by `bulkUpdateEntity` (5xx, etc.). */
   totalWriteErrors: number;
+  /** Count of target EUIDs pruned because they don't exist in the entity store. */
+  totalDroppedTargets: number;
   /** Total composite-agg pagination passes across all integrations. */
   totalIterations: number;
   /** True if any integration hit MAX_ITERATIONS and stopped early. */
@@ -353,6 +362,7 @@ export const runRelationshipMaintainer = async ({
   let totalWritten = 0;
   let totalNotFound = 0;
   let totalWriteErrors = 0;
+  let totalDroppedTargets = 0;
   let totalIterations = 0;
   let truncated = false;
 
@@ -382,6 +392,7 @@ export const runRelationshipMaintainer = async ({
       totalWritten += write.updated;
       totalNotFound += write.notFound;
       totalWriteErrors += write.errors;
+      totalDroppedTargets += write.droppedTargets;
     }
 
     if (telemetryCollector) {
@@ -404,6 +415,7 @@ export const runRelationshipMaintainer = async ({
     totalWritten,
     totalNotFound,
     totalWriteErrors,
+    totalDroppedTargets,
     totalIterations,
     truncated,
     lastRunTimestamp: runStartTimestamp,
