@@ -87,6 +87,7 @@ To use the Dropbox connector, you must register an app in the Dropbox App Consol
    - `files.metadata.read`
    - `files.content.read`
    - `sharing.read`
+   - `sharing.write`
 8. Note the following values for use in {{kib}}:
 
    | Dropbox App Console label | {{kib}} field |
