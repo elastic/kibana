@@ -1,0 +1,87 @@
+version: '1'
+name: SDLC GitHub build team dimension
+description: >
+  Tier-2 projection workflow. Builds sdlc-team-dimension documents from github-intel-teams
+  catalog data. Maps org team slug/name to project field aliases used for epic attribution.
+  Run github-catalog-teams first.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - teams
+  - dimension
+  - ingest
+
+consts:
+  orgLogin: elastic
+  syncStateIndex: github-intel-sync-state
+  teamsIndex: github-intel-teams
+  teamDimensionIndex: sdlc-team-dimension
+  syncSource: github-build-team-dimension
+  entityType: team_dimension
+  pageSize: 500
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-github-build-team-dimension
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: load_teams
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.teamsIndex }}'
+      size: '{{ consts.pageSize }}'
+      query:
+        term:
+          team.org: '{{ consts.orgLogin }}'
+
+  - name: build_team_dimension
+    type: foreach
+    foreach: '${{ steps.load_teams.output.hits.hits | json }}'
+    steps:
+      - name: upsert_team_dimension
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.teamDimensionIndex }}'
+          id: '${{ foreach.item._source.team.slug }}'
+          document:
+            org_team:
+              key: '${{ foreach.item._source.team.slug }}'
+              name: '${{ foreach.item._source.team.name }}'
+              members_count: '${{ foreach.item._source.team.members_count }}'
+            subteams: '${{ foreach.item._source.payload.parentTeam.slug ?? "" }}'
+            aliases:
+              project_team_values:
+                - '${{ foreach.item._source.team.name }}'
+              github_org_slugs:
+                - '${{ foreach.item._source.team.slug }}'
+              github_labels:
+                - '${{ "Team:" + foreach.item._source.team.name }}'
+            payload: '${{ foreach.item._source.payload | json }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          teams_processed: '${{ steps.load_teams.output.hits.hits.size }}'

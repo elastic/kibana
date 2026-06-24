@@ -1,0 +1,239 @@
+version: '1'
+name: SDLC GitHub normalize project items
+description: >
+  Tier-2 projection workflow. Parses Project v2 fieldValues from github-intel-project-items.payload
+  into hierarchy, roadmap, team_attribution, and epic_anchor fields expected by dashboards and
+  sdlc-project-items-enriched-view. Run github-catalog-project-items first. Processes batches
+  with watermark checkpointing.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - normalize
+  - project
+  - ingest
+
+consts:
+  orgLogin: elastic
+  syncStateIndex: github-intel-sync-state
+  projectItemsIndex: github-intel-project-items
+  syncSource: github-normalize-project-items
+  entityType: project_item_normalize
+  batchSize: 50
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-normalize-project-items
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 6h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      itemsProcessed: 0
+      lastUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_items_batch
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.projectItemsIndex }}'
+      size: '{{ consts.batchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+        - entity.id:
+            order: asc
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+
+  - name: normalize_items
+    type: foreach
+    foreach: '${{ steps.load_items_batch.output.hits.hits | json }}'
+    steps:
+      - name: init_item_context
+        type: data.set
+        with:
+          itemId: '${{ foreach.item._source.entity.id }}'
+          itemDoc: '${{ foreach.item._source | json }}'
+          ticketType: ''
+          epicName: ''
+          parentIssue: ''
+          projectTeam: ''
+          productInitiative: ''
+          roadmapStage: ''
+          releaseMilestone: ''
+          coverageStatus: ''
+
+      - name: parse_field_values
+        type: foreach
+        foreach: '${{ foreach.item._source.payload.fieldValues.nodes | json }}'
+        steps:
+          - name: capture_type
+            type: data.set
+            if: '${{ foreach.item.field.name == "Type" }}'
+            with:
+              ticketType: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+          - name: capture_epic
+            type: data.set
+            if: '${{ foreach.item.field.name == "Epic" }}'
+            with:
+              epicName: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+          - name: capture_parent
+            type: data.set
+            if: '${{ foreach.item.field.name == "Parent issue" || foreach.item.field.name == "Parent Issue" }}'
+            with:
+              parentIssue: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+          - name: capture_team
+            type: data.set
+            if: '${{ foreach.item.field.name == "Team" }}'
+            with:
+              projectTeam: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+          - name: capture_initiative
+            type: data.set
+            if: '${{ foreach.item.field.name == "Product Initiative" }}'
+            with:
+              productInitiative: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+          - name: capture_roadmap_stage
+            type: data.set
+            if: '${{ foreach.item.field.name == "Product Roadmap Stage" }}'
+            with:
+              roadmapStage: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+          - name: capture_release_milestone
+            type: data.set
+            if: '${{ foreach.item.field.name == "Release Milestone" }}'
+            with:
+              releaseMilestone: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+          - name: capture_status
+            type: data.set
+            if: '${{ foreach.item.field.name == "Status" }}'
+            with:
+              coverageStatus: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+      - name: upsert_normalized_item
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.projectItemsIndex }}'
+          id: '${{ variables.itemId }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity: '${{ foreach.item._source.entity | json }}'
+            org: '${{ foreach.item._source.org | json }}'
+            project: '${{ foreach.item._source.project | json }}'
+            repository: '${{ foreach.item._source.repository | json }}'
+            github: '${{ foreach.item._source.github | json }}'
+            content_ref: '${{ foreach.item._source.content_ref | json }}'
+            payload: '${{ foreach.item._source.payload | json }}'
+            hierarchy:
+              ticket_type: '${{ variables.ticketType }}'
+              epic: '${{ variables.epicName }}'
+              parent_issue: '${{ variables.parentIssue }}'
+            roadmap:
+              initiative: '${{ variables.productInitiative }}'
+              stage: '${{ variables.roadmapStage }}'
+              release_milestone: '${{ variables.releaseMilestone }}'
+            epic_anchor:
+              title: '${{ foreach.item._source.content_ref.type == "Issue" ? foreach.item._source.payload.content.title : "" }}'
+              team: '${{ variables.projectTeam }}'
+              initiative: '${{ variables.productInitiative }}'
+              roadmap_stage: '${{ variables.roadmapStage }}'
+              release_milestone: '${{ variables.releaseMilestone }}'
+              epic_issue_number: '${{ foreach.item._source.entity.number }}'
+              roadmap_id: '${{ foreach.item._source.project.id }}'
+            team_attribution:
+              engineering_team: '${{ variables.projectTeam }}'
+              org_teams: '${{ variables.projectTeam }}'
+              attribution_source: project_field
+            delivery:
+              coverage_status: '${{ variables.coverageStatus }}'
+
+      - name: track_batch_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '${{ foreach.item._source.github.updated_at }}'
+          itemsProcessed: '${{ variables.itemsProcessed + 1 }}'
+
+  - name: finalize_watermark
+    type: if
+    condition: 'variables.itemsProcessed : {{ consts.batchSize }}'
+    steps:
+      - name: use_last_updated_watermark
+        type: data.set
+        with:
+          watermark: '${{ variables.lastUpdatedAt }}'
+    else:
+      - name: finalize_if_any_processed
+        type: if
+        condition: "${{ variables.itemsProcessed > 0 }}"
+        steps:
+          - name: use_run_started_watermark
+            type: data.set
+            with:
+              watermark: '${{ variables.runStartedAt }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '${{ variables.watermark }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          items_processed: '${{ variables.itemsProcessed }}'
+          batch_size: '${{ steps.load_items_batch.output.hits.hits.size }}'

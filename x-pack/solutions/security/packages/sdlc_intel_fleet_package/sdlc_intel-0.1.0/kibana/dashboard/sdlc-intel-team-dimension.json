@@ -1,14 +1,14 @@
 {
   "attributes": {
-    "description": "Raw GitHub project items fetched per board.",
+    "description": "Team dimension and epic ownership from sdlc-team-dimension and sdlc-epic-phases.",
     "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
     },
     "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"1\",\"w\":24,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"2\",\"w\":24,\"x\":24,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"project_number\",\"items_fetched\",\"page_count\",\"last_fetched\"],\"sort\":[[\"items_fetched\",\"desc\"]]},\"gridData\":{\"h\":14,\"i\":\"3\",\"w\":24,\"x\":0,\"y\":16},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"org_login\",\"project_number\",\"page_count\",\"items_fetched\"],\"sort\":[[\"items_fetched\",\"desc\"]]},\"gridData\":{\"h\":14,\"i\":\"4\",\"w\":24,\"x\":24,\"y\":16},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"}]",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"1\",\"w\":24,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"2\",\"w\":24,\"x\":24,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"org_team.name\",\"org_team.key\",\"org_team.members_count\"],\"sort\":[[\"org_team.members_count\",\"desc\"]]},\"gridData\":{\"h\":14,\"i\":\"3\",\"w\":24,\"x\":0,\"y\":16},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"epic.title\",\"epic.teams\",\"release.roadmap_stage\",\"rollup.status\"],\"sort\":[[\"epic.teams\",\"asc\"]]},\"gridData\":{\"h\":14,\"i\":\"4\",\"w\":24,\"x\":24,\"y\":16},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"}]",
     "timeRestore": false,
-    "title": "SDLC Raw items by project",
+    "title": "SDLC Team dimension",
     "version": 1
   },
   "id": "sdlc-intel-team-dimension",

@@ -241,6 +241,40 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['scheduled', 'slack', 'ingest', 'sdlc', 'messages', 'foreach', 'while'],
     filename: 'sdlc_slack_channel_history.yml',
   },
+  {
+    id: 'sdlc_github_normalize_project_items',
+    name: 'SDLC GitHub normalize project items',
+    description:
+      'Parses Project v2 fieldValues into hierarchy, roadmap, and team_attribution on github-intel-project-items',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'normalize', 'project', 'foreach'],
+    filename: 'sdlc_github_normalize_project_items.yml',
+  },
+  {
+    id: 'sdlc_github_build_team_dimension',
+    name: 'SDLC GitHub build team dimension',
+    description: 'Builds sdlc-team-dimension documents from github-intel-teams catalog data',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'teams', 'dimension', 'foreach'],
+    filename: 'sdlc_github_build_team_dimension.yml',
+  },
+  {
+    id: 'sdlc_github_cross_link_entities',
+    name: 'SDLC GitHub cross-link entities',
+    description:
+      'Links PRs to issues and project items via github-intel-relationships and delivery fields',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'link', 'relationships', 'foreach'],
+    filename: 'sdlc_github_cross_link_entities.yml',
+  },
+  {
+    id: 'sdlc_github_project_epic_phases',
+    name: 'SDLC GitHub project epic phases',
+    description: 'Projects normalized Epic project items into sdlc-epic-phases',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'epic', 'phases', 'foreach'],
+    filename: 'sdlc_github_project_epic_phases.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

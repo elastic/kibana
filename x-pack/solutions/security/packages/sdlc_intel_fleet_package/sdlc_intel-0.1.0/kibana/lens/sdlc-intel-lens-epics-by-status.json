@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Raw pages grouped by GitHub org",
+    "description": "Epics grouped by rollup status",
     "state": {
       "datasourceStates": {
         "indexpattern": {
@@ -11,7 +11,7 @@
                 "bucket-col": {
                   "dataType": "string",
                   "isBucketed": true,
-                  "label": "Org",
+                  "label": "Status",
                   "operationType": "terms",
                   "params": {
                     "missingBucket": false,
@@ -21,15 +21,15 @@
                     "size": 10
                   },
                   "scale": "ordinal",
-                  "sourceField": "org_login"
+                  "sourceField": "rollup.status"
                 },
                 "metric-col": {
                   "dataType": "number",
                   "isBucketed": false,
-                  "label": "Pages",
-                  "operationType": "sum",
+                  "label": "Epics",
+                  "operationType": "count",
                   "scale": "ratio",
-                  "sourceField": "page_count"
+                  "sourceField": "Records"
                 }
               },
               "incompleteColumns": {}
@@ -54,18 +54,18 @@
         "shape": "donut"
       }
     },
-    "title": "SDLC pages by org",
+    "title": "SDLC epics by status",
     "visualizationType": "lnsPie"
   },
   "id": "sdlc-intel-lens-epics-by-status",
   "references": [
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-epic-phases",
       "name": "indexpattern-datasource-current-indexpattern",
       "type": "index-pattern"
     },
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-epic-phases",
       "name": "indexpattern-datasource-layer-layer1",
       "type": "index-pattern"
     }

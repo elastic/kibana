@@ -1,0 +1,253 @@
+version: '1'
+name: SDLC GitHub cross-link entities
+description: >
+  Tier-3 linkage workflow. Writes github-intel-relationships edges for PRs that close issues
+  (from enrich payload) and project items that reference issue/PR content. Run catalog, activity,
+  and enrich workflows first.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - link
+  - relationships
+  - ingest
+
+consts:
+  orgLogin: elastic
+  syncStateIndex: github-intel-sync-state
+  projectItemsIndex: github-intel-project-items
+  pullRequestsIndex: github-intel-pull-requests
+  relationshipsIndex: github-intel-relationships
+  syncSource: github-cross-link-entities
+  entityType: cross_link
+  prBatchSize: 50
+  itemBatchSize: 100
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-cross-link-entities
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 2h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      prsProcessed: 0
+      itemsLinked: 0
+      lastUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_prs_batch
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.pullRequestsIndex }}'
+      size: '{{ consts.prBatchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+        - entity.id:
+            order: asc
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+
+  - name: link_prs_to_issues
+    type: foreach
+    foreach: '${{ steps.load_prs_batch.output.hits.hits | json }}'
+    steps:
+      - name: set_pr_context
+        type: data.set
+        with:
+          prEntityId: '${{ foreach.item._source.entity.id }}'
+          prUrl: '${{ foreach.item._source.entity.url }}'
+          prNumber: '${{ foreach.item._source.entity.number }}'
+          prRepoFullName: '${{ foreach.item._source.repository.full_name }}'
+          prState: '${{ foreach.item._source.github.state }}'
+
+      - name: index_closing_issue_relationships
+        type: foreach
+        foreach: '${{ foreach.item._source.payload.closingIssuesReferences.nodes | json }}'
+        steps:
+          - name: upsert_pr_closes_issue
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              id: '${{ variables.prEntityId }}-closes-${{ foreach.item.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                from: '${{ variables.prUrl }}'
+                to: '${{ foreach.item.url }}'
+                relation: closes
+                metadata:
+                  org: '{{ consts.orgLogin }}'
+                  pr_number: '${{ variables.prNumber }}'
+                  issue_number: '${{ foreach.item.number }}'
+                  repo: '${{ variables.prRepoFullName }}'
+                payload: '${{ foreach.item | json }}'
+
+          - name: find_project_item_for_issue
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.projectItemsIndex }}'
+              size: 5
+              query:
+                bool:
+                  must:
+                    - term:
+                        org.login: '{{ consts.orgLogin }}'
+                    - term:
+                        content_ref.url: '${{ foreach.item.url }}'
+
+          - name: update_project_item_delivery
+            type: foreach
+            foreach: '${{ steps.find_project_item_for_issue.output.hits.hits | json }}'
+            steps:
+              - name: upsert_linked_prs
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.projectItemsIndex }}'
+                  id: '${{ foreach.item._source.entity.id }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    entity: '${{ foreach.item._source.entity | json }}'
+                    org: '${{ foreach.item._source.org | json }}'
+                    project: '${{ foreach.item._source.project | json }}'
+                    hierarchy: '${{ foreach.item._source.hierarchy | json }}'
+                    content_ref: '${{ foreach.item._source.content_ref | json }}'
+                    payload: '${{ foreach.item._source.payload | json }}'
+                    delivery:
+                      linked_prs:
+                        - '${{ variables.prUrl }}'
+                      pr_summary:
+                        total: 1
+                        merged: '${{ variables.prState == "MERGED" ? 1 : 0 }}'
+                        open: '${{ variables.prState == "OPEN" ? 1 : 0 }}'
+                        closed_unmerged: '${{ variables.prState == "CLOSED" ? 1 : 0 }}'
+
+      - name: track_pr_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '${{ foreach.item._source.github.updated_at }}'
+          prsProcessed: '${{ variables.prsProcessed + 1 }}'
+
+  - name: load_project_items_batch
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.projectItemsIndex }}'
+      size: '{{ consts.itemBatchSize }}'
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+          filter:
+            - exists:
+                field: content_ref.url
+
+  - name: link_items_to_content
+    type: foreach
+    foreach: '${{ steps.load_project_items_batch.output.hits.hits | json }}'
+    steps:
+      - name: upsert_contains_relationship
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.relationshipsIndex }}'
+          id: '${{ foreach.item._source.entity.id }}-contains-${{ foreach.item._source.content_ref.id }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            from: '${{ foreach.item._source.entity.id }}'
+            to: '${{ foreach.item._source.content_ref.url }}'
+            relation: project_contains
+            metadata:
+              org: '{{ consts.orgLogin }}'
+              project_number: '${{ foreach.item._source.project.number }}'
+              content_type: '${{ foreach.item._source.content_ref.type }}'
+            payload: '${{ foreach.item._source.content_ref | json }}'
+
+      - name: track_item_progress
+        type: data.set
+        with:
+          itemsLinked: '${{ variables.itemsLinked + 1 }}'
+
+  - name: finalize_watermark
+    type: if
+    condition: 'variables.prsProcessed : {{ consts.prBatchSize }}'
+    steps:
+      - name: use_last_updated_watermark
+        type: data.set
+        with:
+          watermark: '${{ variables.lastUpdatedAt }}'
+    else:
+      - name: finalize_if_any_processed
+        type: if
+        condition: "${{ variables.prsProcessed > 0 }}"
+        steps:
+          - name: use_run_started_watermark
+            type: data.set
+            with:
+              watermark: '${{ variables.runStartedAt }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '${{ variables.watermark }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          prs_processed: '${{ variables.prsProcessed }}'
+          project_items_linked: '${{ variables.itemsLinked }}'

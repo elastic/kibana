@@ -1,31 +1,31 @@
 # SDLC Intelligence dashboards
 
-Fleet integration package that installs Kibana dashboards, Elasticsearch index templates for the raw GitHub pipeline, and ES|QL views (`sdlc-github-raw-summary-view`, `sdlc-project-items-enriched-view`) for the SDLC Intelligence platform.
+Fleet integration package that installs Kibana dashboards, Elasticsearch index templates, ES|QL views, and ingest workflows for the SDLC Intelligence platform.
 
 ## Prerequisites
 
 1. Install this **Fleet package** (see [package README](../README.md)).
-2. Create a **GitHub** connector (`.github`) with ingest scopes (`read:org`, `read:project`, `repo`).
-3. Import **SDLC GitHub catalog repos (GraphQL)** from **Workflows → Examples**, set `githubConnectorId`, and enable.
-
-Additional workflows can be imported from `kibana/workflow/` in the package zip.
-
-If you cannot install the Fleet package, ensure index templates exist before running ingest workflows.
+2. Create **GitHub** (`.github`) and **Slack** (`.slack2`) connectors with appropriate OAuth scopes.
+3. Enable ingest workflows in order (see package README): catalog → normalize → activity → enrich → cross-link → epic phases.
 
 ## View dashboards
 
 **Dashboards** app → search **SDLC**, or **Fleet → Integrations → Installed → SDLC Intelligence**.
 
-| Dashboard | Saved object ID |
-| --- | --- |
-| SDLC GitHub sync overview | `sdlc-intel-executive-roadmap` |
-| SDLC Raw sync by project | `sdlc-intel-phase-pipeline` |
-| SDLC Raw items by project | `sdlc-intel-team-dimension` |
+| Dashboard | Saved object ID | Data source |
+| --- | --- | --- |
+| SDLC Executive roadmap | `sdlc-intel-executive-roadmap` | `sdlc-epic-phases` |
+| SDLC Project item pipeline | `sdlc-intel-phase-pipeline` | `sdlc-project-items-enriched-view` |
+| SDLC Team dimension | `sdlc-intel-team-dimension` | `sdlc-team-dimension`, `sdlc-epic-phases` |
+| SDLC GitHub sync overview | `sdlc-intel-raw-sync` | `sdlc-github-raw-summary-view` |
 
 Direct links (default space): `/app/dashboards#/view/sdlc-intel-executive-roadmap` (and analogous paths for the other IDs).
 
-Per-project page and item counts are served by the **`sdlc-github-raw-summary-view`** ES|QL view (installed with this package), aggregated from raw documents in `github-intel-raw-project-pages`.
+## Data views
 
-Per-item hierarchy, team, and roadmap fields (extracted from raw `github-intel-project-items` payloads) are available via **`sdlc-project-items-enriched-view`**.
+- **`sdlc-github-raw-summary-view`** — ES|QL aggregation of raw project page fetches from `github-intel-raw-project-pages`
+- **`sdlc-project-items-enriched-view`** — ES|QL enrichment of `github-intel-project-items` with team, type, and roadmap fields
+- **`sdlc-epic-phases`** — projected epic documents from the `github-project-epic-phases` workflow
+- **`sdlc-team-dimension`** — org team catalog from the `github-build-team-dimension` workflow
 
-This package does not ship an Elastic Agent policy — it installs Kibana saved objects, index templates, and an ES|QL view.
+This package does not ship an Elastic Agent policy — it installs Kibana saved objects, index templates, ES|QL views, and workflow definitions.

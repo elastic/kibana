@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Epics grouped by owning engineering team",
+    "description": "Project items grouped by team from enriched ES|QL view",
     "state": {
       "datasourceStates": {
         "indexpattern": {
@@ -11,7 +11,7 @@
                 "bucket-col": {
                   "dataType": "string",
                   "isBucketed": true,
-                  "label": "Team",
+                  "label": "Project team",
                   "operationType": "terms",
                   "params": {
                     "missingBucket": false,
@@ -21,12 +21,12 @@
                     "size": 15
                   },
                   "scale": "ordinal",
-                  "sourceField": "teams.own_engineering_team"
+                  "sourceField": "project_team"
                 },
                 "metric-col": {
                   "dataType": "number",
                   "isBucketed": false,
-                  "label": "Epics",
+                  "label": "Items",
                   "operationType": "count",
                   "scale": "ratio",
                   "sourceField": "Records"
@@ -59,18 +59,18 @@
         "valueLabels": "hide"
       }
     },
-    "title": "SDLC epics by team",
+    "title": "SDLC items by project team",
     "visualizationType": "lnsXY"
   },
-  "id": "sdlc-intel-lens-epics-by-team",
+  "id": "sdlc-intel-lens-enriched-by-team",
   "references": [
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-project-items-enriched-view",
       "name": "indexpattern-datasource-current-indexpattern",
       "type": "index-pattern"
     },
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-project-items-enriched-view",
       "name": "indexpattern-datasource-layer-layer1",
       "type": "index-pattern"
     }

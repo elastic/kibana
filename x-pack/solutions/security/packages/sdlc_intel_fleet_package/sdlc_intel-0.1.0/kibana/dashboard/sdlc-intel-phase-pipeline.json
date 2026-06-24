@@ -1,23 +1,23 @@
 {
   "attributes": {
-    "description": "Raw GitHub sync volume by project and org.",
+    "description": "Project item pipeline from sdlc-project-items-enriched-view: ticket types, teams, and roadmap stages.",
     "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
     },
     "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"3\",\"w\":16,\"x\":32,\"y\":0},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"4\",\"w\":48,\"x\":0,\"y\":8},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"org_login\",\"project_number\",\"page_count\",\"items_fetched\"],\"sort\":[[\"page_count\",\"desc\"]]},\"gridData\":{\"h\":22,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":24},\"panelIndex\":\"5\",\"panelRefName\":\"panel_4\",\"version\":\"8.0.0\"}]",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"3\",\"w\":16,\"x\":32,\"y\":0},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"4\",\"w\":48,\"x\":0,\"y\":8},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"project_number\",\"ticket_type\",\"project_team\",\"roadmap_stage\",\"issue_title\",\"is_epic\"],\"sort\":[[\"project_number\",\"asc\"]]},\"gridData\":{\"h\":22,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":24},\"panelIndex\":\"5\",\"panelRefName\":\"panel_4\",\"version\":\"8.0.0\"}]",
     "timeRestore": false,
-    "title": "SDLC Raw sync by project",
+    "title": "SDLC Project item pipeline",
     "version": 1
   },
   "id": "sdlc-intel-phase-pipeline",
   "references": [
-    { "id": "sdlc-intel-lens-epic-count", "name": "panel_0", "type": "lens" },
-    { "id": "sdlc-intel-lens-avg-coverage", "name": "panel_1", "type": "lens" },
-    { "id": "sdlc-intel-lens-epics-by-status", "name": "panel_2", "type": "lens" },
-    { "id": "sdlc-intel-lens-epics-by-team", "name": "panel_3", "type": "lens" },
-    { "id": "sdlc-intel-pipeline-search", "name": "panel_4", "type": "search" },
+    { "id": "sdlc-intel-lens-enriched-epic-count", "name": "panel_0", "type": "lens" },
+    { "id": "sdlc-intel-lens-enriched-by-type", "name": "panel_1", "type": "lens" },
+    { "id": "sdlc-intel-lens-enriched-by-roadmap", "name": "panel_2", "type": "lens" },
+    { "id": "sdlc-intel-lens-enriched-by-team", "name": "panel_3", "type": "lens" },
+    { "id": "sdlc-intel-enriched-items-search", "name": "panel_4", "type": "search" },
     { "id": "sdlc-intel-tag", "name": "tag-ref-sdlc-intel-tag", "type": "tag" }
   ],
   "type": "dashboard"

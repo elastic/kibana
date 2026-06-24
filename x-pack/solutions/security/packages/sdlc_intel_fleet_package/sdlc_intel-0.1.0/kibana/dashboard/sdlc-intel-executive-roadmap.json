@@ -1,14 +1,14 @@
 {
   "attributes": {
-    "description": "Raw GitHub sync overview: pages and items fetched per project.",
+    "description": "Epic roadmap analytics from sdlc-epic-phases: count, coverage, status, and stage breakdown.",
     "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
     },
     "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"3\",\"w\":16,\"x\":32,\"y\":0},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"4\",\"w\":48,\"x\":0,\"y\":8},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"org_login\",\"project_number\",\"page_count\",\"items_fetched\",\"last_fetched\"],\"sort\":[[\"items_fetched\",\"desc\"]]},\"gridData\":{\"h\":20,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":24},\"panelIndex\":\"5\",\"panelRefName\":\"panel_4\",\"version\":\"8.0.0\"}]",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"3\",\"w\":16,\"x\":32,\"y\":0},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"4\",\"w\":48,\"x\":0,\"y\":8},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"epic.title\",\"epic.teams\",\"release.roadmap_stage\",\"release.milestone\",\"rollup.status\",\"rollup.coverage_pct\"],\"sort\":[[\"epic.title\",\"asc\"]]},\"gridData\":{\"h\":20,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":24},\"panelIndex\":\"5\",\"panelRefName\":\"panel_4\",\"version\":\"8.0.0\"}]",
     "timeRestore": false,
-    "title": "SDLC GitHub sync overview",
+    "title": "SDLC Executive roadmap",
     "version": 1
   },
   "id": "sdlc-intel-executive-roadmap",

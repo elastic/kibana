@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Project number vs items fetched",
+    "description": "GitHub org teams by member count",
     "state": {
       "datasourceStates": {
         "indexpattern": {
@@ -9,9 +9,9 @@
               "columnOrder": ["bucket-col", "metric-col"],
               "columns": {
                 "bucket-col": {
-                  "dataType": "number",
+                  "dataType": "string",
                   "isBucketed": true,
-                  "label": "Project #",
+                  "label": "Team",
                   "operationType": "terms",
                   "params": {
                     "missingBucket": false,
@@ -21,15 +21,15 @@
                     "size": 20
                   },
                   "scale": "ordinal",
-                  "sourceField": "project_number"
+                  "sourceField": "org_team.name"
                 },
                 "metric-col": {
                   "dataType": "number",
                   "isBucketed": false,
-                  "label": "Items fetched",
-                  "operationType": "sum",
+                  "label": "Members",
+                  "operationType": "max",
                   "scale": "ratio",
-                  "sourceField": "items_fetched"
+                  "sourceField": "org_team.members_count"
                 }
               },
               "incompleteColumns": {}
@@ -59,18 +59,18 @@
         "valueLabels": "hide"
       }
     },
-    "title": "SDLC items by project (table)",
+    "title": "SDLC team member counts",
     "visualizationType": "lnsXY"
   },
   "id": "sdlc-intel-lens-team-members",
   "references": [
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-team-dimension",
       "name": "indexpattern-datasource-current-indexpattern",
       "type": "index-pattern"
     },
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-team-dimension",
       "name": "indexpattern-datasource-layer-layer1",
       "type": "index-pattern"
     }

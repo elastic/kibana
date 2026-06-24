@@ -1,27 +1,27 @@
 {
   "attributes": {
     "columns": [
-      "epic.title",
-      "epic.teams",
-      "release.roadmap_stage",
-      "release.milestone",
-      "rollup.status",
-      "rollup.coverage_pct",
-      "epic.url"
+      "project_number",
+      "ticket_type",
+      "project_team",
+      "roadmap_stage",
+      "release_milestone",
+      "issue_title",
+      "is_epic"
     ],
-    "description": "Projected epics from sdlc-epic-phases",
+    "description": "Enriched project items from sdlc-project-items-enriched-view ES|QL view",
     "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
     },
-    "sort": [["epic.title", "asc"]],
-    "title": "SDLC epics",
+    "sort": [["project_number", "asc"]],
+    "title": "SDLC enriched project items",
     "version": 1
   },
-  "id": "sdlc-intel-epics-search",
+  "id": "sdlc-intel-enriched-items-search",
   "references": [
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-project-items-enriched-view",
       "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
       "type": "index-pattern"
     }

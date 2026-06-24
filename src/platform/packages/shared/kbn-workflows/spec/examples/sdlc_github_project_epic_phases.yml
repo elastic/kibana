@@ -1,0 +1,113 @@
+version: '1'
+name: SDLC GitHub project epic phases
+description: >
+  Tier-2 projection workflow. Builds sdlc-epic-phases documents from normalized Epic project
+  items in github-intel-project-items. Run github-normalize-project-items first.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - epic
+  - phases
+  - ingest
+
+consts:
+  orgLogin: elastic
+  syncStateIndex: github-intel-sync-state
+  projectItemsIndex: github-intel-project-items
+  epicPhasesIndex: sdlc-epic-phases
+  syncSource: github-project-epic-phases
+  entityType: epic_phases
+  batchSize: 100
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-github-project-epic-phases
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 6h
+  - type: manual
+
+steps:
+  - name: load_epic_items
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.projectItemsIndex }}'
+      size: '{{ consts.batchSize }}'
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - term:
+                hierarchy.ticket_type: Epic
+
+  - name: project_epic_phases
+    type: foreach
+    foreach: '${{ steps.load_epic_items.output.hits.hits | json }}'
+    steps:
+      - name: upsert_epic_phase
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.epicPhasesIndex }}'
+          id: '${{ foreach.item._source.entity.id }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            roadmap:
+              id: '${{ foreach.item._source.project.id }}'
+              title: '${{ foreach.item._source.project.title }}'
+              product: '${{ foreach.item._source.roadmap.initiative }}'
+            epic:
+              key: '${{ foreach.item._source.hierarchy.epic }}'
+              display_id: '${{ foreach.item._source.entity.number }}'
+              title: '${{ foreach.item._source.payload.content.title }}'
+              summary: '${{ foreach.item._source.payload.content.body }}'
+              owner: '${{ foreach.item._source.epic_anchor.owner }}'
+              teams: '${{ foreach.item._source.team_attribution.engineering_team }}'
+              url: '${{ foreach.item._source.content_ref.url }}'
+              project_item_id: '${{ foreach.item._source.entity.id }}'
+              issue_ref:
+                repo: '${{ foreach.item._source.content_ref.repo }}'
+                number: '${{ foreach.item._source.entity.number }}'
+                node_id: '${{ foreach.item._source.content_ref.id }}'
+            teams:
+              own_engineering_team: '${{ foreach.item._source.team_attribution.engineering_team }}'
+              own_org_team: '${{ foreach.item._source.team_attribution.org_teams }}'
+              cross_team: false
+              team_count: 1
+            release:
+              milestone: '${{ foreach.item._source.roadmap.release_milestone }}'
+              roadmap_stage: '${{ foreach.item._source.roadmap.stage }}'
+              initiative: '${{ foreach.item._source.roadmap.initiative }}'
+            links:
+              project_url: '${{ foreach.item._source.project.url }}'
+            rollup:
+              status: '${{ foreach.item._source.delivery.coverage_status }}'
+              coverage_pct: '${{ foreach.item._source.delivery.coverage_pct }}'
+            payload: '${{ foreach.item._source.payload | json }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          epics_projected: '${{ steps.load_epic_items.output.hits.hits.size }}'

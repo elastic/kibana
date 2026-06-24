@@ -1,19 +1,23 @@
 {
   "attributes": {
-    "columns": ["project_number", "items_fetched", "page_count", "last_fetched"],
-    "description": "Items fetched per GitHub project from raw pages",
+    "columns": [
+      "org_team.name",
+      "org_team.key",
+      "org_team.members_count"
+    ],
+    "description": "GitHub org teams from sdlc-team-dimension",
     "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
     },
-    "sort": [["items_fetched", "desc"]],
-    "title": "SDLC raw items by project",
+    "sort": [["org_team.members_count", "desc"]],
+    "title": "SDLC org teams",
     "version": 1
   },
   "id": "sdlc-intel-teams-search",
   "references": [
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-team-dimension",
       "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
       "type": "index-pattern"
     }

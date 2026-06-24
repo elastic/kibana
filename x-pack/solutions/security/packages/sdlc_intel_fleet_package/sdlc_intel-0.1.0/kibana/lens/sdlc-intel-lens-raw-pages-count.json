@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Total epics projected into sdlc-epic-phases",
+    "description": "Total raw project pages fetched",
     "state": {
       "datasourceStates": {
         "indexpattern": {
@@ -11,10 +11,10 @@
                 "metric-col": {
                   "dataType": "number",
                   "isBucketed": false,
-                  "label": "Epics",
-                  "operationType": "count",
+                  "label": "Pages fetched",
+                  "operationType": "sum",
                   "scale": "ratio",
-                  "sourceField": "Records"
+                  "sourceField": "page_count"
                 }
               },
               "incompleteColumns": {}
@@ -30,18 +30,18 @@
         "metricAccessor": "metric-col"
       }
     },
-    "title": "SDLC epic count",
+    "title": "SDLC pages fetched",
     "visualizationType": "lnsMetric"
   },
-  "id": "sdlc-intel-lens-epic-count",
+  "id": "sdlc-intel-lens-raw-pages-count",
   "references": [
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-github-raw-summary-view",
       "name": "indexpattern-datasource-current-indexpattern",
       "type": "index-pattern"
     },
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-github-raw-summary-view",
       "name": "indexpattern-datasource-layer-layer1",
       "type": "index-pattern"
     }

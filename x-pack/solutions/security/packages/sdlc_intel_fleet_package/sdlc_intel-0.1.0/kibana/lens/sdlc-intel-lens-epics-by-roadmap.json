@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Raw pages grouped by GitHub project number",
+    "description": "Epics grouped by product roadmap stage",
     "state": {
       "datasourceStates": {
         "indexpattern": {
@@ -9,9 +9,9 @@
               "columnOrder": ["bucket-col", "metric-col"],
               "columns": {
                 "bucket-col": {
-                  "dataType": "number",
+                  "dataType": "string",
                   "isBucketed": true,
-                  "label": "Project #",
+                  "label": "Roadmap stage",
                   "operationType": "terms",
                   "params": {
                     "missingBucket": false,
@@ -21,15 +21,15 @@
                     "size": 10
                   },
                   "scale": "ordinal",
-                  "sourceField": "project_number"
+                  "sourceField": "release.roadmap_stage"
                 },
                 "metric-col": {
                   "dataType": "number",
                   "isBucketed": false,
-                  "label": "Pages",
-                  "operationType": "sum",
+                  "label": "Epics",
+                  "operationType": "count",
                   "scale": "ratio",
-                  "sourceField": "page_count"
+                  "sourceField": "Records"
                 }
               },
               "incompleteColumns": {}
@@ -59,18 +59,18 @@
         "valueLabels": "hide"
       }
     },
-    "title": "SDLC pages by project",
+    "title": "SDLC epics by roadmap stage",
     "visualizationType": "lnsXY"
   },
   "id": "sdlc-intel-lens-epics-by-roadmap",
   "references": [
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-epic-phases",
       "name": "indexpattern-datasource-current-indexpattern",
       "type": "index-pattern"
     },
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-epic-phases",
       "name": "indexpattern-datasource-layer-layer1",
       "type": "index-pattern"
     }

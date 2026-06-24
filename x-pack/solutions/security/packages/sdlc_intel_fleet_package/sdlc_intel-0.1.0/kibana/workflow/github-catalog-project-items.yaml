@@ -19,6 +19,7 @@ consts:
   syncStateIndex: github-intel-sync-state
   projectsIndex: github-intel-projects
   projectItemsIndex: github-intel-project-items
+  rawPagesIndex: github-intel-raw-project-pages
   syncSource: github-catalog-project-items
   entityType: project_item
   pageSize: 50
@@ -96,6 +97,29 @@ steps:
             with:
               duration: 60s
 
+          - name: index_raw_project_page
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.rawPagesIndex }}'
+              id: '{{ consts.syncSource }}-{{ variables.projectNumber }}-{{ variables.itemPagesFetched | plus: 1 }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                org:
+                  login: '{{ consts.orgLogin }}'
+                project:
+                  id: '{{ variables.projectId }}'
+                  number: '{{ variables.projectNumber }}'
+                  title: '{{ variables.projectTitle }}'
+                cursor: '{{ variables.itemCursor }}'
+                item_count: '${{ steps.fetch_project_items.output.data.node.items.nodes.size }}'
+                page_info:
+                  has_next_page: '${{ steps.fetch_project_items.output.pageInfo.hasNextPage }}'
+                  end_cursor: '${{ steps.fetch_project_items.output.pageInfo.endCursor }}'
+                payload: '${{ steps.fetch_project_items.output.data.node.items | json }}'
+
           - name: index_project_items
             type: foreach
             foreach: '{{ steps.fetch_project_items.output.data.node.items.nodes | json }}'
@@ -113,16 +137,29 @@ steps:
                     entity:
                       type: project_item
                       id: '{{ foreach.item.id }}'
+                      subtype: '${{ foreach.item.content.__typename }}'
+                      number: '${{ foreach.item.content.number }}'
+                      url: '${{ foreach.item.content.url }}'
                     org:
                       login: '{{ consts.orgLogin }}'
                     project:
-                      id: '{{ variables.projectId }}'
-                      number: '{{ variables.projectNumber }}'
-                      title: '{{ variables.projectTitle }}'
+                      id: '${{ variables.projectId }}'
+                      number: '${{ variables.projectNumber }}'
+                      title: '${{ variables.projectTitle }}'
+                    repository:
+                      name: '${{ foreach.item.content.repository.name }}'
+                      full_name: '${{ foreach.item.content.repository.nameWithOwner }}'
                     github:
-                      created_at: '{{ foreach.item.createdAt }}'
-                      updated_at: '{{ foreach.item.updatedAt }}'
-                    payload: '{{ foreach.item | json }}'
+                      created_at: '${{ foreach.item.createdAt }}'
+                      updated_at: '${{ foreach.item.updatedAt }}'
+                      state: '${{ foreach.item.content.state }}'
+                    content_ref:
+                      type: '${{ foreach.item.content.__typename }}'
+                      id: '${{ foreach.item.content.id }}'
+                      repo: '${{ foreach.item.content.repository.nameWithOwner }}'
+                      number: '${{ foreach.item.content.number }}'
+                      url: '${{ foreach.item.content.url }}'
+                    payload: '${{ foreach.item | json }}'
 
           - name: advance_project_item_cursor
             type: data.set

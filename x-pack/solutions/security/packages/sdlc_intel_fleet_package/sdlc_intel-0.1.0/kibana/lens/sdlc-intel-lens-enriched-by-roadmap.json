@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Epics grouped by owning engineering team",
+    "description": "Project items grouped by roadmap stage from enriched ES|QL view",
     "state": {
       "datasourceStates": {
         "indexpattern": {
@@ -11,22 +11,22 @@
                 "bucket-col": {
                   "dataType": "string",
                   "isBucketed": true,
-                  "label": "Team",
+                  "label": "Roadmap stage",
                   "operationType": "terms",
                   "params": {
                     "missingBucket": false,
                     "orderBy": { "columnId": "metric-col", "type": "column" },
                     "orderDirection": "desc",
                     "otherBucket": true,
-                    "size": 15
+                    "size": 10
                   },
                   "scale": "ordinal",
-                  "sourceField": "teams.own_engineering_team"
+                  "sourceField": "roadmap_stage"
                 },
                 "metric-col": {
                   "dataType": "number",
                   "isBucketed": false,
-                  "label": "Epics",
+                  "label": "Items",
                   "operationType": "count",
                   "scale": "ratio",
                   "sourceField": "Records"
@@ -48,29 +48,29 @@
             "accessors": ["metric-col"],
             "layerId": "layer1",
             "position": "top",
-            "seriesType": "bar_horizontal",
+            "seriesType": "bar_stacked",
             "showGridlines": false,
             "xAccessor": "bucket-col"
           }
         ],
         "legend": { "isVisible": true, "position": "right" },
-        "preferredSeriesType": "bar_horizontal",
+        "preferredSeriesType": "bar_stacked",
         "tickLabelsVisibilitySettings": { "x": true, "yLeft": true, "yRight": true },
         "valueLabels": "hide"
       }
     },
-    "title": "SDLC epics by team",
+    "title": "SDLC items by roadmap stage",
     "visualizationType": "lnsXY"
   },
-  "id": "sdlc-intel-lens-epics-by-team",
+  "id": "sdlc-intel-lens-enriched-by-roadmap",
   "references": [
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-project-items-enriched-view",
       "name": "indexpattern-datasource-current-indexpattern",
       "type": "index-pattern"
     },
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-project-items-enriched-view",
       "name": "indexpattern-datasource-layer-layer1",
       "type": "index-pattern"
     }

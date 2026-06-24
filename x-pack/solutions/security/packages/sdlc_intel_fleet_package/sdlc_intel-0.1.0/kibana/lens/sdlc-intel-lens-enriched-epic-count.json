@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Total epics projected into sdlc-epic-phases",
+    "description": "Epic project items from enriched ES|QL view",
     "state": {
       "datasourceStates": {
         "indexpattern": {
@@ -23,25 +23,25 @@
         }
       },
       "filters": [],
-      "query": { "language": "kuery", "query": "" },
+      "query": { "language": "kuery", "query": "is_epic : true" },
       "visualization": {
         "layerId": "layer1",
         "layerType": "data",
         "metricAccessor": "metric-col"
       }
     },
-    "title": "SDLC epic count",
+    "title": "SDLC enriched epic count",
     "visualizationType": "lnsMetric"
   },
-  "id": "sdlc-intel-lens-epic-count",
+  "id": "sdlc-intel-lens-enriched-epic-count",
   "references": [
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-project-items-enriched-view",
       "name": "indexpattern-datasource-current-indexpattern",
       "type": "index-pattern"
     },
     {
-      "id": "sdlc-epic-phases",
+      "id": "sdlc-project-items-enriched-view",
       "name": "indexpattern-datasource-layer-layer1",
       "type": "index-pattern"
     }

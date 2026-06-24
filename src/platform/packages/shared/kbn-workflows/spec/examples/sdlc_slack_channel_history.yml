@@ -1,7 +1,7 @@
 version: '1'
 name: SDLC Slack channel history
 description: >
-  Incremental Slack message ingest. Lists channels via slack2.listChannels, pages message
+  Incremental Slack message ingest. Pages channels via slack2.listChannels, then pages message
   history per channel with slack2.getChannelHistory (oldest watermark), and upserts
   slack-intel-messages. Per-channel checkpoints in slack-intel-sync-state.
 enabled: false
@@ -21,6 +21,7 @@ consts:
   channelPageSize: 200
   historyPageSize: 200
   initialWatermark: '0'
+  maxChannelPages: 20
 
 settings:
   timeout: 60m
@@ -36,119 +37,137 @@ triggers:
   - type: manual
 
 steps:
-  - name: list_channels
-    type: slack2.listChannels
-    connector-id: '{{ consts.slackConnectorId }}'
+  - name: init_channel_pagination
+    type: data.set
     with:
-      types:
-        - public_channel
-        - private_channel
-      limit: '{{ consts.channelPageSize }}'
+      channelCursor: ''
+      channelPagesFetched: 0
 
-  - name: sync_channel_history
-    type: foreach
-    foreach: '{{ steps.list_channels.output.channels | json }}'
+  - name: paginate_channels
+    type: while
+    condition: 'steps.list_channels_page.output.hasMore : true'
+    max-iterations: 20
     steps:
-      - name: init_channel_context
-        type: data.set
+      - name: list_channels_page
+        type: slack2.listChannels
+        connector-id: '{{ consts.slackConnectorId }}'
         with:
-          channelId: '{{ foreach.item.id }}'
-          channelName: '{{ foreach.item.name }}'
-          historyCursor: ''
-          messageWatermark: '{{ consts.initialWatermark }}'
-          historyPagesFetched: 0
+          types:
+            - public_channel
+            - private_channel
+          limit: '{{ consts.channelPageSize }}'
+          cursor: '${{ variables.channelCursor }}'
 
-      - name: read_channel_checkpoint
-        type: elasticsearch.search
-        with:
-          index: '{{ consts.syncStateIndex }}'
-          size: 1
-          query:
-            ids:
-              values:
-                - '{{ consts.syncSource }}-{{ variables.channelId }}'
-
-      - name: restore_channel_state
-        type: data.set
-        with:
-          messageWatermark: '{{ steps.read_channel_checkpoint.output.hits.hits.0._source.watermark }}'
-          historyCursor: '{{ steps.read_channel_checkpoint.output.hits.hits.0._source.cursor }}'
-          historyPagesFetched: 0
-
-      - name: ensure_watermark
-        type: data.set
-        if: '{{ variables.messageWatermark | size }} : 0'
-        with:
-          messageWatermark: '{{ consts.initialWatermark }}'
-
-      - name: paginate_channel_history
-        type: while
-        condition: 'steps.fetch_channel_history.output.hasMore : true'
-        max-iterations: 10
+      - name: sync_channel_history
+        type: foreach
+        foreach: '${{ steps.list_channels_page.output.channels | json }}'
         steps:
-          - name: fetch_channel_history
-            type: slack2.getChannelHistory
-            connector-id: '{{ consts.slackConnectorId }}'
+          - name: init_channel_context
+            type: data.set
             with:
-              channel: '{{ variables.channelId }}'
-              oldest: '{{ variables.messageWatermark }}'
-              limit: '{{ consts.historyPageSize }}'
-              cursor: '{{ variables.historyCursor }}'
+              channelId: '${{ foreach.item.id }}'
+              channelName: '${{ foreach.item.name }}'
+              historyCursor: ''
+              messageWatermark: '{{ consts.initialWatermark }}'
+              historyPagesFetched: 0
 
-          - name: index_messages
-            type: foreach
-            foreach: '{{ steps.fetch_channel_history.output.messages | json }}'
+          - name: read_channel_checkpoint
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.syncStateIndex }}'
+              size: 1
+              query:
+                ids:
+                  values:
+                    - '{{ consts.syncSource }}-{{ variables.channelId }}'
+
+          - name: restore_channel_state
+            type: data.set
+            with:
+              messageWatermark: '{{ steps.read_channel_checkpoint.output.hits.hits.0._source.watermark }}'
+              historyCursor: '{{ steps.read_channel_checkpoint.output.hits.hits.0._source.cursor }}'
+              historyPagesFetched: 0
+
+          - name: ensure_watermark
+            type: data.set
+            if: '{{ variables.messageWatermark | size }} : 0'
+            with:
+              messageWatermark: '{{ consts.initialWatermark }}'
+
+          - name: paginate_channel_history
+            type: while
+            condition: 'steps.fetch_channel_history.output.hasMore : true'
+            max-iterations: 10
             steps:
-              - name: upsert_message
-                type: elasticsearch.index
+              - name: fetch_channel_history
+                type: slack2.getChannelHistory
+                connector-id: '{{ consts.slackConnectorId }}'
                 with:
-                  index: '{{ consts.messagesIndex }}'
-                  id: '{{ variables.channelId }}-{{ foreach.item.ts }}'
-                  document:
-                    '@timestamp': '{{ execution.startedAt }}'
-                    sync:
-                      run_id: '{{ execution.id }}'
-                      source: '{{ consts.syncSource }}'
-                    message:
-                      ts: '{{ foreach.item.ts }}'
-                      text: '{{ foreach.item.text }}'
-                      thread_ts: '{{ foreach.item.thread_ts }}'
-                      user_id: '{{ foreach.item.user }}'
-                    channel:
-                      id: '{{ variables.channelId }}'
-                      name: '{{ variables.channelName }}'
-                    payload: '{{ foreach.item | json }}'
+                  channel: '${{ variables.channelId }}'
+                  oldest: '${{ variables.messageWatermark }}'
+                  limit: '{{ consts.historyPageSize }}'
+                  cursor: '${{ variables.historyCursor }}'
 
-          - name: advance_history_cursor
-            type: data.set
+              - name: index_messages
+                type: foreach
+                foreach: '${{ steps.fetch_channel_history.output.messages | json }}'
+                steps:
+                  - name: upsert_message
+                    type: elasticsearch.index
+                    with:
+                      index: '{{ consts.messagesIndex }}'
+                      id: '${{ variables.channelId }}-${{ foreach.item.ts }}'
+                      document:
+                        '@timestamp': '{{ execution.startedAt }}'
+                        sync:
+                          run_id: '{{ execution.id }}'
+                          source: '{{ consts.syncSource }}'
+                        message:
+                          ts: '${{ foreach.item.ts }}'
+                          text: '${{ foreach.item.text }}'
+                          thread_ts: '${{ foreach.item.thread_ts }}'
+                          user_id: '${{ foreach.item.user }}'
+                        channel:
+                          id: '${{ variables.channelId }}'
+                          name: '${{ variables.channelName }}'
+                        payload: '${{ foreach.item | json }}'
+
+              - name: advance_history_cursor
+                type: data.set
+                with:
+                  historyCursor: '${{ steps.fetch_channel_history.output.nextCursor }}'
+                  historyPagesFetched: '${{ variables.historyPagesFetched + 1 }}'
+
+              - name: track_newest_message_ts
+                type: data.set
+                if: "${{ steps.fetch_channel_history.output.messages.size > 0 }}"
+                with:
+                  messageWatermark: '${{ steps.fetch_channel_history.output.messages[0].ts }}'
+
+          - name: write_channel_checkpoint
+            type: elasticsearch.index
             with:
-              historyCursor: '{{ steps.fetch_channel_history.output.nextCursor }}'
-              historyPagesFetched: '{{ variables.historyPagesFetched | plus: 1 }}'
+              index: '{{ consts.syncStateIndex }}'
+              id: '{{ consts.syncSource }}-{{ variables.channelId }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                entity_type: '{{ consts.entityType }}'
+                channel:
+                  id: '${{ variables.channelId }}'
+                  name: '${{ variables.channelName }}'
+                cursor: '${{ variables.historyCursor }}'
+                watermark: '${{ variables.messageWatermark }}'
+                last_run_at: '{{ execution.startedAt }}'
+                last_run_status: success
+                stats:
+                  pages_fetched: '${{ variables.historyPagesFetched }}'
+                  has_more: '${{ steps.fetch_channel_history.output.hasMore }}'
 
-          - name: track_newest_message_ts
-            type: data.set
-            if: "${{ steps.fetch_channel_history.output.messages.size > 0 }}"
-            with:
-              messageWatermark: '${{ steps.fetch_channel_history.output.messages[0].ts }}'
-
-      - name: write_channel_checkpoint
-        type: elasticsearch.index
+      - name: advance_channel_cursor
+        type: data.set
         with:
-          index: '{{ consts.syncStateIndex }}'
-          id: '{{ consts.syncSource }}-{{ variables.channelId }}'
-          document:
-            '@timestamp': '{{ execution.startedAt }}'
-            sync:
-              run_id: '{{ execution.id }}'
-              source: '{{ consts.syncSource }}'
-            entity_type: '{{ consts.entityType }}'
-            channel:
-              id: '{{ variables.channelId }}'
-              name: '{{ variables.channelName }}'
-            cursor: '{{ variables.historyCursor }}'
-            watermark: '{{ variables.messageWatermark }}'
-            last_run_at: '{{ execution.startedAt }}'
-            last_run_status: success
-            stats:
-              pages_fetched: '{{ variables.historyPagesFetched }}'
-              has_more: '{{ steps.fetch_channel_history.output.hasMore }}'
+          channelCursor: '${{ steps.list_channels_page.output.nextCursor }}'
+          channelPagesFetched: '${{ variables.channelPagesFetched + 1 }}'

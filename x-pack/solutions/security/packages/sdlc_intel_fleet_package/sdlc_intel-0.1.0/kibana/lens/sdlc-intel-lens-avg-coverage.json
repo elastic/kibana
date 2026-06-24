@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Total project items in raw page payloads",
+    "description": "Average epic coverage percentage from sdlc-epic-phases rollup",
     "state": {
       "datasourceStates": {
         "indexpattern": {
@@ -11,10 +11,10 @@
                 "metric-col": {
                   "dataType": "number",
                   "isBucketed": false,
-                  "label": "Items fetched",
-                  "operationType": "sum",
+                  "label": "Avg coverage %",
+                  "operationType": "average",
                   "scale": "ratio",
-                  "sourceField": "items_fetched"
+                  "sourceField": "rollup.coverage_pct"
                 }
               },
               "incompleteColumns": {}
@@ -30,18 +30,18 @@
         "metricAccessor": "metric-col"
       }
     },
-    "title": "SDLC items fetched",
+    "title": "SDLC avg epic coverage",
     "visualizationType": "lnsMetric"
   },
   "id": "sdlc-intel-lens-avg-coverage",
   "references": [
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-epic-phases",
       "name": "indexpattern-datasource-current-indexpattern",
       "type": "index-pattern"
     },
     {
-      "id": "sdlc-github-raw-summary-view",
+      "id": "sdlc-epic-phases",
       "name": "indexpattern-datasource-layer-layer1",
       "type": "index-pattern"
     }

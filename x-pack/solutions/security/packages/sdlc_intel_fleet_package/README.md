@@ -54,8 +54,12 @@ Workflows use connector ingest actions (`github.runQueryTemplate`, `slack2.listU
 | **activity pull requests** | every 30m | `activity.searchPullRequests` | `github-intel-pull-requests` |
 | **enrich issues graph** | hourly | `graph.issueGraph` | `github-intel-issues`, `github-intel-comments`, `github-intel-relationships` |
 | **enrich PRs graph** | hourly | `graph.pullRequestGraph` | `github-intel-pull-requests`, `github-intel-relationships` |
+| **normalize project items** | every 6h | ES field parse | `github-intel-project-items` |
+| **build team dimension** | daily | team catalog projection | `sdlc-team-dimension` |
+| **cross-link entities** | every 2h | PR/issue/project edges | `github-intel-relationships`, `github-intel-project-items` |
+| **project epic phases** | every 6h | Epic projection | `sdlc-epic-phases` |
 
-**Recommended order:** catalog (repos → teams → org members → team members → projects → project items) → activity (issues → PRs) → enrichment (issues graph → PRs graph).
+**Recommended order:** catalog (repos → teams → org members → team members → projects → project items) → **normalize project items** → **build team dimension** → activity (issues → PRs) → enrichment (issues graph → PRs graph) → **cross-link entities** → **project epic phases**.
 
 ### Slack workflows
 
@@ -65,6 +69,17 @@ Workflows use connector ingest actions (`github.runQueryTemplate`, `slack2.listU
 | **channel history** | hourly | `slack2.getChannelHistory` | `slack-intel-messages` |
 
 Slack OAuth scopes must include `channels:history`, `groups:history`, `users:read`, and channel read scopes.
+
+## Dashboards
+
+| Dashboard | Data source | Purpose |
+|-----------|-------------|---------|
+| **SDLC Executive roadmap** | `sdlc-epic-phases` | Epic count, coverage, status, roadmap stage |
+| **SDLC Project item pipeline** | `sdlc-project-items-enriched-view` | Ticket types, teams, roadmap stages from ES\|QL |
+| **SDLC Team dimension** | `sdlc-team-dimension` + `sdlc-epic-phases` | Org teams and epic ownership |
+| **SDLC GitHub sync overview** | `sdlc-github-raw-summary-view` | Raw ingest page/item counts per project |
+
+Run **catalog project items** → **normalize project items** → **project epic phases** before the executive roadmap dashboard populates. The enriched pipeline dashboard works once project items exist (ES\|QL groks payload fields even before normalization, but normalization improves `hierarchy.*` fields).
 
 ## Fleet workflow auto-install
 
