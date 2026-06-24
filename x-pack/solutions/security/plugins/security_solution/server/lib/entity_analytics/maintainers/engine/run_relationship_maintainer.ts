@@ -264,7 +264,7 @@ async function runIntegration(
     const write = await writeEntityIds(crudClient, logger, records);
     const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, records, {
       scanId: metadataContext.scanId,
-      lookbackWindow: LOOKBACK_WINDOW,
+      lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
       entitySource: config.id,
       observedAt: metadataContext.observedAt,
     });

@@ -135,6 +135,14 @@ interface BaseRelationshipIntegrationFields {
    * and Step 2 EUID expression describe the same actor — they cannot drift.
    */
   customActor?: CustomActorBinding;
+  /**
+   * When true, both Step 1 (composite agg) and Step 2 (ES|QL) omit the
+   * lookback-window time filter. Use for integrations that maintain raw
+   * identifier lists (not time-windowed event aggregations) — e.g. a full
+   * directory sync where every record is always current regardless of age.
+   * Defaults to false (lookback window applied).
+   */
+  disableLookbackWindow?: boolean;
 }
 
 /**
