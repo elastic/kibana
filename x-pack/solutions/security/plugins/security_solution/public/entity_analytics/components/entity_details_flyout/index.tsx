@@ -42,7 +42,7 @@ const RiskInputsTabWithAlertPreview = ({
 }: RiskInputsTabWithAlertPreviewProps) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
-  const openAlertPreview = useCallback(
+  const onShowAlert = useCallback(
     (id: string, indexName: string) =>
       openPreviewPanel({
         id: DocumentDetailsPreviewPanelKey,
@@ -62,7 +62,7 @@ const RiskInputsTabWithAlertPreview = ({
       entityType={entityType}
       entityName={entityName}
       entityId={entityId}
-      openAlertPreview={openAlertPreview}
+      onShowAlert={onShowAlert}
     />
   );
 };

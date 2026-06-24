@@ -62,7 +62,7 @@ export interface RiskInputsTabProps<T extends EntityType> {
   entityName: string;
   entityId?: string;
   /** Navigates to the alert preview for a risk-input row. */
-  openAlertPreview: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string) => void;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -106,7 +106,7 @@ export const RiskInputsTab = <T extends EntityType>({
   entityType,
   entityName,
   entityId,
-  openAlertPreview,
+  onShowAlert,
 }: RiskInputsTabProps<T>) => {
   const panels = useStableExpandableFlyoutState();
   const subTab = isRiskScoreFlyoutPanelProps(panels.left)
@@ -237,7 +237,7 @@ export const RiskInputsTab = <T extends EntityType>({
       refetchResolutionRiskScore={refetchResolutionRiskScore}
       resolutionGroup={resolutionGroup}
       watchlistNamesById={watchlistNamesById}
-      openAlertPreview={openAlertPreview}
+      onShowAlert={onShowAlert}
     />
   );
 };
@@ -259,7 +259,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   refetchResolutionRiskScore: RiskScoreState<EntityType>['refetch'];
   resolutionGroup: ReturnType<typeof useResolutionGroup>['data'];
   watchlistNamesById: Map<string, string>;
-  openAlertPreview: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string) => void;
 }
 
 const RiskInputsTabContent = <T extends EntityType>({
@@ -277,7 +277,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   refetchResolutionRiskScore,
   resolutionGroup,
   watchlistNamesById,
-  openAlertPreview,
+  onShowAlert,
 }: RiskInputsTabContentProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
@@ -359,7 +359,7 @@ const RiskInputsTabContent = <T extends EntityType>({
             <EuiButtonIcon
               iconType="expand"
               data-test-subj={EXPAND_ALERT_TEST_ID}
-              onClick={() => openAlertPreview(data._id, data.input.index)}
+              onClick={() => onShowAlert(data._id, data.input.index)}
               aria-label={i18n.translate(
                 'xpack.securitySolution.flyout.right.alertPreview.ariaLabel',
                 {
@@ -441,7 +441,7 @@ const RiskInputsTabContent = <T extends EntityType>({
     }
 
     return columns;
-  }, [alertEntityById, isResolutionView, openAlertPreview]);
+  }, [alertEntityById, isResolutionView, onShowAlert]);
 
   const riskInputsAlertSection = (
     <>
