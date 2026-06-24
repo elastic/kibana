@@ -177,7 +177,6 @@ export class WorkflowExecuteSyncStrategy {
         const stepExecutions =
           await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
             state.executionId,
-            execution.stepExecutionsIndex,
             execution.stepExecutionIds
           );
         const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>

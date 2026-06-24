@@ -10,7 +10,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
 import type { DocumentLocatorsById, EsDocumentLocator } from './document_version';
 import { getEsDocumentLocator } from './document_version';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
@@ -111,16 +110,12 @@ export class StepExecutionRepository {
    */
   public async getStepExecutionsByWorkflowExecution(
     workflowExecutionId: string,
-    stepsExecutionWriteIndex?: string,
     stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
-    return getStepExecutionsByWorkflowExecutionShared({
-      esClient: this.esClient,
-      stepsExecutionIndexAlias: this.indexName,
-      stepsExecutionIndex: stepsExecutionWriteIndex,
-      workflowExecutionId,
-      stepExecutionIds,
-    });
+    if (stepExecutionIds && stepExecutionIds.length > 0) {
+      return this.getStepExecutionsByIds(stepExecutionIds);
+    }
+    return this.searchStepExecutionsByExecutionId(workflowExecutionId);
   }
 
   /*
@@ -264,8 +259,7 @@ export class StepExecutionRepository {
    */
   public async markNonTerminalStepsFailed(
     workflowExecutionId: string,
-    error: SerializedError,
-    stepsExecutionIndex?: string
+    error: SerializedError
   ): Promise<void> {
     const { docs: stepExecutions, locators } =
       await this.searchStepExecutionsWithLocatorsByExecutionId(workflowExecutionId);

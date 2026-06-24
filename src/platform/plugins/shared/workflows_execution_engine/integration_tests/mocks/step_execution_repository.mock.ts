@@ -103,7 +103,6 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
 
   public getStepExecutionsByWorkflowExecution(
     workflowExecutionId: string,
-    _stepsExecutionWriteIndex?: string,
     _stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return this.searchStepExecutionsByExecutionId(workflowExecutionId);

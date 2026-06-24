@@ -57,12 +57,19 @@ export const getWorkflowExecution = async ({
     if (!includeInput) sourceExcludes.push('input');
     if (!includeOutput) sourceExcludes.push('output');
 
-    const stepExecutions = await getStepExecutionsByIdsFromDataStream({
-      esClient,
-      dataStream: stepsExecutionIndex,
-      ids: doc.stepExecutionIds ?? [],
-      sourceExcludes,
-    });
+    const stepExecutions = doc.stepExecutionIds?.length
+      ? await getStepExecutionsByIdsFromDataStream({
+          esClient,
+          dataStream: stepsExecutionIndex,
+          ids: doc.stepExecutionIds,
+          sourceExcludes,
+        })
+      : await getStepExecutionsByWorkflowExecution({
+          esClient,
+          stepsExecutionIndexAlias: stepsExecutionIndex,
+          workflowExecutionId,
+          sourceExcludes,
+        });
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {

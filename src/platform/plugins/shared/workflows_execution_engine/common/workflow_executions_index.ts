@@ -89,12 +89,6 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     concurrencyGroupKey: {
       type: 'keyword',
     },
-    executionsIndex: {
-      type: 'keyword',
-    },
-    stepExecutionsIndex: {
-      type: 'keyword',
-    },
     // Aggregated token usage across all token-consuming steps, accumulated
     // incrementally as each step finishes.
     usage: TOKEN_USAGE_MAPPING,

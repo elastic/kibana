@@ -454,14 +454,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       );
     }
 
-    const stepsExecutionIndex = this.state.getWorkflowExecution().stepExecutionsIndex;
     const { docs: foundSteps, locators } =
-      await this.stepRepository.getStepExecutionsWithLocatorsByIds(
-        stepExecutionIds,
-        undefined,
-        ['output'],
-        stepsExecutionIndex
-      );
+      await this.stepRepository.getStepExecutionsWithLocatorsByIds(stepExecutionIds, undefined, [
+        'output',
+      ]);
 
     // Capture inputs and hand `output`-stripped metadata to state. The
     // `output` sourceExclude above should already drop output from the
@@ -491,8 +487,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       const pinnedDocs = await this.stepRepository.getStepExecutionsByIds(
         pinnedIdsToFetch,
         ['id', 'output'],
-        undefined,
-        stepsExecutionIndex
+        undefined
       );
       for (const doc of pinnedDocs) {
         const output: JsonValue | null = doc.output ?? null;
@@ -788,8 +783,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     const fetched = await this.stepRepository.getStepExecutionsByIds(
       idsToRehydrate,
       ['id', 'output', 'workflowRunId'],
-      undefined,
-      this.state.getWorkflowExecution().stepExecutionsIndex
+      undefined
     );
     // Defensive cross-execution filter: mget targets documents by `_id` only,
     // and step execution IDs are constructed from the workflow execution ID,

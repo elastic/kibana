@@ -32,7 +32,6 @@ describe('getWorkflowExecution', () => {
     status: 'completed',
     startedAt: '2024-01-01T00:00:00Z',
     stepExecutionIds: ['step-doc-1', 'step-doc-2'],
-    stepExecutionsIndex: '.ds-.workflows-step-executions-2026.06.22-000001',
     workflowDefinition: { version: '1', name: 'test', enabled: true, triggers: [], steps: [] },
     concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
   };

@@ -73,7 +73,6 @@ function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {})
     status: ExecutionStatus.RUNNING,
     startedAt: '2025-08-05T20:00:00.000Z',
     isTestRun: false,
-    stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
   } as EsWorkflowExecution;
 
   const state = new WorkflowExecutionState(fakeWorkflowExecution, workflowExecutionRepository);
@@ -604,8 +603,7 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['step-1'],
         ['id', 'output', 'workflowRunId'],
-        undefined,
-        TEST_STEP_EXECUTIONS_INDEX
+        undefined
       );
     });
 
@@ -1296,8 +1294,7 @@ describe('StepIoService', () => {
         2,
         ['11'],
         ['id', 'output'],
-        undefined,
-        TEST_STEP_EXECUTIONS_INDEX
+        undefined
       );
     });
 
@@ -1462,8 +1459,7 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-b'],
         ['id', 'output', 'workflowRunId'],
-        undefined,
-        TEST_STEP_EXECUTIONS_INDEX
+        undefined
       );
     });
 
@@ -1885,8 +1881,7 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-alerts'],
         ['id', 'output', 'workflowRunId'],
-        undefined,
-        TEST_STEP_EXECUTIONS_INDEX
+        undefined
       );
     });
 
@@ -1929,8 +1924,7 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-a'],
         ['id', 'output', 'workflowRunId'],
-        undefined,
-        TEST_STEP_EXECUTIONS_INDEX
+        undefined
       );
     });
 

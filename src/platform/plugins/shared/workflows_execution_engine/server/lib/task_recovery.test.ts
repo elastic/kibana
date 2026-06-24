@@ -28,7 +28,6 @@ jest.mock('uuid', () => ({
 }));
 
 const TEST_EXECUTIONS_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
-const TEST_STEP_EXECUTIONS_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 const WORKFLOW_RUN_ID = 'workflow-run-1';
 const MISSING_WORKFLOW_RUN_ID = 'workflow-run-missing';
 
@@ -121,7 +120,6 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.RUNNING,
-        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       });
 
     await expect(
@@ -225,7 +223,6 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.PENDING,
-        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       });
 
     await expect(
@@ -281,7 +278,6 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.RUNNING,
-        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       });
 
     await expect(
@@ -443,7 +439,6 @@ describe('resolveExhaustedWorkflowRunTask', () => {
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.RUNNING,
-        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       });
 
     const thrown = new Error('handler blew up');
@@ -545,7 +540,6 @@ describe('resolveExhaustedWorkflowRunTask', () => {
         spaceId: 'default',
         workflowId: 'w',
         status: ExecutionStatus.RUNNING,
-        stepExecutionsIndex: TEST_STEP_EXECUTIONS_INDEX,
       });
     esClient.update.mockRejectedValueOnce(new Error('update rejected'));
 
