@@ -28,6 +28,7 @@ import type {
   MitreSubTechnique,
   MitreTechnique,
 } from '../../../../../common/detection_engine/mitre/types';
+import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -139,9 +140,18 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     [field.value, techniquesOptions, threatIndex, onFieldChange]
   );
 
+  const isUnsupportedTechnique = useCallback(
+    (technique: ThreatTechnique) =>
+      techniquesOptions.length > 0 &&
+      technique.name !== 'none' &&
+      !techniquesOptions.some((t) => t.id === technique.id),
+    [techniquesOptions]
+  );
+
   const getSelectTechnique = useCallback(
     (tacticName: string, index: number, disabled: boolean, technique: ThreatTechnique) => {
       const options = techniquesOptions.filter((t) => t.tactics.includes(kebabCase(tacticName)));
+      const isUnsupported = isUnsupportedTechnique(technique);
       return (
         <>
           <EuiSuperSelect
@@ -156,6 +166,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                     },
                   ]
                 : []),
+              ...(isUnsupported ? [createUnsupportedMitreOption(technique.id)] : []),
               ...options.map((option) => ({
                 inputDisplay: <>{option.label}</>,
                 value: option.id,
@@ -170,56 +181,69 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
             data-test-subj="mitreAttackTechnique"
             disabled={disabled}
             placeholder={i18n.TECHNIQUE_PLACEHOLDER}
+            isInvalid={isUnsupported}
           />
         </>
       );
     },
-    [field.label, techniquesOptions, updateTechnique]
+    [field.label, isUnsupportedTechnique, techniquesOptions, updateTechnique]
   );
 
   const techniques = values[threatIndex].technique ?? [];
 
   return (
     <TechniqueContainer>
-      {techniques.map((technique, index) => (
-        <div key={index}>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            fullWidth
-            describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
-          >
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow>
-                {getSelectTechnique(values[threatIndex].tactic.name, index, isDisabled, technique)}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    color="danger"
-                    iconType="trash"
-                    isDisabled={isDisabled}
-                    onClick={() => removeTechnique(index)}
-                    aria-label={Rulei18n.DELETE}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+      {techniques.map((technique, index) => {
+        const techniqueUnsupported = isUnsupportedTechnique(technique);
+        return (
+          <div key={index}>
+            <EuiSpacer size="s" />
+            <EuiFormRow
+              fullWidth
+              describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
+              isInvalid={techniqueUnsupported}
+              error={
+                techniqueUnsupported ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id) : undefined
+              }
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow>
+                  {getSelectTechnique(
+                    values[threatIndex].tactic.name,
+                    index,
+                    isDisabled,
+                    technique
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      color="danger"
+                      iconType="trash"
+                      isDisabled={isDisabled}
+                      onClick={() => removeTechnique(index)}
+                      aria-label={Rulei18n.DELETE}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
 
-          <MitreAttackSubtechniqueFields
-            field={field}
-            idAria={idAria}
-            isDisabled={
-              isDisabled ||
-              technique.name === 'none' ||
-              hasSubtechniqueOptions(subtechniquesOptions, technique) === false
-            }
-            threatIndex={threatIndex}
-            techniqueIndex={index}
-            onFieldChange={onFieldChange}
-          />
-        </div>
-      ))}
+            <MitreAttackSubtechniqueFields
+              field={field}
+              idAria={idAria}
+              isDisabled={
+                isDisabled ||
+                technique.name === 'none' ||
+                hasSubtechniqueOptions(subtechniquesOptions, technique) === false
+              }
+              threatIndex={threatIndex}
+              techniqueIndex={index}
+              onFieldChange={onFieldChange}
+            />
+          </div>
+        );
+      })}
       <MyAddItemButton
         data-test-subj="addMitreAttackTechnique"
         onClick={addMitreAttackTechnique}

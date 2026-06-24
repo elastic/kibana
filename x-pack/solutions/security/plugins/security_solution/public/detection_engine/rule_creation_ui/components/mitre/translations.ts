@@ -76,3 +76,16 @@ export const SUBTECHNIQUE_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Select a subtechnique ...',
   }
 );
+
+export const UNSUPPORTED_MITRE_ID_OPTION_LABEL = (id: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.unsupportedIdOptionLabel', {
+    defaultMessage: '{id} (unsupported)',
+    values: { id },
+  });
+
+export const UNSUPPORTED_MITRE_ID_ERROR = (id: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.unsupportedIdErrorMessage', {
+    defaultMessage:
+      '"{id}" is not in the currently supported MITRE ATT&CK® version. Choose a supported value.',
+    values: { id },
+  });

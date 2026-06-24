@@ -18,8 +18,8 @@ import {
 } from '../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
-import { iterateMitreThreatEntities } from '../../../logic/mitre/iterate_mitre_threat_entities';
-import { findInvalidMitreIds } from '../../../logic/mitre/find_invalid_mitre_ids';
+import { iterateMitreThreatEntities } from '../../../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
+import { findInvalidMitreIds } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
 

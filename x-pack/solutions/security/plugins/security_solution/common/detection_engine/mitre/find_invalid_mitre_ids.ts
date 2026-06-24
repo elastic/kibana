@@ -6,11 +6,7 @@
  */
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import {
-  tactics,
-  techniques,
-  subtechniques,
-} from '../../../../../../common/detection_engine/mitre/mitre_tactics_techniques';
+import { tactics, techniques, subtechniques } from './mitre_tactics_techniques';
 import type { MitreThreatEntityType } from './iterate_mitre_threat_entities';
 import { iterateMitreThreatEntities } from './iterate_mitre_threat_entities';
 
@@ -39,3 +35,15 @@ export const findInvalidMitreIds = (threats: Threats | undefined): string[] => {
 
   return invalidIds;
 };
+
+/**
+ * Returns `true` when the given MITRE ATT&CK™ ID exists in the currently bundled
+ * dataset for the requested entity type. Useful for highlighting individual
+ * unsupported fields (e.g. in a rule edit form).
+ *
+ * NOTE: Importing this helper statically pulls in the bundled MITRE dataset.
+ * On the client, prefer lazy-loading the dataset and checking IDs against the
+ * already-loaded options instead.
+ */
+export const isKnownMitreId = (type: MitreThreatEntityType, id: string): boolean =>
+  validIdsByType[type].has(id);

@@ -23,6 +23,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import type { MitreSubTechnique } from '../../../../../common/detection_engine/mitre/types';
+import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -149,11 +150,20 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     [field.value, subtechniquesOptions, technique, techniqueIndex, onFieldChange, threatIndex]
   );
 
+  const isUnsupportedSubtechnique = useCallback(
+    (subtechnique: ThreatSubtechnique) =>
+      subtechniquesOptions.length > 0 &&
+      subtechnique.name !== 'none' &&
+      !subtechniquesOptions.some((s) => s.id === subtechnique.id),
+    [subtechniquesOptions]
+  );
+
   const getSelectSubtechnique = useCallback(
     (index: number, disabled: boolean, subtechnique: ThreatSubtechnique) => {
       const options = subtechniquesOptions.filter(
         (t) => t.techniqueId === technique[techniqueIndex].id
       );
+      const isUnsupported = isUnsupportedSubtechnique(subtechnique);
 
       return (
         <>
@@ -169,6 +179,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                     },
                   ]
                 : []),
+              ...(isUnsupported ? [createUnsupportedMitreOption(subtechnique.id)] : []),
               ...options.map((option) => ({
                 inputDisplay: <>{option.label}</>,
                 value: option.id,
@@ -183,11 +194,19 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
             data-test-subj="mitreAttackSubtechnique"
             disabled={disabled}
             placeholder={i18n.SUBTECHNIQUE_PLACEHOLDER}
+            isInvalid={isUnsupported}
           />
         </>
       );
     },
-    [subtechniquesOptions, field.label, updateSubtechnique, technique, techniqueIndex]
+    [
+      subtechniquesOptions,
+      isUnsupportedSubtechnique,
+      field.label,
+      updateSubtechnique,
+      technique,
+      techniqueIndex,
+    ]
   );
 
   const subtechniques = useMemo(() => {
@@ -197,32 +216,41 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   return (
     <SubtechniqueContainer>
       {subtechniques != null &&
-        subtechniques.map((subtechnique, index) => (
-          <div key={index}>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              describedByIds={idAria ? [`${idAria} ${i18n.SUBTECHNIQUE}`] : undefined}
-            >
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow>
-                  {getSelectSubtechnique(index, isDisabled, subtechnique)}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      color="danger"
-                      iconType="trash"
-                      isDisabled={isDisabled}
-                      onClick={() => removeSubtechnique(index)}
-                      aria-label={Rulei18n.DELETE}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          </div>
-        ))}
+        subtechniques.map((subtechnique, index) => {
+          const subtechniqueUnsupported = isUnsupportedSubtechnique(subtechnique);
+          return (
+            <div key={index}>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                fullWidth
+                describedByIds={idAria ? [`${idAria} ${i18n.SUBTECHNIQUE}`] : undefined}
+                isInvalid={subtechniqueUnsupported}
+                error={
+                  subtechniqueUnsupported
+                    ? i18n.UNSUPPORTED_MITRE_ID_ERROR(subtechnique.id)
+                    : undefined
+                }
+              >
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow>
+                    {getSelectSubtechnique(index, isDisabled, subtechnique)}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        color="danger"
+                        iconType="trash"
+                        isDisabled={isDisabled}
+                        onClick={() => removeSubtechnique(index)}
+                        aria-label={Rulei18n.DELETE}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </div>
+          );
+        })}
       <MyAddItemButton
         data-test-subj="addMitreAttackSubtechnique"
         onClick={addMitreAttackSubtechnique}

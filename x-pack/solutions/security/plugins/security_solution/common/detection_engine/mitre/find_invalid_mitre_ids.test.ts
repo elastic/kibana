@@ -6,7 +6,7 @@
  */
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import { findInvalidMitreIds } from './find_invalid_mitre_ids';
+import { findInvalidMitreIds, isKnownMitreId } from './find_invalid_mitre_ids';
 
 const MITRE_FRAMEWORK = 'MITRE ATT&CK';
 
@@ -180,5 +180,31 @@ describe('findInvalidMitreIds', () => {
       }),
     ];
     expect(findInvalidMitreIds(threats)).toEqual(['TA9998', 'TA9999']);
+  });
+});
+
+describe('isKnownMitreId', () => {
+  it('returns true for known tactic IDs', () => {
+    expect(isKnownMitreId('tactic', VALID_TACTIC_ID)).toBe(true);
+  });
+
+  it('returns true for known technique IDs', () => {
+    expect(isKnownMitreId('technique', VALID_TECHNIQUE_ID)).toBe(true);
+  });
+
+  it('returns true for known subtechnique IDs', () => {
+    expect(isKnownMitreId('subtechnique', VALID_SUBTECHNIQUE_ID)).toBe(true);
+  });
+
+  it('returns false for unknown tactic IDs', () => {
+    expect(isKnownMitreId('tactic', 'TA9999')).toBe(false);
+  });
+
+  it('returns false for unknown technique IDs', () => {
+    expect(isKnownMitreId('technique', 'T9999')).toBe(false);
+  });
+
+  it('returns false for unknown subtechnique IDs', () => {
+    expect(isKnownMitreId('subtechnique', 'T1548.999')).toBe(false);
   });
 });
