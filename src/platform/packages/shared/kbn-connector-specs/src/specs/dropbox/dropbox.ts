@@ -67,7 +67,7 @@ export const Dropbox: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://www.dropbox.com/oauth2/authorize',
           tokenUrl: 'https://api.dropboxapi.com/oauth2/token',
-          scope: 'account_info.read files.metadata.read files.content.read sharing.read',
+          scope: 'account_info.read files.metadata.read files.content.read sharing.read sharing.write',
         },
         overrides: {
           meta: {
@@ -174,9 +174,7 @@ export const Dropbox: ConnectorSpec = {
       handler: async (ctx, input: ListFolderInput) => {
         return callToolJson(ctx, 'list_folder', {
           path: input.path,
-          limit: input.limit,
           recursive: input.recursive,
-          include_deleted: input.includeDeleted,
         });
       },
     },
@@ -192,7 +190,7 @@ export const Dropbox: ConnectorSpec = {
         return withMcpClient(ctx, async (mcp) => {
           const metaResult = await mcp.callTool({
             name: 'get_file_metadata',
-            arguments: { path: input.path },
+            arguments: { path_or_file_id: input.path },
           });
           const metadata = parseJsonTextFromContentParts(metaResult.content);
 

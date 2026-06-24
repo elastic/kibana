@@ -131,10 +131,10 @@ describe('Dropbox', () => {
       expect(Dropbox.actions.whoAmI.isTool).toBe(true);
     });
 
-    it('calls WhoAmI tool with no arguments', async () => {
+    it('calls who_am_i tool with no arguments', async () => {
       const result = await Dropbox.actions.whoAmI.handler(mockContext, {});
 
-      expect(mockCallTool).toHaveBeenCalledWith({ name: 'WhoAmI', arguments: {} });
+      expect(mockCallTool).toHaveBeenCalledWith({ name: 'who_am_i', arguments: {} });
       expect(result).toEqual(mockJson);
     });
   });
@@ -149,7 +149,7 @@ describe('Dropbox', () => {
       await Dropbox.actions.search.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'Search',
+        name: 'search',
         arguments: {
           query: 'Q3 budget report',
           path: undefined,
@@ -169,7 +169,7 @@ describe('Dropbox', () => {
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'Search',
+        name: 'search',
         arguments: {
           query: 'product roadmap',
           path: '/team-projects',
@@ -186,17 +186,15 @@ describe('Dropbox', () => {
       expect(Dropbox.actions.listFolder.isTool).toBe(true);
     });
 
-    it('calls ListFolder with path and default limit', async () => {
+    it('calls list_folder with path and recursive defaults', async () => {
       const input = parse('listFolder', { path: '/Documents' });
       await Dropbox.actions.listFolder.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'ListFolder',
+        name: 'list_folder',
         arguments: {
           path: '/Documents',
-          limit: 100,
           recursive: false,
-          include_deleted: false,
         },
       });
     });
@@ -206,31 +204,23 @@ describe('Dropbox', () => {
       await Dropbox.actions.listFolder.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'ListFolder',
+        name: 'list_folder',
         arguments: {
           path: '',
-          limit: 100,
           recursive: false,
-          include_deleted: false,
         },
       });
     });
 
-    it('passes custom limit and recursive flag', async () => {
-      await Dropbox.actions.listFolder.handler(mockContext, {
-        path: '/Projects',
-        limit: 50,
-        recursive: true,
-        includeDeleted: false,
-      });
+    it('passes recursive flag', async () => {
+      const input = parse('listFolder', { path: '/Projects', recursive: true });
+      await Dropbox.actions.listFolder.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'ListFolder',
+        name: 'list_folder',
         arguments: {
           path: '/Projects',
-          limit: 50,
           recursive: true,
-          include_deleted: false,
         },
       });
     });
@@ -241,14 +231,14 @@ describe('Dropbox', () => {
       expect(Dropbox.actions.getFileMetadata.isTool).toBe(true);
     });
 
-    it('calls GetFileMetadata with path', async () => {
+    it('calls get_file_metadata with path_or_file_id', async () => {
       const result = await Dropbox.actions.getFileMetadata.handler(mockContext, {
         path: '/Documents/report.pdf',
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'GetFileMetadata',
-        arguments: { path: '/Documents/report.pdf' },
+        name: 'get_file_metadata',
+        arguments: { path_or_file_id: '/Documents/report.pdf' },
       });
       expect(result).toEqual(mockJson);
     });
@@ -259,14 +249,14 @@ describe('Dropbox', () => {
       expect(Dropbox.actions.getFileContent.isTool).toBe(true);
     });
 
-    it('calls GetFileContent with path and returns content', async () => {
+    it('calls get_file_content with path_or_file_id and returns content', async () => {
       const result = await Dropbox.actions.getFileContent.handler(mockContext, {
         path: '/Documents/notes.txt',
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'GetFileContent',
-        arguments: { path: '/Documents/notes.txt' },
+        name: 'get_file_content',
+        arguments: { path_or_file_id: '/Documents/notes.txt' },
       });
       // callToolContent returns the raw content parts
       expect(result).toEqual(mockContent);
@@ -283,7 +273,7 @@ describe('Dropbox', () => {
       await Dropbox.actions.createSharedLink.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'CreateSharedLink',
+        name: 'create_shared_link',
         arguments: {
           path: '/Documents/report.pdf',
           visibility: 'team_only',
@@ -298,7 +288,7 @@ describe('Dropbox', () => {
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'CreateSharedLink',
+        name: 'create_shared_link',
         arguments: {
           path: '/Confidential/budget.xlsx',
           visibility: 'team_only',
@@ -317,7 +307,7 @@ describe('Dropbox', () => {
       await Dropbox.actions.listSharedLinks.handler(mockContext, input);
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'ListSharedLinks',
+        name: 'list_shared_links',
         arguments: { path: undefined },
       });
     });
@@ -328,7 +318,7 @@ describe('Dropbox', () => {
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'ListSharedLinks',
+        name: 'list_shared_links',
         arguments: { path: '/Documents/report.pdf' },
       });
     });

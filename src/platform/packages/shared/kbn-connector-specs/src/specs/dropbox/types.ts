@@ -86,24 +86,11 @@ export const ListFolderInputSchema = lazySchema(() =>
       .describe(
         'Path to the folder to list. Use an empty string "" for the root folder, or a path like "/team-projects/finance".'
       ),
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(2000)
-      .optional()
-      .default(100)
-      .describe('Maximum number of items to return per page (1–2000, default 100)'),
     recursive: z
       .boolean()
       .optional()
       .default(false)
       .describe('If true, list contents of all subdirectories recursively. Default is false.'),
-    includeDeleted: z
-      .boolean()
-      .optional()
-      .default(false)
-      .describe('If true, include deleted files and folders in results. Default is false.'),
   })
 );
 export type ListFolderInput = z.infer<typeof ListFolderInputSchema>;
