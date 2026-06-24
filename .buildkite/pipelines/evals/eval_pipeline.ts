@@ -36,8 +36,6 @@ function pathExistsInGitTree(repoRelativePath: string): boolean {
   }
 }
 
-const SAFE_SUITE_ID_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
-
 function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
   try {
     const filePath = Path.resolve(process.cwd(), EVALS_SUITES_METADATA_RELATIVE_PATH);
@@ -45,10 +43,6 @@ function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
     const parsed = JSON.parse(raw) as { suites?: EvalsSuiteMetadataEntry[] };
     const suites = Array.isArray(parsed.suites) ? parsed.suites : [];
     return suites.filter((suite) => {
-      if (!suite?.id || !SAFE_SUITE_ID_PATTERN.test(suite.id)) {
-        console.warn(`Skipping suite with invalid id: ${JSON.stringify(suite?.id)}`);
-        return false;
-      }
       if (!suite?.configPath) return true;
       return pathExistsInGitTree(suite.configPath);
     });
