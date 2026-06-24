@@ -811,6 +811,43 @@ describe('AttachmentService', () => {
         const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
         expect(persistedAttributes).not.toHaveProperty('foo');
       });
+
+      it('carries the owner through to the response', async () => {
+        const attachment = createUserAttachment();
+        unsecuredSavedObjectsClient.update.mockResolvedValue(attachment);
+
+        const res = await service.update({
+          updatedAttributes: attachment.attributes,
+          savedObjectId: '1',
+        });
+
+        expect(res.attributes.owner).toBe(attachment.attributes.owner);
+      });
+
+      it('throws Boom 400 for unified-only types when the attachments flag is off', async () => {
+        const entityAttrs = {
+          type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+          attachmentId: 'entity-1',
+          metadata: { entityName: 'alice', entityType: 'user' },
+          owner: SECURITY_SOLUTION_OWNER,
+          created_at: '2024-01-01T00:00:00.000Z',
+          created_by: { username: 'u', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        };
+
+        await expect(
+          service.update({ updatedAttributes: entityAttrs, savedObjectId: '1' })
+        ).rejects.toMatchObject({
+          isBoom: true,
+          output: { statusCode: 400 },
+          message: expect.stringContaining(SECURITY_ENTITY_ATTACHMENT_TYPE),
+        });
+
+        expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -972,6 +1009,46 @@ describe('AttachmentService', () => {
           unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
 
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('carries the owner through to the response', async () => {
+        const attachment = createUserAttachment();
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [attachment],
+        });
+
+        const res = await service.bulkUpdate({
+          comments: [{ savedObjectId: '1', updatedAttributes: attachment.attributes }],
+        });
+
+        expect(res.saved_objects[0].attributes.owner).toBe(attachment.attributes.owner);
+      });
+
+      it('throws Boom 400 for unified-only types when the attachments flag is off', async () => {
+        const entityAttrs = {
+          type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+          attachmentId: 'entity-1',
+          metadata: { entityName: 'alice', entityType: 'user' },
+          owner: SECURITY_SOLUTION_OWNER,
+          created_at: '2024-01-01T00:00:00.000Z',
+          created_by: { username: 'u', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        };
+
+        await expect(
+          service.bulkUpdate({
+            comments: [{ savedObjectId: '1', updatedAttributes: entityAttrs }],
+          })
+        ).rejects.toMatchObject({
+          isBoom: true,
+          output: { statusCode: 400 },
+          message: expect.stringContaining(SECURITY_ENTITY_ATTACHMENT_TYPE),
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
       });
     });
   });
