@@ -125,6 +125,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/management-settings-ids'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-chrome-app-menu-components'
 tags:
   - plugin
   - prod
