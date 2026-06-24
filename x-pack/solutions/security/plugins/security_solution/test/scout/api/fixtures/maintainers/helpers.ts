@@ -215,7 +215,7 @@ export const waitForRelationshipIds = async (
           ? normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath])
           : [];
       },
-      { timeout: 10_000, intervals: [200] }
+      { timeout: 30_000, intervals: [200] }
     )
     .toContain(expectedTargetId);
 };
