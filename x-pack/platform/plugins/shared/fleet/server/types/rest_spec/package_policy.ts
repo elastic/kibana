@@ -231,7 +231,7 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
         schema.oneOf([
           PackagePolicyResponseSchema.extends(
             {
-              id: schema.maybe(schema.string()),
+              id: schema.maybe(schema.string({ maxLength: 255 })),
             },
             { meta: { id: 'dry_run_package_policy_response' } }
           ),

@@ -192,7 +192,7 @@ const PackageInfoInstallationInfoSchema = InstallationInfoSchema.extends(
     installed_kibana: schema.arrayOf(PackageInfoKibanaAssetReferenceSchema, { maxSize: 10000 }),
     additional_spaces_installed_kibana: schema.maybe(
       schema.recordOf(
-        schema.string(),
+        schema.string({ maxLength: 255 }),
         schema.arrayOf(PackageInfoKibanaAssetReferenceSchema, { maxSize: 100 })
       )
     ),
