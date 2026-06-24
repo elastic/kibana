@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
+import { take } from 'lodash';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import {
-  MAX_BULK_ITEMS,
-  type FindRulesResponse,
-  type RuleResponse,
-} from '@kbn/alerting-v2-schemas';
+import type { FindRulesResponse, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import { ALERT_EPISODES_LIST_PAGE_SIZE } from '../constants';
 
 export interface FetchRulesByIdsParams {
   http: HttpStart;
@@ -33,22 +30,18 @@ export const fetchRulesByIds = async ({
   http,
   ids,
 }: FetchRulesByIdsParams): Promise<RuleResponse[]> => {
-  if (ids.length === 0) {
+  const idsToFetch = take(ids, ALERT_EPISODES_LIST_PAGE_SIZE);
+  if (idsToFetch.length === 0) {
     return [];
   }
 
-  const idChunks = chunk(ids, MAX_BULK_ITEMS);
-  const chunkResponses = await Promise.all(
-    idChunks.map((idChunk) =>
-      http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-        query: {
-          filter: buildRuleIdsFilter(idChunk),
-          perPage: idChunk.length,
-          page: 1,
-        },
-      })
-    )
-  );
+  const response = await http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
+    query: {
+      filter: buildRuleIdsFilter(idsToFetch),
+      perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
+      page: 1,
+    },
+  });
 
-  return chunkResponses.flatMap((response) => response.items);
+  return response.items;
 };

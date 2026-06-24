@@ -84,9 +84,10 @@ describe('useFetchRule', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
-    expect(result.current.ruleState.status).toBe(RuleStateStatus.error);
-    if (result.current.ruleState.status === RuleStateStatus.error) {
-      expect(result.current.ruleState.ruleId).toBe('r1');
-    }
+    expect(result.current.ruleState).toEqual({
+      status: RuleStateStatus.error,
+      ruleId: 'r1',
+      error: expect.any(Error),
+    });
   });
 });

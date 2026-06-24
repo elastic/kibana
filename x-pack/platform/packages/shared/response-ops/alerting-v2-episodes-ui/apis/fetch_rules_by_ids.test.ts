@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { ALERT_EPISODES_LIST_PAGE_SIZE } from '../constants';
 import { fetchRulesByIds } from './fetch_rules_by_ids';
 
 const mockHttp = httpServiceMock.createStartContract();
@@ -19,7 +19,7 @@ describe('fetchRulesByIds', () => {
       items: [],
       total: 0,
       page: 1,
-      perPage: 1,
+      perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
     });
   });
 
@@ -34,29 +34,25 @@ describe('fetchRulesByIds', () => {
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: '(id: "rule-a" OR id: "rule-b")',
-        perPage: 2,
+        perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
         page: 1,
       },
     });
   });
 
-  it('chunks ids using MAX_BULK_ITEMS', async () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
+  it('caps ids at ALERT_EPISODES_LIST_PAGE_SIZE', async () => {
+    const ids = Array.from(
+      { length: ALERT_EPISODES_LIST_PAGE_SIZE + 1 },
+      (_, index) => `rule-${index}`
+    );
 
     await fetchRulesByIds({ http: mockHttp, ids });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(2);
-    expect(mockHttp.get).toHaveBeenNthCalledWith(1, ALERTING_V2_RULE_API_PATH, {
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
-        filter: expect.any(String),
-        perPage: MAX_BULK_ITEMS,
-        page: 1,
-      },
-    });
-    expect(mockHttp.get).toHaveBeenNthCalledWith(2, ALERTING_V2_RULE_API_PATH, {
-      query: {
-        filter: expect.any(String),
-        perPage: 1,
+        filter: expect.not.stringContaining(`rule-${ALERT_EPISODES_LIST_PAGE_SIZE}`),
+        perPage: ALERT_EPISODES_LIST_PAGE_SIZE,
         page: 1,
       },
     });

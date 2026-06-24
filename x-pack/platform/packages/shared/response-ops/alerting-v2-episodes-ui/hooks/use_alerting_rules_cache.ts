@@ -60,7 +60,6 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
 
   return {
     rulesCache,
-    missingRuleIds,
     loading,
     error,
   };

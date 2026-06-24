@@ -86,7 +86,6 @@ describe('useAlertingRulesCache', () => {
       })
     );
     expect(result.current.rulesCache).toEqual({ [ruleId]: fetchedRule });
-    expect(result.current.missingRuleIds).toEqual(new Set());
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
   });
@@ -101,12 +100,11 @@ describe('useAlertingRulesCache', () => {
 
     expect(mockHttp.get).not.toHaveBeenCalled();
     expect(result.current.rulesCache).toEqual({});
-    expect(result.current.missingRuleIds).toEqual(new Set());
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
   });
 
-  it('tracks missing rule ids that are not returned by find', async () => {
+  it('does not re-fetch rule ids that were not returned by find', async () => {
     const presentRuleId = 'rule-present';
     const missingRuleId = 'rule-missing';
     const fetchedRule = {
@@ -120,15 +118,17 @@ describe('useAlertingRulesCache', () => {
       perPage: 2,
     } as FindRulesResponse);
 
-    const { result } = renderHook(() =>
-      useAlertingRulesCache({
-        ruleIds: [presentRuleId, missingRuleId],
-        services: { http: mockHttp },
-      })
+    const { result, rerender } = renderHook(
+      ({ ruleIds }: { ruleIds: string[] } = { ruleIds: [presentRuleId, missingRuleId] }) =>
+        useAlertingRulesCache({
+          ruleIds,
+          services: { http: mockHttp },
+        })
     );
 
-    await waitFor(() => expect(result.current.missingRuleIds).toEqual(new Set([missingRuleId])));
-    expect(result.current.rulesCache).toEqual({ [presentRuleId]: fetchedRule });
+    await waitFor(() =>
+      expect(result.current.rulesCache).toEqual({ [presentRuleId]: fetchedRule })
+    );
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: `(id: "${presentRuleId}" OR id: "${missingRuleId}")`,
@@ -136,5 +136,9 @@ describe('useAlertingRulesCache', () => {
         page: 1,
       },
     });
+
+    rerender({ ruleIds: [presentRuleId, missingRuleId] });
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
   });
 });
