@@ -166,11 +166,9 @@ export class QueryRuleOrchestrator {
     const scopedLinks = currentLinks.filter((l) => l.rule_backed || l.query.id === query.id);
 
     if (!existing) {
-      await this.syncQueries(
-        definition,
-        [...scopedLinks.map(queryFromLink), query],
-        { currentLinks: scopedLinks }
-      );
+      await this.syncQueries(definition, [...scopedLinks.map(queryFromLink), query], {
+        currentLinks: scopedLinks,
+      });
       return;
     }
     await this.syncQueries(
