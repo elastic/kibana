@@ -304,7 +304,7 @@ describe('useLookupIndexCommand', () => {
 
   it('should show closed warning decoration for a closed lookup index', async () => {
     mockGetLookupIndices.mockResolvedValue({
-      indices: [{ name: 'test-index', status: 'closed' }],
+      indices: [{ name: 'test-index', isClosed: true }],
     });
 
     const { result } = renderHook(

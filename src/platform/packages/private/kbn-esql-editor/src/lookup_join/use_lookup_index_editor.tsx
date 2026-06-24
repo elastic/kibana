@@ -200,7 +200,10 @@ export const useLookupIndexCommand = (
 
     const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
     const lookupIndices: string[] = inQueryLookupIndices.current;
-    const permissions = await getPermissions(lookupIndices);
+    const nonClosedIndices = lookupIndices.filter(
+      (name) => !existingIndices.indices.find((i) => i.name === name)?.isClosed
+    );
+    const permissions = await getPermissions(nonClosedIndices);
     const newDecorations: monaco.editor.IModelDeltaDecoration[] = [];
 
     for (let i = 0; i < lookupIndices.length; i++) {
@@ -208,7 +211,7 @@ export const useLookupIndexCommand = (
 
       const existingIndex = existingIndices.indices.find((index) => index.name === lookupIndex);
       const isExistingIndex = !!existingIndex;
-      const isClosedIndex = existingIndex?.status === 'closed';
+      const isClosedIndex = existingIndex?.isClosed;
       const matches =
         editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
 

@@ -55,7 +55,7 @@ describe('ESQL routes', () => {
     expect(closedItem).toMatchObject({
       name: 'closed_lookup_index',
       mode: 'Lookup',
-      status: 'closed',
+      isClosed: true,
     });
   });
 

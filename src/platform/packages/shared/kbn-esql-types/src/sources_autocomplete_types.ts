@@ -14,7 +14,7 @@ export interface IndexAutocompleteItem {
   name: string;
   mode: 'lookup' | 'time_series' | string;
   aliases: string[];
-  status?: 'closed';
+  isClosed?: boolean;
 }
 
 export interface ESQLSourceResult {
