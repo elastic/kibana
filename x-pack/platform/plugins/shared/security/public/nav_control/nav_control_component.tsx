@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
+  type PopoverAnchorPosition,
 } from '@elastic/eui';
 import type { FunctionComponent, MouseEvent, ReactNode } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
@@ -74,6 +75,7 @@ export interface SecurityNavControlRenderButtonProps {
 }
 
 interface SecurityNavControlProps {
+  anchorPosition?: PopoverAnchorPosition;
   avatarSize?: 's' | 'm' | 'l';
   editProfileUrl: string;
   logoutUrl: string;
@@ -82,6 +84,7 @@ interface SecurityNavControlProps {
 }
 
 export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
+  anchorPosition = 'downRight',
   editProfileUrl,
   logoutUrl,
   userMenuLinks$,
@@ -191,7 +194,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       ownFocus
       button={button}
       isOpen={isPopoverOpen}
-      anchorPosition="downRight"
+      anchorPosition={anchorPosition}
       repositionOnScroll
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
