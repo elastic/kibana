@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Readable } from 'node:stream';
 import type { AxiosInstance } from 'axios';
 import type { FetchLike } from '@kbn/mcp-client';
 
@@ -24,6 +25,7 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     const urlString = typeof url === 'string' ? url : url.toString();
     const method = (init?.method ?? 'GET').toUpperCase();
     const headers: Record<string, string> = {};
+
     if (init?.headers) {
       if (init.headers instanceof Headers) {
         init.headers.forEach((value, key) => {
@@ -38,18 +40,42 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       }
     }
 
-    // Use responseType:'stream' for all methods. MCP's Streamable HTTP transport
-    // can return SSE on both GET (notification channel) and POST (streaming tool
-    // results). Buffering via 'arraybuffer' would stall any SSE response until the
-    // stream closes. The Web Response body handles both JSON and SSE correctly:
-    // the SDK calls .json() for plain responses and reads the body stream for SSE.
+    // GET requests open the SSE stream used by MCP servers to push responses back.
+    // responseType:'stream' is required here — buffering an infinite SSE stream with
+    // 'arraybuffer' would stall until the connection closes.
+    if (method === 'GET') {
+      const res = await axiosInstance.request({
+        url: urlString,
+        method: 'GET',
+        headers: Object.keys(headers).length ? headers : undefined,
+        signal: init?.signal ?? undefined,
+        responseType: 'stream',
+        validateStatus: () => true,
+      });
+
+      const resHeaders = new Headers();
+      if (res.headers && typeof res.headers === 'object') {
+        for (const [key, value] of Object.entries(res.headers)) {
+          if (value !== undefined && value !== null) {
+            resHeaders.set(key, Array.isArray(value) ? value.join(', ') : String(value));
+          }
+        }
+      }
+
+      return new Response(Readable.toWeb(res.data as Readable) as ReadableStream<Uint8Array>, {
+        status: res.status,
+        statusText: res.statusText ?? '',
+        headers: resHeaders,
+      });
+    }
+
     const res = await axiosInstance.request({
       url: urlString,
-      method: method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD',
+      method: method as 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD',
       headers: Object.keys(headers).length ? headers : undefined,
       data: init?.body ?? undefined,
       signal: init?.signal ?? undefined,
-      responseType: 'stream',
+      responseType: 'arraybuffer',
       validateStatus: () => true,
     });
 
@@ -62,23 +88,7 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       }
     }
 
-    const nodeStream = res.data as NodeJS.ReadableStream;
-    const webStream = new ReadableStream<Uint8Array>({
-      start(controller) {
-        nodeStream.on('data', (chunk: Buffer | string) => {
-          controller.enqueue(
-            typeof chunk === 'string' ? Buffer.from(chunk) : (chunk as Uint8Array)
-          );
-        });
-        nodeStream.on('end', () => controller.close());
-        nodeStream.on('error', (err: Error) => controller.error(err));
-      },
-      cancel() {
-        (nodeStream as { destroy?: () => void }).destroy?.();
-      },
-    });
-
-    return new Response(webStream, {
+    return new Response(res.data, {
       status: res.status,
       statusText: res.statusText ?? '',
       headers: resHeaders,
