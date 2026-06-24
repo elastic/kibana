@@ -61,7 +61,7 @@ import {
   TIMELINE_CONTEXT_MENU_BTN,
   TOOLTIP,
 } from '../screens/alerts';
-import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
+import { REFRESH_BUTTON } from '../screens/security_header';
 import {
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
@@ -451,7 +451,6 @@ export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 
