@@ -17,6 +17,7 @@ import {
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
+  buildSkillInvokedCaseExpression,
   createTrajectoryEvaluator,
   createRagEvaluators,
   type GroundTruth,
@@ -343,8 +344,7 @@ function configureExperiment({
 | WHERE trace.id == "${traceId}"
 | STATS skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${shouldNotActivate}/SKILL.md*",
+      ${buildSkillInvokedCaseExpression(shouldNotActivate)},
       1,
       NULL
     )

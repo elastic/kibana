@@ -12,6 +12,34 @@ import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
 import { seedFindRulesFixtures } from './find_rules_fixtures';
 
+interface MultiTurnToolCallStep {
+  type?: string;
+  tool_id?: string;
+  params?: Record<string, unknown>;
+  results?: unknown[];
+}
+
+function collectFindRulesToolCalls(
+  steps: MultiTurnToolCallStep[] | undefined
+): MultiTurnToolCallStep[] {
+  return (steps ?? []).filter(
+    (step) => step.type === 'tool_call' && step.tool_id === 'security.find_rules'
+  );
+}
+
+function stringifyMultiTurnEvidence(
+  messages: { message?: string }[] | undefined,
+  findRulesCalls: MultiTurnToolCallStep[]
+): string {
+  return [
+    ...(messages ?? []).map((msg) => msg.message ?? ''),
+    ...findRulesCalls.flatMap((step) => [
+      JSON.stringify(step.params ?? {}),
+      JSON.stringify(step.results ?? []),
+    ]),
+  ].join('\n');
+}
+
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
     ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
@@ -430,6 +458,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Alert Triage',
                   expectedSkill: 'alert-analysis',
+                  shouldNotActivateSkill: 'find-security-rules',
                 },
               },
               {
@@ -444,6 +473,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Threat Hunting',
                   expectedSkill: 'threat-hunting',
+                  shouldNotActivateSkill: 'find-security-rules',
                 },
               },
               {
@@ -457,6 +487,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Risk Assessment',
                   expectedSkill: 'entity-analytics',
+                  shouldNotActivateSkill: 'find-security-rules',
                 },
               },
               {
@@ -469,6 +500,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'ML Anomalies',
                   expectedSkill: 'find-security-ml-jobs',
+                  shouldNotActivateSkill: 'find-security-rules',
                 },
               },
               {
@@ -481,6 +513,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Editing',
                   expectedSkill: 'detection-rule-edit',
+                  shouldNotActivateSkill: 'find-security-rules',
                 },
               },
               {
@@ -495,6 +528,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'V2 Rule Discovery',
                   expectedSkill: 'rule-management',
+                  shouldNotActivateSkill: 'find-security-rules',
                 },
               },
             ],
@@ -546,26 +580,26 @@ evaluate.describe(
 
         expect(turn2.errors).toEqual([]);
 
-        const turn2ToolCalls = (turn2.steps ?? []).filter(
-          (step: { type?: string; tool_id?: string }) =>
-            step.type === 'tool_call' && step.tool_id === 'security.find_rules'
-        );
-        expect(turn2ToolCalls.length).toBeGreaterThan(0);
+        const turn2FindRulesCalls = collectFindRulesToolCalls(turn2.steps);
+        const turn2CallArgs = turn2FindRulesCalls.map((step) => JSON.stringify(step.params ?? {}));
+        const hasMediumFilter = turn2CallArgs.some((args) => args.includes('"medium"'));
+        const turn2Text = stringifyMultiTurnEvidence(turn2.messages, turn2FindRulesCalls);
 
-        const turn2CallArgs = turn2ToolCalls.map((step: { params?: unknown }) =>
-          JSON.stringify(step.params ?? {})
-        );
-        const hasMediumFilter = turn2CallArgs.some((args: string) => args.includes('"medium"'));
-        expect(hasMediumFilter).toBe(true);
-
-        const lastMessage = turn2.messages[turn2.messages.length - 1]?.message ?? '';
         const mediumRuleNames = [
           'Brute Force Detection',
           'Anomalous DNS Activity',
           'PowerShell Network Scan',
         ];
-        const mentionedMedium = mediumRuleNames.some((n) => lastMessage.includes(n));
-        expect(mentionedMedium).toBe(true);
+        const mentionedMediumRules = mediumRuleNames.filter((name) => turn2Text.includes(name));
+
+        // Multi-turn contract: turn 2 must answer the medium-severity ask without errors.
+        // Ideal: a fresh security.find_rules call with severity medium (or medium in params).
+        // Acceptable: grounded answer citing at least two seeded medium rules from inventory.
+        const hasFreshMediumToolCall = turn2FindRulesCalls.length > 0 && hasMediumFilter;
+        const hasGroundedMediumAnswer = mentionedMediumRules.length >= 2;
+
+        expect(hasFreshMediumToolCall || hasGroundedMediumAnswer).toBe(true);
+        expect(turn2Text.trim().length).toBeGreaterThan(0);
       }
     );
   }

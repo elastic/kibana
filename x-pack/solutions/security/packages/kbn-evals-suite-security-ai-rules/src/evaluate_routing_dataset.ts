@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import {
   createSkillInvocationEvaluator,
+  buildSkillInvokedCaseExpression,
   createTrajectoryEvaluator,
   getStringMeta,
   getToolCallSteps,
@@ -304,8 +305,7 @@ export const buildRuleRoutingEvaluators = ({
 | WHERE trace.id == "${traceId}"
 | STATS skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${shouldNotActivate}/SKILL.md*",
+      ${buildSkillInvokedCaseExpression(shouldNotActivate)},
       1,
       NULL
     )
