@@ -16,7 +16,7 @@ export const BadgeList = ({ items }: Props) => (
   <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
     {items.map((item) => (
       <EuiFlexItem grow={false} key={item}>
-        <EuiBadge color="hollow" css={{ maxWidth: 150 }}>
+        <EuiBadge color="hollow" title={item} css={{ maxWidth: 150 }}>
           {item}
         </EuiBadge>
       </EuiFlexItem>
