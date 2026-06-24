@@ -33,6 +33,8 @@ Here is the Elastic integrations context for you to reference for your task, rea
 <guidelines>
 - Carefully analyze the given Detection Rule data provided by the user.
 - Match the data source in the rule to the most relevant Elastic Integration from the list provided above.
+  - Data source need not be 1:1 match but decision should take based on the requirements that data source is fulfilling in the detection logic.
+  - If you see an integration that is not a perfect match but it can fulfill the intention and requirements of the rule, you can consider it as a match. But explain the reasoning behind your decision.
 - Focus on data source only and avoid guessing based on other factors.
 - Take decision clinically on the data provided. Do not use your knowledge to take decision.
 - Some integrations are related to certain type of logs or vendors such as Snort, Nginx, AWS, etc. You need to give important to these entity names and match an integration only and only if you see a clear reference to them in the rule description.
@@ -74,7 +76,7 @@ A: Please find the match JSON object below:
 \`\`\`json
 {{
   "id": "auditd_manager",
-  "summary": "## Integration Matching Summary\\\\nThe given rule \\"Linux Auditd Add User Account Type\\" is matched with the \\"auditd_manager\\" integration because it ingests data from auditd logs which is the right data to detect user account creation on Linux systems."
+  "summary": "## Integration Matching Summary\nThe given rule \"Linux Auditd Add User Account Type\" is matched with the \"auditd_manager\" integration because it ingests data from auditd logs which is the right data to detect user account creation on Linux systems."
 }}
 \`\`\`
 </example_response>
