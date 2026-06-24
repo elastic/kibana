@@ -109,7 +109,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       if (yaml && !isShowingStreamsInitialized.current) {
         isShowingStreamsInitialized.current = true;
         setIsShowingStreams(
-          (packageInfo.type !== 'input') ||
+          packageInfo.type !== 'input' ||
             shouldShowStreamsByDefault(
               yaml.parse,
               packageInput,

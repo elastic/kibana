@@ -50,7 +50,7 @@ export const SettingsFieldWrapper: React.FC<{
       : undefined;
   const coercedSchema = settingsConfig.schema as z.ZodString;
 
-   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = typeName === ZodFirstPartyTypeKind.ZodBoolean ? e.target.checked : e.target.value;
     const newValue = convertValue(value, typeName);
     const validationError = validateSchema(coercedSchema, newValue);
