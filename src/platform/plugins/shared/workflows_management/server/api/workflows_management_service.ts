@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
   CoreStart,
@@ -85,6 +86,15 @@ import { createStorage, type WorkflowStorage } from '../storage/workflow_storage
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
+
+export interface SearchExecutionsViewParams {
+  query?: estypes.QueryDslQueryContainer;
+  sort?: estypes.SortCombinations;
+  from?: number;
+  size?: number;
+  trackTotalHits?: boolean;
+  includeManagedExecutions?: boolean;
+}
 
 export interface SearchWorkflowExecutionsParams {
   workflowId?: string;
@@ -352,7 +362,7 @@ export class WorkflowsService {
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
-    options?: { includeExecutionHistory?: boolean }
+    options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
     await this.ensureInitialized();
     return this.searchService.getWorkflows(params, spaceId, options);
@@ -360,7 +370,7 @@ export class WorkflowsService {
 
   public async getWorkflowStats(
     spaceId: string,
-    options?: { includeExecutionStats?: boolean }
+    options?: { includeExecutionStats?: boolean; includeManagedExecutionStats?: boolean }
   ): Promise<WorkflowStatsDto> {
     await this.ensureInitialized();
     return this.searchService.getWorkflowStats(spaceId, options);
@@ -400,6 +410,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async searchExecutionsView(
+    params: SearchExecutionsViewParams,
+    spaceId: string
+  ): Promise<estypes.SearchResponse<unknown>> {
+    await this.ensureInitialized();
+    return this.executionQueryService.searchExecutionsView(params, spaceId);
   }
 
   public async listWaitingForInputSteps(
