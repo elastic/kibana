@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { CertFacets } from '../../../../../common/runtime_types';
 import { getCertFacets } from '../../state/certs/api';
@@ -23,14 +23,17 @@ import { SyntheticsRefreshContext } from '../../contexts';
 export const useCertFacets = (remoteNames?: string[]): CertFacets | undefined => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
+  // Stabilize the array reference across renders so useFetcher only re-runs
+  // when the actual cluster selection changes
   const remoteNamesKey = remoteNames?.join(',') ?? '';
-
-  const { data } = useFetcher(
-    () => getCertFacets(remoteNames),
-    // useFetcher does not support dynamic deps, so we serialize the cluster
-    // selection into a stable string key.
-    [lastRefresh, remoteNamesKey]
+  const stableRemoteNames = useMemo(
+    () => (remoteNamesKey ? remoteNamesKey.split(',') : undefined),
+    [remoteNamesKey]
   );
+
+  const fetchFacets = useCallback(() => getCertFacets(stableRemoteNames), [stableRemoteNames]);
+
+  const { data } = useFetcher(fetchFacets, [fetchFacets, lastRefresh]);
 
   return data;
 };
