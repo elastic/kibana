@@ -13,10 +13,10 @@ interface Props {
 }
 
 export const BadgeList = ({ items }: Props) => (
-  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+  <EuiFlexGroup gutterSize="xs" wrap responsive={false} css={{ maxWidth: '100%' }}>
     {items.map((item) => (
-      <EuiFlexItem grow={false} key={item}>
-        <EuiBadge color="hollow" title={item} css={{ maxWidth: 150 }}>
+      <EuiFlexItem grow={false} key={item} css={{ maxWidth: '100%' }}>
+        <EuiBadge color="hollow" title={item}>
           {item}
         </EuiBadge>
       </EuiFlexItem>
