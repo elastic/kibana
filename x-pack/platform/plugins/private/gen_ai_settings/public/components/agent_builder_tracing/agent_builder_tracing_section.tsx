@@ -17,8 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import type { BooleanUnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
-import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
@@ -30,14 +28,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
-
-const dependentTracingSettingIds = [
-  AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
-  AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
-  AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
-  AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
-  AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
-] as const;
+import { useTracingEnabledState } from './use_tracing_enabled_state';
 
 export const AgentBuilderTracingSection: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
@@ -51,7 +42,8 @@ export const AgentBuilderTracingSection: React.FC = () => {
     false
   );
 
-  const tracingEnabledField = fields[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID];
+  const { tracingEnabledField, tracingEnabled, handleTracingEnabledChange } =
+    useTracingEnabledState();
 
   if (!tracingEnabledField || !isExperimentalFeaturesEnabled) {
     return null;
@@ -60,35 +52,6 @@ export const AgentBuilderTracingSection: React.FC = () => {
   const rolesUrl = application.getUrlForApp('management', {
     path: '/security/roles',
   });
-
-  const tracingEnabledUnsaved = unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID];
-  const tracingEnabled =
-    tracingEnabledUnsaved?.unsavedValue !== undefined
-      ? Boolean(tracingEnabledUnsaved.unsavedValue)
-      : Boolean(tracingEnabledField.savedValue ?? tracingEnabledField.defaultValue);
-
-  const handleTracingEnabledChange: OnFieldChangeFn = (id, change) => {
-    handleFieldChange(id, change);
-
-    if (change?.unsavedValue !== false) {
-      return;
-    }
-
-    dependentTracingSettingIds.forEach((settingId) => {
-      const field = fields[settingId];
-
-      if (!field || field.type !== 'boolean' || field.isOverridden) {
-        return;
-      }
-
-      const update: BooleanUnsavedFieldChange = {
-        type: field.type,
-        unsavedValue: false,
-      };
-
-      handleFieldChange(field.id, hasUnsavedChange(field, update) ? update : undefined);
-    });
-  };
 
   return (
     <>
