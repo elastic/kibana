@@ -9,6 +9,7 @@ import type { EvaluationDataset, EvalsExecutorClient, Example, ExperimentTask } 
 import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import type { AgentBuilderEvaluationChatClient } from '../../src/chat_client';
 import { evaluate as base } from '../../src/evaluate';
@@ -28,14 +29,13 @@ type DatasetExample = Example<
   }
 >;
 
-interface EsqlToolCallStep {
+interface ToolResult {
+  data?: { esql?: string };
   type?: string;
-  tool_id?: string;
-  params?: { id?: string; input?: { query?: string } };
 }
 
 interface ToolTaskOutput {
-  steps: unknown[];
+  results: unknown[];
   errors: unknown[];
   esql: string;
 }
@@ -54,21 +54,20 @@ function createEvaluateEsqlDataset({
   return async function evaluateDataset({ dataset: { name, description, examples } }) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
-    const converseTask: ExperimentTask<DatasetExample, ToolTaskOutput> = async ({ input }) => {
-      const response = await chatClient.converse({
-        messages: [{ message: input!.question }],
+    const executeToolTask: ExperimentTask<DatasetExample, ToolTaskOutput> = async ({ input }) => {
+      const response = await chatClient.executeTool({
+        toolId: platformCoreTools.generateEsql,
+        toolParams: { query: input!.question },
       });
 
-      const steps = (response.steps ?? []) as EsqlToolCallStep[];
-
-      const esql = steps
-        .filter((step) => step.type === 'tool_call' && step.tool_id === 'exec' && step.params?.id == "es.esql.query")
-        .map((step) => step.params?.input?.query)
-        .filter((query): query is string => Boolean(query))
+      const esql = (response.results as ToolResult[])
+        .filter((r) => r.type === 'query')
+        .map((r) => r.data?.esql)
+        .filter(Boolean)
         .join('\n');
 
       return {
-        steps,
+        results: response.results,
         errors: response.errors,
         esql,
       };
@@ -84,7 +83,7 @@ function createEvaluateEsqlDataset({
     await executorClient.runExperiment(
       {
         dataset,
-        task: converseTask,
+        task: executeToolTask,
       },
       [esqlEquivalenceEvaluator]
     );
