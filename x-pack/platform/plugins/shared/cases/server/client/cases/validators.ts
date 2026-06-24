@@ -304,18 +304,27 @@ export const validateExtendedFieldsInRequest = async ({
 /**
  * Fetches and parses a template's inline fields for use in close-time validation.
  * Returns [] if the template is not found or its definition is unparseable.
- * Callers in bulk operations should pre-resolve templates by ID to avoid N SO fetches.
+ * Callers in bulk operations should pre-resolve templates by ID+version to avoid N SO fetches.
+ *
+ * Pass `templateVersion` to pin validation to the version the case was created with, preventing
+ * a later template edit (adding a required_on_close field) from blocking closure of older cases.
+ * When omitted, falls back to the latest version.
  */
 export const resolveTemplateFieldsForClose = async ({
   templateId,
+  templateVersion,
   templatesService,
   logger,
 }: {
   templateId: string;
+  templateVersion?: number;
   templatesService: TemplatesService;
   logger: Logger;
 }): Promise<InlineField[]> => {
-  const templateSO = await templatesService.getTemplate(templateId);
+  const templateSO = await templatesService.getTemplate(
+    templateId,
+    templateVersion != null ? String(templateVersion) : undefined
+  );
   if (!templateSO) {
     return [];
   }

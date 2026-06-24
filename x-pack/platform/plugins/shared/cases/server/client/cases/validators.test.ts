@@ -1331,7 +1331,17 @@ describe('validators', () => {
       });
       expect(fields.length).toBeGreaterThan(0);
       expect(fields[0].name).toBe('resolution');
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1');
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', undefined);
+    });
+
+    it('passes templateVersion as string to getTemplate when provided', async () => {
+      await resolveTemplateFieldsForClose({
+        templateId: 'tpl-1',
+        templateVersion: 3,
+        templatesService: templatesService as unknown as TemplatesService,
+        logger,
+      });
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-1', '3');
     });
 
     it('returns [] when template is not found', async () => {

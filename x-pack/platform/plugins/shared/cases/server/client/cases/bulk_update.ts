@@ -618,47 +618,56 @@ export const bulkUpdate = async (
     );
 
     // Pre-resolve template fields for cases transitioning to closed.
-    // Deduplicates SO fetches: N cases sharing the same template issue only one getTemplate call.
-    const getEffectiveTemplateId = (
+    // Deduplicates SO fetches: N cases sharing the same (template id, version) pair issue only one getTemplate call.
+    const getEffectiveTemplate = (
       updateReq: CasePatchRequest,
       originalCase: CaseSavedObjectTransformed
-    ): string | null =>
-      updateReq.template === null
-        ? null
-        : updateReq.template?.id ?? originalCase.attributes.template?.id ?? null;
+    ): { id: string; version: number } | null => {
+      if (updateReq.template === null) return null;
+      if (updateReq.template != null) {
+        return { id: updateReq.template.id, version: updateReq.template.version };
+      }
+      const t = originalCase.attributes.template;
+      return t != null ? { id: t.id, version: t.version } : null;
+    };
 
-    const closingCasesTemplateIds = [
-      ...new Set(
+    // Deduplicate by "id@version" so different versions of the same template are fetched separately.
+    const closingCasesTemplates = [
+      ...new Map(
         casesToUpdate
           .filter(
             ({ updateReq, originalCase }) =>
               updateReq.status === CaseStatuses.closed &&
               originalCase.attributes.status !== CaseStatuses.closed
           )
-          .map(({ updateReq, originalCase }) => getEffectiveTemplateId(updateReq, originalCase))
-          .filter((id): id is string => id != null)
-      ),
+          .map(({ updateReq, originalCase }) => getEffectiveTemplate(updateReq, originalCase))
+          .filter((t): t is { id: string; version: number } => t != null)
+          .map((t) => [`${t.id}@${t.version}`, t] as const)
+      ).values(),
     ];
-    const templateFieldsById = new Map(
+    const templateFieldsByKey = new Map(
       await Promise.all(
-        closingCasesTemplateIds.map(async (templateId) => {
+        closingCasesTemplates.map(async ({ id, version }) => {
           const fields = await resolveTemplateFieldsForClose({
-            templateId,
+            templateId: id,
+            templateVersion: version,
             templatesService,
             logger,
           });
-          return [templateId, fields] as const;
+          return [`${id}@${version}`, fields] as const;
         })
       )
     );
 
     for (const { updateReq, originalCase } of casesToUpdate) {
-      const effectiveTemplateId = getEffectiveTemplateId(updateReq, originalCase);
+      const effectiveTemplate = getEffectiveTemplate(updateReq, originalCase);
+      const templateKey = effectiveTemplate != null
+        ? `${effectiveTemplate.id}@${effectiveTemplate.version}`
+        : null;
       validateExtendedFieldsOnClose({
         updateReq,
         originalCase,
-        templateFields:
-          effectiveTemplateId != null ? templateFieldsById.get(effectiveTemplateId) ?? [] : [],
+        templateFields: templateKey != null ? templateFieldsByKey.get(templateKey) ?? [] : [],
         globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
       });
     }
