@@ -100,7 +100,7 @@ function DevToolsWrapper({
         label: currentDevTool.title,
         isSelected: currentDevTool === activeDevTool,
         disabled: currentDevTool.isDisabled(),
-        tooltipContent: currentDevTool.tooltipContent,
+        toolTipContent: currentDevTool.tooltipContent,
         onClick: () => {
           if (!currentDevTool.isDisabled()) {
             history.push(`/${currentDevTool.id}`);
@@ -161,9 +161,9 @@ function redirectOnMissingCapabilities(application: ApplicationStart) {
   return false;
 }
 
-function getBadges(application: ApplicationStart): AppHeaderBadge[] | undefined {
+function getBadges(application: ApplicationStart): AppHeaderBadge[] {
   if (application.capabilities.dev_tools.save) {
-    return undefined;
+    return [];
   }
 
   return [
@@ -174,6 +174,7 @@ function getBadges(application: ApplicationStart): AppHeaderBadge[] | undefined 
       tooltip: i18n.translate('devTools.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save',
       }),
+      'data-test-subj': 'headerBadge',
     },
   ];
 }
