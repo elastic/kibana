@@ -18,7 +18,6 @@ import {
 } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
-  ScopeableUrlRequest,
   UnauthorizedErrorHandler,
   ICustomClusterClient,
   IScopedClusterClient,
@@ -48,20 +47,30 @@ const noop = () => undefined;
 
 interface CommonFactoryRoutingOpts {
   logger: Logger;
-  request?: ScopeableUrlRequest;
+  request?: ScopeableRequest;
 }
 
-interface ScopedFactoryRoutingOpts extends CommonFactoryRoutingOpts {
+interface SpaceFactoryRoutingOpts extends CommonFactoryRoutingOpts {
   projectRouting: 'space';
-  request: ScopeableUrlRequest;
+  request: ScopeableRequest;
+}
+
+interface ExpressionFactoryRoutingOpts extends CommonFactoryRoutingOpts {
+  projectRouting: 'expression';
+  value: string;
 }
 
 /**
  * Union of routing options passed to {@link OnRequestHandlerFactory}.
- * The scoped variant carries the request so the factory can extract the space NPRE.
+ * The `'space'` variant carries the request so the factory can extract the space NPRE.
+ * The `'expression'` variant carries a caller-supplied `project_routing` expression that is
+ * injected verbatim.
  * @internal
  */
-export type FactoryRoutingOpts = CommonFactoryRoutingOpts | ScopedFactoryRoutingOpts;
+export type FactoryRoutingOpts =
+  | CommonFactoryRoutingOpts
+  | SpaceFactoryRoutingOpts
+  | ExpressionFactoryRoutingOpts;
 /**
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
@@ -136,9 +145,7 @@ export class ClusterClient implements ICustomClusterClient {
     });
   }
 
-  asScoped(request: ScopeableRequest): IScopedClusterClient;
-  asScoped(request: ScopeableUrlRequest, opts: AsScopedOptions): IScopedClusterClient;
-  asScoped(request: ScopeableUrlRequest, opts?: AsScopedOptions): IScopedClusterClient {
+  asScoped(request: ScopeableRequest, opts?: AsScopedOptions): IScopedClusterClient {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
       const factoryOpts: FactoryRoutingOpts = opts

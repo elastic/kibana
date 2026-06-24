@@ -55,7 +55,9 @@ export interface UsageStats {
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
+  'agentBuilder:bashSupport': boolean;
   'agentBuilder:uiamOAuthClientManagement': boolean;
+  'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
@@ -193,8 +195,8 @@ export interface UsageStats {
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableDraftStreams': boolean;
+  'observability:streamsEnableCanvas': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
-  'observability:streamsEnableMemory': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;

@@ -24,13 +24,22 @@ export type StepId =
   | 'details'
   | 'notifications';
 
+export const isAlertConditionStepId = (id: StepId): boolean =>
+  id === 'alertCondition' || id === 'builderCondition';
+
+export interface CustomRecoveryRenderProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}
+
 export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
-  onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
   ruleId?: string;
+  renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
 }
 
 export interface StepDefinition {
@@ -68,7 +77,7 @@ export interface ComposeDiscoverState {
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
+  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }

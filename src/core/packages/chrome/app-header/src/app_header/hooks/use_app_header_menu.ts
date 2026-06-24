@@ -13,7 +13,7 @@ import type {
   AppMenuItemType,
   AppMenuStaticItem,
 } from '@kbn/core-chrome-app-menu-components';
-import { APP_MENU_SHARE_ID, getTooltip } from '@kbn/core-chrome-app-menu-components';
+import { APP_MENU_SHARE_ID, getTooltip, isDisabled } from '@kbn/core-chrome-app-menu-components';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,17 @@ const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   iconType: 'indexOpen',
   order: 0,
   href,
+});
+
+const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem => ({
+  label: i18n.translate('core.chrome.appHeader.feedbackMenuItemLabel', {
+    defaultMessage: 'Feedback',
+  }),
+  id: 'feedback',
+  iconType: 'comment',
+  order: 1,
+  run: feedbackHandler,
+  global: true,
 });
 
 const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
@@ -55,11 +66,19 @@ const useStaticItems = ({
 }) => {
   const chrome = useChromeService();
   const basePath = useBasePath();
+  const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
   return useMemo(() => {
     const staticItems: AppMenuStaticItem[] = [];
 
+    if (feedbackHandler) {
+      staticItems.push(createFeedbackMenuItem(feedbackHandler));
+    }
+
+    /**
+     * Precedence: <AppHeader/> docLink prop -> chrome.getAppDocumentationLink$() -> chrome.getHelpExtension$()
+     */
     const docLink =
       explicitDocLink ??
       helpExtension?.links?.find((link) => link.linkType === 'documentation')?.href;
@@ -74,7 +93,7 @@ const useStaticItems = ({
     }
 
     return staticItems;
-  }, [basePath, explicitDocLink, helpExtension, showAddIntegrations]);
+  }, [basePath, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
 };
 
 const useResolvedAppMenu = (menu: AppMenuConfig | undefined): ResolvedAppMenu => {
@@ -113,10 +132,11 @@ export function useAppHeaderMenu(
 }
 
 export interface ShareAction {
-  onClick: () => void;
+  onClick: (triggerElement: HTMLElement) => void;
   tooltipContent?: string;
   tooltipTitle?: string;
   testId?: string;
+  isDisabled?: boolean;
 }
 
 export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAction | undefined {
@@ -124,7 +144,7 @@ export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAct
 
   return useMemo(() => {
     if (!shareItem) return undefined;
-    const { run, tooltipContent, tooltipTitle, testId } = shareItem;
+    const { run, tooltipContent, tooltipTitle, testId, disableButton } = shareItem;
     if (!run) return undefined;
 
     const { content, title } = getTooltip({
@@ -133,10 +153,13 @@ export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAct
     });
 
     return {
-      onClick: () => run(),
+      onClick: (triggerElement: HTMLElement) => {
+        run({ triggerElement, returnFocus: () => triggerElement.focus() });
+      },
       tooltipContent: content,
       tooltipTitle: title,
       testId,
+      isDisabled: isDisabled(disableButton),
     };
   }, [shareItem]);
 }
