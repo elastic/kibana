@@ -8,24 +8,32 @@
 import type { NodesStatsRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { MainCategories, PipelineStats } from '@kbn/siem-readiness';
+import type { CategoriesResponse, MainCategories, PipelineStats } from '@kbn/siem-readiness';
 import {
   ALL_CATEGORIES,
+  getIndexCategoryMap,
   SILENCE_THRESHOLD_MS,
   SILENCE_THRESHOLD_DEFAULT_MS,
 } from '@kbn/siem-readiness';
 import type { IndexHealthEntry } from './fetch_index_health';
 import { fetchIndexHealth } from './fetch_index_health';
+import { fetchCategories } from './fetch_categories';
 import { toDataStreamName } from './utils';
 
 export const fetchPipelines = async ({
   esClient,
   isServerless,
   logger,
+  categoriesData,
 }: {
   esClient: ElasticsearchClient;
   isServerless: boolean;
   logger: Logger;
+  /**
+   * Pre-fetched categories result. When provided, the internal fetchCategories call is skipped.
+   * Used to resolve each pipeline's SIEM category so the per-category silence threshold applies.
+   */
+  categoriesData?: CategoriesResponse;
 }): Promise<PipelineStats[]> => {
   const settingsResponse = await esClient.indices.getSettings({
     index: ['logs-*', 'metrics-*', '.ds-logs-*', '.ds-metrics-*'],
@@ -97,6 +105,13 @@ export const fetchPipelines = async ({
     }));
 
   const indexHealth = await fetchIndexHealth({ esClient, logger });
+
+  // Resolve each pipeline's SIEM category so the per-category silence threshold can be applied.
+  // Categories live "at the edges" (tool/UI), so when not provided we self-fetch here — this is
+  // the layer where isSilent is computed, and it must know the category to pick the right threshold.
+  const resolvedCategories = categoriesData ?? (await fetchCategories({ esClient, logger }));
+  const indexToCategoryMap = getIndexCategoryMap(resolvedCategories);
+
   const now = Date.now();
 
   const pipelines: PipelineStats[] = rawPipelines.map((p) => {
@@ -141,15 +156,26 @@ export const fetchPipelines = async ({
       );
     }
 
-    // Apply per-category silence threshold; fall back to default when category unknown
-    const rawCategory = p.categories?.[0];
-    const category = ALL_CATEGORIES.find((c): c is MainCategories => c === rawCategory);
+    // Resolve this pipeline's SIEM categories from the indices it serves.
+    const categories = Array.from(
+      new Set(
+        p.indices
+          .map((idx) => indexToCategoryMap.get(idx))
+          .filter((c): c is MainCategories => ALL_CATEGORIES.some((mc) => mc === c))
+      )
+    );
+
+    // Apply the most lenient per-category silence threshold so a pipeline that also serves a
+    // slow/batch category (e.g. Application/SaaS 24h) is not falsely flagged. Fall back to the
+    // default when no category resolves.
+    const thresholds = categories.map((c) => SILENCE_THRESHOLD_MS[c]);
     const threshold =
-      category !== undefined ? SILENCE_THRESHOLD_MS[category] : SILENCE_THRESHOLD_DEFAULT_MS;
+      thresholds.length > 0 ? Math.max(...thresholds) : SILENCE_THRESHOLD_DEFAULT_MS;
     const isSilent = silenceMs !== null && silenceMs > threshold;
 
     return {
       ...p,
+      categories,
       lastEventMs,
       silenceMs,
       isSilent,

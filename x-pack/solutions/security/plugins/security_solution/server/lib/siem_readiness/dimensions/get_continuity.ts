@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ActionableFinding, ContinuityPayload } from '@kbn/siem-readiness';
+import type { ActionableFinding, CategoriesResponse, ContinuityPayload } from '@kbn/siem-readiness';
 import {
   isCriticalFailureRate,
   VOLUME_DROP_WARNING_PCT,
@@ -19,12 +19,15 @@ export const getContinuity = async ({
   esClient,
   isServerless,
   logger,
+  categoriesData,
 }: {
   esClient: ElasticsearchClient;
   isServerless: boolean;
   logger: Logger;
+  /** Pre-fetched categories result; passed to fetchPipelines so per-category silence thresholds apply. */
+  categoriesData?: CategoriesResponse;
 }): Promise<ContinuityPayload> => {
-  const pipelines = await fetchPipelines({ esClient, isServerless, logger });
+  const pipelines = await fetchPipelines({ esClient, isServerless, logger, categoriesData });
 
   const actionableFindings: ActionableFinding[] = [];
 

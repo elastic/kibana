@@ -65,11 +65,14 @@ export const getContinuityTool = (
           });
         });
 
-      // Phase 2: dimension-specific data (pipelines)
+      // Phase 2: dimension-specific data (pipelines).
+      // Pass the already-fetched categories so fetchPipelines can apply per-category silence
+      // thresholds without issuing a duplicate categories aggregation.
       const payload = await getContinuity({
         esClient: esClient.asCurrentUser,
         isServerless,
         logger: handlerLogger,
+        categoriesData: categoriesResult,
       });
 
       // Phase 3: blast radius enrichment
