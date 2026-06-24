@@ -56,17 +56,19 @@ export const classifyStreams = ({
   const unsupported: string[] = [];
   const eligibleNames = new Set<string>();
   for (const stream of allStreams) {
-    if (
-      !Streams.WiredStream.Definition.is(stream) &&
-      !Streams.ClassicStream.Definition.is(stream)
-    ) {
-      unsupported.push(stream.name);
+    const { name } = stream;
+    const isSupported =
+      Streams.WiredStream.Definition.is(stream) ||
+      Streams.ClassicStream.Definition.is(stream) ||
+      Streams.QueryStream.Definition.is(stream);
+    if (!isSupported) {
+      unsupported.push(name);
       continue;
     }
-    if (matchesExcludePatterns(stream.name, excludePatterns)) {
-      excluded.push(stream.name);
+    if (matchesExcludePatterns(name, excludePatterns)) {
+      excluded.push(name);
     } else {
-      eligibleNames.add(stream.name);
+      eligibleNames.add(name);
     }
   }
 
