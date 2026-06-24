@@ -691,4 +691,54 @@ describe('RemoteLogsExtractionClient', () => {
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
+
+  describe('CPS/CCS extraction error handling', () => {
+    const makeClient = (id: 'ccs' | 'cps') =>
+      new RemoteLogsExtractionClient(mockLogger, namespace, {
+        id,
+        client: mockEsClient,
+        stateClient: mockStateClient,
+        buildPatterns: ({ remoteIndexPatterns }) => remoteIndexPatterns,
+      });
+
+    it('CPS: treats no_such_element_exception (no linked projects) as empty, no error', async () => {
+      mockExecuteEsqlQuery.mockRejectedValueOnce(
+        new Error('verification_exception: ... no_such_element_exception: null')
+      );
+
+      const result = await makeClient('cps').extractToUpdates(defaultExtractParams);
+
+      expect(result).toEqual({ count: 0, pages: 0 });
+    });
+
+    it('CPS: treats no_such_remote_cluster_exception (CPS disabled) as empty, no error', async () => {
+      mockExecuteEsqlQuery.mockRejectedValueOnce(
+        new Error('no_such_remote_cluster_exception: no such remote cluster: [_origin]')
+      );
+
+      const result = await makeClient('cps').extractToUpdates(defaultExtractParams);
+
+      expect(result).toEqual({ count: 0, pages: 0 });
+    });
+
+    it('CCS: surfaces no_such_remote_cluster_exception as an error (real misconfiguration)', async () => {
+      mockExecuteEsqlQuery.mockRejectedValueOnce(
+        new Error('no_such_remote_cluster_exception: no such remote cluster: [my-remote]')
+      );
+
+      const result = await makeClient('ccs').extractToUpdates(defaultExtractParams);
+
+      expect(result.count).toBe(0);
+      expect(result.pages).toBe(0);
+      expect(result.error?.message).toContain('no_such_remote_cluster_exception');
+    });
+
+    it('CPS: surfaces unrelated failures as an error', async () => {
+      mockExecuteEsqlQuery.mockRejectedValueOnce(new Error('some other failure'));
+
+      const result = await makeClient('cps').extractToUpdates(defaultExtractParams);
+
+      expect(result.error?.message).toContain('some other failure');
+    });
+  });
 });
