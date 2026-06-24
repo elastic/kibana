@@ -13,42 +13,60 @@ export interface ParsedSkillFileResult {
   content: string;
 }
 
+export interface FrontmatterParseResult {
+  /**
+   * Parsed YAML frontmatter object, or `undefined` when the content has no
+   * `--- ... ---` frontmatter block. An empty or malformed block yields `{}`,
+   * so callers can distinguish "no block" from "block present but empty".
+   */
+  frontmatter: Record<string, unknown> | undefined;
+  /** Markdown body with the frontmatter block removed (not trimmed). */
+  body: string;
+}
+
 const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)---\s*\r?\n?([\s\S]*)$/;
+
+/**
+ * Splits markdown content into its YAML frontmatter object and body.
+ *
+ * Malformed YAML is treated as an empty object rather than throwing, so callers
+ * get consistent behavior regardless of frontmatter validity.
+ */
+export const splitFrontmatter = (rawContent: string): FrontmatterParseResult => {
+  const match = rawContent.match(frontmatterRegex);
+  if (!match) {
+    return { frontmatter: undefined, body: rawContent };
+  }
+
+  const [, frontmatterRaw, body] = match;
+
+  let parsed: unknown;
+  try {
+    parsed = yaml.load(frontmatterRaw);
+  } catch {
+    parsed = undefined;
+  }
+
+  const frontmatter =
+    typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : {};
+
+  return { frontmatter, body };
+};
 
 /**
  * Parses a SKILL.md file content, extracting YAML frontmatter metadata
  * and the markdown body.
  */
 export const parseSkillFile = (rawContent: string): ParsedSkillFileResult => {
-  const match = rawContent.match(frontmatterRegex);
-  if (!match) {
-    return {
-      meta: {},
-      content: rawContent.trim(),
-    };
-  }
-
-  const [, frontmatterRaw, body] = match;
-  const meta = parseFrontmatter(frontmatterRaw);
+  const { frontmatter, body } = splitFrontmatter(rawContent);
 
   return {
-    meta,
+    meta: frontmatter ? toSkillMeta(frontmatter) : {},
     content: body.trim(),
   };
 };
 
-const parseFrontmatter = (raw: string): ParsedSkillMeta => {
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = (yaml.load(raw) as Record<string, unknown>) ?? {};
-  } catch {
-    return {};
-  }
-
-  if (typeof parsed !== 'object' || parsed === null) {
-    return {};
-  }
-
+const toSkillMeta = (parsed: Record<string, unknown>): ParsedSkillMeta => {
   const meta: ParsedSkillMeta = {};
 
   if (typeof parsed.name === 'string') {

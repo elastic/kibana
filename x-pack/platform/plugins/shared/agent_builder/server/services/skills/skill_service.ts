@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillDefinition, DirectoryPath } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
@@ -22,11 +22,13 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../execution/runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
 import type { SkillRegistry } from './skill_registry';
+import { loadSkillFromDirectory } from './load_skill_from_directory';
 import { createBuiltinSkillProvider } from './builtin';
 import { createPersistedSkillProvider } from './persisted';
 
 export interface SkillServiceSetup {
   registerSkill(skill: SkillDefinition): void;
+  registerSkill(directory: string, options: { basePath: DirectoryPath }): void;
 }
 
 export interface SkillServiceStart {
@@ -48,6 +50,7 @@ export interface SkillServiceStart {
    * existed at creation time.
    */
   registerSkill(skill: SkillDefinition): Promise<void>;
+  registerSkill(directory: string, options: { basePath: DirectoryPath }): Promise<void>;
 }
 
 export interface SkillService {
@@ -80,7 +83,18 @@ class SkillServiceImpl implements SkillService {
 
   setup(): SkillServiceSetup {
     return {
-      registerSkill: (skill) => {
+      registerSkill: (
+        skillOrDirectory: SkillDefinition | string,
+        options?: { basePath: DirectoryPath }
+      ) => {
+        
+        let skill: SkillDefinition;
+        if (typeof skillOrDirectory === 'string') {
+          skill = loadSkillFromDirectory(skillOrDirectory, options!.basePath);
+        } else {
+          skill = skillOrDirectory;
+        }
+
         if (!isAllowedBuiltinSkill(skill.id)) {
           throw new Error(
             `Built-in skill with id "${skill.id}" is not in the list of allowed built-in skills.
@@ -139,7 +153,18 @@ class SkillServiceImpl implements SkillService {
           experimentalFeaturesEnabled,
         });
       },
-      registerSkill: (skill) => {
+      registerSkill: (
+        skillOrDirectory: SkillDefinition | string,
+        options?: { basePath: DirectoryPath }
+      ) => {
+
+        let skill: SkillDefinition;
+        if (typeof skillOrDirectory === 'string') {
+          skill = loadSkillFromDirectory(skillOrDirectory, options!.basePath);
+        } else {
+          skill = skillOrDirectory;
+        }
+
         const op = this.mutationQueue.then(async () => {
           await validateSkillDefinition(skill);
 

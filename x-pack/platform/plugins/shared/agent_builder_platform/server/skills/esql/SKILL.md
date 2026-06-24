@@ -1,6 +1,5 @@
 ---
 name: elasticsearch-esql
-basePath: skills/platform/discover
 description: >
   Execute ES|QL (Elasticsearch Query Language) queries, use when the user wants to query Elasticsearch data, analyze
   logs, aggregate metrics, explore data, or create charts and dashboards from ES|QL results.

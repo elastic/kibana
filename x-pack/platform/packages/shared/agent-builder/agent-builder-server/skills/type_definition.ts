@@ -51,7 +51,7 @@ export type SkillsDirectoryStructure = Directory<{
 /**
  * Base paths where files can be placed (exact paths from the structure)
  */
-type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
+export type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
 
 /**
  * Server-side definition of a skill type.

@@ -8,6 +8,7 @@
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { createSkillService } from './skill_service';
+import { loadSkillFromDirectory } from './load_skill_from_directory';
 
 jest.mock('@kbn/agent-builder-server/skills', () => {
   const actual = jest.requireActual('@kbn/agent-builder-server/skills');
@@ -16,6 +17,8 @@ jest.mock('@kbn/agent-builder-server/skills', () => {
     validateSkillDefinition: jest.fn(async (skill) => skill),
   };
 });
+
+jest.mock('./load_skill_from_directory');
 
 jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
   isAllowedBuiltinSkill: jest.fn().mockReturnValue(true),
@@ -56,6 +59,10 @@ const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
     has: jest.fn(async (id: string) => toolIds.includes(id)),
   } as unknown as ToolRegistry);
+
+const mockLoadSkillFromDirectory = loadSkillFromDirectory as jest.MockedFunction<
+  typeof loadSkillFromDirectory
+>;
 
 describe('createSkillService', () => {
   beforeEach(() => {
@@ -129,6 +136,36 @@ describe('createSkillService', () => {
           })
         )
       ).not.toThrow();
+    });
+
+    it('registers a skill from a directory path + basePath', () => {
+      const loaded = createMockSkillDefinition({ id: 'dir-skill', name: 'dir-skill' as any });
+      mockLoadSkillFromDirectory.mockReturnValueOnce(loaded);
+
+      const service = createSkillService();
+      const { registerSkill } = service.setup();
+
+      expect(() =>
+        registerSkill('/abs/path/to/skill-dir', { basePath: 'skills/platform/discover' })
+      ).not.toThrow();
+
+      expect(mockLoadSkillFromDirectory).toHaveBeenCalledWith(
+        '/abs/path/to/skill-dir',
+        'skills/platform/discover'
+      );
+    });
+
+    it('propagates errors thrown by the directory loader', () => {
+      mockLoadSkillFromDirectory.mockImplementationOnce(() => {
+        throw new Error('SKILL.md not found');
+      });
+
+      const service = createSkillService();
+      const { registerSkill } = service.setup();
+
+      expect(() =>
+        registerSkill('/abs/path/to/missing-skill', { basePath: 'skills/platform/discover' })
+      ).toThrow('SKILL.md not found');
     });
   });
 

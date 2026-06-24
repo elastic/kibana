@@ -14,7 +14,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
-import type { SkillDefinition } from './skills';
+import type { SkillDefinition, DirectoryPath } from './skills';
 import type { SkillRegistry } from './skills/registry';
 import type { BuiltInAgentDefinition, AgentRegistry } from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
@@ -63,8 +63,15 @@ export interface SkillsSetup {
   /**
    * Register a built-in skill to be available in agentBuilder.
    * Registration is synchronous; validation is deferred to start.
+   *
+   * Accepts either:
+   * - A `SkillDefinition` object (for inline skills).
+   * - An absolute directory path containing a `SKILL.md` file (with optional
+   *   `references/` sub-folder of `.md` files), plus a required typed `basePath`
+   *   that determines where the skill is mounted in the virtual filesystem.
    */
   register(skill: SkillDefinition): void;
+  register(directory: string, options: { basePath: DirectoryPath }): void;
 }
 
 /**
@@ -79,8 +86,15 @@ export interface SkillsStart {
   /**
    * Register a skill dynamically after plugin start.
    * Only affects future conversations (existing ones snapshot skills at creation time).
+   *
+   * Accepts either:
+   * - A `SkillDefinition` object (for inline skills).
+   * - An absolute directory path containing a `SKILL.md` file (with optional
+   *   `references/` sub-folder of `.md` files), plus a required typed `basePath`
+   *   that determines where the skill is mounted in the virtual filesystem.
    */
-  register: (skill: SkillDefinition) => Promise<void>;
+  register(skill: SkillDefinition): Promise<void>;
+  register(directory: string, options: { basePath: DirectoryPath }): Promise<void>;
 }
 
 export interface AgentsSetup {
