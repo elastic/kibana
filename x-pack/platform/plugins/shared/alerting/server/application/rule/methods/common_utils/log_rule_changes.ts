@@ -73,7 +73,7 @@ export async function logRuleChanges({
   const changes: RuleChange[] = [];
 
   for (const ruleSO of effectiveRuleSOs) {
-    if (isSavedObjectErrorResult(ruleSO) {
+    if (isSavedObjectErrorResult(ruleSO)) {
       continue;
     }
 
@@ -211,10 +211,14 @@ function normalizeDate(value: string | number | Date, fallback: Date): string {
 }
 
 function overlayEncryptedFields(
-  ruleSOs: Array<SavedObject<RawRule>>,
+  ruleSOs: Array<SavedObjectBulkResult<RawRule>>,
   encryptedFieldsMap: Map<string, EncryptedRuleFields>
-): Array<SavedObject<RawRule>> {
+): Array<SavedObjectBulkResult<RawRule>> {
   return ruleSOs.map((so) => {
+    if (isSavedObjectErrorResult(so)) {
+      return so;
+    }
+
     const fields = encryptedFieldsMap.get(so.id);
 
     if (!fields?.apiKey && !fields?.uiamApiKey) {
