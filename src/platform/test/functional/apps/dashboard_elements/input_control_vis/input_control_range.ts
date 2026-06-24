@@ -16,6 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { visualize, visEditor, common } = getPageObjects(['visualize', 'visEditor', 'common']);
 
+  /**
+   * Purpose: Legacy range control smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
   describe('input control range', () => {
     before(async () => {
       await visualize.initTests();

@@ -23,6 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  /**
+   * Purpose: Verify control group apply button
+   *
+   * Migration: Ingestigate if this can be moved to control group RTL test - otherise migrate to scout
+   */
   describe('Dashboard control group apply button', () => {
     const optionsListId = '41827e70-5285-4d44-8375-4c498449b9a7';
     const rangeSliderId = '515e7b9f-4f1b-4a06-beec-763810e4951a';
