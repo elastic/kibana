@@ -1115,11 +1115,14 @@ export const TemplateV2Response = lazySchema(() =>
      * The display name of the template.
      */
     name: z.string(),
-    owner: Owner,
+    /**
+     * The owning solution (e.g. cases, observability, securitySolution).
+     */
+    owner: z.string(),
     /**
      * The parsed template definition.
      */
-    definition: z.object({}).catchall(z.unknown()),
+    definition: z.unknown(),
     /**
      * The raw YAML definition string.
      */
@@ -1177,7 +1180,7 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * Whether the template is enabled.
      */
-    isEnabled: z.boolean(),
+    isEnabled: z.boolean().optional(),
     /**
      * The latest version number of this template.
      */

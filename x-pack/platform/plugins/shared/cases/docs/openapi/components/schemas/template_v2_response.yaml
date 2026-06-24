@@ -9,7 +9,6 @@ required:
   - templateVersion
   - deletedAt
   - isLatest
-  - isEnabled
   - latestVersion
 properties:
   templateId:
@@ -19,11 +18,10 @@ properties:
     type: string
     description: The display name of the template.
   owner:
-    $ref: 'owner.yaml'
+    type: string
+    description: The owning solution (e.g. cases, observability, securitySolution).
   definition:
-    type: object
     description: The parsed template definition.
-    additionalProperties: true
   definitionString:
     type: string
     description: The raw YAML definition string.
