@@ -3,6 +3,10 @@ on:
   issues:
     types:
       - labeled
+
+permissions:
+  contents: read
+
 jobs:
   add_to_project:
     runs-on: ubuntu-latest
