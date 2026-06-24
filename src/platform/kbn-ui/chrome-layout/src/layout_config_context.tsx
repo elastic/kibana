@@ -30,6 +30,7 @@ export type LayoutConfig = Pick<
   | 'applicationMarginTop'
   | 'applicationMarginBottom'
   | 'applicationMarginRight'
+  | 'agentMarginLeft'
 > & {
   chromeStyle?: ChromeStyle;
 };

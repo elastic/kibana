@@ -36,6 +36,7 @@ export interface LayoutDimensions {
   applicationMarginTop: number;
   applicationMarginBottom: number;
   applicationMarginRight: number;
+  agentMarginLeft: number;
 }
 
 /** Full layout state including derived presence flags. */
@@ -64,6 +65,7 @@ export interface ChromeLayoutConfig {
   applicationMarginTop?: number;
   applicationMarginBottom?: number;
   applicationMarginRight?: number;
+  agentMarginLeft?: number;
   chromeStyle?: ChromeStyle;
 }
 

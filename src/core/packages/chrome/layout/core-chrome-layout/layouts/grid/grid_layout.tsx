@@ -39,7 +39,11 @@ import {
 } from '@kbn/core-chrome-browser-hooks';
 import { isAgentFirst } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
-import { GridLayoutGlobalStyles } from '@kbn/ui-chrome-layout';
+import {
+  AGENT_FIRST_LAYOUT_OVERRIDES,
+  AgentFirstChromeGlobalStyles,
+  GridLayoutGlobalStyles,
+} from '@kbn/ui-chrome-layout';
 import {
   clampAgentWorkspaceWidth,
   DEFAULT_AGENT_WIDTH,
@@ -154,6 +158,7 @@ export class GridLayout implements LayoutService {
       const layoutConfig = useMemo(
         () => ({
           ...layoutConfigs[layoutConfigKey],
+          ...(showAgentWorkspace ? AGENT_FIRST_LAYOUT_OVERRIDES : {}),
           sidebarWidth,
           navigationWidth,
           agentWidth: showAgentWorkspace ? agentWorkspaceWidth : 0,
@@ -211,6 +216,7 @@ export class GridLayout implements LayoutService {
 
       return (
         <>
+          {showAgentWorkspace && <AgentFirstChromeGlobalStyles />}
           <GridLayoutGlobalStyles chromeStyle={chromeStyle} hasAgentWorkspace={showAgentWorkspace} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout

@@ -24,10 +24,13 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
       height: calc(
         100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
       );
-      width: calc(100% - ${layoutVar('application.marginRight')});
+      width: calc(
+        100% - ${layoutVar('application.marginRight')} - ${layoutVar('agent.marginLeft', '0px')}
+      );
       margin-top: ${layoutVar('application.marginTop')};
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-right: ${layoutVar('application.marginRight')};
+      margin-left: ${layoutVar('agent.marginLeft', '0px')};
 
       z-index: ${layoutLevels.content};
 

@@ -27,6 +27,7 @@ export type LayoutProperty = keyof Pick<
   | 'height'
   | 'width'
   | 'marginBottom'
+  | 'marginLeft'
   | 'marginRight'
   | 'marginTop'
 >;
