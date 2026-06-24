@@ -6,18 +6,12 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import { ApiPrivileges } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
-import { ROUTE_VERSIONS } from '../../common/constants';
+import { PLUGIN_ID, ROUTE_VERSIONS } from '../../common/constants';
 import { APIRoutes } from '../../common/types';
 import { errorHandler } from '../utils/error_handler';
 import { getRegionPolicy, putRegionPolicy, deleteRegionPolicy } from '../lib/region_policy';
-
-const DELEGATE_TO_ES_CLIENT = {
-  authz: {
-    enabled: false as const,
-    reason: 'This route delegates authorization to the scoped ES client',
-  },
-};
 
 export const defineRegionPolicyRoutes = ({
   logger,
@@ -30,12 +24,20 @@ export const defineRegionPolicyRoutes = ({
     .get({
       access: 'internal',
       path: APIRoutes.REGION_POLICY,
-      security: DELEGATE_TO_ES_CLIENT,
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
+        },
+      },
     })
     .addVersion(
       {
         version: ROUTE_VERSIONS.v1,
-        security: DELEGATE_TO_ES_CLIENT,
+        security: {
+          authz: {
+            requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
+          },
+        },
         validate: {},
       },
       errorHandler(logger)(async (context, request, response) => {
@@ -52,12 +54,20 @@ export const defineRegionPolicyRoutes = ({
     .put({
       access: 'internal',
       path: APIRoutes.REGION_POLICY,
-      security: DELEGATE_TO_ES_CLIENT,
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+        },
+      },
     })
     .addVersion(
       {
         version: ROUTE_VERSIONS.v1,
-        security: DELEGATE_TO_ES_CLIENT,
+        security: {
+          authz: {
+            requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+          },
+        },
         validate: {
           request: {
             body: schema.object({
@@ -97,12 +107,20 @@ export const defineRegionPolicyRoutes = ({
     .delete({
       access: 'internal',
       path: APIRoutes.REGION_POLICY,
-      security: DELEGATE_TO_ES_CLIENT,
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+        },
+      },
     })
     .addVersion(
       {
         version: ROUTE_VERSIONS.v1,
-        security: DELEGATE_TO_ES_CLIENT,
+        security: {
+          authz: {
+            requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+          },
+        },
         validate: {},
       },
       errorHandler(logger)(async (context, request, response) => {
