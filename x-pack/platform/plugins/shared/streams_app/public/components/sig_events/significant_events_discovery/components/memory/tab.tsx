@@ -54,6 +54,7 @@ import {
   useRecentChanges,
   useScrapeConversations,
   useSynthesizeMemory,
+  useDetectGaps,
 } from './use_memory';
 import type { MemoryCategoryNode, MemoryEntry, MemoryVersionRecord } from './types';
 
@@ -72,6 +73,7 @@ export function MemoryTab() {
   const scrapeConversations = useScrapeConversations();
   const consolidateMemory = useConsolidateMemory();
   const synthesizeMemory = useSynthesizeMemory();
+  const detectGaps = useDetectGaps();
 
   const isSearchActive = searchQuery.length >= 2;
 
@@ -167,6 +169,19 @@ export function MemoryTab() {
                   data-test-subj="streamsMemorySynthesizeButton"
                 />
               </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="inspect"
+                isLoading={detectGaps.isLoading}
+                onClick={() => detectGaps.mutate()}
+                data-test-subj="streamsMemoryDetectGapsButton"
+              >
+                {i18n.translate('xpack.streams.memory.detectGapsButton', {
+                  defaultMessage: 'Detect Gaps',
+                })}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />

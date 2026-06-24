@@ -63,6 +63,8 @@ export interface AppHeaderTab {
   href?: string;
   badge?: number;
   'data-test-subj'?: string;
+  disabled?: boolean;
+  toolTipContent?: string;
 }
 
 /** @public */
@@ -215,6 +217,13 @@ export interface ChromeNext {
      * Per-app, cleared on app change.
      */
     set(config: AppHeaderConfig): () => void;
+  };
+  userMenu: {
+    /**
+     * Set the user menu content for the Chrome-Next global header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
   };
   /**
    * Register a handler that opens the feedback UI in the Chrome Next help menu.

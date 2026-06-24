@@ -44,6 +44,7 @@ export interface ResolvedOtelTls {
   key?: Buffer;
   passphrase?: string;
   verificationMode: 'full' | 'certificate' | 'none';
+  allowPartialTrustChain?: boolean;
 }
 
 /**
@@ -81,11 +82,14 @@ export const resolveTlsMaterial = (config?: OtelAppenderTlsConfig): ResolvedOtel
     key,
     passphrase: config.keyPassphrase,
     verificationMode: config.verificationMode,
+    allowPartialTrustChain: config.allowPartialTrustChain,
   };
 };
 
 export const buildHttpsAgentTlsOptions = (resolved: ResolvedOtelTls): HttpsAgentOptions => {
-  const opts: HttpsAgentOptions = {};
+  const opts: HttpsAgentOptions = {
+    allowPartialTrustChain: resolved.allowPartialTrustChain,
+  };
 
   if (resolved.ca !== undefined) {
     opts.ca = resolved.ca;
