@@ -40,6 +40,10 @@ export function buildAdministersConfigs(
       // Entity-index source: disable the engine's @timestamp now-30d lookback (a
       // log-index assumption that would drop entities) and gate on last_seen instead.
       disableLookbackWindow: true,
+      // Targets are derived from raw_identifiers.host.name — a free-text field that
+      // does not guarantee the named host is indexed as an entity. Validate before
+      // writing to prevent dangling IDs in entity.relationships.administers.ids.
+      validateTargetIds: true,
       compositeAggAdditionalFilters: [
         // Scope to AD-sourced entities. entity.source is a single value per entity, so
         // each integration's maintainer processes a disjoint actor set — no cross-maintainer

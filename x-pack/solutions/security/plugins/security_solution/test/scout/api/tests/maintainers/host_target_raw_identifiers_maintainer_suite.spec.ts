@@ -25,6 +25,7 @@ import {
   waitForRelationshipIds,
   waitForEntityStoreRunning,
   assertNoRelationshipId,
+  getRelationshipIds,
 } from '../../fixtures/maintainers/helpers';
 
 /**
@@ -242,6 +243,48 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
 
           await waitForRelationshipIds(esClient, relationshipKey, freshActor, freshTarget);
           await assertNoRelationshipId(esClient, relationshipKey, staleActor, staleTarget);
+        }
+      );
+
+      apiTest(
+        `writes only targets that exist as entities, drops phantom raw_identifiers`,
+        async ({ apiClient, esClient }) => {
+          const actor = actorId('multi');
+          const existingTargetFqdn = targetFqdn('multi-real');
+          const existingTarget = targetId('multi-real');
+          const phantomFqdn = `${entityPrefix}-multi-phantom.${domain}`;
+          // phantomTarget is intentionally NOT seeded — it has no entity document.
+
+          const futureTs = new Date(Date.now() + 3_600_000).toISOString();
+
+          // Seed the real target entity and the actor referencing both targets.
+          await seedHostEntity(esClient, {
+            entityId: existingTarget,
+            hostName: existingTargetFqdn,
+          });
+          await seedHostEntity(esClient, {
+            entityId: actor,
+            hostName: `${entityPrefix}-multi.${domain}`,
+            relationship: {
+              key: relationshipKey,
+              hostNames: [existingTargetFqdn, phantomFqdn],
+            },
+            entitySource: requiredEntitySource,
+            lastSeen: futureTs,
+            firstSeen: futureTs,
+          });
+
+          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
+
+          // Wait until the real target appears (sync run has settled, this absorbs refresh lag).
+          await waitForRelationshipIds(esClient, relationshipKey, actor, existingTarget);
+
+          // Read back the full ids array and assert it contains exactly the real target —
+          // the phantom FQDN must never appear because it has no entity document.
+          const ids = await getRelationshipIds(esClient, relationshipKey, actor);
+          const phantomEuid = `host:${phantomFqdn}`;
+          expect(ids).toContain(existingTarget);
+          expect(ids).not.toContain(phantomEuid);
         }
       );
 

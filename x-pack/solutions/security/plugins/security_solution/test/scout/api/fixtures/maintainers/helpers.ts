@@ -357,6 +357,31 @@ export const waitForRelationshipIds = async (
 };
 
 /**
+ * Reads the current `<relationshipKey>.ids` array for an entity after a
+ * synchronous maintainer run. Refreshes the alias first to ensure the latest
+ * write is visible, then returns the IDs (empty array if absent).
+ *
+ * Use this for assertions that need the complete set of written IDs
+ * (e.g. "exactly these two targets, and no phantom ones").
+ */
+export const getRelationshipIds = async (
+  esClient: EsClient,
+  relationshipKey: string,
+  entityId: string
+): Promise<string[]> => {
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
+  const response = await esClient.search({
+    index: LATEST_ALIAS,
+    query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+    size: 1,
+  });
+  const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+  if (!source) return [];
+  const idsPath = relationshipIdsPath(relationshipKey);
+  return normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath]);
+};
+
+/**
  * Asserts that an entity's `<relationshipKey>.ids` does NOT contain the given
  * target. Callers use `triggerMaintainerRun(..., { sync: true })` so the task
  * has already settled — poll with a short window to absorb ES refresh lag.

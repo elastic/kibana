@@ -136,6 +136,19 @@ interface RelationshipIntegrationBase {
    */
   customActor?: CustomActorBinding;
   /**
+   * When true, the engine validates each derived target EUID against the entity
+   * index before writing, filtering out any IDs that have no matching entity
+   * document. Use this for `kind: 'override'` raw_identifiers-based maintainers
+   * (e.g. administers) whose targets are inferred from free-text fields like
+   * `raw_identifiers.host.name` — a field value does not guarantee an entity
+   * exists. Log-based maintainers (accesses, communicates_with) derive targets
+   * from real ECS host/user identity fields that extraction already indexed, so
+   * the extra round-trip is unnecessary for them.
+   *
+   * Default (false/undefined): no validation, existing behavior preserved.
+   */
+  validateTargetIds?: boolean;
+  /**
    * When true, the engine omits its default `@timestamp >= now-30d` lookback
    * filter from both Step 1 (composite agg) and Step 2 (ES|QL wrapper).
    *
