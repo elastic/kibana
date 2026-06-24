@@ -33,6 +33,7 @@ interface ContextSwitcherComponentProps {
   cloud?: CloudStart;
   isServerless?: boolean;
   allowSolutionVisibility: boolean;
+  iconOnly?: boolean;
 }
 
 const queryClient = new QueryClient({
@@ -55,6 +56,7 @@ const ContextSwitcherInner = ({
   cloud,
   isServerless,
   allowSolutionVisibility,
+  iconOnly,
 }: ContextSwitcherComponentProps) => {
   const { data: spaces, isLoading } = useSpaces(spacesManager);
   const activeSpace = useActiveSpace(spacesManager);
@@ -120,6 +122,7 @@ const ContextSwitcherInner = ({
 
   return (
     <ContextSwitcher
+      iconOnly={iconOnly}
       spaces={spacesConfig}
       environmentContext={environmentContext}
       onOpen={handleOpen}

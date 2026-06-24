@@ -18,6 +18,11 @@ export {
   useHasChromeAppHeaderContent,
 } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
+export {
+  AgentFirstProjectSideNav,
+  AgentFirstGlobalHeader,
+  type AgentFirstGlobalHeaderProps,
+} from './src/agent_first';
 export { AgentSlotPlaceholder } from './src/agent/agent_slot_placeholder';
 export { AgentWorkspaceSlot } from './src/agent/agent_workspace_slot';
 export {
