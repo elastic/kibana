@@ -126,6 +126,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Count Breakdown',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -294,6 +295,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Noisy Rules',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.alerts', 'security.find_rules'],
                 },
               },
               {
@@ -307,6 +309,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Noisy Rules',
                   expectedSkill: 'find-security-rules',
+                  tool_sequence: ['security.alerts', 'security.find_rules'],
                 },
               },
             ],
