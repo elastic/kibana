@@ -170,31 +170,31 @@ describe('aggregationStats', () => {
     expect(() => aggregationStats([invalidField])).toThrow('unknown field operation');
   });
 
-  describe('skipExtraction × allowAPIUpdate matrix', () => {
-    // The 2×2 matrix: skipExtraction controls ESQL inclusion; allowAPIUpdate is orthogonal.
-    it('skipExtraction:false allowAPIUpdate:false — field is included in STATS (normal log field)', () => {
-      const field = keywordField({ skipExtraction: false, allowAPIUpdate: false });
+  describe('managed × allowAPIUpdate matrix', () => {
+    // The 2×2 matrix: managed retention controls ESQL inclusion; allowAPIUpdate is orthogonal.
+    it('log-derived allowAPIUpdate:false — field is included in STATS (normal log field)', () => {
+      const field = keywordField({ allowAPIUpdate: false });
       expect(aggregationStats([field], false)).toContain('host.name');
     });
 
-    it('skipExtraction:false allowAPIUpdate:true — field is included in STATS (API-updatable + from logs)', () => {
-      const field = keywordField({ skipExtraction: false, allowAPIUpdate: true });
+    it('log-derived allowAPIUpdate:true — field is included in STATS (API-updatable + from logs)', () => {
+      const field = keywordField({ allowAPIUpdate: true });
       expect(aggregationStats([field], false)).toContain('host.name');
     });
 
-    it('skipExtraction:true allowAPIUpdate:false — field is excluded from STATS (maintainer-written)', () => {
-      const field = keywordField({ skipExtraction: true, allowAPIUpdate: false });
+    it('managed allowAPIUpdate:false — field is excluded from STATS (maintainer-written)', () => {
+      const field = keywordField({ retention: { operation: 'managed' }, allowAPIUpdate: false });
       expect(aggregationStats([field], false)).toBe('');
     });
 
-    it('skipExtraction:true allowAPIUpdate:true — field is excluded from STATS (pure API-only)', () => {
-      const field = keywordField({ skipExtraction: true, allowAPIUpdate: true });
+    it('managed allowAPIUpdate:true — field is excluded from STATS (pure API-only)', () => {
+      const field = keywordField({ retention: { operation: 'managed' }, allowAPIUpdate: true });
       expect(aggregationStats([field], false)).toBe('');
     });
 
     it('allowAPIUpdate alone does not affect STATS output', () => {
-      const withoutAPIUpdate = keywordField({ skipExtraction: false, allowAPIUpdate: false });
-      const withAPIUpdate = keywordField({ skipExtraction: false, allowAPIUpdate: true });
+      const withoutAPIUpdate = keywordField({ allowAPIUpdate: false });
+      const withAPIUpdate = keywordField({ allowAPIUpdate: true });
       expect(aggregationStats([withoutAPIUpdate], false)).toBe(
         aggregationStats([withAPIUpdate], false)
       );
@@ -222,19 +222,17 @@ describe('fieldsToKeep', () => {
     expect(fieldsToKeep(definitionFields, ['id'])).toBe('name,\nid');
   });
 
-  it('should omit skipExtraction:true fields from KEEP patterns', () => {
+  it('should omit managed fields from KEEP patterns', () => {
     const definitionFields: EntityField[] = [
       {
         source: 'a',
         destination: 'included.field',
         retention: { operation: 'prefer_newest_value' },
-        skipExtraction: false,
       },
       {
         source: 'b',
         destination: 'skipped.field',
-        retention: { operation: 'prefer_newest_value' },
-        skipExtraction: true,
+        retention: { operation: 'managed' },
       },
     ];
     const result = fieldsToKeep(definitionFields, []);
@@ -498,19 +496,17 @@ describe('statsFieldDestinations', () => {
     expect(dest.has('entity.name')).toBe(true);
   });
 
-  it('should exclude skipExtraction:true fields from the destination set', () => {
+  it('should exclude managed fields from the destination set', () => {
     const fields: EntityField[] = [
       {
         source: 'a',
         destination: 'included.field',
         retention: { operation: 'prefer_newest_value' },
-        skipExtraction: false,
       },
       {
         source: 'b',
         destination: 'skipped.field',
-        retention: { operation: 'prefer_newest_value' },
-        skipExtraction: true,
+        retention: { operation: 'managed' },
       },
     ];
     const dest = statsFieldDestinations(fields);

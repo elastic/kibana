@@ -7,7 +7,7 @@
 
 import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
-import { collectValues, newestValue, oldestValue } from './field_retention_operations';
+import { collectValues, newestValue, oldestValue, managedValue } from './field_retention_operations';
 
 /**
  * Dotted ECS paths collected into `entity.relationships.*.raw_identifiers.<path>`.
@@ -58,26 +58,19 @@ export const getCommonFieldDescriptions = (
   newestValue({ source: 'asset.environment' }),
   newestValue({ source: 'asset.criticality' }),
   newestValue({ source: 'asset.business_unit' }),
-  newestValue({
+  managedValue({
     source: `${ecsField}.risk.calculated_level`,
     destination: 'entity.risk.calculated_level',
-    skipExtraction: true,
   }),
-  newestValue({
+  managedValue({
     source: `${ecsField}.risk.calculated_score`,
     destination: 'entity.risk.calculated_score',
-    mapping: {
-      type: 'float',
-    },
-    skipExtraction: true,
+    mapping: { type: 'float' },
   }),
-  newestValue({
+  managedValue({
     source: `${ecsField}.risk.calculated_score_norm`,
     destination: 'entity.risk.calculated_score_norm',
-    mapping: {
-      type: 'float',
-    },
-    skipExtraction: true,
+    mapping: { type: 'float' },
   }),
 ];
 
@@ -94,12 +87,11 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
 
     // ATTRIBUTES ------------------------------------------------------------
-    collectValues({
+    managedValue({
       source: `${prefix}.attributes.watchlists`,
       destination: 'entity.attributes.watchlists',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
-      skipExtraction: true,
     }),
     newestValue({
       source: `${prefix}.attributes.asset`,
@@ -166,19 +158,17 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     // Behaviors are reset periodically by the history snapshot feature
     // The current reset implementation only resets lists and strings
     // if we ever add a boolean, reset via snapshot needs to be updated
-    collectValues({
+    managedValue({
       source: `${prefix}.behaviors.rule_names`,
       destination: 'entity.behaviors.rule_names',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
-      skipExtraction: true,
     }),
-    collectValues({
+    managedValue({
       source: `${prefix}.behaviors.anomaly_job_ids`,
       destination: 'entity.behaviors.anomaly_job_ids',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
-      skipExtraction: true,
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
@@ -200,33 +190,29 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
         allowAPIUpdate: true,
       }),
     ]),
-    newestValue({
+    managedValue({
       source: `${prefix}.relationships.resolution.resolved_to`,
       destination: 'entity.relationships.resolution.resolved_to',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
-      skipExtraction: true,
     }),
-    newestValue({
+    managedValue({
       source: `${prefix}.relationships.resolution.risk.calculated_level`,
       destination: 'entity.relationships.resolution.risk.calculated_level',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
-      skipExtraction: true,
     }),
-    newestValue({
+    managedValue({
       source: `${prefix}.relationships.resolution.risk.calculated_score`,
       destination: 'entity.relationships.resolution.risk.calculated_score',
       mapping: { type: 'float' },
       allowAPIUpdate: true,
-      skipExtraction: true,
     }),
-    newestValue({
+    managedValue({
       source: `${prefix}.relationships.resolution.risk.calculated_score_norm`,
       destination: 'entity.relationships.resolution.risk.calculated_score_norm',
       mapping: { type: 'float' },
       allowAPIUpdate: true,
-      skipExtraction: true,
     }),
   ];
 };

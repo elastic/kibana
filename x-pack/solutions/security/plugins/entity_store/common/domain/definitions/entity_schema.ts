@@ -19,6 +19,7 @@ const retentionOperationSchema = z.discriminatedUnion('operation', [
   z.object({ operation: z.literal('collect_values') }),
   z.object({ operation: z.literal('prefer_newest_value') }),
   z.object({ operation: z.literal('prefer_oldest_value') }),
+  z.object({ operation: z.literal('managed') }),
 ]);
 
 const fieldSchema = z.object({
@@ -26,7 +27,6 @@ const fieldSchema = z.object({
   destination: z.string(),
   mapping: z.optional(mappingSchema),
   retention: retentionOperationSchema,
-  skipExtraction: z.boolean().optional(),
   source: z.string(),
 });
 
