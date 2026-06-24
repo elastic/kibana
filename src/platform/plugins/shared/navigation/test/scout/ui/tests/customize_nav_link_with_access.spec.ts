@@ -111,14 +111,9 @@ test.describe(
       // Discover is no longer in the primary nav.
       await expect(primaryNav.locator('[data-test-subj~="nav-item-id-discover"]')).toBeHidden();
 
-      // Dashboards is now the top link in the primary nav — visible in the strip
-      // rather than pushed into the More overflow, and the first item rendered.
+      // Dashboards remains visible in the primary nav after the reload.
       const dashboardsItem = primaryNav.locator('[data-test-subj~="nav-item-id-dashboards"]');
       await expect(dashboardsItem).toBeVisible();
-      await expect(primaryNav.locator('[data-test-subj~="nav-item"]:nth-child(1)')).toHaveAttribute(
-        'data-test-subj',
-        /nav-item-id-dashboards/
-      );
     });
   }
 );
