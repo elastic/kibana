@@ -6,6 +6,9 @@ source .buildkite/scripts/steps/functional/common.sh
 
 SCOUT_SERVER_LOG=".scout/server.log"
 PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
+# Playwright writes the failed-test list here (config's outputDir). It is shared across configs and
+# overwritten on every run, so we snapshot it per-config to drive `--last-failed` on a retry.
+LAST_RUN_FILE=".scout/test-artifacts/.last-run.json"
 
 LOAD_IDS=()
 PASSED_INDICES=""
@@ -34,6 +37,54 @@ check_required_env_vars() {
 download_test_lane_loads() {
   echo "--- Downloading test lane loads file"
   download_tmp_artifact "$SCOUT_TEST_LANE_LOADS_PATH" . "$BUILDKITE_BUILD_ID"
+}
+
+# Build a build-scoped, collision-free artifact path for a config's failed-test snapshot.
+# Keyed by step key + load index so each config in the lane gets its own snapshot.
+last_run_artifact_path() {
+  local idx="$1"
+  local key="${BUILDKITE_STEP_KEY//[^a-zA-Z0-9_-]/_}"
+  # Staged in .scout/ (not the Playwright outputDir) so it isn't wiped at the start of the next run.
+  echo ".scout/last-run-${key}-${idx}.json"
+}
+
+# After a config fails, persist its `.last-run.json` so a later retry attempt (which runs on a
+# fresh agent) can re-run only the specs that failed.
+snapshot_last_run() {
+  local idx="$1"
+
+  if [[ ! -f "$LAST_RUN_FILE" ]]; then
+    echo "No $LAST_RUN_FILE produced for index $idx; full config will re-run on retry"
+    return
+  fi
+
+  local artifact_path
+  artifact_path="$(last_run_artifact_path "$idx")"
+  # Best-effort: a snapshot failure must not fail the lane — it only means the retry re-runs the
+  # whole config instead of just the failed specs.
+  cp "$LAST_RUN_FILE" "$artifact_path" || return 0
+  buildkite-agent artifact upload "$artifact_path" || echo "Failed to upload failed-test snapshot for index $idx"
+}
+
+# On a retry attempt, restore a config's failed-test snapshot into the location Playwright reads.
+# Returns 0 only when a snapshot was restored (so the caller can add `--last-failed`); any miss
+# falls back to re-running the whole config.
+restore_last_run() {
+  local idx="$1"
+
+  [[ "${BUILDKITE_RETRY_COUNT:-0}" -gt 0 ]] || return 1
+
+  local artifact_path
+  artifact_path="$(last_run_artifact_path "$idx")"
+
+  if ! download_artifact "$artifact_path" . --build "$BUILDKITE_BUILD_ID" >/dev/null 2>&1; then
+    return 1
+  fi
+  [[ -f "$artifact_path" ]] || return 1
+
+  mkdir -p "$(dirname "$LAST_RUN_FILE")"
+  cp "$artifact_path" "$LAST_RUN_FILE"
+  return 0
 }
 
 # Read the comma-separated list of previously passed load indices from Buildkite metadata
@@ -144,13 +195,21 @@ run_scout_tests() {
   local idx="$1"
   local config_path="$2"
 
-  echo "--- Running: $config_path"
+  # On a retry, re-run only the specs that failed last time if we have a snapshot for this config.
+  local last_failed_args=()
+  if restore_last_run "$idx"; then
+    echo "--- Retrying failed specs only: $config_path"
+    last_failed_args+=("--last-failed")
+  else
+    echo "--- Running: $config_path"
+  fi
 
   local pw_args=(
     test
     "--config=$config_path"
     "--grep=$PLAYWRIGHT_GREP_TAG"
     "--project=$PLAYWRIGHT_PROJECT"
+    "${last_failed_args[@]+"${last_failed_args[@]}"}"
   )
 
   local pw_env=(
@@ -184,6 +243,7 @@ run_scout_tests() {
       ;;
     *)
       upload_report_events "$config_path"
+      snapshot_last_run "$idx"
       FAILED+=("$config_path")
       echo "Exited with code $exit_code for $config_path"
       ;;
