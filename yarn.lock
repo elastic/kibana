@@ -7145,10 +7145,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/feedback-components@link:src/platform/packages/shared/feedback-components":
-  version "0.0.0"
-  uid ""
-
 "@kbn/feedback-plugin@link:x-pack/platform/plugins/private/feedback":
   version "0.0.0"
   uid ""
@@ -9757,6 +9753,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-feedback@link:src/platform/kbn-ui/feedback":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-settings-plugin@link:src/platform/test/plugin_functional/plugins/ui_settings_plugin":
   version "0.0.0"
   uid ""
@@ -9770,6 +9770,10 @@
   uid ""
 
 "@kbn/ui-side-navigation@link:src/platform/kbn-ui/side-navigation":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-storybook-config@link:src/platform/kbn-ui/storybook-config":
   version "0.0.0"
   uid ""
 
