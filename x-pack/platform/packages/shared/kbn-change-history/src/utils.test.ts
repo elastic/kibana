@@ -73,9 +73,7 @@ describe('#processFields', () => {
       // @see https://stackoverflow.com/questions/40135684
       expect(result.fields.hashed.sort()).toEqual(['api.key', 'api.token', 'password'].sort());
       expect(result.snapshot.api.key).toBe(sha256('obj-id' + 'sk-9f8a7b6c5d4e3f2a1b0c').slice(-12));
-      expect(result.snapshot.api.token).toBe(
-        sha256('obj-id' + 'tok-1a2b3c4d5e6f7a8b').slice(-12)
-      );
+      expect(result.snapshot.api.token).toBe(sha256('obj-id' + 'tok-1a2b3c4d5e6f7a8b').slice(-12));
       expect(result.snapshot.password).toBe(sha256('obj-id' + 'pw-7g8h9i0j1k2l3m4n').slice(-12));
     });
   });

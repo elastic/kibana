@@ -20,7 +20,8 @@ export interface ProcessFieldsOpts {
   salt?: string;
 }
 
-const hasFields = (fields?: ChangeHistoryFieldsToMask) => !!fields && Object.keys(fields).length > 0;
+const hasFields = (fields?: ChangeHistoryFieldsToMask) =>
+  !!fields && Object.keys(fields).length > 0;
 
 const matcher = (fields: ChangeHistoryFieldsToMask) => {
   const flat = flatten(fields);
