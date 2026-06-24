@@ -22,6 +22,7 @@ import { TimelinesTable } from '../../../timelines/components/open_timeline/time
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { useEditTimelineBatchActions } from '../../../timelines/components/open_timeline/edit_timeline_batch_actions';
 import { BATCH_ACTIONS } from '../../../timelines/components/open_timeline/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
 import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
 
@@ -49,6 +50,7 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
   caseData,
   searchTerm,
 }) => {
+  const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
   const timelineIds = useMemo(() => extractTimelineIds(caseData), [caseData]);
 
   const [pageIndex, setPageIndex] = useState(1);
@@ -118,7 +120,7 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="case-view-timelines">
-      {selectedItems.length > 0 && (
+      {isSuperTimelineEnabled && selectedItems.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
             aria-label={BATCH_ACTIONS}
@@ -142,7 +144,7 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
       )}
       <EuiFlexItem>
         <TimelinesTable
-          actionTimelineToShow={['selectable']}
+          actionTimelineToShow={isSuperTimelineEnabled ? ['selectable'] : []}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           loading={loading}
           itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
