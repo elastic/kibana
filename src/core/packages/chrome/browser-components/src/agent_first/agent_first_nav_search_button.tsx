@@ -11,14 +11,14 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isMac, useKeyboardShortcut } from '@kbn/shared-ux-utility';
+import { useKeyboardShortcut } from '@kbn/shared-ux-utility';
 import { useGlobalSearch } from '../shared/chrome_hooks';
 
 const ARIA_LABEL = i18n.translate('core.ui.chrome.agentFirstNav.searchButton.ariaLabel', {
   defaultMessage: 'Search',
 });
 
-const SHORTCUT = { key: '/', meta: isMac };
+const SHORTCUT = { key: '/', meta: true };
 
 export const AgentFirstNavSearchButton = () => {
   const config = useGlobalSearch();
@@ -45,6 +45,7 @@ export const AgentFirstNavSearchButton = () => {
       >
         <EuiButtonIcon
           aria-label={ARIA_LABEL}
+          color="text"
           data-menu-item="true"
           data-test-subj="agentFirstNavSearchButton"
           display="empty"

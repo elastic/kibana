@@ -14,6 +14,7 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { Navigation } from '../project/sidenav/navigation';
 import { useAutoCollapse } from '../project/sidenav/use_auto_collapse';
 import { AgentFirstNavTopControls } from './agent_first_nav_top_controls';
+import { AgentFirstNavFooterControls } from './agent_first_nav_footer_controls';
 
 function useSideNavSetWidth(): (width: number) => void {
   const chrome = useChromeService();
@@ -40,6 +41,7 @@ export const AgentFirstProjectSideNav = () => {
         setWidth={setWidth}
         onToggleCollapsed={isAutoCollapsed ? undefined : onToggleCollapsed}
         navTopControls={<AgentFirstNavTopControls />}
+        navFooterControls={<AgentFirstNavFooterControls />}
         showTopSeparator={false}
       />
     </>

@@ -187,7 +187,15 @@ export class GridLayout implements LayoutService {
           header = <ClassicHeader />;
         } else {
           if (showAgentWorkspace) {
-            header = <AgentFirstGlobalHeader showLogo={false} showSwitcher={false} />;
+            header = (
+              <AgentFirstGlobalHeader
+                showLogo={false}
+                showSwitcher={false}
+                showSearch={false}
+                showHelp={false}
+                showUserMenu={false}
+              />
+            );
             navigation = <AgentFirstProjectSideNav />;
           } else {
             header = isNextChromeEnabled ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
