@@ -26,8 +26,9 @@ import { getSampleDocumentsEsql } from './get_sample_documents';
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
 const MAX_DOCS_TO_SAMPLE = 100_000;
-// Over-fetch factor for the metadata-free source fetch: a representative value
-// is not a unique key, so we pull several docs per value and keep the first.
+// Over-fetch factor for each metadata-free source-fetch round: a representative
+// value is not a unique key, so we pull several docs per value and keep the
+// first. Combined with the re-query-missing loop below this guarantees coverage.
 const SOURCE_FETCH_PER_VALUE = 10;
 
 interface GetDiverseSampleDocumentsOptions {
@@ -116,31 +117,49 @@ export async function getDiverseSampleDocuments({
   // `_source`, while views silently drop it and `parseEsqlSourceDocuments`
   // reconstructs the source from the projected columns. The join key is the
   // representative field value (not `_id`), so this is metadata-free too.
-  const fetchResponse = (await esClient.esql.query({
-    query: buildSourceFetchQuery({
-      indices,
-      field: messageField,
-      values: sampleValues,
-      limit: sampleValues.length * SOURCE_FETCH_PER_VALUE,
-    }),
-    filter,
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
-
+  //
+  // A representative value is not a unique key, so a single `WHERE field IN
+  // (values) | LIMIT n` lets one high-frequency value crowd others out of the
+  // budget. To guarantee every value resolves, re-query only the still-missing
+  // values each round — their per-value budget grows as the set shrinks — until
+  // all are resolved or a round resolves nothing (the rest have no live
+  // document). `pending` strictly shrinks each iteration, so this terminates.
   const valueToHit = new Map<string, SearchHit<Record<string, unknown>>>();
-  for (const doc of parseEsqlSourceDocuments(fetchResponse)) {
-    const value = readFieldValue(doc.source, messageField);
-    if (value === undefined || valueToHit.has(value)) {
-      continue;
+  let pending = sampleValues;
+  while (pending.length > 0) {
+    const fetchResponse = (await esClient.esql.query({
+      query: buildSourceFetchQuery({
+        indices,
+        field: messageField,
+        values: pending,
+        limit: pending.length * SOURCE_FETCH_PER_VALUE,
+      }),
+      filter,
+      drop_null_columns: true,
+    })) as unknown as ESQLSearchResponse;
+
+    const resolvedBeforeRound = valueToHit.size;
+    for (const doc of parseEsqlSourceDocuments(fetchResponse)) {
+      const value = readFieldValue(doc.source, messageField);
+      if (value === undefined || valueToHit.has(value)) {
+        continue;
+      }
+      valueToHit.set(value, { _index: '', _id: getEsqlDocumentId(doc), _source: doc.source });
     }
-    valueToHit.set(value, { _index: '', _id: getEsqlDocumentId(doc), _source: doc.source });
+
+    if (valueToHit.size === resolvedBeforeRound) {
+      break;
+    }
+    pending = pending.filter((value) => !valueToHit.has(value));
   }
 
   // Emit one document per category, preserving the count-descending window order.
   const hits: Array<SearchHit<Record<string, unknown>>> = [];
+  const emittedValues = new Set<string>();
   for (const row of window) {
     const hit = valueToHit.get(row.sample);
-    if (hit) {
+    if (hit && !emittedValues.has(row.sample)) {
+      emittedValues.add(row.sample);
       hits.push(hit);
     }
   }

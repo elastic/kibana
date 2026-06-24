@@ -68,9 +68,17 @@ export async function getRuleExecutor(
   // ES|QL views (query streams) expose no real `_id`, so the `must_not terms _id`
   // dedup filter pushed to ES is a no-op for their synthesized ids. Dedup
   // client-side here too; for concrete indices ES already pruned these, so this
-  // is a no-op and keeps a single dedup path for both.
+  // is a no-op and keeps a single dedup path for both. Seed the set with previous
+  // runs and add each accepted id as we go, so duplicates are removed both across
+  // runs and within this batch (two identical view rows hash to the same `_id`).
   const seenDocumentIds = new Set(previousOriginalDocumentIds);
-  const results = allResults.filter((result) => !seenDocumentIds.has(result._id));
+  const results = allResults.filter((result) => {
+    if (seenDocumentIds.has(result._id)) {
+      return false;
+    }
+    seenDocumentIds.add(result._id);
+    return true;
+  });
 
   if (results.length === 0) {
     return {

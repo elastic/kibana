@@ -284,13 +284,16 @@ describe('getDiverseSampleDocuments', () => {
     expect(result.hits).toEqual([{ _index: '', _id: 'doc-2', _source: { message: 'warn two' } }]);
   });
 
-  it('skips categories whose representative value has no matching document', async () => {
+  it('re-queries only the still-missing values, then stops when a round resolves nothing', async () => {
     const { esClient, query } = createEsClient();
     query
       .mockResolvedValueOnce(schemaResponse())
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
-      .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]));
+      // Round 1 resolves only "error one"; "warn two" is crowded out / missing.
+      .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]))
+      // Round 2 re-queries just "warn two" and finds nothing → loop stops.
+      .mockResolvedValueOnce(concreteFetchResponse([]));
 
     const result = await getDiverseSampleDocuments({
       esClient,
@@ -302,6 +305,10 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
+    expect(query.mock.calls[3][0].query).toContain(
+      'WHERE message::KEYWORD IN ("error one", "warn two")'
+    );
+    expect(query.mock.calls[4][0].query).toContain('WHERE message::KEYWORD IN ("warn two")');
     expect(result.hits).toEqual([{ _index: '', _id: 'doc-1', _source: { message: 'error one' } }]);
     expect(logger.debug).toHaveBeenCalledWith(
       'Diverse sampling: resolved 1/2 representative documents.'
