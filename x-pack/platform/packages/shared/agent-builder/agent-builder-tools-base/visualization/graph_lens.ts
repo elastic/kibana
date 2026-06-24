@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { ModelProvider, ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -98,7 +98,7 @@ const VisualizationStateAnnotation = Annotation.Root({
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
 
-export const createVisualizationGraph = (
+export const createVisualizationGraph = async (
   modelProvider: ModelProvider,
   logger: Logger,
   events: ToolEventEmitter,
@@ -106,16 +106,7 @@ export const createVisualizationGraph = (
   includeTimeRange = true,
   additionalChartConfigInstructions?: string
 ) => {
-  // Resolved lazily and memoized; used by the config-generation and time-range nodes which
-  // call the chat model directly. ES|QL generation opts into the low-effort model via the
-  // `modelProvider` passed to `generateEsql`.
-  let defaultModelPromise: Promise<ScopedModel> | undefined;
-  const getDefaultModel = () => {
-    if (!defaultModelPromise) {
-      defaultModelPromise = modelProvider.getDefaultModel();
-    }
-    return defaultModelPromise;
-  };
+  const defaultModel = await modelProvider.getDefaultModel();
 
   // Node: Generate ES|QL query
   const generateESQLNode = async (state: VisualizationState) => {
@@ -224,8 +215,7 @@ export const createVisualizationGraph = (
     let action: GenerateConfigAction;
     try {
       // Invoke model without schema validation
-      const model = await getDefaultModel();
-      const response = await model.chatModel.invoke(prompt);
+      const response = await defaultModel.chatModel.invoke(prompt);
       const responseText = extractTextFromMessage(response);
 
       // Try to extract JSON from markdown code blocks
@@ -352,8 +342,7 @@ export const createVisualizationGraph = (
 
     let action: GenerateTimeRangeAction;
     try {
-      const model = await getDefaultModel();
-      const timeRangeModel = model.chatModel.withStructuredOutput(
+      const timeRangeModel = defaultModel.chatModel.withStructuredOutput(
         z.object({
           from: z
             .string()

@@ -72,7 +72,7 @@ describe('createVisualizationGraph', () => {
   });
 
   it('uses the provided esql query without generating a new one', async () => {
-    const graph = createVisualizationGraph(
+    const graph = await createVisualizationGraph(
       createMockModel() as never,
       logger,
       events,
@@ -104,7 +104,7 @@ describe('createVisualizationGraph', () => {
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',
     } as Awaited<ReturnType<typeof generateEsql>>);
 
-    const graph = createVisualizationGraph(
+    const graph = await createVisualizationGraph(
       createMockModel() as never,
       logger,
       events,
@@ -156,7 +156,7 @@ describe('createVisualizationGraph', () => {
       }) +
       '\n```';
 
-    const graph = createVisualizationGraph(
+    const graph = await createVisualizationGraph(
       createMockModel(corruptedConfig) as never,
       logger,
       events,
@@ -188,7 +188,7 @@ describe('createVisualizationGraph', () => {
     const canonicalQuery = 'FROM logs-* | STATS count = COUNT(*)';
     const configWithoutDataSource = '```json\n' + JSON.stringify({ type: 'metric' }) + '\n```';
 
-    const graph = createVisualizationGraph(
+    const graph = await createVisualizationGraph(
       createMockModel(configWithoutDataSource) as never,
       logger,
       events,
@@ -227,7 +227,7 @@ describe('createVisualizationGraph', () => {
       }) +
       '\n```';
 
-    const graph = createVisualizationGraph(
+    const graph = await createVisualizationGraph(
       createMockModel(xyConfigWithoutDataSource) as never,
       logger,
       events,

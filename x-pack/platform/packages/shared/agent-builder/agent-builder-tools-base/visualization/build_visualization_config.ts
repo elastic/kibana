@@ -62,7 +62,7 @@ export const buildVisualizationConfig = async ({
   }
 
   const schema = getSchemaForChartType(selectedChartType);
-  const graph = createVisualizationGraph(
+  const graph = await createVisualizationGraph(
     modelProvider,
     logger,
     events,
