@@ -11,14 +11,18 @@ import { getCertsFacetsRequestBody } from './get_certs_facets_request_body';
 describe('getCertsFacetsRequestBody', () => {
   const params = { monitorIds: ['monitor-1'] };
 
-  // Picks the bool.should clause built by `buildMonitorScopingFilter`. Same
-  // helper used by the certs request body tests; the facets builder reuses
-  // the function under the hood.
+  // Picks the local-vs-remote `bool.should` by its `_index` filter — the
+  // cert-type `bool.should` (lightweight vs browser) shares the same shape.
   const findScopingClause = (body: estypes.SearchRequest) => {
     const filters = (body.query?.bool?.filter ?? []) as estypes.QueryDslQueryContainer[];
     return filters.find((clause) => {
       const should = clause?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
-      return should !== undefined && should.every((branch) => branch?.bool?.filter !== undefined);
+      return should?.some((branch) => {
+        const branchFilters = branch?.bool?.filter as estypes.QueryDslQueryContainer[] | undefined;
+        return branchFilters?.some(
+          (f) => f?.wildcard?._index !== undefined || f?.bool?.must_not !== undefined
+        );
+      });
     });
   };
 

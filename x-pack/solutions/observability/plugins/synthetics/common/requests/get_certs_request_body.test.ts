@@ -170,8 +170,8 @@ describe('getCertsRequestBody', () => {
   });
 
   describe('cross-cluster search (CCS) scoping', () => {
-    // Picks the `bool.should` from `buildMonitorScopingFilter`, identified by
-    // the `_index` marker only its branches carry.
+    // Picks the local-vs-remote `bool.should` by its `_index` filter — the
+    // cert-type `bool.should` (lightweight vs browser) can share the shape.
     const findScopingClause = (body: estypes.SearchRequest) => {
       const filters = (body.query?.bool?.filter ?? []) as estypes.QueryDslQueryContainer[];
       return filters.find((clause) => {
