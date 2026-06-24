@@ -7,9 +7,7 @@
 
 import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/constants';
 import type { RegisterEntityMaintainerConfig } from '../../tasks/entity_maintainers/types';
-import type { EntityStoreCoreSetup } from '../../types';
 import { ResolutionClient } from '../../domain/resolution';
-import { ResolutionRulesClient } from '../../domain/saved_objects';
 import type { AutomatedResolutionState, PerRuleState } from './types';
 import { migrate } from './migrate';
 import { RESOLUTION_RULE_CONFIGS } from './rule_config';
@@ -25,32 +23,20 @@ const EMPTY_RULE_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: 
 // watermark for subsequent runs.
 const createInitialState = (): AutomatedResolutionState => ({ rules: {} });
 
-export const createAutomatedResolutionMaintainerConfig = (
-  core: EntityStoreCoreSetup
-): RegisterEntityMaintainerConfig => ({
+export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig = {
   id: MAINTAINER_ID,
   description: 'Automatically resolves entities using field-matching rules',
   interval: '5m',
   initialState: createInitialState(),
   minLicense: 'enterprise',
-  run: async ({ status, abortController, logger, esClient, fakeRequest }) => {
+  run: async ({ status, abortController, logger, esClient }) => {
     const namespace = status.metadata.namespace;
     const state = migrate(status.state, logger);
-
-    const [coreStart] = await core.getStartServices();
-    const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
-    const resolutionRulesClient = new ResolutionRulesClient(soClient, namespace, logger);
-    const disabledRuleIds = await resolutionRulesClient.getDisabledRuleIds();
 
     const resolutionClient = new ResolutionClient({ logger, esClient, namespace });
     const rules: Record<string, PerRuleState> = { ...state.rules };
 
     for (const ruleConfig of RESOLUTION_RULE_CONFIGS) {
-      if (disabledRuleIds.includes(ruleConfig.id)) {
-        logger.debug(`Resolution rule '${ruleConfig.id}' is disabled; skipping this cycle`);
-        continue;
-      }
-
       // Only the email rule has a runner today; further rules add their own.
       if (ruleConfig.id === RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH) {
         rules[ruleConfig.id] = await runEmailRuleResolution({
@@ -66,4 +52,4 @@ export const createAutomatedResolutionMaintainerConfig = (
 
     return { ...state, rules };
   },
-});
+};

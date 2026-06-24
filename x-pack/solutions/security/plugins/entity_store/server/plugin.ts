@@ -24,14 +24,13 @@ import {
   EntityStoreGlobalStateType,
   LegacyCcsLogExtractionStateType,
   RemoteLogExtractionStateType,
-  EntityStoreResolutionDisabledRulesType,
 } from './domain/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { CRUDClient } from './domain/crud';
 import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
-import { createAutomatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
+import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
 
 export class EntityStorePlugin
   implements
@@ -85,12 +84,11 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EntityStoreGlobalStateType);
     core.savedObjects.registerType(RemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
-    core.savedObjects.registerType(EntityStoreResolutionDisabledRulesType);
 
     registerEntityMaintainerTask({
       taskManager: plugins.taskManager,
       logger: this.logger,
-      config: createAutomatedResolutionMaintainerConfig(core),
+      config: automatedResolutionMaintainerConfig,
       core,
       analytics: createReportEvent(core.analytics),
     });

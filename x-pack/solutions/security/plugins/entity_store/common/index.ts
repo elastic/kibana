@@ -61,9 +61,6 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_LINK: `${PUBLIC_BASE_ROUTE}/resolution/link`,
     RESOLUTION_UNLINK: `${PUBLIC_BASE_ROUTE}/resolution/unlink`,
     RESOLUTION_GROUP: `${PUBLIC_BASE_ROUTE}/resolution/group`,
-    RESOLUTION_RULES_LIST: `${PUBLIC_BASE_ROUTE}/resolution/rules`,
-    RESOLUTION_RULES_ENABLE: `${PUBLIC_BASE_ROUTE}/resolution/rules/{id}/enable`,
-    RESOLUTION_RULES_DISABLE: `${PUBLIC_BASE_ROUTE}/resolution/rules/{id}/disable`,
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
