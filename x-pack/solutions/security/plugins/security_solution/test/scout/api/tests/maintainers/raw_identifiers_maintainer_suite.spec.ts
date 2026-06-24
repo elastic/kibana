@@ -141,7 +141,7 @@ const registerRawIdentifiersMaintainerSuite = (
             entitySource: requiredEntitySource,
           });
 
-          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId);
+          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
 
           await waitForRelationshipIds(esClient, relationshipKey, actor, target);
         }
