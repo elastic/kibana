@@ -14,6 +14,7 @@ import type { CertFacets } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import { getSyntheticsCertsFacets } from '../../queries/get_certs_facets';
 import { isCCSEnabled } from '../../lib/remote_result_utils';
+import { parseRemoteNames } from '../../lib/parse_remote_names';
 
 const EMPTY_FACETS: CertFacets = {
   monitorTypes: [],
@@ -38,16 +39,27 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
       remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
     }),
   },
-  handler: async ({ request, syntheticsEsClient, monitorConfigRepository, server, spaceId }) => {
+  handler: async ({
+    request,
+    response,
+    syntheticsEsClient,
+    monitorConfigRepository,
+    server,
+    spaceId,
+  }) => {
     const { from, to, remoteNames } = request.query;
 
     const ccsEnabled = isCCSEnabled(server);
-    const remoteNameList = remoteNames
-      ? remoteNames
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter(Boolean)
-      : undefined;
+
+    const remoteNamesResult = parseRemoteNames(remoteNames);
+    if (!remoteNamesResult.ok) {
+      return response.badRequest({
+        body: {
+          message: `remoteNames must not exceed ${remoteNamesResult.max} entries (received ${remoteNamesResult.received})`,
+        },
+      });
+    }
+    const remoteNameList = remoteNamesResult.value;
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
