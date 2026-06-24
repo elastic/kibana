@@ -1,6 +1,6 @@
 # Test plan: Super Timeline <!-- omit from toc -->
 
-**Status**: `in progress — PR 1 of 5`
+**Status**: `in progress — PR 2 of 5`
 
 ## Summary <!-- omit from toc -->
 
@@ -60,4 +60,34 @@ No browser UI in this PR. Run the unit tests:
 
 ```bash
 node scripts/jest x-pack/solutions/security/plugins/security_solution/public/timelines/components/super_timeline/build_super_timeline_model.test.ts
+```
+
+---
+
+## PR 2 — Opener hook and read-only modal gating
+
+### What this introduces
+
+- `useOpenSuperTimeline(savedObjectIds)` — fetches N timelines in parallel via `resolveTimeline`,
+  builds the super model via `buildSuperTimelineModel`, dispatches it into the active timeline
+  slot. Shows a warning toast naming any EQL/ESQL timelines whose queries were skipped. Enforces
+  the 10-timeline cap with a toast.
+- **Modal header**: when `isSuperTimeline`, hides Save / Attach to Case / Add to Favorites and
+  shows a "Super Timeline — read-only" badge.
+- **Tabs**: ESQL and EQL tabs are hidden when `isSuperTimeline` is true.
+- **Overwrite guard**: before dispatching, checks whether the active timeline has unsaved changes
+  (`changed: true`) and prompts before overwriting.
+
+### Why
+
+The hook owns the full open lifecycle (fetch → build → dispatch) so all future entry points
+(PRs 4 and 5) just pass `savedObjectIds`. Header and tab gating is centralised here so every
+entry point gets read-only semantics automatically.
+
+### How to verify
+
+No browser entry point in this PR. Run the unit tests:
+
+```bash
+node scripts/jest x-pack/solutions/security/plugins/security_solution/public/timelines/components/super_timeline/use_open_super_timeline.test.ts
 ```
