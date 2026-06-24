@@ -1047,8 +1047,18 @@ function HistoryPanel({ entryId, entry }: { entryId: string; entry: MemoryEntry 
           </EuiTitle>
           <EuiSpacer size="s" />
           <MemoryDiffViewer
-            originalContent={previousRecord?.content ?? ''}
-            modifiedContent={selectedRecord.content}
+            original={{
+              title: previousRecord?.title ?? '',
+              content: previousRecord?.content ?? '',
+              tags: previousRecord?.tags ?? [],
+              categories: previousRecord?.categories ?? [],
+            }}
+            modified={{
+              title: selectedRecord.title,
+              content: selectedRecord.content,
+              tags: selectedRecord.tags,
+              categories: selectedRecord.categories,
+            }}
           />
         </>
       )}
@@ -1071,9 +1081,23 @@ function ChangeFlyout({
     needsPreviousVersion ? change.version - 1 : undefined
   );
 
-  const originalContent =
-    change.change_type === 'delete' ? change.content : previousVersionData?.content ?? '';
-  const modifiedContent = change.change_type === 'delete' ? '' : change.content;
+  const empty: MemorySnapshot = { title: '', content: '', tags: [], categories: [] };
+  const currentSnapshot: MemorySnapshot = {
+    title: change.title,
+    content: change.content,
+    tags: change.tags,
+    categories: change.categories,
+  };
+  const previousSnapshot: MemorySnapshot = previousVersionData
+    ? {
+        title: previousVersionData.title,
+        content: previousVersionData.content,
+        tags: previousVersionData.tags,
+        categories: previousVersionData.categories,
+      }
+    : empty;
+  const original = change.change_type === 'delete' ? currentSnapshot : previousSnapshot;
+  const modified = change.change_type === 'delete' ? empty : currentSnapshot;
   const isLoading = needsPreviousVersion && isPrevLoading;
 
   return (
@@ -1126,7 +1150,7 @@ function ChangeFlyout({
         {isLoading ? (
           <EuiLoadingSpinner size="l" />
         ) : (
-          <MemoryDiffViewer originalContent={originalContent} modifiedContent={modifiedContent} />
+          <MemoryDiffViewer original={original} modified={modified} />
         )}
       </EuiFlyoutBody>
 
@@ -1150,15 +1174,47 @@ function ChangeFlyout({
   );
 }
 
+interface MemorySnapshot {
+  title: string;
+  content: string;
+  tags: string[];
+  categories: string[];
+}
+
 function MemoryDiffViewer({
-  originalContent,
-  modifiedContent,
+  original,
+  modified,
 }: {
-  originalContent: string;
-  modifiedContent: string;
+  original: MemorySnapshot;
+  modified: MemorySnapshot;
 }) {
   const { euiTheme } = useEuiTheme();
-  const changes = diffLines(originalContent, modifiedContent);
+
+  const sections = [
+    {
+      label: i18n.translate('xpack.streams.memory.diff.title', { defaultMessage: 'Title' }),
+      originalText: original.title,
+      modifiedText: modified.title,
+    },
+    {
+      label: i18n.translate('xpack.streams.memory.diff.categories', {
+        defaultMessage: 'Categories',
+      }),
+      originalText: original.categories.join('\n'),
+      modifiedText: modified.categories.join('\n'),
+    },
+    {
+      label: i18n.translate('xpack.streams.memory.diff.tags', { defaultMessage: 'Tags' }),
+      originalText: original.tags.join('\n'),
+      modifiedText: modified.tags.join('\n'),
+    },
+    {
+      label: i18n.translate('xpack.streams.memory.diff.content', { defaultMessage: 'Content' }),
+      originalText: original.content,
+      modifiedText: modified.content,
+      alwaysShow: true,
+    },
+  ].filter((s) => s.alwaysShow || s.originalText !== s.modifiedText);
 
   return (
     <div
@@ -1170,46 +1226,64 @@ function MemoryDiffViewer({
         overflow: auto;
       `}
     >
-      {changes.map((part, partIdx) => {
-        const background = part.added
-          ? euiTheme.colors.backgroundBaseSuccess
-          : part.removed
-          ? euiTheme.colors.backgroundBaseDanger
-          : 'transparent';
-        const prefix = part.added ? '+' : part.removed ? '-' : ' ';
-        const prefixColor = part.added
-          ? euiTheme.colors.textSuccess
-          : part.removed
-          ? euiTheme.colors.textDanger
-          : euiTheme.colors.textSubdued;
-        const lines = part.value.split('\n');
-        if (lines[lines.length - 1] === '') lines.pop();
-        return lines.map((line, lineIdx) => (
+      {sections.map((section) => (
+        <div key={section.label}>
           <div
-            key={`${partIdx}-${lineIdx}`}
             className={css`
-              display: flex;
-              gap: 8px;
-              padding: 0 8px;
-              background-color: ${background};
-              white-space: pre-wrap;
-              word-break: break-word;
+              padding: 4px 8px;
+              color: ${euiTheme.colors.textSubdued};
+              font-size: 11px;
+              font-weight: ${euiTheme.font.weight.bold};
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+              border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+              margin-bottom: 2px;
             `}
           >
-            <span
-              className={css`
-                flex-shrink: 0;
-                width: 10px;
-                color: ${prefixColor};
-                user-select: none;
-              `}
-            >
-              {prefix}
-            </span>
-            <span>{line}</span>
+            {section.label}
           </div>
-        ));
-      })}
+          {diffLines(section.originalText, section.modifiedText).map((part, partIdx) => {
+            const background = part.added
+              ? euiTheme.colors.backgroundBaseSuccess
+              : part.removed
+              ? euiTheme.colors.backgroundBaseDanger
+              : 'transparent';
+            const prefix = part.added ? '+' : part.removed ? '-' : ' ';
+            const prefixColor = part.added
+              ? euiTheme.colors.textSuccess
+              : part.removed
+              ? euiTheme.colors.textDanger
+              : euiTheme.colors.textSubdued;
+            const lines = part.value.split('\n');
+            if (lines[lines.length - 1] === '') lines.pop();
+            return lines.map((line, lineIdx) => (
+              <div
+                key={`${partIdx}-${lineIdx}`}
+                className={css`
+                  display: flex;
+                  gap: 8px;
+                  padding: 0 8px;
+                  background-color: ${background};
+                  white-space: pre-wrap;
+                  word-break: break-word;
+                `}
+              >
+                <span
+                  className={css`
+                    flex-shrink: 0;
+                    width: 10px;
+                    color: ${prefixColor};
+                    user-select: none;
+                  `}
+                >
+                  {prefix}
+                </span>
+                <span>{line}</span>
+              </div>
+            ));
+          })}
+        </div>
+      ))}
     </div>
   );
 }
