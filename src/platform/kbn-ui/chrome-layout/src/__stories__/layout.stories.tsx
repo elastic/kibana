@@ -36,6 +36,7 @@ interface StoryArgs {
   applicationMarginTop: number;
   applicationMarginBottom: number;
   applicationMarginRight: number;
+  agentMarginLeft: number;
   includeSidebar: boolean;
   includeBanner: boolean;
   includeFooter: boolean;
@@ -180,6 +181,7 @@ export const Layout: StoryObj<PropsAndArgs> = {
     applicationMarginTop: 0,
     applicationMarginBottom: 0,
     applicationMarginRight: 0,
+    agentMarginLeft: 0,
   },
   argTypes: {
     debug: {
@@ -238,6 +240,10 @@ export const Layout: StoryObj<PropsAndArgs> = {
     applicationMarginRight: {
       control: 'number',
       description: 'Right margin of the application area',
+    },
+    agentMarginLeft: {
+      control: 'number',
+      description: 'Left margin of the agent workspace column',
     },
   },
   render: (args) => <LayoutExample {...args} />,

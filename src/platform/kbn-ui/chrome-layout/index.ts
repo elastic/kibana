@@ -26,4 +26,9 @@ export {
   type GridLayoutGlobalStylesProps,
 } from './src/layouts/grid_global_app_style';
 
+export {
+  AGENT_FIRST_LAYOUT_OVERRIDES,
+  AgentFirstChromeGlobalStyles,
+} from './src/agent_first/agent_first_chrome_styles';
+
 export { CommonGlobalAppStyles } from './src/layouts/global_app_styles';

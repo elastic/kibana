@@ -28,6 +28,7 @@ export interface LayoutDimensions {
   applicationMarginTop: number;
   applicationMarginBottom: number;
   applicationMarginRight: number;
+  agentMarginLeft: number;
 }
 
 /**

@@ -71,6 +71,7 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     applicationMarginTop: layoutConfig.applicationMarginTop ?? 0,
     applicationMarginRight: layoutConfig.applicationMarginRight ?? 0,
     applicationMarginBottom: layoutConfig.applicationMarginBottom ?? 0,
+    agentMarginLeft: layoutConfig.agentMarginLeft ?? 0,
   };
 
   return <LayoutStateContext.Provider value={layoutState}>{children}</LayoutStateContext.Provider>;

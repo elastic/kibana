@@ -30,6 +30,7 @@ export const LayoutGlobalCSS = () => {
     applicationMarginTop,
     applicationMarginBottom,
     applicationMarginRight,
+    agentMarginLeft,
   } = useLayoutState();
 
   // Pre-calculate composite values for simplified CSS expressions
@@ -37,7 +38,7 @@ export const LayoutGlobalCSS = () => {
   const applicationTop = headerAndBannerHeight + applicationMarginTop;
   const applicationBottom = footerHeight + applicationMarginBottom;
   const applicationRight = applicationMarginRight + sidebarWidth;
-  const applicationLeft = navigationWidth + agentWidth;
+  const applicationLeft = navigationWidth + agentWidth + agentMarginLeft;
   const applicationHorizontalOffset = applicationLeft + applicationRight;
   const contentTop = applicationTop + applicationTopBarHeight;
   const contentBottom = applicationBottom + applicationBottomBarHeight;
@@ -79,9 +80,10 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const agent = css`
+    ${layoutVarName('agent.marginLeft')}: ${agentMarginLeft}px;
     ${layoutVarName('agent.top')}: ${headerAndBannerHeight}px;
     ${layoutVarName('agent.bottom')}: ${footerHeight}px;
-    ${layoutVarName('agent.left')}: ${navigationWidth}px;
+    ${layoutVarName('agent.left')}: ${navigationWidth + agentMarginLeft}px;
     ${layoutVarName('agent.right')}: calc(100vw - ${navigationWidth + agentWidth}px);
     ${layoutVarName('agent.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
     ${layoutVarName('agent.width')}: ${agentWidth}px;
