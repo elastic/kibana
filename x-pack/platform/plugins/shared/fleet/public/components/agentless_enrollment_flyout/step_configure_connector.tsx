@@ -67,15 +67,19 @@ export const AgentlessStepConfigureConnector = ({
 
   const connectorCards =
     connectorInputs.length > 0 ? (
-      connectorInputs.map((input, index) => (
-        <EuiFlexItem key={index}>
-          <EuiCard
-            data-test-subj={`agentlessStepConfigureConnector.connectorCard.${input?.vars?.connector_name?.value}`}
-            title={`${input?.vars?.connector_name?.value ?? packagePolicy.name}`}
-            description={cardDescription}
-            onClick={() => navigateToConnector(input?.vars?.connector_id?.value)}
-          />
-        </EuiFlexItem>
+      connectorInputs.map((input, index) => {
+        const connectorId = input?.vars?.connector_id?.value ?? index;
+        return (
+          <EuiFlexItem key={connectorId}>
+            <EuiCard
+              data-test-subj={`agentlessStepConfigureConnector.connectorCard.${connectorId}`}
+              title={`${input?.vars?.connector_name?.value ?? packagePolicy.name}`}
+              description={cardDescription}
+              onClick={() => navigateToConnector(input?.vars?.connector_id?.value)}
+            />
+          </EuiFlexItem>
+        );
+      }}
       ))
     ) : (
       <EuiFlexItem>
