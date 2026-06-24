@@ -61,7 +61,7 @@ export class DataViewsAsCodeService {
     const dataViews = await Promise.all(
       result.saved_objects.map((so) =>
         this.dataViewsService
-          .createFromSpecLazy(this.dataViewsService.savedObjectToSpec(so))
+          .createDataViewLazy(this.dataViewsService.savedObjectToSpec(so))
           .then((dataView) => this.mapDataView(dataView))
       )
     );

@@ -105,7 +105,7 @@ describe('DataViewsAsCodeService', () => {
         .mockImplementation((savedObject: { id: string }) =>
           savedObject.id === 'dv-1' ? spec1 : spec2
         );
-      mockDataViewsService.createFromSpecLazy = jest
+      mockDataViewsService.createDataViewLazy = jest
         .fn()
         .mockImplementation((spec: DataViewSpec) =>
           Promise.resolve(spec.id === 'dv-1' ? dataView1 : dataView2)
@@ -122,9 +122,9 @@ describe('DataViewsAsCodeService', () => {
       expect(mockDataViewsService.savedObjectToSpec).toHaveBeenCalledTimes(2);
       expect(mockDataViewsService.savedObjectToSpec).toHaveBeenNthCalledWith(1, so1);
       expect(mockDataViewsService.savedObjectToSpec).toHaveBeenNthCalledWith(2, so2);
-      expect(mockDataViewsService.createFromSpecLazy).toHaveBeenCalledTimes(2);
-      expect(mockDataViewsService.createFromSpecLazy).toHaveBeenNthCalledWith(1, spec1);
-      expect(mockDataViewsService.createFromSpecLazy).toHaveBeenNthCalledWith(2, spec2);
+      expect(mockDataViewsService.createDataViewLazy).toHaveBeenCalledTimes(2);
+      expect(mockDataViewsService.createDataViewLazy).toHaveBeenNthCalledWith(1, spec1);
+      expect(mockDataViewsService.createDataViewLazy).toHaveBeenNthCalledWith(2, spec2);
 
       expect(result).toEqual({
         data: [
