@@ -130,7 +130,7 @@ export const defineIndexThresholdRule = async (
 };
 
 export const makeEsQueryRule = (namePrefix: string) => ({
-  name: `${namePrefix}-rule-${Date.now()}`,
+  name: `${namePrefix}-${Date.now()}`,
   ruleTypeId: '.es-query',
   consumer: 'stackAlerts',
   params: {
@@ -154,7 +154,7 @@ export const makeEsQueryRule = (namePrefix: string) => ({
 });
 
 export const makeIndexThresholdRule = (namePrefix: string) => ({
-  name: `${namePrefix}-rule-${Date.now()}`,
+  name: `${namePrefix}-${Date.now()}`,
   ruleTypeId: '.index-threshold',
   consumer: 'alerts',
   enabled: true,
