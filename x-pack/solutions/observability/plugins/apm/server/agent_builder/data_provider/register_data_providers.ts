@@ -6,18 +6,16 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { getRollupIntervalForTimeRange } from '@kbn/apm-data-access-plugin/server/utils';
 import type { TraceMetrics } from '@kbn/observability-agent-builder-plugin/server/data_registry/data_registry_types';
 import type { APMConfig } from '../..';
 import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
 import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from './get_apm_service_summary';
+import { getServices } from '../services/get_services';
 import { getTraceSampleIds } from '../../routes/service_map/get_trace_sample_ids';
 import { fetchExitSpanSamplesFromTraceIds } from '../../routes/service_map/fetch_exit_span_samples';
 import { getConnectionStatsItems } from '../../lib/connections/get_connection_stats/get_connection_stats_items';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
-import { getServicesItems } from '../../routes/services/get_services/get_services_items';
-import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getExitSpanChangePoints, getServiceChangePoints } from './get_change_points';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
@@ -126,28 +124,16 @@ export function registerDataProviders({
 
   observabilityAgentBuilder.registerDataProvider(
     'servicesItems',
-    async ({ request, environment, kuery, start, end, searchQuery }) => {
-      const { apmEventClient, randomSamplerSeed, mlClient, apmAlertsClient } =
-        await buildApmToolResources({ core, plugins, request });
-
-      const startMs = parseDatemath(start);
-      const endMs = parseDatemath(end);
-
-      return getServicesItems({
-        apmEventClient,
-        apmAlertsClient,
-        randomSampler: { seed: randomSamplerSeed, probability: 1 },
-        mlClient,
+    async ({ request, kqlFilter, anomalySeverities, start, end }) => {
+      return getServices({
+        core,
+        plugins,
+        request,
         logger,
-        environment: environment ?? ENVIRONMENT_ALL.value,
-        kuery: kuery ?? '',
-        start: startMs,
-        end: endMs,
-        serviceGroup: null,
-        documentType: ApmDocumentType.TransactionMetric,
-        rollupInterval: getRollupIntervalForTimeRange(startMs, endMs),
-        useDurationSummary: true, // Note: This will not work for pre 8.7 data. See: https://github.com/elastic/kibana/issues/167578
-        searchQuery,
+        start,
+        end,
+        kqlFilter,
+        anomalySeverities,
       });
     }
   );

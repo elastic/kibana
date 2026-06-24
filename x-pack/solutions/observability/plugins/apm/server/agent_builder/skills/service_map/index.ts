@@ -6,10 +6,8 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import {
-  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
-  OBSERVABILITY_GET_SERVICES_TOOL_ID,
-} from '@kbn/observability-agent-builder-plugin/server/tools';
+import { OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
+import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/apm-types';
 import serviceMapDescription from './description.text';
 import serviceMapContent from './skill.md.text';
 

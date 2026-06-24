@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 /**
  * Availability handler for Observability Agent Builder resources.
@@ -20,14 +20,15 @@ export async function getAgentBuilderResourceAvailability({
   request,
   logger,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
+  core: Pick<CoreSetup, 'getStartServices'>;
   request: KibanaRequest;
   logger: Logger;
 }): Promise<ToolAvailabilityResult> {
   const [, pluginsStart] = await core.getStartServices();
+  const { spaces } = pluginsStart as { spaces?: SpacesPluginStart };
 
   try {
-    const activeSpace = await pluginsStart.spaces?.spacesService.getActiveSpace(request);
+    const activeSpace = await spaces?.spacesService.getActiveSpace(request);
     const solution = activeSpace?.solution;
     const isAllowedSolution = !solution || solution === 'classic' || solution === 'oblt';
 

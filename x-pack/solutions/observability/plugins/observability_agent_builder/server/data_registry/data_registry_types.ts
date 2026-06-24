@@ -8,9 +8,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
-import type { Transaction } from '@kbn/apm-types';
+import type { GetServicesRequest, GetServicesResponse, Transaction } from '@kbn/apm-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 interface TimeseriesChangePoint {
   change_point?: number | undefined;
@@ -67,25 +66,6 @@ interface APMTransaction {
   service?: {
     name?: string;
   };
-}
-
-export interface ServicesItemsItem {
-  serviceName: string;
-  transactionType?: string;
-  environments?: string[];
-  agentName?: string;
-  latency?: number | null;
-  transactionErrorRate?: number;
-  throughput?: number;
-  anomalyScore?: number;
-  anomalySeverity?: ML_ANOMALY_SEVERITY;
-  alertsCount?: number;
-}
-
-interface ServicesItemsResponse {
-  items: ServicesItemsItem[];
-  maxCountExceeded: boolean;
-  serviceOverflowCount: number;
 }
 
 // Infra host types
@@ -223,14 +203,9 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     end: string;
   }) => Promise<ChangePointGrouping[]>;
 
-  servicesItems: (params: {
-    request: KibanaRequest;
-    environment?: string;
-    kuery?: string;
-    start: string;
-    end: string;
-    searchQuery?: string;
-  }) => Promise<ServicesItemsResponse>;
+  servicesItems: (
+    params: GetServicesRequest & { request: KibanaRequest }
+  ) => Promise<GetServicesResponse>;
 
   infraHosts: (params: {
     request: KibanaRequest;

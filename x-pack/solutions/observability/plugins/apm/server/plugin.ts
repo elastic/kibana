@@ -53,6 +53,8 @@ import type {
 } from './types';
 import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
 import { registerServiceMapAgentBuilder } from './agent_builder/register_service_map';
+import { registerAgentBuilderTools } from './agent_builder/register_tools';
+import { registerAgentBuilderRoutes } from './routes/agent_builder/register_agent_builder_routes';
 import { registerServiceMapEmbeddableTransforms } from './lib/embeddables/register_service_map_embeddable_transforms';
 
 export class APMPlugin
@@ -262,7 +264,22 @@ export class APMPlugin
 
     if (plugins.agentBuilder) {
       registerServiceMapAgentBuilder({ agentBuilder: plugins.agentBuilder });
+      registerAgentBuilderTools({
+        core,
+        plugins,
+        agentBuilder: plugins.agentBuilder,
+        logger: this.logger.get('observabilityAgentBuilder.tools'),
+      });
     }
+
+    registerAgentBuilderRoutes({
+      core: {
+        setup: core,
+        start: getCoreStart,
+      },
+      plugins: resourcePlugins,
+      logger: this.logger.get('observabilityAgentBuilder.routes'),
+    });
 
     registerDeprecations({
       core,

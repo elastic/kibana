@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/apm-types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -17,7 +18,7 @@ import type {
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
-import { OBSERVABILITY_GET_HOSTS_TOOL_ID, OBSERVABILITY_GET_SERVICES_TOOL_ID } from '..';
+import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '..';
 
 export const OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID = 'observability.get_trace_metrics';
 

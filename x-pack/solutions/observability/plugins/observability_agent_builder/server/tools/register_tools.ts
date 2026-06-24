@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
+import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/apm-types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -27,7 +28,6 @@ import {
   createGetLogGroupsTool,
 } from './get_log_groups/tool';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
-import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
 import {
   createGetTraceMetricsTool,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
@@ -103,7 +103,6 @@ export async function registerTools({
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogGroupsTool({ core, plugins, logger }),
-    createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetTraceMetricsTool({ core, plugins, logger }),
     createGetTracesTool({ core, plugins, logger }),
