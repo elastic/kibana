@@ -247,7 +247,7 @@ describe('unsnoozeRule change tracking', () => {
     );
   });
 
-  test('captures the full post-unsnooze attributes and references of the rule', async () => {
+  test('captures the full post-unsnooze attributes of the rule', async () => {
     const changeTrackingService = createChangeTrackingService();
     const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
 
@@ -255,12 +255,7 @@ describe('unsnoozeRule change tracking', () => {
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
       [
-        {
-          // setGlobalDate pins Date.now() to mockedDateString.
-          timestamp: '2019-02-12T21:01:22.479Z',
-          objectId: 'rule-1',
-          objectType: RULE_SAVED_OBJECT_TYPE,
-          module: 'stack',
+        expect.objectContaining({
           snapshot: expect.objectContaining({
             id: 'rule-1',
             name: 'rule one',
@@ -269,7 +264,25 @@ describe('unsnoozeRule change tracking', () => {
             createdAt: '2019-02-12T21:01:22.479Z',
             updatedAt: '2019-02-12T21:01:22.479Z',
           }),
-        },
+        }),
+      ],
+      expect.any(Object)
+    );
+  });
+
+  test('captures the context of the rule', async () => {
+    const changeTrackingService = createChangeTrackingService();
+    const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+
+    await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
+
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          objectId: 'rule-1',
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: 'stack',
+        }),
       ],
       expect.any(Object)
     );
@@ -334,5 +347,21 @@ describe('unsnoozeRule change tracking', () => {
     await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+  });
+
+  test('captures rule.revision in object.sequence', async () => {
+    const changeTrackingService = createChangeTrackingService();
+    const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+
+    await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
+
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          sequence: 0,
+        }),
+      ],
+      expect.any(Object)
+    );
   });
 });

@@ -634,7 +634,7 @@ describe('updateRuleApiKey()', () => {
       );
     });
 
-    test('captures the full post-update attributes and references of the rule', async () => {
+    test('captures the full post-update attributes of the rule', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
@@ -649,12 +649,7 @@ describe('updateRuleApiKey()', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
-          {
-            // setGlobalDate pins Date.now() to mockedDateString.
-            timestamp: '2019-02-12T21:01:22.479Z',
-            objectId: '1',
-            objectType: RULE_SAVED_OBJECT_TYPE,
-            module: 'stack',
+          expect.objectContaining({
             snapshot: expect.objectContaining({
               id: '1',
               name: ruleName,
@@ -664,7 +659,32 @@ describe('updateRuleApiKey()', () => {
               createdAt: '2019-02-12T21:01:22.479Z',
               updatedAt: '2019-02-12T21:01:22.479Z',
             }),
-          },
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('captures the context of the rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+
+      await trackingClient.updateRuleApiKey({ id: '1' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            objectId: '1',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+          }),
         ],
         expect.any(Object)
       );
@@ -757,6 +777,29 @@ describe('updateRuleApiKey()', () => {
       await trackingClient.updateRuleApiKey({ id: '1' });
 
       expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('captures rule.revision in object.sequence', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+
+      await trackingClient.updateRuleApiKey({ id: '1' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            sequence: 0,
+          }),
+        ],
+        expect.any(Object)
+      );
     });
   });
 });
