@@ -19,10 +19,12 @@ import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
 import { ResolutionGroupTab } from '../entity_resolution/resolution_group_tab';
 import { RESOLUTION_GROUP_TAB_TEST_ID } from '../entity_resolution/test_ids';
+import { AnomaliesTab } from '../anomalies/anomalies_tab';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;
 export const FIELDS_TABLE_TAB_TEST_ID = `${PREFIX}FieldsTableTab` as const;
+export const ANOMALIES_TAB_TEST_ID = `${PREFIX}AnomaliesTab` as const;
 
 export const getRiskInputTab = <T extends EntityType>({
   entityType,
@@ -114,4 +116,22 @@ export const getResolutionGroupTab = ({
     />
   ),
   content: <ResolutionGroupTab entityId={entityId} entityType={entityType} scopeId={scopeId} />,
+});
+
+export const getAnomaliesTab = ({
+  entityId,
+  entityType,
+}: {
+  entityId: string;
+  entityType: EntityStoreEntityType;
+}) => ({
+  id: EntityDetailsLeftPanelTab.ANOMALIES,
+  'data-test-subj': ANOMALIES_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.anomalyTab.tabLabel"
+      defaultMessage="Behavioral anomalies"
+    />
+  ),
+  content: <AnomaliesTab entityId={entityId} entityType={entityType} />,
 });

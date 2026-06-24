@@ -7,7 +7,9 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../common/api/entity_analytics';
+import { useAnomalyOverview } from '../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -24,6 +26,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { AnomaliesSection } from '../../../entity_analytics/components/anomalies/anomalies_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -64,6 +67,13 @@ export const UserPanelContent = ({
   prefetchedResolutionRisk,
 }: UserPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
+
+  const anomalyOverview = useAnomalyOverview({
+    entityId: entityStoreEntityId ?? '',
+    entityType: EntityType.user,
+    enabled: isAnomalyDetailsEnabled && !!entityStoreEntityId,
+  });
 
   // Extract userName from identityFields for components that need a string
   // Priority: identityFields['user.name'] > identityFields[first key]
@@ -93,6 +103,19 @@ export const UserPanelContent = ({
               prefetchedResolutionRisk={prefetchedResolutionRisk}
             />
             <EuiHorizontalRule />
+          </>
+        )}
+      {isAnomalyDetailsEnabled &&
+        entityStoreEntityId &&
+        anomalyOverview.data &&
+        anomalyOverview.data.totalAnomaliesCount > 0 && (
+          <>
+            <AnomaliesSection
+              data={anomalyOverview.data}
+              entityId={entityStoreEntityId}
+              isPreviewMode={isPreviewMode}
+              openDetailsPanel={openDetailsPanel}
+            />
           </>
         )}
       {entityStoreEntityId && (

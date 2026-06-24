@@ -7,11 +7,13 @@
 
 import { useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
   getResolutionGroupTab,
+  getAnomaliesTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import type {
   LeftPanelTabsType,
@@ -60,6 +62,7 @@ export const useTabs = ({
   entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
 
   return useMemo(() => {
     const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
@@ -103,16 +106,27 @@ export const useTabs = ({
           ]
         : [];
 
-    return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
+    const anomaliesTab =
+      entityStoreEntityId && isAnomalyDetailsEnabled
+        ? [
+            getAnomaliesTab({
+              entityId: entityStoreEntityId,
+              entityType: EntityType.host,
+            }),
+          ]
+        : [];
+
+    return [...riskScoreTab, ...anomaliesTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
     isRiskScoreExist,
+    entityStoreEntityId,
     hostName,
-    entityId,
     scopeId,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    entityStoreEntityId,
+    entityId,
     hasEntityResolutionLicense,
+    isAnomalyDetailsEnabled,
   ]);
 };

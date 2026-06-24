@@ -7,8 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
+  getAnomaliesTab,
   getInsightsInputTab,
   getResolutionGroupTab,
   getRiskInputTab,
@@ -41,6 +42,7 @@ export const useTabs = (
   entityStoreEntityId?: string
 ): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
 
   return useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -55,6 +57,15 @@ export const useTabs = (
           entityType: EntityType.user,
           scopeId,
           entityId: entityStoreEntityId,
+        })
+      );
+    }
+
+    if (entityStoreEntityId && isAnomalyDetailsEnabled) {
+      tabs.push(
+        getAnomaliesTab({
+          entityId: entityStoreEntityId,
+          entityType: EntityType.user,
         })
       );
     }
@@ -94,16 +105,17 @@ export const useTabs = (
 
     return tabs;
   }, [
-    entityId,
-    hasEntityResolutionLicense,
+    managedUser,
+    isRiskScoreExist,
+    entityStoreEntityId,
+    isAnomalyDetailsEnabled,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
-    identityFields,
-    isRiskScoreExist,
-    managedUser,
     name,
     scopeId,
-    entityStoreEntityId,
+    entityId,
+    identityFields,
+    hasEntityResolutionLicense,
   ]);
 };
 

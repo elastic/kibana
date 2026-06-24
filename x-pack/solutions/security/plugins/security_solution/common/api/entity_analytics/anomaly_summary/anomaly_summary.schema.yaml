@@ -415,6 +415,7 @@ components:
         - jobName
         - timestamp
         - anomalousValue
+        - detectorIndex
       properties:
         jobId:
           type: string
@@ -433,6 +434,9 @@ components:
           maxLength: 200
           nullable: true
           description: The anomalous value observed by the detector
+        detectorIndex:
+          type: integer
+          description: Index of the detector within the ML job that produced the anomaly
 
     AnomalyOverviewResponse:
       type: object
