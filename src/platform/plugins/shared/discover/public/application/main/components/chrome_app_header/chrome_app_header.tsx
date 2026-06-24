@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppHeader } from '@kbn/app-header';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
@@ -52,15 +52,12 @@ export const ChromeAppHeader = ({
     return {
       ...menu,
       isCollapsed,
-      items: menu?.items?.map(
-        (item) =>
-          ({
-            ...item,
-            // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
-            // (Except switch language)
-            overflow: item.id !== AppMenuActionId.switchLanguageMode,
-          } as AppMenuItemType)
-      ),
+      items: menu?.items?.map((item) => ({
+        ...item,
+        // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
+        // (Except switch language)
+        overflow: item.id !== AppMenuActionId.switchLanguageMode,
+      })),
     };
   }, [isCollapsed, menu]);
 
