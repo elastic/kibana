@@ -585,7 +585,6 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
                       onCreateOption={(searchValue) =>
                         setEditCategories((prev) => [...prev, { label: searchValue }])
                       }
-                      singleSelection={{ asPlainText: true }}
                       isClearable
                       fullWidth
                       placeholder={i18n.translate('xpack.streams.memory.categoriesPlaceholder', {
