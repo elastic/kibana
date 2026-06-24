@@ -19,17 +19,17 @@ export interface IamPolicyDocument {
 export const ALL_INTEGRATIONS_SID = 'ElasticAWSIntegration';
 
 /**
- * Derives an IAM statement Sid from an integration name.
- * Sids must be alphanumeric, so the name is stripped of non-alphanumeric characters
- * and prefixed with "Elastic" (e.g. "AWS GuardDuty" -> "ElasticAWSGuardDuty").
- * Falls back to the aggregated Sid when no name is provided.
+ * Derives an IAM statement Sid from a pre-sanitized identifier segment.
+ * Sids must be alphanumeric, so any remaining non-alphanumeric characters are stripped
+ * and the result is prefixed with "Elastic" (e.g. "Ec2Metrics" -> "ElasticEc2Metrics").
+ * Falls back to the aggregated Sid when no identifier is provided.
  */
-export const getIntegrationSid = (integrationName?: string): string => {
-  if (!integrationName) {
+export const getIntegrationSid = (integrationId?: string): string => {
+  if (!integrationId) {
     return ALL_INTEGRATIONS_SID;
   }
 
-  const sanitized = integrationName.replace(/[^a-zA-Z0-9]/g, '');
+  const sanitized = integrationId.replace(/[^a-zA-Z0-9]/g, '');
   return sanitized ? `Elastic${sanitized}` : ALL_INTEGRATIONS_SID;
 };
 
