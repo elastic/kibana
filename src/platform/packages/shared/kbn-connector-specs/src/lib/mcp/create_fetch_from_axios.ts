@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable } from 'node:stream';
 import type { AxiosInstance } from 'axios';
 import type { FetchLike } from '@kbn/mcp-client';
 
@@ -21,6 +20,13 @@ import type { FetchLike } from '@kbn/mcp-client';
  * @returns A FetchLike suitable for passing to McpClient as the `fetch` option
  */
 export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
+  // The MCP SDK fires the GET SSE channel as a fire-and-forget side effect of the
+  // initialized handshake. Some servers require that channel to be established before
+  // they process tool-call POSTs. Pre-create sseReady when we see the initialized 202
+  // so subsequent POSTs can await it without adding a fixed delay.
+  let sseReady: Promise<void> | null = null;
+  let resolveSseReady: (() => void) | null = null;
+
   return async (url: string | URL, init?: RequestInit): Promise<Response> => {
     const urlString = typeof url === 'string' ? url : url.toString();
     const method = (init?.method ?? 'GET').toUpperCase();
@@ -40,9 +46,11 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       }
     }
 
-    // GET requests open the SSE stream used by MCP servers to push responses back.
-    // responseType:'stream' is required here — buffering an infinite SSE stream with
-    // 'arraybuffer' would stall until the connection closes.
+    const resHeaders = new Headers();
+
+    // GET requests open the SSE channel used by MCP servers to push responses back.
+    // Use responseType:'stream' so the SDK's SSE parser reads events as they arrive
+    // rather than buffering the entire (potentially infinite) stream in memory.
     if (method === 'GET') {
       const res = await axiosInstance.request({
         url: urlString,
@@ -53,7 +61,6 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
         validateStatus: () => true,
       });
 
-      const resHeaders = new Headers();
       if (res.headers && typeof res.headers === 'object') {
         for (const [key, value] of Object.entries(res.headers)) {
           if (value !== undefined && value !== null) {
@@ -62,11 +69,35 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
         }
       }
 
-      return new Response(Readable.toWeb(res.data as Readable) as ReadableStream<Uint8Array>, {
+      // Signal that the SSE channel is open so waiting POSTs can proceed.
+      resolveSseReady?.();
+      resolveSseReady = null;
+
+      const nodeStream = res.data as NodeJS.ReadableStream;
+      const webStream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          nodeStream.on('data', (chunk: Buffer | string) => {
+            controller.enqueue(
+              typeof chunk === 'string' ? Buffer.from(chunk) : (chunk as Uint8Array)
+            );
+          });
+          nodeStream.on('end', () => controller.close());
+          nodeStream.on('error', (err: Error) => controller.error(err));
+        },
+        cancel() {
+          (nodeStream as { destroy?: () => void }).destroy?.();
+        },
+      });
+
+      return new Response(webStream, {
         status: res.status,
         statusText: res.statusText ?? '',
         headers: resHeaders,
       });
+    }
+
+    if (sseReady !== null) {
+      await sseReady;
     }
 
     const res = await axiosInstance.request({
@@ -79,13 +110,21 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       validateStatus: () => true,
     });
 
-    const resHeaders = new Headers();
     if (res.headers && typeof res.headers === 'object') {
       for (const [key, value] of Object.entries(res.headers)) {
         if (value !== undefined && value !== null) {
           resHeaders.set(key, Array.isArray(value) ? value.join(', ') : String(value));
         }
       }
+    }
+
+    // A 202 to a POST means the initialized notification was accepted; the SDK fires
+    // the GET SSE channel immediately after. Pre-create sseReady here so tool-call
+    // POSTs can await it.
+    if (res.status === 202 && sseReady === null) {
+      sseReady = new Promise<void>((resolve) => {
+        resolveSseReady = resolve;
+      });
     }
 
     return new Response(res.data, {

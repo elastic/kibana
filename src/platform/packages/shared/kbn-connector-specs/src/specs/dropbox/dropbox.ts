@@ -110,7 +110,7 @@ export const Dropbox: ConnectorSpec = {
         'Use this to confirm authentication is working and to identify which Dropbox account is connected.',
       input: WhoAmIInputSchema,
       handler: async (ctx) => {
-        return callToolJson(ctx, 'WhoAmI');
+        return callToolJson(ctx, 'who_am_i');
       },
     },
 
@@ -124,7 +124,7 @@ export const Dropbox: ConnectorSpec = {
       handler: async (ctx, input: SearchInput) => {
         return withMcpClient(ctx, async (mcp) => {
           const searchResult = await mcp.callTool({
-            name: 'Search',
+            name: 'search',
             arguments: {
               query: input.query,
               path: input.path,
@@ -139,7 +139,9 @@ export const Dropbox: ConnectorSpec = {
             return data;
           }
 
-          const matches = (data as { matches?: Array<{ metadata?: { metadata?: { path_lower?: string } } }> })?.matches ?? [];
+          const matches =
+            (data as { matches?: Array<{ metadata?: { metadata?: { path_lower?: string } } }> })
+              ?.matches ?? [];
           const paths = matches
             .map((m) => m?.metadata?.metadata?.path_lower)
             .filter((p): p is string => typeof p === 'string' && p.length > 0);
@@ -148,7 +150,7 @@ export const Dropbox: ConnectorSpec = {
             return data;
           }
 
-          const tagsResult = await mcp.callTool({ name: 'GetTags', arguments: { paths } });
+          const tagsResult = await mcp.callTool({ name: 'get_tags', arguments: { paths } });
           const tagsData = parseJsonTextFromContentParts(tagsResult.content) as {
             paths_to_tags?: Array<{ path: string; tags: Array<{ tag_text?: string }> }>;
           };
@@ -170,7 +172,7 @@ export const Dropbox: ConnectorSpec = {
         'from search results to browse specific directories. Returns file names, paths, sizes, and modification dates.',
       input: ListFolderInputSchema,
       handler: async (ctx, input: ListFolderInput) => {
-        return callToolJson(ctx, 'ListFolder', {
+        return callToolJson(ctx, 'list_folder', {
           path: input.path,
           limit: input.limit,
           recursive: input.recursive,
@@ -189,7 +191,7 @@ export const Dropbox: ConnectorSpec = {
       handler: async (ctx, input: GetFileMetadataInput) => {
         return withMcpClient(ctx, async (mcp) => {
           const metaResult = await mcp.callTool({
-            name: 'GetFileMetadata',
+            name: 'get_file_metadata',
             arguments: { path: input.path },
           });
           const metadata = parseJsonTextFromContentParts(metaResult.content);
@@ -199,7 +201,7 @@ export const Dropbox: ConnectorSpec = {
           }
 
           const tagsResult = await mcp.callTool({
-            name: 'GetTags',
+            name: 'get_tags',
             arguments: { paths: [input.path] },
           });
           const tagsData = parseJsonTextFromContentParts(tagsResult.content) as {
@@ -223,8 +225,8 @@ export const Dropbox: ConnectorSpec = {
         'pipeline attachment processor). Large files can produce very large payloads.',
       input: GetFileContentInputSchema,
       handler: async (ctx, input: GetFileContentInput) => {
-        return callToolContent(ctx, 'GetFileContent', {
-          path: input.path,
+        return callToolContent(ctx, 'get_file_content', {
+          path_or_file_id: input.path,
         });
       },
     },
@@ -238,7 +240,7 @@ export const Dropbox: ConnectorSpec = {
         'Pass visibility "public" to create a link accessible to anyone.',
       input: CreateSharedLinkInputSchema,
       handler: async (ctx, input: CreateSharedLinkInput) => {
-        return callToolJson(ctx, 'CreateSharedLink', {
+        return callToolJson(ctx, 'create_shared_link', {
           path: input.path,
           visibility: input.visibility,
         });
@@ -252,7 +254,7 @@ export const Dropbox: ConnectorSpec = {
         'URLs, visibility settings, and expiration dates for each link.',
       input: ListSharedLinksInputSchema,
       handler: async (ctx, input: ListSharedLinksInput) => {
-        return callToolJson(ctx, 'ListSharedLinks', {
+        return callToolJson(ctx, 'list_shared_links', {
           path: input.path,
         });
       },
