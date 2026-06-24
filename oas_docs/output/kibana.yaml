@@ -371,6 +371,7 @@ tags:
     x-displayName: System
     description: |
       Get information about the system status, resource usage, features, and installed plugins.
+  - name: Tags
   - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
     externalDocs:
       description: Task manager
@@ -962,7 +963,8 @@ paths:
                   description: Example response that returns one built-in Elastic agent and one created by the user
                   value:
                     results:
-                      - configuration:
+                      - access_control: null
+                        configuration:
                           tools:
                             - tool_ids:
                                 - platform.core.search
@@ -972,8 +974,17 @@ paths:
                         description: Elastic AI Agent
                         id: elastic-ai-agent
                         name: Elastic AI Agent
+                        permissions:
+                          update_access_control: false
+                          update_agent: false
                         type: chat
-                      - avatar_color: '#BFDBFF'
+                      - access_control:
+                          access_mode: private
+                          entries:
+                            - name: alice
+                              role: manager
+                              type: user
+                        avatar_color: '#BFDBFF'
                         avatar_symbol: SI
                         configuration:
                           instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
@@ -989,6 +1000,9 @@ paths:
                           - custom-indices
                           - department-search
                         name: Search Index Helper
+                        permissions:
+                          update_access_control: true
+                          update_agent: true
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -1052,6 +1066,19 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                access_control:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    access_mode:
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      enum:
+                        - public
+                        - shared
+                        - private
+                      type: string
+                  required:
+                    - access_mode
                 avatar_color:
                   description: Optional hex color code for the agent avatar.
                   type: string
@@ -1127,13 +1154,6 @@ paths:
                   type: array
                 name:
                   description: Display name for the agent.
-                  type: string
-                visibility:
-                  description: '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
-                  enum:
-                    - public
-                    - shared
-                    - private
                   type: string
               required:
                 - id
@@ -1461,6 +1481,12 @@ paths:
                 getAgentByIdResponseExample:
                   description: Example response that an agent created by the user that will query elasticsearch indices starting with 'content-' prefix to answer the questions.
                   value:
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - name: alice
+                          role: manager
+                          type: user
                     avatar_color: '#BFDBFF'
                     avatar_symbol: SI
                     configuration:
@@ -1477,6 +1503,9 @@ paths:
                       - custom-indices
                       - department-search
                     name: Search Index Helper
+                    permissions:
+                      update_access_control: true
+                      update_agent: true
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1547,6 +1576,19 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                access_control:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    access_mode:
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      enum:
+                        - public
+                        - shared
+                        - private
+                      type: string
+                  required:
+                    - access_mode
                 avatar_color:
                   description: Updated hex color code for the agent avatar.
                   type: string
@@ -1617,13 +1659,6 @@ paths:
                   type: array
                 name:
                   description: Updated display name for the agent.
-                  type: string
-                visibility:
-                  description: '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
-                  enum:
-                    - public
-                    - shared
-                    - private
                   type: string
       responses:
         '200':
@@ -1706,19 +1741,19 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/agent_builder/agents/{id}/acl:
+  /api/agent_builder/agents/{id}/access_control:
     get:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/acl</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/access_control</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the access control list (ACL) for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
-      operationId: get-agent-builder-agents-id-acl
+        Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.update_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-agents-id-access-control
       parameters:
-        - description: The unique identifier of the agent whose ACL to retrieve.
+        - description: The unique identifier of the agent whose access control to retrieve.
           in: path
           name: id
           required: true
@@ -1729,16 +1764,22 @@ paths:
           content:
             application/json:
               examples:
-                getAgentAclMaskedResponseExample:
-                  description: Example response for a caller without manage permission — the principal list is hidden and `entries` is always empty.
+                getAgentAccessControlMaskedResponseExample:
+                  description: Example response for a caller without manage permission — only the caller's own entry is returned.
                   value:
-                    acl:
-                      entries: []
-                    can_manage: false
-                getAgentAclResponseExample:
-                  description: Example response for a caller who can manage the ACL — the agent has two grantees.
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - name: bob
+                          role: user
+                          type: user
+                    permissions:
+                      update_access_control: false
+                getAgentAccessControlResponseExample:
+                  description: Example response for a caller who can manage access control — the agent has two grantees.
                   value:
-                    acl:
+                    access_control:
+                      access_mode: private
                       entries:
                         - name: alice
                           role: editor
@@ -1746,7 +1787,8 @@ paths:
                         - name: bob
                           role: user
                           type: user
-                    can_manage: true
+                    permissions:
+                      update_access_control: true
           description: Indicates a successful response
         '404':
           content:
@@ -1767,11 +1809,11 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/access_control" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
-            GET kbn://api/agent_builder/agents/{id}/acl
+            GET kbn://api/agent_builder/agents/{id}/access_control
       x-state: Added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -1780,12 +1822,12 @@ paths:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/acl</span></div>
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/access_control</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Replace the per-agent access control list (ACL). The agent owner, cluster admins, and anyone the ACL grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
-      operationId: put-agent-builder-agents-id-acl
+        Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
+      operationId: put-agent-builder-agents-id-access-control
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -1794,7 +1836,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The unique identifier of the agent whose ACL to update.
+        - description: The unique identifier of the agent whose access control to update.
           in: path
           name: id
           required: true
@@ -1804,12 +1846,12 @@ paths:
         content:
           application/json:
             examples:
-              clearAgentAclRequestExample:
-                description: Submit an empty entries list to remove all ACL grants. Access then falls back to the agent's visibility setting.
+              clearAgentAccessControlRequestExample:
+                description: Submit an empty entries list to remove all custom grants. Access then falls back to the agent's access-control mode.
                 value:
                   entries: []
-              updateAgentAclRequestExample:
-                description: Example request granting two users access to the agent — Alice as Editor (can update the agent and its ACL), Bob as User (can run the agent).
+              updateAgentAccessControlRequestExample:
+                description: Example request granting two users access to the agent — Alice as Editor (can update the agent and its access control), Bob as User (can run the agent).
                 value:
                   entries:
                     - name: alice
@@ -1823,7 +1865,7 @@ paths:
               type: object
               properties:
                 entries:
-                  description: Access control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported; role-based grants are planned for a future release), a `name` (the principal username), and a `role`. Submitting this field replaces the existing ACL entirely; submit an empty array to clear all grants.
+                  description: Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `name` (the principal username), and a `role`.
                   items:
                     additionalProperties: false
                     type: object
@@ -1834,7 +1876,7 @@ paths:
                         minLength: 1
                         type: string
                       role:
-                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its ACL; `manager` adds deleting the agent and changing visibility.'
+                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.'
                         enum:
                           - user
                           - editor
@@ -1857,9 +1899,10 @@ paths:
           content:
             application/json:
               examples:
-                updateAgentAclResponseExample:
-                  description: Example response returning the persisted ACL after the update.
+                updateAgentAccessControlResponseExample:
+                  description: Example response returning the persisted access control after the update.
                   value:
+                    access_mode: private
                     entries:
                       - name: alice
                         role: editor
@@ -1872,8 +1915,8 @@ paths:
           content:
             application/json:
               examples:
-                aclOnDefaultAgentResponseExample:
-                  description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have a custom ACL — its access is governed by the platform, not per-agent grants.
+                accessControlOnDefaultAgentResponseExample:
+                  description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have custom access control — its access is governed by the platform, not per-agent grants.
                   value:
                     attributes:
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
@@ -1886,7 +1929,7 @@ paths:
                     error: Bad Request
                     message: '[request body.entries]: array size is [101], but cannot be greater than [100]'
                     statusCode: 400
-          description: Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have an ACL).
+          description: Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have custom access control).
         '404':
           content:
             application/json:
@@ -1906,7 +1949,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/access_control" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -1918,7 +1961,7 @@ paths:
               }'
         - lang: Console
           source: |
-            PUT kbn://api/agent_builder/agents/{id}/acl
+            PUT kbn://api/agent_builder/agents/{id}/access_control
             {
               "entries": [
                 { "type": "user", "name": "alice", "role": "editor" },
@@ -36269,7 +36312,7 @@ paths:
               - metrics
               - traces
               - synthetics
-              - profiling
+              - profiles
             type: string
         - description: Filter data streams by dataset name
           in: query
@@ -38810,7 +38853,7 @@ paths:
               - metrics
               - traces
               - synthetics
-              - profiling
+              - profiles
             type: string
         - description: When true, only return packages with active data streams
           in: query
@@ -67073,6 +67116,425 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/tags:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of tags matching the optional `query` text.
+      operationId: get-tags
+      parameters:
+        - description: Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchTagsResponse:
+                  summary: Tags matching a search query
+                  value:
+                    data:
+                      - data:
+                          color: '#1BA9F5'
+                          description: Dashboards owned by engineering teams.
+                          name: Engineering
+                        id: tag-engineering
+                        meta:
+                          created_at: '2026-06-01T12:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-06-01T12:00:00.000Z'
+                          version: WzEsMV0=
+                      - data:
+                          color: '#54B399'
+                          description: Content used by operations teams.
+                          name: Operations
+                        id: tag-operations
+                        meta:
+                          created_at: '2026-06-02T09:30:00.000Z'
+                          managed: false
+                          updated_at: '2026-06-02T09:30:00.000Z'
+                          version: WzIsMV0=
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of tags matching the query.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                        id:
+                          description: The tag ID.
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    minItems: 0
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+      summary: Search tags
+      tags:
+        - Tags
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new tag and returns it.
+      operationId: post-tags
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createTagRequest:
+                summary: Create a tag
+                value:
+                  color: '#F04E98'
+                  description: Content related to security investigations.
+                  name: Security
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-request-attributes'
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createTagResponse:
+                  summary: The created tag
+                  value:
+                    data:
+                      color: '#F04E98'
+                      description: Content related to security investigations.
+                      name: Security
+                    id: tag-security
+                    meta:
+                      created_at: '2026-06-03T14:15:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-03T14:15:00.000Z'
+                      version: WzMsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Create a tag
+      tags:
+        - Tags
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/tags/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a tag by ID.
+      operationId: delete-tags-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: deleted
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Delete a tag
+      tags:
+        - Tags
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a tag by ID.
+      operationId: get-tags-id
+      parameters:
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                readTagResponse:
+                  summary: The requested tag
+                  value:
+                    data:
+                      color: '#1BA9F5'
+                      description: Dashboards owned by engineering teams.
+                      name: Engineering
+                    id: tag-engineering
+                    meta:
+                      created_at: '2026-06-01T12:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-01T12:00:00.000Z'
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Get a tag
+      tags:
+        - Tags
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Updates a tag if it exists, or creates it at the provided ID.
+      operationId: put-tags-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upsertTagRequest:
+                summary: Update or create a tag
+                value:
+                  color: '#006BB4'
+                  description: Dashboards and visualizations owned by engineering teams.
+                  name: Engineering
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-request-attributes'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateTagResponse:
+                  summary: The updated tag
+                  value:
+                    data:
+                      color: '#006BB4'
+                      description: Dashboards and visualizations owned by engineering teams.
+                      name: Engineering
+                    id: tag-engineering
+                    meta:
+                      created_at: '2026-06-01T12:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-05T16:45:00.000Z'
+                      version: WzEsMl0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                upsertTagCreatedResponse:
+                  summary: The created tag
+                  value:
+                    data:
+                      color: '#9170B8'
+                      description: Content used for compliance reporting.
+                      name: Compliance
+                    id: tag-compliance
+                    meta:
+                      created_at: '2026-06-06T10:20:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-06T10:20:00.000Z'
+                      version: WzQsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Upsert a tag
+      tags:
+        - Tags
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/task_manager/_health:
     get:
       description: |
@@ -83814,7 +84276,7 @@ components:
                   - metrics
                   - traces
                   - synthetics
-                  - profiling
+                  - profiles
                 type: string
             required:
               - name
@@ -84181,6 +84643,74 @@ components:
         - pattern
       title: Custom Format
       type: object
+    Kibana_HTTP_APIs_data_visualizer_field_stats:
+      anyOf:
+        - additionalProperties: false
+          type: object
+          properties:
+            data_view_id:
+              description: Data view ID (stored as a panel reference).
+              maxLength: 1000
+              minLength: 1
+              type: string
+            description:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            show_distributions:
+              default: false
+              description: Whether to show the distribution mini-charts in the table.
+              type: boolean
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              type: string
+            view_type:
+              enum:
+                - dataview
+              type: string
+          required:
+            - view_type
+            - data_view_id
+        - additionalProperties: false
+          type: object
+          properties:
+            description:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            query:
+              additionalProperties: false
+              description: ES|QL query.
+              type: object
+              properties:
+                esql:
+                  description: The ES|QL query string.
+                  maxLength: 1000
+                  type: string
+              required:
+                - esql
+            show_distributions:
+              default: false
+              description: Whether to show the distribution mini-charts in the table.
+              type: boolean
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              type: string
+            view_type:
+              enum:
+                - esql
+              type: string
+          required:
+            - view_type
+            - query
+      description: Field statistics table embeddable schema
+      title: data_visualizer_field_stats
     Kibana_HTTP_APIs_datasetquality-degradeddocs-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -92709,6 +93239,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
@@ -93393,6 +93924,26 @@ components:
         - type
         - config
       title: ES|QL variable control
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_data_visualizer_field_stats'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - field_stats_table
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Field statistics table
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-image:
       additionalProperties: false
@@ -94393,6 +94944,7 @@ components:
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
+                field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
                 image: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
                 links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                 markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
@@ -94417,6 +94969,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
@@ -94666,6 +95219,39 @@ components:
         - geo_point
       title: Type
       type: string
+    Kibana_HTTP_APIs_kbn-tags-attributes:
+      additionalProperties: false
+      properties:
+        color:
+          description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          type: string
+        description:
+          description: Optional description of the tag.
+          type: string
+        name:
+          description: The display name of the tag.
+          type: string
+      required:
+        - name
+        - color
+      title: kbn-tags-attributes
+      type: object
+    Kibana_HTTP_APIs_kbn-tags-request-attributes:
+      additionalProperties: false
+      properties:
+        color:
+          description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          type: string
+        description:
+          description: Optional description of the tag.
+          type: string
+        name:
+          description: The display name of the tag.
+          type: string
+      required:
+        - name
+      title: kbn-tags-request-attributes
+      type: object
     Kibana_HTTP_APIs_kibana_asset_reference:
       additionalProperties: false
       properties:

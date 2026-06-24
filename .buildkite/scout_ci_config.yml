@@ -13,6 +13,7 @@ plugins:
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - content_management
     - cross_cluster_replication
     - custom_branding
     - dashboard
