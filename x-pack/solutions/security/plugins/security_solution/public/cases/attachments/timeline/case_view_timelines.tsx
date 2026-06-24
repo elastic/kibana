@@ -7,12 +7,12 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
-import type { SortFieldTimeline } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, type SortFieldTimeline } from '../../../../common/api/timeline';
 import type {
   OnOpenTimeline,
   OnTableChange,
@@ -20,6 +20,8 @@ import type {
 } from '../../../timelines/components/open_timeline/types';
 import { TimelinesTable } from '../../../timelines/components/open_timeline/timelines_table';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
+import { useEditTimelineBatchActions } from '../../../timelines/components/open_timeline/edit_timeline_batch_actions';
+import { BATCH_ACTIONS } from '../../../timelines/components/open_timeline/translations';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
 import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
 
@@ -56,6 +58,8 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
   const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
     Record<string, JSX.Element>
   >({});
+  const [selectedItems, setSelectedItems] = useState<OpenTimelineResult[]>([]);
+  const [isBatchActionsPopoverOpen, setIsBatchActionsPopoverOpen] = useState(false);
 
   const sort = useMemo(() => ({ sortField, sortOrder: sortDirection }), [sortField, sortDirection]);
   const pageInfo = useMemo(() => ({ pageSize, pageIndex }), [pageSize, pageIndex]);
@@ -75,6 +79,18 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
       queryTimelineById({ duplicate, timelineId, timelineType }),
     [queryTimelineById]
   );
+
+  const onSelectionChange = useCallback((items: OpenTimelineResult[]) => {
+    setSelectedItems(items);
+  }, []);
+
+  const closeBatchActionsPopover = useCallback(() => setIsBatchActionsPopoverOpen(false), []);
+
+  const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
+    selectedItems,
+    tableRef,
+    timelineType: TimelineTypeEnum.default,
+  });
 
   const onTableChange = useCallback<OnTableChange>(({ page, sort: nextSort }) => {
     if (page) {
@@ -101,15 +117,37 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" data-test-subj="case-view-timelines">
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="case-view-timelines">
+      {selectedItems.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            aria-label={BATCH_ACTIONS}
+            isOpen={isBatchActionsPopoverOpen}
+            closePopover={closeBatchActionsPopover}
+            panelPaddingSize="none"
+            button={
+              <EuiButton
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={() => setIsBatchActionsPopoverOpen((prev) => !prev)}
+                data-test-subj="case-view-timelines-batch-actions-button"
+              >
+                {BATCH_ACTIONS}
+              </EuiButton>
+            }
+          >
+            {getBatchItemsPopoverContent(closeBatchActionsPopover)}
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <TimelinesTable
-          actionTimelineToShow={[]}
+          actionTimelineToShow={['selectable']}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           loading={loading}
           itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
           onOpenTimeline={onOpenTimeline}
-          onSelectionChange={noop}
+          onSelectionChange={onSelectionChange}
           onTableChange={onTableChange}
           onToggleShowNotes={setItemIdToExpandedNotesRowMap}
           pageIndex={pageIndex - 1}
@@ -128,5 +166,3 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
 };
 
 CaseViewTimelines.displayName = 'CaseViewTimelines';
-
-const noop = () => {};
