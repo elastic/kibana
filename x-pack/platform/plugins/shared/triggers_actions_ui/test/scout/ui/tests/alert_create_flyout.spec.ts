@@ -12,7 +12,8 @@ import { test, makeEsQueryRule, defineIndexThresholdRule, THRESHOLD_TEST_INDEX }
 
 const TEST_RUN_ID = Date.now();
 const STATEFUL_ALERTS_INDEX = '.internal.alerts-stack.alerts-default-000001';
-const COMBO_BOX_OPTION_TIMEOUT_MS = 30_000;
+const FILTER_BUILDER_READY_TIMEOUT_MS = 30_000;
+const UI_READY_TIMEOUT_MS = 10_000;
 
 const INDEX_THRESHOLD_DEFAULT_MESSAGE = `Rule {{rule.name}} is active for group {{context.group}}:
 
@@ -106,15 +107,41 @@ const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => 
   await defineIndexThresholdRule(page, alertName);
 };
 
+const waitForAlertsFilterBuilderReady = async (page: ScoutPage) => {
+  await page.testSubj.click('alertsFilterQueryToggle');
+  const popover = page.testSubj.locator('addFilterPopover');
+  const fieldInput = page.testSubj.locator('filterFieldSuggestionList > comboBoxSearchInput');
+
+  // The search bar builds its alert data view asynchronously. If the popover is
+  // opened before that completes, the filter builder can render disabled, so
+  // retry by reopening it until the UI exposes an enabled field selector.
+  await expect(async () => {
+    if (await popover.isVisible()) {
+      await page.keyboard.press('Escape');
+      await expect(popover).toBeHidden({ timeout: UI_READY_TIMEOUT_MS });
+    }
+
+    await page.testSubj.click('addFilter');
+    await expect(popover).toBeVisible({ timeout: UI_READY_TIMEOUT_MS });
+
+    if (!(await fieldInput.isEnabled())) {
+      await page.keyboard.press('Escape');
+      await expect(popover).toBeHidden({ timeout: UI_READY_TIMEOUT_MS });
+    }
+
+    await expect(fieldInput).toBeEnabled({ timeout: UI_READY_TIMEOUT_MS });
+  }).toPass({ timeout: FILTER_BUILDER_READY_TIMEOUT_MS });
+};
+
 const selectComboBoxOption = async (page: ScoutPage, testSubj: string, value: string) => {
   await page.testSubj.click(`${testSubj} > comboBoxInput`);
   const searchInput = page.testSubj.locator(`${testSubj} > comboBoxSearchInput`);
   // Clicking opens the dropdown and triggers the async field-options fetch.
   // The search input stays disabled until that fetch completes; wait for it.
-  await expect(searchInput).toBeEnabled({ timeout: 30_000 });
+  await expect(searchInput).toBeEnabled({ timeout: UI_READY_TIMEOUT_MS });
   await searchInput.pressSequentially(value, { delay: 50 });
   const option = page.locator(`.euiComboBoxOption[title="${value}"]`);
-  await option.waitFor({ state: 'visible', timeout: COMBO_BOX_OPTION_TIMEOUT_MS });
+  await option.waitFor({ state: 'visible', timeout: UI_READY_TIMEOUT_MS });
   await option.click();
 };
 
@@ -128,10 +155,10 @@ const selectComboBoxOptionIn = async (
   const combo = container.locator(`[data-test-subj="${testSubj}"]`);
   await combo.locator('[data-test-subj="comboBoxInput"]').click();
   const searchInput = combo.locator('[data-test-subj="comboBoxSearchInput"]');
-  await expect(searchInput).toBeEnabled({ timeout: 30_000 });
+  await expect(searchInput).toBeEnabled({ timeout: UI_READY_TIMEOUT_MS });
   await searchInput.pressSequentially(value, { delay: 50 });
   const option = page.locator(`.euiComboBoxOption[title="${value}"]`);
-  await option.waitFor({ state: 'visible', timeout: COMBO_BOX_OPTION_TIMEOUT_MS });
+  await option.waitFor({ state: 'visible', timeout: UI_READY_TIMEOUT_MS });
   await option.click();
 };
 
@@ -383,9 +410,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
 
     // Conditional action filter: use the structured filter builder, matching
     // the FTR coverage for field/operator/value interactions.
-    await page.testSubj.click('alertsFilterQueryToggle');
-    await page.testSubj.click('addFilter');
-    await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    await waitForAlertsFilterBuilderReady(page);
     await addStructuredFilterCondition(page, {
       field: 'kibana.alert.rule.uuid',
       operator: 'is not',
@@ -460,9 +485,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
 
     // Conditional action filter: use the structured filter builder and add the
     // second condition through the AND control, matching the old FTR flow.
-    await page.testSubj.click('alertsFilterQueryToggle');
-    await page.testSubj.click('addFilter');
-    await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    await waitForAlertsFilterBuilderReady(page);
     await addStructuredFilterCondition(page, {
       field: 'kibana.alert.rule.uuid',
       operator: 'is not',
