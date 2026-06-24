@@ -41,6 +41,7 @@ import {
 } from '../extraction_window';
 import { capAtMaxLogsPerWindow } from '../effective_page_limits';
 import type { RemoteExtractionStrategy } from './strategies';
+import { getErrorMessage } from '../../../../common';
 
 interface RemoteExtractToUpdatesParams {
   type: EntityType;
@@ -68,6 +69,13 @@ interface RemoteExtractToUpdatesResult {
   logsCapApplied?: boolean;
 }
 
+// CPS is not enabled, so '_origin' can't be resolved
+const isNoSuchRemoteClusterError = (message: string) =>
+  message.includes('no_such_remote_cluster_exception');
+
+// no linked projects, so '-_origin:*' resolves to an empty scope, ESQL throws 500
+const isNoSuchElementError = (message: string) => message.includes('no_such_element_exception');
+
 export class RemoteLogsExtractionClient {
   private readonly logger: Logger;
 
@@ -85,8 +93,18 @@ export class RemoteLogsExtractionClient {
     try {
       return await this.doExtractToUpdates(params);
     } catch (error) {
+      const message = getErrorMessage(error);
+      if (
+        this.strategy.id === 'cps' &&
+        (isNoSuchElementError(message) || isNoSuchRemoteClusterError(message))
+      ) {
+        this.logger.warn(
+          `CPS remote extraction unavailable (no linked projects or CPS disabled): ${message}. Returning empty result.`
+        );
+        return { count: 0, pages: 0 };
+      }
       const wrappedError = new Error(
-        `Failed to extract to updates from remote indices: ${error.message}`
+        `Failed to extract to updates from remote indices: ${message}`
       );
       this.logger.error(wrappedError);
       return { count: 0, pages: 0, error: wrappedError };
