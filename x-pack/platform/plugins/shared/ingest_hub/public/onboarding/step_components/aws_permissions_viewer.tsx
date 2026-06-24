@@ -194,7 +194,6 @@ export const AwsPermissionsViewer: React.FC<AwsPermissionsViewerProps> = ({
               <EuiSpacer size="xs" />
               <EuiListGroup
                 bordered
-                size="s"
                 data-test-subj={`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-managedPoliciesList`}
               >
                 {visibleManagedPolicyArns.map((arn) => (
