@@ -167,8 +167,8 @@ const registerRawIdentifiersMaintainerSuite = (
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
           await waitForRelationshipIds(esClient, relationshipKey, primingActor, primingTarget);
 
-          // staleActor: last_seen in the past → at/older than watermark → skipped
-          // freshActor: last_seen in the future → newer than watermark → resolved
+          // staleActor: last_seen in the past → older than the priming run's start watermark → skipped
+          // freshActor: last_seen after the priming run started → newer than watermark → resolved
           const staleTargetFqdn = targetFqdn('stale');
           const staleTarget = targetId('stale');
           const staleActor = actorId('stale');
