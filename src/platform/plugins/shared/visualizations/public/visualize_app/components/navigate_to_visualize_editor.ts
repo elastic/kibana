@@ -29,17 +29,20 @@ export type VisualizeEditor = UrlEditor | CallbackEditor;
  * 3. `editor.editApp` unset — visualize handles edit + view on the same
  *    URL, push into the local router.
  *
- * Items with `.error` set never navigate; preserves the legacy
- * `getOnClickTitle` gate that returned `undefined` for broken vises.
+ * Items with `.error` or `.readOnly` set never navigate; preserves the legacy
+ * `getOnClickTitle` gate that returned `undefined` for broken vises and for
+ * `readOnly` (managed / "no longer supported") visualizations, matching the
+ * disabled row `Edit` action and the `undefined` href from
+ * `getVisualizeListItemLink`.
  */
 export const navigateToVisualizeEditor = async (
-  item: { id: string; error?: string; editor?: VisualizeEditor },
+  item: { id: string; error?: string; readOnly?: boolean; editor?: VisualizeEditor },
   {
     stateTransferService,
     history,
   }: { stateTransferService: EmbeddableStateTransfer; history: History }
 ): Promise<void> => {
-  if (item.error) return;
+  if (item.error || item.readOnly) return;
   const editor = item.editor ?? { editUrl: '' };
   if ('onEdit' in editor) {
     await editor.onEdit(item.id);
