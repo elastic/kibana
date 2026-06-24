@@ -6,7 +6,7 @@
  */
 
 /**
- * Skill-selection benchmark dataset — 167 examples across 30 skills.
+ * Skill-selection benchmark dataset — 147 examples across 26 skills.
  *
  * Generated from benchmark_dataset.csv (Step 1 of the skill-evals plan).
  * Query types:
@@ -92,23 +92,6 @@ export const GRAPH_CREATION_EXAMPLES = mk('graph-creation', [
   ['Show me a pie chart of alert severity distribution across all active alerts', 'distractor'],
 ]);
 
-export const RULE_MANAGEMENT_EXAMPLES = mk('rule-management', [
-  [
-    'Create an alerting rule that fires when the error rate exceeds 5 percent for more than 10 minutes',
-    'direct',
-  ],
-  ['Update my CPU spike alert rule to notify via PagerDuty instead of email', 'direct'],
-  [
-    'I need to get paged when my database response time stays above 500ms for 5 minutes straight',
-    'indirect',
-  ],
-  [
-    'Set up a notification so my team knows when disk usage hits 80 percent on any production host',
-    'indirect',
-  ],
-  ['Show me all the detection rules currently enabled in my security environment', 'distractor'],
-]);
-
 export const SKILL_AUTHORING_EXAMPLES = mk('skill-authoring', [
   ['Create a new skill for my agent that can query our internal JIRA ticketing system', 'direct'],
   [
@@ -140,29 +123,6 @@ export const VISUALIZATION_CREATION_EXAMPLES = mk('visualization-creation', [
   [
     'Create a bar chart showing the distribution of response codes in kibana_sample_data_logs.',
     'direct',
-  ],
-]);
-
-export const WORKFLOW_AUTHORING_EXAMPLES = mk('workflow-authoring', [
-  [
-    'Create a workflow that sends a Slack message whenever a critical alert fires in Kibana',
-    'direct',
-  ],
-  [
-    'I need a workflow that automatically opens a PagerDuty incident when my SLO breach alert triggers',
-    'direct',
-  ],
-  [
-    'Whenever our checkout service goes down I want the on-call engineer to get notified automatically',
-    'indirect',
-  ],
-  [
-    'Set up an automated response so that when high-severity security events appear they get routed to the right Slack channel',
-    'indirect',
-  ],
-  [
-    'Set up an automated response so that whenever suspicious PowerShell activity is detected on an endpoint the offending process gets blocked and the host is isolated',
-    'distractor',
   ],
 ]);
 
@@ -205,7 +165,7 @@ export const KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES = mk('knowledge-indicators
   ],
 ]);
 
-export const SIG_EVENTS_MANAGEMENT_EXAMPLES = mk('sig-events-management', [
+export const SIG_EVENTS_MANAGEMENT_EXAMPLES = mk('significant-events-management', [
   [
     'Create a new significant event to record the Kafka outage that started yesterday at 14:00 UTC',
     'direct',
@@ -225,7 +185,7 @@ export const SIG_EVENTS_MANAGEMENT_EXAMPLES = mk('sig-events-management', [
   ],
 ]);
 
-export const SIG_EVENTS_MEMORY_EXAMPLES = mk('sig-events-memory', [
+export const SIG_EVENTS_MEMORY_EXAMPLES = mk('significant-events-memory', [
   [
     'Search the significant events knowledge base for what we know about the payments service architecture',
     'direct',
@@ -384,26 +344,6 @@ export const FIND_SECURITY_ML_JOBS_EXAMPLES = mk('find-security-ml-jobs', [
   ['Show me users with high risk scores and unusual behavioral signals this week', 'distractor'],
 ]);
 
-export const PCI_COMPLIANCE_EXAMPLES = mk('pci-compliance', [
-  ['Run a PCI DSS v4.0 compliance assessment on our cardholder data environment', 'direct'],
-  [
-    'Check whether our logging and access control meets PCI DSS requirement 10 for audit trail completeness',
-    'direct',
-  ],
-  [
-    'We are getting audited for card payment security next month — can you check our current compliance posture?',
-    'indirect',
-  ],
-  [
-    'Our compliance team needs to know if we are meeting access monitoring standards for payment processing systems',
-    'indirect',
-  ],
-  [
-    'Do we have enough detection and log coverage across our network and endpoint data sources?',
-    'distractor',
-  ],
-]);
-
 export const SIEM_READINESS_EXAMPLES = mk('siem-readiness', [
   [
     'Run a SIEM readiness assessment and tell me what data coverage gaps we have across log categories',
@@ -481,29 +421,7 @@ export const OBSERVABILITY_INVESTIGATION_EXAMPLES = mk('observability.investigat
   ],
   ['Investigate what is causing issues with the checkout service.', 'indirect'],
   ['Are there any active alerts? Investigate whatever you find.', 'indirect'],
-]);
-
-export const OBSERVABILITY_RCA_EXAMPLES = mk('observability.rca', [
-  [
-    'Perform a root cause analysis for the payment service outage that occurred between 02:00 and 03:15 UTC today',
-    'direct',
-  ],
-  [
-    'Why is the order-service throwing NullPointerExceptions — trace the failure back to its originating cause',
-    'direct',
-  ],
-  [
-    'Our database connection pool exhausted at midnight last night — what actually triggered that cascade failure?',
-    'indirect',
-  ],
-  [
-    'Users are seeing errors but I do not know where the breakage is in the system — help me trace it to the source',
-    'indirect',
-  ],
-  [
-    'Show me all current APM alerts and their statuses for services in the production environment',
-    'distractor',
-  ],
+  ['What skills do you have available? List all of them.', 'distractor'],
 ]);
 
 export const SERVICE_MAP_EXAMPLES = mk('service-map', [
@@ -694,10 +612,8 @@ export const SEARCH_VECTOR_HYBRID_SEARCH_EXAMPLES = mk('search.vector-hybrid-sea
 export const ALL_SKILL_EXAMPLES: BenchmarkExample[] = [
   ...DASHBOARD_MANAGEMENT_EXAMPLES,
   ...GRAPH_CREATION_EXAMPLES,
-  ...RULE_MANAGEMENT_EXAMPLES,
   ...SKILL_AUTHORING_EXAMPLES,
   ...VISUALIZATION_CREATION_EXAMPLES,
-  ...WORKFLOW_AUTHORING_EXAMPLES,
   ...KI_IDENTIFICATION_MANAGEMENT_EXAMPLES,
   ...KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES,
   ...SIG_EVENTS_MANAGEMENT_EXAMPLES,
@@ -709,11 +625,9 @@ export const ALL_SKILL_EXAMPLES: BenchmarkExample[] = [
   ...ENTITY_ANALYTICS_EXAMPLES,
   ...FIND_RULES_EXAMPLES,
   ...FIND_SECURITY_ML_JOBS_EXAMPLES,
-  ...PCI_COMPLIANCE_EXAMPLES,
   ...SIEM_READINESS_EXAMPLES,
   ...THREAT_HUNTING_EXAMPLES,
   ...OBSERVABILITY_INVESTIGATION_EXAMPLES,
-  ...OBSERVABILITY_RCA_EXAMPLES,
   ...SERVICE_MAP_EXAMPLES,
   ...SEARCH_CATALOG_ECOMMERCE_EXAMPLES,
   ...SEARCH_ELASTICSEARCH_ONBOARDING_EXAMPLES,

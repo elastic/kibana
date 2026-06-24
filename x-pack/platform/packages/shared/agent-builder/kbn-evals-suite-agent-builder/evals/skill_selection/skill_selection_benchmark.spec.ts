@@ -22,9 +22,6 @@ import {
   KI_IDENTIFICATION_MANAGEMENT_EXAMPLES,
   KNOWLEDGE_INDICATORS_MANAGEMENT_EXAMPLES,
   OBSERVABILITY_INVESTIGATION_EXAMPLES,
-  OBSERVABILITY_RCA_EXAMPLES,
-  PCI_COMPLIANCE_EXAMPLES,
-  RULE_MANAGEMENT_EXAMPLES,
   SEARCH_CATALOG_ECOMMERCE_EXAMPLES,
   SEARCH_ELASTICSEARCH_ONBOARDING_EXAMPLES,
   SEARCH_ELASTICSEARCH_TUTORIAL_EXAMPLES,
@@ -40,7 +37,6 @@ import {
   STREAMS_MANAGEMENT_EXAMPLES,
   THREAT_HUNTING_EXAMPLES,
   VISUALIZATION_CREATION_EXAMPLES,
-  WORKFLOW_AUTHORING_EXAMPLES,
 } from './benchmark_dataset';
 
 // Use the native kbn-evals executor directly — no Phoenix dependency.
@@ -127,16 +123,6 @@ evaluate.describe(
       });
     });
 
-    evaluate('workflow-authoring routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'workflow-authoring',
-        examples: WORKFLOW_AUTHORING_EXAMPLES,
-      });
-    });
-
-    evaluate('rule-management routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'rule-management', examples: RULE_MANAGEMENT_EXAMPLES });
-    });
   }
 );
 
@@ -148,7 +134,7 @@ evaluate.describe(
   () => {
     evaluate('sig-events-memory routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
-        skillId: 'sig-events-memory',
+        skillId: 'significant-events-memory',
         examples: SIG_EVENTS_MEMORY_EXAMPLES,
       });
     });
@@ -162,7 +148,7 @@ evaluate.describe(
 
     evaluate('sig-events-management routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
-        skillId: 'sig-events-management',
+        skillId: 'significant-events-management',
         examples: SIG_EVENTS_MANAGEMENT_EXAMPLES,
       });
     });
@@ -233,9 +219,6 @@ evaluate.describe(
       await evaluateBenchmark({ skillId: 'siem-readiness', examples: SIEM_READINESS_EXAMPLES });
     });
 
-    evaluate('pci-compliance routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({ skillId: 'pci-compliance', examples: PCI_COMPLIANCE_EXAMPLES });
-    });
   }
 );
 
@@ -249,13 +232,6 @@ evaluate.describe(
       await evaluateBenchmark({
         skillId: 'observability.investigation',
         examples: OBSERVABILITY_INVESTIGATION_EXAMPLES,
-      });
-    });
-
-    evaluate('observability.rca routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'observability.rca',
-        examples: OBSERVABILITY_RCA_EXAMPLES,
       });
     });
 
