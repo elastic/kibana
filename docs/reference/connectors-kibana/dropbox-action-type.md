@@ -94,5 +94,5 @@ To use the Dropbox connector, you must register an app in the Dropbox App Consol
    | **App key**               | Client ID     |
    | **App secret**            | Client Secret |
 
-9. In {{kib}}, enter the values from the table above.
+9. In {{kib}}, enter the values from the preceding table.
 10. Complete the authorization flow to connect your Dropbox account.
