@@ -42,7 +42,6 @@
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
-    "xpack.entityStore": "solutions/security/plugins/entity_store",
     "xpack.features": "platform/plugins/shared/features",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
