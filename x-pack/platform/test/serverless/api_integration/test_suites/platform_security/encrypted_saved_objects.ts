@@ -37,7 +37,9 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body).toEqual({
             statusCode: 400,
             error: 'Bad Request',
-            message: expect.stringContaining('exists but is not available with the current configuration'),
+            message: expect.stringContaining(
+              'exists but is not available with the current configuration'
+            ),
           });
           expect(status).toBe(400);
 
