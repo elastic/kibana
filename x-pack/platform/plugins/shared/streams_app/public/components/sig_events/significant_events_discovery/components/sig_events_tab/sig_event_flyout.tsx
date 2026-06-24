@@ -118,12 +118,7 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
           {event.criticality != null && (
             <EuiFlexItem>
               <FlyoutMetadataCard title={CRITICALITY_LABEL}>
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  data-test-subj="streamsSigEventCriticalityBullseye"
-                >
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="bullseye" size="s" />
                   </EuiFlexItem>
