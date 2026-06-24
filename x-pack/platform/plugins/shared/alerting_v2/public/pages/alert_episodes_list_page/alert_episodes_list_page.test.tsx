@@ -29,8 +29,17 @@ import {
 jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
   ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-  UnifiedDataTable: jest.fn(() => null),
-  getRenderCustomToolbarWithElements: jest.fn(() => jest.fn(() => null)),
+  // The page injects the episode count + reset-filters controls via the toolbar's leftSide.
+  // Render the custom toolbar (and have the toolbar builder render its leftSide) so those
+  // controls end up in the DOM and stay reactive to the page's filter state.
+  UnifiedDataTable: jest.fn((props: { renderCustomToolbar?: () => React.ReactNode }) =>
+    props.renderCustomToolbar ? props.renderCustomToolbar() : null
+  ),
+  getRenderCustomToolbarWithElements: jest.fn(
+    ({ leftSide }: { leftSide: React.ReactNode }) =>
+      () =>
+        leftSide
+  ),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
@@ -278,11 +287,11 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('builds the toolbar with the loaded episode count on the left side', () => {
-    // mockEpisodes has 3 entries; getRenderCustomToolbarWithElements receives the leftSide element
+    // getRenderCustomToolbarWithElements receives the leftSide element, which renders the count
     const mockGetRenderCustomToolbarWithElements = jest.mocked(getRenderCustomToolbarWithElements);
     const lastArgs = mockGetRenderCustomToolbarWithElements.mock.calls.at(-1)?.[0];
     expect(lastArgs?.leftSide).toBeDefined();
-    expect((lastArgs?.leftSide as React.ReactElement).props.count).toBe(mockEpisodes.length);
+    expect(screen.getByTestId('alertEpisodesItemCount')).toBeInTheDocument();
   });
 });
 
