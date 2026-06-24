@@ -51,19 +51,19 @@ export const getPublicTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest
       search: schema.maybe(schema.string({ maxLength: 1000 })),
       tags: schema.maybe(
         schema.oneOf([
-          schema.arrayOf(schema.string({ maxLength: 256 })),
+          schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
           schema.string({ maxLength: 256 }),
         ])
       ),
       author: schema.maybe(
         schema.oneOf([
-          schema.arrayOf(schema.string({ maxLength: 1000 })),
+          schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 }),
           schema.string({ maxLength: 1000 }),
         ])
       ),
       owner: schema.maybe(
         schema.oneOf([
-          schema.arrayOf(schema.string({ maxLength: 50 })),
+          schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 10 }),
           schema.string({ maxLength: 50 }),
         ])
       ),
