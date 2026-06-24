@@ -24,7 +24,7 @@ import { FlyoutError } from '../shared/components/flyout_error';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { FlyoutTitle } from '../shared/components/flyout_title';
 
-export interface MisconfigurationPanelProps {
+export interface MisconfigurationProps {
   /**
    * The unique identifier of the cloud resource associated with the misconfiguration.
    */
@@ -39,7 +39,7 @@ export interface MisconfigurationPanelProps {
  * V2 system-flyout compatible misconfiguration finding panel.
  * This is a simplified version that doesn't use expandable flyout components.
  */
-export const MisconfigurationPanel = memo(({ resourceId, ruleId }: MisconfigurationPanelProps) => {
+export const Misconfiguration = memo(({ resourceId, ruleId }: MisconfigurationProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
 
@@ -92,4 +92,4 @@ export const MisconfigurationPanel = memo(({ resourceId, ruleId }: Misconfigurat
   );
 });
 
-MisconfigurationPanel.displayName = 'MisconfigurationPanel';
+Misconfiguration.displayName = 'Misconfiguration';

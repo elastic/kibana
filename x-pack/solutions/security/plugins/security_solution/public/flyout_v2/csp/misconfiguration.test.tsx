@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
-import { MisconfigurationPanel } from './misconfiguration_panel';
+import { Misconfiguration } from './misconfiguration';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding', () => ({
   useMisconfigurationFinding: jest.fn(),
@@ -58,9 +58,9 @@ jest.mock('../../common/lib/kibana', () => ({
 
 const useMisconfigurationFindingMock = useMisconfigurationFinding as jest.Mock;
 
-const renderPanel = () => render(<MisconfigurationPanel resourceId="resource-1" ruleId="rule-1" />);
+const renderPanel = () => render(<Misconfiguration resourceId="resource-1" ruleId="rule-1" />);
 
-describe('<MisconfigurationPanel />', () => {
+describe('<Misconfiguration />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
