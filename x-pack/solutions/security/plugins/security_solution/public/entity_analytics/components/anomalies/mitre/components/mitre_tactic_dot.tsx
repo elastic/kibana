@@ -306,6 +306,16 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
     [handleActivate]
   );
 
+  const handleDotKeyDown = useCallback<React.KeyboardEventHandler<HTMLDivElement>>(
+    (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleActivate?.();
+      }
+    },
+    [handleActivate]
+  );
+
   const chipAriaLabel = `${tactic}, ${anomaliesCountText(anomalyCount)}`;
 
   const hoverHandlers = showHoverChip
@@ -320,6 +330,10 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
   return (
     <div
       {...hoverHandlers}
+      onClick={handleActivate}
+      onKeyDown={handleActivate ? handleDotKeyDown : undefined}
+      role={handleActivate ? 'button' : undefined}
+      tabIndex={handleActivate ? 0 : undefined}
       css={css`
         position: relative;
         width: 100%;
