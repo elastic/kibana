@@ -79,8 +79,7 @@ export const AgentlessStepConfigureConnector = ({
             />
           </EuiFlexItem>
         );
-      }}
-      ))
+      })
     ) : (
       <EuiFlexItem>
         <EuiCard
