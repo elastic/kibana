@@ -9,8 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { parseEsqlSourceDocuments } from '@kbn/ai-tools';
-import objectHash from 'object-hash';
+import { parseEsqlSourceDocuments, getEsqlDocumentId } from '@kbn/ai-tools';
 
 type Response = Array<{
   _id: string;
@@ -54,7 +53,7 @@ export const executeEsqlRequest = async ({
  * content-based dedup working.
  */
 const parseEsqlResults = (response: ESQLSearchResponse): Response =>
-  parseEsqlSourceDocuments(response).map(({ id, source }) => ({
-    _id: id ?? objectHash(source),
-    _source: source,
+  parseEsqlSourceDocuments(response).map((doc) => ({
+    _id: getEsqlDocumentId(doc),
+    _source: doc.source,
   }));

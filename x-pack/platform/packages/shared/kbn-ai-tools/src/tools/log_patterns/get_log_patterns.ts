@@ -20,13 +20,15 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
-import { esql } from '@elastic/esql';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { pValueToLabel } from '../../utils/p_value_to_label';
-import { columnPath } from '../../utils/esql_two_pass';
+import {
+  buildCategorizeWithSampleQuery,
+  parseCategorizeWithSampleRows,
+} from '../../utils/esql_categorize';
 
 const MAX_DOCS_TO_SAMPLE = 100_000;
 
@@ -517,70 +519,6 @@ async function runEsqlCountQuery({
   return typeof total === 'number' ? total : 0;
 }
 
-/**
- * Builds a single-pass ES|QL categorization query that returns, per pattern, the
- * document count and one representative sample value for the field. The sample
- * uses `TOP(<field>::keyword, 1, "desc")`: text fields are not aggregatable, so
- * the cast to keyword makes the value usable by `TOP` while keeping the original
- * message text. Works for both concrete indices and ES|QL views.
- */
-function buildCategorizeWithSampleQuery({
-  samplingSource,
-  field,
-  limit,
-  samplingProbability,
-  kql,
-}: {
-  samplingSource: string;
-  field: string;
-  limit: number;
-  samplingProbability: number;
-  kql?: string;
-}): string {
-  let query = esql.from([samplingSource]);
-
-  if (kql) {
-    query = query.where`KQL(${esql.str(kql)})`;
-  }
-  if (samplingProbability < 1) {
-    query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
-  }
-
-  return query.pipe`STATS count = COUNT(*), sample = TOP(${esql.col(
-    columnPath(field)
-  )}::keyword, 1, "desc") BY pattern = CATEGORIZE(${esql.col(columnPath(field))})`
-    .sort([['count'], 'DESC', ''])
-    .limit(limit)
-    .print('basic');
-}
-
-function parseCategorizeWithSampleRows(
-  response: ESQLSearchResponse
-): Array<{ count: number; pattern: string; sample: string }> {
-  const countIndex = response.columns.findIndex((column) => column.name === 'count');
-  const sampleIndex = response.columns.findIndex((column) => column.name === 'sample');
-  const patternIndex = response.columns.findIndex((column) => column.name === 'pattern');
-
-  if (countIndex === -1 || sampleIndex === -1 || patternIndex === -1) {
-    return [];
-  }
-
-  return response.values.flatMap((row) => {
-    const count = row[countIndex];
-    const pattern = row[patternIndex];
-    const rawSample = row[sampleIndex];
-    // TOP(..., 1) returns a scalar, but tolerate a single-item array across ES
-    // snapshots (same defensive handling as the two-pass categorize parser).
-    const sample = Array.isArray(rawSample) ? rawSample[0] : rawSample;
-
-    if (typeof count !== 'number' || typeof pattern !== 'string') {
-      return [];
-    }
-
-    return [{ count, pattern, sample: typeof sample === 'string' ? sample : '' }];
-  });
-}
-
 async function runSigEventsCategorize({
   esClient,
   samplingSource,
@@ -602,7 +540,7 @@ async function runSigEventsCategorize({
 }): Promise<Array<{ count: number; pattern: string; sample: string }>> {
   const response = (await esClient.esql('categorize_sigevents_log_patterns', {
     query: buildCategorizeWithSampleQuery({
-      samplingSource,
+      indices: samplingSource,
       kql,
       field,
       samplingProbability,

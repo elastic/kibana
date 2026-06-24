@@ -6,6 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
+import objectHash from 'object-hash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 
@@ -136,22 +137,18 @@ describe('getSampleDocumentsEsql', () => {
       size: 2,
     });
 
+    // Views expose no `_id`, so a stable content hash of the reconstructed
+    // source is synthesized (enables cross-bucket sample dedup for query streams).
+    const firstSource = {
+      '@timestamp': '2026-04-28T08:00:00.000Z',
+      message: 'first',
+      'service.name': 'checkout',
+    };
+    const secondSource = { '@timestamp': '2026-04-28T08:01:00.000Z', message: 'second' };
     expect(result).toEqual({
       hits: [
-        {
-          _index: '',
-          _id: undefined,
-          _source: {
-            '@timestamp': '2026-04-28T08:00:00.000Z',
-            message: 'first',
-            'service.name': 'checkout',
-          },
-        },
-        {
-          _index: '',
-          _id: undefined,
-          _source: { '@timestamp': '2026-04-28T08:01:00.000Z', message: 'second' },
-        },
+        { _index: '', _id: objectHash(firstSource), _source: firstSource },
+        { _index: '', _id: objectHash(secondSource), _source: secondSource },
       ],
       total: 2,
     });

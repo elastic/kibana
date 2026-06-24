@@ -6,6 +6,7 @@
  */
 
 import { isPlainObject } from 'lodash';
+import objectHash from 'object-hash';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
 export interface EsqlSourceDocument {
@@ -16,6 +17,17 @@ export interface EsqlSourceDocument {
    */
   id: string | undefined;
   source: Record<string, unknown>;
+}
+
+/**
+ * Returns a stable string identity for a parsed ES|QL document: the real `_id`
+ * for concrete indices, or a content hash of the reconstructed source for ES|QL
+ * views (which expose no `_id`). The hash is deterministic across runs, so
+ * identity-based dedup (alert dedup in the rule executor, cross-bucket sample
+ * dedup) works for views too.
+ */
+export function getEsqlDocumentId({ id, source }: EsqlSourceDocument): string {
+  return id ?? objectHash(source);
 }
 
 // ES|QL metadata columns that are never part of the reconstructed document body.

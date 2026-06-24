@@ -6,7 +6,7 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { parseEsqlSourceDocuments } from './parse_esql_source_documents';
+import { getEsqlDocumentId, parseEsqlSourceDocuments } from './parse_esql_source_documents';
 
 const response = (
   columns: Array<{ name: string; type: string }>,
@@ -114,5 +114,27 @@ describe('parseEsqlSourceDocuments', () => {
 
       expect(result).toEqual([]);
     });
+  });
+});
+
+describe('getEsqlDocumentId', () => {
+  it('uses the real id when present (concrete index)', () => {
+    expect(getEsqlDocumentId({ id: 'doc-1', source: { a: 1 } })).toBe('doc-1');
+  });
+
+  it('hashes the source deterministically when id is missing (view)', () => {
+    const source = { '@timestamp': 't1', message: 'hello' };
+    const first = getEsqlDocumentId({ id: undefined, source });
+    const second = getEsqlDocumentId({ id: undefined, source: { ...source } });
+
+    expect(typeof first).toBe('string');
+    expect(first).toHaveLength(40);
+    expect(first).toBe(second);
+  });
+
+  it('hashes different sources to different ids', () => {
+    expect(getEsqlDocumentId({ id: undefined, source: { a: 1 } })).not.toBe(
+      getEsqlDocumentId({ id: undefined, source: { a: 2 } })
+    );
   });
 });

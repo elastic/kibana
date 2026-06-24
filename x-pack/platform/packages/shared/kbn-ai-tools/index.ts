@@ -37,6 +37,7 @@ export {
 } from './src/utils/get_esql_column_schema';
 export {
   parseEsqlSourceDocuments,
+  getEsqlDocumentId,
   type EsqlSourceDocument,
 } from './src/utils/parse_esql_source_documents';
 

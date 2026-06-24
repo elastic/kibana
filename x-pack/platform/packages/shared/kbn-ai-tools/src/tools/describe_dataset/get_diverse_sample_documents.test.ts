@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import objectHash from 'object-hash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { getSampleDocumentsEsql } from './get_sample_documents';
@@ -27,6 +28,7 @@ const createEsClient = () => {
 
 const logger = {
   warn: jest.fn(),
+  debug: jest.fn(),
 } as unknown as Logger;
 
 const countResponse = (total: number) => ({
@@ -41,30 +43,45 @@ const schemaResponse = (
   values: [],
 });
 
-const pass1Response = (
+// Single-pass categorize result: count, representative sample value, pattern.
+const categorizeResponse = (
   values: unknown[][] = [
-    ['logs-a:doc-1', 10, 'error'],
-    ['logs-b:doc-2', 5, 'warn'],
+    [10, 'error one', 'error'],
+    [5, 'warn two', 'warn'],
   ]
 ) => ({
   columns: [
-    { name: 'representative_key', type: 'keyword' },
     { name: 'count', type: 'long' },
+    { name: 'sample', type: 'keyword' },
     { name: 'pattern', type: 'keyword' },
   ],
   values,
 });
 
-const pass2Response = (
+// Concrete index source fetch (METADATA _id, _source survives).
+const concreteFetchResponse = (
   values: unknown[][] = [
-    ['logs-a', 'doc-1', { message: 'error one' }],
-    ['logs-b', 'doc-2', { message: 'warn two' }],
+    ['doc-1', { message: 'error one' }],
+    ['doc-2', { message: 'warn two' }],
   ]
 ) => ({
   columns: [
-    { name: '_index', type: 'keyword' },
     { name: '_id', type: 'keyword' },
-    { name: '_source', type: 'object' },
+    { name: '_source', type: '_source' },
+  ],
+  values,
+});
+
+// ES|QL view source fetch: _id/_source dropped, only projected columns remain.
+const viewFetchResponse = (
+  values: unknown[][] = [
+    ['2026-06-18T00:00:00Z', 'error one'],
+    ['2026-06-18T00:01:00Z', 'warn two'],
+  ]
+) => ({
+  columns: [
+    { name: '@timestamp', type: 'date' },
+    { name: 'message', type: 'text' },
   ],
   values,
 });
@@ -74,13 +91,13 @@ describe('getDiverseSampleDocuments', () => {
     jest.clearAllMocks();
   });
 
-  it('uses ES|QL count, categorize pass, and composite-key source fetch', async () => {
+  it('categorizes and fetches sources without _index/_id metadata (concrete indices)', async () => {
     const { esClient, query } = createEsClient();
     query
       .mockResolvedValueOnce(schemaResponse())
       .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(pass1Response())
-      .mockResolvedValueOnce(pass2Response());
+      .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(concreteFetchResponse());
 
     const result = await getDiverseSampleDocuments({
       esClient,
@@ -88,20 +105,54 @@ describe('getDiverseSampleDocuments', () => {
       start: 100,
       end: 200,
       size: 2,
-      offset: 1,
+      offset: 0,
       logger,
     });
 
-    expect(query.mock.calls[0][0].query).toBe('FROM logs-a, logs-b | LIMIT 0');
-    expect(query.mock.calls[1][0].query).toBe('FROM logs-a, logs-b | STATS total = COUNT(*)');
-    expect(query.mock.calls[2][0].query).toBe(
-      'FROM logs-a, logs-b METADATA _index, _id | EVAL doc_key = CONCAT(_index, ":", _id) | STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(message) | SORT count DESC | LIMIT 3'
+    const categorizeQuery = query.mock.calls[2][0].query;
+    expect(categorizeQuery).not.toContain('METADATA');
+    expect(categorizeQuery).toContain(
+      'STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message)'
     );
-    expect(query.mock.calls[3][0].query).toBe(
-      'FROM logs-a, logs-b METADATA _index, _id, _source | EVAL doc_key = CONCAT(_index, ":", _id) | WHERE doc_key IN ("logs-b:doc-2") | KEEP _index, _id, _source | LIMIT 1'
-    );
+    expect(categorizeQuery).toContain('SORT count DESC');
+    expect(categorizeQuery).toContain('LIMIT 2');
+
+    const fetchQuery = query.mock.calls[3][0].query;
+    expect(fetchQuery).toContain('FROM logs-a, logs-b METADATA _id, _source');
+    expect(fetchQuery).toContain('WHERE message::KEYWORD IN ("error one", "warn two")');
+    expect(fetchQuery).toContain('LIMIT 20');
+
     expect(result.hits).toEqual([
-      { _index: 'logs-b', _id: 'doc-2', _source: { message: 'warn two' } },
+      { _index: '', _id: 'doc-1', _source: { message: 'error one' } },
+      { _index: '', _id: 'doc-2', _source: { message: 'warn two' } },
+    ]);
+  });
+
+  it('reconstructs sources for ES|QL views that drop _id/_source metadata', async () => {
+    const { esClient, query } = createEsClient();
+    query
+      .mockResolvedValueOnce(schemaResponse())
+      .mockResolvedValueOnce(countResponse(10))
+      .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(viewFetchResponse());
+
+    const result = await getDiverseSampleDocuments({
+      esClient,
+      index: '$.query',
+      start: 100,
+      end: 200,
+      size: 2,
+      offset: 0,
+      logger,
+    });
+
+    // Views expose no `_id`, so a stable content hash is synthesized so the doc
+    // can be deduped across the diverse/random buckets in mergeDocuments.
+    const firstSource = { '@timestamp': '2026-06-18T00:00:00Z', message: 'error one' };
+    const secondSource = { '@timestamp': '2026-06-18T00:01:00Z', message: 'warn two' };
+    expect(result.hits).toEqual([
+      { _index: '', _id: objectHash(firstSource), _source: firstSource },
+      { _index: '', _id: objectHash(secondSource), _source: secondSource },
     ]);
   });
 
@@ -110,8 +161,8 @@ describe('getDiverseSampleDocuments', () => {
     query
       .mockResolvedValueOnce(schemaResponse())
       .mockResolvedValueOnce(countResponse(10_000_000))
-      .mockResolvedValueOnce(pass1Response([['logs-a:doc-1', 10, 'error']]))
-      .mockResolvedValueOnce(pass2Response([['logs-a', 'doc-1', { message: 'error one' }]]));
+      .mockResolvedValueOnce(categorizeResponse([[10, 'error one', 'error']]))
+      .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]));
 
     await getDiverseSampleDocuments({
       esClient,
@@ -185,12 +236,10 @@ describe('getDiverseSampleDocuments', () => {
         ])
       )
       .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(pass1Response([['logs-a:doc-1', 10, 'body pattern']]))
-      .mockResolvedValueOnce(
-        pass2Response([['logs-a', 'doc-1', { body: { text: 'body value' } }]])
-      );
+      .mockResolvedValueOnce(categorizeResponse([[10, 'body value', 'body pattern']]))
+      .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { body: { text: 'body value' } }]]));
 
-    await getDiverseSampleDocuments({
+    const result = await getDiverseSampleDocuments({
       esClient,
       index: 'logs-*',
       start: 100,
@@ -201,15 +250,47 @@ describe('getDiverseSampleDocuments', () => {
     });
 
     expect(query.mock.calls[2][0].query).toContain('CATEGORIZE(body.text)');
+    expect(query.mock.calls[3][0].query).toContain('WHERE body.text::KEYWORD IN ("body value")');
+    expect(result.hits).toEqual([
+      { _index: '', _id: 'doc-1', _source: { body: { text: 'body value' } } },
+    ]);
   });
 
-  it('drops patterns whose composite key is missing from pass 2', async () => {
+  it('applies the offset window before fetching sources', async () => {
     const { esClient, query } = createEsClient();
     query
       .mockResolvedValueOnce(schemaResponse())
       .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(pass1Response())
-      .mockResolvedValueOnce(pass2Response([['logs-a', 'doc-1', { message: 'error one' }]]));
+      .mockResolvedValueOnce(
+        categorizeResponse([
+          [10, 'error one', 'error'],
+          [5, 'warn two', 'warn'],
+        ])
+      )
+      .mockResolvedValueOnce(concreteFetchResponse([['doc-2', { message: 'warn two' }]]));
+
+    const result = await getDiverseSampleDocuments({
+      esClient,
+      index: 'logs-*',
+      start: 100,
+      end: 200,
+      size: 1,
+      offset: 1,
+      logger,
+    });
+
+    expect(query.mock.calls[2][0].query).toContain('LIMIT 2');
+    expect(query.mock.calls[3][0].query).toContain('WHERE message::KEYWORD IN ("warn two")');
+    expect(result.hits).toEqual([{ _index: '', _id: 'doc-2', _source: { message: 'warn two' } }]);
+  });
+
+  it('skips categories whose representative value has no matching document', async () => {
+    const { esClient, query } = createEsClient();
+    query
+      .mockResolvedValueOnce(schemaResponse())
+      .mockResolvedValueOnce(countResponse(10))
+      .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]));
 
     const result = await getDiverseSampleDocuments({
       esClient,
@@ -221,11 +302,9 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    expect(result.hits).toEqual([
-      { _index: 'logs-a', _id: 'doc-1', _source: { message: 'error one' } },
-    ]);
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Diverse sampling: doc logs-b:doc-2 not found in pass-2 fetch (deleted between passes); skipping pattern.'
+    expect(result.hits).toEqual([{ _index: '', _id: 'doc-1', _source: { message: 'error one' } }]);
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Diverse sampling: resolved 1/2 representative documents.'
     );
   });
 });
