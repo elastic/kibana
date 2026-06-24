@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import type { SearchMode } from '../../../common/queries';
 
 /**
  * A memory page as stored in the main memory index.
@@ -35,6 +36,8 @@ export interface MemoryEntry {
   updated_at: string;
   created_by: string;
   updated_by: string;
+  /** Present and true for soft-deleted tombstone documents */
+  is_deleted?: boolean;
 }
 
 /**
@@ -115,6 +118,7 @@ export interface SearchMemoryParams {
   categories?: string[];
   references?: string[];
   size?: number;
+  mode?: SearchMode;
 }
 
 /** Dependencies for the memory service */

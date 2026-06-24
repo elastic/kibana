@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SmlSearchFilters } from '@kbn/agent-context-layer-plugin/public';
+import type {
+  SmlSearchFilters,
+  SmlSearchConstraints,
+} from '@kbn/agent-context-layer-plugin/public';
 
 /**
  * Query keys for react-query
@@ -19,7 +22,8 @@ export const queryKeys = {
   agentProfiles: {
     all: ['agentProfiles'] as const,
     byId: (agentProfileId?: string) => ['agentProfiles', agentProfileId],
-    acl: (agentProfileId: string) => ['agentProfiles', agentProfileId, 'acl'] as const,
+    accessControl: (agentProfileId: string) =>
+      ['agentProfiles', agentProfileId, 'accessControl'] as const,
   },
   security: {
     users: ['security', 'users'] as const,
@@ -59,8 +63,10 @@ export const queryKeys = {
     byAgent: (agentId?: string) => ['skills', 'byAgent', agentId],
   },
   sml: {
-    search: (query: string, skipContent: boolean, filters?: SmlSearchFilters) =>
-      ['sml', 'search', { query, skipContent, filters }] as const,
+    search: (query: string, constraints?: SmlSearchConstraints, filters?: SmlSearchFilters) =>
+      ['sml', 'search', { query, constraints, filters }] as const,
+    autocomplete: (query: string, constraints?: SmlSearchConstraints, filters?: SmlSearchFilters) =>
+      ['sml', 'autocomplete', { query, constraints, filters }] as const,
   },
   plugins: {
     all: ['plugins', 'list'] as const,
