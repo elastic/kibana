@@ -20,7 +20,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import {
-  isTemplate,
   fillTemplate,
   sanitizeTemplate,
   isValidTemplate,
@@ -142,7 +141,6 @@ export const AiSummaryComponent = ({
     // Slow path — no stored template: LLM generates template. For esqlQuery panels the
     // data fetch runs in parallel so both complete as close together as possible.
     let esqlData: EsqlDataResult | null = null;
-    let staleTemplate: string | null = null;
     let templateDone = false;
     let dataDone = !esqlQuery;
     let hasFailed = false;
@@ -202,10 +200,6 @@ export const AiSummaryComponent = ({
           if (controller.signal.aborted) return;
           esqlData = data;
           dataDone = true;
-          // SWR: if a stale template arrived before data, fill and show it immediately.
-          if (staleTemplate && !templateDone) {
-            setHtml(fillTemplate(staleTemplate, data.columns, data.rows));
-          }
           tryFinish();
         })
         .catch((err: Error) => {
@@ -222,17 +216,7 @@ export const AiSummaryComponent = ({
       (token) => {
         accRef.current += token;
       },
-      controller.signal,
-      (staleHtml) => {
-        if (esqlQuery && isTemplate(staleHtml)) {
-          // SWR for template panels: fill stale template with current data if available.
-          staleTemplate = sanitizeTemplate(staleHtml);
-          if (esqlData) setHtml(fillTemplate(staleTemplate, esqlData.columns, esqlData.rows));
-        } else if (!esqlQuery && !isTemplate(staleHtml)) {
-          stopInterval();
-          setHtml(staleHtml);
-        }
-      }
+      controller.signal
     )
       .catch((err: Error) => {
         if (err.name !== 'AbortError') {

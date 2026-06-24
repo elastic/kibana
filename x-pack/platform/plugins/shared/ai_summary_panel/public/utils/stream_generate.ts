@@ -7,14 +7,13 @@
 
 import type { HttpStart, HttpResponse } from '@kbn/core/public';
 
-// Generic NDJSON streaming helper — reads { token, stale, error } events from any streaming route.
+// Generic NDJSON streaming helper — reads { token, error } events from any streaming route.
 export async function streamNdjson(
   http: HttpStart,
   path: string,
   body: unknown,
   onToken: (token: string) => void,
-  signal: AbortSignal,
-  onStale?: (html: string) => void
+  signal: AbortSignal
 ): Promise<void> {
   const httpResponse = await http.post(path, {
     body: JSON.stringify(body),
@@ -31,9 +30,8 @@ export async function streamNdjson(
 
   const processLine = (line: string) => {
     if (!line.trim()) return;
-    const event = JSON.parse(line) as { token?: string; stale?: string; error?: string };
+    const event = JSON.parse(line) as { token?: string; error?: string };
     if (event.error) throw new Error(event.error);
-    if (event.stale) onStale?.(event.stale);
     if (event.token) onToken(event.token);
   };
 
@@ -75,15 +73,7 @@ export async function streamGenerate(
   http: HttpStart,
   params: GenerateParams,
   onToken: (token: string) => void,
-  signal: AbortSignal,
-  onStale?: (html: string) => void
+  signal: AbortSignal
 ): Promise<void> {
-  return streamNdjson(
-    http,
-    '/internal/ai_summary_panel/generate',
-    params,
-    onToken,
-    signal,
-    onStale
-  );
+  return streamNdjson(http, '/internal/ai_summary_panel/generate', params, onToken, signal);
 }
