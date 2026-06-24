@@ -147,9 +147,7 @@ describe('registerIamPermissionsRoute', () => {
 
     // Should equal the hardcoded matrix actions for cloudtrail
     const matrixActions = AWS_SERVICE_PROVIDER_PERMISSIONS.cloudtrail?.actions ?? [];
-    expect(body.byService.cloudtrail.policy.Statement[0].Action).toEqual(
-      [...matrixActions].sort()
-    );
+    expect(body.byService.cloudtrail.policy.Statement[0].Action).toEqual([...matrixActions].sort());
   });
 
   it('logs a debug message when using the matrix fallback', async () => {
@@ -161,12 +159,8 @@ describe('registerIamPermissionsRoute', () => {
 
     await handler({} as any, request, response);
 
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('cloudtrail')
-    );
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('fallback')
-    );
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('cloudtrail'));
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('fallback'));
   });
 
   it('falls back silently when Fleet package fetch throws', async () => {
@@ -183,9 +177,7 @@ describe('registerIamPermissionsRoute', () => {
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
 
     const matrixActions = AWS_SERVICE_PROVIDER_PERMISSIONS.cloudtrail?.actions ?? [];
-    expect(body.byService.cloudtrail.policy.Statement[0].Action).toEqual(
-      [...matrixActions].sort()
-    );
+    expect(body.byService.cloudtrail.policy.Statement[0].Action).toEqual([...matrixActions].sort());
 
     // Logger should have recorded the debug message about the failed fetch
     expect(logger.debug).toHaveBeenCalledWith(
@@ -273,9 +265,7 @@ describe('registerIamPermissionsRoute', () => {
     // fargate: uses matrix fallback
     const fargateMatrix = AWS_SERVICE_PROVIDER_PERMISSIONS.fargate?.actions ?? [];
     if (fargateMatrix.length > 0) {
-      expect(body.byService.fargate.policy.Statement[0].Action).toEqual(
-        [...fargateMatrix].sort()
-      );
+      expect(body.byService.fargate.policy.Statement[0].Action).toEqual([...fargateMatrix].sort());
     }
   });
 
