@@ -41,11 +41,9 @@ jest.mock('../../../hooks/use_adhoc_apm_data_view', () => ({
       id: 'apm-data-view',
       title: 'apm-*',
       fields: {
-        getByName: (name: string) =>
-          mockMissingFields.includes(name) ? undefined : { name },
+        getByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
       },
-      getFieldByName: (name: string) =>
-        mockMissingFields.includes(name) ? undefined : { name },
+      getFieldByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
     },
   }),
 }));
