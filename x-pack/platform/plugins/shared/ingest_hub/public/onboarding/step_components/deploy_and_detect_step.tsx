@@ -45,18 +45,6 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
 
   return (
     <div data-test-subj="onboardingStep-deploy-and-detect">
-      {onBack && (
-        <>
-          <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
-            <FormattedMessage
-              id="xpack.ingestHub.deployAndDetectStep.backButton"
-              defaultMessage="Back"
-            />
-          </EuiButtonEmpty>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
       {isDeploying && (
         <EuiFlexGroup
           alignItems="center"
@@ -130,15 +118,35 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
         </>
       )}
 
-      {allSucceeded && (
+      {(onBack || allSucceeded) && (
         <>
           <EuiSpacer size="l" />
-          <EuiButton fill onClick={onContinue} data-test-subj="deployAndDetectStep-continueButton">
-            <FormattedMessage
-              id="xpack.ingestHub.deployAndDetectStep.continueButton"
-              defaultMessage="AWS Overview"
-            />
-          </EuiButton>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {onBack && (
+                <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+                  <FormattedMessage
+                    id="xpack.ingestHub.deployAndDetectStep.backButton"
+                    defaultMessage="Back"
+                  />
+                </EuiButtonEmpty>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {allSucceeded && (
+                <EuiButton
+                  fill
+                  onClick={onContinue}
+                  data-test-subj="deployAndDetectStep-continueButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestHub.deployAndDetectStep.continueButton"
+                    defaultMessage="AWS Overview"
+                  />
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
     </div>

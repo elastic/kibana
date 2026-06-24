@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiButtonEmpty, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -50,17 +50,6 @@ export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepPro
 
   return (
     <div data-test-subj="onboardingStep-deploy-settings">
-      {onBack && (
-        <>
-          <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
-            <FormattedMessage
-              id="xpack.ingestHub.deploySettingsStep.backButton"
-              defaultMessage="Back"
-            />
-          </EuiButtonEmpty>
-          <EuiSpacer size="m" />
-        </>
-      )}
       <Suspense
         fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-deploy-settings-loading" />}
       >
@@ -70,6 +59,7 @@ export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepPro
           initialStaticKeys={deploySettingsStep.staticKeys}
           showIdentityFederation={showIdentityFederation}
           staticKeysContent={staticKeysContent}
+          onBack={onBack}
           onContinue={() => handleDeploy()}
           continueButtonLabel={
             <FormattedMessage

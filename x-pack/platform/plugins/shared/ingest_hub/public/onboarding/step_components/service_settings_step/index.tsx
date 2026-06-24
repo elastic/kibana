@@ -40,7 +40,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     setServiceTransport,
     setServiceField,
     setServiceFields,
-    isReady,
+    showValidation,
     handleNext,
   } = useServiceSettings({ onContinue });
 
@@ -96,7 +96,14 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               defaultMessage:
                 'Global AWS Region — can be overridden per service in Collection settings',
             })}
-            isInvalid={!globalRegion.trim()}
+            isInvalid={showValidation && !globalRegion.trim()}
+            error={
+              showValidation && !globalRegion.trim()
+                ? i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.error', {
+                    defaultMessage: 'A global region is required.',
+                  })
+                : undefined
+            }
           >
             <EuiComboBox
               compressed
@@ -105,7 +112,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               selectedOptions={selectedGlobalRegionOption}
               onChange={(selected) => setGlobalRegion(selected[0]?.label ?? '')}
               onCreateOption={(searchValue) => setGlobalRegion(searchValue)}
-              isInvalid={!globalRegion.trim()}
+              isInvalid={showValidation && !globalRegion.trim()}
               customOptionText='Use "{searchValue}" as region'
               placeholder={i18n.translate(
                 'xpack.ingestHub.serviceSettingsStep.globalRegion.placeholder',
@@ -125,6 +132,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             <ServiceSettingsCard
               service={service}
               config={config}
+              showValidation={showValidation}
               onTransportChange={handleTransportChange(service.id)}
               onFieldChange={handleFieldChange(service.id)}
               onOpenFlyout={() => setActiveFlyoutServiceId(service.id)}
@@ -148,12 +156,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleNext}
-            isDisabled={!isReady}
-            data-test-subj="serviceSettingsStep-continueButton"
-          >
+          <EuiButton fill onClick={handleNext} data-test-subj="serviceSettingsStep-continueButton">
             <FormattedMessage
               id="xpack.ingestHub.serviceSettingsStep.continueButton"
               defaultMessage="Continue"

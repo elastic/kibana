@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
@@ -125,8 +125,14 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     });
   }, [globalRegion, selectedServices, getServiceVars]);
 
+  const [showValidation, setShowValidation] = useState(false);
+
   const handleNext = useCallback(() => {
-    if (isReady) onContinue();
+    if (!isReady) {
+      setShowValidation(true);
+      return;
+    }
+    onContinue();
   }, [isReady, onContinue]);
 
   return {
@@ -137,6 +143,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setServiceTransport,
     setServiceField,
     setServiceFields,
+    showValidation,
     isReady,
     handleNext,
   };

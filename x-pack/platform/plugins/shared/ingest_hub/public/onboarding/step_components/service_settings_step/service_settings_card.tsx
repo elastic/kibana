@@ -29,6 +29,7 @@ import { SignalTypeBadge } from '../services_step/signal_type_badge';
 interface ServiceSettingsCardProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
+  showValidation: boolean;
   onTransportChange: (transport: TransportType) => void;
   onFieldChange: (fieldName: string, value: string) => void;
   onOpenFlyout: () => void;
@@ -52,6 +53,7 @@ const TRANSPORT_OPTIONS = [
 export function ServiceSettingsCard({
   service,
   config,
+  showValidation,
   onTransportChange,
   onFieldChange,
   onOpenFlyout,
@@ -116,7 +118,7 @@ export function ServiceSettingsCard({
         )}
       </EuiFlexGroup>
 
-      {hasEmptyInlineFields && (
+      {showValidation && hasEmptyInlineFields && (
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs" color="danger">
@@ -136,7 +138,7 @@ export function ServiceSettingsCard({
         const meta = FIELD_CONFIG[fieldName];
         if (!meta) return null;
         const value = config.vars[fieldName] ?? '';
-        const isInvalid = value.trim() === '';
+        const isInvalid = showValidation && value.trim() === '';
         return (
           <EuiFormRow
             key={fieldName}
