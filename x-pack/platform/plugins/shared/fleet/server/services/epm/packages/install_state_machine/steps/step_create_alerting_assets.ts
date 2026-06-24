@@ -316,6 +316,26 @@ export async function stepCreateAlertingAssets(
     { packageInfo, spaceId, installAsAdditionalSpace }
   );
 
+  // When running from the primary space during a full reinstall, also recreate the inactivity
+  // monitoring template for every registered secondary space. The archive-asset reinstall step
+  // deletes the template SO (it is an alerting_rule_template hidden type) but does not recreate
+  // it because it lives outside the package archive. stepCreateAlertingAssets is only invoked
+  // once per install (for the primary space), so without this loop secondary spaces would be
+  // left without their inactivity template after any primary-space reinstall.
+  if (!installAsAdditionalSpace && installedPkg) {
+    const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+    for (const additionalSpaceId of Object.keys(
+      installedPkg.attributes.additional_spaces_installed_kibana ?? {}
+    ).filter((s) => s !== primarySpaceId)) {
+      const spaceScopedClient =
+        appContextService.getInternalUserSOClientForSpaceId(additionalSpaceId);
+      await createInactivityMonitoringTemplate(
+        { logger, savedObjectsClient: spaceScopedClient },
+        { packageInfo, spaceId: additionalSpaceId, installAsAdditionalSpace: true }
+      );
+    }
+  }
+
   // Create alerting rules templates from archive assets
   if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {
     return;

@@ -794,4 +794,53 @@ describe('stepCreateAlertingAssets', () => {
       ['alert']
     );
   });
+
+  it('recreates the inactivity monitoring template for secondary spaces when running from the primary space', async () => {
+    // Set up the mock internalSoClient to handle secondary-space SO operations
+    internalSoClientMock.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    internalSoClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring-other-space',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    const context = {
+      savedObjectsClient,
+      spaceId: DEFAULT_SPACE_ID,
+      // installAsAdditionalSpace is intentionally omitted — should be derived as false
+      installedPkg: {
+        attributes: {
+          installed_kibana_space_id: DEFAULT_SPACE_ID,
+          additional_spaces_installed_kibana: {
+            'other-space': [],
+          },
+        },
+      },
+      packageInstallContext: {
+        packageInfo: {
+          name: 'nginx',
+          title: 'Nginx',
+          type: 'integration',
+          data_streams: [{ type: 'logs', dataset: 'nginx.access' }],
+        },
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
+
+    await stepCreateAlertingAssets(context as any);
+
+    // saveKibanaAssetsRefs should be called for both the primary space and the secondary space.
+    const calls = jest.mocked(saveKibanaAssetsRefs).mock.calls;
+    const secondarySpaceCall = calls.find((call) => call[3] === 'other-space');
+    expect(secondarySpaceCall).toBeDefined();
+    // The secondary space call must use saveAsAdditionnalSpace=true
+    expect(secondarySpaceCall?.[4]).toBe(true);
+  });
 });
