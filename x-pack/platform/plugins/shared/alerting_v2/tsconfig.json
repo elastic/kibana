@@ -119,7 +119,9 @@
     "@kbn/css-utils",
     "@kbn/dashboard-plugin",
     "@kbn/cps",
-    "@kbn/core-chrome-app-menu-components"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/management-settings-ids",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

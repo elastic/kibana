@@ -38,6 +38,7 @@ import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episo
 import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
 import { AlertEpisodeLifecycleHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section';
+import { AlertEpisodeSeverityHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
@@ -536,6 +537,13 @@ export function EpisodeDetailsPage() {
                     episodeId={episodeId}
                     services={detailsServices}
                   />
+                  <EuiSpacer size="l" />
+                  <AlertEpisodeSeverityHeatmapSection
+                    episodeId={episodeId}
+                    services={detailsServices}
+                  />
+                  <EuiSpacer size="l" />
+                  <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
                 </EuiPanel>
               )}
             </EuiSplitPanel.Inner>
