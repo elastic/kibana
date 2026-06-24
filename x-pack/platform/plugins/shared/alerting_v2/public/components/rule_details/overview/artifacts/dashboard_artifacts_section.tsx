@@ -195,7 +195,13 @@ const MissingDashboardRow = ({
   );
 };
 
-const DashboardsSubsectionHeader = ({ onAdd }: { onAdd: () => void }) => (
+const DashboardsSubsectionHeader = ({
+  onAdd,
+  isAddDisabled,
+}: {
+  onAdd: () => void;
+  isAddDisabled: boolean;
+}) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -213,25 +219,30 @@ const DashboardsSubsectionHeader = ({ onAdd }: { onAdd: () => void }) => (
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiToolTip
-        content={i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.addAriaLabel', {
-          defaultMessage: 'Manage linked dashboards',
-        })}
-        disableScreenReaderOutput
-      >
-        <EuiButtonIcon
-          iconType="plusInCircle"
-          color="text"
-          aria-label={i18n.translate(
-            'xpack.alertingV2.ruleDetails.artifacts.dashboards.addAriaLabel',
-            { defaultMessage: 'Manage linked dashboards' }
+    {!isAddDisabled ? (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.alertingV2.ruleDetails.artifacts.dashboards.manageAriaLabel',
+            {
+              defaultMessage: 'Manage linked dashboards',
+            }
           )}
-          data-test-subj="ruleDashboardArtifactsAddButton"
-          onClick={onAdd}
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="plusInCircle"
+            color="text"
+            aria-label={i18n.translate(
+              'xpack.alertingV2.ruleDetails.artifacts.dashboards.manageAriaLabel',
+              { defaultMessage: 'Manage linked dashboards' }
+            )}
+            data-test-subj="ruleDashboardArtifactsAddButton"
+            onClick={onAdd}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    ) : null}
   </EuiFlexGroup>
 );
 
@@ -318,7 +329,7 @@ export const DashboardArtifactsSection: React.FC = () => {
         initialIsOpen
       >
         <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleDashboardArtifactsSection">
-          <DashboardsSubsectionHeader onAdd={handleEdit} />
+          <DashboardsSubsectionHeader onAdd={handleEdit} isAddDisabled={!dashboard} />
           <EuiSpacer size="m" />
 
           {!dashboard ? (

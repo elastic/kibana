@@ -63,7 +63,10 @@ jest.mock('@kbn/core-di-browser', () => ({
       return mockShareService;
     }
     if (token === 'dashboard') {
-      return options?.optional ? mockDashboardServiceOverride : mockDashboardServiceOverride;
+      if (mockDashboardServiceOverride === undefined && !options?.optional) {
+        throw new Error('Required service "dashboard" is not bound');
+      }
+      return mockDashboardServiceOverride;
     }
     return {};
   },
@@ -251,5 +254,6 @@ describe('DashboardArtifactsSection', () => {
 
     expect(screen.getByTestId('ruleDashboardArtifactsUnavailable')).toBeInTheDocument();
     expect(screen.getByText('Dashboards are unavailable in this environment.')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleDashboardArtifactsAddButton')).not.toBeInTheDocument();
   });
 });

@@ -56,7 +56,7 @@ describe('RuleOverviewSection', () => {
   it('renders the empty state instead of the timeline for signal rules', () => {
     renderSection({ ...baseRule, kind: 'signal' });
     expect(screen.getByTestId('signalRuleOverviewEmptyState')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboardArtifactsSectionMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('dashboardArtifactsSectionMock')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
   });
 });

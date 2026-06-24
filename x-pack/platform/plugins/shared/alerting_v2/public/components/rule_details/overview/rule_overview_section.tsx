@@ -24,8 +24,12 @@ export const RuleOverviewSection: React.FC = () => {
           <AlertTimelineSection />
         </EuiErrorBoundary>
       )}
-      <EuiSpacer size="l" />
-      <DashboardArtifactsSection />
+      {rule.kind === 'alert' ? (
+        <>
+          <EuiSpacer size="l" />
+          <DashboardArtifactsSection />
+        </>
+      ) : null}
     </div>
   );
 };

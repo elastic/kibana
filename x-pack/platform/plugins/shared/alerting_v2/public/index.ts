@@ -152,6 +152,7 @@ export const module = new ContainerModule(({ bind }) => {
         ? (diContainer.get(dashboardToken) as DashboardStart)
         : undefined;
 
+      // Optional RuleFormServices field; used by ComposeDiscoverFlyout (CpsPicker), not artifacts UI.
       const cpsToken = PluginStart('cps');
       const cps = diContainer.isBound(cpsToken)
         ? (diContainer.get(cpsToken) as CPSPluginStart)
