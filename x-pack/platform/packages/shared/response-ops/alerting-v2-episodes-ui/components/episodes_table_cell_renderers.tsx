@@ -27,6 +27,8 @@ import { parseEpisodeDataJson } from '../utils/episode_grouping_data';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { AlertEpisodeTags } from './actions/tags';
+import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
+import type { EpisodeSeverity } from './severity/severity_utils';
 
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
@@ -67,6 +69,12 @@ export const EpisodeTagsCell = ({ row }: CellRendererProps) => {
   const tags = (row.flattened.last_tags as string[] | undefined) ?? [];
 
   return <AlertEpisodeTags tags={tags} />;
+};
+
+export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
+  const severity = row.flattened.severity as EpisodeSeverity | undefined | null;
+
+  return <AlertEpisodeSeverityBadge severity={severity} />;
 };
 
 export interface EpisodeRuleCellProps extends CellRendererProps {

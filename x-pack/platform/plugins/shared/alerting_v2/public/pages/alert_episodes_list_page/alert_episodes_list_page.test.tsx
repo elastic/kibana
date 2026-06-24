@@ -238,6 +238,21 @@ describe('AlertEpisodesListPage', () => {
     expect(Array.isArray(lastCall?.rowAdditionalLeadingControls)).toBe(true);
   });
 
+  it('passes severity column and custom renderer to UnifiedDataTable', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    expect(lastCall?.columns).toEqual([
+      'episode.status',
+      'severity',
+      '@timestamp',
+      'rule.id',
+      'duration',
+      'tags',
+      'assignees',
+    ]);
+    expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
+    expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
+  });
+
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
     // The table should be rendered without a dynamic key that causes remounts
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];

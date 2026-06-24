@@ -49,6 +49,7 @@ import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import { ExperimentalBadge } from '../../components/experimental_badge';
@@ -75,6 +76,7 @@ const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
     duration: { width: 110 },
     assignees: { width: 120 },
     'episode.status': { width: 110 },
+    severity: { width: 100 },
   },
 };
 
@@ -153,6 +155,7 @@ export const AlertEpisodesListPage = () => {
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
+    'severity',
     '@timestamp',
     'rule.id',
     'duration',
@@ -321,6 +324,7 @@ export const AlertEpisodesListPage = () => {
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       'rule.id': (props) => (
         <EpisodeRuleCell
