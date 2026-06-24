@@ -343,7 +343,9 @@ export async function stepCreateAlertingAssets(
 
   await withPackageSpan('Install elastic agent rules', async () => {
     const rulesClient = context.request
-      ? await appContextService.getAlertingStart()?.getRulesClientWithRequest(context.request)
+      ? await appContextService
+          .getAlertingStart()
+          ?.getRulesClientWithRequestInSpace(context.request, spaceId)
       : undefined;
 
     const alertTemplateAssets: ArchiveAsset[] = [];

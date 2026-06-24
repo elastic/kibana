@@ -623,7 +623,7 @@ describe('stepCreateAlertingAssets', () => {
     } as unknown as RulesClientApi;
 
     jest
-      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequest)
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
       .mockResolvedValue(rulesClient);
 
     const context = {
@@ -686,7 +686,7 @@ describe('stepCreateAlertingAssets', () => {
     } as unknown as RulesClientApi;
 
     jest
-      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequest)
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
       .mockResolvedValue(rulesClient);
 
     const context = {
@@ -747,7 +747,7 @@ describe('stepCreateAlertingAssets', () => {
     } as unknown as RulesClientApi;
 
     jest
-      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequest)
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
       .mockResolvedValue(rulesClient);
 
     // No installAsAdditionalSpace — the function must derive it from installedPkg
@@ -793,6 +793,53 @@ describe('stepCreateAlertingAssets', () => {
       true,
       ['alert']
     );
+  });
+
+  it('calls getRulesClientWithRequestInSpace scoped to the target space, not the request space', async () => {
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: getSpaceScopedAssetId('template-id', 'my-space'),
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    const getRulesClientWithRequestInSpace = jest
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
+      .mockResolvedValue(rulesClient);
+
+    const request = httpServerMock.createKibanaRequest();
+    const context = {
+      savedObjectsClient,
+      spaceId: 'my-space',
+      installAsAdditionalSpace: true,
+      packageInstallContext: {
+        packageInfo: { name: 'elastic_agent' },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'elastic_agent-0.0.1/kibana/alerting_rule_template/template-1.json',
+              Buffer.from(JSON.stringify({ id: 'template-id' })),
+            ],
+          ])
+        ),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request,
+    };
+
+    await stepCreateAlertingAssets(context as any);
+
+    expect(getRulesClientWithRequestInSpace).toHaveBeenCalledWith(request, 'my-space');
   });
 
   it('recreates the inactivity monitoring template for secondary spaces when running from the primary space', async () => {
