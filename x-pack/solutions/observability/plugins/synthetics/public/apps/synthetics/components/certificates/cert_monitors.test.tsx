@@ -11,6 +11,7 @@ import { fireEvent } from '@testing-library/react';
 import { CertMonitors } from './cert_monitors';
 import { render } from '../../utils/testing';
 import type { CertMonitor } from '../../../../../common/runtime_types';
+import * as useKibanaSpaceModule from '../../../../hooks/use_kibana_space';
 
 const createMockMonitors = (count: number): CertMonitor[] =>
   Array.from({ length: count }, (_, i) => ({
@@ -125,6 +126,17 @@ describe('CertMonitors', () => {
       expect(link.href).toContain('https://remote-1.kibana');
       expect(link.href).toContain('remote-cfg-1');
       expect(link.href).not.toContain('remoteName=');
+    });
+
+    it('threads the active space into the remote deep link', () => {
+      jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
+        space: { id: 'team-a', name: 'Team A', disabledFeatures: [] },
+        loading: false,
+        error: undefined,
+      });
+      const { getByTestId } = render(<CertMonitors monitors={[remoteWithKibanaUrl]} />);
+      const link = getByTestId('syntheticsMonitorPageLinkRemoteLink') as HTMLAnchorElement;
+      expect(link.href).toContain('https://remote-1.kibana/s/team-a/app/synthetics/monitor/');
     });
 
     it('falls back to a local link with ?remoteName= when no kibanaUrl is known', () => {

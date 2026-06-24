@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RemoteMonitorInfo } from '../../../../../common/runtime_types';
+import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { createRemoteMonitorDetailUrl } from '../../utils/remote/remote_monitor_urls';
 
 interface DetailPageLinkProps {
@@ -26,11 +27,13 @@ export const MonitorPageLink: FC<PropsWithChildren<DetailPageLinkProps>> = ({
   remote,
 }) => {
   const basePath = useKibana().services.http?.basePath.get();
+  const { space } = useKibanaSpace();
 
   if (remote?.kibanaUrl) {
     const externalUrl = createRemoteMonitorDetailUrl({
       monitor: { configId, remote },
       kibanaUrl: remote.kibanaUrl,
+      spaceId: space?.id,
     });
     if (externalUrl) {
       return (
