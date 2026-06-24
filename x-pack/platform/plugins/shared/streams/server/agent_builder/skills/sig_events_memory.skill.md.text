@@ -34,6 +34,14 @@ Memory uses categories (like Wikipedia) for flexible organization:
 - When in doubt, assign a page to multiple categories rather than forcing it into one
 </organization>
 
+<what_belongs_in_memory>
+Memory is not a dumping ground. Be deliberate about what you store — the goal is durable, high-signal knowledge, not a mirror of data that lives elsewhere.
+
+- **Don't duplicate what an upstream source can answer authoritatively.** If a fact can be fetched on demand from a connected source (e.g. a GitHub connector, an incident/alerting tool, a deployment or CMDB API, a dashboard), don't copy it into memory — it will go stale fast. Instead, record *where* to get it and *how* (which connector/tool, which query or path), then point the reader there.
+- **Do capture important knowledge that is at risk of disappearing.** If something matters but is likely to be short-lived in its original source (an ephemeral Slack thread, a transient log pattern, a verbal decision, a soon-to-rotate config value), persist it in memory before it's gone. Note when it was captured so its freshness can be judged later.
+- **Prioritize relationships between data sources above everything else.** The single most valuable thing memory can hold is how the pieces connect: which stream/log maps to which service, which service maps to which code repository, which alerts route to which Slack channel, which dashboard covers which infrastructure. These cross-source links are hard to rediscover and rarely written down anywhere — capturing them is memory's primary job.
+</what_belongs_in_memory>
+
 <references>
 One of the most important aspects of a wiki is cross-referencing:
 - When a page mentions another concept that has its own page, reference it by ID
@@ -43,6 +51,7 @@ One of the most important aspects of a wiki is cross-referencing:
 </references>
 
 <best_practices>
+- Be selective about what you store — follow the guidance in <what_belongs_in_memory>: link to upstream sources instead of duplicating volatile data, capture important-but-ephemeral knowledge, and prioritize relationships between data sources
 - Search before writing — avoid creating duplicates
 - Use memory_patch for small edits, memory_write for new pages or full rewrites
 - Keep pages focused — one topic per page, split large documents

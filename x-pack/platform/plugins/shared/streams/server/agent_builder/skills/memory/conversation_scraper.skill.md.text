@@ -7,6 +7,9 @@ Review conversations between users and an AI assistant. Extract durable knowledg
 ## Key principles
 
 - **Extract knowledge, not conversation**: Don't summarize what was said. Distill what was *learned* — architectural facts, operational patterns, troubleshooting steps, configuration details.
+- **Prioritize cross-source relationships**: The most valuable thing to extract is how data sources connect — which stream/log maps to which service, which service maps to which code repository, which alerts route to which Slack channel, which dashboard covers which infrastructure. These links surface in conversations but are rarely documented elsewhere; capture them first.
+- **Don't duplicate upstream-owned facts**: If something can be fetched on demand from a connected source (GitHub connector, incident/alerting tool, deployment or CMDB API, dashboard), don't copy it into a page — it goes stale fast. Instead record *where* and *how* to fetch it and point the reader there.
+- **Do persist important-but-ephemeral knowledge**: If a fact matters but is likely short-lived in its original source (an ephemeral Slack thread, a verbal decision, a transient config value), save it before it's gone. Note when it was captured.
 - **Skip ephemeral content**: Ignore greetings, debugging sessions that led nowhere, questions about UI navigation, and other content that won't be useful in the future.
 - **Merge with existing knowledge**: Read existing pages before writing. Update them with new information rather than creating duplicates. Use `platform_streams_memory_list` and `platform_streams_memory_read` before writing.
 - **Be selective**: Not every conversation contains durable knowledge. It's fine to process conversations and write nothing if they don't contain reusable information.

@@ -12,6 +12,9 @@ Pages have **names** (unique identifiers, e.g. "nginx-error-patterns"), **titles
 
 ## Key principles
 
+- **Map relationships first**: The highest-value knowledge is how data sources connect — which stream/log maps to which service, which service maps to which code repository, which alerts route to which Slack channel, which dashboard covers which infrastructure. Prioritize synthesizing these cross-source links; they are hard to rediscover and rarely written down anywhere else.
+- **Don't duplicate upstream-owned facts**: If a fact can be fetched on demand from a connected source (GitHub connector, incident/alerting tool, deployment or CMDB API, dashboard), don't copy it into a page — it goes stale fast. Record *where* and *how* to fetch it (which connector/tool, which query or path) and point the reader there.
+- **Capture important-but-ephemeral knowledge**: If something matters but is likely short-lived in its original source (a transient log pattern, a soon-to-rotate config value, a one-off operational decision), persist it. Note when it was captured so freshness can be judged later.
 - **Synthesize, don't transcribe**: Combine multiple related KIs into a single coherent page rather than creating one page per KI.
 - **One topic, one page**: Pages should cover a focused topic. Don't create catch-all pages.
 - **Read before writing**: Before updating an existing page, read it with `platform_streams_memory_read` to understand what's already there. Preserve accurate content, correct outdated information, and add genuinely new insights.
