@@ -169,7 +169,6 @@ export function getCustomAgents(opts: GetCustomAgentsOpts): GetCustomAgentsRespo
         proxyUrl.password && { username: proxyUrl.username, password: proxyUrl.password }),
       // do not fail on invalid certs if value is false
       ...proxyNodeSSLOptions,
-      ...targetSSLOptions,
     },
     targetSSLOptions
   );
