@@ -453,8 +453,17 @@ export class MemoryServiceImpl implements MemoryService {
     return Array.from(categorySet).sort();
   }
 
-  async getCategoryTree(): Promise<MemoryCategoryNode[]> {
-    return buildCategoryTree(await this.listAll());
+  async getCategoryTree(): Promise<{
+    tree: MemoryCategoryNode[];
+    uncategorized: Array<{ id: string; name: string; title: string }>;
+  }> {
+    const all = await this.listAll();
+    return {
+      tree: buildCategoryTree(all),
+      uncategorized: all
+        .filter((e) => e.categories.length === 0)
+        .map((e) => ({ id: e.id, name: e.name, title: e.title })),
+    };
   }
 
   // ── References ──

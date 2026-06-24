@@ -123,8 +123,23 @@ export function MemoryTab() {
   const isSearchActive = searchQuery.length >= 2;
 
   const treeItems = useMemo(() => {
-    if (!treeData?.tree) return [];
-    return toTreeItems(treeData.tree, setSelectedEntryId);
+    if (!treeData) return [];
+    const items = toTreeItems(treeData.tree, setSelectedEntryId);
+    if (treeData.uncategorized.length > 0) {
+      items.push({
+        id: '__uncategorized__',
+        label: i18n.translate('xpack.streams.memory.uncategorized', {
+          defaultMessage: 'Uncategorized',
+        }),
+        icon: <EuiIcon type="folderClosed" size="s" aria-hidden={true} />,
+        iconWhenExpanded: <EuiIcon type="folderOpen" size="s" aria-hidden={true} />,
+        children: treeData.uncategorized.map((page) => ({
+          id: page.id,
+          label: <EuiLink onClick={() => setSelectedEntryId(page.id)}>{page.title}</EuiLink>,
+        })),
+      });
+    }
+    return items;
   }, [treeData]);
 
   return (
@@ -732,9 +747,23 @@ function CreateEntryFlyout({
   onCreated: (id: string) => void;
 }) {
   const { createEntry } = useMemoryMutations();
+  const { data: treeData } = useMemoryTree();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [categories, setCategories] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+
+  const categoryOptions = useMemo(() => {
+    const paths = new Set<string>();
+    const collect = (nodes: MemoryCategoryNode[]) => {
+      for (const node of nodes) {
+        paths.add(node.category);
+        collect(node.children);
+      }
+    };
+    collect(treeData?.tree ?? []);
+    return Array.from(paths).map((p) => ({ label: p }));
+  }, [treeData]);
 
   const handleCreate = useCallback(() => {
     if (!title.trim()) return;
@@ -743,10 +772,16 @@ function CreateEntryFlyout({
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_|_$/g, '');
     createEntry.mutate(
-      { name, title: title.trim(), content, tags: tags.map((t) => t.label) },
+      {
+        name,
+        title: title.trim(),
+        content,
+        tags: tags.map((t) => t.label),
+        categories: categories.map((c) => c.label),
+      },
       { onSuccess: (entry) => onCreated(entry.id) }
     );
-  }, [title, content, tags, createEntry, onCreated]);
+  }, [title, content, tags, categories, createEntry, onCreated]);
 
   return (
     <EuiFlyout
@@ -797,6 +832,31 @@ function CreateEntryFlyout({
               fullWidth
               rows={18}
               data-test-subj="streamsMemoryCreateContent"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.streams.memory.categoriesLabel', {
+                  defaultMessage: 'Category',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiComboBox
+              options={categoryOptions}
+              selectedOptions={categories}
+              onChange={setCategories}
+              onCreateOption={(searchValue) =>
+                setCategories((prev) => [...prev, { label: searchValue }])
+              }
+              singleSelection={{ asPlainText: true }}
+              isClearable
+              fullWidth
+              placeholder={i18n.translate('xpack.streams.memory.categoriesPlaceholder', {
+                defaultMessage: 'e.g. infrastructure/kubernetes',
+              })}
+              data-test-subj="streamsMemoryCreateCategories"
             />
           </EuiFlexItem>
           <EuiFlexItem>
