@@ -26,6 +26,68 @@ export function buildSkillInvokedCaseExpression(skillName: string): string {
     )`;
 }
 
+export interface ExampleScopedSkillInvocationContext {
+  expectedSkill?: string;
+  shouldNotActivateSkill?: string;
+}
+
+export function createExampleScopedSkillInvocationEvaluator({
+  traceEsClient,
+  log,
+  skillName,
+  resolveContext,
+}: {
+  traceEsClient: EsClient;
+  log: ToolingLog;
+  skillName: string;
+  resolveContext: (args: {
+    metadata?: Record<string, unknown>;
+    expected?: unknown;
+  }) => ExampleScopedSkillInvocationContext;
+}): Evaluator {
+  const inner = createSkillInvocationEvaluator({ traceEsClient, log, skillName });
+
+  return {
+    ...inner,
+    evaluate: async (args) => {
+      const { expectedSkill, shouldNotActivateSkill } = resolveContext(args);
+
+      if (shouldNotActivateSkill === skillName) {
+        const result = await inner.evaluate(args);
+        if (result.score == null) {
+          return result;
+        }
+        const invoked = result.score === 1;
+        return {
+          ...result,
+          score: invoked ? 0 : 1,
+          explanation: invoked
+            ? `Skill ${skillName} was invoked for a distractor prompt.`
+            : `Skill ${skillName} correctly not invoked for distractor.`,
+        };
+      }
+
+      if (expectedSkill && expectedSkill !== skillName) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: `Example targets skill ${expectedSkill}, not ${skillName}.`,
+        };
+      }
+
+      if (!expectedSkill && shouldNotActivateSkill && shouldNotActivateSkill !== skillName) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'Skill invocation not scored for this example.',
+        };
+      }
+
+      return inner.evaluate(args);
+    },
+  };
+}
+
 export function createSkillInvocationEvaluator({
   traceEsClient,
   log,

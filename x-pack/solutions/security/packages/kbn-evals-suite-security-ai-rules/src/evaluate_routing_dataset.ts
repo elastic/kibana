@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import {
-  createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
   buildSkillInvokedCaseExpression,
   createTrajectoryEvaluator,
   getStringMeta,
@@ -259,10 +259,18 @@ export const buildRuleRoutingEvaluators = ({
     outputTokens as Evaluator<RuleRoutingDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<RuleRoutingDatasetExample, TaskOutput>,
     ...skillNames.map((skillName) =>
-      createSkillInvocationEvaluator({
+      createExampleScopedSkillInvocationEvaluator({
         traceEsClient,
         log,
         skillName,
+        resolveContext: ({ metadata, expected }) => ({
+          expectedSkill:
+            (expected as RuleRoutingDatasetExpected | undefined)?.expectedSkill ??
+            getStringMeta(metadata, 'expectedSkill'),
+          shouldNotActivateSkill:
+            (expected as RuleRoutingDatasetExpected | undefined)?.shouldNotActivateSkill ??
+            getStringMeta(metadata, 'shouldNotActivateSkill'),
+        }),
       })
     ),
     ...(hasShouldNotActivateExamples(examples)

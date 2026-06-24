@@ -16,7 +16,7 @@ import {
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
-  createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
   buildSkillInvokedCaseExpression,
   createTrajectoryEvaluator,
   createRagEvaluators,
@@ -299,10 +299,14 @@ function configureExperiment({
       }),
     }),
     ...collectUniqueExpectedSkills(examples).map((skillName) =>
-      createSkillInvocationEvaluator({
+      createExampleScopedSkillInvocationEvaluator({
         traceEsClient,
         log,
         skillName,
+        resolveContext: ({ metadata }) => ({
+          expectedSkill: getStringMeta(metadata, 'expectedSkill'),
+          shouldNotActivateSkill: getStringMeta(metadata, 'shouldNotActivateSkill'),
+        }),
       })
     ),
     createAgentBuilderTrajectoryEvaluator(),

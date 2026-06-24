@@ -15,5 +15,7 @@ export { createLatencyEvaluator, createSpanLatencyEvaluator } from './latency';
 export { createToolCallsEvaluator } from './tool_calls';
 export {
   createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
   buildSkillInvokedCaseExpression,
+  type ExampleScopedSkillInvocationContext,
 } from './skill_invocation';

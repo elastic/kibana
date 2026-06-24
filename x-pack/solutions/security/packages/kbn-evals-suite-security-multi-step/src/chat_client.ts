@@ -23,6 +23,8 @@ export interface ConverseResponse {
   steps: ConverseStep[];
   errors: Array<{ error: { message: string; stack?: string }; type: 'error' }>;
   traceId?: string;
+  /** All per-turn trace ids — skill loads often happen on turn 1. */
+  traceIds?: string[];
 }
 
 interface ConverseParams {
@@ -100,7 +102,7 @@ export class MultiStepAgentBuilderChatClient {
     const messages: Array<{ message: string }> = [];
     const steps: ConverseStep[] = [];
     const errors: ConverseResponse['errors'] = [];
-    let traceId: string | undefined;
+    const traceIds: string[] = [];
 
     for (const [index, turn] of turns.entries()) {
       this.log.info(`[multi-step] turn ${index + 1}/${turns.length}`);
@@ -109,9 +111,18 @@ export class MultiStepAgentBuilderChatClient {
       messages.push(...response.messages);
       steps.push(...response.steps);
       errors.push(...response.errors);
-      traceId = response.traceId ?? traceId;
+      if (response.traceId && !traceIds.includes(response.traceId)) {
+        traceIds.push(response.traceId);
+      }
     }
 
-    return { conversationId, messages, steps, errors, traceId };
+    return {
+      conversationId,
+      messages,
+      steps,
+      errors,
+      traceId: traceIds[0],
+      traceIds,
+    };
   }
 }

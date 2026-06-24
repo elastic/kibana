@@ -109,6 +109,7 @@ export {
   type TraceBasedEvaluatorConfig,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
   buildSkillInvokedCaseExpression,
   createToolCallsEvaluator,
 } from './src/evaluators/trace_based';

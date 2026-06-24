@@ -27,6 +27,60 @@ import type { MultiStepAgentBuilderChatClient } from './chat_client';
 const DEFAULT_PRIMARY_SKILL = 'alert-analysis';
 const FILESTORE_READ_TOOL_ID = 'filestore.read';
 
+function resolveTraceIds(output: TaskOutput): string[] {
+  const record = output as TaskOutput & { traceIds?: string[]; traceId?: string };
+  if (Array.isArray(record.traceIds) && record.traceIds.length > 0) {
+    return record.traceIds.filter((id): id is string => typeof id === 'string' && id.length > 0);
+  }
+  return record.traceId ? [record.traceId] : [];
+}
+
+async function evaluateSkillInvocationAcrossTraces({
+  traceEsClient,
+  log,
+  skillName,
+  output,
+  expected,
+  metadata,
+}: {
+  traceEsClient: EsClient;
+  log: ToolingLog;
+  skillName: string;
+  output: TaskOutput;
+  expected: unknown;
+  metadata: unknown;
+}): Promise<Awaited<ReturnType<Evaluator['evaluate']>>> {
+  const inner = createSkillInvocationEvaluator({ traceEsClient, log, skillName });
+  const traceIds = resolveTraceIds(output);
+  if (traceIds.length === 0) {
+    return {
+      score: null,
+      label: 'unavailable',
+      explanation: 'No traceId available for skill invocation check',
+    };
+  }
+
+  let lastResult: Awaited<ReturnType<Evaluator['evaluate']>> | undefined;
+  for (const traceId of traceIds) {
+    const result = await inner.evaluate({
+      output: { ...(output as object), traceId },
+      expected,
+      metadata,
+    } as Parameters<typeof inner.evaluate>[0]);
+    lastResult = result;
+    if (result.score === 1) {
+      return result;
+    }
+  }
+
+  return (
+    lastResult ?? {
+      score: 0,
+      explanation: `Skill ${skillName} was not invoked on any turn trace.`,
+    }
+  );
+}
+
 const createDynamicSkillInvocationEvaluator = ({
   traceEsClient,
   log,
@@ -42,16 +96,14 @@ const createDynamicSkillInvocationEvaluator = ({
       const skillName = exp?.primary_skill ?? DEFAULT_PRIMARY_SKILL;
 
       if (metadata?.is_distractor) {
-        const inner = createSkillInvocationEvaluator({
+        const result = await evaluateSkillInvocationAcrossTraces({
           traceEsClient,
           log,
           skillName,
-        });
-        const result = await inner.evaluate({
-          output,
+          output: output as TaskOutput,
           expected,
           metadata,
-        } as unknown as Parameters<typeof inner.evaluate>[0]);
+        });
         const invoked = result.score === 1;
         return {
           ...result,
@@ -62,15 +114,14 @@ const createDynamicSkillInvocationEvaluator = ({
         };
       }
 
-      return createSkillInvocationEvaluator({
+      return evaluateSkillInvocationAcrossTraces({
         traceEsClient,
         log,
         skillName,
-      }).evaluate({
-        output,
+        output: output as TaskOutput,
         expected,
         metadata,
-      } as unknown as Parameters<ReturnType<typeof createSkillInvocationEvaluator>['evaluate']>[0]);
+      });
     },
   };
 };
@@ -202,6 +253,7 @@ const buildTask = ({
       steps: response.steps,
       errors: response.errors,
       traceId: response.traceId,
+      traceIds: response.traceIds,
     };
 
     const correctnessResult = await withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
