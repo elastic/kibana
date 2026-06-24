@@ -59,7 +59,7 @@ export const registerUISettings = (
         'workflowsManagement.uiSettings.showManagedWorkflows.description',
         {
           defaultMessage:
-            'Display managed workflows and their executions in workflow experiences. ' +
+            'Allows users with the required workflow privileges to display managed workflows and their executions in workflow experiences. ' +
             'Managed workflows are maintained by Elastic and power certain functionality. ' +
             'Editing, disabling, or deleting them may cause unexpected behavior or break product functionality.',
         }

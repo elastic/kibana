@@ -105,7 +105,7 @@ describe('Workflows Management UI Settings', () => {
         [WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID]: expect.objectContaining({
           name: 'Show managed workflows',
           description: expect.stringContaining(
-            'Display managed workflows and their executions in workflow experiences.'
+            'Allows users with the required workflow privileges to display managed workflows and their executions in workflow experiences.'
           ),
         }),
       })

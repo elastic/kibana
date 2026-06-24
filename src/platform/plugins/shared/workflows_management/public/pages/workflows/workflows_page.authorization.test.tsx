@@ -70,13 +70,25 @@ const renderPage = () =>
     </TestWrapper>
   );
 
-function mockCapabilities(createWorkflow: boolean, updateWorkflow: boolean): void {
+function mockCapabilities(
+  createWorkflow: boolean,
+  updateWorkflow: boolean,
+  {
+    readWorkflow = true,
+    readManagedWorkflow = true,
+  }: {
+    readWorkflow?: boolean;
+    readManagedWorkflow?: boolean;
+  } = {}
+): void {
   mockUseKibana.mockReturnValue({
     services: {
       application: {
         capabilities: {
           workflowsManagement: {
             createWorkflow,
+            readWorkflow,
+            readManagedWorkflow,
             updateWorkflow,
           },
         },
@@ -178,6 +190,34 @@ describe('WorkflowsPage authorization', () => {
     expect(screen.getByTestId('managed-filter-popover-button')).toBeInTheDocument();
     expect(mockUseWorkflows).toHaveBeenLastCalledWith(
       expect.not.objectContaining({ managed: expect.anything() })
+    );
+  });
+
+  it.each([
+    {
+      label: 'base workflow read is missing',
+      readWorkflow: false,
+      readManagedWorkflow: true,
+    },
+    {
+      label: 'managed workflow read is missing',
+      readWorkflow: true,
+      readManagedWorkflow: false,
+    },
+  ])('hides the workflow type filter when $label', ({ readWorkflow, readManagedWorkflow }) => {
+    mockCapabilities(true, true, { readWorkflow, readManagedWorkflow });
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
+    expect(mockUseWorkflowFiltersOptions).toHaveBeenLastCalledWith(
+      ['enabled', 'createdBy', 'tags'],
+      undefined
     );
   });
 
