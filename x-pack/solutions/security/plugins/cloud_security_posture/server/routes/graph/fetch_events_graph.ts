@@ -9,10 +9,13 @@ import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import {
   DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  INDEX_PATTERN_REGEX,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
@@ -27,6 +30,8 @@ import {
   JSON_OBJECT_SEPARATOR,
   hashIds,
   rebuildDocData,
+  concatJsonObjectPropertyEsqlExprAsString,
+  concatJsonObjectPropertyString,
 } from './utils';
 import {
   type EuidSourceFields,

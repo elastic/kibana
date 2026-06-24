@@ -11,8 +11,8 @@ export {
   buildEnrichmentQuery,
   listIntegrationsWithEvaluations,
   ENRICHMENT_PHASES,
-} from './buildEnrichmentQuery';
-export type { BuildEnrichmentQueryOptions, EnrichmentPhase } from './buildEnrichmentQuery';
+} from './enrichment_query';
+export type { BuildEnrichmentQueryOptions, EnrichmentPhase } from './enrichment_query';
 
 export { aws_bedrockEvaluations } from './integrations/aws_bedrock';
 export { aws_bedrock_agentcoreEvaluations } from './integrations/aws_bedrock_agentcore';
