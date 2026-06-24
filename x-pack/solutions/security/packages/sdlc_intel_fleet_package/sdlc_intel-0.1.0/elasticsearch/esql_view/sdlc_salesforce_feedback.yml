@@ -1,0 +1,26 @@
+name: sdlc-salesforce-feedback-view
+query: |
+  FROM salesforce-intel-cases
+  | EVAL
+      case_number = case.number,
+      case_status = case.status,
+      case_subject = case.subject,
+      case_priority = case.priority,
+      github_issue_url = links.github_issue_url,
+      github_issue_repo = links.github_issue_repo,
+      github_issue_number = links.github_issue_number,
+      linked_to_sdh = feedback.linked_to_sdh,
+      link_source = links.link_source,
+      last_modified_at = case.last_modified_at
+  | KEEP
+      @timestamp,
+      case_number,
+      case_status,
+      case_subject,
+      case_priority,
+      github_issue_url,
+      github_issue_repo,
+      github_issue_number,
+      linked_to_sdh,
+      link_source,
+      last_modified_at

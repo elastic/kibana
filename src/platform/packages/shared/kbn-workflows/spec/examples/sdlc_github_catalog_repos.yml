@@ -14,7 +14,7 @@ tags:
   - graphql
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   # Replace after creating a GitHub connector instance in Stack Management → Connectors.
   githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
   syncStateIndex: github-intel-sync-state

@@ -6,7 +6,8 @@
   "template": {
     "settings": {
       "number_of_shards": 1,
-      "number_of_replicas": 0
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "sdlc_intel_retention"
     },
     "mappings": {
       "properties": {
@@ -36,6 +37,12 @@
             },
             "user_id": {
               "type": "keyword"
+            },
+            "reply_count": {
+              "type": "integer"
+            },
+            "is_thread_reply": {
+              "type": "boolean"
             }
           }
         },

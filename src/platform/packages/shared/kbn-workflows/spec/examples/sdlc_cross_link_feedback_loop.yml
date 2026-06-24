@@ -1,0 +1,284 @@
+version: '1'
+name: SDLC cross-link feedback loop
+description: >
+  Tier-3 feedback-loop workflow. Bidirectionally links Salesforce Cases to SDH GitHub issues:
+  (1) Case custom GitHub URL field to SDH issue URL, (2) SDH issue title/body text search for
+  CaseNumber. Writes customer_case_links_sdh edges to github-intel-relationships.
+enabled: false
+tags:
+  - sdlc
+  - salesforce
+  - github
+  - link
+  - relationships
+  - ingest
+  - feedback
+  - sdh
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  syncStateIndex: github-intel-sync-state
+  casesIndex: salesforce-intel-cases
+  sdhIssuesIndex: github-intel-sdh-issues
+  relationshipsIndex: github-intel-relationships
+  syncSource: cross-link-feedback-loop
+  entityType: feedback_cross_link
+  caseBatchSize: 100
+  initialWatermark: '2024-01-01T00:00:00.000Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-cross-link-feedback-loop
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 2h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      linksFromSalesforceField: 0
+      linksFromSdhBody: 0
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_cases_with_github_url
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.casesIndex }}'
+      size: '{{ consts.caseBatchSize }}'
+      sort:
+        - case.last_modified_at:
+            order: asc
+      query:
+        bool:
+          must:
+            - exists:
+                field: links.github_issue_url
+            - range:
+                case.last_modified_at:
+                  gt: '{{ variables.watermark }}'
+          must_not:
+            - term:
+                links.github_issue_url: ''
+
+  - name: link_from_salesforce_github_field
+    type: foreach
+    foreach: '${{ steps.load_cases_with_github_url.output.hits.hits | json }}'
+    steps:
+      - name: set_case_context
+        type: data.set
+        with:
+          caseId: '${{ foreach.item._source.case.id }}'
+          caseNumber: '${{ foreach.item._source.case.number }}'
+          caseGithubUrl: '${{ foreach.item._source.links.github_issue_url }}'
+
+      - name: find_sdh_issue_by_url
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.sdhIssuesIndex }}'
+          size: 1
+          query:
+            term:
+              entity.url: '${{ variables.caseGithubUrl }}'
+
+      - name: write_salesforce_field_relationship
+        type: elasticsearch.index
+        if: '${{ steps.find_sdh_issue_by_url.output.hits.hits.size > 0 }}'
+        with:
+          index: '{{ consts.relationshipsIndex }}'
+          id: '${{ variables.caseId }}-customer_case_links_sdh-${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.entity.id }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            from: '${{ variables.caseId }}'
+            to: '${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.entity.url }}'
+            relation: customer_case_links_sdh
+            metadata:
+              org: '{{ consts.orgLogin }}'
+              case_id: '${{ variables.caseId }}'
+              case_number: '${{ variables.caseNumber }}'
+              issue_url: '${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.entity.url }}'
+              issue_number: '${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.entity.number }}'
+              repo: '${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.repository.full_name }}'
+              link_source: salesforce_field
+
+      - name: mark_case_linked
+        type: elasticsearch.index
+        if: '${{ steps.find_sdh_issue_by_url.output.hits.hits.size > 0 }}'
+        with:
+          index: '{{ consts.casesIndex }}'
+          id: '${{ variables.caseId }}'
+          document:
+            feedback:
+              linked_to_sdh: true
+            links:
+              link_source: salesforce_field
+              github_issue_url: '${{ variables.caseGithubUrl }}'
+              github_issue_repo: '${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.repository.full_name }}'
+              github_issue_number: '${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.entity.number }}'
+
+      - name: mark_sdh_issue_linked_from_field
+        type: elasticsearch.index
+        if: '${{ steps.find_sdh_issue_by_url.output.hits.hits.size > 0 }}'
+        with:
+          index: '{{ consts.sdhIssuesIndex }}'
+          id: '${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.entity.id }}'
+          document:
+            feedback:
+              linked_salesforce_case_id: '${{ variables.caseId }}'
+              linked_salesforce_case_number: '${{ variables.caseNumber }}'
+              link_source: salesforce_field
+
+      - name: count_salesforce_field_link
+        type: data.set
+        if: '${{ steps.find_sdh_issue_by_url.output.hits.hits.size > 0 }}'
+        with:
+          linksFromSalesforceField: '${{ variables.linksFromSalesforceField + 1 }}'
+
+  - name: load_unlinked_cases
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.casesIndex }}'
+      size: '{{ consts.caseBatchSize }}'
+      sort:
+        - case.last_modified_at:
+            order: asc
+      query:
+        bool:
+          must:
+            - range:
+                case.last_modified_at:
+                  gt: '{{ variables.watermark }}'
+          must_not:
+            - term:
+                feedback.linked_to_sdh: true
+
+  - name: link_from_sdh_body_case_number
+    type: foreach
+    foreach: '${{ steps.load_unlinked_cases.output.hits.hits | json }}'
+    steps:
+      - name: set_unlinked_case_context
+        type: data.set
+        with:
+          caseId: '${{ foreach.item._source.case.id }}'
+          caseNumber: '${{ foreach.item._source.case.number }}'
+
+      - name: find_sdh_issue_by_case_number
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.sdhIssuesIndex }}'
+          size: 1
+          query:
+            simple_query_string:
+              query: '${{ variables.caseNumber }}'
+              fields:
+                - content.searchable
+                - content.title
+                - content.body
+              default_operator: and
+
+      - name: write_sdh_body_relationship
+        type: elasticsearch.index
+        if: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits.size > 0 }}'
+        with:
+          index: '{{ consts.relationshipsIndex }}'
+          id: '${{ variables.caseId }}-customer_case_links_sdh-${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.id }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            from: '${{ variables.caseId }}'
+            to: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.url }}'
+            relation: customer_case_links_sdh
+            metadata:
+              org: '{{ consts.orgLogin }}'
+              case_id: '${{ variables.caseId }}'
+              case_number: '${{ variables.caseNumber }}'
+              issue_url: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.url }}'
+              issue_number: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.number }}'
+              repo: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.repository.full_name }}'
+              link_source: sdh_body_search
+
+      - name: mark_case_linked_from_body
+        type: elasticsearch.index
+        if: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits.size > 0 }}'
+        with:
+          index: '{{ consts.casesIndex }}'
+          id: '${{ variables.caseId }}'
+          document:
+            feedback:
+              linked_to_sdh: true
+            links:
+              link_source: sdh_body_search
+              github_issue_url: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.url }}'
+              github_issue_repo: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.repository.full_name }}'
+              github_issue_number: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.number }}'
+
+      - name: mark_sdh_issue_linked_from_body
+        type: elasticsearch.index
+        if: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits.size > 0 }}'
+        with:
+          index: '{{ consts.sdhIssuesIndex }}'
+          id: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.id }}'
+          document:
+            feedback:
+              linked_salesforce_case_id: '${{ variables.caseId }}'
+              linked_salesforce_case_number: '${{ variables.caseNumber }}'
+              link_source: sdh_body_search
+
+      - name: count_sdh_body_link
+        type: data.set
+        if: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits.size > 0 }}'
+        with:
+          linksFromSdhBody: '${{ variables.linksFromSdhBody + 1 }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '{{ variables.runStartedAt }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          links_from_salesforce_field: '${{ variables.linksFromSalesforceField }}'
+          links_from_sdh_body: '${{ variables.linksFromSdhBody }}'

@@ -321,6 +321,13 @@ export interface SlackConversationHistoryMessage {
   reply_count?: number;
 }
 
+export interface SlackConversationsRepliesResponse extends SlackErrorFields {
+  ok: boolean;
+  messages?: Array<Record<string, unknown>>;
+  has_more?: boolean;
+  response_metadata?: { next_cursor?: string };
+}
+
 export interface SlackConversationsHistoryResponse extends SlackErrorFields {
   ok: boolean;
   messages?: SlackConversationHistoryMessage[];
@@ -393,3 +400,38 @@ export const SlackGetChannelHistoryInputSchema = lazySchema(() =>
   })
 );
 export type SlackGetChannelHistoryInput = z.infer<typeof SlackGetChannelHistoryInputSchema>;
+
+export const SlackGetConversationRepliesInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .describe('Channel ID (C.../G...) containing the thread parent message.'),
+    ts: z
+      .string()
+      .min(1)
+      .describe('Thread parent message timestamp (ts) from conversations.history.'),
+    cursor: z
+      .string()
+      .optional()
+      .describe('Pagination cursor from a previous getConversationReplies response (nextCursor).'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(SLACK_MAX_CONVERSATIONS_HISTORY_LIMIT)
+      .default(SLACK_DEFAULT_CONVERSATIONS_HISTORY_LIMIT)
+      .describe(
+        `Replies per page (1-${SLACK_MAX_CONVERSATIONS_HISTORY_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_HISTORY_LIMIT}.`
+      ),
+    inclusive: z
+      .boolean()
+      .default(false)
+      .describe('Include messages with oldest/latest timestamps. Defaults to false.'),
+    raw: z
+      .boolean()
+      .optional()
+      .describe('Return the full raw Slack API response instead of a compact ingest result.'),
+  })
+);
+export type SlackGetConversationRepliesInput = z.infer<typeof SlackGetConversationRepliesInputSchema>;

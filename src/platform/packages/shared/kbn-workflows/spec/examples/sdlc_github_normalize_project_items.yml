@@ -14,7 +14,7 @@ tags:
   - ingest
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   syncStateIndex: github-intel-sync-state
   projectItemsIndex: github-intel-project-items
   syncSource: github-normalize-project-items
@@ -172,6 +172,31 @@ steps:
             github: '${{ foreach.item._source.github | json }}'
             content_ref: '${{ foreach.item._source.content_ref | json }}'
             payload: '${{ foreach.item._source.payload | json }}'
+            fields:
+              - name: Type
+                type: single_select
+                value: '${{ variables.ticketType }}'
+              - name: Epic
+                type: single_select
+                value: '${{ variables.epicName }}'
+              - name: Parent issue
+                type: text
+                value: '${{ variables.parentIssue }}'
+              - name: Team
+                type: single_select
+                value: '${{ variables.projectTeam }}'
+              - name: Product Initiative
+                type: single_select
+                value: '${{ variables.productInitiative }}'
+              - name: Product Roadmap Stage
+                type: single_select
+                value: '${{ variables.roadmapStage }}'
+              - name: Release Milestone
+                type: single_select
+                value: '${{ variables.releaseMilestone }}'
+              - name: Status
+                type: single_select
+                value: '${{ variables.coverageStatus }}'
             hierarchy:
               ticket_type: '${{ variables.ticketType }}'
               epic: '${{ variables.epicName }}'

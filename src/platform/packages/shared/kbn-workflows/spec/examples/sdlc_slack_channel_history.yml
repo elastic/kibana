@@ -127,6 +127,8 @@ steps:
                           text: '${{ foreach.item.text }}'
                           thread_ts: '${{ foreach.item.thread_ts }}'
                           user_id: '${{ foreach.item.user }}'
+                          reply_count: '${{ foreach.item.reply_count ?? 0 }}'
+                          is_thread_reply: false
                         channel:
                           id: '${{ variables.channelId }}'
                           name: '${{ variables.channelName }}'

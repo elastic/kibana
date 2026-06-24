@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "description": "Checkpoint lag and last run status per SDLC ingest workflow.",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"sync_source\",\"entity\",\"org_login\",\"lag_hours\",\"run_status\",\"last_run_at\"],\"sort\":[[\"lag_hours\",\"desc\"]]},\"gridData\":{\"h\":18,\"w\":48,\"x\":0,\"y\":8},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"}]",
+    "timeRestore": false,
+    "title": "SDLC Ingest health",
+    "version": 1
+  },
+  "id": "sdlc-intel-ingest-health",
+  "references": [
+    { "id": "sdlc-intel-lens-stale-workflows", "name": "panel_0", "type": "lens" },
+    { "id": "sdlc-intel-lens-avg-ingest-lag", "name": "panel_1", "type": "lens" },
+    { "id": "sdlc-intel-ingest-health-search", "name": "panel_2", "type": "search" },
+    { "id": "sdlc-intel-tag", "name": "tag-ref-sdlc-intel-tag", "type": "tag" }
+  ],
+  "type": "dashboard"
+}

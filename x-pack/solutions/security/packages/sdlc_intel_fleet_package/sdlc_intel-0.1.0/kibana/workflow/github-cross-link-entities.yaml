@@ -13,7 +13,7 @@ tags:
   - ingest
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   syncStateIndex: github-intel-sync-state
   projectItemsIndex: github-intel-project-items
   issuesIndex: github-intel-issues
@@ -139,6 +139,81 @@ steps:
                     - term:
                         to: '${{ foreach.item.url }}'
 
+          - name: init_pr_summary
+            type: data.set
+            with:
+              prSummaryTotal: '${{ steps.count_prs_for_issue.output.hits.total.value }}'
+              prSummaryMerged: 0
+              prSummaryOpen: 0
+              prSummaryClosed: 0
+
+          - name: load_issue_closing_prs
+            type: elasticsearch.search
+            if: '${{ variables.prSummaryTotal > 0 }}'
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              size: 50
+              query:
+                bool:
+                  must:
+                    - term:
+                        relation: closes
+                    - term:
+                        to: '${{ foreach.item.url }}'
+
+          - name: tally_pr_states
+            type: foreach
+            foreach: '${{ steps.load_issue_closing_prs.output.hits.hits | json }}'
+            steps:
+              - name: load_linked_pr
+                type: elasticsearch.search
+                with:
+                  index: '{{ consts.pullRequestsIndex }}'
+                  size: 1
+                  query:
+                    bool:
+                      must:
+                        - term:
+                            org.login: '{{ consts.orgLogin }}'
+                        - term:
+                            entity.url: '${{ foreach.item._source.from }}'
+
+              - name: bump_merged_pr
+                type: data.set
+                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 && steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"MERGED\" }}"
+                with:
+                  prSummaryMerged: '${{ variables.prSummaryMerged + 1 }}'
+
+              - name: bump_open_pr
+                type: data.set
+                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 && steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"OPEN\" }}"
+                with:
+                  prSummaryOpen: '${{ variables.prSummaryOpen + 1 }}'
+
+              - name: bump_closed_pr
+                type: data.set
+                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 && steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"CLOSED\" }}"
+                with:
+                  prSummaryClosed: '${{ variables.prSummaryClosed + 1 }}'
+
+          - name: load_issue_for_labels
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.issuesIndex }}'
+              size: 1
+              query:
+                bool:
+                  must:
+                    - term:
+                        org.login: '{{ consts.orgLogin }}'
+                    - term:
+                        entity.url: '${{ foreach.item.url }}'
+
+          - name: set_label_team
+            type: data.set
+            with:
+              labelTeam: '${{ steps.load_issue_for_labels.output.hits.hits[0]._source.labels[0] ?? "" }}'
+
           - name: find_project_item_for_issue
             type: elasticsearch.search
             with:
@@ -173,14 +248,18 @@ steps:
                     content_ref: '${{ foreach.item._source.content_ref | json }}'
                     payload: '${{ foreach.item._source.payload | json }}'
                     delivery:
-                      linked_prs_count: '${{ steps.count_prs_for_issue.output.hits.total.value }}'
-                      coverage_status: '${{ steps.count_prs_for_issue.output.hits.total.value > 0 ? "in_progress" : "not_started" }}'
-                      coverage_pct: '${{ steps.count_prs_for_issue.output.hits.total.value > 0 ? 50 : 0 }}'
+                      linked_prs_count: '${{ variables.prSummaryTotal }}'
+                      coverage_status: '${{ variables.prSummaryTotal > 0 ? "in_progress" : "not_started" }}'
+                      coverage_pct: '${{ variables.prSummaryMerged > 0 ? 100 : (variables.prSummaryTotal > 0 ? 50 : 0) }}'
                       pr_summary:
-                        total: '${{ steps.count_prs_for_issue.output.hits.total.value }}'
-                        merged: '${{ variables.prState == "MERGED" ? 1 : 0 }}'
-                        open: '${{ variables.prState == "OPEN" ? 1 : 0 }}'
-                        closed_unmerged: '${{ variables.prState == "CLOSED" ? 1 : 0 }}'
+                        total: '${{ variables.prSummaryTotal }}'
+                        merged: '${{ variables.prSummaryMerged }}'
+                        open: '${{ variables.prSummaryOpen }}'
+                        closed_unmerged: '${{ variables.prSummaryClosed }}'
+                    team_attribution:
+                      engineering_team: '${{ foreach.item._source.team_attribution.engineering_team ?? variables.labelTeam }}'
+                      org_teams: '${{ foreach.item._source.team_attribution.org_teams ?? variables.labelTeam }}'
+                      attribution_source: '${{ foreach.item._source.team_attribution.engineering_team ? "project_field" : "issue_label" }}'
 
       - name: track_pr_progress
         type: data.set

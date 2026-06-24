@@ -1,0 +1,10 @@
+name: sdlc-ingest-health-view
+query: |
+  FROM github-intel-sync-state
+  | EVAL
+      sync_source = sync.source,
+      entity = entity_type,
+      org_login = org.login,
+      lag_hours = DATE_DIFF("hours", last_run_at, NOW()),
+      run_status = last_run_status
+  | SORT lag_hours DESC

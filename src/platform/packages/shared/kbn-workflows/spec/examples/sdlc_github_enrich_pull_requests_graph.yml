@@ -15,7 +15,7 @@ tags:
   - pull-requests
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
   syncStateIndex: github-intel-sync-state
   pullRequestsIndex: github-intel-pull-requests

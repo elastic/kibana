@@ -14,6 +14,67 @@ type: integration
 license: basic
 owner:
   github: elastic/security-solution
+vars:
+  - name: github_connector_id
+    type: text
+    title: GitHub connector ID
+    description: >
+      Kibana connector ID for the GitHub (.github) connector used by SDLC ingest workflows.
+      Set when adding the integration policy; workflows auto-install with this ID substituted.
+    multi: false
+    required: false
+    show_user: true
+  - name: slack_connector_id
+    type: text
+    title: Slack connector ID
+    description: >
+      Kibana connector ID for the Slack (.slack2) connector used by SDLC ingest workflows.
+    multi: false
+    required: false
+    show_user: true
+  - name: org_login
+    type: text
+    title: GitHub organization login
+    description: GitHub organization to ingest (default elastic).
+    multi: false
+    required: false
+    show_user: true
+    default: elastic
+  - name: salesforce_connector_id
+    type: text
+    title: Salesforce connector ID
+    description: >
+      Kibana connector ID for the Salesforce (.salesforce) connector used by SDLC feedback-loop
+      ingest workflows.
+    multi: false
+    required: false
+    show_user: true
+  - name: salesforce_case_github_field
+    type: text
+    title: Salesforce Case GitHub URL field
+    description: >
+      Salesforce Case custom field API name that stores the linked GitHub issue URL (for example
+      Engineering_Issue_URL__c). Substituted into SOQL and workflow field mappings on install.
+    multi: false
+    required: false
+    show_user: true
+    default: Engineering_Issue_URL__c
+  - name: sdh_repo_pattern
+    type: text
+    title: SDH GitHub repo search pattern
+    description: >
+      GitHub search repo qualifier for SDH repositories (for example sdh-* for elastic/sdh-* repos).
+    multi: false
+    required: false
+    show_user: true
+    default: sdh-*
+policy_templates:
+  - name: sdlc_intel
+    title: SDLC Intelligence
+    description: >
+      Kibana-only SDLC Intelligence integration. Configures connector IDs for auto-installed
+      ingest workflows. No Elastic Agent is required.
+    inputs: []
 requirement:
   elasticsearch:
     versions: '>7.7.0'

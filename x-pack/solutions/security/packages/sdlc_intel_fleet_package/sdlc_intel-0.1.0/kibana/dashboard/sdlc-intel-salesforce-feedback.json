@@ -1,0 +1,20 @@
+{
+  "attributes": {
+    "description": "Salesforce Case to SDH GitHub issue feedback-loop linkage overview.",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"embeddableConfig\":{\"columns\":[\"case_number\",\"case_status\",\"case_subject\",\"github_issue_url\",\"linked_to_sdh\",\"link_source\",\"last_modified_at\"],\"sort\":[[\"last_modified_at\",\"desc\"]]},\"gridData\":{\"h\":20,\"w\":48,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"}]",
+    "timeRestore": false,
+    "title": "SDLC Salesforce feedback loop",
+    "version": 1
+  },
+  "id": "sdlc-intel-salesforce-feedback",
+  "references": [
+    { "id": "sdlc-intel-salesforce-feedback-search", "name": "panel_0", "type": "search" },
+    { "id": "sdlc-intel-tag", "name": "tag-ref-sdlc-intel-tag", "type": "tag" }
+  ],
+  "type": "dashboard"
+}

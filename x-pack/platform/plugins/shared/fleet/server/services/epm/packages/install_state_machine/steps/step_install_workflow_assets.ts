@@ -9,13 +9,82 @@ import path from 'path';
 
 import pMap from 'p-map';
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../../../common/types';
 import type { KibanaAssetReference } from '../../../../../../common/types';
 import { getPathParts } from '../../../archive';
 import { appContextService } from '../../../../app_context';
+import { packagePolicyService } from '../../../../package_policy';
 import { saveKibanaAssetsRefs } from '../../install';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
+
+const GITHUB_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_GITHUB_CONNECTOR_ID';
+const SLACK_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_SLACK_CONNECTOR_ID';
+const SALESFORCE_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_CONNECTOR_ID';
+const SALESFORCE_CASE_GITHUB_FIELD_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD';
+const SDH_REPO_PATTERN_PLACEHOLDER = 'REPLACE_WITH_SDH_REPO_PATTERN';
+const ORG_LOGIN_PLACEHOLDER = 'REPLACE_WITH_ORG_LOGIN';
+
+export const substituteWorkflowConnectorIds = (
+  yaml: string,
+  vars: Record<string, unknown>
+): string => {
+  let result = yaml;
+  const githubConnectorId = vars.github_connector_id;
+  const slackConnectorId = vars.slack_connector_id;
+  const salesforceConnectorId = vars.salesforce_connector_id;
+  const salesforceCaseGithubField = vars.salesforce_case_github_field;
+  const sdhRepoPattern = vars.sdh_repo_pattern;
+  const orgLogin = vars.org_login;
+
+  if (typeof githubConnectorId === 'string' && githubConnectorId.length > 0) {
+    result = result.replaceAll(GITHUB_CONNECTOR_PLACEHOLDER, githubConnectorId);
+  }
+  if (typeof slackConnectorId === 'string' && slackConnectorId.length > 0) {
+    result = result.replaceAll(SLACK_CONNECTOR_PLACEHOLDER, slackConnectorId);
+  }
+  if (typeof salesforceConnectorId === 'string' && salesforceConnectorId.length > 0) {
+    result = result.replaceAll(SALESFORCE_CONNECTOR_PLACEHOLDER, salesforceConnectorId);
+  }
+  if (typeof salesforceCaseGithubField === 'string' && salesforceCaseGithubField.length > 0) {
+    result = result.replaceAll(
+      SALESFORCE_CASE_GITHUB_FIELD_PLACEHOLDER,
+      salesforceCaseGithubField
+    );
+  }
+  if (typeof sdhRepoPattern === 'string' && sdhRepoPattern.length > 0) {
+    result = result.replaceAll(SDH_REPO_PATTERN_PLACEHOLDER, sdhRepoPattern);
+  }
+  if (typeof orgLogin === 'string' && orgLogin.length > 0) {
+    result = result.replaceAll(ORG_LOGIN_PLACEHOLDER, orgLogin);
+  }
+
+  return result;
+};
+
+export const resolvePackagePolicyConnectorVars = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string
+): Promise<Record<string, unknown>> => {
+  try {
+    const policies = await packagePolicyService.list(savedObjectsClient, {
+      perPage: 20,
+      kuery: `ingest-package-policies.package.name:${pkgName}`,
+    });
+    const policy = policies.items.find((item) => item.package?.name === pkgName);
+    if (!policy?.vars) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(policy.vars).map(([key, config]) => [key, config.value ?? config])
+    );
+  } catch {
+    return {};
+  }
+};
 
 export const getFleetPackageWorkflowId = (params: {
   pkgName: string;
@@ -76,18 +145,30 @@ export async function stepInstallWorkflowAssets(
       return;
     }
 
+    const connectorVars = await resolvePackagePolicyConnectorVars(savedObjectsClient, pkgName);
+
     const assetRefs: KibanaAssetReference[] = [];
 
     await pMap(
       workflowEntries,
       async ({ fileName, yaml }) => {
         const workflowId = getFleetPackageWorkflowId({ pkgName, spaceId, fileName });
+        const workflowYaml = substituteWorkflowConnectorIds(yaml, connectorVars);
         const existingWorkflow = await workflowsApi.getWorkflow(workflowId, spaceId);
 
         if (existingWorkflow) {
-          await workflowsApi.updateWorkflow(workflowId, { yaml }, spaceId, context.request!);
+          await workflowsApi.updateWorkflow(
+            workflowId,
+            { yaml: workflowYaml },
+            spaceId,
+            context.request!
+          );
         } else {
-          await workflowsApi.createWorkflow({ id: workflowId, yaml }, spaceId, context.request!);
+          await workflowsApi.createWorkflow(
+            { id: workflowId, yaml: workflowYaml },
+            spaceId,
+            context.request!
+          );
         }
 
         assetRefs.push({

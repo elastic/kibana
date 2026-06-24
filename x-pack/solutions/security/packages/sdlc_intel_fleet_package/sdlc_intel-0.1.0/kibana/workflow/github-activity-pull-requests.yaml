@@ -14,7 +14,7 @@ tags:
   - pull-requests
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
   syncStateIndex: github-intel-sync-state
   pullRequestsIndex: github-intel-pull-requests
@@ -134,11 +134,10 @@ steps:
           cursor: '{{ steps.fetch_pull_requests.output.pageInfo.endCursor }}'
           pagesFetched: '{{ variables.pagesFetched | plus: 1 }}'
 
-  - name: finalize_watermark
+  - name: clear_cursor_if_complete
     type: data.set
     if: 'steps.fetch_pull_requests.output.pageInfo.hasNextPage : false'
     with:
-      watermark: '{{ variables.runStartedAt }}'
       cursor: ''
 
   - name: write_checkpoint
@@ -155,7 +154,7 @@ steps:
         org:
           login: '{{ consts.orgLogin }}'
         cursor: '{{ variables.cursor }}'
-        watermark: '{{ variables.watermark }}'
+        watermark: '{{ variables.runStartedAt }}'
         last_run_at: '{{ execution.startedAt }}'
         last_run_status: success
         stats:

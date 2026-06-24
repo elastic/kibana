@@ -14,7 +14,7 @@ tags:
   - phases
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   syncStateIndex: github-intel-sync-state
   epicPhasesIndex: sdlc-epic-phases
   epicTicketsIndex: github-intel-epic-tickets
@@ -165,6 +165,44 @@ steps:
                 with:
                   childPrCount: '${{ steps.count_prs_for_child.output.hits.total.value }}'
                   childHasPr: '${{ steps.count_prs_for_child.output.hits.total.value > 0 }}'
+                  childMergedCount: 0
+
+              - name: load_closing_pr_edges
+                type: elasticsearch.search
+                if: '${{ variables.childHasPr }}'
+                with:
+                  index: '{{ consts.relationshipsIndex }}'
+                  size: 50
+                  query:
+                    bool:
+                      must:
+                        - term:
+                            relation: closes
+                        - term:
+                            to: '${{ variables.childIssueUrl }}'
+
+              - name: tally_merged_prs
+                type: foreach
+                foreach: '${{ steps.load_closing_pr_edges.output.hits.hits | json }}'
+                steps:
+                  - name: load_closing_pr
+                    type: elasticsearch.search
+                    with:
+                      index: '{{ consts.pullRequestsIndex }}'
+                      size: 1
+                      query:
+                        bool:
+                          must:
+                            - term:
+                                org.login: '{{ consts.orgLogin }}'
+                            - term:
+                                entity.url: '${{ foreach.item._source.from }}'
+
+                  - name: increment_child_merged
+                    type: data.set
+                    if: "${{ steps.load_closing_pr.output.hits.hits.size > 0 && steps.load_closing_pr.output.hits.hits[0]._source.github.state == \"MERGED\" }}"
+                    with:
+                      childMergedCount: '${{ variables.childMergedCount + 1 }}'
 
               - name: upsert_epic_ticket
                 type: elasticsearch.index
@@ -190,6 +228,7 @@ steps:
                       node_id: '${{ variables.childIssueId }}'
                     delivery:
                       pr_count: '${{ variables.childPrCount }}'
+                      merged_pr_count: '${{ variables.childMergedCount }}'
                       has_pr: '${{ variables.childHasPr }}'
 
               - name: accumulate_ticket_stats
@@ -198,15 +237,39 @@ steps:
                   ticketTotal: '${{ variables.ticketTotal + 1 }}'
                   ticketsWithPrs: '${{ variables.ticketsWithPrs + (variables.childHasPr ? 1 : 0) }}'
                   prTotal: '${{ variables.prTotal + variables.childPrCount }}'
+                  mergedPrTotal: '${{ variables.mergedPrTotal + variables.childMergedCount }}'
+
+      - name: compute_gate_status
+        type: data.set
+        with:
+          epicSummary: '${{ foreach.item._source.epic.summary ?? "" }}'
+          epicPrdUrl: '${{ foreach.item._source.links.prd_url ?? "" }}'
+          epicArchUrl: '${{ foreach.item._source.links.arch_url ?? "" }}'
+          epicRoadmapStage: '${{ foreach.item._source.release.roadmap_stage ?? "" }}'
+          epicMilestone: '${{ foreach.item._source.release.milestone ?? "" }}'
+          p1Status: '${{ (variables.epicPrdUrl != "" || variables.epicSummary != "") ? "passed" : "pending" }}'
+          p2Status: '${{ variables.epicArchUrl != "" ? "passed" : "pending" }}'
+          p4Status: '${{ variables.ticketTotal > 0 ? "passed" : "pending" }}'
+          p5Status: '${{ variables.mergedPrTotal > 0 ? "passed" : "pending" }}'
+          p7Applicable: '${{ variables.epicMilestone != "" || variables.epicRoadmapStage != "" }}'
+
+      - name: compute_p7_status
+        type: data.set
+        with:
+          p7Status: '${{ variables.p7Applicable && (variables.epicRoadmapStage == "GA" || variables.epicRoadmapStage == "Production" || variables.epicRoadmapStage == "Released") ? "passed" : "pending" }}'
 
       - name: compute_coverage
         type: data.set
         with:
           coveragePct: '${{ variables.ticketTotal > 0 ? (variables.ticketsWithPrs * 100 / variables.ticketTotal) : 0 }}'
-          deliveryCoveragePct: '${{ variables.coveragePct }}'
-          gatesApplicable: 2
-          gatesPassed: '${{ (variables.ticketTotal > 0 ? 1 : 0) + (variables.ticketsWithPrs > 0 ? 1 : 0) }}'
-          gatesPassedPct: '${{ variables.gatesPassed * 50 }}'
+          deliveryCoveragePct: '${{ variables.ticketTotal > 0 ? (variables.mergedPrTotal * 100 / variables.ticketTotal) : 0 }}'
+          gatesApplicable: '${{ 4 + (variables.p7Applicable ? 1 : 0) }}'
+          gatesPassed: '${{ (variables.p1Status == "passed" ? 1 : 0) + (variables.p2Status == "passed" ? 1 : 0) + (variables.p4Status == "passed" ? 1 : 0) + (variables.p5Status == "passed" ? 1 : 0) + (variables.p7Applicable && variables.p7Status == "passed" ? 1 : 0) }}'
+
+      - name: compute_rollup
+        type: data.set
+        with:
+          gatesPassedPct: '${{ variables.gatesApplicable > 0 ? (variables.gatesPassed * 100 / variables.gatesApplicable) : 0 }}'
           rollupStatus: '${{ variables.coveragePct >= 80 ? "healthy" : (variables.coveragePct >= 40 ? "at_risk" : "blocked") }}'
 
       - name: upsert_enriched_epic
@@ -227,32 +290,32 @@ steps:
             payload: '${{ foreach.item._source.payload | json }}'
             phases:
               p1_prd:
-                status: pending
+                status: '${{ variables.p1Status }}'
                 applicable: true
               p2_arch:
-                status: pending
+                status: '${{ variables.p2Status }}'
                 applicable: true
               p3_ai_coverage:
-                status: pending
+                status: not_applicable
                 applicable: false
               p4_tickets:
-                status: '${{ variables.ticketTotal > 0 ? "passed" : "pending" }}'
+                status: '${{ variables.p4Status }}'
                 applicable: true
                 total: '${{ variables.ticketTotal }}'
                 with_prs: '${{ variables.ticketsWithPrs }}'
               p5_prs:
-                status: '${{ variables.ticketsWithPrs > 0 ? "passed" : "pending" }}'
+                status: '${{ variables.p5Status }}'
                 applicable: true
                 total: '${{ variables.prTotal }}'
                 merged: '${{ variables.mergedPrTotal }}'
               p6_defects:
-                status: pending
+                status: not_applicable
                 applicable: false
               p7_production:
-                status: pending
-                applicable: false
+                status: '${{ variables.p7Status }}'
+                applicable: '${{ variables.p7Applicable }}'
               p8_telemetry:
-                status: pending
+                status: not_applicable
                 applicable: false
             rollup:
               status: '${{ variables.rollupStatus }}'

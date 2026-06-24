@@ -13,7 +13,7 @@ tags:
   - ingest
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   syncStateIndex: github-intel-sync-state
   teamsIndex: github-intel-teams
   teamDimensionIndex: sdlc-team-dimension

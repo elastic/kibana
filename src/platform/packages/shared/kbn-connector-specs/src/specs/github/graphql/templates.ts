@@ -182,6 +182,35 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
     `,
   },
   {
+    id: 'orgCatalog.projectViews',
+    description:
+      'List saved views for a GitHub Project v2 by project node id. Pass projectId from orgCatalog.projects.',
+    pageInfoPath: 'node.views',
+    query: `
+      query OrgCatalogProjectViews($projectId: ID!, $first: Int!, $after: String) {
+        node(id: $projectId) {
+          ... on ProjectV2 {
+            id
+            number
+            title
+            views(first: $first, after: $after) {
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+              nodes {
+                id
+                number
+                name
+                filter
+              }
+            }
+          }
+        }
+      }
+    `,
+  },
+  {
     id: 'orgCatalog.projectItems',
     description:
       'List items for a GitHub Project v2 by project node id with cursor pagination. Pass projectId from orgCatalog.projects.',

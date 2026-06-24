@@ -14,7 +14,7 @@ tags:
   - projects
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
   syncStateIndex: github-intel-sync-state
   projectsIndex: github-intel-projects

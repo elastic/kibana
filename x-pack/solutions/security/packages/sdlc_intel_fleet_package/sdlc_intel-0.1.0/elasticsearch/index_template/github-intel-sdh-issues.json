@@ -1,0 +1,127 @@
+{
+  "index_patterns": [
+    "github-intel-sdh-issues"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "sdlc_intel_retention"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "entity": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "integer"
+            }
+          }
+        },
+        "org": {
+          "properties": {
+            "login": {
+              "type": "keyword"
+            }
+          }
+        },
+        "repository": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "full_name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "github": {
+          "properties": {
+            "created_at": {
+              "type": "date"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "closed_at": {
+              "type": "date"
+            },
+            "state": {
+              "type": "keyword"
+            }
+          }
+        },
+        "labels": {
+          "type": "keyword"
+        },
+        "people": {
+          "properties": {
+            "author": {
+              "type": "keyword"
+            }
+          }
+        },
+        "content": {
+          "properties": {
+            "title": {
+              "type": "text"
+            },
+            "body": {
+              "type": "text"
+            },
+            "searchable": {
+              "type": "text"
+            }
+          }
+        },
+        "feedback": {
+          "properties": {
+            "is_sdh": {
+              "type": "boolean"
+            },
+            "linked_salesforce_case_id": {
+              "type": "keyword"
+            },
+            "linked_salesforce_case_number": {
+              "type": "keyword"
+            },
+            "link_source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

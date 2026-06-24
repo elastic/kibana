@@ -13,7 +13,7 @@ tags:
   - ingest
 
 consts:
-  orgLogin: elastic
+  orgLogin: REPLACE_WITH_ORG_LOGIN
   syncStateIndex: github-intel-sync-state
   projectItemsIndex: github-intel-project-items
   epicPhasesIndex: sdlc-epic-phases

@@ -14,6 +14,7 @@ import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import {
   SlackCreateConversationInputSchema,
   SlackGetChannelHistoryInputSchema,
+  SlackGetConversationRepliesInputSchema,
   SlackInviteToConversationInputSchema,
   SlackListChannelsInputSchema,
   SlackListUsersInputSchema,
@@ -23,6 +24,8 @@ import {
   SLACK_SEARCH_DEFAULT_COUNT,
   type SlackAssistantSearchContextResponse,
   type SlackConversationsHistoryResponse,
+  type SlackConversationsRepliesResponse,
+  type SlackGetConversationRepliesInput,
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
   type SlackCreateConversationInput,
@@ -560,6 +563,59 @@ export const Slack: ConnectorSpec = {
         return {
           ok: true,
           channel: typedInput.channel,
+          messages: response.data.messages ?? [],
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor || response.data.has_more),
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.replies
+    getConversationReplies: {
+      isTool: false,
+      description:
+        'Fetch thread replies for a Slack message. Use after getChannelHistory to ingest thread context.',
+      input: SlackGetConversationRepliesInputSchema,
+      handler: async (ctx, input: SlackGetConversationRepliesInput) => {
+        const typedInput = SlackGetConversationRepliesInputSchema.parse(input);
+        const params: Record<string, string | number | boolean> = {
+          channel: typedInput.channel,
+          ts: typedInput.ts,
+          limit: typedInput.limit,
+          inclusive: typedInput.inclusive,
+        };
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsRepliesResponse>({
+          ctx,
+          action: 'getConversationReplies',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${SLACK_API_BASE}/conversations.replies`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getConversationReplies',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        return {
+          ok: true,
+          channel: typedInput.channel,
+          threadTs: typedInput.ts,
           messages: response.data.messages ?? [],
           nextCursor: response.data.response_metadata?.next_cursor,
           hasMore: Boolean(response.data.response_metadata?.next_cursor || response.data.has_more),

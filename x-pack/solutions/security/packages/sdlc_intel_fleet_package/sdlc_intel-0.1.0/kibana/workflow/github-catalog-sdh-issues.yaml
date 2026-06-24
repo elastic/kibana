@@ -1,0 +1,174 @@
+version: '1'
+name: SDLC GitHub catalog SDH issues (GraphQL)
+description: >
+  Tier-1 SDH catalog workflow. Repo-scoped GitHub issue search (org + sdh-* pattern) via
+  activity.searchIssues. Upserts github-intel-sdh-issues separately from product-repo issues.
+  Run before cross-link-feedback-loop.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - catalog
+  - ingest
+  - graphql
+  - issues
+  - sdh
+  - feedback
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  sdhRepoPattern: REPLACE_WITH_SDH_REPO_PATTERN
+  syncStateIndex: github-intel-sync-state
+  issuesIndex: github-intel-sdh-issues
+  syncSource: github-catalog-sdh-issues
+  entityType: sdh_issue
+  pageSize: 50
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-github-catalog-sdh-issues
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      cursor: '${{ steps.read_checkpoint.output.hits.hits[0]._source.cursor ?? "" }}'
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      pagesFetched: 0
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: build_search_query
+    type: data.set
+    with:
+      searchQuery: 'org:{{ consts.orgLogin }} repo:{{ consts.sdhRepoPattern }} updated:>{{ variables.watermark }} -is:pr'
+
+  - name: paginate_sdh_issues
+    type: while
+    condition: 'steps.fetch_sdh_issues.output.pageInfo.hasNextPage : true'
+    max-iterations: 15
+    steps:
+      - name: fetch_sdh_issues
+        type: github.runQueryTemplate
+        connector-id: '{{ consts.githubConnectorId }}'
+        with:
+          templateId: activity.searchIssues
+          variables:
+            query: '{{ variables.searchQuery }}'
+          first: '{{ consts.pageSize }}'
+          after: '${{ variables.cursor }}'
+
+      - name: backoff_if_needed
+        type: wait
+        if: '${{ steps.fetch_sdh_issues.output.shouldBackoff }}'
+        with:
+          duration: 60s
+
+      - name: index_sdh_issues
+        type: foreach
+        foreach: '${{ steps.fetch_sdh_issues.output.data.search.nodes | json }}'
+        steps:
+          - name: upsert_sdh_issue
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.issuesIndex }}'
+              id: '${{ foreach.item.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                entity:
+                  type: sdh_issue
+                  id: '${{ foreach.item.id }}'
+                  url: '${{ foreach.item.url }}'
+                  number: '${{ foreach.item.number }}'
+                org:
+                  login: '{{ consts.orgLogin }}'
+                repository:
+                  name: '${{ foreach.item.repository.name }}'
+                  full_name: '${{ foreach.item.repository.nameWithOwner }}'
+                github:
+                  created_at: '${{ foreach.item.createdAt }}'
+                  updated_at: '${{ foreach.item.updatedAt }}'
+                  closed_at: '${{ foreach.item.closedAt }}'
+                  state: '${{ foreach.item.state }}'
+                labels: '${{ foreach.item.labels.nodes | json }}'
+                people:
+                  author: '${{ foreach.item.author.login }}'
+                content:
+                  title: '${{ foreach.item.title }}'
+                  body: '${{ foreach.item.body }}'
+                  searchable: '${{ foreach.item.title }} ${{ foreach.item.body }}'
+                feedback:
+                  is_sdh: true
+                  linked_salesforce_case_id: ''
+                  linked_salesforce_case_number: ''
+                  link_source: ''
+                payload: '${{ foreach.item | json }}'
+
+      - name: advance_cursor
+        type: data.set
+        with:
+          cursor: '${{ steps.fetch_sdh_issues.output.pageInfo.endCursor }}'
+          pagesFetched: '${{ variables.pagesFetched + 1 }}'
+
+  - name: clear_cursor_if_complete
+    type: data.set
+    if: '${{ steps.fetch_sdh_issues.output.pageInfo.hasNextPage == false }}'
+    with:
+      cursor: ''
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        cursor: '${{ variables.cursor }}'
+        watermark: '{{ variables.runStartedAt }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pages_fetched: '${{ variables.pagesFetched }}'
+          has_next_page: '${{ steps.fetch_sdh_issues.output.pageInfo.hasNextPage ?? false }}'
+          search_query: '{{ variables.searchQuery }}'
+          sdh_repo_pattern: '{{ consts.sdhRepoPattern }}'

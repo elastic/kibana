@@ -279,10 +279,63 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     id: 'sdlc_github_enrich_epic_phases',
     name: 'SDLC GitHub enrich epic phases',
     description:
-      'Enriches sdlc-epic-phases with child tickets, rollup coverage, and phase gate summaries',
+      'Enriches sdlc-epic-phases with child tickets, merged PR counts, rollup coverage, and phase gate summaries',
     category: 'security',
     tags: ['scheduled', 'github', 'ingest', 'sdlc', 'epic', 'enrich', 'phases', 'foreach'],
     filename: 'sdlc_github_enrich_epic_phases.yml',
+  },
+  {
+    id: 'sdlc_github_catalog_project_views',
+    name: 'SDLC GitHub catalog project views (GraphQL)',
+    description:
+      'Pages GitHub Project v2 saved views via orgCatalog.projectViews into github-intel-project-views',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'projects', 'views', 'foreach', 'while'],
+    filename: 'sdlc_github_catalog_project_views.yml',
+  },
+  {
+    id: 'sdlc_github_build_release_calendar',
+    name: 'SDLC GitHub build release calendar',
+    description: 'Projects sdlc-epic-phases release milestones into sdlc-release-calendar',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'release', 'calendar', 'foreach'],
+    filename: 'sdlc_github_build_release_calendar.yml',
+  },
+  {
+    id: 'sdlc_slack_thread_replies',
+    name: 'SDLC Slack thread replies',
+    description:
+      'Ingests Slack thread replies via slack2.getConversationReplies into slack-intel-messages',
+    category: 'security',
+    tags: ['scheduled', 'slack', 'ingest', 'sdlc', 'messages', 'threads', 'foreach', 'while'],
+    filename: 'sdlc_slack_thread_replies.yml',
+  },
+  {
+    id: 'sdlc_salesforce_catalog_cases',
+    name: 'SDLC Salesforce catalog cases',
+    description:
+      'Incremental Salesforce Case ingest via salesforce.soqlIngest into salesforce-intel-cases',
+    category: 'security',
+    tags: ['scheduled', 'salesforce', 'ingest', 'sdlc', 'cases', 'feedback', 'foreach', 'while'],
+    filename: 'sdlc_salesforce_catalog_cases.yml',
+  },
+  {
+    id: 'sdlc_github_catalog_sdh_issues',
+    name: 'SDLC GitHub catalog SDH issues',
+    description:
+      'Repo-scoped SDH issue catalog via activity.searchIssues into github-intel-sdh-issues',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'issues', 'sdh', 'feedback', 'foreach', 'while'],
+    filename: 'sdlc_github_catalog_sdh_issues.yml',
+  },
+  {
+    id: 'sdlc_cross_link_feedback_loop',
+    name: 'SDLC cross-link feedback loop',
+    description:
+      'Bidirectional Salesforce Case to SDH GitHub issue linkage via github-intel-relationships',
+    category: 'security',
+    tags: ['scheduled', 'salesforce', 'github', 'ingest', 'sdlc', 'feedback', 'relationships'],
+    filename: 'sdlc_cross_link_feedback_loop.yml',
   },
 ];
 

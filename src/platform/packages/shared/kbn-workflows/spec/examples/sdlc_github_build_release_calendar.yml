@@ -1,0 +1,105 @@
+version: '1'
+name: SDLC GitHub build release calendar
+description: >
+  Tier-2 projection workflow. Builds sdlc-release-calendar entries from sdlc-epic-phases release
+  milestones and roadmap stages. Run github-project-epic-phases first.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - release
+  - calendar
+  - ingest
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  syncStateIndex: github-intel-sync-state
+  epicPhasesIndex: sdlc-epic-phases
+  releaseCalendarIndex: sdlc-release-calendar
+  syncSource: github-build-release-calendar
+  entityType: release_calendar
+  batchSize: 100
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-github-build-release-calendar
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 12h
+  - type: manual
+
+steps:
+  - name: load_epics_with_release
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.epicPhasesIndex }}'
+      size: '{{ consts.batchSize }}'
+      query:
+        bool:
+          should:
+            - exists:
+                field: release.milestone
+            - exists:
+                field: release.roadmap_stage
+          minimum_should_match: 1
+
+  - name: init_stats
+    type: data.set
+    with:
+      entriesProjected: 0
+
+  - name: project_release_entries
+    type: foreach
+    foreach: '${{ steps.load_epics_with_release.output.hits.hits | json }}'
+    steps:
+      - name: upsert_release_entry
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.releaseCalendarIndex }}'
+          id: '${{ foreach.item._source.epic.project_item_id }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            release_line: '${{ foreach.item._source.release.milestone }}'
+            product: '${{ foreach.item._source.roadmap.product }}'
+            version: '${{ foreach.item._source.release.milestone }}'
+            milestone: '${{ foreach.item._source.release.milestone }}'
+            status: '${{ foreach.item._source.release.roadmap_stage }}'
+            release_manager: '${{ foreach.item._source.epic.owner }}'
+            source:
+              type: github_project_epic
+              raw_text: '${{ foreach.item._source.epic.title }}'
+            payload:
+              epic_url: '${{ foreach.item._source.epic.url }}'
+              roadmap_id: '${{ foreach.item._source.roadmap.id }}'
+              initiative: '${{ foreach.item._source.release.initiative }}'
+
+      - name: track_entry_progress
+        type: data.set
+        with:
+          entriesProjected: '${{ variables.entriesProjected + 1 }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          entries_projected: '${{ variables.entriesProjected }}'

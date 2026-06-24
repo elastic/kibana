@@ -1,0 +1,180 @@
+version: '1'
+name: SDLC Slack thread replies
+description: >
+  Incremental Slack thread reply ingest. Reads parent messages with reply_count from
+  slack-intel-messages, fetches thread replies via slack2.getConversationReplies, and upserts
+  reply documents. Run slack-channel-history first.
+enabled: false
+tags:
+  - sdlc
+  - slack
+  - activity
+  - ingest
+  - threads
+
+consts:
+  slackConnectorId: REPLACE_WITH_SLACK_CONNECTOR_ID
+  syncStateIndex: slack-intel-sync-state
+  messagesIndex: slack-intel-messages
+  syncSource: slack-thread-replies
+  entityType: slack_thread_reply
+  batchSize: 50
+  replyPageSize: 200
+  initialWatermark: '0'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-slack-thread-replies
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 2h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      threadsProcessed: 0
+      repliesIndexed: 0
+      lastUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_thread_parents
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.messagesIndex }}'
+      size: '{{ consts.batchSize }}'
+      sort:
+        - message.ts:
+            order: asc
+      query:
+        bool:
+          must:
+            - range:
+                message.ts:
+                  gt: '{{ variables.watermark }}'
+          filter:
+            - range:
+                message.reply_count:
+                  gt: 0
+
+  - name: ingest_thread_replies
+    type: foreach
+    foreach: '${{ steps.load_thread_parents.output.hits.hits | json }}'
+    steps:
+      - name: set_thread_context
+        type: data.set
+        with:
+          channelId: '${{ foreach.item._source.channel.id }}'
+          threadTs: '${{ foreach.item._source.message.ts }}'
+          replyCursor: ''
+
+      - name: paginate_replies
+        type: while
+        condition: 'steps.fetch_replies.output.hasMore : true'
+        max-iterations: 10
+        steps:
+          - name: fetch_replies
+            type: slack2.getConversationReplies
+            connector-id: '{{ consts.slackConnectorId }}'
+            with:
+              channel: '${{ variables.channelId }}'
+              ts: '${{ variables.threadTs }}'
+              limit: '{{ consts.replyPageSize }}'
+              cursor: '${{ variables.replyCursor }}'
+
+          - name: index_replies
+            type: foreach
+            foreach: '${{ steps.fetch_replies.output.messages | json }}'
+            steps:
+              - name: skip_parent_message
+                type: if
+                condition: "${{ foreach.item.ts != variables.threadTs }}"
+                steps:
+                  - name: upsert_reply
+                    type: elasticsearch.index
+                    with:
+                      index: '{{ consts.messagesIndex }}'
+                      id: '${{ variables.channelId }}-${{ foreach.item.ts }}'
+                      document:
+                        '@timestamp': '{{ execution.startedAt }}'
+                        sync:
+                          run_id: '{{ execution.id }}'
+                          source: '{{ consts.syncSource }}'
+                        channel:
+                          id: '${{ variables.channelId }}'
+                        message:
+                          ts: '${{ foreach.item.ts }}'
+                          thread_ts: '${{ variables.threadTs }}'
+                          user_id: '${{ foreach.item.user }}'
+                          text: '${{ foreach.item.text }}'
+                          reply_count: 0
+                          is_thread_reply: true
+                        payload: '${{ foreach.item | json }}'
+
+                  - name: increment_replies_indexed
+                    type: data.set
+                    with:
+                      repliesIndexed: '${{ variables.repliesIndexed + 1 }}'
+
+          - name: advance_reply_cursor
+            type: data.set
+            with:
+              replyCursor: '${{ steps.fetch_replies.output.nextCursor }}'
+
+      - name: track_thread_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '${{ foreach.item._source.message.ts }}'
+          threadsProcessed: '${{ variables.threadsProcessed + 1 }}'
+
+  - name: finalize_watermark
+    type: if
+    condition: "${{ variables.threadsProcessed > 0 }}"
+    steps:
+      - name: use_last_thread_watermark
+        type: data.set
+        with:
+          watermark: '${{ variables.lastUpdatedAt }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-slack-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        watermark: '${{ variables.watermark }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          threads_processed: '${{ variables.threadsProcessed }}'
+          replies_indexed: '${{ variables.repliesIndexed }}'
