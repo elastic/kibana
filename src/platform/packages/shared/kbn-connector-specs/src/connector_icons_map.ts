@@ -211,4 +211,8 @@ export const ConnectorIconsMap: Map<
   ],
 
   ['.box', lazy(() => import(/* webpackChunkName: "connectorIconbox" */ './specs/box/icon'))],
+  [
+    '.mongodb',
+    lazy(() => import(/* webpackChunkName: "connectorIconMongodb" */ './specs/mongodb/icon')),
+  ],
 ]);
