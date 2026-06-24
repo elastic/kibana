@@ -6,8 +6,7 @@
  */
 
 export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
-export { isAlertingV2Enabled } from './is_alerting_v2_enabled';
 export {
+  isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
-  type ShouldShowAlertingV2CreateRuleFlyoutParams,
-} from './should_show_alerting_v2_create_rule_flyout';
+} from './is_alerting_v2_enabled';

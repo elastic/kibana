@@ -148,10 +148,8 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
-  const showCreateRuleV2 = shouldShowAlertingV2CreateRuleFlyout(services.core, {
-    isEsqlMode,
-    isPluginAvailable: Boolean(services.alertingVTwo),
-  });
+  const showCreateRuleV2 =
+    isEsqlMode && shouldShowAlertingV2CreateRuleFlyout(services.core);
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
