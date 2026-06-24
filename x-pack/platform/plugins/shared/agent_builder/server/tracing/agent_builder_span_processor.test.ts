@@ -335,6 +335,163 @@ describe('AgentBuilderSpanProcessor', () => {
     expect(mockBatch.shutdown).toHaveBeenCalledTimes(1);
   });
 
+  it('onEnd skips when enabled is false even if span was marked at onStart', async () => {
+    let enabled = true;
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+      getSettings: () => createSettings({ enabled }),
+    });
+
+    const span = createMockSpan('inference');
+    await processor.onStart(span, agentBuilderParentContext());
+    expect(span.setAttribute).toHaveBeenCalledWith(SHOULD_TRACK_ATTR, true);
+
+    enabled = false;
+
+    const readable = createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true });
+    processor.onEnd(readable);
+
+    expect(mockBatch.onEnd).not.toHaveBeenCalled();
+  });
+
+  describe('event filtering', () => {
+    function makeReadableWithEvents(events: tracing.TimedEvent[]): tracing.ReadableSpan {
+      return {
+        ...createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true }),
+        events,
+      };
+    }
+
+    it('drops gen_ai.system.message when includeSystemPrompt is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeSystemPrompt: false }),
+      });
+
+      processor.onEnd(
+        makeReadableWithEvents([
+          { name: 'gen_ai.system.message', time: [0, 0], attributes: { content: 'You are...' } },
+          { name: 'gen_ai.user.message', time: [0, 0], attributes: { content: 'Hello' } },
+        ])
+      );
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.events).toHaveLength(1);
+      expect(exported.events[0].name).toBe('gen_ai.user.message');
+    });
+
+    it('drops gen_ai.user.message when includeUserPrompts is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeUserPrompts: false }),
+      });
+
+      processor.onEnd(
+        makeReadableWithEvents([
+          { name: 'gen_ai.system.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.user.message', time: [0, 0], attributes: { content: 'secret query' } },
+        ])
+      );
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.events).toHaveLength(1);
+      expect(exported.events[0].name).toBe('gen_ai.system.message');
+    });
+
+    it('drops gen_ai.assistant.message, gen_ai.tool.message, and gen_ai.choice when includeLlmResponses is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeLlmResponses: false }),
+      });
+
+      processor.onEnd(
+        makeReadableWithEvents([
+          { name: 'gen_ai.assistant.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.tool.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.choice', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.user.message', time: [0, 0], attributes: {} },
+        ])
+      );
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.events).toHaveLength(1);
+      expect(exported.events[0].name).toBe('gen_ai.user.message');
+    });
+
+    it('preserves all events when all include flags are true', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings(),
+      });
+
+      processor.onEnd(
+        makeReadableWithEvents([
+          { name: 'gen_ai.system.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.user.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.assistant.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.tool.message', time: [0, 0], attributes: {} },
+          { name: 'gen_ai.choice', time: [0, 0], attributes: {} },
+        ])
+      );
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.events).toHaveLength(5);
+    });
+  });
+
+  describe('tool call I/O stripping', () => {
+    it('strips tool call arguments and result when includeLlmResponses is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeLlmResponses: false }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [GenAISemanticConventions.GenAIToolCallArguments]: '{"query":"secret"}',
+        [GenAISemanticConventions.GenAIToolCallResult]: '{"data":"confidential"}',
+        'other.attr': 'keep-me',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(GenAISemanticConventions.GenAIToolCallArguments in exported.attributes).toBe(false);
+      expect(GenAISemanticConventions.GenAIToolCallResult in exported.attributes).toBe(false);
+      expect(exported.attributes['other.attr']).toBe('keep-me');
+    });
+
+    it('preserves tool call arguments and result when includeLlmResponses is true', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeLlmResponses: true }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [GenAISemanticConventions.GenAIToolCallArguments]: '{"query":"value"}',
+        [GenAISemanticConventions.GenAIToolCallResult]: '{"data":"result"}',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[GenAISemanticConventions.GenAIToolCallArguments]).toBe(
+        '{"query":"value"}'
+      );
+      expect(exported.attributes[GenAISemanticConventions.GenAIToolCallResult]).toBe(
+        '{"data":"result"}'
+      );
+    });
+  });
+
   describe('sensitive attribute hashing', () => {
     it('hashes custom agent IDs but keeps built-in agent IDs', () => {
       const processor = new AgentBuilderSpanProcessor({
