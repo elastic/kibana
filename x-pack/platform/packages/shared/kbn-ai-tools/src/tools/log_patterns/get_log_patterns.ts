@@ -18,20 +18,15 @@ import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categori
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { get, omit, orderBy, uniqBy } from 'lodash';
+import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
+import { esql } from '@elastic/esql';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
-import type { Logger } from '@kbn/logging';
 import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { pValueToLabel } from '../../utils/p_value_to_label';
-import {
-  buildPass1Query,
-  buildPass2Query,
-  parsePass1Rows,
-  parsePass2Hits,
-} from '../../utils/esql_two_pass';
+import { columnPath } from '../../utils/esql_two_pass';
 
 const MAX_DOCS_TO_SAMPLE = 100_000;
 
@@ -39,7 +34,7 @@ const MAX_DOCS_TO_SAMPLE = 100_000;
 // bounded long tail from one ES|QL categorization query avoids reimplementing
 // the DSL helper's second rare-pattern aggregation, while still giving
 // selectLogPatternsForLlm enough sorted rows to take the head and tail.
-const SIG_EVENTS_PASS1_LIMIT = 1000;
+const SIG_EVENTS_CATEGORIZE_LIMIT = 1000;
 
 interface FieldPatternResultBase {
   field: string;
@@ -293,10 +288,9 @@ interface SigEventsLogPatternEsqlOptions {
   esClient: TracedElasticsearchClient;
   start: number;
   end: number;
-  index: string | string[];
+  samplingSource: string;
   fields: string[];
   kql?: string;
-  logger: Logger;
 }
 
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
@@ -428,14 +422,13 @@ export async function getSigEventsLogPatternsEsql({
   esClient,
   start,
   end,
-  index,
+  samplingSource,
   kql,
   fields,
-  logger,
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
   const columns = await getEsqlColumnSchema({
     esClient: esClient.client,
-    index,
+    index: samplingSource,
     start,
     end,
   });
@@ -450,7 +443,13 @@ export async function getSigEventsLogPatternsEsql({
     return [];
   }
 
-  const totalDocs = await runEsqlCountQuery({ esClient, index, start, end, kql });
+  const totalDocs = await runEsqlCountQuery({
+    esClient,
+    samplingSource,
+    start,
+    end,
+    kql,
+  });
   if (totalDocs === 0) {
     return [];
   }
@@ -459,62 +458,30 @@ export async function getSigEventsLogPatternsEsql({
     MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
   const perField = await Promise.all(
     eligibleFields.map(async (field) => {
-      // Pass 1 mirrors the diverse-sampling strategy: categorize and keep one
-      // representative composite key per pattern. ES|QL grouped aggregations do
-      // not provide a coherent full `_source` document in the same row.
-      const pass1Rows = await runSigEventsPass1({
+      // A single categorization query both groups the patterns and emits a
+      // representative sample value per pattern via `TOP(<field>::keyword, 1)`.
+      // This avoids the `_index`/`_id`/`_source` metadata round-trip, which ES|QL
+      // views (e.g. query streams' `$.<name>` views) do not expose — `FROM <view>
+      // METADATA _index, _id` raises `Unknown column [_index]`.
+      const rows = await runSigEventsCategorize({
         esClient,
-        index,
+        samplingSource,
         start,
         end,
         kql,
         field,
         samplingProbability,
-        limit: SIG_EVENTS_PASS1_LIMIT,
+        limit: SIG_EVENTS_CATEGORIZE_LIMIT,
       });
 
-      if (pass1Rows.length === 0) {
-        return [];
-      }
-
-      // Fetch full sources by composite key in a second query. This avoids `_id`
-      // collisions across backing indices and keeps every sample value from the
-      // same underlying log line. Use the wrapped raw client here instead of traced as this is cheap
-      const pass2Response = (await esClient.client.esql.query({
-        query: buildPass2Query(
-          Array.isArray(index) ? index : [index],
-          pass1Rows.map(({ docKey }) => docKey)
-        ),
-        filter: { bool: { filter: dateRangeQuery(start, end) } },
-        drop_null_columns: true,
-      })) as unknown as ESQLSearchResponse;
-      const keyToHit = new Map(
-        parsePass2Hits(pass2Response).map((hit) => [`${hit._index}:${hit._id}`, hit])
-      );
-      const patterns: LogPatternEsqlEntry[] = [];
-
-      for (const row of pass1Rows) {
-        const hit = keyToHit.get(row.docKey);
-        if (!hit) {
-          logger.warn(
-            `Log patterns (ES|QL): doc ${row.docKey} not found in pass-2 fetch (deleted between passes); skipping pattern.`
-          );
-          continue;
-        }
-
-        patterns.push({
-          field,
-          pattern: row.pattern,
-          // DSL random_sampler returns population-scaled doc_counts. ES|QL
-          // SAMPLE returns sampled counts, so scale back for prompt parity.
-          count: Math.round(row.count / samplingProbability),
-          // Dotted ECS paths such as `body.text` are nested in `_source`; direct
-          // bracket access would turn valid samples into empty strings.
-          sample: String(get(hit._source, field) ?? ''),
-        });
-      }
-
-      return patterns;
+      return rows.map((row) => ({
+        field,
+        pattern: row.pattern,
+        // DSL random_sampler returns population-scaled doc_counts. ES|QL
+        // SAMPLE returns sampled counts, so scale back for prompt parity.
+        count: Math.round(row.count / samplingProbability),
+        sample: row.sample,
+      }));
     })
   );
 
@@ -529,19 +496,19 @@ export async function getSigEventsLogPatternsEsql({
 
 async function runEsqlCountQuery({
   esClient,
-  index,
+  samplingSource,
   start,
   end,
   kql,
 }: {
   esClient: TracedElasticsearchClient;
-  index: string | string[];
+  samplingSource: string;
   start: number;
   end: number;
   kql?: string;
 }): Promise<number> {
   const response = (await esClient.esql('count_docs_for_sigevents_log_patterns', {
-    query: buildCountQuery({ index, kql }),
+    query: buildCountQuery({ index: samplingSource, kql }),
     filter: { bool: { filter: dateRangeQuery(start, end) } },
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
@@ -550,9 +517,73 @@ async function runEsqlCountQuery({
   return typeof total === 'number' ? total : 0;
 }
 
-async function runSigEventsPass1({
+/**
+ * Builds a single-pass ES|QL categorization query that returns, per pattern, the
+ * document count and one representative sample value for the field. The sample
+ * uses `TOP(<field>::keyword, 1, "desc")`: text fields are not aggregatable, so
+ * the cast to keyword makes the value usable by `TOP` while keeping the original
+ * message text. Works for both concrete indices and ES|QL views.
+ */
+function buildCategorizeWithSampleQuery({
+  samplingSource,
+  field,
+  limit,
+  samplingProbability,
+  kql,
+}: {
+  samplingSource: string;
+  field: string;
+  limit: number;
+  samplingProbability: number;
+  kql?: string;
+}): string {
+  let query = esql.from([samplingSource]);
+
+  if (kql) {
+    query = query.where`KQL(${esql.str(kql)})`;
+  }
+  if (samplingProbability < 1) {
+    query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
+  }
+
+  return query.pipe`STATS count = COUNT(*), sample = TOP(${esql.col(
+    columnPath(field)
+  )}::keyword, 1, "desc") BY pattern = CATEGORIZE(${esql.col(columnPath(field))})`
+    .sort([['count'], 'DESC', ''])
+    .limit(limit)
+    .print('basic');
+}
+
+function parseCategorizeWithSampleRows(
+  response: ESQLSearchResponse
+): Array<{ count: number; pattern: string; sample: string }> {
+  const countIndex = response.columns.findIndex((column) => column.name === 'count');
+  const sampleIndex = response.columns.findIndex((column) => column.name === 'sample');
+  const patternIndex = response.columns.findIndex((column) => column.name === 'pattern');
+
+  if (countIndex === -1 || sampleIndex === -1 || patternIndex === -1) {
+    return [];
+  }
+
+  return response.values.flatMap((row) => {
+    const count = row[countIndex];
+    const pattern = row[patternIndex];
+    const rawSample = row[sampleIndex];
+    // TOP(..., 1) returns a scalar, but tolerate a single-item array across ES
+    // snapshots (same defensive handling as the two-pass categorize parser).
+    const sample = Array.isArray(rawSample) ? rawSample[0] : rawSample;
+
+    if (typeof count !== 'number' || typeof pattern !== 'string') {
+      return [];
+    }
+
+    return [{ count, pattern, sample: typeof sample === 'string' ? sample : '' }];
+  });
+}
+
+async function runSigEventsCategorize({
   esClient,
-  index,
+  samplingSource,
   start,
   end,
   kql,
@@ -561,17 +592,17 @@ async function runSigEventsPass1({
   limit,
 }: {
   esClient: TracedElasticsearchClient;
-  index: string | string[];
+  samplingSource: string;
   start: number;
   end: number;
   kql?: string;
   field: string;
   samplingProbability: number;
   limit: number;
-}): Promise<Array<{ docKey: string; count: number; pattern: string }>> {
+}): Promise<Array<{ count: number; pattern: string; sample: string }>> {
   const response = (await esClient.esql('categorize_sigevents_log_patterns', {
-    query: buildPass1Query({
-      indices: Array.isArray(index) ? index : [index],
+    query: buildCategorizeWithSampleQuery({
+      samplingSource,
       kql,
       field,
       samplingProbability,
@@ -581,5 +612,5 @@ async function runSigEventsPass1({
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
 
-  return parsePass1Rows(response);
+  return parseCategorizeWithSampleRows(response);
 }

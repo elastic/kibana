@@ -52,6 +52,11 @@ export function validateEsqlQueryForStreamOrThrow({
         `ES|QL query must use FROM ${name} or FROM ${wiredPattern}`
       );
     }
+  } else if (Streams.QueryStream.Definition.is(stream)) {
+    const viewName = stream.query.view;
+    if (sourcesPattern !== viewName) {
+      throw new EsqlQueryValidationError(`ES|QL query must use FROM ${viewName}`);
+    }
   } else if (!matchesWiredPattern) {
     throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern}`);
   }

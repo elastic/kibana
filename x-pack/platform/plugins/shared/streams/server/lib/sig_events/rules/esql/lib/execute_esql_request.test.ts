@@ -37,10 +37,67 @@ describe('executeEsqlRequest', () => {
     expect(results).toEqual([{ _id: 'doc-1', _source: { host: { name: 'test' } } }]);
   });
 
-  it('returns an empty array when _source or _id columns are missing', async () => {
+  it('reconstructs documents from projected columns when _id/_source are missing (ES|QL view)', async () => {
     esClient.esql.query.mockResolvedValueOnce({
-      columns: [{ name: 'host.name', type: 'keyword' }],
-      values: [['test']],
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'host.name', type: 'keyword' },
+        { name: 'message', type: 'text' },
+      ],
+      values: [['2026-06-18T12:30:06.566Z', 'mesos-slave-01', 'INFO signal handlers']],
+    } as never);
+
+    const results = await executeEsqlRequest({ esClient, esqlRequest, logger });
+
+    expect(results).toHaveLength(1);
+    expect(results[0]._source).toEqual({
+      '@timestamp': '2026-06-18T12:30:06.566Z',
+      'host.name': 'mesos-slave-01',
+      message: 'INFO signal handlers',
+    });
+    // Synthetic id is a deterministic, non-empty hash of the reconstructed source.
+    expect(typeof results[0]._id).toBe('string');
+    expect(results[0]._id).not.toHaveLength(0);
+  });
+
+  it('derives stable synthetic ids: identical rows hash equal, different rows differ', async () => {
+    const columns = [
+      { name: '@timestamp', type: 'date' },
+      { name: 'message', type: 'text' },
+    ];
+    esClient.esql.query.mockResolvedValueOnce({
+      columns,
+      values: [
+        ['2026-06-18T12:30:06.566Z', 'a'],
+        ['2026-06-18T12:30:06.566Z', 'a'],
+        ['2026-06-18T12:30:07.000Z', 'b'],
+      ],
+    } as never);
+
+    const results = await executeEsqlRequest({ esClient, esqlRequest, logger });
+
+    expect(results[0]._id).toBe(results[1]._id);
+    expect(results[0]._id).not.toBe(results[2]._id);
+  });
+
+  it('returns an empty array when no metadata and no data columns are present', async () => {
+    esClient.esql.query.mockResolvedValueOnce({
+      columns: [{ name: '_index', type: 'keyword' }],
+      values: [['logs-a']],
+    } as never);
+
+    const results = await executeEsqlRequest({ esClient, esqlRequest, logger });
+
+    expect(results).toEqual([]);
+  });
+
+  it('skips view rows whose projected columns are all null', async () => {
+    esClient.esql.query.mockResolvedValueOnce({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'message', type: 'text' },
+      ],
+      values: [[null, null]],
     } as never);
 
     const results = await executeEsqlRequest({ esClient, esqlRequest, logger });

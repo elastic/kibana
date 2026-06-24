@@ -180,6 +180,7 @@ async function tryIdentifyFeatures(
 interface RunInferredIterationOptions {
   esClient: ElasticsearchClient;
   streamName: string;
+  samplingSource: string;
   start: number;
   end: number;
   runId: string;
@@ -219,6 +220,7 @@ type InferredIterationResult =
 async function runInferredIteration({
   esClient,
   streamName,
+  samplingSource,
   start,
   end,
   runId,
@@ -245,7 +247,7 @@ async function runInferredIteration({
 
   const batchResult = await fetchSampleDocuments({
     esClient,
-    index: streamName,
+    index: samplingSource,
     start,
     end,
     features: discoveredFeatures.filter(isFeatureWithFilter),
@@ -349,6 +351,7 @@ export interface IdentifyInferredFeaturesOptions {
   logger: Logger;
   signal: AbortSignal;
   streamName: string;
+  samplingSource: string;
   streamType: StreamType;
   start: number;
   end: number;
@@ -377,6 +380,7 @@ export async function identifyInferredFeatures({
   logger,
   signal,
   streamName,
+  samplingSource,
   streamType,
   start,
   end,
@@ -403,6 +407,7 @@ export async function identifyInferredFeatures({
   const iterationResult = await runInferredIteration({
     esClient,
     streamName,
+    samplingSource,
     start,
     end,
     runId,

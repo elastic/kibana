@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import {
+  getStreamSamplingSource,
   getStreamTypeFromDefinition,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
@@ -129,6 +130,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
         streamName,
+        samplingSource: getStreamSamplingSource(stream),
         streamType,
         start,
         end,

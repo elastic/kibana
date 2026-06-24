@@ -110,6 +110,53 @@ describe('getSampleDocumentsEsql', () => {
     });
   });
 
+  it('reconstructs documents from row columns when a view drops _id and _source metadata', async () => {
+    const { esClient, query } = createEsClient();
+    // ES|QL views silently drop outer `METADATA _id, _source`, so the response
+    // only contains the view's projected columns.
+    query.mockResolvedValueOnce(
+      createResponse({
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'message', type: 'text' },
+          { name: 'service.name', type: 'keyword' },
+        ],
+        values: [
+          ['2026-04-28T08:00:00.000Z', 'first', 'checkout'],
+          ['2026-04-28T08:01:00.000Z', 'second', null],
+        ],
+      })
+    );
+
+    const result = await getSampleDocumentsEsql({
+      esClient,
+      index: '$.query',
+      start: 100,
+      end: 200,
+      size: 2,
+    });
+
+    expect(result).toEqual({
+      hits: [
+        {
+          _index: '',
+          _id: undefined,
+          _source: {
+            '@timestamp': '2026-04-28T08:00:00.000Z',
+            message: 'first',
+            'service.name': 'checkout',
+          },
+        },
+        {
+          _index: '',
+          _id: undefined,
+          _source: { '@timestamp': '2026-04-28T08:01:00.000Z', message: 'second' },
+        },
+      ],
+      total: 2,
+    });
+  });
+
   it('combines KQL and ES|QL where conditions and enables unmapped field loading', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(createResponse({ values: [] }));
@@ -255,15 +302,15 @@ describe('getSampleDocumentsEsql', () => {
     expect(result).toEqual({ hits: [], total: 0 });
   });
 
-  it('returns an empty result when metadata columns are missing', async () => {
+  it('returns an empty result when a view row has no non-null projected columns', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(
-      createResponse({ columns: [{ name: 'message', type: 'keyword' }], values: [['hello']] })
+      createResponse({ columns: [{ name: 'message', type: 'keyword' }], values: [[null]] })
     );
 
     const result = await getSampleDocumentsEsql({
       esClient,
-      index: 'logs-*',
+      index: '$.query',
       start: 100,
       end: 200,
     });

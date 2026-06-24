@@ -28,7 +28,7 @@ export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
-  type: 'wired' | 'root' | 'classic';
+  type: 'wired' | 'root' | 'classic' | 'query';
   children?: EnrichedStream[];
 }
 
@@ -211,6 +211,8 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     retentionMs,
     type: Streams.ClassicStream.Definition.is(node.stream)
       ? 'classic'
+      : Streams.QueryStream.Definition.is(node.stream)
+      ? 'query'
       : isRootStreamDefinition(node.stream)
       ? 'root'
       : 'wired',

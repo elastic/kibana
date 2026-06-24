@@ -9,6 +9,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { parseEsqlSourceDocuments } from '@kbn/ai-tools';
+import objectHash from 'object-hash';
 
 type Response = Array<{
   _id: string;
@@ -31,23 +33,7 @@ export const executeEsqlRequest = async ({
       drop_null_columns: true,
     })) as unknown as ESQLSearchResponse;
 
-    const { columns, values } = response;
-
-    const [sourceIndex, idIndex] = [
-      columns.findIndex((col) => col.name === '_source'),
-      columns.findIndex((col) => col.name === '_id'),
-    ];
-
-    if (sourceIndex === -1 || idIndex === -1) {
-      return [];
-    }
-
-    const results = values.map((row) => ({
-      _id: row[idIndex],
-      _source: row[sourceIndex],
-    })) as Response;
-
-    return results;
+    return parseEsqlResults(response);
   } catch (error) {
     const message = `Error executing ES|QL request: ${
       error instanceof Error ? error.message : String(error)
@@ -56,3 +42,19 @@ export const executeEsqlRequest = async ({
     throw createTaskRunError(new Error(message), TaskErrorSource.USER);
   }
 };
+
+/**
+ * Maps the ES|QL response rows into `{ _id, _source }` documents.
+ *
+ * Concrete indices expose `METADATA _id, _source`, so the real document id is
+ * used. ES|QL views (e.g. query streams' `$.<name>` views) drop that metadata,
+ * so {@link parseEsqlSourceDocuments} reconstructs `_source` and reports no id;
+ * synthesize a stable `_id` by hashing the reconstructed source. The hash is
+ * deterministic across runs (same field values → same id), which keeps
+ * content-based dedup working.
+ */
+const parseEsqlResults = (response: ESQLSearchResponse): Response =>
+  parseEsqlSourceDocuments(response).map(({ id, source }) => ({
+    _id: id ?? objectHash(source),
+    _source: source,
+  }));

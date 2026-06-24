@@ -31,6 +31,7 @@ import {
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
+import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../stream_badges';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
@@ -90,7 +91,11 @@ export function StreamsTreeTable({
   // Filter streams by query, including ancestors of matches
   const filteredStreams = React.useMemo(() => {
     return filterStreamsByQuery(
-      streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
+      streams.filter(
+        (stream) =>
+          Streams.ingest.all.Definition.is(stream.stream) ||
+          Streams.QueryStream.Definition.is(stream.stream)
+      ),
       searchQuery.text
     );
   }, [streams, searchQuery]);
@@ -330,6 +335,11 @@ export function StreamsTreeTable({
                         <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                       </EuiFlexItem>
                     )}
+                    {Streams.QueryStream.Definition.is(item.stream) && (
+                      <EuiFlexItem grow={false}>
+                        <QueryStreamBadge />
+                      </EuiFlexItem>
+                    )}
                     <EuiFlexItem grow={false}>
                       <EuiLink
                         data-test-subj={`streamsNameLink-${item.stream.name}`}
@@ -340,6 +350,11 @@ export function StreamsTreeTable({
                         <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>
                       </EuiLink>
                     </EuiFlexItem>
+                    {Streams.QueryStream.Definition.is(item.stream) && (
+                      <EuiFlexItem grow={false}>
+                        <TechnicalPreviewBadge />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 );
               },

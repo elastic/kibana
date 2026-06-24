@@ -59,11 +59,18 @@ export async function getRuleExecutor(
     previousOriginalDocumentIds,
   });
 
-  const results = await executeEsqlRequest({
+  const allResults = await executeEsqlRequest({
     esClient: scopedClusterClient.asCurrentUser,
     esqlRequest,
     logger,
   });
+
+  // ES|QL views (query streams) expose no real `_id`, so the `must_not terms _id`
+  // dedup filter pushed to ES is a no-op for their synthesized ids. Dedup
+  // client-side here too; for concrete indices ES already pruned these, so this
+  // is a no-op and keeps a single dedup path for both.
+  const seenDocumentIds = new Set(previousOriginalDocumentIds);
+  const results = allResults.filter((result) => !seenDocumentIds.has(result._id));
 
   if (results.length === 0) {
     return {

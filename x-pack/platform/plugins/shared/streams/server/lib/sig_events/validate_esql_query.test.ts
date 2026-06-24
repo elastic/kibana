@@ -36,6 +36,20 @@ const createWiredStreamDefinition = (name: string): Streams.WiredStream.Definiti
   },
 });
 
+const createQueryStreamDefinition = (
+  name: string,
+  view: string
+): Streams.QueryStream.Definition => ({
+  name,
+  description: '',
+  type: 'query',
+  updated_at: new Date().toISOString(),
+  query: {
+    view,
+    esql: `FROM ${view}`,
+  },
+});
+
 const createClassicStreamDefinition = (name: string): Streams.ClassicStream.Definition => ({
   name,
   description: '',
@@ -206,6 +220,52 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
       ).toThrow(
         'ES|QL query must use FROM metrics-custom or FROM metrics-custom, metrics-custom.*'
       );
+    });
+  });
+
+  describe('source validation for query streams', () => {
+    it('should accept FROM <view> (the stream view name)', () => {
+      const stream = createQueryStreamDefinition('query', '$.query');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM $.query METADATA _id, _source',
+          stream,
+        })
+      ).not.toThrow();
+    });
+
+    it('should accept the quoted view name', () => {
+      const stream = createQueryStreamDefinition('query', '$.query');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM "$.query" METADATA _id, _source',
+          stream,
+        })
+      ).not.toThrow();
+    });
+
+    it('should reject FROM with the stream name instead of the view', () => {
+      const stream = createQueryStreamDefinition('query', '$.query');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM query, query.* METADATA _id, _source',
+          stream,
+        })
+      ).toThrow('ES|QL query must use FROM $.query');
+    });
+
+    it('should reject FROM with an unrelated view', () => {
+      const stream = createQueryStreamDefinition('query', '$.query');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM $.other METADATA _id, _source',
+          stream,
+        })
+      ).toThrow('ES|QL query must use FROM $.query');
     });
   });
 
