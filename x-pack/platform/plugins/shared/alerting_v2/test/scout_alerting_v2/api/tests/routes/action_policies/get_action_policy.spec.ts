@@ -89,7 +89,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({
         id: created.id,
-        type: 'global',
         enabled: true,
         snoozedUntil: null,
         matcher: null,
@@ -101,16 +100,16 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
   );
 
   apiTest(
-    'get: returns type:"single_rule" with ruleId for a single-rule policy',
+    'get: returns the rule.id matcher for a rule-scoped policy',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-get-single' } })
+        buildCreateRuleData({ metadata: { name: 'rule-for-get-scoped' } })
       );
+      const matcher = `rule.id: "${rule.id}"`;
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
-          name: 'single-rule-policy',
-          type: 'single_rule',
-          ruleId: rule.id,
+          name: 'rule-scoped-policy',
+          matcher,
         })
       );
 
@@ -119,8 +118,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.type).toBe('single_rule');
-      expect(response.body.ruleId).toBe(rule.id);
+      expect(response.body.matcher).toBe(matcher);
     }
   );
 

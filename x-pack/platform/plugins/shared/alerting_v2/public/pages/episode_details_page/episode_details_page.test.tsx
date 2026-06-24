@@ -53,6 +53,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_sec
   AlertEpisodeLifecycleHeatmapSection: () => <div data-test-subj="stubLifecycleHeatmapSection" />,
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section', () => ({
+  AlertEpisodeSeverityHeatmapSection: () => <div data-test-subj="stubSeverityHeatmapSection" />,
+}));
+
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
   AlertEpisodeMetadataSection: () => <div data-test-subj="stubMetadataSection" />,
 }));
@@ -96,7 +100,7 @@ const fetchRuleResult = {
     enabled: true,
     metadata: { name: 'Rule A', description: 'Rule description' },
     grouping: { fields: ['host.name'] },
-    evaluation: { query: { base: 'from index-*' } },
+    query: { format: 'standalone', breach: 'from index-*' },
     artifacts: [],
   },
   isLoading: false,
@@ -124,6 +128,8 @@ describe('EpisodeDetailsPage', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
+    expect(screen.getByTestId('stubLifecycleHeatmapSection')).toBeInTheDocument();
+    expect(screen.getByTestId('stubSeverityHeatmapSection')).toBeInTheDocument();
   });
 
   it('renders the not-found prompt when there is no episode', () => {
