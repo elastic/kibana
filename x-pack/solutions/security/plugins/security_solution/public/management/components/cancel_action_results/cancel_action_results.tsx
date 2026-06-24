@@ -49,7 +49,11 @@ export const CancelActionResults = memo<CancelActionResultsProps>(
         );
       } else if (!agentActionState.wasSuccessful) {
         result = (
-          <EndpointActionFailureMessage action={action} data-test-subj={getTestId('failure')} />
+          <EndpointActionFailureMessage
+            action={action}
+            agentId={agentId}
+            data-test-subj={getTestId('failure')}
+          />
         );
       } else {
         const actionOutputCode = agentActionResult?.content?.code;
