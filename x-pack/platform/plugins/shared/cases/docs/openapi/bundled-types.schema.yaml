@@ -3118,17 +3118,21 @@ components:
       properties:
         templateId:
           type: string
+          maxLength: 36
           description: The unique identifier of the template, shared across all versions.
         name:
           type: string
+          maxLength: 100
           description: The display name of the template.
         owner:
           type: string
+          maxLength: 50
           description: The owning solution (e.g. cases, observability, securitySolution).
         definition:
           description: The parsed template definition.
         definitionString:
           type: string
+          maxLength: 30000
           description: The raw YAML definition string.
         templateVersion:
           type: integer
@@ -3140,11 +3144,13 @@ components:
           description: The date the template was soft-deleted, or null if active.
         description:
           type: string
+          maxLength: 30000
           description: A human-readable description of the template.
         tags:
           $ref: '#/components/schemas/template_tags'
         author:
           type: string
+          maxLength: 1000
           description: The username of the template author.
         usageCount:
           type: integer
@@ -3165,12 +3171,16 @@ components:
             properties:
               name:
                 type: string
+                maxLength: 256
               label:
                 type: string
+                maxLength: 256
               type:
                 type: string
+                maxLength: 50
               control:
                 type: string
+                maxLength: 50
         lastUsedAt:
           type: string
           format: date-time

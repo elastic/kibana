@@ -1110,15 +1110,15 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * The unique identifier of the template, shared across all versions.
      */
-    templateId: z.string(),
+    templateId: z.string().max(36),
     /**
      * The display name of the template.
      */
-    name: z.string(),
+    name: z.string().max(100),
     /**
      * The owning solution (e.g. cases, observability, securitySolution).
      */
-    owner: z.string(),
+    owner: z.string().max(50),
     /**
      * The parsed template definition.
      */
@@ -1126,7 +1126,7 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * The raw YAML definition string.
      */
-    definitionString: z.string(),
+    definitionString: z.string().max(30000),
     /**
      * The version number of this template revision.
      */
@@ -1138,12 +1138,12 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * A human-readable description of the template.
      */
-    description: z.string().optional(),
+    description: z.string().max(30000).optional(),
     tags: TemplateTags.optional(),
     /**
      * The username of the template author.
      */
-    author: z.string().optional(),
+    author: z.string().max(1000).optional(),
     /**
      * The number of times this template has been used to create a case.
      */
@@ -1158,10 +1158,10 @@ export const TemplateV2Response = lazySchema(() =>
     fieldNames: z
       .array(
         z.object({
-          name: z.string(),
-          label: z.string(),
-          type: z.string(),
-          control: z.string(),
+          name: z.string().max(256),
+          label: z.string().max(256),
+          type: z.string().max(50),
+          control: z.string().max(50),
         })
       )
       .optional(),

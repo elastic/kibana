@@ -6,6 +6,7 @@
  */
 
 import { castArray } from 'lodash';
+import { schema } from '@kbn/config-schema';
 import type { TemplatesFindRequest } from '../../../../common/types/api';
 import type { GetCaseTemplatesResponse } from '../../../../common/bundled-types.gen';
 import { CASE_TEMPLATES_URL } from '../../../../common/constants';
@@ -27,6 +28,48 @@ export const getPublicTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest
     summary: 'Get all case templates',
     tags: ['oas-tag:cases'],
   },
+  params: {
+    query: schema.object({
+      page: schema.number({ defaultValue: 1, min: 1 }),
+      perPage: schema.number({ defaultValue: 20, min: 1, max: 100 }),
+      sortField: schema.maybe(
+        schema.oneOf([
+          schema.literal('templateId'),
+          schema.literal('name'),
+          schema.literal('templateVersion'),
+          schema.literal('owner'),
+          schema.literal('deletedAt'),
+          schema.literal('author'),
+          schema.literal('usageCount'),
+          schema.literal('fieldCount'),
+          schema.literal('lastUsedAt'),
+          schema.literal('isDefault'),
+          schema.literal('isLatest'),
+        ])
+      ),
+      sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+      search: schema.maybe(schema.string({ maxLength: 1000 })),
+      tags: schema.maybe(
+        schema.oneOf([
+          schema.arrayOf(schema.string({ maxLength: 256 })),
+          schema.string({ maxLength: 256 }),
+        ])
+      ),
+      author: schema.maybe(
+        schema.oneOf([
+          schema.arrayOf(schema.string({ maxLength: 1000 })),
+          schema.string({ maxLength: 1000 }),
+        ])
+      ),
+      owner: schema.maybe(
+        schema.oneOf([
+          schema.arrayOf(schema.string({ maxLength: 50 })),
+          schema.string({ maxLength: 50 }),
+        ])
+      ),
+      isEnabled: schema.maybe(schema.boolean()),
+    }),
+  },
   handler: async ({ context, request, response, logger }) => {
     try {
       const caseContext = await context.cases;
@@ -35,8 +78,8 @@ export const getPublicTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest
       const { page, perPage, sortField, sortOrder, search, tags, author, owner, isEnabled } =
         request.query;
       const { templates, ...pagination } = await casesClient.templates.getAllTemplates({
-        page: Number(page),
-        perPage: Number(perPage),
+        page,
+        perPage,
         sortField,
         sortOrder,
         search,
