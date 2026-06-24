@@ -164,6 +164,12 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
     return counts;
   }, [dataSetsRaw]);
 
+  useEffect(() => {
+    setSelectedItems((prev) =>
+      prev.filter((item) => (dataSetsCountByDataSource.get(item.name) ?? 0) === 0)
+    );
+  }, [dataSetsCountByDataSource]);
+
   const dataSourceFilterOptions = useMemo(
     () => [
       { value: '', text: mainTranslations.filters.allDataSources },
@@ -392,6 +398,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
             icon: 'trash',
             color: 'danger',
             type: 'icon',
+            enabled: (item) => (dataSetsCountByDataSource.get(item.name) ?? 0) === 0,
             onClick: (item) => {
               handleDeleteDataSource(item);
             },
@@ -625,6 +632,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
               selection={{
                 selected: selectedItems,
                 onSelectionChange: setSelectedItems,
+                selectable: (row) => (dataSetsCountByDataSource.get(row.name) ?? 0) === 0,
               }}
               sorting
               pagination={{
@@ -644,6 +652,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
     [
       columns,
       dataClient,
+      dataSetsCountByDataSource,
       dataSetColumns,
       dataSourceFilter,
       dataSourceFilterOptions,
