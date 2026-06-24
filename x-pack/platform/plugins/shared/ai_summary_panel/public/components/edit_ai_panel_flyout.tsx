@@ -89,10 +89,10 @@ export const EditAiPanelFlyout = ({
     setPreviewError(null);
     try {
       const result = await getServices().http.post<PreviewData>(
-        '/internal/ai_summary_panel/preview_esql',
+        '/internal/ai_summary_panel/esql_data',
         { body: JSON.stringify({ esqlQuery: draftEsqlQuery, timeRange }) }
       );
-      setPreviewData(result);
+      setPreviewData({ ...result, rows: result.rows.slice(0, 10) });
     } catch (err) {
       setPreviewError(err instanceof Error ? err.message : String(err));
     } finally {
