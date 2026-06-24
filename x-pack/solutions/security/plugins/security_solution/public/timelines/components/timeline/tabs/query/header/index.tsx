@@ -8,6 +8,7 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { FilterManager } from '@kbn/data-plugin/public';
+import { useSelector } from 'react-redux';
 import { InPortal } from 'react-reverse-portal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { css } from '@emotion/react';
@@ -27,6 +28,8 @@ import * as i18n from './translations';
 import { StatefulSearchOrFilter } from '../../../search_or_filter';
 import { DataProviders } from '../../../data_providers';
 import { EventsCountBadge, StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
+import { selectIsSuperTimeline } from '../../../../../store/selectors';
+import type { State } from '../../../../../../common/store';
 
 interface Props {
   activeTab: TimelineTabs;
@@ -89,6 +92,8 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
     []
   );
 
+  const isSuperTimeline = useSelector((state: State) => selectIsSuperTimeline(state, timelineId));
+
   const timelineType = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
   );
@@ -120,12 +125,12 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
               <EuiFlexItem>
                 <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
               </EuiFlexItem>
-              {showAlertsOnlyMigrationMessage && (
+              {!isSuperTimeline && showAlertsOnlyMigrationMessage && (
                 <EuiFlexItem>
                   <MigrationMessageCallout timelineId={timelineId} />
                 </EuiFlexItem>
               )}
-              {showCallOutUnauthorizedMsg && (
+              {!isSuperTimeline && showCallOutUnauthorizedMsg && (
                 <EuiFlexItem>
                   <EuiCallOut
                     announceOnMount={false}
@@ -137,7 +142,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
               )}
-              {status === TimelineStatusEnum.immutable && (
+              {!isSuperTimeline && status === TimelineStatusEnum.immutable && (
                 <EuiFlexItem>
                   <EuiCallOut
                     announceOnMount={false}
@@ -149,7 +154,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
               )}
-              {show ? (
+              {!isSuperTimeline && show ? (
                 <div css={dataProviderStyles} className="data-providers-container">
                   <DataProviders timelineId={timelineId} />
                 </div>

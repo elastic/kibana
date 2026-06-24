@@ -212,4 +212,5 @@ export interface TimelineUrl {
   graphEventId?: string;
   savedSearchId?: string;
   query?: KueryFilterQuery;
+  superTimelineSourceIds?: string[];
 }

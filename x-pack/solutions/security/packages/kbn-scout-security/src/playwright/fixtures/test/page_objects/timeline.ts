@@ -33,6 +33,8 @@ export class TimelinePage {
   readonly timelineRows: Locator;
   readonly batchActionsButton: Locator;
   readonly superTimelineBadge: Locator;
+  readonly viewSuperTimelineAction: Locator;
+  readonly addToFavoritesButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.panel = this.page.testSubj.locator('timeline-modal-header-panel');
@@ -63,6 +65,8 @@ export class TimelinePage {
     this.timelineRows = this.timelinesTable.locator('tbody').getByRole('row');
     this.batchActionsButton = this.page.testSubj.locator('batchActions');
     this.superTimelineBadge = this.page.testSubj.locator('timeline-modal-super-timeline-badge');
+    this.viewSuperTimelineAction = this.page.testSubj.locator('view-super-timeline-action');
+    this.addToFavoritesButton = this.page.testSubj.locator('add-to-favorites-btn');
   }
 
   /** Select a timeline row's checkbox by its title text. */
