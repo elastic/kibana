@@ -9,6 +9,7 @@ import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
 import { HIGH_SEVERITY_THRESHOLD, normalizeEsqlSafe, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../streams/ki';
+import { queryFromLink } from '../streams/ki/knowledge_indicator_client/serializers';
 import type { StreamsClient } from '../streams/client';
 
 type PersistedQuery = GeneratedSignificantEventQuery & { id: string };
@@ -113,7 +114,7 @@ export async function persistQueries(
     await kiClient.replaceStreamQueries(definition, (currentLinks) => [
       ...currentLinks
         .filter((l) => !ruleEligibleIds.has(l.query.id))
-        .map((l) => ({ ...l.query, expires_at: l.expires_at })),
+        .map(queryFromLink),
       ...ruleEligibleQueries.map(({ replaces: _replaces, ...q }) => ({
         ...q,
         expires_at: ruleEligibleExpiresAt.get(q.id),

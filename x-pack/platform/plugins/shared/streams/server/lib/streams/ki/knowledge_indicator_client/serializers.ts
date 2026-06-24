@@ -125,6 +125,10 @@ export function toTombstone(
   };
 }
 
+export function queryFromLink(link: QueryLink): StreamQuery {
+  return { ...link.query, expires_at: link.expires_at };
+}
+
 export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature {
   return {
     id: doc.feature.slug,
