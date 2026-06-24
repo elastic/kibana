@@ -107,10 +107,11 @@ export const LifecyclePreviewProvider = ({ children }: { children: React.ReactNo
   );
 
   const setIsDslDownsampleFlyoutOpen = useCallback((isDslDownsampleFlyoutOpen: boolean) => {
-    setState((prev) => {
-      if (prev.isDslDownsampleFlyoutOpen === isDslDownsampleFlyoutOpen) return prev;
-      return { ...prev, isDslDownsampleFlyoutOpen };
-    });
+    setState((prev) =>
+      prev.isDslDownsampleFlyoutOpen === isDslDownsampleFlyoutOpen
+        ? prev
+        : { ...prev, isDslDownsampleFlyoutOpen }
+    );
   }, []);
 
   const clearPreview = useCallback(() => {
