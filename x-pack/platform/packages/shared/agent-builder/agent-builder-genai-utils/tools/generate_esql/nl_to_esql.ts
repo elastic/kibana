@@ -18,15 +18,23 @@ import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 
+export class GenerateEsqlNoDataError extends Error {
+  readonly code = 'NO_DATA' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'GenerateEsqlNoDataError';
+  }
+}
+
 export interface GenerateEsqlResponse {
   /**
    * The ES|QL query which was generated
    */
-  query: string;
+  query?: string;
   /**
    * The full text answer which was provided by the LLM when generating the query.
    */
-  answer: string;
+  answer?: string;
   /**
    * Results from executing the query.
    * Available if `executeQuery` was true and if a successful query was executed.
@@ -147,7 +155,7 @@ export const generateEsql = async ({
             logger,
           });
           if (!selectedResource) {
-            throw new Error(
+            throw new GenerateEsqlNoDataError(
               'Could not discover a suitable index for the query. Please specify an index explicitly.'
             );
           }
@@ -181,6 +189,9 @@ export const generateEsql = async ({
           results: outState.results,
         };
       } catch (e) {
+        if (e instanceof GenerateEsqlNoDataError) {
+          throw e;
+        }
         throw new Error(`Could not generate ESQL query: ${e.message}`);
       }
     }

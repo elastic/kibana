@@ -36,6 +36,18 @@ Use this skill when the user asks to:
 
 This covers the rule type ES|QL. Do not create a rule with a rule type other than ES|QL. Only create ES|QL rules.
 
+## When NOT to Create a Rule
+
+Before calling \`security.create_detection_rule\`, assess whether the requested detection is actually achievable with the available data sources. Do NOT call the tool if any of the following apply:
+
+- **Wrong data source**: The user specifies a data source (e.g. network flow logs, O365 audit logs) that does not contain the telemetry needed for the detection (e.g. process execution, cloud API calls from a different provider). Example: detecting PowerShell execution using only \`logs-network_traffic.*\` is impossible — process and script telemetry does not exist in network flow data.
+- **Fundamental telemetry mismatch**: The detection goal requires fields or event types that are categorically absent from the stated index pattern. No query rewrite or approximation can bridge this gap.
+
+When you determine a rule cannot be created:
+1. Do NOT call \`security.create_detection_rule\`.
+2. Explain clearly why the available data cannot support the detection.
+3. Tell the user what data source they would actually need (e.g. "This requires endpoint telemetry from \`logs-endpoint.events.*\` or Windows Event Logs").
+
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 
 **You MUST apply changes directly to the attachment.** Do NOT just describe or suggest what fields to change in your response text. Every edit request requires you to actually call the tools (\`attachment_update\` or \`security.create_detection_rule\`) to persist the change in the attachment. Describing the change without applying it is not acceptable.
@@ -65,7 +77,6 @@ If you are creating a new rule, use the following:
 - after calling the \`security.create_detection_rule\` tool, move to step 4.
 - render the latest version of the attachment inline.
 
-
 When asked to edit or update the rule or any field of the rule, use the following:
 **Editing an existing rule** (changing fields like tags, severity, description, schedule, MITRE ATT&CK, index patterns, query, etc.):
 
@@ -87,6 +98,25 @@ attachment_update({ attachment_id: "ATTACHMENT_ID", data: { text: "<full stringi
 Checklist before finishing the answer:
 - [ ] Did I call the tool read attachment first?
 - [ ] Did I render inline the latest version of the attachment? ← YOU MUST DO THIS, always render the latest version of the attachment inline.
+
+---
+
+## Handling Tool Rejections
+
+The \`security.create_detection_rule\` tool can return a rejection when it deliberately cannot build a rule. A rejection looks like this:
+
+\`\`\`json
+{ "rejected": true, "rejectionCode": "NO_DATA", "message": "..." }
+\`\`\`
+
+**When you see \`rejected: true\`:**
+- Do NOT retry the tool. This is not a transient error — the agent tried and made a deliberate decision.
+- Surface the \`message\` field directly to the user. It is already written for the user to read.
+- Follow up based on \`rejectionCode\`:
+  - \`NO_DATA\` — No relevant index was found. Ask the user to name a specific index or data source (e.g. "Which index contains the data you want to detect on?").
+  - \`INVALID_OUTPUT\` — The agent produced a rule but it failed validation. Ask the user to rephrase or add more detail to their request, then retry the tool once with the revised description.
+  - \`INCOHERENT\` — The request did not describe a detectable behavior. Ask the user to rephrase and describe the specific activity to detect (e.g. "detect failed logins from a single IP").
+  - \`NOT_SECURITY_RELEVANT\` — The request is not a security detection scenario. Ask the user to describe suspicious behavior, attack patterns, or anomalies instead.
 
 ---
 
