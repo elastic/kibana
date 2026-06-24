@@ -57,7 +57,7 @@ const UNIT_OPTIONS: EuiSelectOption[] = [
 ];
 
 // Intentional override on the EUI select
-const unitSelectAppendCss = (borderRadius: string) => css`
+const unitSelectAppendCss = (borderRadius: string | number) => css`
   && .euiFormControlLayout__append {
     padding: 0;
     align-items: stretch;
@@ -90,7 +90,7 @@ export const SplayTimeField = ({
 }: SplayTimeFieldProps) => {
   const { euiTheme } = useEuiTheme();
   const appendCss = useMemo(
-    () => unitSelectAppendCss(euiTheme.border.radius.medium),
+    () => unitSelectAppendCss(euiTheme.border.radius.medium ?? 0),
     [euiTheme.border.radius.medium]
   );
 
