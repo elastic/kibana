@@ -16,12 +16,10 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
@@ -128,49 +126,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     const hasOutput = Boolean(stepExecution?.output);
     const hasError = Boolean(stepExecution?.error);
 
-    const tabs = useMemo(() => {
-      if (isTriggerPseudoStep) {
-        const pseudoTabs: { id: string; name: string }[] = [];
-        if (hasError) {
-          pseudoTabs.push({
-            id: 'output',
-            name: 'Error',
-          });
-        }
-        if (hasInput) {
-          pseudoTabs.push({
-            id: 'input',
-            name: 'Input',
-          });
-        }
-        if (hasOutput) {
-          pseudoTabs.push({
-            id: 'output',
-            name: 'Output',
-          });
-        }
-        return pseudoTabs;
-      }
-      return [
-        {
-          id: 'output',
-          name: hasError ? 'Error' : 'Output',
-        },
-        {
-          id: 'input',
-          name: 'Input',
-        },
-      ];
-    }, [hasInput, hasOutput, hasError, isTriggerPseudoStep]);
-
-    const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
-    const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
-
-    useEffect(() => {
-      // reset the tab to the default one on step change
-      setSelectedTabId(isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input');
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [stepExecution?.stepId, stepExecution?.status, tabs[0].id]);
+    const showInput = hasInput;
+    const showOutput = hasOutput || hasError;
 
     if (!stepExecution) {
       return (
@@ -250,21 +207,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiTabs expand>
-              {tabs.map((tab) => (
-                <EuiTab
-                  onClick={() => setSelectedTabId(tab.id)}
-                  isSelected={tab.id === selectedTabId}
-                  key={tab.id}
-                  css={{ lineHeight: 'normal' }}
-                  data-test-subj={`workflowStepTab_${tab.id}`}
-                >
-                  {tab.name}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </EuiFlexItem>
           {isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
               {isLoadingStepData ? (
@@ -272,12 +214,9 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   <EuiSkeletonText lines={4} />
                 </EuiPanel>
               ) : (
-                <>
-                  {selectedTabId === 'output' && (
-                    <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-                  )}
-                  {selectedTabId === 'input' && (
-                    <>
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  {showInput && (
+                    <EuiFlexItem grow={false}>
                       {isWaitingForInput && (
                         <>
                           <ResumeExecutionButton
@@ -323,9 +262,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                         </>
                       )}
                       <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-                    </>
+                    </EuiFlexItem>
                   )}
-                </>
+                  {showOutput && (
+                    <EuiFlexItem grow={false}>
+                      <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               )}
             </EuiFlexItem>
           ) : (

@@ -26,6 +26,7 @@ export interface StepExecutionTreeItem extends StepListTreeItem {
   stepExecutionId: string | null;
   isTriggerPseudoStep?: boolean;
   isChildWorkflowStep?: boolean;
+  attemptNumber?: number;
   children: StepExecutionTreeItem[];
 }
 
@@ -226,7 +227,31 @@ export function buildStepExecutionsTree(
     });
   }
 
-  return [...pseudoSteps, ...regularSteps];
+  return [...pseudoSteps, ...flattenRetryAttempts(regularSteps)];
+}
+
+const ATTEMPT_ID_REGEX = /^(\d+)-attempt$/;
+
+function flattenRetryAttempts(nodes: StepExecutionTreeItem[]): StepExecutionTreeItem[] {
+  return nodes.map((node) => {
+    const allChildrenAreAttempts =
+      node.children.length > 0 && node.children.every((c) => ATTEMPT_ID_REGEX.test(c.stepId));
+
+    if (allChildrenAreAttempts) {
+      const flattenedChildren = node.children.flatMap((attemptNode) => {
+        const match = attemptNode.stepId.match(ATTEMPT_ID_REGEX);
+        const attemptNumber = match ? parseInt(match[1], 10) : undefined;
+        return attemptNode.children.map((actualStep) => ({
+          ...actualStep,
+          attemptNumber,
+          children: flattenRetryAttempts(actualStep.children),
+        }));
+      });
+      return { ...node, children: flattenedChildren };
+    }
+
+    return { ...node, children: flattenRetryAttempts(node.children) };
+  });
 }
 
 /**

@@ -7,34 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
-import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { debounce } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiAccordion, EuiPanel, EuiSelect, EuiText } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { JsonValue } from '@kbn/utility-types';
 import { JsonDataCode } from './json_data_code';
 import { JSONDataTable } from './json_data_table';
 
-const SearchTermStorageKey = 'workflows_management.step_execution.searchTerm';
-
-const ViewModeOptions: EuiButtonGroupOptionProps[] = [
+const viewModeOptions: EuiSelectOption[] = [
   {
-    id: 'table',
-    'data-test-subj': 'workflowViewMode_table',
-    label: i18n.translate('workflows.jsonDataTable.viewMode.table', {
-      defaultMessage: 'Table',
-    }),
-    iconType: 'table',
+    value: 'table',
+    text: i18n.translate('workflows.jsonDataTable.viewMode.table', { defaultMessage: 'Table' }),
   },
   {
-    id: 'json',
-    'data-test-subj': 'workflowViewMode_json',
-    label: i18n.translate('workflows.jsonDataTable.viewMode.json', {
-      defaultMessage: 'JSON',
-    }),
-    iconType: 'code',
+    value: 'json',
+    text: i18n.translate('workflows.jsonDataTable.viewMode.json', { defaultMessage: 'JSON' }),
   },
 ];
 
@@ -55,88 +43,48 @@ export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
   ({ data, title, fieldPathActionsPrefix }) => {
     const [selectedViewMode, setSelectedViewMode] = useState<'table' | 'json'>('table');
 
-    const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(SearchTermStorageKey, '');
-    const [searchTerm, setSearchTerm] = useState(storedSearchTerm ?? '');
-
-    const setStoredSearchTermDebounced = useMemo(
-      () => debounce(setStoredSearchTerm, 500),
-      [setStoredSearchTerm]
-    );
-
-    const handleViewModeChange = useCallback((id: string) => {
-      setSelectedViewMode(id as 'table' | 'json');
+    const handleViewModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedViewMode(e.target.value as 'table' | 'json');
     }, []);
 
-    const handleSearchTermChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { value } = e.target;
-        setSearchTerm(value);
-        setStoredSearchTermDebounced(value);
-      },
-      [setStoredSearchTermDebounced]
-    );
-
     return (
-      <EuiFlexGroup
+      <EuiAccordion
+        id={`execution-data-viewer-${title ?? 'data'}`}
         data-test-subj="workflowJsonDataViewer"
-        direction="column"
-        gutterSize="none"
-        responsive={false}
-        style={{ height: '100%' }}
+        initialIsOpen={true}
+        arrowDisplay="left"
+        buttonContent={
+          title ? (
+            <EuiText size="s">
+              <strong>{title}</strong>
+            </EuiText>
+          ) : undefined
+        }
+        extraAction={
+          <EuiSelect
+            compressed
+            options={viewModeOptions}
+            value={selectedViewMode}
+            onChange={handleViewModeChange}
+            aria-label={i18n.translate('workflows.jsonDataTable.viewMode', {
+              defaultMessage: 'View mode',
+            })}
+            data-test-subj="workflowViewModeSelect"
+          />
+        }
       >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} gutterSize="s">
-            {selectedViewMode === 'table' && (
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  compressed
-                  fullWidth
-                  placeholder="Filter by field, value"
-                  value={searchTerm}
-                  onChange={handleSearchTermChange}
-                  isClearable
-                  aria-label={i18n.translate('workflows.jsonDataTable.searchAriaLabel', {
-                    defaultMessage: 'Search fields and values',
-                  })}
-                />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem
-              grow={false}
-              css={{
-                justifySelf: 'flex-end',
-                marginLeft: 'auto',
-              }}
-            >
-              <EuiButtonGroup
-                isIconOnly
-                buttonSize="compressed"
-                color="primary"
-                type="single"
-                idSelected={selectedViewMode}
-                legend={i18n.translate('workflows.jsonDataTable.viewMode', {
-                  defaultMessage: 'View mode',
-                })}
-                onChange={handleViewModeChange}
-                options={ViewModeOptions}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={true} css={{ overflow: 'hidden', minHeight: 0 }}>
-          <EuiSpacer size="s" />
+        <EuiPanel hasBorder paddingSize="none">
           {selectedViewMode === 'table' && data && (
             <JSONDataTable
               data={data}
               title={title}
-              searchTerm={searchTerm}
+              searchTerm=""
               fieldPathActionsPrefix={fieldPathActionsPrefix}
             />
           )}
           {selectedViewMode === 'json' && <JsonDataCode json={data} />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiPanel>
+      </EuiAccordion>
     );
   }
 );

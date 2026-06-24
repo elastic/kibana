@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
-import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
@@ -207,9 +206,6 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem css={{ overflow: 'hidden', minHeight: 0 }}>
-            <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );

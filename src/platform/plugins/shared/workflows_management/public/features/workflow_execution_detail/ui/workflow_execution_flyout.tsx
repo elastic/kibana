@@ -17,11 +17,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiHorizontalRule,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiLoadingSpinner,
+  EuiPopover,
+  EuiToken,
   EuiTab,
   EuiTabs,
   EuiText,
@@ -31,8 +36,14 @@ import {
 import { css } from '@emotion/react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
+import {
+  buildOverviewStepExecutionFromContext,
+  buildTriggerStepExecutionFromContext,
+} from './workflow_pseudo_step_context';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
@@ -72,10 +83,20 @@ const FLYOUT_CLASSNAME = 'workflowExecutionFlyout';
 const EXECUTION_PANEL_WIDTH = 480;
 const STEP_DETAIL_WIDTH = 480;
 
+type FieldType = 'string' | 'number' | 'boolean' | 'array' | 'null';
+
+const fieldTypeToToken: Record<FieldType, string> = {
+  string: 'tokenString',
+  number: 'tokenNumber',
+  boolean: 'tokenBoolean',
+  array: 'tokenArray',
+  null: 'tokenNull',
+};
+
 const flattenToRows = (
   value: unknown,
   prefix = ''
-): Array<{ field: string; value: string }> => {
+): Array<{ field: string; value: string; fieldType: FieldType }> => {
   if (value === null || value === undefined || typeof value !== 'object' || Array.isArray(value)) {
     return [];
   }
@@ -84,6 +105,11 @@ const flattenToRows = (
     if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
       return flattenToRows(val, fullKey);
     }
+    const fieldType: FieldType = val === null
+      ? 'null'
+      : Array.isArray(val)
+      ? 'array'
+      : (typeof val as FieldType);
     const display =
       val === null
         ? 'null'
@@ -92,7 +118,7 @@ const flattenToRows = (
         : typeof val === 'string'
         ? val
         : String(val);
-    return [{ field: fullKey, value: display }];
+    return [{ field: fullKey, value: display, fieldType }];
   });
 };
 
@@ -100,170 +126,305 @@ const isTableable = (v: unknown): boolean =>
   v !== null && v !== undefined && typeof v === 'object' && !Array.isArray(v) &&
   Object.keys(v as object).length > 0;
 
+interface AiStepStats {
+  model?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+}
+
+const extractAiStats = (output: unknown): AiStepStats | null => {
+  if (!output || typeof output !== 'object' || Array.isArray(output)) return null;
+  const o = output as Record<string, unknown>;
+  const usage = o.usage as Record<string, unknown> | undefined;
+  const model = typeof o.model === 'string' ? o.model : undefined;
+  // Cover both snake_case (Bedrock/Claude) and camelCase (OpenAI/agent) field names
+  const inputTokens = (
+    usage?.input_tokens ?? usage?.inputTokens ?? usage?.prompt_tokens
+  ) as number | undefined;
+  const outputTokens = (
+    usage?.output_tokens ?? usage?.outputTokens ?? usage?.completion_tokens
+  ) as number | undefined;
+  if (!model && inputTokens === undefined && outputTokens === undefined) return null;
+  return { model, inputTokens, outputTokens };
+};
+
+const isAiOrAgentStep = (stepType?: string): boolean =>
+  (stepType?.startsWith('ai.') ||
+    stepType?.startsWith('inference.') ||
+    stepType?.startsWith('bedrock.') ||
+    stepType?.startsWith('gen-ai.') ||
+    stepType?.startsWith('gemini.')) ??
+  false;
+
+const AiStatsSection = ({ stats }: { stats: AiStepStats }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(true);
+  const rows: Array<{ icon: string; label: string; value: string }> = [];
+  if (stats.model) {
+    rows.push({ icon: 'productAgent', label: i18n.translate('workflows.executionFlyout.aiStats.model', { defaultMessage: 'Model used' }), value: stats.model });
+  }
+  if (stats.inputTokens !== undefined) {
+    rows.push({ icon: 'inputOutput', label: i18n.translate('workflows.executionFlyout.aiStats.inputTokens', { defaultMessage: 'Input tokens' }), value: String(stats.inputTokens) });
+  }
+  if (stats.outputTokens !== undefined) {
+    rows.push({ icon: 'inputOutput', label: i18n.translate('workflows.executionFlyout.aiStats.outputTokens', { defaultMessage: 'Output tokens' }), value: String(stats.outputTokens) });
+  }
+  if (rows.length === 0) return null;
+  return (
+    <div css={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
+      <div css={{ display: 'flex', alignItems: 'center', height: '32px', gap: '4px' }}>
+        <EuiButtonIcon
+          iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+          size="xs"
+          color="text"
+          aria-label={isOpen ? 'collapse' : 'expand'}
+          onClick={() => setIsOpen((v) => !v)}
+        />
+        <span css={{ fontSize: '14px', fontWeight: 600, color: euiTheme.colors.title }}>
+          {i18n.translate('workflows.executionFlyout.aiStats.label', { defaultMessage: 'Model' })}
+        </span>
+      </div>
+      {isOpen && (
+        <div
+          css={{
+            border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+            borderRadius: '6px',
+            overflow: 'hidden',
+            padding: '0 16px',
+          }}
+        >
+          {rows.map((row, idx) => (
+            <div
+              key={row.label}
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                borderBottom: idx < rows.length - 1 ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none',
+                padding: '8px 0',
+                minHeight: '33px',
+              }}
+            >
+              <EuiIcon type={row.icon} size="s" color="subdued" css={{ flexShrink: 0 }} />
+              <span css={{ flex: '0 0 50%', fontSize: '12px', color: euiTheme.colors.subduedText }}>
+                {row.label}
+              </span>
+              <span css={{ flex: 1, fontSize: '12px', fontFamily: euiTheme.font.familyCode, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {row.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<'table' | 'code'>(() => (isTableable(data) ? 'table' : 'code'));
-  const [filter, setFilter] = useState('');
+  const [isOpen, setIsOpen] = useState(true);
+  const [isViewPopoverOpen, setIsViewPopoverOpen] = useState(false);
 
   const hasTable = isTableable(data);
   const effectiveView = hasTable ? view : 'code';
 
   const rows = useMemo(() => flattenToRows(data), [data]);
-  const filteredRows = useMemo(
-    () =>
-      filter
-        ? rows.filter(
-            (r) =>
-              r.field.toLowerCase().includes(filter.toLowerCase()) ||
-              r.value.toLowerCase().includes(filter.toLowerCase())
-          )
-        : rows,
-    [rows, filter]
-  );
 
   return (
-    <div
-      css={{
-        border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-        borderRadius: '10px',
-        overflow: 'hidden',
-        flexShrink: 0,
-      }}
-    >
+    <div css={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
       {/* Section header bar */}
       <div
         css={{
           display: 'flex',
           alignItems: 'center',
-          height: '40px',
-          padding: '0 16px',
+          height: '32px',
           gap: '4px',
-          background: euiTheme.colors.lightestShade,
-          borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
         }}
       >
-        <span css={{ flex: 1, fontSize: '12px', fontWeight: 600 }}>{label}</span>
-
+        <EuiButtonIcon
+          iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+          size="xs"
+          color="text"
+          onClick={() => setIsOpen((v) => !v)}
+          aria-label={i18n.translate('workflows.executionFlyout.stepDetail.toggleSection', {
+            defaultMessage: '{label} section',
+            values: { label },
+          })}
+        />
+        <span css={{ flex: 1, fontSize: '14px', fontWeight: 600 }}>{label}</span>
         {hasTable && (
-          <>
-            <EuiButtonIcon
-              iconType="list"
-              size="s"
-              color={effectiveView === 'table' ? 'primary' : 'text'}
-              aria-label={i18n.translate('workflows.executionFlyout.stepDetail.tableView', {
-                defaultMessage: 'Table view',
-              })}
-              onClick={() => setView('table')}
+          <EuiPopover
+            isOpen={isViewPopoverOpen}
+            closePopover={() => setIsViewPopoverOpen(false)}
+            anchorPosition="downRight"
+            panelPaddingSize="none"
+            button={
+              <EuiButtonEmpty
+                size="xs"
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={() => setIsViewPopoverOpen((v) => !v)}
+              >
+                {effectiveView === 'table'
+                  ? i18n.translate('workflows.executionFlyout.stepDetail.tableView', {
+                      defaultMessage: 'Table',
+                    })
+                  : i18n.translate('workflows.executionFlyout.stepDetail.codeView', {
+                      defaultMessage: 'JSON',
+                    })}
+              </EuiButtonEmpty>
+            }
+          >
+            <EuiContextMenuPanel
+              items={[
+                <EuiContextMenuItem
+                  key="table"
+                  icon={effectiveView === 'table' ? 'check' : 'empty'}
+                  onClick={() => {
+                    setView('table');
+                    setIsViewPopoverOpen(false);
+                  }}
+                >
+                  {i18n.translate('workflows.executionFlyout.stepDetail.tableView', {
+                    defaultMessage: 'Table',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="code"
+                  icon={effectiveView === 'code' ? 'check' : 'empty'}
+                  onClick={() => {
+                    setView('code');
+                    setIsViewPopoverOpen(false);
+                  }}
+                >
+                  {i18n.translate('workflows.executionFlyout.stepDetail.codeView', {
+                    defaultMessage: 'JSON',
+                  })}
+                </EuiContextMenuItem>,
+              ]}
             />
-            <EuiButtonIcon
-              iconType="editorCodeBlock"
-              size="s"
-              color={effectiveView === 'code' ? 'primary' : 'text'}
-              aria-label={i18n.translate('workflows.executionFlyout.stepDetail.codeView', {
-                defaultMessage: 'Code view',
-              })}
-              onClick={() => setView('code')}
-            />
-          </>
+          </EuiPopover>
         )}
       </div>
 
       {/* Section content */}
-      {effectiveView === 'code' ? (
-        <EuiCodeBlock
-          language="json"
-          fontSize="s"
-          transparentBackground
-          paddingSize="m"
-          overflowHeight={300}
-          isCopyable
+      {isOpen && (
+        <div
+          css={{
+            border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+            borderRadius: '6px',
+            overflow: 'hidden',
+          }}
         >
-          {JSON.stringify(data ?? null, null, 2)}
-        </EuiCodeBlock>
-      ) : (
-        <>
-          <div css={{ padding: '12px 12px 0' }}>
-            <EuiFieldSearch
-              placeholder={i18n.translate(
-                'workflows.executionFlyout.stepDetail.filterPlaceholder',
-                { defaultMessage: 'Filter by field, value' }
-              )}
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              compressed
-              fullWidth
-            />
-          </div>
-          <div css={{ padding: '0 12px 12px' }}>
-            <div
-              css={{
-                display: 'flex',
-                borderBottom: `1px solid ${euiTheme.colors.lightShade}`,
-                padding: '7px 8px',
-                marginTop: '10px',
-              }}
+          {effectiveView === 'code' ? (
+            <EuiCodeBlock
+              language="json"
+              fontSize="s"
+              transparentBackground
+              paddingSize="m"
+              overflowHeight={300}
+              isCopyable
+              css={`
+                & .euiCodeBlock__controls {
+                  background: ${euiTheme.colors.emptyShade};
+                  top: 4px;
+                  right: 4px;
+                  padding: 2px;
+                  border-radius: 4px;
+                }
+              `}
             >
-              <span css={{ flex: '0 0 50%', fontSize: '12px', fontWeight: 600 }}>
-                {i18n.translate('workflows.executionFlyout.stepDetail.fieldColumn', {
-                  defaultMessage: 'Field',
-                })}
-              </span>
-              <span css={{ flex: '0 0 50%', fontSize: '12px', fontWeight: 600 }}>
-                {i18n.translate('workflows.executionFlyout.stepDetail.valueColumn', {
-                  defaultMessage: 'Value',
-                })}
-              </span>
-            </div>
-            {filteredRows.length === 0 ? (
+              {JSON.stringify(data ?? null, null, 2)}
+            </EuiCodeBlock>
+          ) : (
+            <div css={{ padding: '16px' }}>
               <div
-                css={{ padding: '12px 8px', fontSize: '12px', color: euiTheme.colors.subduedText }}
+                css={{
+                  display: 'flex',
+                  borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                  padding: '7px 8px',
+                }}
               >
-                {i18n.translate('workflows.executionFlyout.stepDetail.noData', {
-                  defaultMessage: 'No data',
-                })}
+                <span css={{ flex: '0 0 50%', fontSize: '12px', fontWeight: 600 }}>
+                  {i18n.translate('workflows.executionFlyout.stepDetail.fieldColumn', {
+                    defaultMessage: 'Field',
+                  })}
+                </span>
+                <span css={{ flex: '0 0 50%', fontSize: '12px', fontWeight: 600 }}>
+                  {i18n.translate('workflows.executionFlyout.stepDetail.valueColumn', {
+                    defaultMessage: 'Value',
+                  })}
+                </span>
               </div>
-            ) : (
-              filteredRows.map((row, idx) => (
+              {rows.length === 0 ? (
                 <div
-                  key={idx}
                   css={{
-                    display: 'flex',
-                    borderBottom: `1px solid ${euiTheme.colors.lightShade}`,
-                    padding: '4px 8px',
-                    minHeight: '25px',
-                    alignItems: 'center',
+                    padding: '12px 4px',
+                    fontSize: '12px',
+                    color: euiTheme.colors.subduedText,
                   }}
                 >
-                  <span
-                    css={{
-                      flex: '0 0 50%',
-                      fontSize: '12px',
-                      fontFamily: euiTheme.font.familyCode,
-                      color: euiTheme.colors.subduedText,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      paddingRight: '8px',
-                    }}
-                  >
-                    {row.field}
-                  </span>
-                  <span
-                    css={{
-                      flex: '0 0 50%',
-                      fontSize: '12px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {row.value}
-                  </span>
+                  {i18n.translate('workflows.executionFlyout.stepDetail.noData', {
+                    defaultMessage: 'No data',
+                  })}
                 </div>
-              ))
-            )}
-          </div>
-        </>
+              ) : (
+                rows.map((row, idx) => (
+                  <div
+                    key={idx}
+                    css={{
+                      display: 'flex',
+                      borderBottom: idx < rows.length - 1 ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none',
+                      padding: '4px 4px',
+                      minHeight: '33px',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span
+                      css={{
+                        flex: '0 0 50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        overflow: 'hidden',
+                        paddingRight: '8px',
+                      }}
+                    >
+                      <EuiToken
+                        iconType={fieldTypeToToken[row.fieldType]}
+                        size="xs"
+                        css={{ flexShrink: 0, width: '12px', height: '12px', margin: 0 }}
+                      />
+                      <span
+                        css={{
+                          fontSize: '12px',
+                          fontFamily: euiTheme.font.familyCode,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {row.field}
+                      </span>
+                    </span>
+                    <span
+                      css={{
+                        flex: '0 0 50%',
+                        fontSize: '12px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {row.value}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -290,6 +451,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const { euiTheme } = useEuiTheme();
     const [activeTab, setActiveTab] = useState<FlyoutTabId>('table');
     const [selectedStepExecutionId, setSelectedStepExecutionId] = useState<string | null>(null);
+    const [stepSearchQuery, setStepSearchQuery] = useState('');
 
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
 
@@ -299,9 +461,48 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       [workflowExecution?.stepExecutions, selectedStepExecutionId]
     );
 
+    const isPseudoStep =
+      selectedStepExecutionId === '__overview' ||
+      selectedStepExecutionId === 'trigger' ||
+      (selectedStepExecutionId?.startsWith('if-branch:') ?? false);
+
+    const pseudoStepExecution = useMemo<WorkflowStepExecutionDto | null>(() => {
+      if (!workflowExecution) return null;
+      if (selectedStepExecutionId === 'trigger') {
+        return buildTriggerStepExecutionFromContext(workflowExecution);
+      }
+      if (selectedStepExecutionId === '__overview') {
+        return buildOverviewStepExecutionFromContext(workflowExecution);
+      }
+      if (selectedStepExecutionId?.startsWith('if-branch:')) {
+        const branchName = selectedStepExecutionId.split(':')[1];
+        return {
+          id: selectedStepExecutionId,
+          stepId: branchName,
+          stepType: 'if-branch',
+          status: ExecutionStatus.COMPLETED,
+          input: undefined,
+          output: { result: branchName } as unknown as WorkflowStepExecutionDto['output'],
+          scopeStack: [],
+          workflowRunId: workflowExecution.id,
+          workflowId: workflowExecution.workflowId ?? '',
+          startedAt: '',
+          globalExecutionIndex: -1,
+          stepExecutionIndex: 0,
+          topologicalIndex: -1,
+        } as WorkflowStepExecutionDto;
+      }
+      return null;
+    }, [selectedStepExecutionId, workflowExecution]);
+
+    const executionMetadata = useMemo(() => {
+      if (!workflowExecution || selectedStepExecutionId !== 'trigger') return null;
+      return buildOverviewStepExecutionFromContext(workflowExecution).input;
+    }, [selectedStepExecutionId, workflowExecution]);
+
     const { data: fullStepExecution, isLoading: isLoadingStepData } = useStepExecution(
       executionId,
-      selectedStepExecutionId ?? undefined,
+      isPseudoStep ? undefined : (selectedStepExecutionId ?? undefined),
       selectedLightStep?.status
     );
     const { childExecutions, isLoading: isLoadingChildExecutions } =
@@ -321,7 +522,8 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       [workflowExecution?.duration]
     );
 
-    const stepName = selectedLightStep?.stepId ?? fullStepExecution?.stepId ?? '';
+    const activeStepExecution = fullStepExecution ?? pseudoStepExecution;
+    const stepName = selectedLightStep?.stepId ?? activeStepExecution?.stepId ?? '';
 
     // Widen the flyout DOM element when the step detail panel is open (FlyoutPanels pattern).
     useLayoutEffect(() => {
@@ -409,7 +611,9 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   />
                 </div>
 
-                {isLoadingStepData ? (
+                <EuiHorizontalRule margin="none" css={{ marginLeft: '-16px', marginRight: '-16px', width: 'calc(100% + 32px)' }} />
+
+                {isLoadingStepData && !isPseudoStep ? (
                   <EuiFlexGroup justifyContent="center">
                     <EuiFlexItem grow={false}>
                       <EuiLoadingSpinner size="l" />
@@ -417,20 +621,38 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   </EuiFlexGroup>
                 ) : (
                   <>
+                    {executionMetadata && (
+                      <StepDataSection
+                        key={`metadata-${selectedStepExecutionId}`}
+                        label={i18n.translate('workflows.executionFlyout.stepDetail.metadata', {
+                          defaultMessage: 'Metadata',
+                        })}
+                        data={executionMetadata}
+                      />
+                    )}
                     <StepDataSection
                       key={`input-${selectedStepExecutionId}`}
                       label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
                         defaultMessage: 'Input',
                       })}
-                      data={fullStepExecution?.input}
+                      data={activeStepExecution?.input}
                     />
-                    <StepDataSection
-                      key={`output-${selectedStepExecutionId}`}
-                      label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
-                        defaultMessage: 'Output',
-                      })}
-                      data={fullStepExecution?.error ?? fullStepExecution?.output}
-                    />
+                    {!isPseudoStep && (() => {
+                      const stepType = selectedLightStep?.stepType ?? activeStepExecution?.stepType;
+                      const aiStats = isAiOrAgentStep(stepType)
+                        ? extractAiStats(activeStepExecution?.output)
+                        : null;
+                      return aiStats ? <AiStatsSection stats={aiStats} /> : null;
+                    })()}
+                    {!isPseudoStep && (
+                      <StepDataSection
+                        key={`output-${selectedStepExecutionId}`}
+                        label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
+                          defaultMessage: 'Output',
+                        })}
+                        data={activeStepExecution?.error ?? activeStepExecution?.output}
+                      />
+                    )}
                   </>
                 )}
               </div>
@@ -649,6 +871,24 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       {i18nTexts.jsonTab}
                     </EuiTab>
                   </EuiTabs>
+                  {activeTab === 'table' && (
+                    <div css={{ padding: `${euiTheme.size.base} ${euiTheme.size.base} 0` }}>
+                      <EuiFieldSearch
+                        fullWidth
+                        compressed
+                        placeholder={i18n.translate(
+                          'workflows.executionFlyout.stepSearch.placeholder',
+                          { defaultMessage: 'Type text' }
+                        )}
+                        value={stepSearchQuery}
+                        onChange={(e) => setStepSearchQuery(e.target.value)}
+                        aria-label={i18n.translate(
+                          'workflows.executionFlyout.stepSearch.ariaLabel',
+                          { defaultMessage: 'Search steps' }
+                        )}
+                      />
+                    </div>
+                  )}
                   <div
                     css={{
                       padding: `${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base}`,
@@ -663,6 +903,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         selectedId={selectedStepExecutionId}
                         childExecutionsMap={childExecutions}
                         isLoadingChildExecutions={isLoadingChildExecutions}
+                        searchQuery={stepSearchQuery}
                       />
                     )}
                     {activeTab === 'json' && workflowExecution && (
