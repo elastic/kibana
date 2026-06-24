@@ -68,6 +68,7 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.visualization.layers.*.colorMapping.assignments.*.touched',
   'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
   'state.visualization.layers.*.colorMapping.colorMode.steps.*.touched',
+  'state.visualization.colorMapping.colorMode.steps.*.touched',
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -126,8 +127,13 @@ function normalizeESQLAdHocDataViews(
       const timeFieldName = esqlQuery
         ? getTimeFieldFromESQLQuery(esqlQuery)
         : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
+      // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
+      // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
+      const indexPattern = esqlQuery
+        ? getIndexPatternFromESQLQuery(esqlQuery)
+        : adHocDataView.name ?? '';
       const newId = generateAdHocDataViewId({
-        index: adHocDataView.name ?? '',
+        index: indexPattern,
         dataSourceType: 'esql',
         esqlQuery,
         timeFieldName,
@@ -135,6 +141,8 @@ function normalizeESQLAdHocDataViews(
 
       layer.index = newId;
       adHocDataView.id = newId;
+      adHocDataView.name = indexPattern;
+      adHocDataView.title = indexPattern;
       // Transform always sets type: 'esql' on ESQL adHocDataViews (via getAdHocDataViewSpec)
       adHocDataView.type = 'esql';
       attributes.state.adHocDataViews[newId] = adHocDataView;
@@ -244,6 +252,22 @@ function removeOrphanedAdHocDataViews(attributes: LensAttributes, internalRefere
   }
 }
 
+/**
+ * Switching between chart types in ES|QL mode leaves behind empty-column layers
+ * from previously selected charts (Check https://github.com/elastic/kibana/issues/243084).
+ * Only the active layer (in layerRemapping) survives the round-trip.
+ */
+function pruneEmptyColumnTextBasedLayers(attributes: LensAttributes) {
+  const textBasedLayers = attributes.state.datasourceStates.textBased?.layers;
+  if (!textBasedLayers) return;
+
+  for (const [layerId, layer] of Object.entries(textBasedLayers)) {
+    if (layer.columns.length === 0) {
+      delete textBasedLayers[layerId];
+    }
+  }
+}
+
 function normalizeAdHocDataViews(attributes: LensAttributes) {
   // Clear empty typeMeta objects
   for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
@@ -275,12 +299,9 @@ function normalizeESQLQuery(attributes: LensAttributes) {
   const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
   if (textBasedLayers.length > 0) {
     const layerQuery = textBasedLayers[0].query;
-    if (
-      layerQuery?.esql &&
-      attributes.state.query &&
-      'esql' in attributes.state.query &&
-      attributes.state.query.esql !== layerQuery.esql
-    ) {
+    // For ES|QL panels the layer query is authoritative; the transform always promotes it to the
+    // top-level state query, replacing any stale legacy query (even a different language).
+    if (layerQuery?.esql && attributes.state.query) {
       attributes.state.query = layerQuery;
     }
   }
@@ -421,6 +442,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
   original: (attributes: T) => {
     const { layerRemapping, columnRemapping, inferColumnDataType } = getArgs(attributes);
 
+    pruneEmptyColumnTextBasedLayers(attributes);
     normalizeAdHocDataViews(attributes);
     normalizeESQLQuery(attributes);
     normalizeEmptyQuery(attributes);

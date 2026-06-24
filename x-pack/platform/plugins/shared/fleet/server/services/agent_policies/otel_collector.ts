@@ -21,6 +21,7 @@ import type {
 } from '../../../common/types';
 import {
   dataTypes,
+  FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   USE_APM_VAR_NAME,
@@ -159,7 +160,11 @@ export function generateOtelcolConfig({
         };
 
         let otelConfig: OTelCollectorConfig = {
-          ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
+          ...addSuffixToOtelcolComponentsConfig(
+            'extensions',
+            suffix,
+            rewriteExtRefs(stream?.extensions)
+          ),
           ...addSuffixToOtelcolComponentsConfig(
             'receivers',
             suffix,
@@ -209,8 +214,12 @@ export function generateOtelcolConfig({
         };
 
         // Must run before the APM block below so the aggregated metrics pipeline
-        // does not receive the per-stream routing transform.
-        otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+        // does not receive the per-stream routing transform. `attributesTransform` is
+        // undefined when the stream only carries Fleet-unmanaged signals (e.g. profiles),
+        // in which case no routing transform is injected.
+        if (attributesTransform) {
+          otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+        }
 
         if (resolvedOutputId) {
           for (const pipelineId of Object.keys(otelConfig.service?.pipelines ?? {})) {
@@ -363,16 +372,10 @@ function generateOtelTypeTransforms(
           },
         ],
       };
-    case 'profiles':
-      return {
-        profile_statements: [
-          {
-            context: 'profile',
-            statements: buildDataStreamStatements('profiles', dataset, namespace),
-          },
-        ],
-      };
     default:
+      // `profiles` is intentionally absent: it is filtered out before this function is
+      // called (see FLEET_UNMANAGED_DATA_STREAM_TYPES) because the Elasticsearch
+      // exporter — not Fleet — routes it. Any other type here is unexpected.
       throw new FleetError(`unexpected data stream type ${type}`);
   }
 }
@@ -397,18 +400,29 @@ function generateOTelAttributesTransform(
   suffix: string,
   dynamicSignalTypes: boolean,
   signalTypes?: string[]
-): Record<OTelCollectorComponentID, any> {
+): Record<OTelCollectorComponentID, any> | undefined {
   let transformStatements: Record<string, any> = {};
 
   if (dynamicSignalTypes && signalTypes) {
-    signalTypes.forEach((signalType) => {
-      const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
-      Object.assign(transformStatements, typeTransforms);
-    });
-  } else {
+    signalTypes
+      // Fleet-unmanaged signals (e.g. profiles) are routed by the Elasticsearch exporter,
+      // not by Fleet, so they must not get a data_stream.* routing transform.
+      .filter((signalType) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(signalType))
+      .forEach((signalType) => {
+        const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
+        Object.assign(transformStatements, typeTransforms);
+      });
+  } else if (!FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type)) {
     // Default: single signal type from stream.data_stream.type
     transformStatements = generateOtelTypeTransforms(type, dataset, namespace);
   }
+
+  // When every signal type is Fleet-unmanaged (e.g. a profiles-only stream) there is
+  // nothing to route, so do not emit an empty routing transform.
+  if (Object.keys(transformStatements).length === 0) {
+    return undefined;
+  }
+
   return {
     [`transform/${suffix}-routing`]: transformStatements,
   };
@@ -499,45 +513,34 @@ function alignPipelineSignalType(
   return { [newKey]: pipeline };
 }
 
-// Recursively walks a component config body and rewrites extension references
-// whose bare ID appears in originalToSuffixedExtensionIds. This covers two OTel
-// conventions for referencing an in-stream extension:
-//   - configauth: `auth: { authenticator: <extension-id> }` on receivers/exporters/etc.
-//   - storage: `storage: <extension-id>` on receivers (e.g. akamai_siem).
-// Both rewrites share the same guard: only references whose bare name was declared
-// as an extension in this stream are suffixed. Globally-injected extensions (e.g.
-// `elasticsearch_storage`, `beatsauth/default`) are not in the map, so the `?? val`
-// fallback leaves them untouched — no special-casing by extension type.
+// Recursively walks a component config body and rewrites any string value that
+// exactly matches a declared extension ID to its suffixed form. This is
+// intentionally value-based rather than field-name-based: OTel contrib uses
+// many different field names to reference extensions (auth.authenticator,
+// credentials_provider, storage, sending_queue.storage, …) with no uniform
+// convention, so a field-name allow-list would need constant maintenance.
+// Exact whole-string matching keeps false-positive risk negligible — the
+// package author controls both the extension IDs and the component configs
+// within a stream, so an accidental collision is very rare.
 function rewriteOtelcolExtensionReferences(
   value: unknown,
   originalToSuffixedExtensionIds: Record<string, string>
 ): unknown {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return value;
+  if (typeof value === 'string') {
+    return originalToSuffixedExtensionIds[value] ?? value;
   }
-  const obj = value as Record<string, unknown>;
-  const result: Record<string, unknown> = {};
-  for (const [key, val] of Object.entries(obj)) {
-    if (
-      key === 'auth' &&
-      val !== null &&
-      typeof val === 'object' &&
-      !Array.isArray(val) &&
-      typeof (val as Record<string, unknown>).authenticator === 'string'
-    ) {
-      const authObj = val as Record<string, unknown>;
-      const authenticator = authObj.authenticator as string;
-      result[key] = {
-        ...authObj,
-        authenticator: originalToSuffixedExtensionIds[authenticator] ?? authenticator,
-      };
-    } else if (key === 'storage' && typeof val === 'string') {
-      result[key] = originalToSuffixedExtensionIds[val] ?? val;
-    } else {
-      result[key] = rewriteOtelcolExtensionReferences(val, originalToSuffixedExtensionIds);
-    }
+  if (Array.isArray(value)) {
+    return value.map((v) => rewriteOtelcolExtensionReferences(v, originalToSuffixedExtensionIds));
   }
-  return result;
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [
+        k,
+        rewriteOtelcolExtensionReferences(v, originalToSuffixedExtensionIds),
+      ])
+    );
+  }
+  return value;
 }
 
 function addSuffixToOtelcolPipelinesComponents(
