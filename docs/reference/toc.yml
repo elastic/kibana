@@ -96,6 +96,7 @@ toc:
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
+          - file: connectors-kibana/mongodb-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/outlook-action-type.md
