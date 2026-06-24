@@ -15,7 +15,9 @@ consts:
   slackConnectorId: REPLACE_WITH_SLACK_CONNECTOR_ID
   salesforceConnectorId: REPLACE_WITH_SALESFORCE_CONNECTOR_ID
   caseGithubField: REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD
+  productAreaField: REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD
   sdhRepoPattern: REPLACE_WITH_SDH_REPO_PATTERN
+  sdhLabel: REPLACE_WITH_SDH_LABEL
 `;
 
   it('substitutes connector and org placeholders from package policy vars', () => {
@@ -24,7 +26,9 @@ consts:
       slack_connector_id: 'slack-conn-2',
       salesforce_connector_id: 'salesforce-conn-3',
       salesforce_case_github_field: 'Engineering_Issue_URL__c',
+      salesforce_product_area_field: 'Product_Area__c',
       sdh_repo_pattern: 'sdh-*',
+      sdh_label: 'sdh',
       org_login: 'my-org',
     });
 
@@ -33,13 +37,17 @@ consts:
     expect(result).toContain('slackConnectorId: slack-conn-2');
     expect(result).toContain('salesforceConnectorId: salesforce-conn-3');
     expect(result).toContain('caseGithubField: Engineering_Issue_URL__c');
+    expect(result).toContain('productAreaField: Product_Area__c');
     expect(result).toContain('sdhRepoPattern: sdh-*');
+    expect(result).toContain('sdhLabel: sdh');
     expect(result).not.toContain('REPLACE_WITH_ORG_LOGIN');
     expect(result).not.toContain('REPLACE_WITH_GITHUB_CONNECTOR_ID');
     expect(result).not.toContain('REPLACE_WITH_SLACK_CONNECTOR_ID');
     expect(result).not.toContain('REPLACE_WITH_SALESFORCE_CONNECTOR_ID');
     expect(result).not.toContain('REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD');
+    expect(result).not.toContain('REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD');
     expect(result).not.toContain('REPLACE_WITH_SDH_REPO_PATTERN');
+    expect(result).not.toContain('REPLACE_WITH_SDH_LABEL');
   });
 
   it('leaves placeholders when vars are missing', () => {
@@ -50,6 +58,8 @@ consts:
     expect(result).toContain('REPLACE_WITH_SLACK_CONNECTOR_ID');
     expect(result).toContain('REPLACE_WITH_SALESFORCE_CONNECTOR_ID');
     expect(result).toContain('REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD');
+    expect(result).toContain('REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD');
     expect(result).toContain('REPLACE_WITH_SDH_REPO_PATTERN');
+    expect(result).toContain('REPLACE_WITH_SDH_LABEL');
   });
 });

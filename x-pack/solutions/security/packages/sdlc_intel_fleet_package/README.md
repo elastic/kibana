@@ -44,6 +44,8 @@ When adding the integration policy, set:
 | `salesforce_connector_id` | Kibana `.salesforce` connector ID — feedback-loop Case ingest |
 | `salesforce_case_github_field` | Salesforce Case custom field API name for GitHub issue URL (default: `Engineering_Issue_URL__c`) |
 | `sdh_repo_pattern` | GitHub search repo qualifier for SDH repos (default: `sdh-*`) |
+| `sdh_label` | GitHub label for SDH issues in product repos (default: `sdh`) |
+| `salesforce_product_area_field` | Salesforce Case product area field (default: `Product_Area__c`) |
 
 If vars are unset, workflows retain `REPLACE_WITH_*` placeholders for manual editing.
 
@@ -118,6 +120,30 @@ Cross-link writes `customer_case_links_sdh` relationship edges when:
 1. A Case stores a GitHub issue URL in the configured Salesforce field and a matching SDH issue exists.
 2. An SDH issue title/body contains a Salesforce `CaseNumber` for an unlinked Case.
 
+### Phase C2 — SDH → product engineering plane
+
+| Workflow | Schedule | Action / template | Target index |
+|----------|----------|-------------------|--------------|
+| **catalog SDH labeled issues** | hourly | `activity.searchIssues` (`label:sdh`) | `github-intel-sdh-issues` |
+| **cross-link SDH to product** | every 2h | SDH body product-issue URL search | `github-intel-relationships`, `github-intel-sdh-issues` |
+
+**Extended order:** C1 workflows → **catalog SDH labeled issues** → **github-activity-issues** → **cross-link SDH to product**.
+
+Phase C2 adds:
+
+- **`sdh_links_product`** edges when an SDH issue body references a product-repo GitHub issue URL
+- **`label:sdh`** ingest path for SDH issues tracked in product repos (not only `sdh-*` repos)
+- **`salesforce_product_area_field`** on Cases for team/product taxonomy joins
+- **`sdlc-feedback-loop-enriched-view`** ES\|QL view: Case → SDH → product issue (LOOKUP JOIN)
+- Ingest health dashboard now includes `salesforce-intel-sync-state` checkpoints
+
+Relationship types in `github-intel-relationships`:
+
+| Relation | From | To |
+|----------|------|-----|
+| `customer_case_links_sdh` | Salesforce Case Id | SDH issue URL |
+| `sdh_links_product` | SDH issue URL | Product issue URL |
+
 ## Dashboards
 
 | Dashboard | Data source | Purpose |
@@ -128,13 +154,13 @@ Cross-link writes `customer_case_links_sdh` relationship edges when:
 | **SDLC GitHub sync overview** | `sdlc-github-raw-summary-view` | Raw ingest page/item counts per project |
 | **SDLC Epic phase gates** | `sdlc-epic-phases` + `sdlc-epic-tickets-by-repo-view` | Child ticket coverage, PR linkage, gate pass rates |
 | **SDLC Ingest health** | `sdlc-ingest-health-view` | Checkpoint lag, stale workflows, last run status |
-| **SDLC Salesforce feedback loop** | `sdlc-salesforce-feedback-view` | Case ↔ SDH linkage status and GitHub URL field coverage |
+| **SDLC Salesforce feedback loop** | `sdlc-salesforce-feedback-view`, `sdlc-feedback-loop-enriched-view` | Case ↔ SDH linkage and Case → SDH → product three-hop view |
 
 ## Fleet workflow auto-install
 
 When the `workflowsManagement` plugin is enabled, Fleet installs package workflows from `kibana/workflow/*.yaml` during package installation. Workflow IDs follow the pattern `fleet-{spaceId}-{pkgName}-{file-base}`.
 
-Connector IDs, org login, Salesforce field name, and SDH repo pattern from the integration policy vars replace `REPLACE_WITH_GITHUB_CONNECTOR_ID`, `REPLACE_WITH_SLACK_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD`, `REPLACE_WITH_SDH_REPO_PATTERN`, and `REPLACE_WITH_ORG_LOGIN` during install.
+Connector IDs, org login, Salesforce field names, SDH repo pattern, and SDH label from the integration policy vars replace `REPLACE_WITH_GITHUB_CONNECTOR_ID`, `REPLACE_WITH_SLACK_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD`, `REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD`, `REPLACE_WITH_SDH_REPO_PATTERN`, `REPLACE_WITH_SDH_LABEL`, and `REPLACE_WITH_ORG_LOGIN` during install.
 
 On package uninstall, workflow assets are deleted via `workflowsManagement.deleteWorkflows`.
 

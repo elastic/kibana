@@ -1,0 +1,46 @@
+name: sdlc-feedback-loop-enriched-view
+query: |
+  FROM salesforce-intel-cases
+  | EVAL
+      case_number = case.number,
+      case_status = case.status,
+      case_subject = case.subject,
+      case_priority = case.priority,
+      product_area = product.area,
+      sdh_issue_url = links.github_issue_url,
+      linked_to_sdh = feedback.linked_to_sdh,
+      case_link_source = links.link_source,
+      last_modified_at = case.last_modified_at
+  | LOOKUP JOIN github-intel-sdh-issues ON sdh_issue_url == entity.url
+  | EVAL
+      sdh_repo = repository.full_name,
+      sdh_state = github.state,
+      sdh_catalog_source = feedback.sdh_catalog_source,
+      product_issue_url = feedback.linked_product_issue_url,
+      linked_to_product = feedback.linked_to_product
+  | LOOKUP JOIN github-intel-issues ON product_issue_url == entity.url
+  | EVAL
+      product_repo = repository.full_name,
+      product_issue_number = entity.number,
+      product_state = github.state,
+      product_issue_title = content.title
+  | KEEP
+      @timestamp,
+      case_number,
+      case_status,
+      case_subject,
+      case_priority,
+      product_area,
+      sdh_issue_url,
+      sdh_repo,
+      sdh_state,
+      sdh_catalog_source,
+      linked_to_sdh,
+      case_link_source,
+      product_issue_url,
+      product_repo,
+      product_issue_number,
+      product_state,
+      product_issue_title,
+      linked_to_product,
+      last_modified_at

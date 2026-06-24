@@ -337,6 +337,24 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['scheduled', 'salesforce', 'github', 'ingest', 'sdlc', 'feedback', 'relationships'],
     filename: 'sdlc_cross_link_feedback_loop.yml',
   },
+  {
+    id: 'sdlc_cross_link_sdh_product',
+    name: 'SDLC cross-link SDH to product issues',
+    description:
+      'Links SDH issues to product GitHub issues via body URL references (sdh_links_product)',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'feedback', 'relationships', 'sdh', 'product'],
+    filename: 'sdlc_cross_link_sdh_product.yml',
+  },
+  {
+    id: 'sdlc_github_catalog_sdh_labeled_issues',
+    name: 'SDLC GitHub catalog SDH labeled issues',
+    description:
+      'Ingests label:sdh issues from product repos into github-intel-sdh-issues',
+    category: 'security',
+    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'issues', 'sdh', 'feedback', 'label'],
+    filename: 'sdlc_github_catalog_sdh_labeled_issues.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

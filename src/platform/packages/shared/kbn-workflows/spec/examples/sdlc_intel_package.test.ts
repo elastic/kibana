@@ -106,4 +106,29 @@ describe('SDLC intel golden-path assets', () => {
       fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/dashboard/sdlc-intel-salesforce-feedback.json'))
     ).toBe(true);
   });
+
+  it('includes Phase C2 feedback-loop extensions', () => {
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/cross-link-sdh-product.yaml'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/github-catalog-sdh-labeled-issues.yaml')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/esql_view/sdlc_feedback_loop_enriched.yml')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/index_pattern/sdlc-feedback-loop-enriched-view.json')
+      )
+    ).toBe(true);
+
+    const manifest = fs.readFileSync(path.join(FLEET_PACKAGE_ROOT, 'manifest.yml'), 'utf8');
+    expect(manifest).toContain('salesforce_product_area_field');
+    expect(manifest).toContain('sdh_label');
+  });
 });

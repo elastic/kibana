@@ -24,7 +24,9 @@ const GITHUB_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_GITHUB_CONNECTOR_ID';
 const SLACK_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_SLACK_CONNECTOR_ID';
 const SALESFORCE_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_CONNECTOR_ID';
 const SALESFORCE_CASE_GITHUB_FIELD_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD';
+const SALESFORCE_PRODUCT_AREA_FIELD_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD';
 const SDH_REPO_PATTERN_PLACEHOLDER = 'REPLACE_WITH_SDH_REPO_PATTERN';
+const SDH_LABEL_PLACEHOLDER = 'REPLACE_WITH_SDH_LABEL';
 const ORG_LOGIN_PLACEHOLDER = 'REPLACE_WITH_ORG_LOGIN';
 
 export const substituteWorkflowConnectorIds = (
@@ -36,7 +38,9 @@ export const substituteWorkflowConnectorIds = (
   const slackConnectorId = vars.slack_connector_id;
   const salesforceConnectorId = vars.salesforce_connector_id;
   const salesforceCaseGithubField = vars.salesforce_case_github_field;
+  const salesforceProductAreaField = vars.salesforce_product_area_field;
   const sdhRepoPattern = vars.sdh_repo_pattern;
+  const sdhLabel = vars.sdh_label;
   const orgLogin = vars.org_login;
 
   if (typeof githubConnectorId === 'string' && githubConnectorId.length > 0) {
@@ -49,13 +53,19 @@ export const substituteWorkflowConnectorIds = (
     result = result.replaceAll(SALESFORCE_CONNECTOR_PLACEHOLDER, salesforceConnectorId);
   }
   if (typeof salesforceCaseGithubField === 'string' && salesforceCaseGithubField.length > 0) {
+    result = result.replaceAll(SALESFORCE_CASE_GITHUB_FIELD_PLACEHOLDER, salesforceCaseGithubField);
+  }
+  if (typeof salesforceProductAreaField === 'string' && salesforceProductAreaField.length > 0) {
     result = result.replaceAll(
-      SALESFORCE_CASE_GITHUB_FIELD_PLACEHOLDER,
-      salesforceCaseGithubField
+      SALESFORCE_PRODUCT_AREA_FIELD_PLACEHOLDER,
+      salesforceProductAreaField
     );
   }
   if (typeof sdhRepoPattern === 'string' && sdhRepoPattern.length > 0) {
     result = result.replaceAll(SDH_REPO_PATTERN_PLACEHOLDER, sdhRepoPattern);
+  }
+  if (typeof sdhLabel === 'string' && sdhLabel.length > 0) {
+    result = result.replaceAll(SDH_LABEL_PLACEHOLDER, sdhLabel);
   }
   if (typeof orgLogin === 'string' && orgLogin.length > 0) {
     result = result.replaceAll(ORG_LOGIN_PLACEHOLDER, orgLogin);

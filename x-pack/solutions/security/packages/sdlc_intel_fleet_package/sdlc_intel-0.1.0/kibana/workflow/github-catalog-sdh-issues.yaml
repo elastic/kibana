@@ -133,6 +133,7 @@ steps:
                   searchable: '${{ foreach.item.title }} ${{ foreach.item.body }}'
                 feedback:
                   is_sdh: true
+                  sdh_catalog_source: sdh_repo
                   linked_salesforce_case_id: ''
                   linked_salesforce_case_number: ''
                   link_source: ''

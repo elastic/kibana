@@ -1,0 +1,183 @@
+version: '1'
+name: SDLC cross-link SDH to product issues
+description: >
+  Tier-3 feedback-loop workflow. Links SDH GitHub issues to product-repo GitHub issues when the
+  SDH issue body/title references a product issue URL. Writes sdh_links_product edges to
+  github-intel-relationships. Run github-catalog-sdh-issues and github-activity-issues first.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - link
+  - relationships
+  - ingest
+  - feedback
+  - sdh
+  - product
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  sdhRepoPattern: REPLACE_WITH_SDH_REPO_PATTERN
+  syncStateIndex: github-intel-sync-state
+  sdhIssuesIndex: github-intel-sdh-issues
+  productIssuesIndex: github-intel-issues
+  relationshipsIndex: github-intel-relationships
+  syncSource: cross-link-sdh-product
+  entityType: sdh_product_cross_link
+  productBatchSize: 100
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-cross-link-sdh-product
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 2h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      linksFromProductUrl: 0
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_product_issues_batch
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.productIssuesIndex }}'
+      size: '{{ consts.productBatchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+        - entity.id:
+            order: asc
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+          must_not:
+            - wildcard:
+                repository.full_name: '*{{ consts.sdhRepoPattern }}*'
+
+  - name: link_sdh_to_product_by_url_reference
+    type: foreach
+    foreach: '${{ steps.load_product_issues_batch.output.hits.hits | json }}'
+    steps:
+      - name: set_product_issue_context
+        type: data.set
+        with:
+          productIssueId: '${{ foreach.item._source.entity.id }}'
+          productIssueUrl: '${{ foreach.item._source.entity.url }}'
+          productIssueNumber: '${{ foreach.item._source.entity.number }}'
+          productRepoFullName: '${{ foreach.item._source.repository.full_name }}'
+
+      - name: find_sdh_issue_referencing_product_url
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.sdhIssuesIndex }}'
+          size: 1
+          query:
+            simple_query_string:
+              query: '${{ variables.productIssueUrl }}'
+              fields:
+                - content.searchable
+                - content.title
+                - content.body
+              default_operator: and
+
+      - name: write_sdh_links_product_relationship
+        type: elasticsearch.index
+        if: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits.size > 0 }}'
+        with:
+          index: '{{ consts.relationshipsIndex }}'
+          id: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits[0]._source.entity.id }}-sdh_links_product-${{ variables.productIssueId }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            from: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits[0]._source.entity.url }}'
+            to: '${{ variables.productIssueUrl }}'
+            relation: sdh_links_product
+            metadata:
+              org: '{{ consts.orgLogin }}'
+              sdh_issue_url: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits[0]._source.entity.url }}'
+              sdh_issue_number: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits[0]._source.entity.number }}'
+              sdh_repo: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits[0]._source.repository.full_name }}'
+              product_issue_url: '${{ variables.productIssueUrl }}'
+              product_issue_number: '${{ variables.productIssueNumber }}'
+              product_repo: '${{ variables.productRepoFullName }}'
+              link_source: sdh_body_product_url
+
+      - name: mark_sdh_issue_linked_to_product
+        type: elasticsearch.index
+        if: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits.size > 0 }}'
+        with:
+          index: '{{ consts.sdhIssuesIndex }}'
+          id: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits[0]._source.entity.id }}'
+          document:
+            feedback:
+              linked_to_product: true
+              linked_product_issue_id: '${{ variables.productIssueId }}'
+              linked_product_issue_url: '${{ variables.productIssueUrl }}'
+              linked_product_issue_repo: '${{ variables.productRepoFullName }}'
+              linked_product_issue_number: '${{ variables.productIssueNumber }}'
+              product_link_source: sdh_body_product_url
+
+      - name: count_product_url_link
+        type: data.set
+        if: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits.size > 0 }}'
+        with:
+          linksFromProductUrl: '${{ variables.linksFromProductUrl + 1 }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '{{ variables.runStartedAt }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          links_from_product_url: '${{ variables.linksFromProductUrl }}'
+          product_issues_scanned: '${{ steps.load_product_issues_batch.output.hits.hits.size }}'

@@ -68,6 +68,25 @@ vars:
     required: false
     show_user: true
     default: sdh-*
+  - name: sdh_label
+    type: text
+    title: SDH GitHub label
+    description: >
+      GitHub label used to identify SDH issues in product repositories (for example sdh).
+    multi: false
+    required: false
+    show_user: true
+    default: sdh
+  - name: salesforce_product_area_field
+    type: text
+    title: Salesforce Case product area field
+    description: >
+      Salesforce Case custom field API name for product area / team taxonomy (for example
+      Product_Area__c). Substituted into SOQL on install.
+    multi: false
+    required: false
+    show_user: true
+    default: Product_Area__c
 policy_templates:
   - name: sdlc_intel
     title: SDLC Intelligence

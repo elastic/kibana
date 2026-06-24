@@ -69,7 +69,8 @@ steps:
     with:
       baseSoql: >-
         SELECT Id, CaseNumber, Subject, Status, Priority, CreatedDate, ClosedDate,
-        LastModifiedDate, AccountId, Account.Name, REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD
+        LastModifiedDate, AccountId, Account.Name, REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD,
+        REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD
         FROM Case WHERE LastModifiedDate > {{ variables.watermark }}
         ORDER BY LastModifiedDate ASC
 
@@ -111,6 +112,8 @@ steps:
                 account:
                   id: '${{ foreach.item.AccountId }}'
                   name: '${{ foreach.item.Account?.Name ?? "" }}'
+                product:
+                  area: '${{ foreach.item.REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD ?? "" }}'
                 links:
                   github_issue_url: '${{ foreach.item.REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD ?? "" }}'
                   link_source: salesforce_field

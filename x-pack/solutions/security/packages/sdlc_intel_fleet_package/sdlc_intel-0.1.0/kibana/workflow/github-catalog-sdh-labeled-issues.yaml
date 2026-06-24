@@ -1,9 +1,9 @@
 version: '1'
-name: SDLC GitHub catalog SDH issues (GraphQL)
+name: SDLC GitHub catalog SDH labeled issues (GraphQL)
 description: >
-  Tier-1 SDH catalog workflow. Repo-scoped GitHub issue search (org + sdh-* pattern) via
-  activity.searchIssues. Upserts github-intel-sdh-issues separately from product-repo issues.
-  Run before cross-link-feedback-loop.
+  Tier-1 SDH catalog workflow for product repos. Org-wide GitHub issue search with label:sdh
+  (excluding sdh-* dedicated repos already covered by github-catalog-sdh-issues). Upserts into
+  github-intel-sdh-issues with sdh_catalog_source=sdh_label.
 enabled: false
 tags:
   - sdlc
@@ -14,22 +14,23 @@ tags:
   - issues
   - sdh
   - feedback
+  - label
 
 consts:
   orgLogin: REPLACE_WITH_ORG_LOGIN
   githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
-  sdhRepoPattern: REPLACE_WITH_SDH_REPO_PATTERN
+  sdhLabel: REPLACE_WITH_SDH_LABEL
   syncStateIndex: github-intel-sync-state
   issuesIndex: github-intel-sdh-issues
-  syncSource: github-catalog-sdh-issues
-  entityType: sdh_issue
+  syncSource: github-catalog-sdh-labeled-issues
+  entityType: sdh_labeled_issue
   pageSize: 50
   initialWatermark: '2024-01-01T00:00:00Z'
 
 settings:
   timeout: 30m
   concurrency:
-    key: sdlc-github-catalog-sdh-issues
+    key: sdlc-github-catalog-sdh-labeled-issues
     strategy: drop
     max: 1
 
@@ -72,14 +73,14 @@ steps:
   - name: build_search_query
     type: data.set
     with:
-      searchQuery: 'org:{{ consts.orgLogin }} repo:{{ consts.sdhRepoPattern }} updated:>{{ variables.watermark }} -is:pr'
+      searchQuery: 'org:{{ consts.orgLogin }} label:{{ consts.sdhLabel }} updated:>{{ variables.watermark }} -is:pr'
 
-  - name: paginate_sdh_issues
+  - name: paginate_sdh_labeled_issues
     type: while
-    condition: 'steps.fetch_sdh_issues.output.pageInfo.hasNextPage : true'
+    condition: 'steps.fetch_sdh_labeled_issues.output.pageInfo.hasNextPage : true'
     max-iterations: 15
     steps:
-      - name: fetch_sdh_issues
+      - name: fetch_sdh_labeled_issues
         type: github.runQueryTemplate
         connector-id: '{{ consts.githubConnectorId }}'
         with:
@@ -91,15 +92,15 @@ steps:
 
       - name: backoff_if_needed
         type: wait
-        if: '${{ steps.fetch_sdh_issues.output.shouldBackoff }}'
+        if: '${{ steps.fetch_sdh_labeled_issues.output.shouldBackoff }}'
         with:
           duration: 60s
 
-      - name: index_sdh_issues
+      - name: index_sdh_labeled_issues
         type: foreach
-        foreach: '${{ steps.fetch_sdh_issues.output.data.search.nodes | json }}'
+        foreach: '${{ steps.fetch_sdh_labeled_issues.output.data.search.nodes | json }}'
         steps:
-          - name: upsert_sdh_issue
+          - name: upsert_sdh_labeled_issue
             type: elasticsearch.index
             with:
               index: '{{ consts.issuesIndex }}'
@@ -133,7 +134,7 @@ steps:
                   searchable: '${{ foreach.item.title }} ${{ foreach.item.body }}'
                 feedback:
                   is_sdh: true
-                  sdh_catalog_source: sdh_repo
+                  sdh_catalog_source: sdh_label
                   linked_salesforce_case_id: ''
                   linked_salesforce_case_number: ''
                   link_source: ''
@@ -142,12 +143,12 @@ steps:
       - name: advance_cursor
         type: data.set
         with:
-          cursor: '${{ steps.fetch_sdh_issues.output.pageInfo.endCursor }}'
+          cursor: '${{ steps.fetch_sdh_labeled_issues.output.pageInfo.endCursor }}'
           pagesFetched: '${{ variables.pagesFetched + 1 }}'
 
   - name: clear_cursor_if_complete
     type: data.set
-    if: '${{ steps.fetch_sdh_issues.output.pageInfo.hasNextPage == false }}'
+    if: '${{ steps.fetch_sdh_labeled_issues.output.pageInfo.hasNextPage == false }}'
     with:
       cursor: ''
 
@@ -170,6 +171,6 @@ steps:
         last_run_status: success
         stats:
           pages_fetched: '${{ variables.pagesFetched }}'
-          has_next_page: '${{ steps.fetch_sdh_issues.output.pageInfo.hasNextPage ?? false }}'
+          has_next_page: '${{ steps.fetch_sdh_labeled_issues.output.pageInfo.hasNextPage ?? false }}'
           search_query: '{{ variables.searchQuery }}'
-          sdh_repo_pattern: '{{ consts.sdhRepoPattern }}'
+          sdh_label: '{{ consts.sdhLabel }}'

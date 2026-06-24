@@ -101,13 +101,34 @@
             "is_sdh": {
               "type": "boolean"
             },
+            "sdh_catalog_source": {
+              "type": "keyword"
+            },
             "linked_salesforce_case_id": {
               "type": "keyword"
             },
             "linked_salesforce_case_number": {
               "type": "keyword"
             },
+            "linked_product_issue_id": {
+              "type": "keyword"
+            },
+            "linked_product_issue_url": {
+              "type": "keyword"
+            },
+            "linked_product_issue_repo": {
+              "type": "keyword"
+            },
+            "linked_product_issue_number": {
+              "type": "integer"
+            },
+            "linked_to_product": {
+              "type": "boolean"
+            },
             "link_source": {
+              "type": "keyword"
+            },
+            "product_link_source": {
               "type": "keyword"
             }
           }
