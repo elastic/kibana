@@ -1,0 +1,113 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { NotificationEventsProvider } from '@kbn/core-notifications-browser-hooks';
+import { registerDemoTypes } from './event_types';
+import { notificationCenterAppId } from './notification_center_app';
+import { HeaderNotificationButton } from './header_notification_button';
+import { notificationStackManagementAppId } from './stack_management';
+
+interface SetupDeps {
+  developerExamples: DeveloperExamplesSetup;
+  spaces?: SpacesPluginSetup;
+}
+
+interface StartDeps {
+  spaces?: SpacesPluginStart;
+}
+
+export class NotificationCenterExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
+    core.chrome.sidebar.registerApp({
+      appId: notificationCenterAppId,
+      restoreOnReload: false,
+      loadComponent: async () => {
+        const [coreStart, { spaces }] = await core.getStartServices();
+        const { NotificationCenterApp } = await import('./notification_center_app');
+        const events = coreStart.notifications.events;
+
+        return function NotificationCenterAppWithProvider(props: SidebarComponentProps) {
+          return (
+            <NotificationEventsProvider events={events} spaces={spaces}>
+              <NotificationCenterApp
+                {...props}
+                uiSettings={coreStart.uiSettings}
+                onOpenStackManagement={() =>
+                  coreStart.application.navigateToApp(notificationStackManagementAppId)
+                }
+              />
+            </NotificationEventsProvider>
+          );
+        };
+      },
+    });
+
+    core.application.register({
+      id: 'notificationEventsExample',
+      title: 'Notification Events Example',
+      async mount({ element }: AppMountParameters) {
+        const [coreStart, { spaces }] = await core.getStartServices();
+        const events = coreStart.notifications.events;
+
+        // Idempotent: registering existing typeIds is a no-op in EventsService.
+        registerDemoTypes(events);
+
+        const { App } = await import('./app');
+
+        ReactDOM.render(
+          coreStart.rendering.addContext(
+            <NotificationEventsProvider events={events} spaces={spaces}>
+              <App />
+            </NotificationEventsProvider>
+          ),
+          element
+        );
+        return () => ReactDOM.unmountComponentAtNode(element);
+      },
+    });
+
+    core.application.register({
+      id: notificationStackManagementAppId,
+      title: 'Notification Center',
+      async mount({ element }: AppMountParameters) {
+        const [coreStart, { spaces }] = await core.getStartServices();
+        const { renderApp } = await import('./stack_management/render_app');
+        return renderApp(element, coreStart, spaces);
+      },
+    });
+
+    deps.developerExamples.register({
+      appId: 'notificationEventsExample',
+      title: 'Notification Events',
+      description:
+        'Fully featured notification center demo built on core.notifications.events, the browser-hooks package, and the NotificationEvent component.',
+    });
+  }
+
+  public start(core: CoreStart) {
+    core.chrome.navControls.registerRight({
+      order: 1000,
+      content: (
+        <NotificationEventsProvider events={core.notifications.events}>
+          <HeaderNotificationButton currentAppId$={core.application.currentAppId$} />
+        </NotificationEventsProvider>
+      ),
+    });
+
+    return {};
+  }
+
+  public stop() {}
+}

@@ -5885,6 +5885,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-notifications-browser-components@link:src/core/packages/notifications/browser-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-notifications-browser-hooks@link:src/core/packages/notifications/browser-hooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-notifications-browser-internal@link:src/core/packages/notifications/browser-internal":
   version "0.0.0"
   uid ""
@@ -8057,7 +8065,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/notification-center-plugin@link:x-pack/platform/plugins/shared/notification_center":
+"@kbn/notification-center-example-plugin@link:examples/notification_center_example":
   version "0.0.0"
   uid ""
 

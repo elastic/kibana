@@ -20,6 +20,8 @@ import { showErrorDialog, ToastsService } from './toasts';
 import { Coordinator, notificationCoordinator } from './notification_coordinator';
 import { FeedbackService } from './feedback';
 import { ToursService } from './tours';
+import { EventsService } from './events';
+import { LocalStorageNotificationStateStore } from './events/local_storage_state_store';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -39,6 +41,7 @@ export class NotificationsService {
   private readonly toasts: ToastsService;
   private readonly feedback: FeedbackService;
   private readonly tours: ToursService;
+  private readonly events: EventsService;
   private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
   private readonly coordinator = notificationCoordinator.bind(new Coordinator());
@@ -47,6 +50,10 @@ export class NotificationsService {
     this.toasts = new ToastsService();
     this.feedback = new FeedbackService();
     this.tours = new ToursService();
+    // TEMPORARY: localStorage-backed notification state. Swap for
+    // UserStorageNotificationStateStore when core.userStorage browser
+    // hooks ship. See LocalStorageNotificationStateStore for context.
+    this.events = new EventsService(new LocalStorageNotificationStateStore());
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
@@ -67,15 +74,17 @@ export class NotificationsService {
     return notificationSetup;
   }
 
-  public start({
+  public async start({
     overlays,
     targetDomElement,
     settings,
     ...startDeps
-  }: StartDeps): NotificationsStart {
+  }: StartDeps): Promise<NotificationsStart> {
     this.targetDomElement = targetDomElement;
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
+
+    const events = await this.events.start();
 
     return {
       toasts: this.toasts.start({
@@ -93,6 +102,7 @@ export class NotificationsService {
         }),
       feedback: this.feedback.start({ settings }),
       tours: this.tours.start({ settings }),
+      events,
     };
   }
 

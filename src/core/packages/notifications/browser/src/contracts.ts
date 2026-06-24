@@ -10,6 +10,7 @@
 import type { IToasts, NotificationCoordinator } from './types';
 import type { FeedbackStart } from './feedback_types';
 import type { ToursStart } from './tours_types';
+import type { INotificationEvents } from './events_types';
 
 /**
  * {@link IToasts}
@@ -49,4 +50,10 @@ export interface NotificationsStart {
    * @public
    */
   tours: ToursStart;
+
+  /**
+   * Persistent notification events surfaced in the notifications center.
+   * @public
+   */
+  events: INotificationEvents;
 }

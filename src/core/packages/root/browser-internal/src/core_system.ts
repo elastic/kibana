@@ -405,7 +405,7 @@ export class CoreSystem {
         chrome,
       });
 
-      const notifications = this.notifications.start({
+      const notifications = await this.notifications.start({
         analytics,
         overlays,
         targetDomElement: notificationsTargetDomElement,

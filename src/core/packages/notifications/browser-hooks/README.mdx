@@ -1,0 +1,133 @@
+---
+id: kibDevDocsCoreNotificationsBrowserHooks
+slug: /kibana-dev-docs/core/notifications-browser-hooks
+title: Core Notifications Browser Hooks
+description: React hooks for consuming persistent notification events in Kibana's notification center.
+tags: ['kibana', 'core', 'notifications', 'notification-center', 'hooks', 'shared-ux']
+date: 2026-05-12
+---
+
+# @kbn/core-notifications-browser-hooks
+
+React hooks that read from `core.notifications.events`. The hooks are thin
+wrappers around the `INotificationEvents` observable API; they subscribe
+via [`@kbn/use-observable`](../../../shared/use-observable) so React
+components rerender automatically when events arrive or change.
+
+For the type system, the publish API, the persistence contract, and the
+typeId allowlist, see
+[`@kbn/core-notifications-browser`](../browser/README.mdx). This README
+covers consumption only.
+
+## Mounting the provider
+
+Wrap the consumer subtree with `NotificationEventsProvider` near the
+application root and pass `notifications.events` as the value.
+
+```tsx
+import { NotificationEventsProvider } from '@kbn/core-notifications-browser-hooks';
+
+function AppRoot({ core, spaces }: { core: CoreStart; spaces?: SpacesPluginStart }) {
+  return (
+    <NotificationEventsProvider events={core.notifications.events} spaces={spaces}>
+      <App />
+    </NotificationEventsProvider>
+  );
+}
+```
+
+## API
+
+### `NotificationEventsProvider`
+
+| Prop | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `events` | `INotificationEvents` | Yes | Typically `core.notifications.events` from `start()`. |
+| `children` | `ReactNode` | Yes | Subtree that can consume the hooks below. |
+| `spaces` | `SpacesDependency` | No | Pass `spaces` from `StartDeps` to enable space-scoped filtering. The provider only binds to `getActiveSpace$()`. Omit when the spaces plugin is not available. |
+
+### `useNotificationEventsService(): INotificationEvents`
+
+Returns the raw events service. Use this from a component when you need
+to call `notify`, `markAsRead`, `pin`, `unpin`, or `registerType`. Throws
+if used outside `NotificationEventsProvider`.
+
+### `useNotifications(): NotificationEvent[]`
+
+All events, sorted **pinned-first then by descending timestamp**. The
+sort lives in this hook so consumers always get the canonical order
+without having to apply their own. If you need raw insertion order, call
+`events.get$()` directly via `useNotificationEventsService()`.
+
+### `useUnreadNotifications(): NotificationEvent[]`
+
+Subset of `useNotifications()` where `isRead` is false. Memoized; the
+array reference is stable across renders that don't change the filtered
+result.
+
+### `useReadNotifications(): NotificationEvent[]`
+
+Inverse — events the user has acknowledged.
+
+### `usePinnedNotifications(): NotificationEvent[]`
+
+Subset where `isPinned` is true. Mostly useful for a separate "Pinned"
+tab; the main list already shows pinned events at the top via
+`useNotifications`.
+
+### `useUnreadNotificationCount(): number`
+
+**O(1) per render.** Subscribes to the dedicated `getUnreadCount$()`
+observable on `INotificationEvents`, not to the events list. Designed
+specifically for the global-header notification badge — it must not
+iterate the full events list every render and must only re-render when
+the count actually changes. Use this hook (not
+`useUnreadNotifications().length`) for any badge.
+
+## Reading and updating example
+
+```tsx
+import {
+  useNotificationEventsService,
+  useNotifications,
+  useUnreadNotificationCount,
+} from '@kbn/core-notifications-browser-hooks';
+import { NotificationEvent } from '@kbn/core-notifications-browser-components';
+
+function GlobalBadge() {
+  const unread = useUnreadNotificationCount();
+  return <EuiNotificationBadge>{unread}</EuiNotificationBadge>;
+}
+
+function NotificationList() {
+  const events = useNotificationEventsService();
+  const items = useNotifications();
+  return (
+    <>
+      {items.map((event) => (
+        <NotificationEvent
+          key={event.id}
+          {...event}
+          messages={[event.message]}
+          time={formatTime(event.timestamp)}
+          onRead={(id, isRead) => events.markAsRead(id, !isRead)}
+          isPinned={event.isPinned ?? false}
+          onPin={(id, isPinned) => (isPinned ? events.unpin(id) : events.pin(id))}
+        />
+      ))}
+    </>
+  );
+}
+```
+
+## Publishing
+
+Publishing happens through the service, not the hooks. See the
+[`browser` README](../browser/README.mdx) for `notify()`, `registerType()`,
+the typeId allowlist, and the namespaced-id convention.
+
+## Testing
+
+```bash
+yarn test:jest src/core/packages/notifications/browser-hooks
+```

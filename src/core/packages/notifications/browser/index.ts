@@ -26,3 +26,21 @@ export type {
 } from './src/contracts';
 export type { FeedbackStart } from './src/feedback_types';
 export type { ToursStart } from './src/tours_types';
+export type {
+  INotificationEvents,
+  NotificationEvent,
+  NotificationEventTypeData,
+  NotificationTypeId,
+  PrimaryActionDescriptor,
+  RegisteredNotificationEventType,
+  TypedNotificationEvent,
+} from './src/events_types';
+export {
+  EXAMPLE_NOTIFICATION_TYPE_ID_PREFIX,
+  VALID_NOTIFICATION_TYPE_IDS,
+  isValidNotificationTypeId,
+} from './src/events_types';
+export type {
+  NotificationStateScope,
+  NotificationStateStore,
+} from './src/notification_state_store_types';
