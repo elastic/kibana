@@ -485,6 +485,26 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString(logger, '{{a}}', { a: 1, 'a.b': 2 }, 'none')).toEqual('{"b":2}');
     });
 
+    it('merges dotted and plain keys regardless of their order in the input', () => {
+      // dotted key first, plain object key second – prior behaviour dropped 'b'
+      expect(
+        renderMustacheString(logger, '{{a.b}} {{a.x}}', { 'a.b': 2, a: { x: 1 } }, 'none')
+      ).toEqual('2 1');
+      // plain object key first, dotted key second – already worked before the fix
+      expect(
+        renderMustacheString(logger, '{{a.b}} {{a.x}}', { a: { x: 1 }, 'a.b': 2 }, 'none')
+      ).toEqual('2 1');
+      // deeply nested: 'a.b.c' then a: { b: { d: 2 } }
+      expect(
+        renderMustacheString(
+          logger,
+          '{{a.b.c}} {{a.b.d}}',
+          { 'a.b.c': 1, a: { b: { d: 2 } } },
+          'none'
+        )
+      ).toEqual('1 2');
+    });
+
     it('expands a large flat AAD-style object with many kibana.alert.* dotted keys', () => {
       const aadAlert: Record<string, unknown> = {
         'kibana.alert.rule.name': 'My Rule',

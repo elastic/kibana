@@ -102,7 +102,8 @@ export function renderMustacheObject<Params>(
 }
 
 // Return variables as a fresh isolated tree with:
-//   - dotted keys expanded inline into nested objects (no lodash merge)
+//   - dotted keys expanded into nested objects with deep-merge semantics
+//     (order-independent: { 'a.b': 2, a: { x: 1 } } → a = { x:1, b:2 })
 //   - toString() attached to every plain object
 //   - asJSON() attached to every array
 // Replaces the previous three-pass approach (JSON clone → convertDotVariables → addToStringDeep).
@@ -136,14 +137,20 @@ function transformNode(value: unknown): unknown {
       if (!key.includes('.')) {
         // Skip top-level keys that would mutate the prototype chain.
         if (!PROTO_POLLUTION_KEYS.has(key)) {
-          obj[key] = transformed;
+          if (isNonNullObject(obj[key]) && isNonNullObject(transformed)) {
+            // A prior dotted-key pass already started building this subtree
+            // (e.g. 'a.b': 2 was processed before a: { x: 1 }).  Deep-merge
+            // the new object into the existing one so neither side's keys are
+            // lost, matching lodash merge() semantics regardless of key order.
+            deepMergeInto(obj[key] as Record<string, unknown>, transformed);
+          } else {
+            obj[key] = transformed;
+          }
         }
         continue;
       }
 
       // Inline dotted-path reduction: expand 'a.b.c' → nested objects.
-      // Later keys win over earlier ones, matching the behaviour of lodash
-      // merge (e.g. { a: 1, 'a.b': 2 } → a becomes { b: 2 }).
       // If the user's data has an explicit key named 'toString', it overwrites
       // the JSON.stringify function that makeObj() pre-populated, which is the
       // correct precedence (mirrors the Object.hasOwn guard that was in the
@@ -167,6 +174,23 @@ function transformNode(value: unknown): unknown {
 
   // Scalar, null, undefined: copy by value (no allocation needed).
   return value;
+}
+
+// Deep-merges every own-enumerable, non-function entry from `source` into
+// `target` in place.  Recurses into nested plain-object pairs; all other
+// values are assigned (source wins, matching lodash merge semantics).
+// Function-valued entries (e.g. the toString closure added by makeObj) are
+// intentionally skipped so the target's own toString closure is preserved.
+function deepMergeInto(target: Record<string, unknown>, source: Record<string, unknown>): void {
+  for (const [key, val] of Object.entries(source)) {
+    if (PROTO_POLLUTION_KEYS.has(key)) continue;
+    if (typeof val === 'function') continue;
+    if (isNonNullObject(target[key]) && isNonNullObject(val)) {
+      deepMergeInto(target[key] as Record<string, unknown>, val as Record<string, unknown>);
+    } else {
+      target[key] = val;
+    }
+  }
 }
 
 // Creates a fresh plain object pre-populated with a toString() that serialises
