@@ -12,15 +12,19 @@ import {
   fromStoredDataViewToAsCodeSavedSchema,
   toStoredDataView,
 } from '@kbn/as-code-data-views-transforms';
-import type { DataViewLazy } from '@kbn/data-views-plugin/common';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 
 export class DataViewsAsCodeService {
   private dataViewsService: DataViewsService;
+  private savedObjectsClient: SavedObjectsClientContract;
 
-  constructor(dataViewsService: DataViewsService) {
+  constructor(dataViewsService: DataViewsService, savedObjectsClient: SavedObjectsClientContract) {
     this.dataViewsService = dataViewsService;
+    this.savedObjectsClient = savedObjectsClient;
   }
 
   private async mapDataView(dataView: DataViewLazy) {
@@ -34,6 +38,40 @@ export class DataViewsAsCodeService {
         managed: dataView.managed,
         version: dataView.version,
         namespaces: dataView.namespaces,
+      },
+    };
+  }
+
+  public async search({
+    page,
+    perPage,
+    search,
+  }: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+  }) {
+    const result = await this.savedObjectsClient.find<DataViewAttributes>({
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+      page,
+      perPage,
+      search,
+    });
+
+    const dataViews = await Promise.all(
+      result.saved_objects.map((so) =>
+        this.dataViewsService
+          .createFromSpecLazy(this.dataViewsService.savedObjectToSpec(so))
+          .then((dataView) => this.mapDataView(dataView))
+      )
+    );
+
+    return {
+      data: dataViews,
+      meta: {
+        page: result.page,
+        per_page: result.per_page,
+        total: result.total,
       },
     };
   }
