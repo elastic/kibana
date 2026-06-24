@@ -11,6 +11,7 @@ import {
   buildTrendlineBucketExpression,
   queryHasStatsCommand,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 
 import React from 'react';
 
@@ -414,7 +415,7 @@ export function getTextBasedDatasource({
           // When the source has no STATS, wrap the raw field in AVG() so the
           // fieldName matches the auto-generated trendline STATS expression.
           ...(!sourceQueryHasStats && {
-            fieldName: `AVG(${sourceCol.fieldName})`,
+            fieldName: `AVG(${esql.col(sourceCol.fieldName)})`,
           }),
         };
 
