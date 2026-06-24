@@ -16,9 +16,7 @@ export type EntityInsightProps = Omit<
 >;
 
 /**
- * Flyout v2 wrapper around the context-agnostic {@link EntityInsightBase}.
- * The v2 flyout always renders the insights in their non-expandable form, so it
- * composes the v1 component with `isPreviewMode` pinned on rather than duplicating it.
+ * Flyout v2 wrapper around {@link EntityInsightBase}.
  */
 export const EntityInsight = (props: EntityInsightProps) => (
   <EntityInsightBase {...props} isPreviewMode />

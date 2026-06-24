@@ -17,9 +17,7 @@ export type AlertsDetailsTableProps = Omit<
 };
 
 /**
- * Flyout v2 wrapper around the context-agnostic {@link AlertsDetailsTableBase}.
- * It composes the v1 table and requires the `onShowAlert` callback so navigation
- * is owned by the caller (the new EUI flyout system) rather than hardcoded.
+ * Flyout v2 wrapper around {@link AlertsDetailsTableBase}.
  */
 export const AlertsDetailsTable = (props: AlertsDetailsTableProps) => (
   <AlertsDetailsTableBase {...props} />

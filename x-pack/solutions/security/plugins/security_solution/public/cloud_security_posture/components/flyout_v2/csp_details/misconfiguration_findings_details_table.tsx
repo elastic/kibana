@@ -17,9 +17,7 @@ export type MisconfigurationFindingsDetailsTableProps = Omit<
 };
 
 /**
- * Flyout v2 wrapper around the context-agnostic {@link MisconfigurationFindingsDetailsTableBase}.
- * It composes the v1 table and requires the `onShowFinding` callback so navigation
- * is owned by the caller (the new EUI flyout system) rather than hardcoded.
+ * Flyout v2 wrapper around {@link MisconfigurationFindingsDetailsTableBase}.
  */
 export const MisconfigurationFindingsDetailsTable = (
   props: MisconfigurationFindingsDetailsTableProps
