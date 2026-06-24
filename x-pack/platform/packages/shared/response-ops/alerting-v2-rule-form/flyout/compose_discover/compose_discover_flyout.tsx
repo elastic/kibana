@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,8 +29,9 @@ import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
 import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
-import { getBreachQuery } from '../../form/types';
+import { getBreachQuery } from '../../form/utils/query_helpers';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
+import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
@@ -47,6 +49,9 @@ import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_
 import { useEsqlAutocomplete } from './use_esql_providers';
 import { guessRecoveryBlock, discoverQueryToComposed, splitQuery } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
+import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
+import { ComposeDiscoverTimeFieldContextProvider } from './compose_discover_time_field_context';
+import { useResolveTimeField } from './use_resolve_time_field';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -81,6 +86,14 @@ const CREATE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.cre
 const EDIT_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.editTitleLabel', {
   defaultMessage: 'Edit alert rule',
 });
+
+const YAML_ONLY_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.editMode.yamlOnlyTooltip',
+  {
+    defaultMessage:
+      'The current YAML configuration contains features that cannot be represented in the GUI.',
+  }
+);
 
 const EDIT_MODE_OPTIONS = [
   { id: 'form', label: FORM_VIEW_LABEL, iconType: 'tableDensityNormal' },
@@ -181,6 +194,8 @@ export function ComposeDiscoverFlyout({
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
 
+  const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
+
   const inlineResult = useMemo(
     () =>
       initialQuery !== undefined
@@ -202,6 +217,7 @@ export function ComposeDiscoverFlyout({
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
     isBuilderMode,
     isQueryPrePopulated: isDiscoverQueryComplete,
+    forceYamlMode,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -319,6 +335,50 @@ export function ComposeDiscoverFlyout({
   );
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
+  const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  useEffect(() => {
+    if (watchedTimeField && watchedTimeField !== sandboxTimeField) {
+      setSandboxTimeField(watchedTimeField);
+    }
+  }, [watchedTimeField, sandboxTimeField]);
+
+  const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
+  const watchedQuery = useWatch({ control: methods.control, name: 'query' });
+
+  const timeFieldResolutionQuery = useMemo(
+    () =>
+      getTimeFieldResolutionQuery(
+        uiState.childOpen ? sandboxQuery : watchedQuery,
+        isAlert,
+        uiState.queryCommitted || uiState.childOpen
+      ),
+    [uiState.childOpen, uiState.queryCommitted, sandboxQuery, watchedQuery, isAlert]
+  );
+
+  const handleResolvedTimeFieldChange = useCallback(
+    (field: string) => {
+      methods.setValue('timeField', field, { shouldDirty: false });
+      setSandboxTimeField(field);
+    },
+    [methods]
+  );
+
+  const { timeFieldOptions, isTimeFieldResolved } = useResolveTimeField({
+    query: timeFieldResolutionQuery,
+    timeField: (uiState.childOpen ? sandboxTimeField : watchedTimeField) ?? '@timestamp',
+    onTimeFieldChange: handleResolvedTimeFieldChange,
+    http: baseServices.http,
+    dataViews: baseServices.dataViews,
+  });
+
+  // Gate sandbox autoRun on the time field the sandbox actually executes with — not
+  // only the form value, which can lead autoRun by one render.
+  const sandboxIsTimeFieldResolved = useMemo(
+    () =>
+      isTimeFieldResolved && timeFieldOptions.some((option) => option.value === sandboxTimeField),
+    [isTimeFieldResolved, timeFieldOptions, sandboxTimeField]
+  );
+
   useEffect(() => {
     if (rule || initialQuery === undefined) {
       return;
@@ -378,7 +438,6 @@ export function ComposeDiscoverFlyout({
     search: services.data.search.search,
   });
 
-  const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
 
@@ -508,8 +567,18 @@ export function ComposeDiscoverFlyout({
   const isLastStep = uiState.step === steps.length - 1;
 
   // ── YAML mode state ──────────────────────────────────────────────────────
-  const [yamlText, setYamlText] = useState('');
+  const [yamlText, setYamlText] = useState(() => {
+    if (forceYamlMode) {
+      const serialized = serializeFormToYaml(defaultValues);
+      yamlBaselineRef.current = serialized;
+      return serialized;
+    }
+    return '';
+  });
   yamlTextRef.current = yamlText;
+  // Reflects Monaco markers set by the YAML editor's schema validator. Used to
+  // disable the Save button while the buffer is invalid.
+  const [yamlHasErrors, setYamlHasErrors] = useState(false);
 
   // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF
   // and mirrors the composed query into the sandbox editing buffer.
@@ -538,6 +607,8 @@ export function ComposeDiscoverFlyout({
 
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
+      if (forceYamlMode) return;
+
       if (enabled) {
         const serialized = serializeFormToYaml(methods.getValues());
         setYamlText(serialized);
@@ -568,7 +639,7 @@ export function ComposeDiscoverFlyout({
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch]
+    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch, forceYamlMode]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -611,17 +682,20 @@ export function ComposeDiscoverFlyout({
   // YAML "Save" — flush any pending debounce into RHF, then run the shared
   // handleSubmit path so validation + submission use a single pipeline.
   const handleYamlSave = useCallback(() => {
-    if (hasValidationErrors) {
+    if (hasValidationErrors || yamlHasErrors) {
       return;
     }
     cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
-    if (result.values) {
-      applyYamlValuesToFormAndSandbox(result.values);
-      // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
-      // we're about to submit. On success the flyout closes; on failure the user is still
-      // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
+    if (result.error !== null) {
+      // YAML syntax or shape errors are surfaced inline by the editor's Monaco
+      // markers; abort submission so we don't post stale RHF state to the API.
+      return;
     }
+    applyYamlValuesToFormAndSandbox(result.values);
+    // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
+    // we're about to submit. On success the flyout closes; on failure the user is still
+    // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     handleSubmit();
   }, [
     cancelYamlParse,
@@ -629,6 +703,7 @@ export function ComposeDiscoverFlyout({
     applyYamlValuesToFormAndSandbox,
     handleSubmit,
     hasValidationErrors,
+    yamlHasErrors,
   ]);
 
   const handleNext = useCallback(async () => {
@@ -697,13 +772,14 @@ export function ComposeDiscoverFlyout({
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
   // field on RuleQuery itself, gate this on query shape instead.
   const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
-    if (uiState.yamlMode && sandboxQuery.format === 'composed') {
-      return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+    if (!uiState.yamlMode) {
+      return getSandboxTabs(isAlert, {
+        step: uiState.step,
+        recoveryType: uiState.recoveryType,
+      });
     }
-    return getSandboxTabs(isAlert, {
-      step: uiState.step,
-      recoveryType: uiState.recoveryType,
-    });
+    if (sandboxQuery.format === 'standalone') return undefined;
+    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
   }, [uiState.yamlMode, uiState.recoveryType, uiState.step, sandboxQuery.format, isAlert]);
 
   const handleSandboxTabChange = useCallback(
@@ -722,127 +798,136 @@ export function ComposeDiscoverFlyout({
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
-        <EuiFlyout
-          key={flyoutKey}
-          type="overlay"
-          session="start"
-          historyKey={historyKey}
-          onClose={handleRequestClose}
-          aria-labelledby={FLYOUT_TITLE_ID}
-          size={480}
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-              <h2>{title}</h2>
-            </EuiTitle>
+        <ComposeDiscoverTimeFieldContextProvider value={{ timeFieldOptions, isTimeFieldResolved }}>
+          <EuiFlyout
+            key={flyoutKey}
+            type="overlay"
+            session="start"
+            historyKey={historyKey}
+            onClose={handleRequestClose}
+            aria-labelledby={FLYOUT_TITLE_ID}
+            size={480}
+          >
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
+                <h2>{title}</h2>
+              </EuiTitle>
 
-            <EuiFlexGroup
-              justifyContent="spaceBetween"
-              alignItems="center"
-              responsive={false}
-              style={{ marginTop: 8 }}
-            >
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                responsive={false}
+                style={{ marginTop: 8 }}
+              >
+                {uiState.yamlMode ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
+                      {YAML_MODE_BADGE_LABEL}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem grow>
+                    <HorizontalMinimalStepper
+                      steps={steps.map(
+                        (s, i): MinimalStep => ({
+                          title: s.title,
+                          status: getStepStatus(uiState.step, i),
+                        })
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
+                {!isBuilderMode && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={forceYamlMode ? YAML_ONLY_TOOLTIP : undefined}>
+                      <EuiButtonGroup
+                        legend={EDIT_MODE_LEGEND}
+                        options={EDIT_MODE_OPTIONS}
+                        idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                        onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                        isIconOnly
+                        isDisabled={forceYamlMode}
+                        buttonSize="compressed"
+                        data-test-subj="composeDiscoverEditModeToggle"
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlyoutHeader>
+
+            <EuiFlyoutBody>
+              {validationCallout}
               {uiState.yamlMode ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
-                    {YAML_MODE_BADGE_LABEL}
-                  </EuiBadge>
-                </EuiFlexItem>
+                <React.Suspense fallback={null}>
+                  <LazyYamlRuleForm
+                    services={baseServices}
+                    yamlText={yamlText}
+                    setYamlText={handleSetYamlText}
+                    onBlurSync={handleBlurSync}
+                    onValidate={setYamlHasErrors}
+                    isSubmitting={isSaving}
+                  />
+                </React.Suspense>
               ) : (
-                <EuiFlexItem grow>
-                  <HorizontalMinimalStepper
-                    steps={steps.map(
-                      (s, i): MinimalStep => ({
-                        title: s.title,
-                        status: getStepStatus(uiState.step, i),
-                      })
-                    )}
+                <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
+                  <ComposeDiscoverForm
+                    state={uiState}
+                    dispatch={dispatch}
+                    services={baseServices}
+                    onRecoveryTypeChange={handleRecoveryTypeChange}
+                    onKindChange={handleKindChange}
+                    isEditing={isEditing}
+                    ruleId={ruleId}
+                    builderType={builderType}
                   />
-                </EuiFlexItem>
+                </BuilderStateProvider>
               )}
-              {!isBuilderMode && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonGroup
-                    legend={EDIT_MODE_LEGEND}
-                    options={EDIT_MODE_OPTIONS}
-                    idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                    onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                    isIconOnly
-                    buttonSize="compressed"
-                    data-test-subj="composeDiscoverEditModeToggle"
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
+            </EuiFlyoutBody>
 
-          <EuiFlyoutBody>
-            {validationCallout}
-            {uiState.yamlMode ? (
-              <React.Suspense fallback={null}>
-                <LazyYamlRuleForm
-                  services={baseServices}
-                  yamlText={yamlText}
-                  setYamlText={handleSetYamlText}
-                  onBlurSync={handleBlurSync}
-                  isSubmitting={isSaving}
-                />
-              </React.Suspense>
-            ) : (
-              <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
-                <ComposeDiscoverForm
-                  state={uiState}
-                  dispatch={dispatch}
-                  services={baseServices}
-                  onRecoveryTypeChange={handleRecoveryTypeChange}
-                  onKindChange={handleKindChange}
-                  isEditing={isEditing}
-                  ruleId={ruleId}
-                  builderType={builderType}
-                />
-              </BuilderStateProvider>
-            )}
-          </EuiFlyoutBody>
-
-          <ComposeDiscoverFooter
-            uiState={uiState}
-            dispatch={dispatch}
-            currentStep={currentStep}
-            isLastStep={isLastStep}
-            isCreate={isCreate}
-            hasValidationErrors={hasValidationErrors}
-            isSaving={isSaving}
-            onNext={handleNext}
-            onFinalSubmit={handleFinalSubmit}
-            onYamlSave={handleYamlSave}
-            onRequestClose={handleRequestClose}
-            closeSourceRef={closeSourceRef}
-          />
-
-          {uiState.childOpen && (
-            <QuerySandboxFlyout
-              query={sandboxQuery}
-              onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
-              tabs={sandboxTabs}
-              timeField={sandboxTimeField}
-              onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-              activeTab={uiState.activeTab}
-              onTabChange={handleSandboxTabChange}
-              onAlertEditorMount={onAlertEditorMount}
-              onRecoveryEditorMount={onRecoveryEditorMount}
-              onClose={() => {
-                syncSandbox();
-                dispatch({ type: 'CLOSE_CHILD' });
-              }}
-              onApply={isBuilderMode ? undefined : handleSandboxApply}
+            <ComposeDiscoverFooter
+              uiState={uiState}
+              dispatch={dispatch}
+              currentStep={currentStep}
+              isLastStep={isLastStep}
+              isCreate={isCreate}
+              hasValidationErrors={hasValidationErrors}
+              yamlHasErrors={yamlHasErrors}
+              isSaving={isSaving}
+              onNext={handleNext}
+              onFinalSubmit={handleFinalSubmit}
+              onYamlSave={handleYamlSave}
+              onRequestClose={handleRequestClose}
+              closeSourceRef={closeSourceRef}
             />
+
+            {uiState.childOpen && (
+              <QuerySandboxFlyout
+                query={sandboxQuery}
+                onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
+                tabs={sandboxTabs}
+                timeField={sandboxTimeField || '@timestamp'}
+                onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
+                timeFieldOptions={timeFieldOptions}
+                isTimeFieldResolved={sandboxIsTimeFieldResolved}
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+                activeTab={uiState.activeTab}
+                onTabChange={handleSandboxTabChange}
+                onAlertEditorMount={onAlertEditorMount}
+                onRecoveryEditorMount={onRecoveryEditorMount}
+                onClose={() => {
+                  syncSandbox();
+                  dispatch({ type: 'CLOSE_CHILD' });
+                }}
+                onApply={isBuilderMode ? undefined : handleSandboxApply}
+              />
+            )}
+          </EuiFlyout>
+          {isConfirmCloseVisible && (
+            <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
           )}
-        </EuiFlyout>
-        {isConfirmCloseVisible && (
-          <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
-        )}
+        </ComposeDiscoverTimeFieldContextProvider>
       </FormProvider>
     </RuleFormProvider>
   );
