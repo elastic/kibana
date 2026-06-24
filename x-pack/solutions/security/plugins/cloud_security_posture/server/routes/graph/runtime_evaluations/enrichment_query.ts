@@ -12,7 +12,7 @@ import {
   mergeAssignments,
   parseEvalSnippet,
   type ParsedAssignment,
-} from './integrations/mergeEval';
+} from './merge_eval';
 
 /** Pipeline phases merged into one `| EVAL` each (`detection_flags` is skipped). */
 export const ENRICHMENT_PHASES = [
