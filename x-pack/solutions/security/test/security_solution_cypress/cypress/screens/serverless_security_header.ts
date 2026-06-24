@@ -110,6 +110,12 @@ export const openNavigationPanelFor = (pageName: string) => {
  * Unconditionally opening "More" when the control is already visible is a common flake (extra overlay, layout races).
  */
 const clickWhenVisibleElseOpenMore = (selector: string) => {
+  // Wait for chrome to settle before checking visibility — the SideNav can cover elements with a
+  // transient overlay (css-1rrlroc) while it is still measuring/laying out after initial render.
+  // https://github.com/elastic/kibana/issues/239331
+  cy.get('[data-test-subj~="nav-item"]').should('exist');
+  cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   cy.get('body').then(($body) => {
     const hasVisible = $body.find(selector).filter(':visible').length > 0;
     if (hasVisible) {
