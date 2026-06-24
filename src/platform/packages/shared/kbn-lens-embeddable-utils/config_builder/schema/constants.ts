@@ -20,10 +20,6 @@ export const LENS_TERMS_MISSING_BUCKET_DEFAULT = false;
 export const LENS_FORMAT_NUMBER_DECIMALS_DEFAULT = 2;
 export const LENS_FORMAT_COMPACT_DEFAULT = false;
 
-/** Default source unit in Lens editor state (field format value). */
-export const LENS_DURATION_INPUT_UNIT_DEFAULT = 'seconds';
-/** Default display unit in Lens editor state (field format value). */
-export const LENS_DURATION_OUTPUT_UNIT_DEFAULT = 'humanize';
 /** Default source unit in Lens as code API (`from`). */
 export const LENS_DURATION_API_INPUT_UNIT_DEFAULT = 's';
 /** Default display unit in Lens as code API (`to`). */
