@@ -11,6 +11,7 @@ import type { RootSchema } from '@kbn/core/server';
 import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
 import {
   type EventDrivenExecutionSuppressedParams,
+  type ParallelStepExecutedParams,
   type TriggerEventDispatchedParams,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
@@ -44,6 +45,7 @@ export const workflowExecutionEventNames = {
   [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]:
     'Event-driven workflow execution suppressed at runtime',
   [WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched]: 'Trigger event dispatched',
+  [WorkflowExecutionTelemetryEventTypes.ParallelStepExecuted]: 'Parallel step executed',
 };
 
 const baseWorkflowExecutionSchema: RootSchema<{
@@ -1047,6 +1049,87 @@ const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
   },
 };
 
+const parallelStepExecutedSchema: RootSchema<ParallelStepExecutedParams> = {
+  ...eventNameSchema,
+  workflowId: {
+    type: 'keyword',
+    _meta: { description: 'The workflow ID that owns the parallel step', optional: false },
+  },
+  spaceId: {
+    type: 'keyword',
+    _meta: { description: 'The space ID', optional: false },
+  },
+  stepId: {
+    type: 'keyword',
+    _meta: { description: "The parallel step's id within the workflow", optional: false },
+  },
+  isTestRun: {
+    type: 'boolean',
+    _meta: { description: 'Whether this is a test run', optional: false },
+  },
+  total: {
+    type: 'integer',
+    _meta: { description: 'Total number of fan-out branches created', optional: false },
+  },
+  succeeded: {
+    type: 'integer',
+    _meta: { description: 'Branches that completed successfully', optional: false },
+  },
+  failed: {
+    type: 'integer',
+    _meta: { description: 'Branches that failed (includes timed-out branches)', optional: false },
+  },
+  skipped: {
+    type: 'integer',
+    _meta: {
+      description: 'Branches that never started because of a fail-fast short-circuit',
+      optional: false,
+    },
+  },
+  timedOut: {
+    type: 'integer',
+    _meta: {
+      description: 'Branches terminated by a timeout (overall or per-branch)',
+      optional: false,
+    },
+  },
+  status: {
+    type: 'keyword',
+    _meta: { description: 'Aggregate terminal status of the step', optional: false },
+  },
+  concurrency: {
+    type: 'integer',
+    _meta: { description: 'Concurrency cap actually applied (after clamping)', optional: false },
+  },
+  countWaiting: {
+    type: 'boolean',
+    _meta: { description: 'Whether waiting branches consume a concurrency slot', optional: false },
+  },
+  mode: {
+    type: 'keyword',
+    _meta: { description: "Failure mode: 'fail-fast' (default) or 'settled'", optional: false },
+  },
+  hasExplicitConcurrency: {
+    type: 'boolean',
+    _meta: { description: 'Whether the author set an explicit concurrency value', optional: false },
+  },
+  hasTimeout: {
+    type: 'boolean',
+    _meta: { description: 'Whether an overall step timeout was configured', optional: false },
+  },
+  hasBranchTimeout: {
+    type: 'boolean',
+    _meta: { description: 'Whether a per-branch timeout was configured', optional: false },
+  },
+  rejectionRate: {
+    type: 'float',
+    _meta: {
+      description: 'Fraction of branches that did not complete successfully, in [0, 1]',
+      optional: false,
+    },
+  },
+};
+
 export const workflowExecutionEventSchemas = {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]:
     workflowExecutionCompletedSchema,
@@ -1056,4 +1139,5 @@ export const workflowExecutionEventSchemas = {
   [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]:
     eventDrivenExecutionSuppressedSchema,
   [WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched]: triggerEventDispatchedSchema,
+  [WorkflowExecutionTelemetryEventTypes.ParallelStepExecuted]: parallelStepExecutedSchema,
 };

@@ -1,0 +1,32 @@
+version: '1'
+name: 'Parallel MT-10 · Results correlation & downstream consumption'
+description: |
+  Verifies the index-aligned results contract and per-branch correlation fields
+  (index, key, timing) and that a downstream step can consume the aggregate
+  output. Each branch echoes a derived value; the summary reads results by index.
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  items: ['red', 'green', 'blue']
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 3 }
+    steps:
+      - name: emit
+        type: console
+        with:
+          message: 'color {{ foreach.index }} = {{ foreach.item }}'
+  - name: assert_shape
+    type: console
+    with:
+      message: |-
+        total={{ steps.fan_out.output.total }}
+        first_index={{ steps.fan_out.output.results[0].index }}
+        first_key={{ steps.fan_out.output.results[0].key }}
+        first_status={{ steps.fan_out.output.results[0].status }}
+        last_key={{ steps.fan_out.output.results[2].key }}
+        full_results={{ steps.fan_out.output.results | json:2 }}

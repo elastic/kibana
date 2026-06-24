@@ -506,29 +506,156 @@ export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) =
   return schema;
 };
 
-export const ParallelStepConfigSchema = z.object({
-  branches: z
-    .array(
-      z.object({
-        name: z.string().describe('Unique name for this branch'),
-        steps: z.array(BaseStepSchema).describe('Steps to execute in this branch'),
-      })
+// Default for the number of branches that may run at once.
+export const DEFAULT_PARALLEL_CONCURRENCY = 5;
+// Hard ceiling on the requested concurrency, regardless of what an author sets.
+// Guards against an author pinning a worker with an unrealistic lane count.
+export const DEFAULT_PARALLEL_MAX_CONCURRENCY = 20;
+// Default cap on the total number of fan-out items for a dynamic parallel step.
+export const DEFAULT_PARALLEL_MAX_FAN_OUT = 100;
+
+// `concurrency` accepts either a bare number (shorthand for `{ max: N }`) or an
+// object so authors can also control whether parked/polling lanes hold a slot.
+export const ParallelConcurrencyObjectSchema = z.object({
+  max: z
+    .number()
+    .int()
+    .positive()
+    .max(
+      DEFAULT_PARALLEL_MAX_CONCURRENCY,
+      `Parallel concurrency "max" cannot exceed ${DEFAULT_PARALLEL_MAX_CONCURRENCY}.`
     )
-    .describe('Array of named branches to execute in parallel'),
+    .optional()
+    .describe(
+      'Maximum number of branches that run at once. Defaults to a conservative finite cap.'
+    ),
+  'count-waiting': z
+    .boolean()
+    .optional()
+    .describe(
+      'When true (default), a branch that is waiting/polling still occupies a concurrency slot. ' +
+        'When false, waiting branches free their slot so more branches can start.'
+    ),
 });
-export const ParallelStepSchema = BaseStepSchema.extend({
+export type ParallelConcurrencyObject = z.infer<typeof ParallelConcurrencyObjectSchema>;
+
+export const ParallelConcurrencySchema = z
+  .union([
+    z
+      .number()
+      .int()
+      .positive()
+      .max(
+        DEFAULT_PARALLEL_MAX_CONCURRENCY,
+        `Parallel concurrency cannot exceed ${DEFAULT_PARALLEL_MAX_CONCURRENCY}.`
+      ),
+    ParallelConcurrencyObjectSchema,
+  ])
+  .describe('Concurrency control: a number (max lanes) or { max, count-waiting }.');
+
+export const ParallelModeSchema = z
+  .enum(['fail-fast', 'settled'])
+  .describe(
+    'fail-fast (default): stop scheduling new branches when one fails, let in-flight branches finish, then fail. ' +
+      'settled: let every branch reach a terminal state; the step succeeds and reports per-branch results.'
+  );
+export type ParallelMode = z.infer<typeof ParallelModeSchema>;
+
+// A single named branch in a static parallel step. Each branch has its own
+// (heterogeneous) body — unlike dynamic fan-out, branches run different steps.
+export const ParallelBranchSchema = z.object({
+  name: z
+    .string()
+    .min(1)
+    .describe(
+      'Branch identifier, used as the result `key` for this branch in the aggregate output.'
+    ),
+  steps: z
+    .array(BaseStepSchema)
+    .min(1)
+    .describe('Branch body. v1 supports a straight-line sequence of steps per branch.'),
+});
+export type ParallelBranch = z.infer<typeof ParallelBranchSchema>;
+
+// The `parallel` step has two mutually exclusive modes:
+// - Dynamic fan-out (`foreach` + `steps`): run the SAME branch body once per
+//   runtime list item, concurrently.
+// - Static branches (`branches`): run a FIXED set of named, heterogeneous
+//   branch bodies concurrently (scatter-gather). The set is known at author
+//   time, so each branch compiles to its own real subgraph.
+export const ParallelStepConfigSchema = z.object({
+  foreach: z
+    .union([z.string(), z.array(z.unknown())])
+    .optional()
+    .describe(
+      'Dynamic fan-out: a Liquid expression evaluating to an array (or a literal array). The ' +
+        '`steps` body runs once per item, concurrently. Mutually exclusive with `branches`. ' +
+        'Inside a branch, access the item via {{ foreach.item }} / {{ foreach.index }}.'
+    ),
+  steps: z
+    .array(BaseStepSchema)
+    .min(1)
+    .optional()
+    .describe('Dynamic fan-out branch body executed once per item. Used with `foreach`.'),
+  branches: z
+    .array(ParallelBranchSchema)
+    .min(1)
+    .optional()
+    .describe(
+      'Static scatter-gather: a fixed set of named branches, each with its own body, run ' +
+        'concurrently. Mutually exclusive with `foreach`/`steps`.'
+    ),
+  concurrency: ParallelConcurrencySchema.optional(),
+  mode: ParallelModeSchema.optional(),
+  'branch-timeout': DurationSchema.optional().describe(
+    'Maximum duration a single branch may run before it is failed with a timeout. ' +
+      'Independent of the step-level `timeout`, which bounds the whole parallel step.'
+  ),
+});
+// Object form (extendable). The exported `ParallelStepSchema` applies the
+// mode-exclusivity refinement on top; keep this base for `.extend()` callers.
+export const ParallelStepObjectSchema = BaseStepSchema.extend({
   type: z
     .literal('parallel')
     .describe(
-      'Execute multiple branches of steps concurrently. Each branch runs independently and results are available after all branches complete'
+      'Run branches concurrently and continue when all reach a terminal state. Either dynamic ' +
+        'fan-out (`foreach` + `steps`) or a fixed set of named `branches`. Results are collected ' +
+        'per branch with aggregate counts.'
     ),
   ...ParallelStepConfigSchema.shape,
+  ...TimeoutPropSchema.shape,
 });
-export type ParallelStep = z.infer<typeof ParallelStepSchema>;
+
+// Exactly one mode. Dynamic requires `steps`; static must not use top-level `steps`.
+const parallelModeRefinement = (step: {
+  foreach?: unknown;
+  branches?: unknown;
+  steps?: unknown;
+}): boolean => {
+  const hasForeach = step.foreach !== undefined;
+  const hasBranches = step.branches !== undefined;
+  if (hasForeach === hasBranches) return false;
+  if (hasForeach) return Array.isArray(step.steps) && step.steps.length > 0;
+  return step.steps === undefined;
+};
+const PARALLEL_MODE_REFINEMENT_MESSAGE =
+  'A "parallel" step must use either dynamic fan-out (`foreach` + `steps`) or static ' +
+  '`branches`, but not both. With `foreach`, provide `steps`; with `branches`, omit `steps`.';
+
+export const ParallelStepSchema = ParallelStepObjectSchema.refine(parallelModeRefinement, {
+  message: PARALLEL_MODE_REFINEMENT_MESSAGE,
+});
+export type ParallelStep = z.infer<typeof ParallelStepObjectSchema>;
 
 export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = ParallelStepSchema.extend({
-    branches: z.array(z.object({ name: z.string(), steps: z.array(stepSchema) })),
+  // Populate both the dynamic `steps` body and each static branch's `steps` with
+  // the resolved per-step schema so connector steps validate inside branches too.
+  const schema = ParallelStepObjectSchema.extend({
+    steps: z.array(stepSchema).min(1).optional(),
+    branches: z
+      .array(ParallelBranchSchema.extend({ steps: z.array(stepSchema).min(1) }))
+      .min(1)
+      .optional(),
   });
 
   if (loose) {
@@ -536,7 +663,7 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
     return schema.partial().required({ type: true });
   }
 
-  return schema;
+  return schema.refine(parallelModeRefinement, { message: PARALLEL_MODE_REFINEMENT_MESSAGE });
 };
 
 export const MergeStepConfigSchema = z.object({
@@ -686,7 +813,7 @@ export const BuiltInStepTypes = [
   ...LoopStepTypes,
   IfStepSchema.shape.type.value,
   SwitchStepSchema.shape.type.value,
-  ParallelStepSchema.shape.type.value,
+  ParallelStepObjectSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,

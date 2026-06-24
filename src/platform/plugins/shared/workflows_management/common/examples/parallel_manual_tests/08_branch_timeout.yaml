@@ -1,0 +1,32 @@
+version: '1'
+name: 'Parallel MT-08 · Per-branch timeout'
+description: |
+  All branches call a ~10s slow HTTP endpoint, but each branch has a budget of
+  3s via branch-timeout. Each branch is independently marked "timed_out" once it
+  exceeds its own budget. Uses settled mode so the timeout behavior is observed
+  on every branch rather than short-circuiting after the first.
+
+  Expected results array statuses: all 'timed_out'; aggregate status 'failed'.
+
+  NOTE: uses https://postman-echo.com/delay/N (must be reachable from Kibana).
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  items: ['a', 'b', 'c']
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 3 }
+    mode: settled
+    branch-timeout: '3s'
+    steps:
+      - name: slow_branch
+        type: http
+        with:
+          url: 'https://postman-echo.com/delay/10'
+          method: GET
+  # The parallel step fails (all branches timed out), so the workflow stops here.
+  # Inspect the `fan_out` step execution directly (see README) for results[].

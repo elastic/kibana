@@ -331,6 +331,14 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // prepareForRead rehydrate from ES and overwrite with a stale doc
     // (common when a deferred step completes on resume before flush).
     this.clearEvicted(stepExecutionId);
+    // A step that just (re)wrote its output is no longer a "transiently
+    // rehydrated predecessor": the value is freshly authoritative, not a
+    // copy pulled from ES for one read. Drop it from the transient set so the
+    // deferred transient-release in a later `prepareForRead` cannot re-evict
+    // it and force a stale ES re-read (which returns the pre-flush value). This
+    // matters for re-entrant aggregators (e.g. `parallel`) that finish on a
+    // resume tick and are consumed by the next step before the flush lands.
+    this.forgetTransientRehydration(stepExecutionId);
 
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
@@ -753,6 +761,24 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       this.logger?.debug(
         `Released ${releasedCount} transiently rehydrated step output(s); ${remaining.length} kept resident; total evicted: ${this.evictedOutputIds.size}`
       );
+    }
+  }
+
+  /**
+   * Removes a step execution id from the transient-rehydration set. Called
+   * when the step (re)writes its own output via {@link setStepOutput}: the
+   * value is now freshly authoritative rather than a copy pulled from ES for
+   * a single downstream read, so it must not be subject to the deferred
+   * transient release (which would re-evict it and force a stale ES re-read
+   * before the flush lands).
+   */
+  private forgetTransientRehydration(stepExecutionId: string): void {
+    if (this.transientlyRehydratedIds.length === 0) {
+      return;
+    }
+    const idx = this.transientlyRehydratedIds.indexOf(stepExecutionId);
+    if (idx !== -1) {
+      this.transientlyRehydratedIds.splice(idx, 1);
     }
   }
 

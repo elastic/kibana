@@ -1,0 +1,57 @@
+version: '1'
+name: 'Parallel · Multiple (slow) Elasticsearch searches'
+description: |-
+  Fans out over a list of search specs and runs each Elasticsearch search in its
+  own branch, concurrently. Each branch first waits a per-item "latency" to
+  simulate a slow/long-running query, then runs elasticsearch.search. The
+  aggregate result collects each search's hit count index-aligned.
+
+  Why the wait? A plain search returns in milliseconds, so to *observe*
+  concurrency we simulate query latency with a per-branch wait (waits inside a
+  parallel branch are supported). Remove the `delay` step to run the raw
+  searches back-to-back.
+
+  Index: defaults to `.kibana` (always present). Point `index` at
+  `kibana_sample_data_logs` (install the Sample web logs data set) or any index
+  you have to search real data.
+enabled: true
+tags: ['manual-test', 'parallel', 'elasticsearch']
+consts:
+  searches:
+    - { label: 'all-1', term: '*' }
+    - { label: 'all-2', term: '*' }
+    - { label: 'all-3', term: '*' }
+triggers:
+  - type: manual
+steps:
+  - name: searches
+    type: parallel
+    foreach: '{{ consts.searches }}'
+    concurrency: { max: 3 }
+    branch-timeout: '2m'
+    steps:
+      # Simulate a slow query so the concurrent fan-out is observable. The wait
+      # duration must be a literal (the schema rejects templated durations), so
+      # every branch uses the same simulated latency and runs concurrently.
+      - name: delay
+        type: wait
+        with:
+          duration: '5s'
+      - name: run_search
+        type: elasticsearch.search
+        with:
+          index: .kibana
+          size: 0
+          track_total_hits: true
+          query:
+            query_string:
+              query: '{{ foreach.item.term }}'
+  - name: summarize
+    type: console
+    with:
+      message: |-
+        total={{ steps.searches.output.total }}
+        succeeded={{ steps.searches.output.succeeded }}
+        failed={{ steps.searches.output.failed }}
+        status={{ steps.searches.output.status }}
+        results={{ steps.searches.output.results | json:2 }}

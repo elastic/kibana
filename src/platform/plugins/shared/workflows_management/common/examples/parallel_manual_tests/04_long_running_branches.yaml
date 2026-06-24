@@ -1,0 +1,35 @@
+version: '1'
+name: 'Parallel MT-04 · Long-running branches (multi-tick)'
+description: |
+  Three branches that each call a ~8s slow HTTP endpoint. The branches run
+  longer than a single tick, so the parallel step keeps re-ticking until all
+  three finish, then completes. Verifies the durable-tick loop keeps the step
+  alive across ticks for slow branches and aggregates correctly.
+
+  NOTE: built-in `wait`/`waitForInput` steps are NOT supported inside a parallel
+  branch yet (they depend on the main-loop delay mechanism). True durable
+  suspend-and-resume across task runs requires a custom poll step. This test
+  uses an in-process slow HTTP call instead.
+
+  NOTE: uses https://postman-echo.com/delay/N (must be reachable from Kibana).
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  items: ['p', 'q', 'r']
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 3 }
+    steps:
+      - name: long_branch
+        type: http
+        with:
+          url: 'https://postman-echo.com/delay/8'
+          method: GET
+  - name: done
+    type: console
+    with:
+      message: 'completed -> {{ steps.fan_out.output | json:2 }}'

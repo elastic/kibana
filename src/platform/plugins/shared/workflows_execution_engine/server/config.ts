@@ -10,7 +10,30 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import {
+  DEFAULT_PARALLEL_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_FAN_OUT,
+} from '@kbn/workflows';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
+
+const ParallelConfigSchema = schema.object({
+  /**
+   * Default number of parallel branches that run at once when a `parallel` step
+   * does not set `concurrency`.
+   */
+  defaultConcurrency: schema.number({ defaultValue: DEFAULT_PARALLEL_CONCURRENCY, min: 1 }),
+  /**
+   * Hard ceiling on the requested concurrency for any `parallel` step. Requests
+   * above this value are rejected at validation time and clamped at runtime.
+   */
+  maxConcurrency: schema.number({ defaultValue: DEFAULT_PARALLEL_MAX_CONCURRENCY, min: 1 }),
+  /**
+   * Maximum total number of fan-out items (branches) a single `parallel` step
+   * may create. Runs that exceed this fail with a clear validation error.
+   */
+  maxFanOut: schema.number({ defaultValue: DEFAULT_PARALLEL_MAX_FAN_OUT, min: 1 }),
+});
 
 const EventTriggersConfigSchema = schema.object({
   /**
@@ -36,6 +59,7 @@ const configSchema = schema.object({
    * Maximum depth of nested workflow execution (workflow calling workflow via workflow.execute step).
    */
   maxWorkflowDepth: schema.number({ defaultValue: 10, min: 1 }),
+  parallel: ParallelConfigSchema,
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
@@ -68,6 +92,7 @@ const configSchema = schema.object({
 });
 
 export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;
+export type ParallelConfig = TypeOf<typeof ParallelConfigSchema>;
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {

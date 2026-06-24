@@ -49,6 +49,7 @@ import {
   StepLevelOnFailureNodeSchema,
   WorkflowLevelOnFailureNodeSchema,
 } from './on_failure_nodes';
+import { EnterParallelNodeSchema, ExitParallelNodeSchema } from './parallel_nodes';
 import {
   EnterCaseBranchNodeSchema,
   EnterDefaultBranchNodeSchema,
@@ -76,6 +77,8 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ExitForeachNodeSchema,
   EnterWhileNodeSchema,
   ExitWhileNodeSchema,
+  EnterParallelNodeSchema,
+  ExitParallelNodeSchema,
   EnterRetryNodeSchema,
   ExitRetryNodeSchema,
   EnterContinueNodeSchema,

@@ -1,0 +1,34 @@
+version: '1'
+name: 'Parallel MT-03 · Concurrency window (max 2)'
+description: |
+  Ten branches, each calling a ~3s slow HTTP endpoint, with concurrency max=2.
+  The step advances 2 lanes at a time, so total wall-clock should be roughly
+  ceil(10 / 2) * 3s = ~15s, NOT ~3s (all-at-once) and NOT ~30s (fully
+  sequential). Use this to eyeball that the concurrency window is honored.
+
+  NOTE: uses https://postman-echo.com/delay/N (must be reachable from Kibana).
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  items: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+triggers:
+  - type: manual
+steps:
+  - name: started_at
+    type: console
+    with:
+      message: 'fan-out starting'
+  - name: fan_out
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 2 }
+    steps:
+      - name: slow_branch
+        type: http
+        with:
+          url: 'https://postman-echo.com/delay/3'
+          method: GET
+  - name: finished
+    type: console
+    with:
+      message: 'fan-out finished -> {{ steps.fan_out.output.status }}'

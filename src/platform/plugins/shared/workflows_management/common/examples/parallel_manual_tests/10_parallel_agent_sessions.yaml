@@ -1,0 +1,46 @@
+version: '1'
+name: 'Parallel · Multiple Agent Builder sessions'
+description: |-
+  Fans out over a list of prompts and runs each one as an independent ai.agent
+  session, concurrently, so the aggregate result collects every agent answer
+  index-aligned.
+
+  Notes:
+  - Uses the default Elastic AI agent (agent-id omitted). To target a specific
+    agent, add a top-level `agent-id: "..."` on the step (config fields are NOT
+    Liquid-rendered, so use a static value).
+  - To pin the model, add a top-level `connector-id: "..."` (or `inference-id`).
+  - For structured output, add a `schema:` under `with` and read
+    `steps.agent_sessions.output.results[].output.structured_output`.
+  - Agent runs take time (reasoning + tool calls), which is exactly the
+    concurrency this workflow is meant to exercise.
+enabled: true
+tags: ['manual-test', 'parallel', 'agent-builder']
+consts:
+  prompts:
+    - 'In one sentence, what data sources can you access through your tools?'
+    - 'List up to 3 things you could help an analyst investigate.'
+    - 'Summarize your capabilities in two short bullet points.'
+triggers:
+  - type: manual
+steps:
+  - name: agent_sessions
+    type: parallel
+    foreach: '{{ consts.prompts }}'
+    concurrency: { max: 3 }
+    # Give each agent session room to reason + call tools before timing out.
+    branch-timeout: '5m'
+    steps:
+      - name: run_agent
+        type: ai.agent
+        with:
+          message: '{{ foreach.item }}'
+  - name: summarize
+    type: console
+    with:
+      message: |-
+        total={{ steps.agent_sessions.output.total }}
+        succeeded={{ steps.agent_sessions.output.succeeded }}
+        failed={{ steps.agent_sessions.output.failed }}
+        status={{ steps.agent_sessions.output.status }}
+        results={{ steps.agent_sessions.output.results | json:2 }}

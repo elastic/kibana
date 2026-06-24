@@ -1,0 +1,31 @@
+version: '1'
+name: 'Parallel MT-01 · Basic fan-out (happy path)'
+description: |
+  Smallest happy-path case. Fans out over a literal list and logs each item from
+  its own branch. Verifies branch-per-item execution, per-branch context
+  (foreach.item / foreach.index), and the index-aligned aggregate result.
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  items: ['alpha', 'beta', 'gamma']
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 3 }
+    steps:
+      - name: process_item
+        type: console
+        with:
+          message: 'branch index={{ foreach.index }} item={{ foreach.item }}'
+  - name: summarize
+    type: console
+    with:
+      message: |-
+        total={{ steps.fan_out.output.total }}
+        succeeded={{ steps.fan_out.output.succeeded }}
+        failed={{ steps.fan_out.output.failed }}
+        status={{ steps.fan_out.output.status }}
+        results={{ steps.fan_out.output.results | json:2 }}

@@ -26,6 +26,7 @@ import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { extractParallelStepTelemetry } from '../lib/telemetry/utils/extract_parallel_step_telemetry';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
@@ -150,6 +151,17 @@ export class WorkflowExecutionRuntimeManager {
 
   public getCurrentNodeScope(): StackFrame[] {
     return [...this.workflowExecution.scopeStack];
+  }
+
+  /**
+   * Replaces the global scope stack outright. Unlike {@link enterScope} /
+   * {@link exitScope}, this is not guarded by the current node type. It exists
+   * for control-flow nodes (e.g. the parallel fan-out node) that drive nested
+   * branch steps in-process and must temporarily install — then restore — a
+   * branch's scope so per-branch context (e.g. {{ foreach.item }}) resolves.
+   */
+  public setScopeStack(scopeStack: StackFrame[]): void {
+    this.workflowExecutionState.updateWorkflowExecution({ scopeStack: [...scopeStack] });
   }
 
   /**
@@ -583,5 +595,12 @@ export class WorkflowExecutionRuntimeManager {
       finalStatus,
       outputSizeStats,
     });
+
+    for (const parallelTelemetry of extractParallelStepTelemetry(
+      finalWorkflowExecution,
+      stepExecutions
+    )) {
+      this.telemetryClient.reportParallelStepExecuted(parallelTelemetry);
+    }
   }
 }

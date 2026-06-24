@@ -1,0 +1,27 @@
+version: '1'
+name: 'Parallel MT-06 · settled mode (run every branch)'
+description: |
+  Same shape as MT-05 (every branch fails) but mode: settled. Every branch must
+  run to a terminal state even though they fail; the aggregate status is "failed"
+  but NO branch is skipped. This is the key contrast with fail-fast (MT-05).
+
+  Expected results array statuses: ['failed', 'failed', 'failed', 'failed'].
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  items: ['0', '1', '2', '3']
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 1 }
+    mode: settled
+    steps:
+      - name: always_fail
+        type: workflow.fail
+        with:
+          message: 'forced failure on branch {{ foreach.index }}'
+  # The parallel step's aggregate status is `failed`, so the workflow stops here.
+  # Inspect the `fan_out` step execution directly (see README) for results[].

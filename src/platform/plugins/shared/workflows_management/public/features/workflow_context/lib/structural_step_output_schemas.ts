@@ -17,8 +17,34 @@ import { z } from '@kbn/zod/v4';
  * steps don't have user-provided handlers — they are implemented as dedicated
  * NodeImplementation classes in the execution engine.
  */
+/**
+ * One entry of the index-aligned `results` array a `parallel` step exposes.
+ * Mirrors `ParallelBranchResult` in the execution engine; `output`/`error` are
+ * branch-specific so they stay permissive (`unknown`).
+ */
+const parallelBranchResultSchema = z.object({
+  index: z.number(),
+  key: z.unknown().optional(),
+  status: z.enum(['completed', 'failed', 'skipped', 'timed_out']),
+  output: z.unknown().optional(),
+  error: z.unknown().optional(),
+  startedAt: z.number().optional(),
+  finishedAt: z.number().optional(),
+  durationMs: z.number().optional(),
+});
+
 export const structuralStepOutputSchemas: Record<string, z.ZodSchema> = {
   if: z.object({
     conditionResult: z.boolean(),
+  }),
+  // Aggregate output of a dynamic `parallel` fan-out step. Mirrors
+  // `ParallelStepOutput` in the execution engine so authors get editor
+  // validation/autocomplete for `steps.<id>.output.{status,total,succeeded,...}`.
+  parallel: z.object({
+    results: z.array(parallelBranchResultSchema),
+    total: z.number(),
+    succeeded: z.number(),
+    failed: z.number(),
+    status: z.enum(['completed', 'failed']),
   }),
 };

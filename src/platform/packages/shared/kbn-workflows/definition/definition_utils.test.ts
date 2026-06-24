@@ -72,6 +72,18 @@ describe('collectAllSteps', () => {
     ]);
   });
 
+  it('collects steps inside a dynamic parallel (foreach) body', () => {
+    const steps = [
+      {
+        name: 'par',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+        steps: [waitStep('item_step')],
+      },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual(['par', 'item_step']);
+  });
+
   it('collects steps inside merge', () => {
     const steps = [
       { name: 'mrg', type: 'merge', sources: ['b1'], steps: [waitStep('inner')] },

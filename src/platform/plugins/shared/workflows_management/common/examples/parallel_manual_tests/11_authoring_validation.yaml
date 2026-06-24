@@ -1,0 +1,61 @@
+version: '1'
+name: 'Parallel MT-11 · Authoring validation (editor-only)'
+description: |
+  NOT meant to run successfully — paste into the YAML editor to exercise
+  schema validation and lint warnings. See the README for the exact markers to
+  expect. Uncomment each block one at a time.
+enabled: false
+tags: ['manual-test', 'parallel', 'validation']
+triggers:
+  - type: manual
+steps:
+  # (A) WARNING (lint): parallel step with no `concurrency` cap should surface a
+  # yellow "unbounded fan-out" warning on the `type: parallel` line.
+  - name: no_concurrency
+    type: parallel
+    foreach: '{{ consts.items }}'
+    steps:
+      - name: body
+        type: console
+        with:
+          message: '{{ foreach.item }}'
+
+  # (B) ERROR (schema): concurrency above the ceiling (max 20) must be rejected.
+  # Uncomment to see the schema error on the `concurrency` value.
+  # - name: too_much_concurrency
+  #   type: parallel
+  #   foreach: '{{ consts.items }}'
+  #   concurrency: { max: 999 }
+  #   steps:
+  #     - name: body2
+  #       type: console
+  #       with:
+  #         message: '{{ foreach.item }}'
+
+  # (C) ERROR (schema): empty branch body (steps must have at least one step).
+  # - name: empty_body
+  #   type: parallel
+  #   foreach: '{{ consts.items }}'
+  #   steps: []
+
+  # (D) ERROR (schema): invalid mode value.
+  # - name: bad_mode
+  #   type: parallel
+  #   foreach: '{{ consts.items }}'
+  #   mode: whenever
+  #   steps:
+  #     - name: body4
+  #       type: console
+  #       with:
+  #         message: '{{ foreach.item }}'
+
+  # (E) ERROR (schema): invalid branch-timeout duration.
+  # - name: bad_branch_timeout
+  #   type: parallel
+  #   foreach: '{{ consts.items }}'
+  #   branch-timeout: soon
+  #   steps:
+  #     - name: body5
+  #       type: console
+  #       with:
+  #         message: '{{ foreach.item }}'

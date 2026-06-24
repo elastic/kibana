@@ -12,6 +12,11 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import {
+  DEFAULT_PARALLEL_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_FAN_OUT,
+} from '@kbn/workflows';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
 export const mockContextDependencies = () => ({
@@ -29,6 +34,11 @@ export const mockContextDependencies = () => ({
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
     eviction: {
       minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
+    },
+    parallel: {
+      defaultConcurrency: DEFAULT_PARALLEL_CONCURRENCY,
+      maxConcurrency: DEFAULT_PARALLEL_MAX_CONCURRENCY,
+      maxFanOut: DEFAULT_PARALLEL_MAX_FAN_OUT,
     },
     collectQueueMetrics: false,
   },

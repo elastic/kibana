@@ -9,7 +9,12 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus } from '@kbn/workflows';
+import {
+  DEFAULT_PARALLEL_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_FAN_OUT,
+  ExecutionStatus,
+} from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
@@ -23,6 +28,11 @@ export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEng
   http: { allowedHosts: ['*'] },
   maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
   eviction: { minPayloadSize: new ByteSizeValue(10 * 1024) },
+  parallel: {
+    defaultConcurrency: DEFAULT_PARALLEL_CONCURRENCY,
+    maxConcurrency: DEFAULT_PARALLEL_MAX_CONCURRENCY,
+    maxFanOut: DEFAULT_PARALLEL_MAX_FAN_OUT,
+  },
   collectQueueMetrics: false,
 });
 

@@ -1,0 +1,56 @@
+version: '1'
+name: 'Parallel MT-02 · Dynamic foreach from a previous step'
+description: |
+  Fans out over a runtime list produced by an Elasticsearch search rather than a
+  literal. Verifies that the foreach expression is evaluated at runtime and that
+  one branch runs per hit. Creates and seeds its own index so it is repeatable.
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  indexName: .parallel-mt-fruits
+triggers:
+  - type: manual
+steps:
+  - name: drop_index_if_exists
+    type: elasticsearch.indices.delete
+    on-failure:
+      continue: true
+    with:
+      index: '{{ consts.indexName }}'
+  - name: create_index
+    type: elasticsearch.indices.create
+    with:
+      index: '{{ consts.indexName }}'
+      mappings:
+        properties:
+          name: { type: keyword }
+  - name: seed_data
+    type: elasticsearch.bulk
+    with:
+      index: '{{ consts.indexName }}'
+      refresh: true
+      operations:
+        - { name: 'apple' }
+        - { name: 'banana' }
+        - { name: 'cherry' }
+        - { name: 'date' }
+  - name: search_data
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.indexName }}'
+      size: 10
+      query:
+        match_all: {}
+  - name: fan_out
+    type: parallel
+    foreach: '{{ steps.search_data.output.hits.hits }}'
+    concurrency: { max: 2 }
+    steps:
+      - name: process_hit
+        type: console
+        with:
+          message: 'index={{ foreach.index }} doc={{ foreach.item._source.name }}'
+  - name: summarize
+    type: console
+    with:
+      message: 'fan_out over search hits -> {{ steps.fan_out.output | json:2 }}'

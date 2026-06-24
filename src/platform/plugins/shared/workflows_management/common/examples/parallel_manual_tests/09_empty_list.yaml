@@ -1,0 +1,26 @@
+version: '1'
+name: 'Parallel MT-09 · Empty fan-out list'
+description: |
+  Edge case: foreach evaluates to an empty array. The parallel step must finish
+  immediately with total=0, status=completed, and an empty results array; the
+  branch body must never run, and the workflow continues normally.
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  items: []
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: '{{ consts.items }}'
+    steps:
+      - name: never_runs
+        type: console
+        with:
+          message: 'this should never appear in logs'
+  - name: report
+    type: console
+    with:
+      message: |-
+        empty fan-out -> total={{ steps.fan_out.output.total }} status={{ steps.fan_out.output.status }}

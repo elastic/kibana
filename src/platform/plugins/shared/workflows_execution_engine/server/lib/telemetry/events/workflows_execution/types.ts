@@ -124,6 +124,11 @@ export enum WorkflowExecutionTelemetryEventTypes {
    * When a trigger event is dispatched (emitEvent called) and workflows are resolved/scheduled.
    */
   TriggerEventDispatched = 'workflows_trigger_event_dispatched',
+  /**
+   * When a parallel (dynamic fan-out) step reaches a terminal state.
+   * Captures adoption, fan-out size, concurrency, rejection rate, and mode split.
+   */
+  ParallelStepExecuted = 'workflows_execution_parallel_step_executed',
 }
 
 /**
@@ -573,6 +578,51 @@ export interface TriggerEventDispatchedParams {
 }
 
 /**
+ * Telemetry event reported when a parallel (dynamic fan-out) step terminates.
+ * One event per parallel step execution, enabling adoption and shape analysis.
+ */
+export interface ParallelStepExecutedParams {
+  eventName: string;
+  /** The workflow ID that owns the parallel step. */
+  workflowId: string;
+  /** The space ID. */
+  spaceId: string;
+  /** The parallel step's id within the workflow. */
+  stepId: string;
+  /** Whether this is a test run. */
+  isTestRun: boolean;
+  /** Total number of fan-out branches the step created. */
+  total: number;
+  /** Branches that completed successfully. */
+  succeeded: number;
+  /** Branches that failed (includes timed-out branches). */
+  failed: number;
+  /** Branches that never started because of a fail-fast short-circuit. */
+  skipped: number;
+  /** Branches terminated by a timeout (overall or per-branch). */
+  timedOut: number;
+  /** Aggregate terminal status of the step. */
+  status: 'completed' | 'failed';
+  /** Configured concurrency cap actually applied (after clamping). */
+  concurrency: number;
+  /** Whether waiting branches consume a concurrency slot. */
+  countWaiting: boolean;
+  /** Failure-handling mode: 'fail-fast' (default) or 'settled'. */
+  mode: 'fail-fast' | 'settled';
+  /** Whether the author set an explicit concurrency value. */
+  hasExplicitConcurrency: boolean;
+  /** Whether an overall step timeout was configured. */
+  hasTimeout: boolean;
+  /** Whether a per-branch timeout was configured. */
+  hasBranchTimeout: boolean;
+  /**
+   * Fraction of branches that did not complete successfully (failed + skipped +
+   * timed out) over total, in the range [0, 1]. 0 when there were no branches.
+   */
+  rejectionRate: number;
+}
+
+/**
  * Union type of all workflow execution telemetry event parameters
  */
 export type WorkflowExecutionTelemetryEventParams =
@@ -580,7 +630,8 @@ export type WorkflowExecutionTelemetryEventParams =
   | WorkflowExecutionFailedParams
   | WorkflowExecutionCancelledParams
   | EventDrivenExecutionSuppressedParams
-  | TriggerEventDispatchedParams;
+  | TriggerEventDispatchedParams
+  | ParallelStepExecutedParams;
 
 /**
  * Maps each workflow execution event type to its corresponding params type.
@@ -592,4 +643,5 @@ export interface WorkflowExecutionTelemetryEventsMap {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled]: WorkflowExecutionCancelledParams;
   [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]: EventDrivenExecutionSuppressedParams;
   [WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched]: TriggerEventDispatchedParams;
+  [WorkflowExecutionTelemetryEventTypes.ParallelStepExecuted]: ParallelStepExecutedParams;
 }

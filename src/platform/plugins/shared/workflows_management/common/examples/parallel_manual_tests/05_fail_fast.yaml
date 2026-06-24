@@ -1,0 +1,28 @@
+version: '1'
+name: 'Parallel MT-05 · fail-fast (default mode)'
+description: |
+  Sequential window (max=1) so branch order is deterministic. Every branch fails
+  via workflow.fail; under the default fail-fast mode, once the first branch
+  fails the remaining branches must NOT start and are reported as "skipped".
+  The parallel step's aggregate status is "failed".
+
+  Expected results array statuses: ['failed', 'skipped', 'skipped', 'skipped'].
+enabled: true
+tags: ['manual-test', 'parallel']
+consts:
+  items: ['0', '1', '2', '3']
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 1 }
+    # mode omitted -> defaults to fail-fast
+    steps:
+      - name: always_fail
+        type: workflow.fail
+        with:
+          message: 'forced failure on branch {{ foreach.index }}'
+  # The parallel step fails, so the workflow stops here. Inspect the failed
+  # `fan_out` step execution directly (see README) for the aggregate/results.

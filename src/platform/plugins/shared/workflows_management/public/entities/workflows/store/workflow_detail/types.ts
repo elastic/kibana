@@ -81,6 +81,22 @@ export interface ComputedData {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
   workflowDefinition?: WorkflowYaml | null;
+  /**
+   * Set when the workflow definition parsed but compiling it into an execution
+   * graph failed (e.g. an unsupported construct inside a parallel branch).
+   * Graph-dependent computation is skipped (`workflowGraph` is undefined) but
+   * the rest of the computed data stays intact so YAML-only validators keep
+   * working and the editor can surface a precise, step-anchored error instead
+   * of a generic "document not loaded" message.
+   */
+  graphBuildError?: GraphBuildErrorInfo;
+}
+
+/** Serializable details of a graph-build failure (see {@link ComputedData}). */
+export interface GraphBuildErrorInfo {
+  message: string;
+  /** Step id (workflow `name`) the error relates to, when the builder knew it. */
+  stepId?: string;
 }
 
 /**

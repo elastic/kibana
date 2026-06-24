@@ -16,9 +16,11 @@ import { collectAllVariables } from './collect_all_variables';
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
+import { validateGraphBuild } from './validate_graph_build';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
+import { validateParallelFanOut } from './validate_parallel_fan_out';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateStepProperties } from './validate_step_properties';
 import { validateTriggerConditions } from './validate_trigger_conditions';
@@ -29,6 +31,7 @@ import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workf
 import {
   selectConnectors,
   selectEditorWorkflowLookup,
+  selectGraphBuildError,
   selectIsWorkflowTab,
   selectWorkflowDefinition,
   selectWorkflows,
@@ -83,6 +86,7 @@ export function useYamlValidation(
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
+  const graphBuildError = useSelector(selectGraphBuildError);
   const lineCounter = useSelector(selectYamlLineCounter);
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
@@ -166,6 +170,10 @@ export function useYamlValidation(
         ...liquidScalarResults.filter((result) => result.owner === 'liquid-template-validation'),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
+        // Surface graph-build failures (valid YAML that compiles to an
+        // unsupported graph, e.g. waitForInput inside a parallel branch) as a
+        // precise, step-anchored marker instead of the generic fallback error.
+        ...validateGraphBuild(graphBuildError, workflowLookup, lineCounter),
         ...(stepPropertyItems ? await validateStepProperties(stepPropertyItems) : []),
         // Lookup-backed validators run sequentially (each await blocks the next).
         // ES|QL runs after step-property validation so property errors surface first
@@ -173,6 +181,7 @@ export function useYamlValidation(
         ...(workflowLookup && lineCounter
           ? [
               ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
+              ...validateParallelFanOut(workflowLookup, lineCounter),
               ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
               ...validateIfConditions(workflowLookup, lineCounter),
               ...(await validateEsqlSteps(
@@ -230,6 +239,7 @@ export function useYamlValidation(
     lineCounter,
     workflowDefinition,
     workflowGraph,
+    graphBuildError,
     yamlDocument,
     application,
     isWorkflowTab,

@@ -12,7 +12,12 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import {
+  DEFAULT_PARALLEL_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_FAN_OUT,
+  ExecutionStatus,
+} from '@kbn/workflows';
 import { StepExecutionRepositoryMock, WorkflowExecutionRepositoryMock } from './mocks';
 import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
 import { TaskManagerMock } from './mocks/task_manager.mock';
@@ -57,6 +62,11 @@ export class WorkflowRunFixture {
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb default
     eviction: {
       minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb default
+    },
+    parallel: {
+      defaultConcurrency: DEFAULT_PARALLEL_CONCURRENCY,
+      maxConcurrency: DEFAULT_PARALLEL_MAX_CONCURRENCY,
+      maxFanOut: DEFAULT_PARALLEL_MAX_FAN_OUT,
     },
     collectQueueMetrics: false,
   };
