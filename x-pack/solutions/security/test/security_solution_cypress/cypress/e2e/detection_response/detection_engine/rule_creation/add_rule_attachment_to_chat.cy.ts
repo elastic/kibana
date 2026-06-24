@@ -42,6 +42,8 @@ describe(
       // "Add to chat" is enabled only for ES|QL rules, so switch the form to the ES|QL rule type.
       selectEsqlRuleType();
 
+      // Selecting the rule type scrolls the form down; bring the header button back into view.
+      cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).scrollIntoView();
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
       assertAgentBuilderSidebarIsOpen();
