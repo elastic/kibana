@@ -119,5 +119,13 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
       ),
   });
 
-  return <EuiDescriptionList compressed type="column" listItems={items} />;
+  return (
+    <EuiDescriptionList
+      compressed
+      type="column"
+      columnWidths={[1, 3]}
+      descriptionProps={{ style: { minWidth: 0 } }}
+      listItems={items}
+    />
+  );
 };
