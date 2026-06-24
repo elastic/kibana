@@ -797,6 +797,7 @@ export class AlertingPlugin {
         getMaintenanceWindowClient,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
+      actionSchedulerYieldAfterMs: this.config.rules.run.actionSchedulerYieldAfterMs,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       rulesSettingsService: new RulesSettingsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,

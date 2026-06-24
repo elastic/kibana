@@ -193,6 +193,7 @@ export const getDefaultSchedulerContext = <
     },
     actionsPlugin: actionsPluginMock,
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+    actionSchedulerYieldAfterMs: 50,
   } as unknown as TaskRunnerContext,
   apiKey,
   ruleConsumer: 'rule-consumer',

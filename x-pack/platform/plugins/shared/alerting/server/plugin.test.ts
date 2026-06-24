@@ -164,7 +164,7 @@ describe('Alerting Plugin', () => {
             maxScheduledPerMinute: 10000,
             isUsingSecurity: false,
             minimumScheduleInterval: { value: '1m', enforce: false },
-            run: { alerts: { max: 1000 }, actions: { max: 1000 } },
+            run: { alerts: { max: 1000 }, actions: { max: 1000 }, actionSchedulerYieldAfterMs: 50 },
             apiKeyType: 'es',
           });
 

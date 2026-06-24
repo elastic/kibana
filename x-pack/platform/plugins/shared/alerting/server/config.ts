@@ -61,6 +61,10 @@ const rulesSchema = schema.object({
       max: schema.number({ defaultValue: DEFAULT_MAX_ALERTS }),
     }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
+    // Undocumented escape-hatch: milliseconds the action-parameter building loop
+    // may hold the event loop before yielding to allow other I/O and Task Manager
+    // heartbeats to run. Requires a process restart to take effect.
+    actionSchedulerYieldAfterMs: schema.number({ defaultValue: 50, min: 0 }),
   }),
   apiKeyType: schema.oneOf([schema.literal('es'), schema.literal('uiam')], {
     defaultValue: 'es',

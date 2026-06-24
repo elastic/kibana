@@ -188,6 +188,7 @@ export interface TaskRunnerContext {
   logger: Logger;
   maintenanceWindowsService: MaintenanceWindowsService;
   maxAlerts: number;
+  actionSchedulerYieldAfterMs: number;
   ruleTypeRegistry: RuleTypeRegistry;
   rulesSettingsService: RulesSettingsService;
   apiKeyType: ApiKeyType;
