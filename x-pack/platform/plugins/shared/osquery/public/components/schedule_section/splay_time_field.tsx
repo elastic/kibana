@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiCallOut, EuiFieldNumber, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiCallOut,
+  EuiFieldNumber,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { EuiSelectOption } from '@elastic/eui';
 import { MAX_SPLAY_SECONDS } from '../../../common/schedule';
 import {
@@ -48,6 +56,28 @@ const UNIT_OPTIONS: EuiSelectOption[] = [
   { value: 'hours', text: SPLAY_UNIT_HOURS },
 ];
 
+// Intentional override on the EUI select
+const unitSelectAppendCss = (borderRadius: string) => css`
+  && .euiFormControlLayout__append {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  && .euiFormControlLayout__append,
+  && .euiFormControlLayout__append .euiFormControlLayout,
+  && .euiFormControlLayout__append .euiFormControlLayout__childrenWrapper,
+  && .euiFormControlLayout__append .euiSelect {
+    block-size: 100%;
+  }
+
+  && .euiFormControlLayout__append .euiSelect {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    border-start-end-radius: ${borderRadius};
+    border-end-end-radius: ${borderRadius};
+  }
+`;
+
 const isSplayUnit = (raw: string): raw is SplayUnit =>
   raw === 'seconds' || raw === 'minutes' || raw === 'hours';
 
@@ -58,6 +88,12 @@ export const SplayTimeField = ({
   isRecurrence,
   disabled,
 }: SplayTimeFieldProps) => {
+  const { euiTheme } = useEuiTheme();
+  const appendCss = useMemo(
+    () => unitSelectAppendCss(euiTheme.border.radius.medium),
+    [euiTheme.border.radius.medium]
+  );
+
   const handleToggle = useCallback(
     (next: boolean) => {
       // Touching the toggle invalidates any preserved compound string from the
@@ -115,6 +151,7 @@ export const SplayTimeField = ({
           <EuiFormRow
             isInvalid={isInvalid}
             error={isInvalid ? SPLAY_MAX_ERROR : undefined}
+            css={appendCss}
             fullWidth
           >
             <EuiFieldNumber
