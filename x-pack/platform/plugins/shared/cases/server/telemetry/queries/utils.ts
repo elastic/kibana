@@ -14,7 +14,10 @@ import {
   FILE_ATTACHMENT_TYPE,
   MAX_OBSERVABLES_PER_CASE,
 } from '../../../common/constants';
-import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants/observables';
+import {
+  AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
+  OBSERVABLE_TYPES_BUILTIN_KEYS,
+} from '../../../common/constants/observables';
 import type {
   CaseAggregationResult,
   Buckets,
@@ -225,7 +228,7 @@ export const getObservablesTotalsByType = (
       const type = OBSERVABLE_TYPES_BUILTIN_KEYS.includes(typeBucket.key) ? 'default' : 'custom';
       const count = typeBucket.doc_count;
 
-      if (description === 'Auto extract observables') {
+      if (description === AUTO_EXTRACT_OBSERVABLE_DESCRIPTION) {
         result.auto[type] += count;
       } else {
         result.manual[type] += count;
