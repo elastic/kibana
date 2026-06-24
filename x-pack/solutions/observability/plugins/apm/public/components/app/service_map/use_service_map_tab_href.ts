@@ -37,9 +37,7 @@ export type ServiceMapTab = 'alerts' | 'overview';
  * Returns a stable `(serviceName) => href` builder for a given service-detail
  * tab from the current map route. `kuery` is stripped — see module header.
  */
-export function useServiceMapTabHrefBuilder(
-  tab: ServiceMapTab
-): (serviceName: string) => string {
+export function useServiceMapTabHrefBuilder(tab: ServiceMapTab): (serviceName: string) => string {
   const apmRouter = useApmRouter();
   const routePath = useApmRoutePath();
   const { query } = useAnyOfApmParams(
