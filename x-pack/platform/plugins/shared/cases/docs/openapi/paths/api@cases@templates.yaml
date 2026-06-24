@@ -22,6 +22,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/get_case_templates_response.yaml'
+          examples:
+            getCaseTemplatesResponse:
+              $ref: '../components/examples/get_case_templates_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:

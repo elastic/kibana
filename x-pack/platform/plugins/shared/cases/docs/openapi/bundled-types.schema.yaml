@@ -889,6 +889,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/get_case_templates_response'
+              examples:
+                getCaseTemplatesResponse:
+                  $ref: '#/components/examples/get_case_templates_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -916,6 +919,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/template_v2_response'
+              examples:
+                getCaseTemplateResponse:
+                  $ref: '#/components/examples/get_case_template_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -931,6 +937,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
   /api/cases/{caseId}:
     get:
       summary: Get case information
@@ -4440,6 +4449,41 @@ components:
         - security
         - tag 1
         - tag 2
+    get_case_templates_response:
+      summary: A paginated list of case templates.
+      value:
+        page: 1
+        perPage: 20
+        total: 1
+        templates:
+          - templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+            name: My Template
+            owner: cases
+            definition: {}
+            definitionString: 'fields: []'
+            templateVersion: 1
+            deletedAt: null
+            isLatest: true
+            latestVersion: 1
+            fieldSearchMatches: false
+    get_case_template_response:
+      summary: A case template.
+      value:
+        templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+        name: My Template
+        owner: cases
+        definition: {}
+        definitionString: 'fields: []'
+        templateVersion: 1
+        deletedAt: null
+        isLatest: true
+        latestVersion: 1
+    response_404:
+      summary: The requested resource was not found.
+      value:
+        error: Not Found
+        message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
+        statusCode: 404
     get_case_response:
       summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
