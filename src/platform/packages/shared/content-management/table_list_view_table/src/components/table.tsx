@@ -388,7 +388,7 @@ export function Table<T extends UserContentCommonSchema>({
           itemId="id"
           items={visibleItems}
           columns={tableColumns}
-          pagination={pagination}
+          pagination={visibleItems.length > 0 ? pagination : false}
           loading={isFetchingItems}
           noItemsMessage={isFetchingItems ? '' : noItemsMessage}
           selection={selection}
