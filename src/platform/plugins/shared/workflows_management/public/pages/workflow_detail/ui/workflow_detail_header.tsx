@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiButtonIcon,
   EuiCheckbox,
   EuiFlexGroup,
@@ -54,10 +53,6 @@ import {
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
-  useWorkflowUrlState,
-  type WorkflowUrlStateTabType,
-} from '../../../hooks/use_workflow_url_state';
-import {
   getSaveWorkflowTooltipContent,
   getTestRunTooltipContent,
   ManagedWorkflowBadge,
@@ -93,28 +88,13 @@ const Translations = {
   }),
 };
 
-const ButtonGroupOptions: EuiButtonGroupOptionProps[] = [
-  {
-    id: 'workflow',
-    label: i18n.translate('workflows.workflowDetailHeader.workflow', {
-      defaultMessage: 'Workflow',
-    }),
-    iconType: 'grid',
-  },
-  {
-    id: 'executions',
-    label: i18n.translate('workflows.workflowDetailHeader.executions', {
-      defaultMessage: 'Executions',
-    }),
-    iconType: 'play',
-  },
-];
 
 export interface WorkflowDetailHeaderProps {
   isLoading: boolean;
   // TODO: manage it in a workflow state context
   highlightDiff: boolean;
   setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
+  onOpenExecutionList?: () => void;
 }
 
 interface GetSaveWorkflowButtonDisabledParams {
@@ -145,30 +125,13 @@ const getSaveWorkflowButtonDisabled = ({
   !hasUnsavedChanges;
 
 export const WorkflowDetailHeader = React.memo(
-  ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
+  ({ isLoading, highlightDiff, setHighlightDiff, onOpenExecutionList }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
     const { application } = useKibana().services;
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
     const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
       useWorkflowsCapabilities();
-
-    const workflowDetailTabButtonOptions = useMemo(
-      () =>
-        ButtonGroupOptions.map((option) =>
-          option.id === 'executions' && !canReadWorkflowExecution
-            ? {
-                ...option,
-                isDisabled: true,
-                title: '',
-                toolTipContent: executionsTabReadExecutionDisabledTooltip,
-              }
-            : option
-        ),
-      [canReadWorkflowExecution]
-    );
-
-    const { activeTab, setActiveTab } = useWorkflowUrlState();
 
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
@@ -335,28 +298,6 @@ export const WorkflowDetailHeader = React.memo(
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageHeaderSection>
-            {workflowId && (
-              <EuiPageHeaderSection
-                css={{
-                  flexBasis: '15%',
-                }}
-              >
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      buttonSize="compressed"
-                      color="primary"
-                      options={workflowDetailTabButtonOptions}
-                      idSelected={activeTab}
-                      legend="Switch between workflow and executions"
-                      type="single"
-                      hasAriaDisabled={!canReadWorkflowExecution}
-                      onChange={(id) => setActiveTab(id as WorkflowUrlStateTabType)}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPageHeaderSection>
-            )}
             <EuiPageHeaderSection
               css={{
                 flexBasis: '40%',
@@ -391,6 +332,27 @@ export const WorkflowDetailHeader = React.memo(
                     })}
                   />
                 </EuiToolTip>
+                {workflowId && onOpenExecutionList && (
+                  <EuiToolTip
+                    content={
+                      !canReadWorkflowExecution
+                        ? executionsTabReadExecutionDisabledTooltip
+                        : undefined
+                    }
+                  >
+                    <EuiButtonEmpty
+                      size="s"
+                      iconType="play"
+                      onClick={onOpenExecutionList}
+                      disabled={!canReadWorkflowExecution}
+                      data-test-subj="openExecutionListButton"
+                    >
+                      {i18n.translate('workflows.workflowDetailHeader.executions', {
+                        defaultMessage: 'Executions',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
+                )}
                 <EuiFlexItem grow={false} css={styles.separator} />
                 <EuiToolTip content={runWorkflowTooltipContent}>
                   <EuiButtonIcon

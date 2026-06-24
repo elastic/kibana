@@ -79,9 +79,28 @@ export const StepIcon = React.memo(
         workflowsExtensions.getStepDefinition(stepType) ??
         findStepDefinitionByBaseType(stepType, workflowsExtensions);
       if (stepDefinition?.icon) {
+        const statusColor = shouldApplyColorToIcon
+          ? getExecutionStatusColors(euiTheme, executionStatus).color
+          : undefined;
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={stepDefinition.icon} size="m" {...rest} aria-hidden={true} />
+            <EuiIcon
+              type={stepDefinition.icon}
+              size="m"
+              color={statusColor}
+              css={
+                shouldApplyColorToIcon &&
+                executionStatus !== ExecutionStatus.COMPLETED &&
+                css`
+                  & * {
+                    fill: ${statusColor};
+                    color: ${statusColor};
+                  }
+                `
+              }
+              {...rest}
+              aria-hidden={true}
+            />
           </Suspense>,
           title
         );
@@ -89,9 +108,28 @@ export const StepIcon = React.memo(
 
       const connectorSpecIcon = getConnectorSpecIcon(stepType);
       if (connectorSpecIcon) {
+        const statusColor = shouldApplyColorToIcon
+          ? getExecutionStatusColors(euiTheme, executionStatus).color
+          : undefined;
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={connectorSpecIcon} size="m" {...rest} aria-hidden={true} />
+            <EuiIcon
+              type={connectorSpecIcon}
+              size="m"
+              color={statusColor}
+              css={
+                shouldApplyColorToIcon &&
+                executionStatus !== ExecutionStatus.COMPLETED &&
+                css`
+                  & * {
+                    fill: ${statusColor};
+                    color: ${statusColor};
+                  }
+                `
+              }
+              {...rest}
+              aria-hidden={true}
+            />
           </Suspense>,
           title
         );
@@ -99,9 +137,28 @@ export const StepIcon = React.memo(
 
       const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
       if (actionTypeIcon) {
+        const statusColor = shouldApplyColorToIcon
+          ? getExecutionStatusColors(euiTheme, executionStatus).color
+          : undefined;
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={actionTypeIcon} size="m" {...rest} aria-hidden={true} />
+            <EuiIcon
+              type={actionTypeIcon}
+              size="m"
+              color={statusColor}
+              css={
+                shouldApplyColorToIcon &&
+                executionStatus !== ExecutionStatus.COMPLETED &&
+                css`
+                  & * {
+                    fill: ${statusColor};
+                    color: ${statusColor};
+                  }
+                `
+              }
+              {...rest}
+              aria-hidden={true}
+            />
           </Suspense>,
           title
         );

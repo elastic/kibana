@@ -31,12 +31,12 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
-  ExecutionStatus,
   WorkflowExecutionDto,
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
 import {
+  ExecutionStatus,
   isDangerousStatus,
   isFailedBeforeSteps,
   isInProgressStatus,
@@ -46,7 +46,6 @@ import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree, injectChildWorkflowSteps } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import {
-  buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
@@ -64,8 +63,16 @@ function convertTreeToEuiTreeViewItems(
 ): EuiTreeViewProps['items'] {
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
-    const status = stepExecution?.status;
-    const selected = selectedId === stepExecution?.id;
+    const status = stepExecution?.status ?? item.status;
+
+    // If-branch nodes have no real step execution; give them a stable virtual ID
+    const ifBranchVirtualId =
+      item.stepType === 'if-branch' && !stepExecution
+        ? `if-branch:${item.stepId}:${item.executionIndex}`
+        : null;
+    const selected = ifBranchVirtualId
+      ? selectedId === ifBranchVirtualId
+      : selectedId === stepExecution?.id;
 
     const stepId = stepExecution?.stepId ?? item.stepId;
     const stepType = stepExecution?.stepType ?? item.stepType;
@@ -81,6 +88,8 @@ function convertTreeToEuiTreeViewItems(
       // Don't allow selecting skeleton steps
       if (stepExecution?.id) {
         onSelectStepExecution(stepExecution.id);
+      } else if (ifBranchVirtualId) {
+        onSelectStepExecution(ifBranchVirtualId);
       }
     };
 
@@ -88,7 +97,7 @@ function convertTreeToEuiTreeViewItems(
     const isTriggerPseudoStep = stepType.startsWith('trigger_');
 
     return {
-      id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
+      id: item.stepExecutionId ?? ifBranchVirtualId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
       css: [
         getStatusCss({ status, selected }, euiTheme),
         // Don't allow selecting skeleton steps using css, as we don't have a 'disabled' prop on the tree view item
@@ -126,6 +135,7 @@ function convertTreeToEuiTreeViewItems(
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
           usage={stepExecution?.usage}
           onClick={selectStepExecution}
+          attemptNumber={item.attemptNumber}
         />
       ),
       children:
@@ -141,7 +151,7 @@ function convertTreeToEuiTreeViewItems(
       callback:
         // collapse/expand the tree view item when the button is clicked
         () => {
-          let toOpen = item.stepExecutionId;
+          let toOpen = item.stepExecutionId ?? ifBranchVirtualId;
           if (!toOpen && item.children.length) {
             toOpen = item.children[0].stepExecutionId;
           }
@@ -162,7 +172,36 @@ export interface WorkflowStepExecutionTreeProps {
   selectedId: string | null;
   childExecutionsMap?: ChildWorkflowExecutionsMap;
   isLoadingChildExecutions?: boolean;
+  searchQuery?: string;
 }
+
+const filterStepTree = (
+  items: StepExecutionTreeItem[],
+  query: string
+): StepExecutionTreeItem[] => {
+  const lower = query.toLowerCase();
+  return items.reduce<StepExecutionTreeItem[]>((acc, item) => {
+    const filteredChildren = filterStepTree(item.children, query);
+    if (item.stepId.toLowerCase().includes(lower) || filteredChildren.length > 0) {
+      acc.push({ ...item, children: filteredChildren });
+    }
+    return acc;
+  }, []);
+};
+
+// Flatten if-branch container nodes: promote each branch to a leaf and hoist its
+// children to the same level. Status is derived from whether the branch was taken.
+const flattenIfBranches = (items: StepExecutionTreeItem[]): StepExecutionTreeItem[] =>
+  items.flatMap((item) => {
+    if (item.stepType === 'if-branch') {
+      const branchTaken = item.children.some((c) => c.stepExecutionId != null);
+      return [
+        { ...item, status: branchTaken ? ExecutionStatus.COMPLETED : ExecutionStatus.SKIPPED, children: [] },
+        ...flattenIfBranches(item.children),
+      ];
+    }
+    return [{ ...item, children: flattenIfBranches(item.children) }];
+  });
 
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
 
@@ -174,6 +213,7 @@ export const WorkflowStepExecutionTree = ({
   selectedId,
   childExecutionsMap,
   isLoadingChildExecutions,
+  searchQuery,
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
@@ -281,12 +321,6 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap.set(childStep.id, childStep);
     }
 
-    const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
-    if (overviewPseudoStep) {
-      const executionOverview = buildOverviewStepExecutionFromContext(execution);
-      stepExecutionMap.set('__overview', executionOverview);
-    }
-
     const triggerPseudoStep =
       stepExecutionsTree.find((item) => item.stepType === '__trigger') ??
       stepExecutionsTree.find((item) => item.stepType === '__inputs');
@@ -299,51 +333,27 @@ export const WorkflowStepExecutionTree = ({
         triggerPseudoStep.stepType = triggerExecution.stepType ?? '';
       }
     }
+    const visibleTree = stepExecutionsTree.filter((item) => item.stepType !== '__overview');
+    const filteredTree = searchQuery ? filterStepTree(visibleTree, searchQuery) : visibleTree;
+    const flatTree = flattenIfBranches(filteredTree);
+
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
-      stepExecutionsTree,
+      flatTree,
       stepExecutionMap,
       euiTheme,
       selectedId,
       onStepExecutionClick
     );
 
-    const overviewItem = items.find(
-      (item) => stepExecutionMap.get(item.id)?.stepType === '__overview'
-    );
-    const regularItems = items.filter(
-      (item) => stepExecutionMap.get(item.id)?.stepType !== '__overview'
-    );
-
     return (
       <>
         <div css={styles.treeViewContainer}>
-          {overviewItem && (
-            <>
-              <EuiTreeView
-                showExpansionArrows
-                expandByDefault
-                items={[overviewItem]}
-                aria-label={i18n.translate(
-                  'workflows.WorkflowStepExecutionTree.overviewAriaLabel',
-                  {
-                    defaultMessage: 'Execution overview',
-                  }
-                )}
-              />
-              <EuiHorizontalRule
-                margin="none"
-                css={{ marginTop: euiTheme.size.xs, marginBottom: euiTheme.size.xs }}
-              />
-            </>
-          )}
-
-          {/* Regular steps */}
-          {regularItems.length > 0 && (
+          {items.length > 0 && (
             <EuiTreeView
               data-test-subj="workflowStepExecutionTree"
               showExpansionArrows
               expandByDefault
-              items={regularItems}
+              items={items}
               aria-label={i18n.translate(
                 'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
                 {

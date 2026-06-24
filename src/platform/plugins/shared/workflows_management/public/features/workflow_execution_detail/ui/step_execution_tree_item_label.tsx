@@ -31,6 +31,7 @@ export interface StepExecutionTreeItemLabelProps {
   usage?: WorkflowTokenUsage;
   selected: boolean;
   onClick?: React.MouseEventHandler;
+  attemptNumber?: number;
 }
 
 export function StepExecutionTreeItemLabel({
@@ -40,6 +41,7 @@ export function StepExecutionTreeItemLabel({
   usage,
   selected,
   onClick,
+  attemptNumber,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
   // Trigger pseudo-steps are not real steps, they are used to display the trigger context
@@ -65,7 +67,14 @@ export function StepExecutionTreeItemLabel({
           isInactiveStatus && styles.inactiveStepName,
         ]}
       >
-        <span data-test-subj="workflowStepName">{stepId}</span>
+        <span data-test-subj="workflowStepName">
+          {attemptNumber !== undefined && (
+            <span css={[styles.attemptNumber, isDangerous && styles.dangerousStepName]}>
+              #{attemptNumber}{' '}
+            </span>
+          )}
+          {stepId}
+        </span>
         {status === ExecutionStatus.SKIPPED && (
           <>
             {' '}
@@ -133,10 +142,9 @@ const componentStyles = {
     css({
       color: euiTheme.colors.textDanger,
     }),
-  executionIndex: ({ euiTheme }: UseEuiTheme) =>
+  attemptNumber: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.textDisabled,
-      display: 'inline-block',
-      marginLeft: euiTheme.size.xs,
+      color: euiTheme.colors.textSubdued,
+      fontVariantNumeric: 'tabular-nums',
     }),
 };
