@@ -99,7 +99,7 @@ export const ServiceNode = memo(
 
       return {
         borderColor: hasScore
-          ? getSeverityColor(score)
+          ? getSeverityColor(score, euiTheme)
           : selected
           ? euiTheme.colors.primary
           : euiTheme.colors.mediumShade,

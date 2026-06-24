@@ -12,6 +12,7 @@ import { ServiceMapGraph } from './graph';
 import { getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import { MOCK_EUI_THEME, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -353,7 +354,9 @@ describe('ServiceMapGraph - MiniMap', () => {
         type: 'service',
       };
 
-      expect(nodeColorFn(scoredNode)).toBe(getSeverityColor(90));
+      expect(nodeColorFn(scoredNode)).toBe(
+        getSeverityColor(90, MOCK_EUI_THEME_FOR_USE_THEME as unknown as EuiThemeComputed)
+      );
     });
   });
 });

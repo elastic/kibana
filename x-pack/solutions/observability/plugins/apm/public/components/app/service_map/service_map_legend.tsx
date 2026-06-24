@@ -319,7 +319,11 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           {ANOMALY_SCORE_LEVELS.map(({ score, label }) => (
             <EuiFlexItem key={label}>
               <EuiHealth
-                color={score === undefined ? euiTheme.colors.textSubdued : getSeverityColor(score)}
+                color={
+                  score === undefined
+                    ? euiTheme.colors.textSubdued
+                    : getSeverityColor(score, euiTheme)
+                }
               >
                 <EuiText size="xs">{label}</EuiText>
               </EuiHealth>

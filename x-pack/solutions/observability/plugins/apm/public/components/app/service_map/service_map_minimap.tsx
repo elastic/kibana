@@ -22,7 +22,7 @@ export function ServiceMapMinimap() {
       if (isServiceNodeData(node.data)) {
         const { anomalyScore } = node.data.serviceAnomalyStats ?? {};
         if (anomalyScore !== undefined) {
-          return getSeverityColor(anomalyScore);
+          return getSeverityColor(anomalyScore, euiTheme);
         }
         return euiTheme.colors.primary;
       }

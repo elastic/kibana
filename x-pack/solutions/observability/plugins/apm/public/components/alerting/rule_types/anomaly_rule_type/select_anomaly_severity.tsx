@@ -8,15 +8,19 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText, useEuiTheme } from '@elastic/eui';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import type { AnomalyAlertSeverityType } from '../../../../../common/rules/apm_rule_types';
 import { ANOMALY_ALERT_SEVERITY_TYPES } from '../../../../../common/rules/apm_rule_types';
 
 export function AnomalySeverity({ type }: { type: AnomalyAlertSeverityType }) {
+  const { euiTheme } = useEuiTheme();
   const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find((option) => option.type === type)!;
   return (
-    <EuiHealth color={getSeverityColor(selectedOption.threshold)} style={{ lineHeight: 'inherit' }}>
+    <EuiHealth
+      color={getSeverityColor(selectedOption.threshold, euiTheme)}
+      style={{ lineHeight: 'inherit' }}
+    >
       {selectedOption.label}
     </EuiHealth>
   );

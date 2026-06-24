@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiHealth, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { getSeverity, getSeverityColor } from '../../../../../common/anomaly_detection';
@@ -57,6 +57,7 @@ const anomaliesBadgeHealthCss = css`
 `;
 
 export function AnomaliesBadge({ score }: { score?: number }) {
+  const { euiTheme } = useEuiTheme();
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
@@ -75,7 +76,7 @@ export function AnomaliesBadge({ score }: { score?: number }) {
       <EuiBadge tabIndex={0} color="hollow" css={anomaliesBadgeCss}>
         <EuiHealth
           textSize="inherit"
-          color={score === undefined ? 'subdued' : getSeverityColor(score)}
+          color={score === undefined ? 'subdued' : getSeverityColor(score, euiTheme)}
           css={anomaliesBadgeHealthCss}
         >
           {text}

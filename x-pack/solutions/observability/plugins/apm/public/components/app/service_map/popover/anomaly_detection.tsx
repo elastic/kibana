@@ -68,7 +68,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
       {hasAnomalyDetectionScore && (
         <section css={contentLineStyles}>
           <div css={verticallyCenteredStyles}>
-            <EuiHealth color={getSeverityColor(anomalyScore as number)}>
+            <EuiHealth color={getSeverityColor(anomalyScore as number, euiTheme)}>
               <span>
                 {i18n.translate('xpack.apm.serviceMap.anomalyDetectionPopoverScoreWithValue', {
                   defaultMessage: '{metric}: {score}',
