@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -92,9 +90,8 @@
 import { Readable, Transform } from 'stream';
 import type { ApmFields } from '@kbn/synthtrace-client';
 import { apm, ApmSynthtracePipelineSchema, httpExitSpan } from '@kbn/synthtrace-client';
-import type { Scenario, ScenarioInitOptions } from '../cli/scenario';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { withClient } from '../lib/utils/with_client';
+import type { Scenario, ScenarioInitOptions } from '@kbn/synthtrace';
+import { getSynthtraceEnvironment, withClient } from '@kbn/synthtrace';
 
 // Part A - transaction-group rollup timestamp mismatch
 const MISMATCH_SERVICE_BASE = 'synth-rollup-mismatch-compensation-eco-sync';
