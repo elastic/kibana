@@ -283,10 +283,10 @@ await client.log(
 
 ### Sensitive fields in the snapshot
 
-Use `fieldsToHash` for high-entropy secret string fields (secrets, API keys, tokens). Matching string values are replaced with the last 12 hex chars of `sha256(object.id + value)`, so equal values for the same object hash identically (handy for spotting "did this field change?").
+Use `fieldsToHash` for high-entropy secret string fields (secrets, API keys, tokens) that need version control. Matching string values are replaced with the last 12 hex chars of `sha256(object.id + value)`, so equal values for the same object hash identically ("did this field change?" scenarios).
 
-> [!WARNING]
-> Hashing is **not** a safe way to hide low-entropy values. The salt is the `object.id`, which is not secret, and the digest is deterministic — so anything with a small or guessable value space (emails, usernames, names, IP addresses, short enums, booleans-as-strings) can be brute-forced or matched against a precomputed table. Only hash genuinely high-entropy secrets. If a field is low entropy and sensitive, drop it from the snapshot instead of hashing it.
+> [!IMPORTANT]
+> **Prefer not to store hashes at all** (Kibana Security guidance) — please avoid exposing hashes of tracked data where possible, most critically for low-entropy data but also for high-entropy keys and secrets. Before reaching for `fieldsToHash`, check whether a non-hash signal answers your question: if you only need "did this field change between two versions?", you may record a **change marker** (e.g. a timestamp or revision captured when the field changed) for the same diff-ability with zero secret material stored. Only hash genuinely high-entropy secrets, and only when a non-hash value can't give the same result.
 
 ```ts
 await client.log(change, {
@@ -301,7 +301,7 @@ await client.log(change, {
 });
 ```
 
-For **low-entropy** sensitive data (emails, names, IPs, short enums) and large base64 blobs use `fieldsToRedact` instead. Matching string values are replaced with a fixed `[redacted]` placeholder, so nothing about the original is stored or recoverable. When a field is listed in both maps, redaction wins.
+For most secrets, **low-entropy** sensitive data (emails, names, IPs, short enums) and large base64 blobs use `fieldsToRedact` instead. Matching string values are replaced with a fixed `[redacted]` placeholder, so nothing about the original is stored or recoverable. When a field is listed in both maps, redaction wins.
 
 ```ts
 await client.log(change, {

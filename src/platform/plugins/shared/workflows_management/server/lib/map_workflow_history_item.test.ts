@@ -27,7 +27,7 @@ const createDocument = (overrides: Partial<ChangeHistoryDocument> = {}): ChangeH
     type: 'workflow',
     hash: 'abc',
     sequence: 3,
-    fields: { hashed: [] },
+    fields: { hashed: [], redacted: [] },
     snapshot: {
       name: 'My workflow',
       description: 'desc',
@@ -66,7 +66,7 @@ describe('mapWorkflowHistoryItem', () => {
           id: 'wf-1',
           type: 'workflow',
           hash: 'abc',
-          fields: { hashed: [] },
+          fields: { hashed: [], redacted: [] },
           snapshot: {
             name: 'W',
             enabled: false,

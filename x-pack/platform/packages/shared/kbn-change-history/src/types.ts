@@ -70,9 +70,9 @@ export interface ChangeHistoryDocument {
      */
     sequence?: number;
     fields: {
-      /** Full paths of fields stored as hashes (high-entropy secrets or blob binaries). */
+      /** Full paths of fields stored as hashes (high-entropy secrets). */
       hashed: string[];
-      /** Full paths of fields replaced with a `[redacted]` placeholder (low-entropy sensitive data). */
+      /** Full paths of fields replaced with a `[redacted]` placeholder (low-entropy sensitive data, large blobs). */
       redacted: string[];
     };
     /** Full snapshot after the change. */
