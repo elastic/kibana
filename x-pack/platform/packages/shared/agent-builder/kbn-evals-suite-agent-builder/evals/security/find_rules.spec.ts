@@ -11,6 +11,10 @@ import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
 import { seedFindRulesFixtures } from './find_rules_fixtures';
+import {
+  disableAgentBuilderExperimentalFeatures,
+  enableAgentBuilderExperimentalFeatures,
+} from './agent_builder_experimental';
 
 interface MultiTurnToolCallStep {
   type?: string;
@@ -63,12 +67,14 @@ evaluate.describe(
   () => {
     let teardown: (() => Promise<void>) | undefined;
 
-    evaluate.beforeAll(async ({ kbnClient, esClient, log }) => {
+    evaluate.beforeAll(async ({ kbnClient, esClient, log, uiSettings }) => {
+      await enableAgentBuilderExperimentalFeatures(uiSettings);
       const seeded = await seedFindRulesFixtures({ kbnClient, esClient, log });
       teardown = seeded.cleanup;
     });
 
-    evaluate.afterAll(async () => {
+    evaluate.afterAll(async ({ uiSettings }) => {
+      await disableAgentBuilderExperimentalFeatures(uiSettings);
       if (teardown) await teardown();
     });
 
@@ -317,12 +323,14 @@ evaluate.describe(
   () => {
     let teardown: (() => Promise<void>) | undefined;
 
-    evaluate.beforeAll(async ({ kbnClient, esClient, log }) => {
+    evaluate.beforeAll(async ({ kbnClient, esClient, log, uiSettings }) => {
+      await enableAgentBuilderExperimentalFeatures(uiSettings);
       const seeded = await seedFindRulesFixtures({ kbnClient, esClient, log });
       teardown = seeded.cleanup;
     });
 
-    evaluate.afterAll(async () => {
+    evaluate.afterAll(async ({ uiSettings }) => {
+      await disableAgentBuilderExperimentalFeatures(uiSettings);
       if (teardown) await teardown();
     });
 
@@ -437,6 +445,14 @@ evaluate.describe(
   'Security Skills - Find Rules Boundaries',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
+    evaluate.beforeAll(async ({ uiSettings }) => {
+      await enableAgentBuilderExperimentalFeatures(uiSettings);
+    });
+
+    evaluate.afterAll(async ({ uiSettings }) => {
+      await disableAgentBuilderExperimentalFeatures(uiSettings);
+    });
+
     evaluate(
       'rule-adjacent queries do NOT activate find-rules and route to the correct sibling skill',
       async ({ evaluateDataset }) => {
@@ -545,12 +561,14 @@ evaluate.describe(
   () => {
     let teardown: (() => Promise<void>) | undefined;
 
-    evaluate.beforeAll(async ({ kbnClient, esClient, log }) => {
+    evaluate.beforeAll(async ({ kbnClient, esClient, log, uiSettings }) => {
+      await enableAgentBuilderExperimentalFeatures(uiSettings);
       const seeded = await seedFindRulesFixtures({ kbnClient, esClient, log });
       teardown = seeded.cleanup;
     });
 
-    evaluate.afterAll(async () => {
+    evaluate.afterAll(async ({ uiSettings }) => {
+      await disableAgentBuilderExperimentalFeatures(uiSettings);
       if (teardown) await teardown();
     });
 
