@@ -85,7 +85,11 @@ export const getAppMenuItems = ({
 }: {
   config?: AppMenuConfig;
   hasStaticItems?: boolean;
-}) => {
+}): {
+  displayedItems: AppMenuItemType[];
+  overflowItems: AppMenuItemType[];
+  shouldOverflow: boolean;
+} => {
   if (!config || !config.items) {
     return {
       displayedItems: [],
@@ -228,6 +232,7 @@ export const mapAppMenuItemToPanelItem = (
       title,
     },
     ...(childPanelId !== undefined && { panel: childPanelId }),
+    ...(item?.isDestructive && { color: 'danger' }),
   };
 };
 
