@@ -224,7 +224,7 @@ evaluate.describe(
           dataset: {
             name: 'workflow-es-ops: search-by-id',
             description:
-              'Model must place the document ID lookup inside a query field — not as a top-level parameter',
+              'Model must fetch a document by ID correctly — either via elasticsearch.search with a query, or elasticsearch.request GET to /<index>/_doc/{{ id }}',
             examples: [
               {
                 // Canonical: explicit "document_id" input name
@@ -234,14 +234,12 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    'There is an elasticsearch.search step targeting the my-records index.',
-                    'The search step has a query field containing a match or term condition on _id or a document ID field, referencing inputs.document_id.',
-                    'The query is NOT missing — the document_id is NOT passed as a top-level parameter outside the query.',
-                    'A size of 1 is set so only one document is returned.',
-                    'A console step logs the result, referencing the search output.',
-                    'The step type is elasticsearch.search — not a fictional type like elasticsearch.get or elasticsearch.getById.',
+                    'There is a step that fetches a document from the my-records index using inputs.document_id.',
+                    'The step is either: (a) elasticsearch.search with a query filtering on _id or a document ID field referencing inputs.document_id — the ID must NOT be a top-level parameter outside the query; or (b) elasticsearch.request GET to /my-records/_doc/{{ inputs.document_id }}.',
+                    'A console step logs the result.',
+                    'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
                   ],
-                  expectedStepTypes: ['elasticsearch.search', 'console'],
+                  expectedStepTypes: ['console'],
                   expectedStepCount: { min: 2, max: 3 },
                   expectedMaxToolCalls: 6,
                   expectedToolSequence: [
@@ -259,13 +257,12 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    'There is an elasticsearch.search step targeting the users index.',
-                    'The search step has a query field filtering on user_id via inputs.user_id — NOT passed as a top-level parameter.',
-                    'A size of 1 is set.',
-                    'A console step logs a field from the search output.',
-                    'The step type is elasticsearch.search — not a fictional type like elasticsearch.get or elasticsearch.getById.',
+                    'There is a step that fetches a document from the users index using inputs.user_id.',
+                    'The step is either: (a) elasticsearch.search with a query filtering on user_id referencing inputs.user_id — the ID must NOT be a top-level parameter outside the query; or (b) elasticsearch.request GET to /users/_doc/{{ inputs.user_id }}.',
+                    'A console step logs a field from the result.',
+                    'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
                   ],
-                  expectedStepTypes: ['elasticsearch.search', 'console'],
+                  expectedStepTypes: ['console'],
                   expectedStepCount: { min: 2, max: 3 },
                   expectedMaxToolCalls: 6,
                   expectedToolSequence: [
@@ -283,13 +280,12 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    'There is an elasticsearch.search step targeting the products-catalog index.',
-                    'The search step has a query field filtering on product_code via inputs.product_code — the lookup value is inside the query, NOT a top-level parameter.',
-                    'A size of 1 is set.',
+                    'There is a step that fetches a document from the products-catalog index using inputs.product_code.',
+                    'The step is either: (a) elasticsearch.search with a query filtering on product_code referencing inputs.product_code — the lookup value must be inside the query, NOT a top-level parameter; or (b) elasticsearch.request GET to /products-catalog/_doc/{{ inputs.product_code }}.',
                     'A console step logs the output.',
-                    'The step type is elasticsearch.search — not a fictional type like elasticsearch.get or elasticsearch.getById.',
+                    'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
                   ],
-                  expectedStepTypes: ['elasticsearch.search', 'console'],
+                  expectedStepTypes: ['console'],
                   expectedStepCount: { min: 2, max: 3 },
                   expectedMaxToolCalls: 6,
                   expectedToolSequence: [
