@@ -121,7 +121,11 @@ export function ServiceSettingsCard({
       {showValidation && hasEmptyInlineFields && (
         <>
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="danger">
+          <EuiText
+            size="xs"
+            color="danger"
+            data-test-subj="serviceSettingsStep-cardValidationMessage"
+          >
             <p>
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.card.validationMessage"

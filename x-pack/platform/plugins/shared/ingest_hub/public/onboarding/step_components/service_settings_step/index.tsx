@@ -98,11 +98,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             })}
             isInvalid={showValidation && !globalRegion.trim()}
             error={
-              showValidation && !globalRegion.trim()
-                ? i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.error', {
+              showValidation && !globalRegion.trim() ? (
+                <span data-test-subj="serviceSettingsStep-globalRegionError">
+                  {i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.error', {
                     defaultMessage: 'A global region is required.',
-                  })
-                : undefined
+                  })}
+                </span>
+              ) : undefined
             }
           >
             <EuiComboBox

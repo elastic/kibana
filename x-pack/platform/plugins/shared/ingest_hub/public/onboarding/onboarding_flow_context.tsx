@@ -123,6 +123,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const deployHandlerRef = useRef<((packageNames?: string[]) => void) | null>(null);
 
+  // Ref always holds the latest persisted value so updateDeployAndDetectStep
+  // reads current state even when called after an await (stale closure prevention).
+  const persistedDeployAndDetectStepRef = useRef(persistedDeployAndDetectStep);
+  persistedDeployAndDetectStepRef.current = persistedDeployAndDetectStep;
+
   const updateDeployAndDetectStep = useCallback(
     (update: Partial<DeployAndDetectStepState>) => {
       if (update.isDeploying !== undefined) {
@@ -130,24 +135,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       }
       const { isDeploying: _, ...rest } = update;
       if (Object.keys(rest).length > 0) {
+        const prev = persistedDeployAndDetectStepRef.current;
         setPersistedDeployAndDetectStep({
-          serviceStatuses: {
-            ...persistedDeployAndDetectStep.serviceStatuses,
-            ...(rest.serviceStatuses ?? {}),
-          },
+          serviceStatuses: { ...(prev?.serviceStatuses ?? {}), ...(rest.serviceStatuses ?? {}) },
           policyIdsByPackage: {
-            ...persistedDeployAndDetectStep.policyIdsByPackage,
+            ...(prev?.policyIdsByPackage ?? {}),
             ...(rest.policyIdsByPackage ?? {}),
           },
-          failedPackages: rest.failedPackages ?? persistedDeployAndDetectStep.failedPackages,
-          deployErrors: {
-            ...persistedDeployAndDetectStep.deployErrors,
-            ...(rest.deployErrors ?? {}),
-          },
+          failedPackages: rest.failedPackages ?? prev?.failedPackages ?? [],
+          deployErrors: { ...(prev?.deployErrors ?? {}), ...(rest.deployErrors ?? {}) },
         });
       }
     },
-    [persistedDeployAndDetectStep, setPersistedDeployAndDetectStep]
+    [setPersistedDeployAndDetectStep]
   );
 
   const registerDeployHandler = useCallback((fn: (packageNames?: string[]) => void) => {

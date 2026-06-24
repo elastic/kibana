@@ -61,12 +61,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     // Button is always enabled — validation is shown after clicking, not before
-    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).not.toBeDisabled();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
 
     // Clicking without a global region keeps the user on the step and shows an error
     await page.testSubj.locator('serviceSettingsStep-continueButton').click();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
-    await expect(page.getByText('A global region is required.')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-globalRegionError')).toBeVisible();
   });
 
   test('Continue button is always enabled when global region is set and no inline fields are required', async ({
@@ -89,7 +89,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     });
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).not.toBeDisabled();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
 
   test('clicking Continue with an empty inline required field shows validation error', async ({
@@ -119,15 +119,11 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     // Click Continue — error appears, step stays visible
     await page.testSubj.locator('serviceSettingsStep-continueButton').click();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
-    await expect(
-      page.getByText('Complete the required fields below before continuing.')
-    ).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-cardValidationMessage')).toBeVisible();
 
     // Filling the bucket_arn clears the error message
     await page.getByPlaceholder('arn:aws:s3:::my-bucket').fill('arn:aws:s3:::my-cloudtrail-bucket');
-    await expect(
-      page.getByText('Complete the required fields below before continuing.')
-    ).not.toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-cardValidationMessage')).toBeHidden();
   });
 
   test('transport toggle swaps the inline required field', async ({ browserAuth, page }) => {
