@@ -314,9 +314,11 @@ export class EvalsClient {
       });
 
       const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
-      const match = parsed.experiments.find((exp) => exp.execution_id !== excludeExecutionId);
+      const match = parsed.experiments.find(
+        (exp) => exp.execution_id != null && exp.execution_id !== excludeExecutionId
+      );
 
-      if (!match) {
+      if (!match || !match.execution_id) {
         return undefined;
       }
 
