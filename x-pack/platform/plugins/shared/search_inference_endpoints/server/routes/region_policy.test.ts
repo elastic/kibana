@@ -135,6 +135,14 @@ describe('Region Policy Routes', () => {
         body: { allowed_regions: [{ csp: 'aws', region: 'r'.repeat(129) }] },
       });
     });
+
+    it('rejects allowed_geos with non-string elements', () => {
+      mockRouter.shouldThrow({ body: { allowed_geos: [123] } });
+    });
+
+    it('rejects malformed fallback_region shape', () => {
+      mockRouter.shouldThrow({ body: { fallback_region: 'not-an-object' } });
+    });
   });
 
   describe('DELETE /internal/search_inference_endpoints/region_policy', () => {

@@ -18,6 +18,7 @@ export const APIRoutes = {
   PUT_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
   GET_INFERENCE_FEATURES: '/internal/search_inference_endpoints/features',
   GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  // Single path shared by GET, PUT, and DELETE region policy operations
   REGION_POLICY: '/internal/search_inference_endpoints/region_policy',
 } as const;
 
