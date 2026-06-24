@@ -110,6 +110,15 @@ function augmentObjectVariables(variables: Variables): Variables {
   return transformNode(variables) as Variables;
 }
 
+// Keys that must never be assigned as object properties during dot expansion.
+// Assigning to __proto__ via bracket notation changes the receiver's prototype
+// chain; traversing it during the segment walk resolves current[__proto__] to
+// Object.prototype (because isPlainObject(Object.prototype) === true), enabling
+// process-wide prototype pollution. constructor and prototype are included for
+// defence-in-depth. This matches the silent-drop behaviour of the previous
+// lodash merge() pipeline.
+const PROTO_POLLUTION_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 function transformNode(value: unknown): unknown {
   if (Array.isArray(value)) {
     const arr: unknown[] = value.map(transformNode);
@@ -125,7 +134,10 @@ function transformNode(value: unknown): unknown {
       const transformed = transformNode(raw);
 
       if (!key.includes('.')) {
-        obj[key] = transformed;
+        // Skip top-level keys that would mutate the prototype chain.
+        if (!PROTO_POLLUTION_KEYS.has(key)) {
+          obj[key] = transformed;
+        }
         continue;
       }
 
@@ -137,6 +149,10 @@ function transformNode(value: unknown): unknown {
       // correct precedence (mirrors the Object.hasOwn guard that was in the
       // previous addToStringDeep implementation).
       const parts = key.split('.');
+      // Skip dotted keys containing any prototype-polluting segment.
+      if (parts.some((part) => PROTO_POLLUTION_KEYS.has(part))) {
+        continue;
+      }
       let current = obj;
       for (let i = 0; i < parts.length - 1; i++) {
         const part = parts[i];

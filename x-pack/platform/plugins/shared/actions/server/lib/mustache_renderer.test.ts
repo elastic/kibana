@@ -543,5 +543,19 @@ describe('mustache_renderer', () => {
       // The user's 'toString' string key should win; it renders as a plain string
       expect(renderMustacheString(logger, '{{obj.toString}}', input, 'none')).toEqual('user-value');
     });
+
+    it('does not allow prototype pollution via dotted __proto__ keys', () => {
+      // JSON.parse produces an object whose own-enumerable key is literally
+      // '__proto__.polluted' — Object.entries() surfaces it, and a naive segment
+      // walk would resolve current['__proto__'] to Object.prototype and write
+      // attacker-controlled data onto it process-wide.
+      const maliciousVars = JSON.parse('{"__proto__.polluted":"PWNED","a.__proto__.p":"C"}');
+      renderMustacheString(logger, '{{a}}', maliciousVars, 'none');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(({} as any).polluted).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(({} as any).p).toBeUndefined();
+    });
   });
 });
