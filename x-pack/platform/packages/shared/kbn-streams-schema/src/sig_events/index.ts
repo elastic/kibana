@@ -21,3 +21,4 @@ export {
   MAX_TITLE_LENGTH,
   MAX_TEXT_LENGTH,
 } from './constants';
+export type { StreamsSigEventsResetDeletedCounts, StreamsSigEventsResetResult } from './reset';
