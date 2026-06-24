@@ -11,7 +11,9 @@ import type { MemoryToolsOptions } from '../../tools/memory/types';
 import { createMemorySearchTool } from '../../tools/memory/memory_search';
 import { createMemoryReadTool } from '../../tools/memory/memory_read';
 import { createMemoryWriteTool } from '../../tools/memory/memory_write';
+import { createMemoryPatchTool } from '../../tools/memory/memory_patch';
 import { createMemoryListTool } from '../../tools/memory/memory_list';
+import { createMemoryDeleteTool } from '../../tools/memory/memory_delete';
 import { createSearchKnowledgeIndicatorsTool } from '../../tools/search_knowledge_indicators/tool';
 import { toInlineMemoryTool, toInlineMemoryTools } from './to_inline_tools';
 import description from './memory_synthesis.description.text';
@@ -25,12 +27,15 @@ export const createMemorySynthesisSkill = (options: MemoryToolsOptions) =>
     description,
     content,
     getInlineTools: () => {
-      // Synthesis only needs read, search, list, and write — 4 tools + 1 KI tool = 5 total (limit: 7).
+      // Synthesis reads, searches, lists, writes, patches, and deletes so it can
+      // prune stale/contradicting content — 6 tools + 1 KI tool = 7 total (limit: 7).
       const memoryTools = toInlineMemoryTools([
         createMemorySearchTool(options),
         createMemoryReadTool(options),
         createMemoryWriteTool(options),
+        createMemoryPatchTool(options),
         createMemoryListTool(options),
+        createMemoryDeleteTool(options),
       ]);
 
       const kiToolDefinition = createSearchKnowledgeIndicatorsTool({

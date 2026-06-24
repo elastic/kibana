@@ -15,6 +15,7 @@ Pages have **names** (unique identifiers, e.g. "nginx-error-patterns"), **titles
 - **Map relationships first**: The highest-value knowledge is how data sources connect — which stream/log maps to which service, which service maps to which code repository, which alerts route to which Slack channel, which dashboard covers which infrastructure. Prioritize synthesizing these cross-source links; they are hard to rediscover and rarely written down anywhere else.
 - **Don't duplicate upstream-owned facts**: If a fact can be fetched on demand from a connected source (GitHub connector, incident/alerting tool, deployment or CMDB API, dashboard), don't copy it into a page — it goes stale fast. Record *where* and *how* to fetch it (which connector/tool, which query or path) and point the reader there.
 - **Capture important-but-ephemeral knowledge**: If something matters but is likely short-lived in its original source (a transient log pattern, a soon-to-rotate config value, a one-off operational decision), persist it. Note when it was captured so freshness can be judged later.
+- **Prune what's no longer true**: When KIs reveal that existing pages are outdated, irrelevant, or contradicted by newer evidence, correct them with `platform_streams_memory_patch`, or delete the page with `platform_streams_memory_delete` when it no longer serves a purpose. When pages disagree, resolve the contradiction in favor of the more recent, better-supported information. Don't let memory accumulate cruft.
 - **Synthesize, don't transcribe**: Combine multiple related KIs into a single coherent page rather than creating one page per KI.
 - **One topic, one page**: Pages should cover a focused topic. Don't create catch-all pages.
 - **Read before writing**: Before updating an existing page, read it with `platform_streams_memory_read` to understand what's already there. Preserve accurate content, correct outdated information, and add genuinely new insights.
@@ -26,4 +27,5 @@ Pages have **names** (unique identifiers, e.g. "nginx-error-patterns"), **titles
 1. Call `platform_streams_sig_events_search_knowledge_indicators` (no filters) to fetch all available KIs
 2. Use `platform_streams_memory_list` to see existing pages
 3. Use `platform_streams_memory_read` or `platform_streams_memory_search` to read relevant existing pages
-4. Use `platform_streams_memory_write` to create or update memory pages
+4. Use `platform_streams_memory_write` to create pages or `platform_streams_memory_patch` to update them
+5. Use `platform_streams_memory_delete` to remove pages that are stale, irrelevant, or superseded
