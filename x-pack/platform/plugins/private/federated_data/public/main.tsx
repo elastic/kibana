@@ -32,6 +32,7 @@ import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
+import { ConfirmDeleteDataSourcesModal } from './confirm_delete_data_sources_modal';
 import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
 import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
 
@@ -76,6 +77,11 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
   const [pendingDeleteDataSource, setPendingDeleteDataSource] = useState<DataSource | null>(null);
   const [isDeletingDataSource, setIsDeletingDataSource] = useState(false);
   const [deleteDataSourceError, setDeleteDataSourceError] = useState<string | null>(null);
+  const [pendingDeleteDataSources, setPendingDeleteDataSources] = useState<
+    readonly DataSource[] | null
+  >(null);
+  const [isDeletingDataSources, setIsDeletingDataSources] = useState(false);
+  const [deleteDataSourcesError, setDeleteDataSourcesError] = useState<string | null>(null);
   const [pendingDeleteDataSet, setPendingDeleteDataSet] = useState<DataSetListRow | null>(null);
   const [isDeletingDataSet, setIsDeletingDataSet] = useState(false);
   const [deleteDataSetError, setDeleteDataSetError] = useState<string | null>(null);
@@ -253,6 +259,48 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
     setPendingDeleteDataSource(null);
     setDeleteDataSourceError(null);
   }, [isDeletingDataSource]);
+
+  const cancelDeleteDataSources = useCallback(() => {
+    if (isDeletingDataSources) {
+      return;
+    }
+    setPendingDeleteDataSources(null);
+    setDeleteDataSourcesError(null);
+  }, [isDeletingDataSources]);
+
+  const confirmDeleteDataSources = useCallback(async () => {
+    if (!pendingDeleteDataSources || pendingDeleteDataSources.length === 0) {
+      return;
+    }
+
+    const hasRelatedDataSets = pendingDeleteDataSources.some(
+      (ds) => (dataSetsCountByDataSource.get(ds.name) ?? 0) > 0
+    );
+    if (hasRelatedDataSets) {
+      setDeleteDataSourcesError(
+        'Unable to delete one or more data sources because they have related data sets.'
+      );
+      return;
+    }
+
+    setIsDeletingDataSources(true);
+    setDeleteDataSourcesError(null);
+    try {
+      await dataClient.delete(pendingDeleteDataSources.map((ds) => ds.name));
+      setItems(await dataClient.get());
+      setSelectedItems([]);
+      setPendingDeleteDataSources(null);
+    } catch (e) {
+      const message = getFlyoutSaveErrorMessage(e);
+      setDeleteDataSourcesError(message);
+      toasts.addDanger({
+        title: mainTranslations.confirmDeleteDataSources.errorTitle,
+        text: message,
+      });
+    } finally {
+      setIsDeletingDataSources(false);
+    }
+  }, [dataClient, dataSetsCountByDataSource, pendingDeleteDataSources, toasts]);
 
   const handleDataSetSave = useCallback(
     async (dataSet: DataSetWithName, previousId?: string): Promise<string | null> => {
@@ -598,18 +646,8 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
                       data-test-subj="dataSetsDeleteButton"
                       iconType="trash"
                       onClick={() => {
-                        void (async () => {
-                          try {
-                            await dataClient.delete(selectedItems.map((item) => item.name));
-                            setItems(await dataClient.get());
-                            setSelectedItems([]);
-                          } catch (e) {
-                            toasts.addDanger({
-                              title: mainTranslations.confirmDeleteDataSource.errorTitle,
-                              text: getFlyoutSaveErrorMessage(e),
-                            });
-                          }
-                        })();
+                        setPendingDeleteDataSources(selectedItems);
+                        setDeleteDataSourcesError(null);
                       }}
                     >
                       {mainTranslations.actions.deleteButtonLabel}
@@ -651,7 +689,6 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
     ],
     [
       columns,
-      dataClient,
       dataSetsCountByDataSource,
       dataSetColumns,
       dataSourceFilter,
@@ -660,7 +697,6 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
       items,
       selectedDataSets,
       selectedItems,
-      toasts,
     ]
   );
 
@@ -694,6 +730,15 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts, feature
           error={deleteDataSourceError}
           onConfirm={() => void confirmDeleteDataSource()}
           onCancel={cancelDeleteDataSource}
+        />
+      ) : null}
+      {pendingDeleteDataSources ? (
+        <ConfirmDeleteDataSourcesModal
+          dataSourceNames={pendingDeleteDataSources.map((ds) => ds.name)}
+          isDeleting={isDeletingDataSources}
+          error={deleteDataSourcesError}
+          onConfirm={() => void confirmDeleteDataSources()}
+          onCancel={cancelDeleteDataSources}
         />
       ) : null}
       {pendingDeleteDataSet ? (

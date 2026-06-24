@@ -148,6 +148,34 @@ export const mainTranslations = {
     }),
   },
 
+  confirmDeleteDataSources: {
+    title: i18n.translate('dataSets.confirmDeleteDataSources.title', {
+      defaultMessage: 'Delete data sources',
+    }),
+    prompt: (count: number) =>
+      i18n.translate('dataSets.confirmDeleteDataSources.prompt', {
+        defaultMessage: 'Are you sure you want to delete {count} data sources?',
+        values: { count },
+      }),
+    countLabel: (count: number) =>
+      i18n.translate('dataSets.confirmDeleteDataSources.countLabel', {
+        defaultMessage: '{count} data sources selected',
+        values: { count },
+      }),
+    warning: i18n.translate('dataSets.confirmDeleteDataSources.warning', {
+      defaultMessage: 'This action cannot be undone.',
+    }),
+    cancelButton: i18n.translate('dataSets.confirmDeleteDataSources.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    confirmButton: i18n.translate('dataSets.confirmDeleteDataSources.confirmButton', {
+      defaultMessage: 'Delete',
+    }),
+    errorTitle: i18n.translate('dataSets.confirmDeleteDataSources.errorTitle', {
+      defaultMessage: 'Delete failed',
+    }),
+  },
+
   confirmDeleteDataSet: {
     title: i18n.translate('dataSets.confirmDeleteDataSet.title', {
       defaultMessage: 'Delete data set',
