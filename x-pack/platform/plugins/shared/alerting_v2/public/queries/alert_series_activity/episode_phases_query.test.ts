@@ -8,14 +8,14 @@
 import { buildEpisodePhasesQuery } from './episode_phases_query';
 
 const RULE_ID = 'rule-abc';
-const GTE_MS = Date.parse('2026-04-01T00:00:00Z');
-const LTE_MS = Date.parse('2026-04-08T00:00:00Z');
+const WINDOW_START_MS = Date.parse('2026-04-01T00:00:00Z');
+const WINDOW_END_MS = Date.parse('2026-04-08T00:00:00Z');
 
 describe('buildEpisodePhasesQuery', () => {
   const queryString = buildEpisodePhasesQuery({
     ruleId: RULE_ID,
-    gteMs: GTE_MS,
-    lteMs: LTE_MS,
+    windowStartMs: WINDOW_START_MS,
+    windowEndMs: WINDOW_END_MS,
     episodeIds: ['ep-1', 'ep-2'],
   }).print('basic');
 

@@ -25,8 +25,8 @@ export const MAX_EPISODES_PER_LANE = 50;
 
 export interface BuildEpisodeSelectionQueryOptions {
   ruleId: string;
-  gteMs: number;
-  lteMs: number;
+  windowStartMs: number;
+  windowEndMs: number;
   /** Series (lanes) to restrict selection to — the chosen top-N `group_hash`es. */
   groupHashes: string[];
   /** Max episodes kept per series. Defaults to {@link MAX_EPISODES_PER_LANE}. */
@@ -37,13 +37,13 @@ const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
 export const buildEpisodeSelectionQuery = ({
   ruleId,
-  gteMs,
-  lteMs,
+  windowStartMs,
+  windowEndMs,
   groupHashes,
   perLaneLimit = MAX_EPISODES_PER_LANE,
 }: BuildEpisodeSelectionQueryOptions) => {
-  const fromIso = toIsoUtc(gteMs);
-  const toIso = toIsoUtc(lteMs);
+  const fromIso = toIsoUtc(windowStartMs);
+  const toIso = toIsoUtc(windowEndMs);
   const hashLiterals = groupHashes.map((h) => esql.str(h));
 
   return (

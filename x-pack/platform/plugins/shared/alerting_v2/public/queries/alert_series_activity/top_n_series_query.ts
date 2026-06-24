@@ -14,17 +14,21 @@ export interface TopNSeriesRow {
 
 export interface BuildTopNSeriesQueryOptions {
   ruleId: string;
-  gteMs: number;
-  lteMs: number;
+  windowStartMs: number;
+  windowEndMs: number;
 }
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
 const MAX_SERIES_LIMIT = 10_000;
 
-export const buildTopNSeriesQuery = ({ ruleId, gteMs, lteMs }: BuildTopNSeriesQueryOptions) => {
-  const fromIso = toIsoUtc(gteMs);
-  const toIso = toIsoUtc(lteMs);
+export const buildTopNSeriesQuery = ({
+  ruleId,
+  windowStartMs,
+  windowEndMs,
+}: BuildTopNSeriesQueryOptions) => {
+  const fromIso = toIsoUtc(windowStartMs);
+  const toIso = toIsoUtc(windowEndMs);
 
   return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`.where`rule.id == ${ruleId}`
     .where`@timestamp >= ${fromIso}::DATETIME AND @timestamp <= ${toIso}::DATETIME`

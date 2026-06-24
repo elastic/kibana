@@ -18,19 +18,19 @@ export interface AlertTimelineSummaryEsqlRow {
 
 export interface BuildAlertTimelineSummaryQueryOptions {
   ruleId: string;
-  gteMs: number;
-  lteMs: number;
+  windowStartMs: number;
+  windowEndMs: number;
 }
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
 export const buildAlertTimelineSummaryQuery = ({
   ruleId,
-  gteMs,
-  lteMs,
+  windowStartMs,
+  windowEndMs,
 }: BuildAlertTimelineSummaryQueryOptions) => {
-  const fromIso = toIsoUtc(gteMs);
-  const toIso = toIsoUtc(lteMs);
+  const fromIso = toIsoUtc(windowStartMs);
+  const toIso = toIsoUtc(windowEndMs);
 
   return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`.where`rule.id == ${ruleId}`
     .where`@timestamp >= ${fromIso}::DATETIME AND @timestamp <= ${toIso}::DATETIME`

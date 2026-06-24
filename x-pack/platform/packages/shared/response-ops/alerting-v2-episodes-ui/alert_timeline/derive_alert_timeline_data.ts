@@ -50,17 +50,18 @@ interface ParsedPhase {
 /**
  * Builds timeline lanes from per-status episode phase rows (`buildEpisodePhasesQuery`):
  * order each episode's phases by start and link each to the next (Gantt bar = phases
- * end to end). An open episode's last phase tails to `lteMs`; a terminal INACTIVE phase
+ * end to end). An open episode's last phase tails to `windowEndMs`; a terminal INACTIVE phase
  * just marks recovery (no bar). Summary/total are supplied externally. Segments are
- * clipped to `[gteMs, lteMs]`; a left edge clamped to `gteMs` is shown as "outside of
- * window" by the renderer.
+ * clipped to `[windowStartMs, windowEndMs]` for drawing; each segment keeps its `trueStartMs`
+ * (the window-independent start overlaid by `applyEpisodeStarts`) so the tooltip
+ * reports the real start even when the rendered left edge is clamped to `windowStartMs`.
  */
 export const deriveAlertTimelineData = (
   phaseRows: AlertTimelinePhaseRow[],
   groupingValuesByHash: AlertTimelineGroupingValues,
   sort: AlertTimelineSortPolicy,
-  gteMs: number,
-  lteMs: number,
+  windowStartMs: number,
+  windowEndMs: number,
   summary: AlertTimelineSummary,
   totalSeriesCount: number
 ): AlertTimelineData => {
@@ -122,16 +123,23 @@ export const deriveAlertTimelineData = (
               status: phase.status,
               x0Ms: phase.startMs,
               x1Ms: next.startMs,
+              trueStartMs: phase.startMs,
             });
           }
         } else if (isOpenStatus(phase.status)) {
           // Last phase, still open: tail to the window edge. (Could cap at `endMs`
           // to avoid overstating a stopped rule — follow-up.)
-          if (lteMs > phase.startMs) {
-            segments.push({ episodeId, status: phase.status, x0Ms: phase.startMs, x1Ms: lteMs });
+          if (windowEndMs > phase.startMs) {
+            segments.push({
+              episodeId,
+              status: phase.status,
+              x0Ms: phase.startMs,
+              x1Ms: windowEndMs,
+              trueStartMs: phase.startMs,
+            });
           }
           hasOpenEpisode = true;
-          const openDuration = Math.max(0, lteMs - earliestStartMs);
+          const openDuration = Math.max(0, windowEndMs - earliestStartMs);
           if (openDuration > longestOpenDurationMs) longestOpenDurationMs = openDuration;
         }
         // A terminal INACTIVE last phase draws nothing (recovery marker only).
@@ -141,13 +149,15 @@ export const deriveAlertTimelineData = (
       }
     }
 
-    // Clip to the visible window (phases may start before `gteMs`).
+    // Clip the *rendered* edge to the visible window (phases may start before
+    // `windowStartMs`). `trueStartMs` is left untouched so the tooltip can still report
+    // the real start of a clipped bar.
     const clippedSegments: AlertTimelineSegment[] = [];
     for (const s of segments) {
-      if (s.x1Ms <= gteMs) continue;
-      clippedSegments.push(s.x0Ms < gteMs ? { ...s, x0Ms: gteMs } : s);
+      if (s.x1Ms <= windowStartMs) continue;
+      clippedSegments.push(s.x0Ms < windowStartMs ? { ...s, x0Ms: windowStartMs } : s);
     }
-    const clippedTransitions = transitions.filter((t) => t.tsMs >= gteMs);
+    const clippedTransitions = transitions.filter((t) => t.tsMs >= windowStartMs);
 
     seriesByHash.set(groupHash, {
       groupHash,

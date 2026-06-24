@@ -8,14 +8,14 @@
 import { buildEpisodeSelectionQuery, MAX_EPISODES_PER_LANE } from './episode_selection_query';
 
 const RULE_ID = 'rule-abc';
-const GTE_MS = Date.parse('2026-04-01T00:00:00Z');
-const LTE_MS = Date.parse('2026-04-08T00:00:00Z');
+const WINDOW_START_MS = Date.parse('2026-04-01T00:00:00Z');
+const WINDOW_END_MS = Date.parse('2026-04-08T00:00:00Z');
 
 describe('buildEpisodeSelectionQuery', () => {
   const queryString = buildEpisodeSelectionQuery({
     ruleId: RULE_ID,
-    gteMs: GTE_MS,
-    lteMs: LTE_MS,
+    windowStartMs: WINDOW_START_MS,
+    windowEndMs: WINDOW_END_MS,
     groupHashes: ['hash-1', 'hash-2'],
   }).print('basic');
 
@@ -46,8 +46,8 @@ describe('buildEpisodeSelectionQuery', () => {
   it('honours an explicit per-lane limit', () => {
     const q = buildEpisodeSelectionQuery({
       ruleId: RULE_ID,
-      gteMs: GTE_MS,
-      lteMs: LTE_MS,
+      windowStartMs: WINDOW_START_MS,
+      windowEndMs: WINDOW_END_MS,
       groupHashes: ['hash-1'],
       perLaneLimit: 5,
     }).print('basic');

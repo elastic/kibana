@@ -30,13 +30,6 @@ export const formatDuration = (ms: number, fallback = '0m'): string => {
 
 export interface SegmentSpanFlags {
   /**
-   * The span's left edge sits at (or before) the window's start, so its true
-   * start is earlier and is not knowable from the fetched events — the bar was
-   * clipped. The tooltip should say "Outside of window" rather than show the
-   * window edge as if it were the start.
-   */
-  startsBeforeWindow: boolean;
-  /**
    * The span runs to the window's right edge and the episode has not recovered
    * (status is not inactive), i.e. it is still open. The tooltip should say
    * "Ongoing" rather than show the window edge as a (false) end.
@@ -45,24 +38,20 @@ export interface SegmentSpanFlags {
 }
 
 /**
- * Classify a rendered segment's edges relative to the visible window so the
- * tooltip can avoid presenting clipped window edges as real start/end times.
- * Segments are built with `x0Ms` clamped to `gteMs` when clipped and the open
- * tail's `x1Ms` set to `lteMs`, so edge equality is a reliable signal.
+ * Classify a rendered segment's right edge so the tooltip can avoid presenting a
+ * clipped window edge as a real end time. The open tail's `x1Ms` is set to
+ * `windowEndMs`, so right-edge equality is a reliable "ongoing" signal. (The left edge
+ * needs no such treatment: the segment's `trueStartMs` is the real start,
+ * resolved by the untimed starts query independent of the display window.)
  */
 export const describeSegmentSpan = ({
-  x0Ms,
   x1Ms,
   status,
-  gteMs,
-  lteMs,
+  windowEndMs,
 }: {
-  x0Ms: number;
   x1Ms: number;
   status: AlertEpisodeStatus;
-  gteMs: number;
-  lteMs: number;
+  windowEndMs: number;
 }): SegmentSpanFlags => ({
-  startsBeforeWindow: x0Ms <= gteMs,
-  isOngoing: x1Ms >= lteMs && status !== ALERT_EPISODE_STATUS.INACTIVE,
+  isOngoing: x1Ms >= windowEndMs && status !== ALERT_EPISODE_STATUS.INACTIVE,
 });

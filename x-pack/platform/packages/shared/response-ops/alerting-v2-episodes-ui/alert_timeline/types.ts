@@ -19,10 +19,21 @@ export const ALERT_TIMELINE_TOP_N_DEFAULT = 8;
 export interface AlertTimelineSegment {
   episodeId: string;
   status: AlertEpisodeStatus;
-  /** Inclusive epoch ms of the segment's left edge (the phase's start). */
+  /**
+   * Inclusive epoch ms of the segment's *rendered* left edge — clamped to `windowStartMs`
+   * when the phase began before the visible window. Use for drawing only.
+   */
   x0Ms: number;
-  /** Epoch ms of the segment's right edge (the next phase's start, or `lteMs` for the open tail). */
+  /** Epoch ms of the segment's right edge (the next phase's start, or `windowEndMs` for the open tail). */
   x1Ms: number;
+  /**
+   * The phase's true (unclamped) start in epoch ms, resolved by the untimed
+   * starts query independent of the display window. Equals `x0Ms` when the start
+   * is inside the visible window; earlier than `x0Ms` when the bar was clipped to
+   * the window's left edge. The tooltip shows this so a clipped bar still reports
+   * its real start.
+   */
+  trueStartMs: number;
 }
 
 /** A point marker inside a lane at a status-change timestamp. */

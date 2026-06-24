@@ -8,43 +8,16 @@
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { describeSegmentSpan, formatDuration } from './alert_timeline_format';
 
-const GTE = Date.UTC(2026, 5, 10, 0, 0, 0);
-const LTE = Date.UTC(2026, 5, 11, 0, 0, 0);
 const HOUR = 60 * 60 * 1000;
+const WINDOW_END = Date.UTC(2026, 5, 11, 0, 0, 0);
 
 describe('describeSegmentSpan', () => {
-  it('flags a start clipped at (or before) the window edge as outside the window', () => {
-    expect(
-      describeSegmentSpan({
-        x0Ms: GTE,
-        x1Ms: GTE + 6 * HOUR,
-        status: ALERT_EPISODE_STATUS.ACTIVE,
-        gteMs: GTE,
-        lteMs: LTE,
-      }).startsBeforeWindow
-    ).toBe(true);
-  });
-
-  it('does not flag a start that falls inside the window', () => {
-    expect(
-      describeSegmentSpan({
-        x0Ms: GTE + HOUR,
-        x1Ms: GTE + 6 * HOUR,
-        status: ALERT_EPISODE_STATUS.ACTIVE,
-        gteMs: GTE,
-        lteMs: LTE,
-      }).startsBeforeWindow
-    ).toBe(false);
-  });
-
   it('flags a span running to the window edge with a non-inactive status as ongoing', () => {
     expect(
       describeSegmentSpan({
-        x0Ms: GTE + HOUR,
-        x1Ms: LTE,
+        x1Ms: WINDOW_END,
         status: ALERT_EPISODE_STATUS.ACTIVE,
-        gteMs: GTE,
-        lteMs: LTE,
+        windowEndMs: WINDOW_END,
       }).isOngoing
     ).toBe(true);
   });
@@ -52,11 +25,9 @@ describe('describeSegmentSpan', () => {
   it('does not treat a recovered (inactive) span at the window edge as ongoing', () => {
     expect(
       describeSegmentSpan({
-        x0Ms: GTE + HOUR,
-        x1Ms: LTE,
+        x1Ms: WINDOW_END,
         status: ALERT_EPISODE_STATUS.INACTIVE,
-        gteMs: GTE,
-        lteMs: LTE,
+        windowEndMs: WINDOW_END,
       }).isOngoing
     ).toBe(false);
   });
@@ -64,24 +35,11 @@ describe('describeSegmentSpan', () => {
   it('does not flag a span that ends inside the window as ongoing', () => {
     expect(
       describeSegmentSpan({
-        x0Ms: GTE + HOUR,
-        x1Ms: LTE - HOUR,
+        x1Ms: WINDOW_END - HOUR,
         status: ALERT_EPISODE_STATUS.ACTIVE,
-        gteMs: GTE,
-        lteMs: LTE,
+        windowEndMs: WINDOW_END,
       }).isOngoing
     ).toBe(false);
-  });
-
-  it('flags both edges for a long-running episode that fills the whole window', () => {
-    const flags = describeSegmentSpan({
-      x0Ms: GTE,
-      x1Ms: LTE,
-      status: ALERT_EPISODE_STATUS.ACTIVE,
-      gteMs: GTE,
-      lteMs: LTE,
-    });
-    expect(flags).toEqual({ startsBeforeWindow: true, isOngoing: true });
   });
 });
 

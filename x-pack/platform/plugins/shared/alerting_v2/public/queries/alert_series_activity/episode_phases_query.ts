@@ -11,9 +11,11 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-episodes-ui/constants
 /**
  * Collapses each episode's per-execution events into status *phases*: one
  * `[seg_start, seg_end]` row per contiguous `episode.status` run (≤4 per episode).
- * Scoped by the selected `episode.id`s over a wider-than-display lookback, so a
- * bar gets its true start regardless of rule frequency. Result shape is the
- * package's `AlertTimelinePhaseRow`.
+ * Scoped by the selected `episode.id`s and bounded to the display window — this
+ * query supplies the segment *geometry* drawn in view. The bar's true start is
+ * resolved separately by the untimed `buildEpisodeStartsQuery` (window-independent)
+ * and overlaid via `applyEpisodeStarts`. Result shape is the package's
+ * `AlertTimelinePhaseRow`.
  *
  * Caveat — flapping: `BY episode.id, episode.status` merges non-contiguous runs of
  * the same status (active → recovering → active collapses to one active span).
@@ -24,9 +26,9 @@ const MAX_PHASES_PER_EPISODE = 4;
 
 export interface BuildEpisodePhasesQueryOptions {
   ruleId: string;
-  /** Lookback floor (epoch ms) — earlier than the display window to capture true starts. */
-  gteMs: number;
-  lteMs: number;
+  /** Display window lower bound (epoch ms) — segments are drawn within this window. */
+  windowStartMs: number;
+  windowEndMs: number;
   /** The exact episodes being drawn (from {@link buildEpisodeSelectionQuery}). */
   episodeIds: string[];
 }
@@ -35,12 +37,12 @@ const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
 export const buildEpisodePhasesQuery = ({
   ruleId,
-  gteMs,
-  lteMs,
+  windowStartMs,
+  windowEndMs,
   episodeIds,
 }: BuildEpisodePhasesQueryOptions) => {
-  const fromIso = toIsoUtc(gteMs);
-  const toIso = toIsoUtc(lteMs);
+  const fromIso = toIsoUtc(windowStartMs);
+  const toIso = toIsoUtc(windowEndMs);
   const episodeLiterals = episodeIds.map((id) => esql.str(id));
 
   return (

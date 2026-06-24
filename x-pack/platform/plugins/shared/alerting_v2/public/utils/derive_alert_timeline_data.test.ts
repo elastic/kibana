@@ -70,18 +70,26 @@ describe('deriveAlertTimelineData', () => {
 
     // The terminal INACTIVE phase is the recovery marker — no bar drawn for it.
     expect(row.segments).toEqual([
-      { episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.PENDING, x0Ms: T0, x1Ms: T0 + HOUR_MS },
+      {
+        episodeId: 'ep-1',
+        status: ALERT_EPISODE_STATUS.PENDING,
+        x0Ms: T0,
+        x1Ms: T0 + HOUR_MS,
+        trueStartMs: T0,
+      },
       {
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.ACTIVE,
         x0Ms: T0 + HOUR_MS,
         x1Ms: T0 + 2 * HOUR_MS,
+        trueStartMs: T0 + HOUR_MS,
       },
       {
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.RECOVERING,
         x0Ms: T0 + 2 * HOUR_MS,
         x1Ms: T0 + 3 * HOUR_MS,
+        trueStartMs: T0 + 2 * HOUR_MS,
       },
     ]);
     // A dot at the entry into each status, including start and recovery.
@@ -94,7 +102,7 @@ describe('deriveAlertTimelineData', () => {
     expect(row.hasOpenEpisode).toBe(false);
   });
 
-  it('extends the tail segment to lteMs for open episodes and tracks longest open', () => {
+  it('extends the tail segment to windowEndMs for open episodes and tracks longest open', () => {
     const phases: AlertTimelinePhaseRow[] = [
       phase({ episodeId: 'open-long', status: ALERT_EPISODE_STATUS.ACTIVE, startMs: T0 }),
       phase({
@@ -120,6 +128,7 @@ describe('deriveAlertTimelineData', () => {
       status: ALERT_EPISODE_STATUS.ACTIVE,
       x0Ms: T0,
       x1Ms: NOW,
+      trueStartMs: T0,
     });
     expect(result.summary.stillOpen).toBe(2);
   });
@@ -184,12 +193,14 @@ describe('deriveAlertTimelineData', () => {
       status: ALERT_EPISODE_STATUS.ACTIVE,
       x0Ms: T0 + HOUR_MS,
       x1Ms: T0 + 3 * HOUR_MS,
+      trueStartMs: T0 + HOUR_MS,
     });
     expect(row.segments.find((s) => s.episodeId === 'ep-new')).toEqual({
       episodeId: 'ep-new',
       status: ALERT_EPISODE_STATUS.ACTIVE,
       x0Ms: T0 + 10 * HOUR_MS,
       x1Ms: NOW,
+      trueStartMs: T0 + 10 * HOUR_MS,
     });
   });
 
@@ -326,9 +337,9 @@ describe('deriveAlertTimelineData', () => {
     ).toBe('gh-long-open');
   });
 
-  it('clips segments to gteMs and suppresses pre-window transitions', () => {
-    const VISIBLE_GTE = T0 + 4 * HOUR_MS;
-    const VISIBLE_LTE = T0 + 8 * HOUR_MS;
+  it('clips segments to windowStartMs and suppresses pre-window transitions', () => {
+    const WINDOW_START_MS = T0 + 4 * HOUR_MS;
+    const WINDOW_END_MS = T0 + 8 * HOUR_MS;
 
     // The active phase began before the visible window (a wider lookback found it).
     const phases: AlertTimelinePhaseRow[] = [
@@ -354,8 +365,8 @@ describe('deriveAlertTimelineData', () => {
       phases,
       {},
       'started_asc',
-      VISIBLE_GTE,
-      VISIBLE_LTE,
+      WINDOW_START_MS,
+      WINDOW_END_MS,
       STUB_SUMMARY,
       1
     );
@@ -365,14 +376,18 @@ describe('deriveAlertTimelineData', () => {
       {
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.ACTIVE,
-        x0Ms: VISIBLE_GTE,
+        // Rendered edge is clamped to the window, but the true start is preserved
+        // so the tooltip can report the real (pre-window) start.
+        x0Ms: WINDOW_START_MS,
         x1Ms: T0 + 6 * HOUR_MS,
+        trueStartMs: T0 + 2 * HOUR_MS,
       },
       {
         episodeId: 'ep-1',
         status: ALERT_EPISODE_STATUS.RECOVERING,
         x0Ms: T0 + 6 * HOUR_MS,
         x1Ms: T0 + 7 * HOUR_MS,
+        trueStartMs: T0 + 6 * HOUR_MS,
       },
     ]);
     expect(row.transitions.map((t) => ({ status: t.status, tsMs: t.tsMs }))).toEqual([
@@ -408,12 +423,14 @@ describe('deriveAlertTimelineData', () => {
           status: ALERT_EPISODE_STATUS.ACTIVE,
           x0Ms: T0,
           x1Ms: T0 + 2 * HOUR_MS,
+          trueStartMs: T0,
         },
         {
           episodeId: 'ep-1',
           status: ALERT_EPISODE_STATUS.RECOVERING,
           x0Ms: T0 + 2 * HOUR_MS,
           x1Ms: NOW,
+          trueStartMs: T0 + 2 * HOUR_MS,
         },
       ]);
       expect(row.hasOpenEpisode).toBe(true);
