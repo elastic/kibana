@@ -18,6 +18,8 @@ import {
 import { CommonGlobalAppStyles } from './global_app_styles';
 import type { ChromeStyle } from '../layout.types';
 
+const AGENT_WORKSPACE_ACTIVE_ATTR = 'data-agent-workspace-active';
+
 export const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
   return css`
     :root {
@@ -116,7 +118,11 @@ export const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
 
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
-const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: ChromeStyle) => css`
+const globalTempHackStyles = (
+  _euiTheme: UseEuiTheme['euiTheme'],
+  chromeStyle: ChromeStyle,
+  hasAgentWorkspace = false
+) => css`
   body,
   .kbnBody {
     // adjust position of the classic side-navigation
@@ -186,14 +192,38 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
     box-shadow: ${_euiTheme.shadows.xs.down} !important;
     clip-path: inset(0 -10px -10px -10px) !important;
   }
+
+  ${
+    hasAgentWorkspace
+      ? `
+  /* Agent workspace: overlays and bottom bars scoped to the agent column */
+  body[${AGENT_WORKSPACE_ACTIVE_ATTR}='true'] .kbnChromeLayoutAgent .euiOverlayMask[data-relative-to-header='below'] {
+    ${logicalCSS('top', layoutVar('agent.top', '0px'))};
+    ${logicalCSS('left', layoutVar('agent.left', '0px'))};
+    ${logicalCSS('right', layoutVar('agent.right', '0px'))};
+    ${logicalCSS('bottom', layoutVar('agent.bottom', '0px'))};
+  }
+
+  body[${AGENT_WORKSPACE_ACTIVE_ATTR}='true'] .kbnChromeLayoutAgent .euiBottomBar.euiBottomBar--fixed {
+    left: ${layoutVar('agent.left', '0px')} !important;
+    right: ${layoutVar('agent.right', '0px')} !important;
+    bottom: ${layoutVar('agent.bottom', '0px')} !important;
+    border-bottom-left-radius: ${_euiTheme.border.radius.medium} !important;
+    border-bottom-right-radius: ${_euiTheme.border.radius.medium} !important;
+  }
+  `
+      : ''
+  }
 `;
 
 export interface GridLayoutGlobalStylesProps {
   chromeStyle?: ChromeStyle;
+  hasAgentWorkspace?: boolean;
 }
 
 export const GridLayoutGlobalStyles = ({
   chromeStyle = 'classic',
+  hasAgentWorkspace = false,
 }: GridLayoutGlobalStylesProps) => {
   const euiTheme = useEuiTheme();
   const isProjectStyle = chromeStyle === 'project';
@@ -203,7 +233,7 @@ export const GridLayoutGlobalStyles = ({
       <Global
         styles={[
           globalLayoutStyles(euiTheme),
-          globalTempHackStyles(euiTheme.euiTheme, chromeStyle),
+          globalTempHackStyles(euiTheme.euiTheme, chromeStyle, hasAgentWorkspace),
           // Only apply the decorative background for project mode
           isProjectStyle && projectModeBackgroundStyles(euiTheme),
         ]}

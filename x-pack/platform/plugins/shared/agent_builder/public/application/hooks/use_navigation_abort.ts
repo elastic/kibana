@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import type { OnAppLeave } from '../context/app_leave_context';
 import { labels } from '../utils/i18n';
+import { useIsAgentWorkspaceMount } from './use_navigation';
 
 interface UseNavigationAbortParams {
   onAppLeave: OnAppLeave;
@@ -28,6 +29,8 @@ export const useNavigationAbort = ({
   isResponseLoading,
   cancelAll,
 }: UseNavigationAbortParams) => {
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
+
   useEffect(() => {
     onAppLeave((actions) => {
       if (isResponseLoading) {
@@ -48,4 +51,22 @@ export const useNavigationAbort = ({
       onAppLeave((actions) => actions.default());
     };
   }, [onAppLeave, isResponseLoading, cancelAll]);
+
+  useEffect(() => {
+    if (!isAgentWorkspaceMount || !isResponseLoading) {
+      return;
+    }
+
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = labels.navigationAbort.message;
+      cancelAll();
+    };
+
+    window.addEventListener('beforeunload', onBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [isAgentWorkspaceMount, isResponseLoading, cancelAll]);
 };

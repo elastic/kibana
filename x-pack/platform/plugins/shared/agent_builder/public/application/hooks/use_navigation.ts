@@ -13,6 +13,7 @@ import type { ConversationAttachment } from '@kbn/agent-builder-common/attachmen
 import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import type { CreateOAuthClientResponse } from '../../../common/http_api/oauth_clients';
 import { useKibana } from './use_kibana';
+import { confirmAgentWorkspaceLeaveIfNeeded } from '../../agent_workspace/agent_workspace_app_leave';
 
 export interface LocationState {
   shouldStickToBottom?: boolean;
@@ -82,7 +83,7 @@ export const useOrchestratedAppId = (): string | undefined => {
 
 export const useNavigation = () => {
   const {
-    services: { application, appParams },
+    services: { application, appParams, overlays },
   } = useKibana();
 
   const isAgentWorkspaceMount = appParams?.isAgentWorkspaceMount === true;
@@ -121,9 +122,18 @@ export const useNavigation = () => {
   );
 
   const navigateToOrchestratedApp = useCallback(
-    (appId: string, options?: OrchestratedAppNavigateOptions) =>
-      application.navigateToApp(appId, options),
-    [application]
+    async (appId: string, options?: OrchestratedAppNavigateOptions) => {
+      if (isAgentWorkspaceMount) {
+        const confirmed = await confirmAgentWorkspaceLeaveIfNeeded(overlays, appId);
+
+        if (!confirmed) {
+          return;
+        }
+      }
+
+      return application.navigateToApp(appId, options);
+    },
+    [application, isAgentWorkspaceMount, overlays]
   );
 
   const getOrchestratedAppUrl = useCallback(

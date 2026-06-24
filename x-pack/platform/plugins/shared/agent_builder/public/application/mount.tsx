@@ -7,40 +7,22 @@
 
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { AgentBuilderRoutes } from './routes';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
 import { AgentBuilderServicesContext } from './context/agent_builder_services_context';
-import { ActiveSpaceProvider } from './context/active_space_context';
+import { ActiveSpaceSync } from './context/active_space_sync';
 import { PageWrapper } from './page_wrapper';
 import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
 import { StreamingProvider } from './context/streaming/streaming_context';
 import { AgentWorkspaceLinkInterceptor } from './context/agent_workspace_link_interceptor';
-import { AgentWorkspaceOrchestrationBar } from '../agent_workspace/agent_workspace_orchestration_bar';
-
-const agentWorkspaceLayoutStyles = css`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 0%;
-  min-height: 0;
-  min-width: 0;
-`;
-
-const agentWorkspaceMainStyles = css`
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 0%;
-  min-height: 0;
-  min-width: 0;
-`;
+import { AgentWorkspaceDocTitle } from '../agent_workspace/agent_workspace_doc_title';
 
 export const mountApp = async ({
   core,
@@ -68,51 +50,45 @@ export const mountApp = async ({
   };
   const queryClient = new QueryClient();
   await services.accessChecker.initAccess();
-  const activeSpaceId = (await plugins.spaces?.getActiveSpace())?.id ?? DEFAULT_SPACE_ID;
 
-  ReactDOM.render(
-    core.rendering.addContext(
-      <KibanaContextProvider services={kibanaServices}>
-        <ApplicationUsageTrackingProvider>
-          <I18nProvider>
-            <QueryClientProvider client={queryClient}>
-              <AgentBuilderServicesContext.Provider value={services}>
-                <ActiveSpaceProvider spaceId={activeSpaceId}>
-                  <AppLeaveContext.Provider value={onAppLeave}>
-                    <RedirectAppLinks coreStart={core}>
-                      <PageWrapper>
-                        {isAgentWorkspaceMount ? (
-                          <div css={agentWorkspaceLayoutStyles}>
-                            <div css={agentWorkspaceMainStyles}>
-                              <Router history={history}>
-                                <StreamingProvider>
-                                  <AgentWorkspaceLinkInterceptor history={history}>
-                                    <AgentBuilderRoutes />
-                                  </AgentWorkspaceLinkInterceptor>
-                                </StreamingProvider>
-                              </Router>
-                            </div>
-                            <AgentWorkspaceOrchestrationBar />
-                          </div>
-                        ) : (
-                          <Router history={history}>
-                            <StreamingProvider>
+  const appTree = (
+    <KibanaContextProvider services={kibanaServices}>
+      <ApplicationUsageTrackingProvider>
+        <I18nProvider>
+          <ActiveSpaceSync spaces={plugins.spaces} queryClient={queryClient}>
+            <AgentBuilderServicesContext.Provider value={services}>
+              <AppLeaveContext.Provider value={onAppLeave}>
+                <RedirectAppLinks coreStart={core}>
+                  <PageWrapper>
+                    {isAgentWorkspaceMount ? (
+                      <>
+                        <AgentWorkspaceDocTitle />
+                        <Router history={history}>
+                          <StreamingProvider>
+                            <AgentWorkspaceLinkInterceptor history={history}>
                               <AgentBuilderRoutes />
-                            </StreamingProvider>
-                          </Router>
-                        )}
-                      </PageWrapper>
-                    </RedirectAppLinks>
-                  </AppLeaveContext.Provider>
-                </ActiveSpaceProvider>
-              </AgentBuilderServicesContext.Provider>
-            </QueryClientProvider>
-          </I18nProvider>
-        </ApplicationUsageTrackingProvider>
-      </KibanaContextProvider>
-    ),
-    element
+                            </AgentWorkspaceLinkInterceptor>
+                          </StreamingProvider>
+                        </Router>
+                      </>
+                    ) : (
+                      <Router history={history}>
+                        <StreamingProvider>
+                          <AgentBuilderRoutes />
+                        </StreamingProvider>
+                      </Router>
+                    )}
+                  </PageWrapper>
+                </RedirectAppLinks>
+              </AppLeaveContext.Provider>
+            </AgentBuilderServicesContext.Provider>
+          </ActiveSpaceSync>
+        </I18nProvider>
+      </ApplicationUsageTrackingProvider>
+    </KibanaContextProvider>
   );
+
+  ReactDOM.render(core.rendering.addContext(appTree), element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
