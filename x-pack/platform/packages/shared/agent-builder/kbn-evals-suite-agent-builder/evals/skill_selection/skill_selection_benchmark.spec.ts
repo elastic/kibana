@@ -122,7 +122,6 @@ evaluate.describe(
         examples: DASHBOARD_MANAGEMENT_EXAMPLES,
       });
     });
-
   }
 );
 
@@ -218,7 +217,6 @@ evaluate.describe(
     evaluate('siem-readiness routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({ skillId: 'siem-readiness', examples: SIEM_READINESS_EXAMPLES });
     });
-
   }
 );
 
