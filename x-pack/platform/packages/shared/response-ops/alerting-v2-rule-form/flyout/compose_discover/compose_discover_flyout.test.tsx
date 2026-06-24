@@ -41,7 +41,9 @@ const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
 ));
 
 jest.mock('./compose_discover_form', () => {
-  const { useFormContext } = jest.requireActual('react-hook-form');
+  const { useFormContext } = jest.requireActual(
+    'react-hook-form'
+  ) as typeof import('react-hook-form');
   const actual = jest.requireActual('./use_compose_discover_state');
   return {
     getSteps: (isAlert: boolean) => ({
