@@ -10,6 +10,14 @@ import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
+  MAX_SNOOZED_INSTANCE_CONDITIONS,
+  MAX_SNOOZED_ALERT_INSTANCES,
+  MAX_SNOOZED_INSTANCE_ID_LENGTH,
+  MAX_SNOOZED_CONDITION_FIELD_LENGTH,
+  MAX_SNOOZE_EXPIRES_AT_LENGTH,
+  MAX_SNOOZED_BY_LENGTH,
+} from '../../../../max_alert_limit';
+import {
   ruleNotifyWhen as ruleNotifyWhenV1,
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
   ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
@@ -491,7 +499,10 @@ export const artifactsSchema = schema.object({
 });
 
 const snoozedAlertConditionSchema = schema.oneOf([
-  schema.object({ type: schema.literal('field_change'), field: schema.string() }),
+  schema.object({
+    type: schema.literal('field_change'),
+    field: schema.string({ maxLength: MAX_SNOOZED_CONDITION_FIELD_LENGTH }),
+  }),
   schema.object({ type: schema.literal('severity_change') }),
   schema.object({
     type: schema.literal('severity_equals'),
@@ -507,10 +518,12 @@ const snoozedAlertConditionSchema = schema.oneOf([
 
 export const snoozedAlertInstanceSchema = schema.object({
   instance_id: schema.string({
+    maxLength: MAX_SNOOZED_INSTANCE_ID_LENGTH,
     meta: { description: 'The identifier of the snoozed alert instance.' },
   }),
   expires_at: schema.maybe(
     schema.string({
+      maxLength: MAX_SNOOZE_EXPIRES_AT_LENGTH,
       meta: {
         description: 'The datetime at which the per-alert snooze expires, in ISO 8601 format.',
       },
@@ -518,6 +531,7 @@ export const snoozedAlertInstanceSchema = schema.object({
   ),
   conditions: schema.maybe(
     schema.arrayOf(snoozedAlertConditionSchema, {
+      maxSize: MAX_SNOOZED_INSTANCE_CONDITIONS,
       meta: { description: 'Conditions that automatically expire the snooze when met.' },
     })
   ),
@@ -527,9 +541,11 @@ export const snoozedAlertInstanceSchema = schema.object({
     })
   ),
   snoozed_at: schema.string({
+    maxLength: MAX_SNOOZE_EXPIRES_AT_LENGTH,
     meta: { description: 'The datetime at which the alert was snoozed, in ISO 8601 format.' },
   }),
   snoozed_by: schema.string({
+    maxLength: MAX_SNOOZED_BY_LENGTH,
     meta: { description: 'The identifier of the user who snoozed the alert.' },
   }),
 });
@@ -804,6 +820,7 @@ export const ruleResponseInternalSchema = schema.object(
     ),
     snoozed_alert_instances: schema.maybe(
       schema.arrayOf(snoozedAlertInstanceSchema, {
+        maxSize: MAX_SNOOZED_ALERT_INSTANCES,
         meta: { description: 'List of per-alert snooze entries for this rule.' },
       })
     ),

@@ -8,8 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { ISO_DATE_REGEX } from '../../../../schedule/constants';
 import {
+  MAX_ID_LENGTH,
   MAX_SNOOZED_INSTANCE_CONDITIONS,
+  MAX_SNOOZED_INSTANCE_ID_LENGTH,
   MAX_SNOOZED_CONDITION_FIELD_LENGTH,
+  MAX_SNOOZE_EXPIRES_AT_LENGTH,
 } from '../../../../../max_alert_limit';
 
 const validateIsoDate = (value: string) => {
@@ -59,11 +62,13 @@ const snoozeConditionSchema = schema.oneOf([
 
 export const snoozeAlertParamsSchema = schema.object({
   rule_id: schema.string({
+    maxLength: MAX_ID_LENGTH,
     meta: {
       description: 'The identifier for the rule.',
     },
   }),
   alert_id: schema.string({
+    maxLength: MAX_SNOOZED_INSTANCE_ID_LENGTH,
     meta: {
       description: 'The identifier for the alert.',
     },
@@ -87,6 +92,7 @@ export const snoozeAlertBodySchema = schema.object(
   {
     expires_at: schema.maybe(
       schema.string({
+        maxLength: MAX_SNOOZE_EXPIRES_AT_LENGTH,
         validate: (value) => validateIsoDate(value),
         meta: {
           description:

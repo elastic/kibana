@@ -6,8 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  MAX_ID_LENGTH,
+  MAX_SNOOZED_INSTANCE_ID_LENGTH,
+} from '../../../../../../common/max_alert_limit';
 
 export const unsnoozeAlertParamsSchema = schema.object({
-  alertId: schema.string(),
-  alertInstanceId: schema.string(),
+  alertId: schema.string({ maxLength: MAX_ID_LENGTH }),
+  alertInstanceId: schema.string({ maxLength: MAX_SNOOZED_INSTANCE_ID_LENGTH }),
 });
