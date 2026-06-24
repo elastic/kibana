@@ -49,7 +49,7 @@ jest.mock('../../../timelines/components/open_timeline/edit_timeline_batch_actio
 const mockedUseGetTimelinesByIds = useGetTimelinesByIds as jest.MockedFunction<
   typeof useGetTimelinesByIds
 >;
-const mockedTimelinesTable = TimelinesTable as jest.Mock;
+const mockedTimelinesTable = TimelinesTable as unknown as jest.Mock;
 const mockedUseEditTimelineBatchActions = useEditTimelineBatchActions as jest.Mock;
 
 const buildCaseData = (comments: Array<{ type: string; attachmentId?: string | string[] }>) =>

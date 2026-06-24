@@ -153,6 +153,7 @@ export const buildSuperTimelineModel = (
             disabled: false,
             negate: false,
             key: 'query',
+            index: dataView.id,
           },
           query: JSON.parse(combined.filterQuery),
         });

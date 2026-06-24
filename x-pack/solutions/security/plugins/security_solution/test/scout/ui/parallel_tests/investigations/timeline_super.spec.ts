@@ -22,11 +22,11 @@ const TIMELINES_URL = '/api/timelines';
 
 /** Fetch the total count of saved timelines (default type) from the API. */
 const fetchTimelineSavedObjectCount = async (kbnClient: { request: Function }): Promise<number> => {
-  const response = await kbnClient.request<{ totalCount: number }>({
+  const response = await kbnClient.request({
     method: 'GET',
     path: `${TIMELINES_URL}?page_size=1&page_index=1&sort_field=updated&sort_order=desc&timeline_type=default`,
   });
-  return response.data?.totalCount ?? 0;
+  return (response.data as { totalCount: number })?.totalCount ?? 0;
 };
 
 spaceTest.describe(
@@ -74,16 +74,14 @@ spaceTest.describe(
 
         await spaceTest.step('Trigger View Super Timeline', async () => {
           await timelinePage.batchActionsButton.click();
-          await timelinePage.page.testSubj.locator('view-super-timeline-action').click();
+          await timelinePage.viewSuperTimelineAction.click();
           await timelinePage.panel.waitFor({ timeout: 10_000 });
         });
 
         await spaceTest.step('Assert read-only modal — badge present, Save hidden', async () => {
           await expect(timelinePage.superTimelineBadge).toBeVisible();
           await expect(timelinePage.saveButton).not.toBeVisible();
-          await expect(
-            timelinePage.page.testSubj.locator('add-to-favorites-btn')
-          ).not.toBeVisible();
+          await expect(timelinePage.addToFavoritesButton).not.toBeVisible();
         });
 
         await spaceTest.step('Assert no new saved objects were created (transient)', async () => {
@@ -106,8 +104,7 @@ spaceTest.describe(
         await timelinePage.selectTimelineByTitle('Endpoint Investigation');
         await timelinePage.batchActionsButton.click();
 
-        const actionButton = timelinePage.page.testSubj.locator('view-super-timeline-action');
-        await expect(actionButton).toBeDisabled();
+        await expect(timelinePage.viewSuperTimelineAction).toBeDisabled();
       }
     );
   }
