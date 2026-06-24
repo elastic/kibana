@@ -50,6 +50,10 @@ function getStepTreeType(
     if (previousStepExecution.stepType === 'if') {
       return 'if-branch';
     }
+
+    if (previousStepExecution.stepType === 'switch') {
+      return 'enter-case-branch';
+    }
   }
 
   return 'unknown';

@@ -145,8 +145,15 @@ function convertTreeToEuiTreeViewItems(
       item.stepType === 'if-branch' && !stepExecution
         ? `if-branch:${item.stepId}:${item.executionIndex}`
         : null;
+    // Enter-case-branch nodes (switch step cases) — same pattern, status encoded for the detail panel
+    const enterCaseBranchVirtualId =
+      item.stepType === 'enter-case-branch' && !stepExecution
+        ? `enter-case-branch:${item.stepId}:${item.executionIndex}:${item.status ?? ExecutionStatus.COMPLETED}`
+        : null;
     const selected = ifBranchVirtualId
       ? selectedId === ifBranchVirtualId
+      : enterCaseBranchVirtualId
+      ? selectedId === enterCaseBranchVirtualId
       : selectedId === stepExecution?.id;
 
     const stepId = stepExecution?.stepId ?? item.stepId;
@@ -165,6 +172,8 @@ function convertTreeToEuiTreeViewItems(
         onSelectStepExecution(stepExecution.id);
       } else if (ifBranchVirtualId) {
         onSelectStepExecution(ifBranchVirtualId);
+      } else if (enterCaseBranchVirtualId) {
+        onSelectStepExecution(enterCaseBranchVirtualId);
       }
     };
 
@@ -359,12 +368,12 @@ const filterStepTree = (
   }, []);
 };
 
-// Flatten virtual container nodes (if-branch, foreach-iteration, while-iteration):
-// - if-branch: promote branch label as a leaf, hoist its children to the same level
+// Flatten virtual container nodes (if-branch, foreach-iteration, while-iteration, enter-case-branch):
+// - if-branch / enter-case-branch: promote branch label as a leaf, hoist its children to the same level
 // - foreach/while-iteration: skip the container, hoist children with the iteration index as attemptNumber
 const flattenIfBranches = (items: StepExecutionTreeItem[]): StepExecutionTreeItem[] =>
   items.flatMap((item) => {
-    if (item.stepType === 'if-branch') {
+    if (item.stepType === 'if-branch' || item.stepType === 'enter-case-branch') {
       const branchTaken = item.children.some((c) => c.stepExecutionId != null);
       return [
         { ...item, status: branchTaken ? ExecutionStatus.COMPLETED : ExecutionStatus.SKIPPED, children: [] },

@@ -8,7 +8,7 @@
  */
 
 import type { EuiSelectOption } from '@elastic/eui';
-import { EuiAccordion, EuiPanel, EuiSelect, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiFieldSearch, EuiPanel, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { JsonValue } from '@kbn/utility-types';
@@ -42,6 +42,7 @@ export interface ExecutionDataViewerProps {
 export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
   ({ data, title, fieldPathActionsPrefix }) => {
     const [selectedViewMode, setSelectedViewMode] = useState<'table' | 'json'>('table');
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handleViewModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedViewMode(e.target.value as 'table' | 'json');
@@ -75,12 +76,25 @@ export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
       >
         <EuiPanel hasBorder paddingSize="none">
           {selectedViewMode === 'table' && data && (
-            <JSONDataTable
-              data={data}
-              title={title}
-              searchTerm=""
-              fieldPathActionsPrefix={fieldPathActionsPrefix}
-            />
+            <>
+              <EuiFieldSearch
+                compressed
+                fullWidth
+                placeholder={i18n.translate('workflows.executionDataViewer.searchPlaceholder', {
+                  defaultMessage: 'Search fields and values',
+                })}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                css={{ borderRadius: 0, borderBottom: 'none', boxShadow: 'none' }}
+              />
+              <EuiSpacer size="xs" />
+              <JSONDataTable
+                data={data}
+                title={title}
+                searchTerm={searchTerm}
+                fieldPathActionsPrefix={fieldPathActionsPrefix}
+              />
+            </>
           )}
           {selectedViewMode === 'json' && <JsonDataCode json={data} />}
         </EuiPanel>

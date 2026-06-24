@@ -15,7 +15,7 @@ import type {
 } from '@elastic/eui';
 import { copyToClipboard, EuiDataGrid, EuiEmptyPrompt, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -119,9 +119,14 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const { width: containerWidth } = useResizeObserver(containerRef.current);
     const { curPageIndex, pageSize, changePageIndex, changePageSize } = usePager({
-      initialPageSize: 20,
+      initialPageSize: 10,
       totalItems: filteredRecords.length,
     });
+
+    // Reset to first page whenever the search filter changes
+    useEffect(() => {
+      changePageIndex(0);
+    }, [searchTerm, changePageIndex]);
 
     const fieldCellActions = useMemo(() => {
       const cellActions: EuiDataGridColumnCellAction[] = [];
@@ -206,7 +211,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const pagination: EuiDataGridProps['pagination'] = useMemo(
       () => ({
-        pageSizeOptions: [20, 50, 100, 200],
+        pageSizeOptions: [10, 25, 50, 100],
         pageIndex: curPageIndex,
         pageSize,
         onChangeItemsPerPage: changePageSize,

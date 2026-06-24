@@ -133,8 +133,32 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     const isForeachOrWhile =
       stepExecution?.stepType === 'foreach' || stepExecution?.stepType === 'while';
 
+    // Detect foreach/while steps by finding child steps in allStepExecutions whose scopeStack
+    // references this step. This works even when stepType is absent from the lightweight poll.
+    const foreachRows = useMemo(() => {
+      const stepId = stepExecution?.stepId;
+      if (!stepId || !allStepExecutions?.length || !onSelectStepExecution) {
+        return [];
+      }
+      const result: Array<{ iterNum: number; step: WorkflowStepExecutionDto }> = [];
+      for (const s of allStepExecutions) {
+        const frame = s.scopeStack.find((f) => f.stepId === stepId);
+        const iterScope = frame?.nestedScopes.find((sc) => sc.scopeId !== undefined);
+        if (!iterScope?.scopeId) continue;
+        const iterNum = parseInt(iterScope.scopeId, 10);
+        if (isNaN(iterNum)) continue;
+        result.push({ iterNum, step: s });
+      }
+      result.sort(
+        (a, b) =>
+          a.iterNum - b.iterNum ||
+          (a.step.globalExecutionIndex ?? 0) - (b.step.globalExecutionIndex ?? 0)
+      );
+      return result;
+    }, [stepExecution?.stepId, allStepExecutions, onSelectStepExecution]);
+
     const showInput = hasInput;
-    const showOutput = hasOutput || hasError || isForeachOrWhile;
+    const showOutput = hasOutput || hasError || isForeachOrWhile || foreachRows.length > 0;
 
     if (!stepExecution) {
       return (
@@ -273,10 +297,10 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   )}
                   {showOutput && (
                     <EuiFlexItem grow={false}>
-                      {isForeachOrWhile && allStepExecutions?.length && onSelectStepExecution ? (
+                      {foreachRows.length > 0 && onSelectStepExecution ? (
                         <ForeachIterationStepList
-                          stepExecution={stepExecution}
-                          allStepExecutions={allStepExecutions}
+                          executionId={stepExecution.id}
+                          rows={foreachRows}
                           onSelectStep={onSelectStepExecution}
                         />
                       ) : (

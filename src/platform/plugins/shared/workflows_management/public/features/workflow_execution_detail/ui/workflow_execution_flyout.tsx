@@ -25,6 +25,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiLoadingSpinner,
+  EuiPagination,
   EuiPopover,
   EuiToken,
   EuiTab,
@@ -34,7 +35,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -51,6 +52,7 @@ import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { buildForeachOutput } from './step_execution_data_view';
+import { ForeachIterationStepList, type ForeachIterationRow } from './foreach_iteration_step_list';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 
 export interface WorkflowExecutionFlyoutProps {
@@ -221,16 +223,38 @@ const AiStatsSection = ({ stats }: { stats: AiStepStats }) => {
   );
 };
 
+const SECTION_PAGE_SIZE = 10;
+
 const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<'table' | 'code'>(() => (isTableable(data) ? 'table' : 'code'));
   const [isOpen, setIsOpen] = useState(true);
   const [isViewPopoverOpen, setIsViewPopoverOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [pageIndex, setPageIndex] = useState(0);
 
   const hasTable = isTableable(data);
   const effectiveView = hasTable ? view : 'code';
 
   const rows = useMemo(() => flattenToRows(data), [data]);
+
+  const filteredRows = useMemo(() => {
+    if (!searchTerm) return rows;
+    const term = searchTerm.toLowerCase();
+    return rows.filter(
+      (row) => row.field.toLowerCase().includes(term) || row.value.toLowerCase().includes(term)
+    );
+  }, [rows, searchTerm]);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [searchTerm]);
+
+  const pageCount = Math.ceil(filteredRows.length / SECTION_PAGE_SIZE);
+  const paginatedRows = filteredRows.slice(
+    pageIndex * SECTION_PAGE_SIZE,
+    (pageIndex + 1) * SECTION_PAGE_SIZE
+  );
 
   return (
     <div css={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
@@ -340,6 +364,20 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
             </EuiCodeBlock>
           ) : (
             <div css={{ padding: '16px' }}>
+              {rows.length >= SECTION_PAGE_SIZE && (
+                <div css={{ marginBottom: '16px' }}>
+                  <EuiFieldSearch
+                    compressed
+                    fullWidth
+                    placeholder={i18n.translate(
+                      'workflows.executionFlyout.stepDetail.searchPlaceholder',
+                      { defaultMessage: 'Search fields and values' }
+                    )}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              )}
               <div
                 css={{
                   display: 'flex',
@@ -358,7 +396,7 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
                   })}
                 </span>
               </div>
-              {rows.length === 0 ? (
+              {filteredRows.length === 0 ? (
                 <div
                   css={{
                     padding: '12px 4px',
@@ -371,57 +409,72 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
                   })}
                 </div>
               ) : (
-                rows.map((row, idx) => (
-                  <div
-                    key={idx}
-                    css={{
-                      display: 'flex',
-                      borderBottom: idx < rows.length - 1 ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none',
-                      padding: '4px 4px',
-                      minHeight: '33px',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span
+                <>
+                  {paginatedRows.map((row, idx) => (
+                    <div
+                      key={idx}
                       css={{
-                        flex: '0 0 50%',
                         display: 'flex',
+                        borderBottom:
+                          idx < paginatedRows.length - 1 || pageCount > 1
+                            ? `1px solid ${euiTheme.colors.borderBaseSubdued}`
+                            : 'none',
+                        padding: '4px 4px',
+                        minHeight: '33px',
                         alignItems: 'center',
-                        gap: '4px',
-                        overflow: 'hidden',
-                        paddingRight: '8px',
                       }}
                     >
-                      <EuiToken
-                        iconType={fieldTypeToToken[row.fieldType]}
-                        size="xs"
-                        css={{ flexShrink: 0, width: '12px', height: '12px', margin: 0 }}
-                      />
                       <span
                         css={{
+                          flex: '0 0 50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          overflow: 'hidden',
+                          paddingRight: '8px',
+                        }}
+                      >
+                        <EuiToken
+                          iconType={fieldTypeToToken[row.fieldType]}
+                          size="xs"
+                          css={{ flexShrink: 0, width: '12px', height: '12px', margin: 0 }}
+                        />
+                        <span
+                          css={{
+                            fontSize: '12px',
+                            fontFamily: euiTheme.font.familyCode,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {row.field}
+                        </span>
+                      </span>
+                      <span
+                        css={{
+                          flex: '0 0 50%',
                           fontSize: '12px',
-                          fontFamily: euiTheme.font.familyCode,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {row.field}
+                        {row.value}
                       </span>
-                    </span>
-                    <span
-                      css={{
-                        flex: '0 0 50%',
-                        fontSize: '12px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {row.value}
-                    </span>
-                  </div>
-                ))
+                    </div>
+                  ))}
+                  {pageCount > 1 && (
+                    <div css={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 0' }}>
+                      <EuiPagination
+                        pageCount={pageCount}
+                        activePage={pageIndex}
+                        onPageClick={setPageIndex}
+                        compressed
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -465,7 +518,8 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const isPseudoStep =
       selectedStepExecutionId === '__overview' ||
       selectedStepExecutionId === 'trigger' ||
-      (selectedStepExecutionId?.startsWith('if-branch:') ?? false);
+      (selectedStepExecutionId?.startsWith('if-branch:') ?? false) ||
+      (selectedStepExecutionId?.startsWith('enter-case-branch:') ?? false);
 
     const pseudoStepExecution = useMemo<WorkflowStepExecutionDto | null>(() => {
       if (!workflowExecution) return null;
@@ -484,6 +538,26 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
           status: ExecutionStatus.COMPLETED,
           input: undefined,
           output: { result: branchName } as unknown as WorkflowStepExecutionDto['output'],
+          scopeStack: [],
+          workflowRunId: workflowExecution.id,
+          workflowId: workflowExecution.workflowId ?? '',
+          startedAt: '',
+          globalExecutionIndex: -1,
+          stepExecutionIndex: 0,
+          topologicalIndex: -1,
+        } as WorkflowStepExecutionDto;
+      }
+      if (selectedStepExecutionId?.startsWith('enter-case-branch:')) {
+        const parts = selectedStepExecutionId.split(':');
+        const caseName = parts[1];
+        const caseStatus = (parts[3] as ExecutionStatus) ?? ExecutionStatus.COMPLETED;
+        return {
+          id: selectedStepExecutionId,
+          stepId: caseName,
+          stepType: 'enter-case-branch',
+          status: caseStatus,
+          input: undefined,
+          output: undefined,
           scopeStack: [],
           workflowRunId: workflowExecution.id,
           workflowId: workflowExecution.workflowId ?? '',
@@ -533,6 +607,26 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       (isForeachOrWhileStep && activeStepExecution != null && activeStepExecution.output == null
         ? buildForeachOutput(activeStepExecution, workflowExecution?.stepExecutions ?? [])
         : activeStepExecution?.output);
+
+    const foreachRows = useMemo((): ForeachIterationRow[] => {
+      const stepId = activeStepExecution?.stepId;
+      if (!stepId || !isForeachOrWhileStep || !workflowExecution?.stepExecutions?.length) return [];
+      const result: ForeachIterationRow[] = [];
+      for (const s of workflowExecution.stepExecutions) {
+        const frame = s.scopeStack.find((f) => f.stepId === stepId);
+        const iterScope = frame?.nestedScopes.find((sc) => sc.scopeId !== undefined);
+        if (!iterScope?.scopeId) continue;
+        const iterNum = parseInt(iterScope.scopeId, 10);
+        if (isNaN(iterNum)) continue;
+        result.push({ iterNum, step: s });
+      }
+      result.sort(
+        (a, b) =>
+          a.iterNum - b.iterNum ||
+          (a.step.globalExecutionIndex ?? 0) - (b.step.globalExecutionIndex ?? 0)
+      );
+      return result;
+    }, [activeStepExecution?.stepId, isForeachOrWhileStep, workflowExecution?.stepExecutions]);
 
     // Widen the flyout DOM element when the step detail panel is open (FlyoutPanels pattern).
     useLayoutEffect(() => {
@@ -628,6 +722,23 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       <EuiLoadingSpinner size="l" />
                     </EuiFlexItem>
                   </EuiFlexGroup>
+                ) : activeStepExecution?.stepType === 'enter-case-branch' ? (
+                  <StepDataSection
+                    key={`status-${selectedStepExecutionId}`}
+                    label={i18n.translate('workflows.executionFlyout.caseBranch.statusLabel', {
+                      defaultMessage: 'Status',
+                    })}
+                    data={{
+                      result:
+                        activeStepExecution.status === ExecutionStatus.COMPLETED
+                          ? i18n.translate('workflows.executionFlyout.caseBranch.taken', {
+                              defaultMessage: 'Branch executed',
+                            })
+                          : i18n.translate('workflows.executionFlyout.caseBranch.skipped', {
+                              defaultMessage: 'Branch not taken',
+                            }),
+                    }}
+                  />
                 ) : (
                   <>
                     {executionMetadata && (
@@ -654,13 +765,21 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       return aiStats ? <AiStatsSection stats={aiStats} /> : null;
                     })()}
                     {!isPseudoStep && (
-                      <StepDataSection
-                        key={`output-${selectedStepExecutionId}`}
-                        label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
-                          defaultMessage: 'Output',
-                        })}
-                        data={stepOutputData}
-                      />
+                      isForeachOrWhileStep && foreachRows.length > 0 ? (
+                        <ForeachIterationStepList
+                          executionId={selectedStepExecutionId ?? ''}
+                          rows={foreachRows}
+                          onSelectStep={setSelectedStepExecutionId}
+                        />
+                      ) : (
+                        <StepDataSection
+                          key={`output-${selectedStepExecutionId}`}
+                          label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
+                            defaultMessage: 'Output',
+                          })}
+                          data={stepOutputData}
+                        />
+                      )
                     )}
                   </>
                 )}
