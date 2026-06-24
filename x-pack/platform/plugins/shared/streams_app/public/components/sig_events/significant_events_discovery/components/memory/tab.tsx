@@ -798,8 +798,8 @@ function HistoryFlyout({
                   modified={{
                     title: selectedRecord.title,
                     content: selectedRecord.content,
-                    tags: selectedRecord.tags,
-                    categories: selectedRecord.categories,
+                    tags: selectedRecord.tags ?? [],
+                    categories: selectedRecord.categories ?? [],
                   }}
                 />
               </>
