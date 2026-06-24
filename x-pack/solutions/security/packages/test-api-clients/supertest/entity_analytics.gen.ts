@@ -135,7 +135,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-      * **DEPRECATED.** Use the Entity Store APIs to check privileges managing asset criticality.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to check privileges for managing asset criticality.
 
       */
   assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
@@ -170,7 +170,7 @@ is added to its existing source labels instead.
       .send(props.body as object);
   },
   /**
-      * **DEPRECATED.** Use the Entity Store APIs to bulk set asset criticality.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset criticality.
 
 Bulk upsert up to 1000 asset criticality records.
 
@@ -213,7 +213,7 @@ If asset criticality records already exist for the specified entities, those rec
       .send(props.body as object);
   },
   /**
-      * **DEPRECATED.** Use the Entity Store APIs to set asset criticality for an entity.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset criticality to an entity.
 
 Create or update an asset criticality record for a specific entity.
 
@@ -292,7 +292,7 @@ If a record already exists for the specified entity, that record is overwritten 
       .send(props.body as object);
   },
   /**
-      * **DEPRECATED.** Use the Entity Store APIs to unset asset criticality for a specific entity.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset criticality for a specific entity.
 
 Delete the asset criticality record for a specific entity.
 
@@ -460,7 +460,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * **DEPRECATED.** List asset criticality records, paging, sorting and filtering as needed.
+   * **Deprecated in 9.4.0.** List asset criticality records, paging, sorting and filtering as needed.
    */
   findAssetCriticalityRecords(
     props: FindAssetCriticalityRecordsProps,
@@ -512,7 +512,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .send(props.body as object);
   },
   /**
-   * **DEPRECATED.** Get the asset criticality record for a specific entity.
+   * **Deprecated in 9.4.0.** Get the asset criticality record for a specific entity.
    */
   getAssetCriticalityRecord(
     props: GetAssetCriticalityRecordProps,
@@ -526,7 +526,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .query(props.query);
   },
   /**
-      * **DEPRECATED.** Use the Entity Store APIs to get asset criticality for a specific entity.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to get asset criticality status for a specific entity.
 
       */
   getAssetCriticalityStatus(kibanaSpace: string = 'default') {
@@ -1028,7 +1028,7 @@ remain on the watchlist.
       .send(props.body as object);
   },
   /**
-      * **DEPRECATED.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
+      * **Deprecated in 9.4.0.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
 
       */
   uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
