@@ -12,6 +12,8 @@ import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-co
 import { AGENT_EXECUTION_USAGE_TYPE, METERING_SOURCE_ID } from './constants';
 import type { AgentExecutionUsage } from './types';
 
+const TEMP_ECH_METERING_REGION = 'eu-west-1';
+
 export const createMeteringService = ({
   logger,
   cloud,
@@ -48,9 +50,18 @@ class MeteringServiceImpl implements MeteringService {
   }
 
   public async reportExecution(execution: AgentExecutionUsage) {
+    this.logger.debug(
+      `[agent builder metering] Evaluating execution ${execution.executionId} for usage reporting ` +
+        `(hasCloud=${Boolean(this.cloud)}, hasUsageReporting=${Boolean(
+          this.usageApi?.usageReporting
+        )}, hasProjectId=${Boolean(this.cloud?.serverless.projectId)}, hasDeploymentId=${Boolean(
+          this.cloud?.deploymentId
+        )}, provider=${this.cloud?.csp ?? 'unknown'}, region=${this.cloud?.region ?? 'unknown'})`
+    );
+
     if (!this.cloud || !this.usageApi?.usageReporting) {
       this.logger.debug(
-        `[reportExecution] Skipping reporting due to missing cloud or usage reporting dependencies.`
+        `[agent builder metering] Skipping execution ${execution.executionId}; missing cloud or usage reporting dependencies`
       );
       return;
     }
@@ -60,7 +71,9 @@ class MeteringServiceImpl implements MeteringService {
     const instanceGroupType = projectId ? 'serverless_project' : 'stateful_deployment';
 
     if (!projectOrDeploymentId) {
-      this.logger.debug(`[reportExecution] Skipping reporting due to project or deployment ID.`);
+      this.logger.debug(
+        `[agent builder metering] Skipping execution ${execution.executionId}; no projectId or deploymentId available`
+      );
       return;
     }
 
@@ -104,7 +117,7 @@ class MeteringServiceImpl implements MeteringService {
 
     if (instanceGroupType !== 'serverless_project') {
       source.provider = this.cloud.csp;
-      source.region = this.cloud.region;
+      source.region = TEMP_ECH_METERING_REGION;
     }
 
     const record: UsageRecord = {
@@ -125,5 +138,9 @@ class MeteringServiceImpl implements MeteringService {
     });
 
     await this.usageApi.usageReporting.reportUsage([record]);
+    this.logger.debug(
+      `[agent builder metering] Successfully reported execution ${execution.executionId} usage record ` +
+        `(source=${record.source.instance_group_id}, sourceType=${record.source.instance_group_type})`
+    );
   }
 }

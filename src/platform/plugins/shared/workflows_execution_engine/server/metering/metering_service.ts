@@ -15,6 +15,8 @@ import { ExecutionStatus, isTerminalStatus, pickManagedWorkflowFields } from '@k
 
 import { BUCKET_SIZE_MS, METERING_SOURCE_ID, WORKFLOWS_USAGE_TYPE } from './constants';
 
+const TEMP_ECH_METERING_REGION = 'eu-west-1';
+
 /**
  * Workflows Metering Service - Stage 1 of the billing pipeline.
  *
@@ -45,6 +47,15 @@ export class WorkflowsMeteringService {
     execution: EsWorkflowExecution,
     cloudSetup?: CloudSetup
   ): Promise<void> {
+    this.logger.debug(
+      `[workflows metering] Evaluating execution ${execution.id} for usage reporting ` +
+        `(status=${execution.status}, hasProjectId=${Boolean(
+          cloudSetup?.serverless?.projectId
+        )}, hasDeploymentId=${Boolean(cloudSetup?.deploymentId)}, provider=${
+          cloudSetup?.csp ?? 'unknown'
+        }, region=${cloudSetup?.region ?? 'unknown'})`
+    );
+
     const projectId = cloudSetup?.serverless?.projectId;
     const deploymentId = cloudSetup?.deploymentId;
     const instanceGroupId = projectId || deploymentId;
@@ -52,15 +63,24 @@ export class WorkflowsMeteringService {
 
     // Self-managed: no metering (no projectId or deploymentId available)
     if (!instanceGroupId) {
+      this.logger.debug(
+        `[workflows metering] Skipping execution ${execution.id}; no projectId or deploymentId available`
+      );
       return;
     }
 
     // Only report for terminal states; skip SKIPPED executions since they
     // were dropped by concurrency limits and never actually ran.
     if (!isTerminalStatus(execution.status as ExecutionStatus)) {
+      this.logger.debug(
+        `[workflows metering] Skipping execution ${execution.id}; status ${execution.status} is not terminal`
+      );
       return;
     }
     if (execution.status === ExecutionStatus.SKIPPED) {
+      this.logger.debug(
+        `[workflows metering] Skipping execution ${execution.id}; status is skipped`
+      );
       return;
     }
 
@@ -71,8 +91,18 @@ export class WorkflowsMeteringService {
       cloudSetup
     );
 
+    this.logger.debug(
+      `[workflows metering] Reporting execution ${execution.id} usage record: ${JSON.stringify(
+        usageRecord
+      )}`
+    );
+
     try {
       await this.usageReportingService.reportUsage([usageRecord]);
+      this.logger.debug(
+        `[workflows metering] Successfully reported execution ${execution.id} usage record ` +
+          `(source=${usageRecord.source.instance_group_id}, sourceType=${usageRecord.source.instance_group_type})`
+      );
     } catch (err) {
       // Log with billing-relevant details per monitoring requirements:
       // project ID, type, and count for impact assessment
@@ -137,7 +167,7 @@ export class WorkflowsMeteringService {
 
     if (instanceGroupType !== 'serverless_project') {
       source.provider = cloudSetup?.csp;
-      source.region = cloudSetup?.region;
+      source.region = TEMP_ECH_METERING_REGION;
     }
 
     return {

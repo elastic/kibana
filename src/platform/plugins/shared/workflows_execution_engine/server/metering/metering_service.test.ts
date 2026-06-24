@@ -380,7 +380,7 @@ describe('WorkflowsMeteringService', () => {
       expect(record.source.instance_group_id).toBe('deploy-789');
       expect(record.source.instance_group_type).toBe('stateful_deployment');
       expect(record.source.provider).toBe('gcp');
-      expect(record.source.region).toBe('europe-west1');
+      expect(record.source.region).toBe('eu-west-1');
     });
   });
 });
