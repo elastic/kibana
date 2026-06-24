@@ -68,8 +68,8 @@ export function StepExecutionTreeItemLabel({
             <span
               css={[
                 styles.attemptNumber,
-                isDangerous && styles.dangerousStepName,
                 selected && styles.selectedStepName,
+                isDangerous && styles.dangerousStepName,
               ]}
             >
               #{attemptNumber}{' '}

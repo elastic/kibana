@@ -54,6 +54,79 @@ const TRIGGER_BOLT_ICON_SVG =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="%23535966" d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"/></svg>';
 
 
+function buildIterationExpandButton(
+  foreachParentId: string,
+  hiddenAttempts: number[],
+  hiddenChildren: StepExecutionTreeItem[],
+  stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
+  euiTheme: EuiThemeComputed,
+  onToggleForeach: (id: string) => void
+): EuiTreeViewProps['items'][number] {
+  const minHidden = hiddenAttempts[0];
+  const maxHidden = hiddenAttempts[hiddenAttempts.length - 1];
+
+  const allHiddenFailed =
+    hiddenChildren.length > 0 &&
+    hiddenChildren.every((c) => {
+      const childExec = stepExecutionMap.get(c.stepExecutionId ?? '');
+      const childStatus = childExec?.status ?? c.status;
+      return childStatus != null && isDangerousStatus(childStatus);
+    });
+  const expandIconColor = allHiddenFailed
+    ? euiTheme.colors.danger
+    : euiTheme.colors.vis.euiColorVisSuccess0;
+
+  const handleExpand: React.MouseEventHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleForeach(foreachParentId);
+  };
+
+  return {
+    id: `foreach-expand-${foreachParentId}`,
+    label: (
+      <span
+        onClick={handleExpand}
+        css={css({
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          cursor: 'pointer',
+          fontSize: `${euiTheme.font.scale.s * euiTheme.base}px`,
+          lineHeight: euiTheme.font.lineHeightMultiplier,
+        })}
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden={true}
+          css={css({ flexShrink: 0, color: expandIconColor })}
+        >
+          <path
+            d="M1 14L15 14V15L1 15L1 14ZM1 1L15 1V2L1 2L1 1ZM4 10L12 10V6L4 6L4 10ZM12 5C12.5523 5 13 5.44771 13 6V10C13 10.5523 12.5523 11 12 11L4 11C3.44772 11 3 10.5523 3 10L3 6C3 5.44772 3.44772 5 4 5L12 5Z"
+            fill="currentColor"
+          />
+        </svg>
+        <span
+          css={css({
+            color: allHiddenFailed ? euiTheme.colors.danger : euiTheme.colors.textSubdued,
+            fontVariantNumeric: 'tabular-nums',
+          })}
+        >
+          #{minHidden}-{maxHidden}
+        </span>
+      </span>
+    ),
+    callback: () => {
+      onToggleForeach(foreachParentId);
+      return foreachParentId;
+    },
+  };
+}
+
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
@@ -63,7 +136,7 @@ function convertTreeToEuiTreeViewItems(
   expandedForeachIds: Set<string>,
   onToggleForeach: (id: string) => void
 ): EuiTreeViewProps['items'] {
-  return treeItems.map((item) => {
+  return treeItems.flatMap((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
     const status = (stepExecution?.status ?? item.status) ?? undefined;
 
@@ -98,7 +171,55 @@ function convertTreeToEuiTreeViewItems(
     // Check if this is a trigger pseudo-step
     const isTriggerPseudoStep = stepType.startsWith('trigger_');
 
-    return {
+    // Detect iteration children (have attemptNumber set by flattenIfBranches / flattenRetryAttempts)
+    const foreachChildAttempts = item.children
+      .map((c) => c.attemptNumber)
+      .filter((n): n is number => n !== undefined);
+
+    const isForeachOrWhileParent = stepType === 'foreach' || stepType === 'while';
+
+    // Retry parent: all children are retry attempts but the step is NOT a foreach/while loop.
+    // Remove the parent container and return children as siblings at this level.
+    if (foreachChildAttempts.length > 0 && !isForeachOrWhileParent) {
+      const foreachParentId = item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}`;
+      const isExpanded = expandedForeachIds.has(foreachParentId);
+      const uniqueAttempts = [...new Set(foreachChildAttempts)];
+      const maxAttempt = Math.max(...uniqueAttempts);
+      const lastIterChildren = item.children.filter((c) => c.attemptNumber === maxAttempt);
+      const hiddenAttempts = uniqueAttempts.filter((n) => n !== maxAttempt).sort((a, b) => a - b);
+
+      const visibleChildren = isExpanded ? item.children : lastIterChildren;
+      const euiVisibleChildren = convertTreeToEuiTreeViewItems(
+        visibleChildren,
+        stepExecutionMap,
+        euiTheme,
+        selectedId,
+        onSelectStepExecution,
+        expandedForeachIds,
+        onToggleForeach
+      );
+
+      if (!isExpanded && hiddenAttempts.length > 0) {
+        const hiddenChildren = item.children.filter(
+          (c) => c.attemptNumber !== undefined && hiddenAttempts.includes(c.attemptNumber)
+        );
+        return [
+          buildIterationExpandButton(
+            foreachParentId,
+            hiddenAttempts,
+            hiddenChildren,
+            stepExecutionMap,
+            euiTheme,
+            onToggleForeach
+          ),
+          ...euiVisibleChildren,
+        ];
+      }
+
+      return euiVisibleChildren;
+    }
+
+    return [{
       id: item.stepExecutionId ?? ifBranchVirtualId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
       css: [
         getStatusCss({ status, selected }, euiTheme),
@@ -142,12 +263,8 @@ function convertTreeToEuiTreeViewItems(
       children: (() => {
         if (item.children.length === 0) return undefined;
 
-        // Detect foreach/while iteration children (have attemptNumber set by flattenIfBranches)
-        const foreachChildAttempts = item.children
-          .map((c) => c.attemptNumber)
-          .filter((n): n is number => n !== undefined);
-
-        if (foreachChildAttempts.length > 0) {
+        // foreach/while parent: keep parent as container, show collapse button + last iteration
+        if (foreachChildAttempts.length > 0 && isForeachOrWhileParent) {
           const foreachParentId =
             item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}`;
           const isExpanded = expandedForeachIds.has(foreachParentId);
@@ -156,10 +273,9 @@ function convertTreeToEuiTreeViewItems(
           const lastIterChildren = item.children.filter(
             (c) => c.attemptNumber === maxAttempt
           );
-          const hiddenAttempts = uniqueAttempts.filter((n) => n !== maxAttempt).sort((a, b) => a - b);
-          const hiddenIterationCount = hiddenAttempts.length;
-          const minHidden = hiddenAttempts[0];
-          const maxHidden = hiddenAttempts[hiddenAttempts.length - 1];
+          const hiddenAttempts = uniqueAttempts
+            .filter((n) => n !== maxAttempt)
+            .sort((a, b) => a - b);
 
           const visibleChildren = isExpanded ? item.children : lastIterChildren;
           const euiVisibleChildren = convertTreeToEuiTreeViewItems(
@@ -172,51 +288,21 @@ function convertTreeToEuiTreeViewItems(
             onToggleForeach
           );
 
-          if (!isExpanded && hiddenIterationCount > 0) {
-            const handleExpand: React.MouseEventHandler = (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleForeach(foreachParentId);
-            };
-            const expandButtonItem: EuiTreeViewProps['items'][number] = {
-              id: `foreach-expand-${foreachParentId}`,
-              label: (
-                <span
-                  onClick={handleExpand}
-                  css={css({
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    fontSize: `${euiTheme.font.scale.s * euiTheme.base}px`,
-                    lineHeight: euiTheme.font.lineHeightMultiplier,
-                  })}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden={true}
-                    css={css({ flexShrink: 0, color: euiTheme.colors.vis.euiColorVisSuccess0 })}
-                  >
-                    <path
-                      d="M1 14L15 14V15L1 15L1 14ZM1 1L15 1V2L1 2L1 1ZM4 10L12 10V6L4 6L4 10ZM12 5C12.5523 5 13 5.44771 13 6V10C13 10.5523 12.5523 11 12 11L4 11C3.44772 11 3 10.5523 3 10L3 6C3 5.44772 3.44772 5 4 5L12 5Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <span css={css({ color: euiTheme.colors.textSubdued, fontVariantNumeric: 'tabular-nums' })}>
-                    #{minHidden}-{maxHidden}
-                  </span>
-                </span>
+          if (!isExpanded && hiddenAttempts.length > 0) {
+            const hiddenChildren = item.children.filter(
+              (c) => c.attemptNumber !== undefined && hiddenAttempts.includes(c.attemptNumber)
+            );
+            return [
+              buildIterationExpandButton(
+                foreachParentId,
+                hiddenAttempts,
+                hiddenChildren,
+                stepExecutionMap,
+                euiTheme,
+                onToggleForeach
               ),
-              callback: () => {
-                onToggleForeach(foreachParentId);
-                return foreachParentId;
-              },
-            };
-            return [expandButtonItem, ...euiVisibleChildren];
+              ...euiVisibleChildren,
+            ];
           }
 
           return euiVisibleChildren;
@@ -244,7 +330,7 @@ function convertTreeToEuiTreeViewItems(
           }
           return toOpen ?? '';
         },
-    };
+    }];
   });
 }
 

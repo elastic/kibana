@@ -26,6 +26,7 @@ import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import type { ChildWorkflowExecutionItem, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { ForeachIterationStepList } from './foreach_iteration_step_list';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
@@ -48,6 +49,7 @@ interface WorkflowStepExecutionDetailsProps {
   childWorkflowExecution?: ChildWorkflowExecutionItem;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
   parentWorkflowExecution?: WorkflowExecutionLinkInfo;
+  onSelectStepExecution?: (stepExecutionId: string) => void;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
@@ -64,6 +66,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     waitingStepExecutionId,
     childWorkflowExecution,
     parentWorkflowExecution,
+    onSelectStepExecution,
   }) => {
     const { euiTheme } = useEuiTheme();
     const workflowNav = useNavigateToExecution(
@@ -270,11 +273,19 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   )}
                   {showOutput && (
                     <EuiFlexItem grow={false}>
-                      <StepExecutionDataView
-                        stepExecution={stepExecution}
-                        mode="output"
-                        allStepExecutions={allStepExecutions}
-                      />
+                      {isForeachOrWhile && allStepExecutions?.length && onSelectStepExecution ? (
+                        <ForeachIterationStepList
+                          stepExecution={stepExecution}
+                          allStepExecutions={allStepExecutions}
+                          onSelectStep={onSelectStepExecution}
+                        />
+                      ) : (
+                        <StepExecutionDataView
+                          stepExecution={stepExecution}
+                          mode="output"
+                          allStepExecutions={allStepExecutions}
+                        />
+                      )}
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
