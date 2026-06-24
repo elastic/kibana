@@ -9,10 +9,12 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
+
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_SEARCH_DESCRIPTION } from '../constants';
 import { searchLinksOASOperationObject } from '../oas_examples';
-import { searchRequestSchema, searchResponseBodySchema } from './schemas';
+import { searchResponseBodySchema } from './schemas';
 import { search } from './search';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
@@ -30,7 +32,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
         oasOperationObject: () => searchLinksOASOperationObject,
       },
       validate: {
-        request: { query: searchRequestSchema },
+        request: { query: asCodeSearchRequestSchema },
         response: {
           200: {
             body: () => searchResponseBodySchema,

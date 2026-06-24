@@ -8,7 +8,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { searchRequestSchema, searchResponseBodySchema } from './schemas';
+import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
+import type { searchResponseBodySchema } from './schemas';
 
-export type LinksSearchRequestParams = TypeOf<typeof searchRequestSchema>;
+export type LinksSearchRequestParams = TypeOf<typeof asCodeSearchRequestSchema>;
 export type LinksSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;
