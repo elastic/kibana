@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
+import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { TestProviders } from '../../test_utils/test_providers';
 import { EpisodeDetailsPage } from './episode_details_page';
 
@@ -51,6 +52,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () 
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section', () => ({
   AlertEpisodeLifecycleHeatmapSection: () => <div data-test-subj="stubLifecycleHeatmapSection" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section', () => ({
+  AlertEpisodeSeverityHeatmapSection: () => <div data-test-subj="stubSeverityHeatmapSection" />,
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
@@ -100,6 +105,19 @@ const fetchRuleResult = {
     artifacts: [],
   },
   isLoading: false,
+  ruleState: {
+    status: RuleStateStatus.loaded,
+    ruleId: 'rule-1',
+    rule: {
+      id: 'rule-1',
+      kind: 'alerting',
+      enabled: true,
+      metadata: { name: 'Rule A', description: 'Rule description' },
+      grouping: { fields: ['host.name'] },
+      evaluation: { query: { base: 'from index-*' } },
+      artifacts: [],
+    },
+  },
 } as unknown as FetchRuleResult;
 
 const episodeId = 'ep-1';
@@ -124,6 +142,8 @@ describe('EpisodeDetailsPage', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
+    expect(screen.getByTestId('stubLifecycleHeatmapSection')).toBeInTheDocument();
+    expect(screen.getByTestId('stubSeverityHeatmapSection')).toBeInTheDocument();
   });
 
   it('renders the not-found prompt when there is no episode', () => {
