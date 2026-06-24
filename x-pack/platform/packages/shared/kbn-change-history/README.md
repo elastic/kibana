@@ -106,8 +106,8 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
     - `userProfileId` [user profile](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles) from auth realm,
     - `correlationId` to groups bulk events in a common span when set,
     - change `data` overrides (partial `event`, `tags`, and `metadata` to merge into the document),
-    - `fieldsToHash` a nested key/value map of fields to hash in the stored snapshot (only string values are hashed). Hash **high-entropy secrets only** — the digest is a deterministic, `object.id`-salted SHA-256, so low-entropy values (emails, names, etc.) stay brute-forceable. See [Hashed fields in the snapshot](#hashed-fields-in-the-snapshot),
-    - `fieldsToRedact` a nested key/value map of fields to replace with a `[redacted]` placeholder (only string values). Use for **low-entropy** sensitive data where hashing isn't safe. See [Hashed fields in the snapshot](#hashed-fields-in-the-snapshot),
+    - `fieldsToHash` a nested key/value map of fields to hash in the stored snapshot (only string values are hashed). Hash **high-entropy secrets only** — the digest is a deterministic, `object.id`-salted SHA-256, so low-entropy values (emails, names, etc.) stay brute-forceable. See [Sensitive fields in the snapshot](#sensitive-fields-in-the-snapshot),
+    - `fieldsToRedact` a nested key/value map of fields to replace with a `[redacted]` placeholder (only string values). Use for **low-entropy** sensitive data where hashing isn't safe. See [Sensitive fields in the snapshot](#sensitive-fields-in-the-snapshot),
     - `refresh` an optional indicator to force ES shard refresh after changes (affects performance).
 
 - **`getHistory(spaceId, objectType, objectId, opts?)`**
@@ -281,9 +281,9 @@ await client.log(
 );
 ```
 
-### Hashed fields in the snapshot
+### Sensitive fields in the snapshot
 
-Use `fieldsToHash` for sensitive string fields (secrets, API keys, tokens, large base64 blobs). Matching string values are replaced with the last 12 hex chars of `sha256(object.id + value)`, so equal values for the same object hash identically (handy for spotting "did this field change?").
+Use `fieldsToHash` for high-entropy secret string fields (secrets, API keys, tokens). Matching string values are replaced with the last 12 hex chars of `sha256(object.id + value)`, so equal values for the same object hash identically (handy for spotting "did this field change?").
 
 > [!WARNING]
 > Hashing is **not** a safe way to hide low-entropy values. The salt is the `object.id`, which is not secret, and the digest is deterministic — so anything with a small or guessable value space (emails, usernames, names, IP addresses, short enums, booleans-as-strings) can be brute-forced or matched against a precomputed table. Only hash genuinely high-entropy secrets. If a field is low entropy and sensitive, drop it from the snapshot instead of hashing it.
@@ -301,7 +301,7 @@ await client.log(change, {
 });
 ```
 
-For **low-entropy** sensitive data (emails, names, IPs, short enums) use `fieldsToRedact` instead. Matching string values are replaced with a fixed `[redacted]` placeholder, so nothing about the original is stored or recoverable. When a field is listed in both maps, redaction wins.
+For **low-entropy** sensitive data (emails, names, IPs, short enums) and large base64 blobs use `fieldsToRedact` instead. Matching string values are replaced with a fixed `[redacted]` placeholder, so nothing about the original is stored or recoverable. When a field is listed in both maps, redaction wins.
 
 ```ts
 await client.log(change, {
