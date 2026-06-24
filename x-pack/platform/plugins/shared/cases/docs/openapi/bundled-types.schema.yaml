@@ -867,6 +867,70 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
+  /api/cases/templates:
+    get:
+      summary: Get all case templates
+      operationId: getCaseTemplatesDefaultSpace
+      description: |
+        Returns a paginated list of case templates. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the templates you're seeking.
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/template_sort_field'
+        - $ref: '#/components/parameters/sort_order'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/owner_filter'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_case_templates_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+  /api/cases/templates/{templateId}:
+    get:
+      summary: Get a case template by ID
+      operationId: getCaseTemplateDefaultSpace
+      description: |
+        Returns the details of a case template. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the template you're seeking.
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/template_id'
+        - $ref: '#/components/parameters/template_version'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/template_v2_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '404':
+          description: The template was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}:
     get:
       summary: Get case information
@@ -1524,6 +1588,44 @@ components:
       schema:
         type: string
         example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
+    template_sort_field:
+      in: query
+      name: sortField
+      description: Determines which field is used to sort the results.
+      required: false
+      schema:
+        type: string
+        enum:
+          - templateId
+          - name
+          - templateVersion
+          - owner
+          - author
+          - usageCount
+          - fieldCount
+          - lastUsedAt
+          - isDefault
+          - isLatest
+        default: name
+      example: name
+    template_id:
+      in: path
+      name: template_id
+      description: The identifier for the template.
+      required: true
+      schema:
+        type: string
+        maxLength: 36
+      example: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+    template_version:
+      in: query
+      name: version
+      description: The version number of the template to retrieve. If omitted, the latest version is returned.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
     case_id:
       in: path
       name: caseId
@@ -3000,6 +3102,123 @@ components:
             The version of the connector. To retrieve the version value, use the get configuration API.
           type: string
           example: WzIwMiwxXQ==
+    template_v2_response:
+      type: object
+      description: A case template (v2).
+      required:
+        - templateId
+        - name
+        - owner
+        - definition
+        - definitionString
+        - templateVersion
+        - deletedAt
+        - isLatest
+        - isEnabled
+        - latestVersion
+      properties:
+        templateId:
+          type: string
+          description: The unique identifier of the template, shared across all versions.
+        name:
+          type: string
+          description: The display name of the template.
+        owner:
+          $ref: '#/components/schemas/owner'
+        definition:
+          type: object
+          description: The parsed template definition.
+          additionalProperties: true
+        definitionString:
+          type: string
+          description: The raw YAML definition string.
+        templateVersion:
+          type: integer
+          description: The version number of this template revision.
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date the template was soft-deleted, or null if active.
+        description:
+          type: string
+          description: A human-readable description of the template.
+        tags:
+          $ref: '#/components/schemas/template_tags'
+        author:
+          type: string
+          description: The username of the template author.
+        usageCount:
+          type: integer
+          description: The number of times this template has been used to create a case.
+        fieldCount:
+          type: integer
+          description: The number of fields defined in the template.
+        fieldNames:
+          type: array
+          description: Metadata about each field defined in the template.
+          items:
+            type: object
+            required:
+              - name
+              - label
+              - type
+              - control
+            properties:
+              name:
+                type: string
+              label:
+                type: string
+              type:
+                type: string
+              control:
+                type: string
+        lastUsedAt:
+          type: string
+          format: date-time
+          description: The date the template was last used to create a case.
+        isDefault:
+          type: boolean
+          description: Whether this is the default template for its owner.
+        isLatest:
+          type: boolean
+          description: Whether this is the latest version of the template.
+        isEnabled:
+          type: boolean
+          description: Whether the template is enabled.
+        latestVersion:
+          type: integer
+          description: The latest version number of this template.
+    get_case_templates_response:
+      type: object
+      description: Response returned by the get all case templates API.
+      required:
+        - templates
+        - page
+        - perPage
+        - total
+      properties:
+        templates:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/template_v2_response'
+              - type: object
+                required:
+                  - fieldSearchMatches
+                properties:
+                  fieldSearchMatches:
+                    type: boolean
+                    description: Whether the search query matched a field name in this template.
+        page:
+          type: integer
+          description: The page number of the returned results.
+        perPage:
+          type: integer
+          description: The number of results per page.
+        total:
+          type: integer
+          description: The total number of templates matching the query.
     case_response_get_case:
       title: Get case response
       description: |

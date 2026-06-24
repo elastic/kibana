@@ -7,6 +7,7 @@
 
 import { castArray } from 'lodash';
 import type { TemplatesFindRequest } from '../../../../common/types/api';
+import type { GetCaseTemplatesResponse } from '../../../../common/bundled-types.gen';
 import { CASE_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -62,12 +63,12 @@ export const getPublicTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest
         })
         .filter((template): template is NonNullable<typeof template> => template !== null);
 
-      return response.ok({
-        body: {
-          ...pagination,
-          templates: parsedTemplates,
-        },
-      });
+      const body: GetCaseTemplatesResponse = {
+        ...pagination,
+        templates: parsedTemplates,
+      };
+
+      return response.ok({ body });
     } catch (error) {
       throw createCaseError({
         message: `Failed to get templates: ${error}`,

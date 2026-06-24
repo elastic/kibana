@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { TemplateV2Response } from '../../../../common/bundled-types.gen';
 import { CASE_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -27,7 +28,7 @@ export const getPublicTemplateRoute = createCasesRoute({
   },
   params: {
     params: schema.object({
-      template_id: schema.string(),
+      template_id: schema.string({ maxLength: 36 }),
     }),
     query: schema.object({
       version: schema.maybe(schema.number()),
@@ -52,11 +53,9 @@ export const getPublicTemplateRoute = createCasesRoute({
         });
       }
 
-      const parsedTemplate = parseTemplate(template.attributes);
+      const body: TemplateV2Response = parseTemplate(template.attributes);
 
-      return response.ok({
-        body: parsedTemplate,
-      });
+      return response.ok({ body });
     } catch (error) {
       throw createCaseError({
         message: `Failed to get template: ${error}`,

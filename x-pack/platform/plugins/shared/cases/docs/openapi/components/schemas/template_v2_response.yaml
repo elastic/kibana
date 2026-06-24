@@ -1,0 +1,86 @@
+type: object
+description: A case template (v2).
+required:
+  - templateId
+  - name
+  - owner
+  - definition
+  - definitionString
+  - templateVersion
+  - deletedAt
+  - isLatest
+  - isEnabled
+  - latestVersion
+properties:
+  templateId:
+    type: string
+    description: The unique identifier of the template, shared across all versions.
+  name:
+    type: string
+    description: The display name of the template.
+  owner:
+    $ref: 'owner.yaml'
+  definition:
+    type: object
+    description: The parsed template definition.
+    additionalProperties: true
+  definitionString:
+    type: string
+    description: The raw YAML definition string.
+  templateVersion:
+    type: integer
+    description: The version number of this template revision.
+  deletedAt:
+    type: string
+    format: date-time
+    nullable: true
+    description: The date the template was soft-deleted, or null if active.
+  description:
+    type: string
+    description: A human-readable description of the template.
+  tags:
+    $ref: 'template_tags.yaml'
+  author:
+    type: string
+    description: The username of the template author.
+  usageCount:
+    type: integer
+    description: The number of times this template has been used to create a case.
+  fieldCount:
+    type: integer
+    description: The number of fields defined in the template.
+  fieldNames:
+    type: array
+    description: Metadata about each field defined in the template.
+    items:
+      type: object
+      required:
+        - name
+        - label
+        - type
+        - control
+      properties:
+        name:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+        control:
+          type: string
+  lastUsedAt:
+    type: string
+    format: date-time
+    description: The date the template was last used to create a case.
+  isDefault:
+    type: boolean
+    description: Whether this is the default template for its owner.
+  isLatest:
+    type: boolean
+    description: Whether this is the latest version of the template.
+  isEnabled:
+    type: boolean
+    description: Whether the template is enabled.
+  latestVersion:
+    type: integer
+    description: The latest version number of this template.
