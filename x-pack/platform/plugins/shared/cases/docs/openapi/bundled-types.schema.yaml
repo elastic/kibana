@@ -898,7 +898,7 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
-  /api/cases/templates/{templateId}:
+  /api/cases/templates/{template_id}:
     get:
       summary: Get a case template by ID
       operationId: getCaseTemplateDefaultSpace
