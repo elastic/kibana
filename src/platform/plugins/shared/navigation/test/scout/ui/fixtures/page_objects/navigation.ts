@@ -41,14 +41,14 @@ export class Navigation {
     return this.page.testSubj.locator('customizeNavigationUserMenuLink');
   }
 
-  getCustomizeNavModal() {
+  private getCustomizeNavModal() {
     return this.page.testSubj.locator('customizeNavigationModal');
   }
 
   async openCustomizeNavModal() {
     await this.openUserMenu();
     await this.page.testSubj.click('customizeNavigationUserMenuLink');
-    await this.page.testSubj.locator('customizeNavigationModal').waitFor({ state: 'visible' });
+    await this.getCustomizeNavModal().waitFor({ state: 'visible' });
   }
 
   async toggleItemVisibility(id: string) {
@@ -65,6 +65,6 @@ export class Navigation {
     );
     await this.page.testSubj.click('customizeNavigationSaveButton');
     await saved;
-    await this.page.testSubj.locator('customizeNavigationModal').waitFor({ state: 'hidden' });
+    await this.getCustomizeNavModal().waitFor({ state: 'hidden' });
   }
 }
