@@ -416,6 +416,8 @@ ${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip'] })}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
 ${buildV2TargetResolution()}
+// Save EUID source fields after MV_EXPAND (single-value per row) but before entity enrichment overwrites them
+${buildSaveSourceFieldsEsql()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 ${buildPinnedEsql(pinnedIds)}
@@ -436,14 +438,14 @@ ${buildPinnedEsql(pinnedIds)}
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
-      ? `COALESCE(event.id in (${originEventIds
+      ? `CASE (event.id IS NOT NULL AND event.id != "", (${originEventIds
           .map((_id, idx) => `?og_id${idx}`)
           .join(', ')}), false)`
       : 'false'
   }
 | EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `COALESCE(isOrigin AND event.id in (${originAlertIds
+      ? `CASE (event.id IS NOT NULL AND event.id != "", event.id in (${originAlertIds
           .map((_id, idx) => `?og_alrt_id${idx}`)
           .join(', ')}), false)`
       : 'false'
