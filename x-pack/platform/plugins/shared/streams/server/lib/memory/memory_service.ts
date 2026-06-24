@@ -825,6 +825,8 @@ export class MemoryServiceImpl implements MemoryService {
       name: entry.name,
       title: entry.title,
       content: entry.content,
+      tags: entry.tags,
+      categories: entry.categories,
       change_type: changeType,
       change_summary: changeSummary,
       created_at: entry.updated_at,
