@@ -8,13 +8,7 @@
  */
 
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import {
-  asCodeQuerySchema,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_ID_LENGTH,
-  MAX_TITLE_LENGTH,
-  getAsCodeTagsSchema,
-} from '@kbn/as-code-shared-schemas';
+import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { getControlsGroupSchema } from '@kbn/controls-schemas';
