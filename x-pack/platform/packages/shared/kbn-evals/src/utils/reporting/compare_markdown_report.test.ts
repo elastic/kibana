@@ -76,6 +76,44 @@ describe('formatMarkdownCompareReport', () => {
     );
   });
 
+  it('includes refresh baseline link when provided', () => {
+    const output = formatMarkdownCompareReport({
+      experimentIdA: 'exp-a',
+      experimentIdB: 'exp-b',
+      results: [makeResult()],
+      refreshBaselineUrl:
+        'https://buildkite.com/elastic/kibana-pull-request/builds/123#kbn-evals-refresh-block',
+    });
+
+    expect(output).toContain(
+      '[Refresh baseline against latest main](https://buildkite.com/elastic/kibana-pull-request/builds/123#kbn-evals-refresh-block)'
+    );
+  });
+
+  it('renders both compare and refresh links separated by pipe', () => {
+    const output = formatMarkdownCompareReport({
+      experimentIdA: 'exp-a',
+      experimentIdB: 'exp-b',
+      results: [makeResult()],
+      comparePageUrl: 'https://kibana.example.com/compare',
+      refreshBaselineUrl: 'https://buildkite.com/builds/123#kbn-evals-refresh-block',
+    });
+
+    expect(output).toContain(
+      '[View full comparison in UI](https://kibana.example.com/compare) | [Refresh baseline against latest main](https://buildkite.com/builds/123#kbn-evals-refresh-block)'
+    );
+  });
+
+  it('omits refresh link when not provided', () => {
+    const output = formatMarkdownCompareReport({
+      experimentIdA: 'exp-a',
+      experimentIdB: 'exp-b',
+      results: [makeResult()],
+    });
+
+    expect(output).not.toContain('Refresh baseline');
+  });
+
   it('handles null p-values as n/a', () => {
     const output = formatMarkdownCompareReport({
       experimentIdA: 'exp-a',

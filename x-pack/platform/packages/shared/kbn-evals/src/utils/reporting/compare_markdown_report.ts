@@ -54,6 +54,7 @@ export function formatMarkdownCompareReport({
   comparePageUrl,
   baselineTimestamp,
   baselineCommitSha,
+  refreshBaselineUrl,
 }: {
   experimentIdA: string;
   experimentIdB: string;
@@ -62,6 +63,7 @@ export function formatMarkdownCompareReport({
   comparePageUrl?: string;
   baselineTimestamp?: string;
   baselineCommitSha?: string;
+  refreshBaselineUrl?: string;
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
@@ -108,9 +110,16 @@ export function formatMarkdownCompareReport({
     );
   }
 
+  const actionLinks: string[] = [];
   if (comparePageUrl) {
+    actionLinks.push(`[View full comparison in UI](${comparePageUrl})`);
+  }
+  if (refreshBaselineUrl) {
+    actionLinks.push(`[Refresh baseline against latest main](${refreshBaselineUrl})`);
+  }
+  if (actionLinks.length > 0) {
     lines.push('');
-    lines.push(`[View full comparison in UI](${comparePageUrl})`);
+    lines.push(actionLinks.join(' | '));
   }
 
   lines.push('');

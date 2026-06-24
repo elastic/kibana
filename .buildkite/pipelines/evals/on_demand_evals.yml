@@ -42,3 +42,18 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+
+  - label: 'LLM Evals: Post Fresh Baseline Comparison'
+    key: kbn-evals-fresh-compare
+    command: bash .buildkite/scripts/steps/evals/post_eval_comment.sh
+    depends_on: kbn-evals-on-demand
+    if: "build.env('FRESH_BASELINE_PR_EXPERIMENT_ID') != null && build.env('FRESH_BASELINE_PR_EXPERIMENT_ID') != ''"
+    env:
+      KBN_EVALS: '1'
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true

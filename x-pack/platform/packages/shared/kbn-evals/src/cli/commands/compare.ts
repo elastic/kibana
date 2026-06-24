@@ -32,23 +32,25 @@ export const compareCmd: Command<void> = {
 
   Options:
     --baseline-branch  Branch to find the latest baseline experiment on (e.g. "main")
-    --suite            Suite ID filter for baseline lookup
+    --suite            Suite ID filter for baseline lookup and score filtering
     --format           Output format: "terminal" (default) or "markdown"
     --kibana-url       Kibana URL for generating compare page links in markdown
     --output           Write markdown output to a file instead of stdout
+    --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
 
   Environment:
     EVALUATIONS_KBN_URL      Target Kibana URL (defaults to localhost)
     EVALUATIONS_KBN_API_KEY  API key for authenticating to the target Kibana
   `,
   flags: {
-    string: ['baseline-branch', 'suite', 'format', 'kibana-url', 'output'],
+    string: ['baseline-branch', 'suite', 'format', 'kibana-url', 'output', 'refresh-url'],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
-      --suite            Suite ID filter for baseline lookup
+      --suite            Suite ID filter for baseline lookup and score filtering
       --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
       --output           Write markdown output to a file instead of stdout
+      --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -58,6 +60,7 @@ export const compareCmd: Command<void> = {
     const format = flagsReader.string('format') ?? 'terminal';
     const kibanaUrl = flagsReader.string('kibana-url');
     const outputPath = flagsReader.string('output');
+    const refreshUrl = flagsReader.string('refresh-url');
 
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
@@ -213,6 +216,7 @@ export const compareCmd: Command<void> = {
         comparePageUrl,
         baselineTimestamp: baselineMetadata?.timestamp,
         baselineCommitSha: baselineMetadata?.gitCommitSha ?? undefined,
+        refreshBaselineUrl: refreshUrl,
       });
 
       if (outputPath) {

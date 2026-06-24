@@ -206,6 +206,58 @@ function buildEvalsYaml({
       ].join('\n')
     : null;
 
+  const prBuildId = process.env.BUILDKITE_BUILD_ID ?? '';
+  const prNumber = process.env.BUILDKITE_PULL_REQUEST ?? '';
+
+  const refreshBlockStep = isPrBuild
+    ? [
+        `      - block: 'LLM Evals: Refresh Baseline'`,
+        `        key: kbn-evals-refresh-block`,
+        `        blocked_state: passed`,
+        `        depends_on:`,
+        `          - kbn-evals-post-comparison`,
+      ].join('\n')
+    : null;
+
+  const refreshTriggerSteps = isPrBuild
+    ? selectedSuites.map((suite) => {
+        const triggerKey = `kbn-evals-refresh-${normalizeBuildkiteKey(suite.id)}`;
+        const suiteModelGroups = resolveModelGroups(suite);
+        const includeEisModels =
+          hasEisJudge || suiteModelGroups.some((group) => group.startsWith('eis/'));
+        const triggerEnvLines: string[] = [
+          `            EVAL_SUITE_ID: '${suite.id}'`,
+          `            EVAL_SUITE_IDS: '${suite.id}'`,
+          `            FRESH_BASELINE_PR_EXPERIMENT_ID: 'bk-${prBuildId}'`,
+          `            GITHUB_PR_NUMBER: '${prNumber}'`,
+        ];
+        if (evaluationConnectorId) {
+          triggerEnvLines.push(`            EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`);
+        }
+        if (includeEisModels) {
+          triggerEnvLines.push(`            EVAL_INCLUDE_EIS_MODELS: '1'`);
+        }
+        if (suiteModelGroups.length > 0) {
+          triggerEnvLines.push(`            EVAL_MODEL_GROUPS: '${suiteModelGroups.join(',')}'`);
+        }
+        if (suite.serverConfigSet) {
+          triggerEnvLines.push(`            EVAL_SERVER_CONFIG_SET: '${suite.serverConfigSet}'`);
+        }
+        return [
+          `      - trigger: kibana-evals-on-demand`,
+          `        label: 'LLM Evals: Refresh ${suite.name || suite.id}'`,
+          `        key: ${triggerKey}`,
+          `        depends_on:`,
+          `          - kbn-evals-refresh-block`,
+          `        build:`,
+          `          branch: main`,
+          `          message: 'Fresh baseline for PR #${prNumber}: ${suite.id}'`,
+          `          env:`,
+          ...triggerEnvLines,
+        ].join('\n');
+      })
+    : [];
+
   return [
     // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
     // under the single top-level `steps:` key. This must follow that convention.
@@ -216,6 +268,8 @@ function buildEvalsYaml({
     `    steps:`,
     suiteSteps,
     ...(postCompareStep ? [postCompareStep] : []),
+    ...(refreshBlockStep ? [refreshBlockStep] : []),
+    ...refreshTriggerSteps,
   ].join('\n');
 }
 
