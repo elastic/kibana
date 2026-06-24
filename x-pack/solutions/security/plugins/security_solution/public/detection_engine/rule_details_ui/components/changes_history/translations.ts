@@ -36,16 +36,22 @@ export const NO_CHANGE_HISTORY_BODY = i18n.translate(
 );
 
 export const CUSTOM_RULE_RESTORE_SUCCESS_TOAST = (revision: number): string =>
-  i18n.translate('xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreSuccessToast', {
-    defaultMessage: 'Rule restored to revision {revision}',
-    values: { revision },
-  });
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleChangesHistory.customRuleRestoreSuccessToast',
+    {
+      defaultMessage: 'Rule restored to revision {revision}',
+      values: { revision },
+    }
+  );
 
 export const PREBUILT_RULE_RESTORE_SUCCESS_TOAST = (version: number, revision: number): string =>
-  i18n.translate('xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreSuccessToast', {
-    defaultMessage: 'Rule restored to version {version} and revision {revision}',
-    values: { version, revision },
-  });
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleChangesHistory.prebuiltRuleRestoreSuccessToast',
+    {
+      defaultMessage: 'Rule restored to version {version} and revision {revision}',
+      values: { version, revision },
+    }
+  );
 
 export const RESTORE_NO_CHANGE_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleChangesHistory.restoreNoChangeToast',
