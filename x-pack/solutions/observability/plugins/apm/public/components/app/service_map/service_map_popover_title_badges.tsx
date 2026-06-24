@@ -13,10 +13,8 @@ import type { ServiceNodeData } from '../../../../common/service_map';
 import { SloStatusBadge } from '../../shared/slo_status_badge';
 import { useServiceMapSloFlyout } from '../../shared/service_map/service_map_slo_flyout_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
+import { useServiceMapTabNavigate } from './use_service_map_tab_href';
 import { AnomaliesBadge } from '../service_inventory/service_list/anomalies_badge';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 
 interface Props {
   nodeData: ServiceNodeData;
@@ -29,19 +27,13 @@ interface Props {
 export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
   const { core } = useApmPluginContext();
   const canReadSlos = !!core.application?.capabilities?.slo?.read;
-  const navigateToUrl = core.application?.navigateToUrl;
   const { onSloBadgeClick } = useServiceMapSloFlyout();
-
-  const apmRouter = useApmRouter();
-  const routePath = useApmRoutePath();
-  const { query } = useAnyOfApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
 
   const serviceName = nodeData.label;
   const navigateToAlertsTab = useServiceMapAlertsTabNavigate(serviceName);
+  // Reuses the alerts redirection logic (map-context resolution + `kuery`
+  // stripping) but targets the overview tab, where anomalies are highlighted.
+  const navigateToAnomaliesOverview = useServiceMapTabNavigate('overview', serviceName);
 
   const { serviceAnomalyStats } = nodeData;
 
@@ -53,26 +45,6 @@ export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
   if (!showAlertsBadge && !showSloBadge && !showAnomaliesBadge) {
     return null;
   }
-
-  // Strip `kuery` so the map's service-name filter isn't carried into the
-  // service overview (same treatment as the alerts redirection — see
-  // `useAlertsTabHrefBuilder` — to avoid undesired side effects on the destination).
-  // Mobile services live under a different route, so pick the matching one.
-  const isMobileContext = String(routePath).includes('mobile-services');
-  const anomaliesOverviewHref = isMobileContext
-    ? apmRouter.link('/mobile-services/{serviceName}/overview', {
-        path: { serviceName },
-        query: { ...query, kuery: '' },
-      })
-    : apmRouter.link('/services/{serviceName}/overview', {
-        path: { serviceName },
-        query: { ...query, kuery: '' },
-      });
-  const navigateToAnomaliesOverview: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigateToUrl?.(anomaliesOverviewHref);
-  };
 
   const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
     defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
