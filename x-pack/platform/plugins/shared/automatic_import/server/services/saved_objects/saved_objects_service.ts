@@ -546,7 +546,9 @@ export class AutomaticImportSavedObjectService {
         updatedAttributes
       );
 
-      this.logger.debug(`Data stream ${dataStreamId} phase updated to ${phase}`);
+      this.logger.debug(
+        `[ProgressBar] Data stream "${dataStreamId}" (integration "${integrationId}") phase updated to "${phase}"`
+      );
     } catch (error) {
       this.logger.error(`Failed to update data stream ${dataStreamId} phase: ${error}`);
       throw error;

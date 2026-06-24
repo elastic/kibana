@@ -141,7 +141,9 @@ ${ecsRootFieldsSummary}
           })
         : [];
 
-    const phaseCallbackHandler = reportPhase ? new PhaseCallbackHandler(reportPhase) : undefined;
+    const phaseCallbackHandler = reportPhase
+      ? new PhaseCallbackHandler(reportPhase, this.logger)
+      : undefined;
 
     const invokeInput: AutomaticImportAgentStateUpdateType = {
       messages: [

@@ -7,6 +7,7 @@
 
 import { BaseCallbackHandler } from '@langchain/core/callbacks/base';
 import type { Serialized } from '@langchain/core/load/serializable';
+import type { Logger } from '@kbn/core/server';
 import {
   DATA_STREAM_PHASES,
   DATA_STREAM_PHASE_ORDER,
@@ -32,11 +33,17 @@ const TOOL_PHASE_MAP: Record<string, DataStreamPhase> = {
   submit_review: DATA_STREAM_PHASES.reviewing,
 };
 
-const getToolName = (tool: Serialized): string => {
+const getToolName = (tool: Serialized, runName?: string): string => {
+  // For tools created via `tool()` / `DynamicStructuredTool`, the serialized object is a
+  // "not_implemented" shape with no usable `name`; LangChain passes the actual tool name as
+  // the `runName` argument of handleToolStart, so prefer that.
+  if (runName) {
+    return runName;
+  }
   if (typeof tool === 'object' && tool !== null && 'name' in tool) {
     return String((tool as { name: string }).name);
   }
-  return String(tool);
+  return '';
 };
 
 const parseTaskSubagentName = (input: string): string | undefined => {
@@ -56,13 +63,24 @@ export class PhaseCallbackHandler extends BaseCallbackHandler {
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingPhase: DataStreamPhase | null = null;
 
-  constructor(private readonly reportPhase: ReportPhaseFn) {
+  constructor(private readonly reportPhase: ReportPhaseFn, private readonly logger?: Logger) {
     super();
   }
 
-  async handleToolStart(tool: Serialized, input: string): Promise<void> {
-    const toolName = getToolName(tool);
+  async handleToolStart(
+    tool: Serialized,
+    input: string,
+    _runId: string,
+    _parentRunId?: string,
+    _tags?: string[],
+    _metadata?: Record<string, unknown>,
+    runName?: string
+  ): Promise<void> {
+    const toolName = getToolName(tool, runName);
     const phase = this.resolvePhase(toolName, input);
+    this.logger?.debug(
+      `[ProgressBar] Tool "${toolName}" started; resolved phase: ${phase ?? '(none)'}`
+    );
     if (phase) {
       this.reportPhaseIfAdvanced(phase);
     }
@@ -111,10 +129,14 @@ export class PhaseCallbackHandler extends BaseCallbackHandler {
     }
 
     if (phaseIndex <= this.maxPhaseIndex) {
+      this.logger?.debug(
+        `[ProgressBar] Phase "${phase}" skipped (not advancing past current phase index ${this.maxPhaseIndex})`
+      );
       return;
     }
 
     this.maxPhaseIndex = phaseIndex;
+    this.logger?.debug(`[ProgressBar] Phase advanced to "${phase}" (scheduling update)`);
     this.schedulePhaseReport(phase);
   }
 
