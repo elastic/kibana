@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
@@ -34,6 +33,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDestinationsSummary } from '../../components/action_policy/action_policy_destinations_summary';
+import { BadgeList } from '../../components/action_policy/badge_list';
 import { ActionPolicySnoozePopover } from '../../components/action_policy/action_policy_snooze_popover';
 import { ActionPolicyStateBadge } from '../../components/action_policy/action_policy_state_badge';
 import { DeleteActionPolicyConfirmModal } from '../../components/action_policy/delete_confirmation_modal';
@@ -289,17 +289,7 @@ export const ListActionPoliciesPage = () => {
       ),
       render: (tags: string[] | null) => {
         if (!tags || tags.length === 0) return null;
-        return (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {tags.map((tag) => (
-              <EuiFlexItem grow={false} key={tag}>
-                <EuiBadge color="hollow" css={{ maxWidth: 150 }}>
-                  {tag}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        );
+        return <BadgeList items={tags} />;
       },
     },
     {

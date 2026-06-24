@@ -18,7 +18,7 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
-import { BadgeList } from './badge_list';
+import { BadgeList } from '../badge_list';
 import { DestinationRow } from './destination_row';
 
 const EMPTY_VALUE = '-';

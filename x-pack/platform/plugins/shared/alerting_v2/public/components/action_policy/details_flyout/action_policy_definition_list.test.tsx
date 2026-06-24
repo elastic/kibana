@@ -28,7 +28,7 @@ jest.mock('@kbn/core-di-browser', () => ({
   },
 }));
 
-jest.mock('./badge_list', () => ({
+jest.mock('../badge_list', () => ({
   BadgeList: ({ items }: { items: string[] }) => (
     <span data-test-subj="mockBadgeList">{items.join(', ')}</span>
   ),
