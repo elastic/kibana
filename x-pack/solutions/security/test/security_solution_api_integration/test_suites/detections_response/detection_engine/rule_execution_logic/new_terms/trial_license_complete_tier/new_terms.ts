@@ -1274,7 +1274,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
-      platinumOnlyIt('supression per rule execution should work for manual rule runs', async () => {
+      platinumOnlyIt('suppression per rule execution should work for manual rule runs', async () => {
         const id = uuidv4();
         const firstTimestamp = moment(new Date()).subtract(3, 'h');
         const firstDocument = {
@@ -1330,7 +1330,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       platinumOnlyIt(
-        'supression with time window should work for manual rule runs and update alert',
+        'suppression with time window should work for manual rule runs and update alert',
         async () => {
           const id = uuidv4();
           const firstTimestamp = moment(new Date()).subtract(3, 'h');

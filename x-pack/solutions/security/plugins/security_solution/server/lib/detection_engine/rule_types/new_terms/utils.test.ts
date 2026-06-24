@@ -209,21 +209,37 @@ describe('hasFieldsWithUnsupportedEsqlTypes', () => {
     expect(result).toBe(true);
   });
 
-  it('queries both the dotted field and its root', async () => {
+  it('queries all prefix paths of a dotted field', async () => {
     const esClient = createEsClientMock({
-      'labels.env': { keyword: { type: 'keyword' } },
-      labels: { keyword: { type: 'keyword' } },
+      'a.b.c': { keyword: { type: 'keyword' } },
+      'a.b': { keyword: { type: 'keyword' } },
+      a: { keyword: { type: 'keyword' } },
     });
 
     await hasFieldsWithUnsupportedEsqlTypes({
       esClient,
       index: ['logs-*'],
-      fields: ['labels.env'],
+      fields: ['a.b.c'],
     });
 
     const fieldCapsMock = esClient.fieldCaps as jest.Mock;
     const calledFields = fieldCapsMock.mock.calls[0][0].fields;
-    expect(calledFields).toContain('labels.env');
-    expect(calledFields).toContain('labels');
+    expect(calledFields).toContain('a.b.c');
+    expect(calledFields).toContain('a.b');
+    expect(calledFields).toContain('a');
+  });
+
+  it('returns true when an intermediate prefix of a dotted subfield is flattened', async () => {
+    const esClient = createEsClientMock({
+      'a.b': { flattened: { type: 'flattened', searchable: true } },
+    });
+
+    const result = await hasFieldsWithUnsupportedEsqlTypes({
+      esClient,
+      index: ['logs-*'],
+      fields: ['a.b.c'],
+    });
+
+    expect(result).toBe(true);
   });
 });

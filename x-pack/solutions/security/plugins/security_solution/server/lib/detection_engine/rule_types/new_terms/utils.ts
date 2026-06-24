@@ -83,9 +83,10 @@ export const hasFieldsWithUnsupportedEsqlTypes = async ({
   const rootFields = new Set<string>();
   for (const field of fields) {
     rootFields.add(field);
-    const dotIndex = field.indexOf('.');
-    if (dotIndex > 0) {
-      rootFields.add(field.substring(0, dotIndex));
+    let currentDotIndex = field.indexOf('.');
+    while (currentDotIndex > 0) {
+      rootFields.add(field.substring(0, currentDotIndex));
+      currentDotIndex = field.indexOf('.', currentDotIndex + 1);
     }
   }
 

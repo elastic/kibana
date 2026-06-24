@@ -296,7 +296,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the ES|QL + `_msearch` based New Terms rule execution implementation. When enabled,
    * New Terms rules use the faster ES|QL approach (subject to the licensing constraints around
    * cross-cluster search). When disabled, rules fall back to the aggregation based implementation.
-   * Enabled by default;
+   * Enabled by default.
    */
   newTermsEsqlApproachEnabled: true,
 
