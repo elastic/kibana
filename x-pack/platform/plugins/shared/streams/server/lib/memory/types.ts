@@ -145,7 +145,10 @@ export interface MemoryService {
   addCategory(params: { id: string; category: string; user: string }): Promise<MemoryEntry>;
   removeCategory(params: { id: string; category: string; user: string }): Promise<MemoryEntry>;
   listCategories(): Promise<string[]>;
-  getCategoryTree(): Promise<MemoryCategoryNode[]>;
+  getCategoryTree(): Promise<{
+    tree: MemoryCategoryNode[];
+    uncategorized: Array<{ id: string; name: string; title: string }>;
+  }>;
 
   // References
   getBacklinks(params: { id: string }): Promise<MemoryEntry[]>;
