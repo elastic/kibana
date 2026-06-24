@@ -15,6 +15,7 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
   description:
     'Resolves supervises (user → user) relationships from raw_identifiers on entity documents',
   interval: '1d',
+  timeout: '1h',
   initialState: {},
   run: async ({ esClient, logger, status, crudClient, abortController }) => {
     const namespace = status.metadata.namespace;
