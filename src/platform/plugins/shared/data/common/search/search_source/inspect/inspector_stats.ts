@@ -18,6 +18,10 @@ import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import type { ISearchSource } from '../../../../public';
+import {
+  getDslRequestInspectorStats,
+  getDslResponseInspectorStats,
+} from '../../search_methods/inspector_stats';
 
 /** @public */
 export function getRequestInspectorStats(searchSource: ISearchSource) {
@@ -37,28 +41,9 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
         }),
       };
     }
-    stats.indexPattern = {
-      label: i18n.translate('data.search.searchSource.dataViewLabel', {
-        defaultMessage: 'Data view',
-      }),
-      value: index.title,
-      description: i18n.translate('data.search.searchSource.dataViewDescription', {
-        defaultMessage: 'The data view that was queried.',
-      }),
-    };
-    stats.indexPatternId = {
-      label: i18n.translate('data.search.searchSource.dataViewIdLabel', {
-        defaultMessage: 'Data view ID',
-      }),
-      value: index.id!,
-      description: i18n.translate('data.search.searchSource.indexPatternIdDescription', {
-        defaultMessage: 'The ID in the {kibanaIndexPattern} index.',
-        values: { kibanaIndexPattern: '.kibana' },
-      }),
-    };
   }
 
-  return stats;
+  return { ...stats, ...getDslRequestInspectorStats(index) };
 }
 
 /** @public */
@@ -69,55 +54,6 @@ export function getResponseInspectorStats(
   const lastRequest =
     searchSource?.history && searchSource.history[searchSource.history.length - 1];
   const stats: RequestStatistics = {};
-
-  if (resp && resp.took) {
-    stats.queryTime = {
-      label: i18n.translate('data.search.searchSource.queryTimeLabel', {
-        defaultMessage: 'Query time',
-      }),
-      value: i18n.translate('data.search.searchSource.queryTimeValue', {
-        defaultMessage: '{queryTime}ms',
-        values: { queryTime: resp.took },
-      }),
-      description: i18n.translate('data.search.searchSource.queryTimeDescription', {
-        defaultMessage:
-          'The time it took to process the query. ' +
-          'Does not include the time to send the request or parse it in the browser.',
-      }),
-    };
-  }
-
-  if (resp && resp.hits?.total !== undefined) {
-    let value: string | undefined;
-    // TODO remove case where total is number when legacyHitsTotal is removed
-    if (typeof resp.hits.total === 'number') {
-      value = `${resp.hits.total}`;
-    } else {
-      const total = resp.hits.total as { relation: string; value: number };
-      value = total.relation === 'eq' ? `${total.value}` : `> ${total.value}`;
-    }
-    stats.hitsTotal = {
-      label: i18n.translate('data.search.searchSource.hitsTotalLabel', {
-        defaultMessage: 'Hits (total)',
-      }),
-      value,
-      description: i18n.translate('data.search.searchSource.hitsTotalDescription', {
-        defaultMessage: 'The number of documents that match the query.',
-      }),
-    };
-  }
-
-  if (resp && resp.hits) {
-    stats.hits = {
-      label: i18n.translate('data.search.searchSource.hitsLabel', {
-        defaultMessage: 'Hits',
-      }),
-      value: `${resp.hits.hits.length}`,
-      description: i18n.translate('data.search.searchSource.hitsDescription', {
-        defaultMessage: 'The number of documents returned by the query.',
-      }),
-    };
-  }
 
   if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
     stats.requestTime = {
@@ -136,5 +72,5 @@ export function getResponseInspectorStats(
     };
   }
 
-  return stats;
+  return { ...stats, ...getDslResponseInspectorStats(resp) };
 }

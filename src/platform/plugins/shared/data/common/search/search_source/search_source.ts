@@ -100,7 +100,6 @@ import type {
 } from './types';
 import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
-import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
 import type { AggsStart } from '../aggs';
@@ -110,6 +109,7 @@ import type {
   ExpressionFunctionKibanaContext,
 } from '../expressions';
 import { filtersToAst, queryToAst } from '../expressions';
+import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
