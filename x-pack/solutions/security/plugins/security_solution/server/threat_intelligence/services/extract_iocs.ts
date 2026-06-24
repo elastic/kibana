@@ -237,20 +237,59 @@ const defangValue = (type: IocType, value: string, shouldDefang: boolean): strin
   return value;
 };
 
+/**
+ * Refangs defanged IOC strings back to their canonical form before regex matching.
+ *
+ * Applied to the full source text once before any pattern matching so that
+ * defanged IOCs — the way vendors actually publish live C2 infrastructure —
+ * are recovered and matched by the standard patterns.
+ *
+ * Transformations (applied in order; case-insensitive where noted):
+ *   [.] / (.) / {.}              → .    bracket/paren/brace-wrapped dot
+ *   [dot] / (dot)                 → .    spelled-out dot (bracketed/parenthesized only;
+ *                                        bare " dot " is omitted — too FP-prone in prose)
+ *   [://] / [:]//                → ://  bracket-wrapped scheme separator
+ *   [:]                          → :    bracket-wrapped colon
+ *   hxxp:// / hxxps:// (any case)→ http:// / https://   obfuscated scheme prefix
+ *
+ * Intentionally conservative: only unambiguous defang markers are transformed.
+ * The email `[@]`/`(at)` forms are omitted — email support is not yet implemented
+ * and the `at` substring is too common in natural language to transform safely.
+ */
+const refang = (text: string): string =>
+  text
+    // Bracket/paren/brace-wrapped dot
+    .replace(/\[\.\]|\(\.\)|\{\.\}/g, '.')
+    // Spelled-out dot in brackets or parens only — bare " dot " is NOT refanged
+    // (too FP-prone: "asp dot net", "polka dot pattern" would corrupt natural language)
+    .replace(/\[dot\]|\(dot\)/gi, '.')
+    // Bracket-wrapped scheme separator: [://] or [:]// → ://
+    .replace(/\[:\/\/\]|\[:\]\/\//g, '://')
+    // Bracket-wrapped colon (after scheme separator already handled)
+    .replace(/\[:\]/g, ':')
+    // Obfuscated scheme prefix: hxxps?:// (any casing of the XX) → http(s)://
+    .replace(/hxxps?:\/\//gi, (m) =>
+      m.toLowerCase().startsWith('hxxps') ? 'https://' : 'http://'
+    );
+
 export const extractIocs = ({ text, defang = true }: ExtractIocsParams): ExtractIocsResult => {
+  // Pre-pass: recover defanged IOCs before regex matching.
+  const refangedText = refang(text);
   const seen = new Set<string>();
   const rawDomains: string[] = [];
   const iocs: ExtractedIoc[] = [];
 
   // Pass 1 — collect non-domain IOCs and candidate domain strings.
   for (const type of IOC_TYPES) {
-    const matches = text.match(PATTERNS[type]) ?? [];
+    const matches = refangedText.match(PATTERNS[type]) ?? [];
     for (const raw of matches) {
       if (type === 'domain') {
         // Domains go through the full filter pipeline + longest-match dedup below.
         rawDomains.push(raw);
       } else {
-        const value = type === 'hash' ? raw.toLowerCase() : raw;
+        // Normalize: lowercase hashes (hex) and urls (scheme+host are case-insensitive).
+        // IPs are digits-only; no case change needed.
+        const value = type === 'hash' || type === 'url' ? raw.toLowerCase() : raw;
         const dedupKey = `${type}:${value.toLowerCase()}`;
         const isPrivateIpHit = type === 'ip' && isPrivateIp(value);
         if (!seen.has(dedupKey) && !isPrivateIpHit) {
@@ -262,11 +301,12 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   }
 
   // Pass 2 — domain filter pipeline: step 1-4 per domain, then longest-match dedup.
-  const filteredDomains = longestMatchDomainDedup(
-    rawDomains.filter((d) => isDomainKept(d.toLowerCase()))
-  );
+  // Lowercase before filtering so isDomainKept and longestMatchDomainDedup work
+  // on normalized strings; stored `value` is the lowercase canonical form.
+  const lowercasedDomains = rawDomains.map((d) => d.toLowerCase());
+  const filteredDomains = longestMatchDomainDedup(lowercasedDomains.filter(isDomainKept));
   for (const domain of filteredDomains) {
-    const dedupKey = `domain:${domain.toLowerCase()}`;
+    const dedupKey = `domain:${domain}`;
     if (!seen.has(dedupKey)) {
       seen.add(dedupKey);
       iocs.push({ type: 'domain', value: domain, defanged: defangValue('domain', domain, defang) });
@@ -275,8 +315,8 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
   // Sorted-set fingerprint of the unique IOC values in this report. Workflow 2
   // persists this to `extracted.ioc_set_hash` and uses it to find other reports
-  // with overlapping infrastructure. Type-agnostic on purpose so the same IP
-  // surfacing under different normalization conventions still matches.
+  // with overlapping infrastructure. `value` is already normalized (lowercase for
+  // domain/url/hash); the .toLowerCase() call is a safety net for ip and future types.
   const iocSetHash =
     iocs.length === 0
       ? null

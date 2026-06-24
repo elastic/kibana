@@ -135,6 +135,7 @@ x-pack/solutions/security/plugins/security_solution/public/management/cypress_en
 # release notes script output
 report.csv
 report.asciidoc
+scripts/ioc_eval/
 
 # TS incremental build cache
 *.tsbuildinfo

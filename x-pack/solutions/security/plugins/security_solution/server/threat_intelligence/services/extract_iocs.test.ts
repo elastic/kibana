@@ -15,6 +15,136 @@ const domainValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result
 const hashValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'hash');
 const urlValues = (result: ReturnType<typeof extractIocs>) => valuesOf(result, 'url');
 
+// ── Refang + normalization (Phase 1a) ─────────────────────────────────────────
+
+describe('extract_iocs — refang pre-pass and value normalization', () => {
+  describe('refang: recovers defanged domains', () => {
+    test('recovers [.] bracket dot', () => {
+      const r = extractIocs({ text: 'C2 at evil[.]com' });
+      expect(domainValues(r)).toContain('evil.com');
+    });
+
+    test('recovers (.) paren dot', () => {
+      const r = extractIocs({ text: 'callback to bad(.)example.net' });
+      expect(domainValues(r)).toContain('bad.example.net');
+    });
+
+    test('recovers {.} brace dot', () => {
+      const r = extractIocs({ text: 'stage2 from evil{.}org' });
+      expect(domainValues(r)).toContain('evil.org');
+    });
+
+    test('recovers [dot] bracketed spelled-out form', () => {
+      const r = extractIocs({ text: 'beacon to c2[dot]attacker[dot]top' });
+      expect(domainValues(r)).toContain('c2.attacker.top');
+    });
+
+    test('recovers (dot) parenthesized spelled-out form', () => {
+      const r = extractIocs({ text: 'C2 at evil(dot)example(dot)com' });
+      expect(domainValues(r)).toContain('evil.example.com');
+    });
+
+    test('does NOT refang bare " dot " prose (too FP-prone)', () => {
+      // "asp dot net", "polka dot" must not be corrupted
+      const r = extractIocs({ text: 'visit asp dot net for docs' });
+      expect(domainValues(r)).not.toContain('asp.net');
+    });
+
+    test('recovers multi-label defanged domain: evil[.]example[.]com', () => {
+      const r = extractIocs({ text: 'dropper calls home to evil[.]example[.]com' });
+      expect(domainValues(r)).toContain('evil.example.com');
+    });
+  });
+
+  describe('refang: recovers defanged IPs', () => {
+    test('recovers 1.2.3[.]4', () => {
+      const r = extractIocs({ text: 'C2 server at 1.2.3[.]4' });
+      expect(valuesOf(r, 'ip')).toContain('1.2.3.4');
+    });
+
+    test('recovers 10[.]0[.]0[.]1 (private — still dropped)', () => {
+      // Refang recovers the dotted-quad form, but private-IP filter then drops it.
+      const r = extractIocs({ text: 'LAN hop at 10[.]0[.]0[.]1' });
+      expect(valuesOf(r, 'ip')).not.toContain('10.0.0.1');
+    });
+
+    test('recovers 192[.]168[.]1[.]100 (private — still dropped)', () => {
+      const r = extractIocs({ text: 'pivot via 192[.]168[.]1[.]100' });
+      expect(valuesOf(r, 'ip')).not.toContain('192.168.1.100');
+    });
+  });
+
+  describe('refang: recovers hxxp/hxxps URLs', () => {
+    test('recovers hxxps:// scheme', () => {
+      const r = extractIocs({ text: 'payload from hxxps://bad[.]com/x' });
+      expect(urlValues(r)).toContain('https://bad.com/x');
+    });
+
+    test('recovers hxxp:// scheme', () => {
+      const r = extractIocs({ text: 'download hxxp://evil.top/drop' });
+      expect(urlValues(r)).toContain('http://evil.top/drop');
+    });
+
+    test('recovers mixed-case hXXps://', () => {
+      const r = extractIocs({ text: 'seen hXXps://malware.io/payload' });
+      expect(urlValues(r)).toContain('https://malware.io/payload');
+    });
+
+    test('recovers hxxps:// with [.] in host', () => {
+      const r = extractIocs({ text: 'C2: hxxps://bad[.]com/x' });
+      expect(urlValues(r)).toContain('https://bad.com/x');
+    });
+  });
+
+  describe('value normalization: lowercase canonical values', () => {
+    test('mixed-case domain is stored lowercase', () => {
+      const r = extractIocs({ text: 'beacon to Evil.COM' });
+      expect(domainValues(r)).toContain('evil.com');
+      expect(domainValues(r)).not.toContain('Evil.COM');
+    });
+
+    test('defanged Evil[.]com and fanged evil.com produce the SAME value (collision)', () => {
+      const r1 = extractIocs({ text: 'C2 at Evil[.]com' });
+      const r2 = extractIocs({ text: 'C2 at evil.com' });
+      expect(domainValues(r1)).toEqual(domainValues(r2));
+    });
+
+    test('url value is lowercased', () => {
+      const r = extractIocs({ text: 'from hXXps://Bad.Example.Com/Path' });
+      expect(urlValues(r)).toContain('https://bad.example.com/path');
+    });
+
+    test('hash value is lowercased (unchanged from prior behavior)', () => {
+      const r = extractIocs({ text: 'hash: D41D8CD98F00B204E9800998ECF8427E' });
+      expect(valuesOf(r, 'hash')).toContain('d41d8cd98f00b204e9800998ecf8427e');
+    });
+  });
+
+  describe('ioc_set_hash stability with normalization', () => {
+    test('Evil[.]com and evil.com produce the same ioc_set_hash', () => {
+      const r1 = extractIocs({ text: 'C2 at Evil[.]com' });
+      const r2 = extractIocs({ text: 'C2 at evil.com' });
+      expect(r1.ioc_set_hash).not.toBeNull();
+      expect(r1.ioc_set_hash).toEqual(r2.ioc_set_hash);
+    });
+
+    test('hxxps://bad[.]com and https://bad.com produce the same ioc_set_hash', () => {
+      const r1 = extractIocs({ text: 'from hxxps://bad[.]com/x' });
+      const r2 = extractIocs({ text: 'from https://bad.com/x' });
+      expect(r1.ioc_set_hash).not.toBeNull();
+      expect(r1.ioc_set_hash).toEqual(r2.ioc_set_hash);
+    });
+
+    test('hash IOC is unchanged: same hash in defanged or fanged report', () => {
+      const hash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+      const r1 = extractIocs({ text: `sha256: ${hash}` });
+      const r2 = extractIocs({ text: `sha256: ${hash.toUpperCase()}` });
+      expect(r1.ioc_set_hash).not.toBeNull();
+      expect(r1.ioc_set_hash).toEqual(r2.ioc_set_hash);
+    });
+  });
+});
+
 // ── DROP side: tokens that must NOT appear in IOC output ──────────────────────
 
 describe('extract_iocs — DROP side (precision filters)', () => {
