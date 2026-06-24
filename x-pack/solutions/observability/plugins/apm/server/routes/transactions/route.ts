@@ -124,8 +124,12 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       }),
     ]);
 
-    const { transactionGroups, maxCountExceeded, transactionOverflowCount, fellBackToRollupInterval } =
-      serviceTransactionGroups;
+    const {
+      transactionGroups,
+      maxCountExceeded,
+      transactionOverflowCount,
+      fellBackToRollupInterval,
+    } = serviceTransactionGroups;
 
     const transactionGroupsWithAlerts = joinByKey(
       [...transactionGroups, ...serviceTransactionGroupsAlerts],

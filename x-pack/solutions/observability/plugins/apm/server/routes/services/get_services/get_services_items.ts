@@ -7,7 +7,10 @@
 
 import type { Logger } from '@kbn/logging';
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
-import { ApmDocumentType, type ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import {
+  ApmDocumentType,
+  type ApmServiceTransactionDocumentType,
+} from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ServiceGroup } from '../../../../common/service_groups';
