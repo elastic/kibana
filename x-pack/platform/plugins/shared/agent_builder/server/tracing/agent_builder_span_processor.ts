@@ -9,11 +9,15 @@ import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { GenAISemanticConventions } from '@kbn/inference-tracing';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
-import { AGENT_BUILDER_BUILTIN_TOOLS } from '@kbn/agent-builder-server/allow_lists';
+import {
+  AGENT_BUILDER_BUILTIN_AGENTS,
+  AGENT_BUILDER_BUILTIN_TOOLS,
+} from '@kbn/agent-builder-server/allow_lists';
 import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
 import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
+const BUILTIN_AGENT_NAMES: Set<string> = new Set(AGENT_BUILDER_BUILTIN_AGENTS);
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
@@ -64,8 +68,8 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
 }
 
 /**
- * Replaces user-created tool and agent names with 'custom' to avoid leaking
- * user-chosen identifiers. Built-in tools and agents keep their real names.
+ * Replaces user-created tool, agent, and workflow names with 'custom' to avoid
+ * leaking user-chosen identifiers. Built-in tools and agents keep their real names.
  * Returns the anonymized attributes and the (possibly rewritten) span name.
  */
 function anonymizeNames(
@@ -77,10 +81,13 @@ function anonymizeNames(
 
   const agentName = result[GenAISemanticConventions.GenAIAgentName];
   if (agentName != null) {
-    result[GenAISemanticConventions.GenAIAgentName] = 'custom';
-    const prefix = 'invoke_agent ';
-    if (finalSpanName.startsWith(prefix)) {
-      finalSpanName = `${prefix}custom`;
+    const isBuiltin = BUILTIN_AGENT_NAMES.has(String(agentName));
+    result[GenAISemanticConventions.GenAIAgentName] = isBuiltin ? agentName : 'custom';
+    if (!isBuiltin) {
+      const prefix = 'invoke_agent ';
+      if (finalSpanName.startsWith(prefix)) {
+        finalSpanName = `${prefix}custom`;
+      }
     }
   }
 
@@ -88,6 +95,11 @@ function anonymizeNames(
   if (toolName != null) {
     const isBuiltin = BUILTIN_TOOL_IDS.has(String(toolName)) || isInternalTool(String(toolName));
     result[GenAISemanticConventions.GenAIToolName] = isBuiltin ? toolName : 'custom';
+  }
+
+  const workflowName = result[GenAISemanticConventions.GenAIWorkflowName];
+  if (workflowName != null) {
+    result[GenAISemanticConventions.GenAIWorkflowName] = 'custom';
   }
 
   return { attributes: result, spanName: finalSpanName };
