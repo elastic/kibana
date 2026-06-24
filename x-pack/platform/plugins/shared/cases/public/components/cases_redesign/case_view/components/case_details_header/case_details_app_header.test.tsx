@@ -25,10 +25,6 @@ jest.mock('../../../../../common/navigation/hooks');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../case_view/use_on_refresh_case_view_page');
 
-jest.mock('@kbn/app-header', () =>
-  jest.requireActual('@kbn/app-header/mocks').mockAppHeaderModule()
-);
-
 jest.mock('../../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));

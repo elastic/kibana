@@ -5381,6 +5381,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-browser-context-mocks@link:src/core/packages/chrome/browser-context-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-browser-context@link:src/core/packages/chrome/browser-context":
   version "0.0.0"
   uid ""

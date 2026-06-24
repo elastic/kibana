@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  MockAppHeader,
-  MockAppHeaderView,
-  mockAppHeaderModule,
-} from './src/app_header/app_header.mock';
-
-// RTL helpers live in `@kbn/app-header/test_helpers`; test subjects in `@kbn/app-header`.
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/chrome/browser-context-mocks'],
+};

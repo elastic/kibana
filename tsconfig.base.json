@@ -454,6 +454,8 @@
       "@kbn/core-chrome-browser-components/*": ["src/core/packages/chrome/browser-components/*"],
       "@kbn/core-chrome-browser-context": ["src/core/packages/chrome/browser-context"],
       "@kbn/core-chrome-browser-context/*": ["src/core/packages/chrome/browser-context/*"],
+      "@kbn/core-chrome-browser-context-mocks": ["src/core/packages/chrome/browser-context-mocks"],
+      "@kbn/core-chrome-browser-context-mocks/*": ["src/core/packages/chrome/browser-context-mocks/*"],
       "@kbn/core-chrome-browser-hooks": ["src/core/packages/chrome/browser-hooks"],
       "@kbn/core-chrome-browser-hooks/*": ["src/core/packages/chrome/browser-hooks/*"],
       "@kbn/core-chrome-browser-internal": ["src/core/packages/chrome/browser-internal"],

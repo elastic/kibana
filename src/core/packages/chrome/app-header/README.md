@@ -80,28 +80,35 @@ button is present.
 ## Testing
 
 `AppHeader` reads chrome from context, so rendering it without a `ChromeServiceProvider` throws
-`"useChromeService must be used within a ChromeServiceProvider"`. Satisfy it one of two ways:
+`"useChromeService must be used within a ChromeServiceProvider"`.
 
-**Provide chrome in your harness** — best when a suite already has a shared render wrapper:
+**If your harness renders through `KibanaRenderContextProvider {...coreStart}`, you need nothing.** That
+provider forwards `chrome.withProvider`, and the chrome mock (`chromeServiceMock.createStartContract()`)
+implements it just like production — wrapping children in `ChromeServiceProvider`. So any test using the
+standard core-mock render harness already has chrome context, exactly as the app does at runtime.
+
+**For components rendered in isolation** (a bare `render(<Component />)` with no core-mock render
+context), wrap with `MockAppHeaderProvider`, which supplies everything an `AppHeader` needs in tests
+(today just the chrome context):
 
 ```tsx
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
-import { chromeServiceMock } from '@kbn/core/public/mocks';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
-<ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
-  {/* ...rest of your harness... */}
-</ChromeServiceProvider>;
+render(
+  <MockAppHeaderProvider>
+    <MyComponentThatRendersAnAppHeader />
+  </MockAppHeaderProvider>
+);
 ```
 
-**Mock the package** — best for a one-off test that can't reach a shared harness:
+Pass `chrome` to override the default mock chrome service when a test needs custom chrome behavior:
 
-```ts
-jest.mock('@kbn/app-header', () => jest.requireActual('@kbn/app-header/mocks').mockAppHeaderModule());
+```tsx
+<MockAppHeaderProvider chrome={myChromeMock}>{children}</MockAppHeaderProvider>
 ```
 
-`mockAppHeaderModule()` renders the **real** `AppHeader`/`AppHeaderView` wrapped in mock chrome, so the
-genuine DOM and test subjects are produced; every other export is preserved. (`MockAppHeader` /
-`MockAppHeaderView` are also exported directly.)
+`MockChromeContextProvider` (the generic chrome-only provider it wraps) is also re-exported here, and
+lives in `@kbn/core-chrome-browser-context-mocks` for non-header code.
 
 Assert against `APP_HEADER_TEST_SUBJECTS` (from the package root) so component and test can't drift:
 

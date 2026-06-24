@@ -15,10 +15,6 @@ import { CasesListAppHeader } from './cases_list_app_header';
 
 jest.mock('../../../../common/navigation/hooks');
 
-jest.mock('@kbn/app-header', () =>
-  jest.requireActual('@kbn/app-header/mocks').mockAppHeaderModule()
-);
-
 describe('CasesListAppHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();

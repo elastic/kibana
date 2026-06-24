@@ -7,18 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { AppHeaderConfig, ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type { ReactNode } from 'react';
+import type {
+  AppHeaderConfig,
+  ChromeBadge,
+  ChromeBreadcrumb,
+  GlobalSearchConfig,
+} from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
   InternalChromeStart,
 } from '@kbn/core-chrome-browser-internal-types';
 import { lazyObject } from '@kbn/lazy-object';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
-import type { ReactNode } from 'react';
 
 const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
   return lazyObject({
@@ -27,12 +35,23 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 };
 
 const createStartContractMock = () => {
+  const nextGlobalSearchState$ = new BehaviorSubject<GlobalSearchConfig | undefined>(undefined);
+  const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
+  const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
   const inlineAppHeaderState$ = new BehaviorSubject(false);
   let appHeaderRegistrationId = 0;
 
+  const sidebar = sidebarServiceMock.createStartContract();
+
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
-    withProvider: jest.fn((children) => children),
+    // Mirror the real `withProvider` (see browser-internal `createChromeApi`) so components that read
+    // chrome via context render in tests just like in production, without per-test wrapping.
+    withProvider: jest.fn((children: ReactNode) => (
+      <ChromeServiceProvider value={{ chrome: startContract }}>
+        <SidebarServiceProvider value={{ sidebar }}>{children}</SidebarServiceProvider>
+      </ChromeServiceProvider>
+    )),
     componentDeps: lazyObject({
       basePath: lazyObject({
         get: jest.fn().mockReturnValue(''),
@@ -45,7 +64,7 @@ const createStartContractMock = () => {
         undefined
       ) as unknown as DeeplyMockedKeys<Observable<MountPoint | undefined>>,
     }),
-    sidebar: lazyObject(sidebarServiceMock.createStartContract()),
+    sidebar: lazyObject(sidebar),
     navLinks: lazyObject({
       getNavLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       has: jest.fn(),
@@ -125,14 +144,22 @@ const createStartContractMock = () => {
         register: jest.fn().mockReturnValue(() => {}),
       }),
       globalSearch: lazyObject({
-        set: jest.fn(),
-        get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+        set: jest.fn((config?: GlobalSearchConfig) => {
+          nextGlobalSearchState$.next(config);
+        }),
+        get$: jest.fn().mockReturnValue(nextGlobalSearchState$),
+      }),
+      userMenu: lazyObject({
+        get$: jest.fn().mockReturnValue(nextUserMenuState$),
+        set: jest.fn((content?: ReactNode) => {
+          nextUserMenuState$.next(content ?? null);
+        }),
       }),
       contextSwitcher: lazyObject({
+        get$: jest.fn().mockReturnValue(nextContextSwitcherState$),
         set: jest.fn((content?: ReactNode) => {
-          new BehaviorSubject<ReactNode>(null).next(content ?? null);
+          nextContextSwitcherState$.next(content ?? null);
         }),
-        get$: jest.fn().mockReturnValue(new BehaviorSubject<ReactNode>(null)),
       }),
       inlineAppHeader: lazyObject({
         get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
@@ -148,12 +175,6 @@ const createStartContractMock = () => {
               nextAppHeaderState$.next(undefined);
             }
           };
-        }),
-      }),
-      userMenu: lazyObject({
-        get$: jest.fn().mockReturnValue(new BehaviorSubject<ReactNode>(null)),
-        set: jest.fn((content?: ReactNode) => {
-          new BehaviorSubject<ReactNode>(null).next(content ?? null);
         }),
       }),
       getFeedbackHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
