@@ -251,7 +251,7 @@ export const assertNoRelationshipId = async (
     .not.toContain(unexpectedTargetId);
 };
 
-const RESOLVED_TO_PATH = 'entity.relationshpips.resolution.resolved_to';
+const RESOLVED_TO_PATH = 'entity.relationships.resolution.resolved_to';
 
 export const waitForResolution = async (
   esClient: EsClient,
