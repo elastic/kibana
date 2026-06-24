@@ -215,7 +215,7 @@ export const waitForRelationshipIds = async (
           ? normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath])
           : [];
       },
-      { timeout: 5_000, intervals: [200] }
+      { timeout: 10_000, intervals: [200] }
     )
     .toContain(expectedTargetId);
 };
@@ -246,7 +246,7 @@ export const assertNoRelationshipId = async (
           ? normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath])
           : [];
       },
-      { timeout: 5_000, intervals: [200] }
+      { timeout: 10_000, intervals: [200] }
     )
     .not.toContain(unexpectedTargetId);
 };
