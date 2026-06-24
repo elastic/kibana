@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
+  type IconType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -44,7 +45,7 @@ export interface AwsConnectSetupProps {
   onContinue?: () => void;
   isContinueButtonLoading?: boolean;
   continueButtonLabel?: React.ReactNode;
-  continueButtonIconType?: string;
+  continueButtonIconType?: IconType;
   onConnectorIdChange?: (connectorId: string | undefined) => void;
   onStaticKeysChange?: (keys: AwsStaticKeyCredentials | undefined) => void;
   onTemporaryKeysChange?: (keys: AwsTemporaryKeyCredentials | undefined) => void;

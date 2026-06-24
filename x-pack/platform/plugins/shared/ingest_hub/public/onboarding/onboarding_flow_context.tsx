@@ -133,14 +133,17 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         setPersistedDeployAndDetectStep({
           serviceStatuses: {
             ...persistedDeployAndDetectStep.serviceStatuses,
-            ...rest.serviceStatuses,
+            ...(rest.serviceStatuses ?? {}),
           },
           policyIdsByPackage: {
             ...persistedDeployAndDetectStep.policyIdsByPackage,
-            ...rest.policyIdsByPackage,
+            ...(rest.policyIdsByPackage ?? {}),
           },
           failedPackages: rest.failedPackages ?? persistedDeployAndDetectStep.failedPackages,
-          deployErrors: { ...persistedDeployAndDetectStep.deployErrors, ...rest.deployErrors },
+          deployErrors: {
+            ...persistedDeployAndDetectStep.deployErrors,
+            ...(rest.deployErrors ?? {}),
+          },
         });
       }
     },

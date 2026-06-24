@@ -326,8 +326,17 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         if (targets.length === 0) return;
       } else {
         targets = packageNames;
+        const retryStatuses = buildServiceStatuses(targets, [], servicesByPackage);
+        const remainingFailed = deployAndDetectStep.failedPackages.filter(
+          (pkg) => !targets.includes(pkg)
+        );
         setIsDeploying(true);
-        updateDeployAndDetectStep({ isDeploying: true });
+        updateDeployAndDetectStep({
+          isDeploying: true,
+          serviceStatuses: retryStatuses,
+          failedPackages: remainingFailed,
+          deployErrors: {},
+        });
       }
 
       const globalRegion = serviceSettings?.globalRegion ?? '';
@@ -376,6 +385,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       onContinue,
       updateDeployAndDetectStep,
       deployAndDetectStep.serviceStatuses,
+      deployAndDetectStep.failedPackages,
     ]
   );
 

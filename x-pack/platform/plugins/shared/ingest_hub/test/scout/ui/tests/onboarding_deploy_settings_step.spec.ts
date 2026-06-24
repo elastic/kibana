@@ -141,11 +141,13 @@ test.describe('Onboarding deploy settings step', { tag: tags.stateful.classic },
       // Next button stays disabled until a connector is chosen from the selector
       await expect(page.testSubj.locator('awsConnectSetup-continueButton')).toBeDisabled();
     } finally {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/api/fleet/cloud_connectors/${connectorId ?? 'none'}`,
-        ignoreErrors: [404],
-      });
+      if (connectorId) {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `/api/fleet/cloud_connectors/${connectorId}`,
+          ignoreErrors: [404],
+        });
+      }
     }
   });
 });
