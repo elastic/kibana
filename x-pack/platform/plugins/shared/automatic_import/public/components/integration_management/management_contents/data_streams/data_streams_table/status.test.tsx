@@ -29,21 +29,21 @@ describe('Status', () => {
     it('should show progress bar for pending status', () => {
       render(<Status status="pending" phase="mapping_to_ecs" />);
 
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
       expect(screen.getByText('Mapping to ECS')).toBeInTheDocument();
     });
 
     it('should show progress bar for processing status', () => {
       render(<Status status="processing" phase="building_pipeline" />);
 
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
       expect(screen.getByText('Building ingest pipeline')).toBeInTheDocument();
     });
 
     it('should fall back to analyzing label when phase is missing', () => {
       render(<Status status="processing" />);
 
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
       expect(screen.getByText('Analyzing')).toBeInTheDocument();
     });
 

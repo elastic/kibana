@@ -54,7 +54,14 @@ export const Status = ({ status, phase, isDeleting = false }: StatusProps) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">{phaseLabel}</EuiText>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">{phaseLabel}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

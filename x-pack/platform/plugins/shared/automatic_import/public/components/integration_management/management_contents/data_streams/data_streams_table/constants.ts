@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type {
-  DataStreamResponse,
+import {
   DATA_STREAM_PHASE_ORDER,
   DATA_STREAM_PHASES,
   getDataStreamPhaseProgress,
-  type DataStreamPhase,
 } from '../../../../../../common';
+import type { DataStreamResponse, DataStreamPhase } from '../../../../../../common';
 import * as i18n from '../translations';
 
 export const STATUS_COLOR_MAP: Record<DataStreamResponse['status'], string> = {
