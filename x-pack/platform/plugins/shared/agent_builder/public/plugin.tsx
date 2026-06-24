@@ -137,14 +137,19 @@ export class AgentBuilderPlugin
 
     registerWorkflowSteps(deps.workflowsExtensions, core);
 
-    core.chrome.sidebar.registerApp({
-      appId: 'agentBuilder',
-      restoreOnReload: false,
-      loadComponent: async () => {
-        const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
-        return SidebarConversation;
-      },
-    });
+    const isAgentFirstChromeAtSetup =
+      isAgentFirst(core.featureFlags) && isNextChrome(core.featureFlags);
+
+    if (!isAgentFirstChromeAtSetup) {
+      core.chrome.sidebar.registerApp({
+        appId: 'agentBuilder',
+        restoreOnReload: false,
+        loadComponent: async () => {
+          const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
+          return SidebarConversation;
+        },
+      });
+    }
 
     return {};
   }
@@ -182,20 +187,24 @@ export class AgentBuilderPlugin
     const { navigationService, usageCollection } = this.setupServices;
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
-    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
+    const isAgentFirstChrome =
+      isAgentFirst(core.featureFlags) && isNextChrome(core.featureFlags);
+    const sidebar = isAgentFirstChrome ? undefined : core.chrome.sidebar.getApp('agentBuilder');
+
+    const noopSidebarChatRef = { close: () => {} };
 
     const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
       // Agent-first chrome: AB lives in the agent workspace column; skip sidebar embeddable.
-      if (isAgentFirst(core.featureFlags) && isNextChrome(core.featureFlags)) {
+      if (isAgentFirstChrome) {
         if (this.activeSidebarRef) {
           return { chatRef: this.activeSidebarRef };
         }
 
-        return {
-          chatRef: {
-            close: () => {},
-          },
-        };
+        return { chatRef: noopSidebarChatRef };
+      }
+
+      if (!sidebar) {
+        return { chatRef: noopSidebarChatRef };
       }
 
       const { conversationId, ...openOptions } = options ?? {};
@@ -352,10 +361,12 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.resetBrowserApiTools();
         }
       },
-      openChat: (options?: OpenConversationSidebarOptions) => {
-        return openSidebarInternal(options);
-      },
+      openChat: (options?: OpenConversationSidebarOptions) => openSidebarInternal(options),
       toggleChat: (options?: OpenConversationSidebarOptions) => {
+        if (isAgentFirstChrome) {
+          return;
+        }
+
         if (this.activeSidebarRef) {
           const sidebarRef = this.activeSidebarRef;
           // Be defensive: clear local references immediately in case the sidebar doesn't
@@ -400,40 +411,42 @@ export class AgentBuilderPlugin
         order: 1000,
       });
 
-      core.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
+      if (!isAgentFirstChrome) {
+        core.chrome.navControls.registerRight({
+          mount: (element) => {
+            ReactDOM.render(
+              <AgentBuilderNavControlInitiator
+                coreStart={core}
+                pluginsStart={startDependencies}
+                agentBuilderService={agentBuilderService}
+              />,
+              element,
+              () => {}
+            );
+
+            return () => {
+              ReactDOM.unmountComponentAtNode(element);
+            };
+          },
+          // right before the user profile
+          order: 1001,
+        });
+
+        // Chrome Next transition: also expose this control as an AI button so it renders in the
+        // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
+        // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
+        // Remove the `registerRight` registration once Chrome Next is the only chrome.
+        // See https://github.com/elastic/kibana/issues/260010
+        core.chrome.next.aiButton.register({
+          content: (
             <AgentBuilderNavControlInitiator
               coreStart={core}
               pluginsStart={startDependencies}
               agentBuilderService={agentBuilderService}
-            />,
-            element,
-            () => {}
-          );
-
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // right before the user profile
-        order: 1001,
-      });
-
-      // Chrome Next transition: also expose this control as an AI button so it renders in the
-      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
-      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
-      // Remove the `registerRight` registration once Chrome Next is the only chrome.
-      // See https://github.com/elastic/kibana/issues/260010
-      core.chrome.next.aiButton.register({
-        content: (
-          <AgentBuilderNavControlInitiator
-            coreStart={core}
-            pluginsStart={startDependencies}
-            agentBuilderService={agentBuilderService}
-          />
-        ),
-      });
+            />
+          ),
+        });
+      }
     }
 
     return agentBuilderService;

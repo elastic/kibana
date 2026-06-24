@@ -43,7 +43,7 @@ const buildAgentBuilderPath = (path: string, params?: Record<string, string>): s
 
 export const useIsAgentWorkspaceMount = (): boolean => {
   const { services } = useKibana();
-  return services.appParams.isAgentWorkspaceMount === true;
+  return services.appParams?.isAgentWorkspaceMount === true;
 };
 
 /** Sidebar chat is redundant when AB is already in the chrome sidebar flyout or agent workspace column. */
@@ -85,14 +85,14 @@ export const useNavigation = () => {
     services: { application, appParams },
   } = useKibana();
 
-  const isAgentWorkspaceMount = appParams.isAgentWorkspaceMount === true;
-  const scopedHistory = appParams.history;
+  const isAgentWorkspaceMount = appParams?.isAgentWorkspaceMount === true;
+  const scopedHistory = appParams?.history;
 
   const navigateToAgentBuilderUrl = useCallback(
     (path: string, params?: Record<string, string>, state?: LocationState) => {
       const agentBuilderPath = buildAgentBuilderPath(path, params);
 
-      if (isAgentWorkspaceMount) {
+      if (isAgentWorkspaceMount && scopedHistory) {
         scopedHistory.push(agentBuilderPath, state);
         return;
       }
@@ -109,7 +109,7 @@ export const useNavigation = () => {
     (path: string, params?: Record<string, string>) => {
       const agentBuilderPath = buildAgentBuilderPath(path, params);
 
-      if (isAgentWorkspaceMount) {
+      if (isAgentWorkspaceMount && scopedHistory) {
         return scopedHistory.createHref({ pathname: agentBuilderPath });
       }
 
