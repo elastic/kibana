@@ -33,6 +33,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
+  getCreateRuleOptionsAppMenuItem,
   getNewSearchAppMenuItem,
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
@@ -63,6 +64,18 @@ const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
   AppMenuActionId.inspect,
 ]);
 
+export interface UseTopNavLinksParams {
+  dataView: DataView | undefined;
+  services: DiscoverServices;
+  hasUnsavedChanges: boolean;
+  isEsqlMode: boolean;
+  adHocDataViews: DataView[];
+  hasShareIntegration: boolean;
+  persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
+}
+
 /**
  * Helper function to build the top nav links
  */
@@ -76,22 +89,11 @@ export const useTopNavLinks = ({
   persistedDiscoverSession,
   onOpenSaveModal,
   onOpenSaveAsModal,
-}: {
-  dataView: DataView | undefined;
-  services: DiscoverServices;
-  hasUnsavedChanges: boolean;
-  isEsqlMode: boolean;
-  adHocDataViews: DataView[];
-  hasShareIntegration: boolean;
-  persistedDiscoverSession: DiscoverSession | undefined;
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-}): AppMenuConfig => {
+}: UseTopNavLinksParams): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
   const subscribe = useInternalStateSubscribe();
-
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -151,21 +153,6 @@ export const useTopNavLinks = ({
     isPluginAvailable: Boolean(services.alertingVTwo),
   });
 
-  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
-
-  const profileAppMenuExtension = useMemo(() => {
-    const getAppMenu = getAppMenuAccessor(() => ({
-      appMenuRegistry: (registry) => registry,
-    }));
-
-    return getAppMenu(discoverParams);
-  }, [getAppMenuAccessor, discoverParams]);
-
-  const additionalLegacyRuleTypes = useMemo(
-    () => profileAppMenuExtension.getAlertsLegacyRuleTypes?.() ?? [],
-    [profileAppMenuExtension]
-  );
-
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
@@ -179,9 +166,6 @@ export const useTopNavLinks = ({
         tabId: currentTab.id,
         getState,
         dispatch,
-        showCreateRuleV2,
-        subscribe,
-        additionalLegacyRuleTypes,
       });
       items.push(alertsAppMenuItem);
     }
@@ -267,7 +251,7 @@ export const useTopNavLinks = ({
         tooltipContent: isDataViewMode
           ? i18n.translate('discover.localMenu.switchToESQLTooltip', {
               defaultMessage:
-                'Search, transform, join, and aggregate your data with ES|QL or PromQL',
+                'Search, transform, join and aggregate your data with ES|QL or PromQL',
             })
           : i18n.translate('discover.localMenu.switchToClassicTooltip', {
               defaultMessage: 'Search your data with data views and KQL in Classic Discover',
@@ -303,7 +287,6 @@ export const useTopNavLinks = ({
     appId,
     dispatch,
     getState,
-    subscribe,
     isEsqlMode,
     currentDataView,
     currentTab,
@@ -316,8 +299,9 @@ export const useTopNavLinks = ({
     intl,
     showCreateRuleV2,
     switchLanguageMode,
-    additionalLegacyRuleTypes,
   ]);
+
+  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
 
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
@@ -420,15 +404,39 @@ export const useTopNavLinks = ({
     }
 
     // Allow profile accessors to add additional items/popover items
-    const registry = profileAppMenuExtension.appMenuRegistry(newAppMenuRegistry);
+    const getAppMenu = getAppMenuAccessor(() => ({
+      appMenuRegistry: () => newAppMenuRegistry,
+    }));
+
+    const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+
+    const CreateRuleOptionsFlyout = services.alertingVTwo?.CreateRuleOptionsFlyout;
+
+    if (showCreateRuleV2 && CreateRuleOptionsFlyout) {
+      registry.registerItem(
+        getCreateRuleOptionsAppMenuItem({
+          CreateRuleOptionsFlyout,
+          baseItem: registry.getItem(AppMenuActionId.alerts),
+          alertsPopoverItems: registry.getPopoverItems(AppMenuActionId.alerts),
+          services,
+          tabId: currentTab.id,
+          getState,
+          subscribe,
+        })
+      );
+    }
 
     return registry;
   }, [
-    profileAppMenuExtension,
+    getAppMenuAccessor,
+    discoverParams,
     appMenuItems,
     services,
+    currentTab.id,
     dispatch,
     getState,
+    subscribe,
+    showCreateRuleV2,
     hasUnsavedChanges,
     transferBackToEditor,
     persistedDiscoverSession,

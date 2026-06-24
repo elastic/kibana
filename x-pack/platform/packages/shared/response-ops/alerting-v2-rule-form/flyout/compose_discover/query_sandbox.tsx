@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -28,7 +28,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
-import { useDataFields } from '../../form/hooks/use_data_fields';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
 import {
@@ -39,6 +38,7 @@ import {
 } from './compose_discover_tabs';
 import type { QueryTab } from './types';
 import { CpsPicker } from './cps_picker';
+import { useResolveTimeField } from './use_resolve_time_field';
 
 /**
  * Self-contained ES|QL sandbox that handles data fetching and renders the full
@@ -64,6 +64,13 @@ export interface QuerySandboxProps {
   onDateRangeChange: (range: { dateStart: string; dateEnd: string }) => void;
   /** Execute the query on mount. */
   autoRun?: boolean;
+  /**
+   * When provided, time-field resolution is owned by the parent (e.g. compose
+   * flyout) and the sandbox only displays the options without fetching.
+   */
+  timeFieldOptions?: Array<{ value: string; text: string }>;
+  /** Required with `timeFieldOptions` when the parent gates autoRun on resolution. */
+  isTimeFieldResolved?: boolean;
   /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
@@ -100,11 +107,14 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   dateRange,
   onDateRangeChange,
   autoRun = false,
+  timeFieldOptions: timeFieldOptionsProp,
+  isTimeFieldResolved: isTimeFieldResolvedProp,
   tabProps,
 }) => {
   const services = useRuleFormServices();
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
+  const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
 
   const splitTabs = useMemo(() => {
     if (!tabProps?.tabs?.length) return [];
@@ -125,37 +135,20 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     [dateRange.dateStart, dateRange.dateEnd]
   );
 
-  const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(query) ? query : '';
-  const { data: fieldMap } = useDataFields({
-    query: queryForFields,
+  const {
+    timeFieldOptions: resolvedTimeFieldOptions,
+    isTimeFieldResolved: resolvedIsTimeFieldResolved,
+  } = useResolveTimeField({
+    query,
+    timeField,
+    onTimeFieldChange,
+    enabled: !skipTimeFieldResolution,
     http: services.http,
     dataViews: services.dataViews,
   });
 
-  const timeFieldOptions = useMemo(() => {
-    const dateFields = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name)
-      .sort();
-
-    if (dateFields.length === 0) {
-      return [{ value: '@timestamp', text: '@timestamp' }];
-    }
-
-    return dateFields.map((name) => ({ value: name, text: name }));
-  }, [fieldMap]);
-
-  useEffect(() => {
-    const dateFieldNames = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name);
-
-    if (dateFieldNames.length === 0) {
-      if (timeField !== '@timestamp') onTimeFieldChange?.('@timestamp');
-    } else if (!dateFieldNames.includes(timeField)) {
-      onTimeFieldChange?.(dateFieldNames[0]);
-    }
-  }, [fieldMap, timeField, onTimeFieldChange]);
+  const timeFieldOptions = timeFieldOptionsProp ?? resolvedTimeFieldOptions;
+  const isTimeFieldResolved = isTimeFieldResolvedProp ?? resolvedIsTimeFieldResolved;
 
   const {
     columns,
@@ -174,11 +167,15 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     data: services.data,
   });
 
+  const hasAutoRunRef = useRef(false);
+
   useEffect(() => {
-    if (autoRun) {
-      run();
+    if (!autoRun || hasAutoRunRef.current || !isTimeFieldResolved) {
+      return;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    hasAutoRunRef.current = true;
+    run();
+  }, [autoRun, isTimeFieldResolved, run]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

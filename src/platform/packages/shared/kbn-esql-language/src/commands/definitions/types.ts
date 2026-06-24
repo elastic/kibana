@@ -218,6 +218,7 @@ export enum PromQLFunctionDefinitionTypes {
   LABEL_MATCHING_OPERATOR = 'label_matching_operator',
   SCALAR_CONVERSION = 'scalar_conversion',
   TIME = 'time',
+  HISTOGRAM = 'histogram',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -505,11 +506,18 @@ export interface ValidationErrors {
 export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
+export type ESQLDiagnosticData = ColumnTypeConflictDiagnosticData;
+interface ColumnTypeConflictDiagnosticData {
+  columnName: string;
+  types: string[];
+}
+
 export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;
   location: ESQLLocation;
   code: string;
+  data?: ESQLDiagnosticData; // Dynamic parameters used to build quick fixes.
   errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
   underlinedWarning?: boolean;
