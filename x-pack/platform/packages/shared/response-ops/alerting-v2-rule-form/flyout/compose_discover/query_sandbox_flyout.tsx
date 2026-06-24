@@ -63,6 +63,9 @@ export interface QuerySandboxFlyoutProps {
   timeField: string;
   /** Absent → time field selector is read-only. */
   onTimeFieldChange?: (tf: string) => void;
+  /** When provided, resolution is owned by the parent and passed through to QuerySandbox. */
+  timeFieldOptions?: Array<{ value: string; text: string }>;
+  isTimeFieldResolved?: boolean;
   /** Preview date range. Never resets on close — caller owns persistence. */
   dateRange: { dateStart: string; dateEnd: string };
   /** Always required — date range is always interactive. */
@@ -85,6 +88,8 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onTabChange,
   timeField,
   onTimeFieldChange,
+  timeFieldOptions,
+  isTimeFieldResolved,
   dateRange,
   onDateRangeChange,
   onApply,
@@ -187,6 +192,8 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           onQueryChange={isReadOnly ? undefined : handleQueryChange}
           timeField={timeField}
           onTimeFieldChange={onTimeFieldChange}
+          timeFieldOptions={timeFieldOptions}
+          isTimeFieldResolved={isTimeFieldResolved}
           dateRange={dateRange}
           onDateRangeChange={onDateRangeChange}
           autoRun
