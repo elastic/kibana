@@ -484,5 +484,64 @@ describe('mustache_renderer', () => {
       `);
       expect(renderMustacheString(logger, '{{a}}', { a: 1, 'a.b': 2 }, 'none')).toEqual('{"b":2}');
     });
+
+    it('expands a large flat AAD-style object with many kibana.alert.* dotted keys', () => {
+      const aadAlert: Record<string, unknown> = {
+        'kibana.alert.rule.name': 'My Rule',
+        'kibana.alert.rule.category': 'Metric threshold',
+        'kibana.alert.rule.uuid': 'rule-uuid-123',
+        'kibana.alert.status': 'active',
+        'kibana.alert.uuid': 'alert-uuid-456',
+        'kibana.alert.instance.id': 'host-1',
+        'kibana.alert.start': '2024-01-01T00:00:00.000Z',
+        'kibana.alert.duration.us': 60000000,
+        'kibana.alert.reason': 'CPU usage above threshold',
+        'kibana.space_ids': ['default'],
+      };
+
+      expect(renderMustacheString(logger, '{{kibana.alert.rule.name}}', aadAlert, 'none')).toEqual(
+        'My Rule'
+      );
+
+      expect(
+        renderMustacheString(logger, '{{kibana.alert.instance.id}}', aadAlert, 'none')
+      ).toEqual('host-1');
+
+      expect(
+        renderMustacheString(logger, '{{kibana.alert.duration.us}}', aadAlert, 'none')
+      ).toEqual('60000000');
+
+      // The top-level 'kibana' object renders as JSON via its toString()
+      const rendered = renderMustacheString(logger, '{{kibana}}', aadAlert, 'none');
+      const parsed = JSON.parse(rendered);
+      expect(parsed.alert.rule.name).toEqual('My Rule');
+      expect(parsed.alert.status).toEqual('active');
+    });
+
+    it('does not mutate the caller input object', () => {
+      const input = {
+        a: 1,
+        'a.b': 2,
+        nested: { c: 3 },
+        arr: [1, 2, 3],
+      };
+      const inputCopy = JSON.parse(JSON.stringify(input));
+
+      renderMustacheString(logger, '{{a}}', input, 'none');
+
+      // Original keys must be unchanged (no dotted key deleted, no toString added)
+      expect(Object.keys(input)).toEqual(Object.keys(inputCopy));
+      expect(input['a.b']).toEqual(2);
+      expect(Object.hasOwn(input, 'toString')).toBe(false);
+      expect(Object.hasOwn(input.nested, 'toString')).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((input.arr as any).asJSON).toBeUndefined();
+    });
+
+    it('preserves user-supplied toString key and does not overwrite it with JSON serialiser', () => {
+      const input = { obj: { toString: 'user-value', extra: 42 } };
+      // The user's 'toString' string key should win; it renders as a plain string
+      expect(renderMustacheString(logger, '{{obj.toString}}', input, 'none')).toEqual('user-value');
+    });
   });
 });

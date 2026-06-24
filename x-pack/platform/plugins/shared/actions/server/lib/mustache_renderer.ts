@@ -6,7 +6,7 @@
  */
 
 import Mustache from 'mustache';
-import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
+import { isString, isPlainObject, cloneDeepWith } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { getMustacheLambdas } from './mustache_lambdas';
 
@@ -101,57 +101,66 @@ export function renderMustacheObject<Params>(
   return result as unknown as Params;
 }
 
-// return variables cloned, with a toString() added to objects
+// Return variables as a fresh isolated tree with:
+//   - dotted keys expanded inline into nested objects (no lodash merge)
+//   - toString() attached to every plain object
+//   - asJSON() attached to every array
+// Replaces the previous three-pass approach (JSON clone → convertDotVariables → addToStringDeep).
 function augmentObjectVariables(variables: Variables): Variables {
-  const result = JSON.parse(JSON.stringify(variables));
-  // convert variables with '.' in the name to objects
-  convertDotVariables(result);
-  addToStringDeep(result);
-  return result;
+  return transformNode(variables) as Variables;
 }
 
-function convertDotVariables(variables: Variables) {
-  Object.keys(variables).forEach((key) => {
-    if (key.includes('.')) {
-      const obj = buildObject(key, variables[key]);
-      variables = merge(variables, obj);
-    }
-    if (typeof variables[key] === 'object' && variables[key] != null) {
-      convertDotVariables(variables[key] as Variables);
-    }
-  });
-}
-
-function buildObject(key: string, value: unknown) {
-  const newObject: Variables = {};
-  let tempObject = newObject;
-  const splits = key.split('.');
-  const length = splits.length - 1;
-  splits.forEach((k, index) => {
-    tempObject[k] = index === length ? value : ({} as unknown);
-    tempObject = tempObject[k] as Variables;
-  });
-  return newObject;
-}
-
-function addToStringDeep(object: unknown): void {
-  // for objects, add a toString method, and then walk
-  if (isNonNullObject(object)) {
-    if (!Object.hasOwn(object, 'toString')) {
-      object.toString = () => JSON.stringify(object);
-    }
-    Object.values(object).forEach((value) => addToStringDeep(value));
-  }
-
-  // walk arrays, but don't add a toString() as mustache already does something
-  if (Array.isArray(object)) {
-    // instead, add an asJSON()
-
+function transformNode(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    const arr: unknown[] = value.map(transformNode);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (object as any).asJSON = () => JSON.stringify(object);
-    object.forEach((element) => addToStringDeep(element));
-    return;
+    (arr as any).asJSON = () => JSON.stringify(arr);
+    return arr;
   }
+
+  if (isNonNullObject(value)) {
+    const obj = makeObj();
+
+    for (const [key, raw] of Object.entries(value)) {
+      const transformed = transformNode(raw);
+
+      if (!key.includes('.')) {
+        obj[key] = transformed;
+        continue;
+      }
+
+      // Inline dotted-path reduction: expand 'a.b.c' → nested objects.
+      // Later keys win over earlier ones, matching the behaviour of lodash
+      // merge (e.g. { a: 1, 'a.b': 2 } → a becomes { b: 2 }).
+      // If the user's data has an explicit key named 'toString', it overwrites
+      // the JSON.stringify function that makeObj() pre-populated, which is the
+      // correct precedence (mirrors the Object.hasOwn guard that was in the
+      // previous addToStringDeep implementation).
+      const parts = key.split('.');
+      let current = obj;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        if (!isNonNullObject(current[part])) current[part] = makeObj();
+        current = current[part] as Record<string, unknown>;
+      }
+      current[parts[parts.length - 1]] = transformed;
+    }
+
+    return obj;
+  }
+
+  // Scalar, null, undefined: copy by value (no allocation needed).
+  return value;
+}
+
+// Creates a fresh plain object pre-populated with a toString() that serialises
+// the object to JSON. Using a closure over `obj` means JSON.stringify sees all
+// keys added after construction, and the toString function itself is ignored by
+// JSON.stringify (functions are not serialised), so it won't appear in output.
+function makeObj(): Record<string, unknown> {
+  const obj: Record<string, unknown> = {};
+  obj.toString = () => JSON.stringify(obj);
+  return obj;
 }
 
 function isNonNullObject(object: unknown): object is Record<string, unknown> {
