@@ -29,6 +29,7 @@ const defaultProps = {
   ruleState: loadedRuleState,
   tags: [] as string[],
   status: undefined,
+  severity: undefined,
   episodeAction: undefined,
   groupAction: undefined,
 };
@@ -41,6 +42,9 @@ describe('AlertEpisodeDetailsHeader', () => {
           {...defaultProps}
           tags={['t1']}
           status={ALERT_EPISODE_STATUS.ACTIVE}
+          severity={undefined}
+          episodeAction={undefined}
+          groupAction={undefined}
         />
       </I18nProvider>
     );
@@ -57,6 +61,11 @@ describe('AlertEpisodeDetailsHeader', () => {
           {...defaultProps}
           isLoadingEpisode={true}
           ruleState={{ status: RuleStateStatus.idle }}
+          tags={[]}
+          status={undefined}
+          severity={undefined}
+          episodeAction={undefined}
+          groupAction={undefined}
         />
       </I18nProvider>
     );
@@ -90,5 +99,22 @@ describe('AlertEpisodeDetailsHeader', () => {
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent(
       'Alert episode'
     );
+  });
+
+  it('renders the severity badge after the status badge', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeDetailsHeader
+          {...defaultProps}
+          tags={[]}
+          status={ALERT_EPISODE_STATUS.ACTIVE}
+          severity="high"
+          episodeAction={undefined}
+          groupAction={undefined}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toHaveTextContent('High');
   });
 });
