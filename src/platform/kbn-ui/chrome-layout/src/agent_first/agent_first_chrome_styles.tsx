@@ -428,6 +428,10 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${containerRadius};
     }
 
+    ${scope} .euiModal {
+      border-radius: ${containerRadius} !important;
+    }
+
     ${scope} .euiFlyout[class*='right']:not(
         [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
       ) {
