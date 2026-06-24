@@ -539,11 +539,21 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:bashSupport': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'agentBuilder:uiamOAuthClientManagement': {
     type: 'boolean',
     _meta: {
       description:
         'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
+    },
+  },
+  'workflows:experimentalFeatures': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether experimental features for Elastic Workflows are enabled.',
     },
   },
   'workflows:ui:enabled': {
@@ -757,6 +767,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable draft streams with read-time ES|QL views',
+    },
+  },
+  'observability:streamsEnableCanvas': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams Canvas',
     },
   },
   'observability:streamsSigEventsIndexPatterns': {
