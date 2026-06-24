@@ -539,6 +539,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:bashSupport': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'agentBuilder:uiamOAuthClientManagement': {
     type: 'boolean',
     _meta: {
@@ -763,6 +767,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable draft streams with read-time ES|QL views',
+    },
+  },
+  'observability:streamsEnableCanvas': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams Canvas',
     },
   },
   'observability:streamsSigEventsIndexPatterns': {
