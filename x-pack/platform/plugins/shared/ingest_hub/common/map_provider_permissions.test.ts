@@ -236,10 +236,8 @@ describe('mapProviderPermissions', () => {
 
     const result = mapProviderPermissions(pkgInfo, CLOUDTRAIL_LOOKUP);
 
-    // anyDeclared is true (gcp entry found) but after filtering for aws, actions are empty
-    // The function returns non-null with empty arrays in this case
-    expect(result).not.toBeNull();
-    expect(result!.actions).toHaveLength(0);
+    // No AWS entries declared — should fall back to the matrix, not return empty arrays.
+    expect(result).toBeNull();
   });
 
   it('collects permissions when policyTemplate is undefined (matches all templates)', () => {

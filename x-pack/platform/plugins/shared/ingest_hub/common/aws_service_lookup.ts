@@ -17,6 +17,8 @@ export interface AwsServiceLookupEntry {
   packageName: string;
   policyTemplate?: string;
   inputs?: readonly string[];
+  /** Data stream path when it differs from the service id (e.g. fargate → task_stats). */
+  dataStream?: string;
 }
 
 /** Keyed by data stream id (matches `AwsServiceMatrixEntry.id`). */
@@ -137,6 +139,7 @@ export const AWS_SERVICE_LOOKUP: Readonly<Record<string, AwsServiceLookupEntry>>
     packageName: 'awsfargate',
     policyTemplate: 'awsfargate',
     inputs: ['awsfargate/metrics'],
+    dataStream: 'task_stats',
   },
 
   // ── aws_mq package ──────────────────────────────────────────────────────

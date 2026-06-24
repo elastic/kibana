@@ -28,17 +28,19 @@ export interface MappedProviderPermissions {
 /** Extract AWS-specific permissions from a provider_permissions array. */
 const extractAws = (
   entries: RegistryProviderPermissions[]
-): { actions: string[]; managedPolicyArns: string[] } => {
+): { actions: string[]; managedPolicyArns: string[]; found: boolean } => {
   const actions: string[] = [];
   const managedPolicyArns: string[] = [];
+  let found = false;
 
   for (const entry of entries) {
     if (entry.provider !== 'aws') continue;
+    found = true;
     if (entry.permissions) actions.push(...entry.permissions);
     if (entry.roles) managedPolicyArns.push(...entry.roles);
   }
 
-  return { actions, managedPolicyArns };
+  return { actions, managedPolicyArns, found };
 };
 
 /**
@@ -62,14 +64,14 @@ export const mapProviderPermissions = (
 
   const allActions: string[] = [];
   const allManagedPolicyArns: string[] = [];
-  let anyDeclared = false;
+  let anyAwsDeclared = false;
 
   // — Package level ─────────────────────────────────────────────────────────
   if (pkgInfo.provider_permissions?.length) {
-    const { actions, managedPolicyArns } = extractAws(pkgInfo.provider_permissions);
+    const { actions, managedPolicyArns, found } = extractAws(pkgInfo.provider_permissions);
     allActions.push(...actions);
     allManagedPolicyArns.push(...managedPolicyArns);
-    anyDeclared = true;
+    if (found) anyAwsDeclared = true;
   }
 
   // — Policy template + input levels ─────────────────────────────────────────
@@ -78,10 +80,10 @@ export const mapProviderPermissions = (
     if (policyTemplateName && pt.name !== policyTemplateName) continue;
 
     if (pt.provider_permissions?.length) {
-      const { actions, managedPolicyArns } = extractAws(pt.provider_permissions);
+      const { actions, managedPolicyArns, found } = extractAws(pt.provider_permissions);
       allActions.push(...actions);
       allManagedPolicyArns.push(...managedPolicyArns);
-      anyDeclared = true;
+      if (found) anyAwsDeclared = true;
     }
 
     // Input level — only RegistryPolicyIntegrationTemplate has `inputs`.
@@ -91,10 +93,10 @@ export const mapProviderPermissions = (
       if (inputTypes.length > 0 && !inputTypes.includes(input.type)) continue;
 
       if (input.provider_permissions?.length) {
-        const { actions, managedPolicyArns } = extractAws(input.provider_permissions);
+        const { actions, managedPolicyArns, found } = extractAws(input.provider_permissions);
         allActions.push(...actions);
         allManagedPolicyArns.push(...managedPolicyArns);
-        anyDeclared = true;
+        if (found) anyAwsDeclared = true;
       }
     }
   }
@@ -104,14 +106,16 @@ export const mapProviderPermissions = (
     if (ds.path !== dataStream) continue;
 
     if (ds.provider_permissions?.length) {
-      const { actions, managedPolicyArns } = extractAws(ds.provider_permissions);
+      const { actions, managedPolicyArns, found } = extractAws(ds.provider_permissions);
       allActions.push(...actions);
       allManagedPolicyArns.push(...managedPolicyArns);
-      anyDeclared = true;
+      if (found) anyAwsDeclared = true;
     }
   }
 
-  if (!anyDeclared) return null;
+  // Only return non-null when the manifest explicitly declares AWS entries. A package that
+  // declares only GCP/Azure entries should still fall back to the hardcoded AWS matrix.
+  if (!anyAwsDeclared) return null;
 
   return {
     actions: [...new Set(allActions)],

@@ -22,6 +22,7 @@ const makeResponse = (actions: string[]): GetIamPermissionsResponse => ({
     Version: '2012-10-17',
     Statement: [{ Sid: 'All', Effect: 'Allow', Resource: '*', Action: actions }],
   },
+  mergedManagedPolicyArns: [],
   byService: {},
 });
 
@@ -107,7 +108,8 @@ describe('useIamPermissions', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.data).toBeNull();
-    expect(result.current.error).toBe('Network error');
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error?.message).toBe('Network error');
   });
 
   it('does not set error state when the request is aborted', async () => {

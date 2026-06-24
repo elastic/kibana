@@ -11,6 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
@@ -21,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { IamPolicyDocument } from '../../../common/iam_policy_document';
+import type { ServiceIamPermissions } from '../../../common/iam_permissions_api';
 
 export const AWS_PERMISSIONS_VIEWER_TEST_SUBJ = 'awsPermissionsViewer';
 export const ALL_SERVICES_OPTION_VALUE = '__all__';
@@ -31,10 +34,12 @@ export interface AwsPermissionsViewerService {
 }
 
 export interface AwsPermissionsViewerProps {
-  /** Per-service policy documents keyed by service id, from the endpoint. */
-  byService: Record<string, IamPolicyDocument>;
-  /** Deduped union of all service permissions, from the endpoint. */
+  /** Per-service permissions (policy + managed ARNs) keyed by service id, from the endpoint. */
+  byService: Record<string, ServiceIamPermissions>;
+  /** Deduped union of all services' inline policy actions, from the endpoint. */
   merged: IamPolicyDocument;
+  /** Deduped union of all services' managed policy ARNs, from the endpoint. */
+  mergedManagedPolicyArns: string[];
   /** Display info for the dropdown (id + name). */
   services: AwsPermissionsViewerService[];
 }
@@ -46,6 +51,7 @@ function getServiceLabel(service: AwsPermissionsViewerService, hasDuplicateNames
 export const AwsPermissionsViewer: React.FC<AwsPermissionsViewerProps> = ({
   byService,
   merged,
+  mergedManagedPolicyArns,
   services,
 }) => {
   const [selectedOption, setSelectedOption] = useState(ALL_SERVICES_OPTION_VALUE);
@@ -84,16 +90,24 @@ export const AwsPermissionsViewer: React.FC<AwsPermissionsViewerProps> = ({
     }
   }, [byService, selectedOption]);
 
-  const policyDocument = useMemo(() => {
+  const { policyDocument, visibleManagedPolicyArns } = useMemo(() => {
     if (selectedOption === ALL_SERVICES_OPTION_VALUE) {
-      return JSON.stringify(merged, null, 2);
+      return {
+        policyDocument: JSON.stringify(merged, null, 2),
+        visibleManagedPolicyArns: mergedManagedPolicyArns,
+      };
     }
-    const doc = byService[selectedOption];
-    return doc ? JSON.stringify(doc, null, 2) : JSON.stringify(merged, null, 2);
-  }, [selectedOption, merged, byService]);
+    const svc = byService[selectedOption];
+    return {
+      policyDocument: svc ? JSON.stringify(svc.policy, null, 2) : JSON.stringify(merged, null, 2),
+      visibleManagedPolicyArns: svc ? svc.managedPolicyArns : mergedManagedPolicyArns,
+    };
+  }, [selectedOption, merged, mergedManagedPolicyArns, byService]);
 
-  // Only render when there are services with permissions.
-  const hasPermissions = merged.Statement.length > 0 && merged.Statement[0].Action.length > 0;
+  // Render only when at least one service has inline actions or managed policy ARNs.
+  const hasPermissions =
+    merged.Statement.flatMap((s) => s.Action).length > 0 ||
+    mergedManagedPolicyArns.length > 0;
   if (!hasPermissions) {
     return null;
   }
@@ -165,6 +179,30 @@ export const AwsPermissionsViewer: React.FC<AwsPermissionsViewerProps> = ({
           >
             {policyDocument}
           </EuiCodeBlock>
+          {visibleManagedPolicyArns.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiText size="s" color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestHub.awsPermissionsViewer.managedPoliciesIntro"
+                    defaultMessage="Also attach these AWS managed policies via {command}:"
+                    values={{ command: <code>aws iam attach-user-policy</code> }}
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiListGroup
+                bordered
+                size="s"
+                data-test-subj={`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-managedPoliciesList`}
+              >
+                {visibleManagedPolicyArns.map((arn) => (
+                  <EuiListGroupItem key={arn} label={arn} />
+                ))}
+              </EuiListGroup>
+            </>
+          )}
         </EuiPanel>
       </EuiPanel>
       <EuiSpacer size="l" />

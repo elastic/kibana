@@ -56,6 +56,7 @@ export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) 
     return (
       <AwsPermissionsViewer
         merged={iamPermissions.merged}
+        mergedManagedPolicyArns={iamPermissions.mergedManagedPolicyArns}
         byService={iamPermissions.byService}
         services={viewerServices}
       />

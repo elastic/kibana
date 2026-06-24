@@ -15,7 +15,7 @@ import { IAM_PERMISSIONS_API_PATH } from '../../common/iam_permissions_api';
 export interface UseIamPermissionsResult {
   data: GetIamPermissionsResponse | null;
   loading: boolean;
-  error: string | null;
+  error: Error | null;
 }
 
 /**
@@ -26,7 +26,7 @@ export const useIamPermissions = (serviceIds: string[]): UseIamPermissionsResult
   const { services } = useKibana<CoreStart>();
   const [data, setData] = useState<GetIamPermissionsResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   // Stable key to avoid unnecessary refetches when the caller passes a new array with the same ids.
   const servicesKey = [...serviceIds].sort().join(',');
@@ -58,7 +58,7 @@ export const useIamPermissions = (serviceIds: string[]): UseIamPermissionsResult
       })
       .catch((err: Error) => {
         if (err.name === 'AbortError') return;
-        setError(err.message ?? 'Failed to load IAM permissions');
+        setError(err);
         setLoading(false);
       });
 

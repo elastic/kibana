@@ -20,8 +20,14 @@ const SERVICE_A: AwsPermissionsViewerService = { id: 'service_a', name: 'Service
 const SERVICE_B: AwsPermissionsViewerService = { id: 'service_b', name: 'Service B' };
 
 const MOCK_BY_SERVICE = {
-  service_a: buildIamPolicyDocument(['s3:GetObject', 's3:ListBucket'], 'ElasticServiceA'),
-  service_b: buildIamPolicyDocument(['s3:GetObject', 'sqs:ReceiveMessage'], 'ElasticServiceB'),
+  service_a: {
+    policy: buildIamPolicyDocument(['s3:GetObject', 's3:ListBucket'], 'ElasticServiceA'),
+    managedPolicyArns: [],
+  },
+  service_b: {
+    policy: buildIamPolicyDocument(['s3:GetObject', 'sqs:ReceiveMessage'], 'ElasticServiceB'),
+    managedPolicyArns: [],
+  },
 };
 
 const MOCK_MERGED = buildIamPolicyDocument(['s3:GetObject', 's3:ListBucket', 'sqs:ReceiveMessage']);
@@ -29,6 +35,7 @@ const MOCK_MERGED = buildIamPolicyDocument(['s3:GetObject', 's3:ListBucket', 'sq
 const defaultProps: AwsPermissionsViewerProps = {
   byService: MOCK_BY_SERVICE,
   merged: MOCK_MERGED,
+  mergedManagedPolicyArns: [],
   services: [SERVICE_A, SERVICE_B],
 };
 
@@ -40,14 +47,27 @@ const renderViewer = (props: Partial<AwsPermissionsViewerProps> = {}) =>
   );
 
 describe('AwsPermissionsViewer', () => {
-  it('renders nothing when merged has no actions', () => {
+  it('renders nothing when merged has no actions and no managed policy ARNs', () => {
     const { container } = renderViewer({
       merged: buildIamPolicyDocument([]),
+      mergedManagedPolicyArns: [],
       byService: {},
       services: [],
     });
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('renders when only managed policy ARNs are present (no inline actions)', () => {
+    const { container } = renderViewer({
+      merged: buildIamPolicyDocument([]),
+      mergedManagedPolicyArns: ['arn:aws:iam::aws:policy/SecurityAudit'],
+      byService: {},
+      services: [],
+    });
+
+    expect(container).not.toBeEmptyDOMElement();
+    expect(screen.getByText('Required IAM permissions')).toBeInTheDocument();
   });
 
   it('shows the panel title and aggregated IAM policy JSON by default', () => {
@@ -88,8 +108,14 @@ describe('AwsPermissionsViewer', () => {
         { id: 's3_inventory', name: 'AWS S3' },
       ],
       byService: {
-        s3_access_logs: buildIamPolicyDocument(['s3:GetObject'], 'Elastics3accesslogs'),
-        s3_inventory: buildIamPolicyDocument(['s3:ListBucket'], 'Elastics3inventory'),
+        s3_access_logs: {
+          policy: buildIamPolicyDocument(['s3:GetObject'], 'Elastics3accesslogs'),
+          managedPolicyArns: [],
+        },
+        s3_inventory: {
+          policy: buildIamPolicyDocument(['s3:ListBucket'], 'Elastics3inventory'),
+          managedPolicyArns: [],
+        },
       },
     });
 
@@ -128,6 +154,7 @@ describe('AwsPermissionsViewer', () => {
         <AwsPermissionsViewer
           byService={{ service_b: MOCK_BY_SERVICE.service_b }}
           merged={buildIamPolicyDocument(['s3:GetObject', 'sqs:ReceiveMessage'])}
+          mergedManagedPolicyArns={[]}
           services={[SERVICE_B]}
         />
       </I18nProvider>
@@ -159,5 +186,61 @@ describe('AwsPermissionsViewer', () => {
     expect(actionsList).toHaveTextContent('"Sid": "ElasticAWSIntegration"');
     expect(actionsList).toHaveTextContent('"s3:ListBucket"');
     expect(actionsList).toHaveTextContent('"sqs:ReceiveMessage"');
+  });
+
+  it('shows merged managed policy ARNs in the all-integrations view', () => {
+    const arns = ['arn:aws:iam::aws:policy/SecurityAudit', 'arn:aws:iam::aws:policy/ReadOnlyAccess'];
+
+    renderViewer({ mergedManagedPolicyArns: arns });
+
+    const list = screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-managedPoliciesList`);
+    expect(list).toHaveTextContent('arn:aws:iam::aws:policy/SecurityAudit');
+    expect(list).toHaveTextContent('arn:aws:iam::aws:policy/ReadOnlyAccess');
+  });
+
+  it('shows per-service managed policy ARNs when a specific service is selected', () => {
+    const serviceArn = 'arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess';
+
+    renderViewer({
+      byService: {
+        ...MOCK_BY_SERVICE,
+        service_a: {
+          policy: MOCK_BY_SERVICE.service_a.policy,
+          managedPolicyArns: [serviceArn],
+        },
+      },
+      mergedManagedPolicyArns: [serviceArn],
+    });
+
+    // In the merged view, ARN is shown
+    expect(
+      screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-managedPoliciesList`)
+    ).toHaveTextContent(serviceArn);
+
+    // Switch to service_b which has no managed ARNs
+    fireEvent.change(screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-serviceSelector`), {
+      target: { value: 'service_b' },
+    });
+
+    expect(
+      screen.queryByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-managedPoliciesList`)
+    ).not.toBeInTheDocument();
+
+    // Switch to service_a which has the ARN
+    fireEvent.change(screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-serviceSelector`), {
+      target: { value: 'service_a' },
+    });
+
+    expect(
+      screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-managedPoliciesList`)
+    ).toHaveTextContent(serviceArn);
+  });
+
+  it('does not show the managed policies section when there are no ARNs', () => {
+    renderViewer({ mergedManagedPolicyArns: [] });
+
+    expect(
+      screen.queryByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-managedPoliciesList`)
+    ).not.toBeInTheDocument();
   });
 });

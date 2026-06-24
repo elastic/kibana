@@ -101,10 +101,35 @@ describe('registerIamPermissionsRoute', () => {
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
 
     // byService entry for cloudtrail uses manifest actions (sorted), not the matrix
-    expect(body.byService.cloudtrail.Statement[0].Action).toEqual([...manifestActions].sort());
+    expect(body.byService.cloudtrail.policy.Statement[0].Action).toEqual(
+      [...manifestActions].sort()
+    );
+    expect(body.byService.cloudtrail.managedPolicyArns).toEqual([]);
 
     // merged is the same since there's only one service
     expect(body.merged.Statement[0].Action).toEqual([...manifestActions].sort());
+    expect(body.mergedManagedPolicyArns).toEqual([]);
+  });
+
+  it('surfaces managed policy ARNs from manifest roles', async () => {
+    const arn = 'arn:aws:iam::aws:policy/SecurityAudit';
+    mockGetLatestPackageInfo.mockResolvedValue(
+      makePackageInfo({
+        provider_permissions: [{ provider: 'aws', permissions: ['s3:GetObject'], roles: [arn] }],
+      })
+    );
+
+    const request = httpServerMock.createKibanaRequest({ query: { services: 'cloudtrail' } });
+    const response = httpServerMock.createResponseFactory();
+    const handler = getHandler();
+
+    await handler({} as any, request, response);
+
+    expect(response.ok).toHaveBeenCalled();
+    const body = (response.ok as jest.Mock).mock.calls[0][0].body;
+
+    expect(body.byService.cloudtrail.managedPolicyArns).toContain(arn);
+    expect(body.mergedManagedPolicyArns).toContain(arn);
   });
 
   it('falls back to the hardcoded matrix when the package has no provider_permissions', async () => {
@@ -122,7 +147,26 @@ describe('registerIamPermissionsRoute', () => {
 
     // Should equal the hardcoded matrix actions for cloudtrail
     const matrixActions = AWS_SERVICE_PROVIDER_PERMISSIONS.cloudtrail?.actions ?? [];
-    expect(body.byService.cloudtrail.Statement[0].Action).toEqual([...matrixActions].sort());
+    expect(body.byService.cloudtrail.policy.Statement[0].Action).toEqual(
+      [...matrixActions].sort()
+    );
+  });
+
+  it('logs a debug message when using the matrix fallback', async () => {
+    mockGetLatestPackageInfo.mockResolvedValue(makePackageInfo());
+
+    const request = httpServerMock.createKibanaRequest({ query: { services: 'cloudtrail' } });
+    const response = httpServerMock.createResponseFactory();
+    const handler = getHandler();
+
+    await handler({} as any, request, response);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('cloudtrail')
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('fallback')
+    );
   });
 
   it('falls back silently when Fleet package fetch throws', async () => {
@@ -139,9 +183,11 @@ describe('registerIamPermissionsRoute', () => {
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
 
     const matrixActions = AWS_SERVICE_PROVIDER_PERMISSIONS.cloudtrail?.actions ?? [];
-    expect(body.byService.cloudtrail.Statement[0].Action).toEqual([...matrixActions].sort());
+    expect(body.byService.cloudtrail.policy.Statement[0].Action).toEqual(
+      [...matrixActions].sort()
+    );
 
-    // Logger should have recorded the debug message
+    // Logger should have recorded the debug message about the failed fetch
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('Could not fetch package info')
     );
@@ -172,7 +218,7 @@ describe('registerIamPermissionsRoute', () => {
     expect(mergedActions).toEqual([...new Set(mergedActions)].sort());
 
     // merged.Action must be a superset of each service's actions
-    const cloudtrailActions: string[] = body.byService.cloudtrail.Statement[0].Action;
+    const cloudtrailActions: string[] = body.byService.cloudtrail.policy.Statement[0].Action;
     for (const action of cloudtrailActions) {
       expect(mergedActions).toContain(action);
     }
@@ -222,12 +268,34 @@ describe('registerIamPermissionsRoute', () => {
     const body = (response.ok as jest.Mock).mock.calls[0][0].body;
 
     // cloudtrail: uses manifest
-    expect(body.byService.cloudtrail.Statement[0].Action).toContain('cloudtrail:GetTrail');
+    expect(body.byService.cloudtrail.policy.Statement[0].Action).toContain('cloudtrail:GetTrail');
 
     // fargate: uses matrix fallback
     const fargateMatrix = AWS_SERVICE_PROVIDER_PERMISSIONS.fargate?.actions ?? [];
     if (fargateMatrix.length > 0) {
-      expect(body.byService.fargate.Statement[0].Action).toEqual([...fargateMatrix].sort());
+      expect(body.byService.fargate.policy.Statement[0].Action).toEqual(
+        [...fargateMatrix].sort()
+      );
     }
+  });
+
+  it('uses title-cased Sid for byService entries', async () => {
+    mockGetLatestPackageInfo.mockResolvedValue(
+      makePackageInfo({
+        provider_permissions: [{ provider: 'aws', permissions: ['ec2:DescribeInstances'] }],
+      })
+    );
+
+    const request = httpServerMock.createKibanaRequest({ query: { services: 'ec2_metrics' } });
+    const response = httpServerMock.createResponseFactory();
+    const handler = getHandler();
+
+    await handler({} as any, request, response);
+
+    expect(response.ok).toHaveBeenCalled();
+    const body = (response.ok as jest.Mock).mock.calls[0][0].body;
+
+    // Sid should be ElasticEc2Metrics, not Elasticec2metrics
+    expect(body.byService.ec2_metrics.policy.Statement[0].Sid).toBe('ElasticEc2Metrics');
   });
 });

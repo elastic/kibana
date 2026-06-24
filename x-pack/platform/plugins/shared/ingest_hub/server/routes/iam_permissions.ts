@@ -10,14 +10,22 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 
-import {
-  AWS_SERVICE_LOOKUP,
-  AWS_SERVICE_PROVIDER_PERMISSIONS,
-  IAM_PERMISSIONS_API_PATH,
-  buildIamPolicyDocument,
-  getIntegrationSid,
-  mapProviderPermissions,
-} from '../../common';
+import { IAM_PERMISSIONS_API_PATH } from '../../common/iam_permissions_api';
+import { AWS_SERVICE_LOOKUP } from '../../common/aws_service_lookup';
+import { AWS_SERVICE_PROVIDER_PERMISSIONS } from '../../common/aws_provider_permissions';
+import { buildIamPolicyDocument, getIntegrationSid } from '../../common/iam_policy_document';
+import { mapProviderPermissions } from '../../common/map_provider_permissions';
+
+/**
+ * Title-cases each underscore/hyphen-separated segment of a service id so that
+ * `getIntegrationSid` produces a readable Sid (e.g. 'ec2_metrics' → 'ElasticEc2Metrics'
+ * rather than 'Elasticec2metrics').
+ */
+const toSidSegment = (id: string): string =>
+  id
+    .split(/[_-]/)
+    .map((seg) => seg.charAt(0).toUpperCase() + seg.slice(1))
+    .join('');
 
 export const registerIamPermissionsRoute = (
   router: IRouter,
@@ -92,43 +100,56 @@ export const registerIamPermissionsRoute = (
 
       // Resolve permissions per service, falling back to the hardcoded matrix.
       const allActions: string[] = [];
-      const byService: Record<string, ReturnType<typeof buildIamPolicyDocument>> = {};
+      const allManagedPolicyArns: string[] = [];
+      const byService: Record<string, { policy: ReturnType<typeof buildIamPolicyDocument>; managedPolicyArns: string[] }> = {};
 
       for (const id of serviceIds) {
         const lookup = AWS_SERVICE_LOOKUP[id];
         const pkgInfo = packageInfoMap.get(lookup.packageName);
 
         let actions: string[] | null = null;
+        let managedPolicyArns: string[] = [];
 
         if (pkgInfo) {
           const fromManifest = mapProviderPermissions(pkgInfo, {
             packageName: lookup.packageName,
             policyTemplate: lookup.policyTemplate,
             inputs: lookup.inputs,
-            dataStream: id,
+            // Use the lookup's dataStream override when the service id differs from
+            // the actual data stream path in the package (e.g. fargate → task_stats).
+            dataStream: lookup.dataStream ?? id,
           });
 
-          if (fromManifest && fromManifest.actions.length > 0) {
+          if (fromManifest && (fromManifest.actions.length > 0 || fromManifest.managedPolicyArns.length > 0)) {
             actions = fromManifest.actions;
+            managedPolicyArns = fromManifest.managedPolicyArns;
           }
         }
 
         // Fall back to the hardcoded matrix when the package has no manifest permissions.
         if (actions === null) {
+          logger.debug(
+            `No manifest provider_permissions found for service '${id}' — using hardcoded matrix fallback`
+          );
           const fallback = AWS_SERVICE_PROVIDER_PERMISSIONS[id];
           actions = fallback?.actions ?? [];
         }
 
-        if (actions.length > 0) {
-          byService[id] = buildIamPolicyDocument(actions, getIntegrationSid(id));
+        if (actions.length > 0 || managedPolicyArns.length > 0) {
+          byService[id] = {
+            policy: buildIamPolicyDocument(actions, getIntegrationSid(toSidSegment(id))),
+            managedPolicyArns,
+          };
           allActions.push(...actions);
+          allManagedPolicyArns.push(...managedPolicyArns);
         }
       }
 
       // Build the merged policy from all services' actions, deduped.
       const merged = buildIamPolicyDocument(allActions);
+      const mergedManagedPolicyArns = [...new Set(allManagedPolicyArns)];
 
-      return response.ok({ body: { merged, byService } });
+      return response.ok({ body: { merged, mergedManagedPolicyArns, byService } });
     }
   );
 };
