@@ -79,6 +79,11 @@ const registerRawIdentifiersMaintainerSuite = (
     `Entity Store ${maintainerId} maintainer (raw_identifiers)`,
     { tag: ENTITY_STORE_TAGS },
     () => {
+      // Each test may issue multiple synchronous maintainer runs plus polling loops.
+      // The default 60s Playwright timeout is too tight; use the same 3-minute
+      // ceiling as Playwright's global setup projects.
+      apiTest.setTimeout(180_000);
+
       let defaultHeaders: Record<string, string>;
       let internalHeaders: Record<string, string>;
 
@@ -132,11 +137,17 @@ const registerRawIdentifiersMaintainerSuite = (
       });
 
       apiTest(
-        `resolves ${relationshipKey}.ids on the first run (no watermark — full scan)`,
+        `resolves ${relationshipKey}.ids for a freshly-seen actor`,
         async ({ apiClient, esClient }) => {
           const actor = actorId('fresh');
           const tFqdn = targetFqdn('fresh');
           const target = targetId('fresh');
+
+          // The maintainer task auto-runs once on registration (ensureScheduled
+          // fires ~immediately after init), persisting a watermark before this
+          // test seeds anything. Seed the actor with a future last_seen so it is
+          // always newer than whatever watermark the startup run left.
+          const futureTs = new Date(Date.now() + 3_600_000).toISOString();
 
           await seedHostEntity(esClient, { entityId: target, hostName: tFqdn });
           await seedHostEntity(esClient, {
@@ -144,6 +155,8 @@ const registerRawIdentifiersMaintainerSuite = (
             hostName: `${entityPrefix}-fresh.${domain}`,
             relationship: { key: relationshipKey, hostNames: [tFqdn] },
             entitySource: requiredEntitySource,
+            lastSeen: futureTs,
+            firstSeen: futureTs,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
