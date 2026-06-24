@@ -15,11 +15,47 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { emptyAssets } from '@kbn/streams-schema';
+import { emptyAssets, getParentId, isDraftStream, isRoot } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+
+const useIsParentDraft = (streamName: string): boolean | undefined => {
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+
+  const { value, error } = useStreamsAppFetch(
+    async ({ signal }) => {
+      if (isRoot(streamName)) {
+        return false;
+      }
+      const parentName = getParentId(streamName);
+      if (!parentName) {
+        return false;
+      }
+      const response = await streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+        signal,
+        params: { path: { name: parentName } },
+      });
+      return isDraftStream(response.stream);
+    },
+    [streamsRepositoryClient, streamName],
+    { disableToastOnError: true }
+  );
+
+  // Fail open: a failed parent lookup shouldn't block materialization (the server still validates),
+  // so treat a fetch error as "parent is not a draft" rather than leaving the button disabled.
+  return error ? false : value;
+};
 
 export function DraftMaterializationCTA({
   definition,
@@ -30,6 +66,7 @@ export function DraftMaterializationCTA({
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isMaterializing, setIsMaterializing] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
   const {
     dependencies: {
       start: {
@@ -38,6 +75,8 @@ export function DraftMaterializationCTA({
     },
     core: { notifications },
   } = useKibana();
+
+  const isParentDraft = useIsParentDraft(definition.stream.name);
 
   const materialize = async () => {
     setIsMaterializing(true);
@@ -108,20 +147,37 @@ export function DraftMaterializationCTA({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => setIsModalVisible(true)}
-              disabled={!definition.privileges.manage}
+            <EuiToolTip
+              content={
+                isParentDraft
+                  ? i18n.translate(
+                      'xpack.streams.draftMaterialization.convertButtonParentIsDraftTooltip',
+                      {
+                        defaultMessage:
+                          "Can't convert while the parent stream is still a draft. Convert the parent to ingest-time first.",
+                      }
+                    )
+                  : undefined
+              }
             >
-              {i18n.translate('xpack.streams.draftMaterialization.convertButton', {
-                defaultMessage: 'Convert to ingest-time',
-              })}
-            </EuiButton>
+              <EuiButton
+                onClick={() => setIsModalVisible(true)}
+                disabled={!definition.privileges.manage || isParentDraft === true}
+                isLoading={isParentDraft === undefined}
+              >
+                {i18n.translate('xpack.streams.draftMaterialization.convertButton', {
+                  defaultMessage: 'Convert to ingest-time',
+                })}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 
       {isModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
           title={i18n.translate('xpack.streams.draftMaterialization.modal.title', {
             defaultMessage: 'Convert draft stream to ingest-time?',
           })}

@@ -7,7 +7,13 @@
 import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate';
 import { assign, and, not, enqueueActions, setup, sendTo, assertEvent } from 'xstate';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { Streams, isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import {
+  Streams,
+  isChildOf,
+  isSchema,
+  isValidRoutingOrder,
+  routingDefinitionListSchema,
+} from '@kbn/streams-schema';
 import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
@@ -168,6 +174,7 @@ export const streamRoutingMachine = setup({
       'isValidRouting',
       'hasRoutingChanges',
       'isConditionEditorValid',
+      'hasValidRoutingOrder',
     ]),
     canSaveSuggestion: and([
       'hasManagePrivileges',
@@ -183,6 +190,8 @@ export const streamRoutingMachine = setup({
     isConditionEditorValid: ({ context }) => context.isConditionEditorValid,
     isValidRouting: ({ context }) =>
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
+    hasValidRoutingOrder: ({ context }) =>
+      isValidRoutingOrder(context.routing.map(routingConverter.toAPIDefinition)),
     hasRoutingChanges: ({ context }) => {
       // Compare current routing with initial routing to detect changes
       const currentRouting = context.routing.map(routingConverter.toAPIDefinition);
@@ -604,6 +613,15 @@ export const streamRoutingMachine = setup({
               ],
               states: {
                 reordering: {
+                  // If a reorder restores the original order there are no pending changes, so
+                  // return to idle (equivalent to cancelling). This re-enables the create/suggest
+                  // actions and hides the save bar, instead of leaving the page stuck in a
+                  // "reordering" state with no actual changes.
+                  always: {
+                    guard: not('hasRoutingChanges'),
+                    target: '#idle',
+                    actions: [{ type: 'resetRoutingChanges' }],
+                  },
                   on: {
                     'routingRule.reorder': {
                       actions: [{ type: 'reorderRouting', params: ({ event }) => event }],

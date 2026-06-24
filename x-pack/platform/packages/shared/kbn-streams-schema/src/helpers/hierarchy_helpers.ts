@@ -6,6 +6,26 @@
  */
 
 import { Streams } from '../models/streams';
+import type { RoutingDefinition } from '../models/ingest/routing';
+
+/**
+ * Returns false when a materialized (non-draft) routing entry appears after a
+ * draft entry. This mirrors the server-side invariant enforced in WiredStream.doValidateUpsertion.
+ * Drafts must be contiguous at the end of the routing list.
+ */
+export const isValidRoutingOrder = (
+  routing: ReadonlyArray<Pick<RoutingDefinition, 'draft'>>
+): boolean => {
+  let seenDraft = false;
+  for (const rule of routing) {
+    if (rule.draft) {
+      seenDraft = true;
+    } else if (seenDraft) {
+      return false;
+    }
+  }
+  return true;
+};
 
 export function getIndexPatternsForStream<T extends Streams.all.Definition | undefined>(
   stream: T

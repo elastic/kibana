@@ -34,10 +34,12 @@ const StreamDetailGeneralDataInner = ({
   definition,
   refreshDefinition,
   data,
+  isDraft = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   data: ReturnType<typeof useDataStreamStats>;
+  isDraft?: boolean;
 }) => {
   const {
     core: { notifications, http, overlays, application },
@@ -146,70 +148,79 @@ const StreamDetailGeneralDataInner = ({
           updateInProgress={updateInProgress}
         />
       )}
-      <EuiTitle size="xs">
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <h4>
-              {i18n.translate('xpack.streams.streamDetailLifecycle.successfulData', {
-                defaultMessage: 'Successful data',
-              })}
-            </h4>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiTitle>
+      {!isDraft && (
+        <EuiTitle size="xs">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <h4>
+                {i18n.translate('xpack.streams.streamDetailLifecycle.successfulData', {
+                  defaultMessage: 'Successful data',
+                })}
+              </h4>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+      )}
 
-      {/* Retention Section */}
-      <SectionPanel
-        topCard={
-          <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
-        }
-        bottomCard={
-          <StorageSizeCard
-            hasMonitorPrivileges={definition.privileges?.monitor}
-            isTimeSeriesMode={definition.index_mode === 'time_series'}
-            stats={data.stats?.ds.stats}
-            statsError={data.error}
-          />
-        }
-      >
-        {definition.privileges.lifecycle ? (
-          <LifecycleSummary
+      {/* Retention Section. Drafts have no backing data stream, so only the
+          definition-based retention editor is shown (stats cards are omitted). */}
+      {isDraft ? (
+        <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
+      ) : (
+        <SectionPanel
+          topCard={
+            <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
+          }
+          bottomCard={
+            <StorageSizeCard
+              hasMonitorPrivileges={definition.privileges?.monitor}
+              isTimeSeriesMode={definition.index_mode === 'time_series'}
+              stats={data.stats?.ds.stats}
+              statsError={data.error}
+            />
+          }
+        >
+          {definition.privileges.lifecycle ? (
+            <LifecycleSummary
+              definition={definition}
+              stats={data.stats?.ds.stats}
+              isMetricsStream={definition.index_mode === 'time_series'}
+              refreshDefinition={refreshDefinition}
+            />
+          ) : null}
+        </SectionPanel>
+      )}
+
+      {/* Ingestion Section. Requires live data stream stats, so hidden for drafts. */}
+      {!isDraft && (
+        <SectionPanel
+          topCard={
+            <IngestionCard
+              period="daily"
+              hasMonitorPrivileges={definition.privileges?.monitor}
+              stats={data.stats?.ds.stats}
+              statsError={data.error}
+            />
+          }
+          bottomCard={
+            <IngestionCard
+              period="monthly"
+              hasMonitorPrivileges={definition.privileges?.monitor}
+              stats={data.stats?.ds.stats}
+              statsError={data.error}
+            />
+          }
+        >
+          <IngestionRate
             definition={definition}
+            isLoadingStats={data.isLoading}
             stats={data.stats?.ds.stats}
-            isMetricsStream={definition.index_mode === 'time_series'}
-            refreshDefinition={refreshDefinition}
-          />
-        ) : null}
-      </SectionPanel>
-
-      {/* Ingestion Section */}
-      <SectionPanel
-        topCard={
-          <IngestionCard
-            period="daily"
-            hasMonitorPrivileges={definition.privileges?.monitor}
-            stats={data.stats?.ds.stats}
+            timeState={timeState}
             statsError={data.error}
+            aggregations={data.stats?.ds.aggregations}
           />
-        }
-        bottomCard={
-          <IngestionCard
-            period="monthly"
-            hasMonitorPrivileges={definition.privileges?.monitor}
-            stats={data.stats?.ds.stats}
-            statsError={data.error}
-          />
-        }
-      >
-        <IngestionRate
-          definition={definition}
-          isLoadingStats={data.isLoading}
-          stats={data.stats?.ds.stats}
-          timeState={timeState}
-          statsError={data.error}
-          aggregations={data.stats?.ds.aggregations}
-        />
-      </SectionPanel>
+        </SectionPanel>
+      )}
     </EuiFlexGroup>
   );
 };
@@ -218,10 +229,12 @@ export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
   data,
+  isDraft = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   data: ReturnType<typeof useDataStreamStats>;
+  isDraft?: boolean;
 }) => {
   return (
     <LifecycleAfterSaveProvider>
@@ -230,6 +243,7 @@ export const StreamDetailGeneralData = ({
           definition={definition}
           refreshDefinition={refreshDefinition}
           data={data}
+          isDraft={isDraft}
         />
       </LifecyclePreviewProvider>
     </LifecycleAfterSaveProvider>

@@ -41,6 +41,12 @@ jest.mock('./import_export_panel', () => ({
   ImportExportPanel: () => <div data-test-subj="mockImportExportPanel">Import & export</div>,
 }));
 
+jest.mock('../stream_management/data_management/draft_materialization_cta', () => ({
+  DraftMaterializationCTA: () => (
+    <div data-test-subj="mockDraftMaterializationCTA">Convert to ingest-time</div>
+  ),
+}));
+
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('StreamOverview', () => {
@@ -142,5 +148,6 @@ describe('StreamOverview', () => {
 
     expect(screen.queryByText('Dataset quality')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockIngestRateChart')).toBeInTheDocument();
+    expect(screen.getByTestId('mockDraftMaterializationCTA')).toBeInTheDocument();
   });
 });

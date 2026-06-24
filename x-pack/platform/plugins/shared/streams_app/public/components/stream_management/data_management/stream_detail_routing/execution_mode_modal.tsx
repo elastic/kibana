@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckableCard,
   EuiFieldText,
   EuiFlexGroup,
@@ -35,13 +36,20 @@ export function ExecutionModeModal({
   condition,
   onCancel,
   onConfirm,
+  parentIsDraft = false,
+  hasDraftSiblings = false,
 }: {
   streamName: string;
   condition: Condition;
   onCancel: () => void;
   onConfirm: (isDraft: boolean) => void;
+  parentIsDraft?: boolean;
+  hasDraftSiblings?: boolean;
 }) {
   const [selectedMode, setSelectedMode] = useState<ExecutionMode>('draft');
+  // Final is unavailable when the parent is a draft (children must be drafts) or when draft
+  // siblings already exist (a Final stream can't be ordered after existing drafts).
+  const isFinalDisabled = parentIsDraft || hasDraftSiblings;
 
   return (
     <EuiModal onClose={onCancel} data-test-subj="streamsAppExecutionModeModal">
@@ -82,6 +90,44 @@ export function ExecutionModeModal({
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        {parentIsDraft && (
+          <>
+            <EuiCallOut
+              announceOnMount={false}
+              size="s"
+              color="primary"
+              iconType="info"
+              title={i18n.translate('xpack.streams.executionModeModal.parentIsDraftTitle', {
+                defaultMessage: 'Parent stream is a draft',
+              })}
+            >
+              {i18n.translate('xpack.streams.executionModeModal.parentIsDraftDescription', {
+                defaultMessage:
+                  'Child streams of a draft parent must also be drafts. Convert the parent to ingest-time first to create stored (Final) children.',
+              })}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {!parentIsDraft && hasDraftSiblings && (
+          <>
+            <EuiCallOut
+              announceOnMount={false}
+              size="s"
+              color="primary"
+              iconType="info"
+              title={i18n.translate('xpack.streams.executionModeModal.hasDraftSiblingsTitle', {
+                defaultMessage: 'This stream already has draft children',
+              })}
+            >
+              {i18n.translate('xpack.streams.executionModeModal.hasDraftSiblingsDescription', {
+                defaultMessage:
+                  'Stored (Final) streams must come before drafts in the routing order, so new streams must also be drafts while drafts exist. Convert the existing drafts to ingest-time first to create a stored (Final) stream.',
+              })}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
             <EuiCheckableCard
@@ -129,6 +175,7 @@ export function ExecutionModeModal({
               }
               checked={selectedMode === 'final'}
               onChange={() => setSelectedMode('final')}
+              disabled={isFinalDisabled}
               data-test-subj="streamsAppExecutionModeFinalCard"
             >
               <EuiText size="xs" color="subdued">
@@ -153,7 +200,7 @@ export function ExecutionModeModal({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              onClick={() => onConfirm(selectedMode === 'draft')}
+              onClick={() => onConfirm(isFinalDisabled || selectedMode === 'draft')}
               data-test-subj="streamsAppExecutionModeConfirmButton"
             >
               {i18n.translate('xpack.streams.executionModeModal.confirm', {

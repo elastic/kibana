@@ -105,7 +105,7 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
 
-  const histogramFetch = getStreamHistogram(esqlSource);
+  const histogramFetch = getStreamHistogram(esqlSource, { loadUnmappedFields: isDraft });
   const histogramResult = useAsync(() => histogramFetch, [histogramFetch]);
 
   const allTimeseries = useMemo(
@@ -257,7 +257,7 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
               <EuiFlexItem grow={false}>
                 <span
                   aria-hidden
-                  css={{
+                  style={{
                     width: euiTheme.size.s,
                     height: euiTheme.size.s,
                     borderRadius: '50%',

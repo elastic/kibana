@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import { isDraftStream, Streams } from '@kbn/streams-schema';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { minimatch } from 'minimatch';
 import { isTerminalStatus } from '@kbn/workflows';
@@ -60,6 +60,10 @@ export const classifyStreams = ({
       !Streams.WiredStream.Definition.is(stream) &&
       !Streams.ClassicStream.Definition.is(stream)
     ) {
+      unsupported.push(stream.name);
+      continue;
+    }
+    if (isDraftStream(stream)) {
       unsupported.push(stream.name);
       continue;
     }

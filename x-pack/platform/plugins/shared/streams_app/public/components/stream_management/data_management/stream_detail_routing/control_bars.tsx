@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useState } from 'react';
 import type { Streams } from '@kbn/streams-schema';
+import { isDraftStream } from '@kbn/streams-schema';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
 import { buildRequestPreviewCodeContent } from '../shared/utils';
@@ -51,6 +52,12 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
 
   const streamName = useStreamsRoutingSelector(
     (snapshot) => snapshot.context.definition.stream.name
+  );
+  const isParentDraft = useStreamsRoutingSelector((snapshot) =>
+    isDraftStream(snapshot.context.definition.stream)
+  );
+  const hasDraftSiblings = useStreamsRoutingSelector((snapshot) =>
+    snapshot.context.routing.some((rule) => rule.draft)
   );
   const hasPrivileges = useStreamsRoutingSelector((snapshot) =>
     'privileges' in snapshot.context.definition
@@ -136,6 +143,8 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
           condition={currentRoutingRule.where}
           onCancel={() => setIsExecutionModeModalVisible(false)}
           onConfirm={handleExecutionModeConfirm}
+          parentIsDraft={isParentDraft}
+          hasDraftSiblings={hasDraftSiblings}
         />
       )}
 

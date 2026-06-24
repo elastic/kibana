@@ -11,6 +11,7 @@ import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { DraftMaterializationCTA } from '../stream_management/data_management/draft_materialization_cta';
 import { AboutPanel } from './about_panel';
 import { DataQualityCard } from './data_quality_card';
 import { IngestRateChart } from './ingest_rate_chart';
@@ -45,6 +46,13 @@ export function StreamOverview() {
   );
 
   const mainSections: OverviewSection[] = [
+    {
+      id: 'draft-materialization',
+      node: Streams.WiredStream.GetResponse.is(definition) ? (
+        <DraftMaterializationCTA definition={definition} refreshDefinition={refresh} />
+      ) : null,
+      show: isDraft,
+    },
     { id: 'ingest-rate-chart', node: <IngestRateChart />, show: true },
     { id: 'dataset-quality', node: <DataQualityCard />, show: isIngest && !isDraft },
   ];

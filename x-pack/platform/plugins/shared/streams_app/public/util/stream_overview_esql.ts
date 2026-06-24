@@ -6,10 +6,30 @@
  */
 
 import { esql } from '@elastic/esql';
+import { withUnmappedFieldsDirective } from '@kbn/streams-schema';
+
+/**
+ * Options shared by the overview ES|QL builders.
+ */
+interface BuildOverviewEsqlOptions {
+  /**
+   * When true, prepend `SET unmapped_fields="LOAD";` to the query. Required when
+   * the `source` is a draft stream's ES|QL view: such views can reference fields
+   * (e.g. a routing condition on `host.hostname`) that are unmapped in the
+   * underlying indices, which otherwise fails with "Unknown column". The directive
+   * is not supported inside view definitions, so each consumer that reads a draft
+   * view must add it at query time.
+   */
+  loadUnmappedFields?: boolean;
+}
 
 /** Total document count in the active time range (`source` may be a stream, view, or comma-separated list). */
-export function buildDataQualityTotalDocCountEsql(source: string): string {
-  return esql.from(source).pipe`STATS doc_count = COUNT(*)`.print();
+export function buildDataQualityTotalDocCountEsql(
+  source: string,
+  { loadUnmappedFields = false }: BuildOverviewEsqlOptions = {}
+): string {
+  const query = esql.from(source).pipe`STATS doc_count = COUNT(*)`.print();
+  return loadUnmappedFields ? withUnmappedFieldsDirective(query) : query;
 }
 
 /** Degraded-doc count: rows with non-null `_ignored` in the time range. */
@@ -61,9 +81,14 @@ export function getMeaningfulBucketMs(rangeMs: number, numDataPoints: number): n
 }
 
 /** Ingest histogram: doc_count by @timestamp bucket (`intervalMs` snapped to a meaningful interval). */
-export function buildStreamIngestHistogramEsql(source: string, intervalMs: number): string {
-  return esql.from(source)
+export function buildStreamIngestHistogramEsql(
+  source: string,
+  intervalMs: number,
+  { loadUnmappedFields = false }: BuildOverviewEsqlOptions = {}
+): string {
+  const query = esql.from(source)
     .pipe`STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${intervalMs} ms)`.print(
     'basic'
   );
+  return loadUnmappedFields ? withUnmappedFieldsDirective(query) : query;
 }
