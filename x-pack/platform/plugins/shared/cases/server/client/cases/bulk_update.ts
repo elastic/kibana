@@ -661,9 +661,8 @@ export const bulkUpdate = async (
 
     for (const { updateReq, originalCase } of casesToUpdate) {
       const effectiveTemplate = getEffectiveTemplate(updateReq, originalCase);
-      const templateKey = effectiveTemplate != null
-        ? `${effectiveTemplate.id}@${effectiveTemplate.version}`
-        : null;
+      const templateKey =
+        effectiveTemplate != null ? `${effectiveTemplate.id}@${effectiveTemplate.version}` : null;
       validateExtendedFieldsOnClose({
         updateReq,
         originalCase,
