@@ -350,7 +350,7 @@ const RiskInputsTabContent = <T extends EntityType>({
       {
         render: (data: InputAlert) => (
           <EuiToolTip
-            content={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.tooltip', {
+            content={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.ariaLabel', {
               defaultMessage: 'Preview alert with id {id}',
               values: { id: data._id },
             })}

@@ -17,7 +17,6 @@ import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
-import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
 import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
 import { ResolutionGroupTab } from '../entity_resolution/resolution_group_tab';
@@ -27,18 +26,20 @@ export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;
 export const FIELDS_TABLE_TAB_TEST_ID = `${PREFIX}FieldsTableTab` as const;
 
-type RiskInputsTabWithAlertPreviewProps<T extends EntityType> = Omit<
-  RiskInputsTabProps<T>,
-  'openAlertPreview'
-> & { scopeId: string };
+interface RiskInputsTabWithAlertPreviewProps {
+  entityType: EntityType;
+  entityName: string;
+  entityId?: string;
+  scopeId: string;
+}
 
 /** Wires the legacy expandable-flyout alert preview into {@link RiskInputsTab}. */
-const RiskInputsTabWithAlertPreview = <T extends EntityType>({
+const RiskInputsTabWithAlertPreview = ({
   entityType,
   entityName,
   entityId,
   scopeId,
-}: RiskInputsTabWithAlertPreviewProps<T>) => {
+}: RiskInputsTabWithAlertPreviewProps) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const openAlertPreview = useCallback(
@@ -66,12 +67,12 @@ const RiskInputsTabWithAlertPreview = <T extends EntityType>({
   );
 };
 
-export const getRiskInputTab = <T extends EntityType>({
+export const getRiskInputTab = ({
   entityType,
   entityName,
   scopeId,
   entityId,
-}: RiskInputsTabWithAlertPreviewProps<T>) => ({
+}: RiskInputsTabWithAlertPreviewProps) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
   name: (
