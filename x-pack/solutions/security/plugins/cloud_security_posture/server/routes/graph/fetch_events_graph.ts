@@ -438,15 +438,14 @@ ${buildPinnedEsql(pinnedIds)}
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
-      ? `CASE (event.id IS NOT NULL AND event.id != "", (${originEventIds
+      ? `CASE (event.id IS NOT NULL AND event.id != "", event.id in (${originEventIds
           .map((_id, idx) => `?og_id${idx}`)
           .join(', ')}), false)`
       : 'false'
   }
 | EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `CASE (event.id IS NOT NULL AND event.id != "", event.id in (${originAlertIds
-          .map((_id, idx) => `?og_alrt_id${idx}`)
+      ? `CASE (event.id IS NOT NULL AND event.id != "", isOrigin AND event.id in (${originAlertIds          .map((_id, idx) => `?og_alrt_id${idx}`)
           .join(', ')}), false)`
       : 'false'
   }
