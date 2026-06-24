@@ -25,6 +25,8 @@ interface ServiceHeaderBadgesProps {
   end: string;
   onSloClick: () => void;
   alertsTabHref: string;
+  overviewTabHref: string;
+  selectedTab: string;
 }
 
 export function ServiceHeaderBadges({
@@ -34,6 +36,8 @@ export function ServiceHeaderBadges({
   end,
   onSloClick,
   alertsTabHref,
+  overviewTabHref,
+  selectedTab,
 }: ServiceHeaderBadgesProps) {
   const { euiTheme } = useEuiTheme();
   const { core, plugins } = useApmPluginContext();
@@ -114,9 +118,21 @@ export function ServiceHeaderBadges({
     values: { count: alertsCount },
   });
 
+  // Both the alerts and anomalies badges link to their respective tabs (alerts
+  // and overview). When the user is already on that tab the badge has nothing
+  // to navigate to, so we render it as non-interactive to avoid a link that
+  // "does nothing" (and the related screen-reader confusion).
+  const isOnAlertsTab = selectedTab === 'alerts';
+  const isOnOverviewTab = selectedTab === 'overview';
+
   const onAlertsBadgeClick = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     navigateToUrl(alertsTabHref);
+  };
+
+  const onAnomaliesBadgeClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault();
+    navigateToUrl(overviewTabHref);
   };
 
   return (
@@ -133,10 +149,9 @@ export function ServiceHeaderBadges({
               data-test-subj="serviceHeaderAlertsBadge"
               color="danger"
               iconType="warning"
-              onClick={onAlertsBadgeClick}
-              tabIndex={0}
-              role="button"
-              onClickAriaLabel={alertsTooltip}
+              {...(isOnAlertsTab
+                ? { role: 'img', 'aria-label': alertsTooltip }
+                : { onClick: onAlertsBadgeClick, onClickAriaLabel: alertsTooltip })}
             >
               {alertsCount}
             </EuiBadge>
@@ -158,6 +173,7 @@ export function ServiceHeaderBadges({
           <AnomaliesBadge
             score={anomalyData?.anomalyScore}
             detectorType={anomalyData?.detectorType}
+            onClick={isOnOverviewTab ? undefined : onAnomaliesBadgeClick}
           />
         </EuiFlexItem>
       )}

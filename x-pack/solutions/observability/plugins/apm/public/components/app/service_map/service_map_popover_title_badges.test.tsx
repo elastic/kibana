@@ -38,6 +38,11 @@ jest.mock('../../../hooks/use_apm_router', () => ({
   }),
 }));
 
+const mockUseApmRoutePath = jest.fn(() => '/services/{serviceName}/service-map');
+jest.mock('../../../hooks/use_apm_route_path', () => ({
+  useApmRoutePath: () => mockUseApmRoutePath(),
+}));
+
 jest.mock('../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: () => ({
     query: {
@@ -67,6 +72,7 @@ function serviceNodeData(overrides?: Partial<ServiceNodeData>): ServiceNodeData 
 describe('ServiceMapPopoverTitleBadges', () => {
   beforeEach(() => {
     mockNavigateToUrl.mockClear();
+    mockUseApmRoutePath.mockReturnValue('/services/{serviceName}/service-map');
   });
 
   it('renders nothing when there are no alerts, SLO issues, or anomalies', () => {
@@ -92,6 +98,26 @@ describe('ServiceMapPopoverTitleBadges', () => {
     fireEvent.click(badge);
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
       expect.stringContaining('/app/apm/services/{serviceName}/overview')
+    );
+  });
+
+  it('redirects to the mobile-services overview tab when on a mobile service map route', () => {
+    mockUseApmRoutePath.mockReturnValue('/mobile-services/{serviceName}/service-map');
+
+    render(
+      <ServiceMapPopoverTitleBadges
+        nodeData={serviceNodeData({
+          serviceAnomalyStats: {
+            anomalyScore: 90,
+            detectorType: AnomalyDetectorType.txFailureRate,
+          },
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('apmAnomaliesBadge'));
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      expect.stringContaining('/app/apm/mobile-services/{serviceName}/overview')
     );
   });
 
