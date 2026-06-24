@@ -32,11 +32,7 @@ type RiskInputsTabWithAlertPreviewProps<T extends EntityType> = Omit<
   'openAlertPreview'
 > & { scopeId: string };
 
-/**
- * Owns the legacy expandable-flyout alert-preview navigation and composes the
- * context-agnostic {@link RiskInputsTab}, so the tab itself has no dependency on
- * `useExpandableFlyoutApi`.
- */
+/** Wires the legacy expandable-flyout alert preview into {@link RiskInputsTab}. */
 const RiskInputsTabWithAlertPreview = <T extends EntityType>({
   entityType,
   entityName,
