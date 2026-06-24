@@ -168,4 +168,27 @@ export const mainTranslations = {
       defaultMessage: 'Delete failed',
     }),
   },
+
+  confirmDeleteDataSets: {
+    title: i18n.translate('dataSets.confirmDeleteDataSets.title', {
+      defaultMessage: 'Delete data sets',
+    }),
+    prompt: (count: number) =>
+      i18n.translate('dataSets.confirmDeleteDataSets.prompt', {
+        defaultMessage: 'Are you sure you want to delete {count} data sets?',
+        values: { count },
+      }),
+    warning: i18n.translate('dataSets.confirmDeleteDataSets.warning', {
+      defaultMessage: 'This action cannot be undone.',
+    }),
+    cancelButton: i18n.translate('dataSets.confirmDeleteDataSets.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    confirmButton: i18n.translate('dataSets.confirmDeleteDataSets.confirmButton', {
+      defaultMessage: 'Delete',
+    }),
+    errorTitle: i18n.translate('dataSets.confirmDeleteDataSets.errorTitle', {
+      defaultMessage: 'Delete failed',
+    }),
+  },
 } as const;
