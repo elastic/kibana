@@ -54,6 +54,29 @@ Pass a title object when the page title can be renamed from the header:
 The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
 saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
 
+## Title size
+
+The title is `xs` for a single-row header and `s` when the header has a second row (tabs or a
+metadata row), where an `xs` title looks too small in the taller header. This is automatic — there
+is no size knob to set.
+
+## Padding
+
+`padding` controls the header's **outer** spacing. The scalar values only add symmetric horizontal
+padding; the `bleed` variant additionally breaks the header out of a surrounding padded container.
+The header's **internal vertical padding** is standardized regardless of this prop (and of the title
+size), so the header keeps a consistent height — 48px for a single row, whether or not only a back
+button is present.
+
+- `'none'` — no horizontal padding, no bleed.
+- `'s'` — symmetric horizontal padding (compact).
+- `'m'` — symmetric horizontal padding (default for inline headers).
+- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. an
+  `EuiPageSection`). Set `bleed` to the section's **symmetric** padding: the header breaks out to that
+  section's top/left/right edges via negative margin so it spans full width and sits flush at the top,
+  and its content is auto re-inset by the same amount to stay aligned with the page gutter. (The
+  single value applies to both the sides and the top because the section's padding is symmetric.)
+
 ## Chrome Next flag and runtime checks
 
 Chrome layout code should use `isNextChrome(featureFlags)` from `@kbn/core-chrome-feature-flags` to
