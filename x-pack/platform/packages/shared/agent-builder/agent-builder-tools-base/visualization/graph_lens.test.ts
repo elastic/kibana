@@ -51,15 +51,21 @@ describe('createVisualizationGraph', () => {
   const events = {} as ToolEventEmitter;
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
-  const createMockModel = (invokeResult: string = '```json\n{"type":"metric"}\n```') =>
-    ({
+  // Returns a ModelProvider-shaped mock. `createVisualizationGraph` resolves the default model
+  // via `getDefaultModel()` for the config / time-range nodes.
+  const createMockModel = (invokeResult: string = '```json\n{"type":"metric"}\n```') => {
+    const scopedModel = {
       chatModel: {
         // invoke resolves to a message-like object; graph_lens reads `.content` via
         // extractTextFromMessage.
         invoke: jest.fn().mockResolvedValue({ content: invokeResult }),
         withStructuredOutput: jest.fn(),
       },
-    } as const);
+    };
+    return {
+      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+    } as const;
+  };
 
   beforeEach(() => {
     mockedGenerateEsql.mockReset();

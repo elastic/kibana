@@ -11,7 +11,12 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { ToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
+import type {
+  ModelProvider,
+  ScopedModel,
+  ToolEventEmitter,
+  ToolHandlerResult,
+} from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createToolCallMessage, extractTextContent, generateFakeToolCallId } from '../../langchain';
@@ -62,28 +67,30 @@ const isPatternTargetEnabled = (state: StateType): state is StateType & { target
   );
 
 export const createSearchToolGraph = ({
-  model,
+  modelProvider,
   esClient,
   logger,
   events,
   topSnippetsConfig,
 }: {
-  model: ScopedModel;
+  modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
 }) => {
-  const getTools = (state: StateType) => {
+  // `defaultModel` is used by the relevance search tool and the dispatcher. The natural language
+  // search tool receives the `modelProvider` directly so it can opt into the low-effort model.
+  const getTools = (state: StateType, defaultModel: ScopedModel) => {
     const relevanceTool = createRelevanceSearchTool({
-      model,
+      model: defaultModel,
       esClient,
       events,
       logger,
       topSnippetsConfig,
     });
     const nlSearchTool = createNaturalLanguageSearchTool({
-      model,
+      modelProvider,
       esClient,
       events,
       logger,
@@ -135,10 +142,13 @@ export const createSearchToolGraph = ({
       return { error: NO_MATCHING_RESOURCE_ERROR };
     }
 
-    const tools = getTools(state);
-    const searchModel = model.chatModel.bindTools(tools, { tool_choice: 'any' }).withConfig({
-      tags: ['agent-builder-search-tool'],
-    });
+    const defaultModel = await modelProvider.getDefaultModel();
+    const tools = getTools(state, defaultModel);
+    const searchModel = defaultModel.chatModel
+      .bindTools(tools, { tool_choice: 'any' })
+      .withConfig({
+        tags: ['agent-builder-search-tool'],
+      });
 
     const response = await searchModel.invoke(
       getSearchDispatcherPrompt({
@@ -159,7 +169,8 @@ export const createSearchToolGraph = ({
   };
 
   const executeTool = async (state: StateType) => {
-    const tools = getTools(state);
+    const defaultModel = await modelProvider.getDefaultModel();
+    const tools = getTools(state, defaultModel);
     const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
 
     const toolNodeResult = await toolNode.invoke(state.messages);
