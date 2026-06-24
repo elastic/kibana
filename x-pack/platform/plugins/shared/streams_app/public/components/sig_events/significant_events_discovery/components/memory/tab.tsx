@@ -394,32 +394,50 @@ type FlyoutTab = 'content' | 'history';
 
 function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => void }) {
   const { data: entry, isLoading } = useMemoryEntry(entryId);
+  const { data: treeData } = useMemoryTree();
   const { updateEntry, deleteEntry } = useMemoryMutations();
   const [activeTab, setActiveTab] = useState<FlyoutTab>('content');
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [editTags, setEditTags] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [editCategories, setEditCategories] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
+
+  const categoryOptions = useMemo(() => {
+    const paths = new Set<string>();
+    const collect = (nodes: MemoryCategoryNode[]) => {
+      for (const node of nodes) {
+        paths.add(node.category);
+        collect(node.children);
+      }
+    };
+    collect(treeData?.tree ?? []);
+    return Array.from(paths).map((p) => ({ label: p }));
+  }, [treeData]);
 
   const startEditing = useCallback(() => {
     if (entry) {
       setEditTitle(entry.title);
       setEditContent(entry.content);
       setEditTags(entry.tags.map((tag) => ({ label: tag })));
+      setEditCategories(entry.categories.map((cat) => ({ label: cat })));
       setIsEditing(true);
     }
   }, [entry]);
 
   const editTagLabels = editTags.map((t) => t.label);
+  const editCategoryLabels = editCategories.map((c) => c.label);
   const isDirty =
     isEditing &&
     !!entry &&
     (editTitle !== entry.title ||
       editContent !== entry.content ||
       editTagLabels.length !== entry.tags.length ||
-      editTagLabels.some((tag, i) => tag !== entry.tags[i]));
+      editTagLabels.some((tag, i) => tag !== entry.tags[i]) ||
+      editCategoryLabels.length !== entry.categories.length ||
+      editCategoryLabels.some((cat, i) => cat !== entry.categories[i]));
 
   const handleSave = useCallback(() => {
     if (!entry) return;
@@ -433,11 +451,12 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
         ...(editTitle !== entry.title ? { title: editTitle } : {}),
         ...(editContent !== entry.content ? { content: editContent } : {}),
         tags: editTagLabels,
+        categories: editCategoryLabels,
         change_summary: 'Manual edit via UI',
       },
       { onSuccess: () => setIsEditing(false) }
     );
-  }, [entry, isDirty, editTitle, editContent, editTagLabels, updateEntry]);
+  }, [entry, isDirty, editTitle, editContent, editTagLabels, editCategoryLabels, updateEntry]);
 
   const handleDelete = useCallback(() => {
     if (entry) {
@@ -548,6 +567,31 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
                       fullWidth
                       rows={18}
                       data-test-subj="streamsMemoryEditArea"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xxs">
+                      <h4>
+                        {i18n.translate('xpack.streams.memory.categoriesLabel', {
+                          defaultMessage: 'Category',
+                        })}
+                      </h4>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
+                    <EuiComboBox
+                      options={categoryOptions}
+                      selectedOptions={editCategories}
+                      onChange={setEditCategories}
+                      onCreateOption={(searchValue) =>
+                        setEditCategories((prev) => [...prev, { label: searchValue }])
+                      }
+                      singleSelection={{ asPlainText: true }}
+                      isClearable
+                      fullWidth
+                      placeholder={i18n.translate('xpack.streams.memory.categoriesPlaceholder', {
+                        defaultMessage: 'e.g. infrastructure/kubernetes',
+                      })}
+                      data-test-subj="streamsMemoryEditCategories"
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
