@@ -55,7 +55,7 @@ export const GetDataStreamResultsResponse = lazySchema(() =>
   z
     .object({
       /**
-       * The ingest pipeline as a string up to 10MiB.
+       * The ingest pipeline as a JSON string up to 10MiB.
        */
       ingest_pipeline: NonEmptyIngestPipeline,
       /**

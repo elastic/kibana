@@ -28,6 +28,7 @@ import {
 } from './constants';
 import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 import { IntegrationAlreadyExistsError } from '../../errors';
+import type { DataStreamPhase } from '../../../common';
 
 export interface FieldMappingEntry {
   name: string;
@@ -518,6 +519,41 @@ export class AutomaticImportSavedObjectService {
   }
 
   /**
+   * Updates only the phase of a data stream's job_info.
+   * @param dataStreamId - The ID of the data stream
+   * @param integrationId - The ID of the integration
+   * @param phase - The new phase to set
+   */
+  public async updateDataStreamPhase(
+    dataStreamId: string,
+    integrationId: string,
+    phase: DataStreamPhase
+  ): Promise<void> {
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      const updatedAttributes: Partial<DataStreamAttributes> = {
+        job_info: {
+          ...dataStream.attributes.job_info,
+          phase,
+        },
+      };
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        compositeId,
+        updatedAttributes
+      );
+
+      this.logger.debug(`Data stream ${dataStreamId} phase updated to ${phase}`);
+    } catch (error) {
+      this.logger.error(`Failed to update data stream ${dataStreamId} phase: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * Delete a data stream by ID
    * @param dataStreamId - The ID of the data stream
    * @param integrationId - The ID of the integration
@@ -626,6 +662,7 @@ export class AutomaticImportSavedObjectService {
         job_info: {
           ...dataStream.attributes.job_info,
           status,
+          ...(this.isTerminalTaskStatus(status) ? { phase: undefined } : {}),
         },
       };
 
@@ -640,5 +677,13 @@ export class AutomaticImportSavedObjectService {
       this.logger.error(`Failed to update data stream ${dataStreamId}: ${error}`);
       throw error;
     }
+  }
+
+  private isTerminalTaskStatus(status: keyof typeof TASK_STATUSES): boolean {
+    return (
+      status === TASK_STATUSES.completed ||
+      status === TASK_STATUSES.failed ||
+      status === TASK_STATUSES.cancelled
+    );
   }
 }

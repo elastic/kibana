@@ -40,6 +40,9 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
           status: {
             type: 'keyword',
           },
+          phase: {
+            type: 'keyword',
+          },
         },
       },
       metadata: {
@@ -76,6 +79,25 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
           type: 'mappings_addition',
           addedMappings: {
             title: { type: 'text' },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: dataStreamSchemaV1.extends({}, { unknowns: 'ignore' }),
+        create: dataStreamSchemaV1,
+      },
+    },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            job_info: {
+              type: 'nested',
+              properties: {
+                phase: { type: 'keyword' },
+              },
+            },
           },
         },
       ],

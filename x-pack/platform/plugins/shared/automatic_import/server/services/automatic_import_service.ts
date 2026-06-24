@@ -233,6 +233,7 @@ export class AutomaticImportService {
       description: dataStream.description,
       inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
       status: dataStream.job_info.status as TaskStatus,
+      ...(dataStream.job_info.phase ? { phase: dataStream.job_info.phase } : {}),
     }));
 
     const integrationResponse: IntegrationResponse = {
@@ -266,6 +267,7 @@ export class AutomaticImportService {
           description: dataStream.description,
           inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
           status: dataStream.job_info.status as TaskStatus,
+          ...(dataStream.job_info.phase ? { phase: dataStream.job_info.phase } : {}),
         }));
         return {
           integrationId: integration.integration_id,
