@@ -203,10 +203,17 @@ export const compareCmd: Command<void> = {
       let comparePageUrl: string | undefined;
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
       if (effectiveKibanaUrl) {
-        const baseUrl = effectiveKibanaUrl.replace(/\/+$/, '');
-        comparePageUrl = `${baseUrl}/app/management/ai/evals/compare?runA=${encodeURIComponent(
-          firstExperimentId
-        )}&runB=${encodeURIComponent(secondExperimentId)}`;
+        try {
+          const urlObj = new URL(effectiveKibanaUrl);
+          urlObj.username = '';
+          urlObj.password = '';
+          const baseUrl = urlObj.toString().replace(/\/+$/, '');
+          comparePageUrl = `${baseUrl}/app/management/ai/evals/compare?runA=${encodeURIComponent(
+            firstExperimentId
+          )}&runB=${encodeURIComponent(secondExperimentId)}`;
+        } catch {
+          log.warning(`Invalid Kibana URL for compare page link: ${effectiveKibanaUrl}`);
+        }
       }
 
       const markdown = formatMarkdownCompareReport({

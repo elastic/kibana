@@ -47,6 +47,7 @@ steps:
     key: kbn-evals-fresh-compare
     command: bash .buildkite/scripts/steps/evals/post_eval_comment.sh
     depends_on: kbn-evals-on-demand
+    allow_dependency_failure: true
     if: "build.env('FRESH_BASELINE_PR_EXPERIMENT_ID') != null && build.env('FRESH_BASELINE_PR_EXPERIMENT_ID') != ''"
     env:
       KBN_EVALS: '1'

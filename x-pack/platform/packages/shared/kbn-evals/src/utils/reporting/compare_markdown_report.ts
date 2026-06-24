@@ -38,12 +38,19 @@ function formatDifference(value: number): string {
   return value.toFixed(2);
 }
 
-function relativeAge(timestamp: string): string {
+function escapeTableCell(value: string): string {
+  return value.replaceAll('|', '\\|');
+}
+
+function daysSince(timestamp: string): number {
   const diffMs = Date.now() - new Date(timestamp).getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'today';
-  if (diffDays === 1) return 'yesterday';
-  return `${diffDays} days ago`;
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+
+function relativeAge(days: number): string {
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  return `${days} days ago`;
 }
 
 export function formatMarkdownCompareReport({
@@ -82,13 +89,12 @@ export function formatMarkdownCompareReport({
   lines.push(`**PR run**: ${experimentIdA} | **Baseline (main)**: ${experimentIdB}`);
 
   if (baselineTimestamp) {
+    const diffDays = daysSince(baselineTimestamp);
     const commitLabel = baselineCommitSha ? `commit ${baselineCommitSha.slice(0, 7)}` : '';
-    const age = relativeAge(baselineTimestamp);
+    const age = relativeAge(diffDays);
     const parts = ['Baseline:', commitLabel, age].filter(Boolean);
     lines.push(parts.join(', '));
 
-    const diffMs = Date.now() - new Date(baselineTimestamp).getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     if (diffDays >= STALENESS_WARNING_DAYS) {
       lines.push(
         `> **Warning**: Baseline is ${diffDays} days old. Results may not reflect current main.`
@@ -138,11 +144,11 @@ export function formatMarkdownCompareReport({
     rows.forEach((r) => {
       const delta = r.meanA - r.meanB;
       tableLines.push(
-        `| ${r.datasetName} | ${r.evaluatorName} | ${r.sampleSize} | ${formatNumber(
-          r.meanA
-        )} | ${formatNumber(r.meanB)} | ${formatDifference(delta)} | ${formatPValue(
-          r.pValue
-        )} | ${formatSig(r.pValue, significanceThreshold)} |`
+        `| ${escapeTableCell(r.datasetName)} | ${escapeTableCell(r.evaluatorName)} | ${
+          r.sampleSize
+        } | ${formatNumber(r.meanA)} | ${formatNumber(r.meanB)} | ${formatDifference(
+          delta
+        )} | ${formatPValue(r.pValue)} | ${formatSig(r.pValue, significanceThreshold)} |`
       );
     });
     return tableLines.join('\n');
