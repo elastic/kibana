@@ -65,7 +65,7 @@ describe('run query helpers', () => {
 
     it('should return only the variables used in the query', () => {
       const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
-      const query = 'FROM foo | KEEP ??field | WHERE agent.name = ?agent_name';
+      const query = 'FROM foo | KEEP ??field | WHERE agent.name == ?agent_name';
       const variables = [
         {
           key: 'field',
@@ -102,7 +102,7 @@ describe('run query helpers', () => {
     it('should return only the variables used in the query, plus time params', () => {
       const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
       const query =
-        'FROM foo | KEEP ??field | WHERE agent.name = ?agent_name AND time < ?_tend amd time > ?_tstart';
+        'FROM foo | KEEP ??field | WHERE agent.name == ?agent_name AND time < ?_tend AND time > ?_tstart';
       const variables = [
         {
           key: 'field',
