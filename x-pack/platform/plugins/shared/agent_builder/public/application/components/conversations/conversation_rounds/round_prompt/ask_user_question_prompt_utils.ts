@@ -23,6 +23,7 @@ import {
 import { borderRadiusXlStyles } from '../../../../../common.styles';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useAgentId, useConversation } from '../../../../hooks/use_conversation';
+export { promptContainerStyles as containerStyles } from './prompt_container.styles';
 
 /** In-progress (mutable) answer for a single question, before it is mapped to the wire shape. */
 export interface AnswerDraft {
@@ -63,17 +64,6 @@ export const labels = {
   customError: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.customError', {
     defaultMessage: 'Enter a response or choose a different option.',
   }),
-};
-
-export const containerStyles = (euiThemeContext: UseEuiTheme) => {
-  const { euiTheme } = euiThemeContext;
-  return css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    ${borderRadiusXlStyles}
-    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
-    padding: ${euiTheme.size.base};
-    ${euiShadow(euiThemeContext, 's')};
-  `;
 };
 
 export const optionCardStyles = ({ euiTheme }: UseEuiTheme) => css`
