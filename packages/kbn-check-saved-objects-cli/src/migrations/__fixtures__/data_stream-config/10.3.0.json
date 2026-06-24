@@ -1,0 +1,48 @@
+{
+  "10.2.0": [
+    {
+      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
+      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
+      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
+      "HINT": "You can use the template below and create sample objects for 10.2.0 and 10.3.0 versions.",
+      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
+      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
+      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+    }
+  ],
+  "10.3.0": [
+    {
+      "integration_id": "string",
+      "data_stream_id": "string",
+      "created_by": "string",
+      "title": "string",
+      "description": "string",
+      "input_types": "array",
+      "job_info": {
+        "job_id": "string",
+        "job_type": "string",
+        "status": "pending|processing|completed|approved|failed|cancelled|deleting",
+        "phase": "string?"
+      },
+      "metadata": {
+        "sample_count": "number?",
+        "created_at": "string?",
+        "version": "string?",
+        "original_source": {
+          "source_type": "file|index",
+          "source_value": "string"
+        }
+      },
+      "result": {
+        "field_mapping": "array?",
+        "connector": "string?",
+        "pipeline_docs": "array?",
+        "ingest_pipeline": {
+          "processors": "array",
+          "on_failure": "array?",
+          "name": "string?"
+        }
+      }
+    }
+  ]
+}
