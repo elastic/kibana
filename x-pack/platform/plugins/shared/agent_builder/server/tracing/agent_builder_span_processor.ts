@@ -9,6 +9,7 @@ import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { GenAISemanticConventions } from '@kbn/inference-tracing';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AGENT_BUILDER_BUILTIN_AGENTS,
   AGENT_BUILDER_BUILTIN_TOOLS,
@@ -17,7 +18,10 @@ import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_
 import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
-const BUILTIN_AGENT_NAMES: Set<string> = new Set(AGENT_BUILDER_BUILTIN_AGENTS);
+const BUILTIN_AGENT_IDS: Set<string> = new Set([
+  agentBuilderDefaultAgentId,
+  ...AGENT_BUILDER_BUILTIN_AGENTS,
+]);
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
@@ -88,7 +92,8 @@ function anonymizeNames(
 
   const agentName = result[GenAISemanticConventions.GenAIAgentName];
   if (agentName != null) {
-    const isBuiltin = BUILTIN_AGENT_NAMES.has(String(agentName));
+    const agentId = result[GenAISemanticConventions.GenAIAgentId];
+    const isBuiltin = agentId != null && BUILTIN_AGENT_IDS.has(String(agentId));
     result[GenAISemanticConventions.GenAIAgentName] = isBuiltin ? agentName : 'custom';
     if (!isBuiltin) {
       const prefix = 'invoke_agent ';
