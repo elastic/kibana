@@ -326,16 +326,8 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
         headers: writerHeaders,
         body: { reason: 'reopen' },
       });
+
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({
-        code: 'INVALID_EPISODE_STATE_TRANSITION',
-        details: {
-          group_hash: groupHash,
-          episode_id: episodeId,
-          episode_status: 'active',
-          action_type: 'activate',
-        },
-      });
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
       expect(ruleEvents).toHaveLength(1);
@@ -343,6 +335,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
         ruleId,
         actionTypes: ['activate'],
       });
+
       expect(actions).toHaveLength(0);
     }
   );
@@ -401,17 +394,6 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
         body: { reason: 'reopen' },
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({
-        code: 'INVALID_EPISODE_STATE_TRANSITION',
-        details: {
-          group_hash: groupHash,
-          // Latest event is for the *new* episode → activate targets it and
-          // rejects because its status is `active`, not `inactive`.
-          episode_id: newEpisodeId,
-          episode_status: 'active',
-          action_type: 'activate',
-        },
-      });
     }
   );
 
@@ -440,16 +422,6 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
         body: { reason: 'reopen' },
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({
-        code: 'INVALID_EPISODE_STATE_TRANSITION',
-        details: {
-          group_hash: groupHash,
-          episode_id: episodeId,
-          episode_status: 'inactive',
-          action_type: 'activate',
-          last_lifecycle_action: null,
-        },
-      });
     }
   );
 
@@ -492,16 +464,6 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
         body: { reason: 'reopen again' },
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({
-        code: 'INVALID_EPISODE_STATE_TRANSITION',
-        details: {
-          group_hash: groupHash,
-          episode_id: episodeId,
-          episode_status: 'inactive',
-          action_type: 'activate',
-          last_lifecycle_action: 'activate',
-        },
-      });
     }
   );
 

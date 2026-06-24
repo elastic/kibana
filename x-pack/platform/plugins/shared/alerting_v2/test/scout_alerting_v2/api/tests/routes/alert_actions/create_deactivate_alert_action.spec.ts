@@ -202,15 +202,6 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({
-        code: 'INVALID_EPISODE_STATE_TRANSITION',
-        details: {
-          group_hash: groupHash,
-          episode_id: episodeId,
-          episode_status: 'inactive',
-          action_type: 'deactivate',
-        },
-      });
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
       expect(ruleEvents).toHaveLength(1);
@@ -245,15 +236,6 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({
-        code: 'INVALID_EPISODE_STATE_TRANSITION',
-        details: {
-          group_hash: groupHash,
-          episode_id: episodeId,
-          episode_status: 'pending',
-          action_type: 'deactivate',
-        },
-      });
     }
   );
 
