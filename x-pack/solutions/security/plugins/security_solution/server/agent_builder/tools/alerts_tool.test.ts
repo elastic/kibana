@@ -110,7 +110,7 @@ describe('alertsTool', () => {
   });
 
   describe('handler', () => {
-    it('calls runSearchTool with default index when index not provided', async () => {
+    it('calls runSearchTool with the wildcard alerts pattern when index not provided and passes KEEP clause guidance via customInstructions (not concatenated to NL query)', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
       const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
@@ -123,20 +123,21 @@ describe('alertsTool', () => {
         })
       );
 
-      expect(runSearchTool).toHaveBeenCalledWith({
-        nlQuery: expect.stringContaining('find all alerts'),
-        index: `${DEFAULT_ALERTS_INDEX}-default`,
-        esClient: mockEsClient.asCurrentUser,
-        model: { model: 'test-model' },
-        events: mockEvents,
-        logger: mockLogger,
-      });
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.nlQuery).toContain('KEEP clause');
-      expect(callArgs.nlQuery).toContain(fieldsList);
+      // ES|QL cannot resolve the per-space alias `${DEFAULT_ALERTS_INDEX}-<space>`
+      // as a data source. The default targets the wildcard pattern instead, and
+      // `allowPatternTarget: true` lets the search subgraph honor it verbatim.
+      expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-*`);
+      expect(callArgs.allowPatternTarget).toBe(true);
+      // NL query stays clean — no boilerplate concatenation
+      expect(callArgs.nlQuery).toBe('find all alerts');
+      expect(callArgs.nlQuery).not.toContain('KEEP clause');
+      // Static guidance flows through customInstructions instead
+      expect(callArgs.customInstructions).toContain('KEEP clause');
+      expect(callArgs.customInstructions).toContain(fieldsList);
     });
 
-    it('uses handler context spaceId when building default index', async () => {
+    it('uses the wildcard alerts pattern regardless of handler context spaceId (alias is not ES|QL-resolvable)', async () => {
       (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
@@ -149,10 +150,13 @@ describe('alertsTool', () => {
       );
 
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-custom-space`);
+      // Whatever the spaceId is, the default targets the wildcard pattern.
+      // (Cross-space safety is enforced by RBAC on the underlying indices.)
+      expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-*`);
+      expect(callArgs.allowPatternTarget).toBe(true);
     });
 
-    it('calls runSearchTool with explicit index when provided', async () => {
+    it('keeps allowPatternTarget=true even when an explicit index is provided (callers may pass a pattern)', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
 
@@ -164,17 +168,14 @@ describe('alertsTool', () => {
         })
       );
 
-      expect(runSearchTool).toHaveBeenCalledWith({
-        nlQuery: expect.stringContaining('find alerts'),
-        index: '.alerts-security.alerts-custom',
-        esClient: mockEsClient.asCurrentUser,
-        model: { model: 'test-model' },
-        events: mockEvents,
-        logger: mockLogger,
-      });
+      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      expect(callArgs.index).toBe('.alerts-security.alerts-custom');
+      expect(callArgs.allowPatternTarget).toBe(true);
+      expect(callArgs.nlQuery).toBe('find alerts');
+      expect(callArgs.customInstructions).toContain('KEEP clause');
     });
 
-    it('enhances query with KEEP clause for alerts index', async () => {
+    it('passes KEEP clause + wildcard guidance via customInstructions for an alerts index (NL query unchanged)', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
       const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
@@ -188,12 +189,21 @@ describe('alertsTool', () => {
       );
 
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.nlQuery).toContain('find alerts');
-      expect(callArgs.nlQuery).toContain('KEEP clause');
-      expect(callArgs.nlQuery).toContain(fieldsList);
+      expect(callArgs.nlQuery).toBe('find alerts');
+      expect(callArgs.nlQuery).not.toContain('KEEP clause');
+      expect(callArgs.customInstructions).toContain('KEEP clause');
+      expect(callArgs.customInstructions).toContain(fieldsList);
+      expect(callArgs.customInstructions).toContain('leading dot');
+      // The instruction MUST steer the dispatcher toward the wildcard form,
+      // not the per-space alias. Mirror-iter4: REPORT_ITER3.md captures the
+      // alias-form failure mode in detail.
+      expect(callArgs.customInstructions).toContain('.alerts-security.alerts-*');
+      expect(callArgs.customInstructions).toContain(
+        'ES|QL cannot resolve that alias as a data source'
+      );
     });
 
-    it('enhances query with count instructions when isCount is true', async () => {
+    it('appends count guidance to customInstructions when isCount is true (NL query unchanged)', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
 
@@ -206,12 +216,14 @@ describe('alertsTool', () => {
       );
 
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.nlQuery).toContain('how many alerts');
-      expect(callArgs.nlQuery).toContain('count query');
-      expect(callArgs.nlQuery).toContain('STATS count = COUNT(*)');
+      expect(callArgs.nlQuery).toBe('how many alerts');
+      expect(callArgs.nlQuery).not.toContain('count query');
+      expect(callArgs.customInstructions).toContain('KEEP clause');
+      expect(callArgs.customInstructions).toContain('count query');
+      expect(callArgs.customInstructions).toContain('STATS count = COUNT(*)');
     });
 
-    it('does not enhance query for non-alerts index', async () => {
+    it('does not set customInstructions for non-alerts index and leaves NL query untouched', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
 
@@ -225,7 +237,7 @@ describe('alertsTool', () => {
 
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
       expect(callArgs.nlQuery).toBe('find documents');
-      expect(callArgs.nlQuery).not.toContain('KEEP clause');
+      expect(callArgs.customInstructions).toBeUndefined();
     });
 
     it('logs debug message with correct parameters', async () => {

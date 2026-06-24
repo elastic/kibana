@@ -12,6 +12,8 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
+import { healLeadingDotInFromClause } from './heal_leading_dot';
+import { healAlertsAliasInFromClause } from './heal_alerts_alias';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
@@ -185,12 +187,29 @@ export const createNlToEsqlGraph = ({
       throw new Error(`Last action is not a generate_query action`);
     }
 
-    const correction = correctCommonEsqlMistakes(lastAction.query);
+    // Step 1: heal a known LLM hallucination — dropping the leading dot on
+    // system-index names (e.g. `.alerts-security.alerts-default`). The heal
+    // is narrow and only restores the dot for indices on the agent-builder
+    // allow-list. See `heal_leading_dot.ts`.
+    const healedDot = healLeadingDotInFromClause(lastAction.query);
+
+    // Step 1b: rewrite the per-space security-alerts alias form
+    // `.alerts-security.alerts-<space>` to the wildcard form
+    // `.alerts-security.alerts-*`. ES|QL cannot resolve aliases as data
+    // sources; the wildcard targets the underlying backing indices that
+    // ES|QL CAN read. Empirical motivation: REPORT_ITER3.md observed
+    // `Unknown data source ".alerts-security.alerts-default"` errors on
+    // 4/5 reps when the dispatcher generated the alias form. See
+    // `heal_alerts_alias.ts`.
+    const healed = healAlertsAliasInFromClause(healedDot);
+
+    // Step 2: run the existing structural autocorrect on the healed query.
+    const correction = correctCommonEsqlMistakes(healed);
 
     const action: AutocorrectQueryAction = {
       type: 'autocorrect_query',
-      wasCorrected: correction.isCorrection,
-      input: correction.input,
+      wasCorrected: correction.isCorrection || healed !== lastAction.query,
+      input: lastAction.query,
       output: correction.output,
     };
 
