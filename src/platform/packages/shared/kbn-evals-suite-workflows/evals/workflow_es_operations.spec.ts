@@ -157,7 +157,7 @@ evaluate.describe(
                   expectedMaxToolCalls: 6,
                   expectedToolSequence: [
                     'platform.workflows.get_step_definitions',
-                    'platform.workflows.workflow_set_yaml',
+                    'platform.core.generate_workflow',
                   ],
                 },
                 metadata: { category: 'es-ops-correctness' },
