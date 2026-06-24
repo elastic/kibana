@@ -19,17 +19,8 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 MongoDB connectors have the following configuration properties:
 
-Host
-:   Hostname or IP address of the MongoDB server, such as `mongo.example.com` or `192.168.1.10`.
-
-Port
-:   (Optional) TCP port for the MongoDB server. Defaults to `27017`.
-
-Default database
-:   The default database name used when actions do not specify a database.
-
-TLS
-:   (Optional) Enable TLS/SSL for the connection. Defaults to `false`. Use with MongoDB servers configured for encrypted connections.
+Connection URI
+:   Full MongoDB connection string, such as `mongodb://hostname:27017/mydb` or `mongodb+srv://cluster.example.com/mydb`. Include the database name in the URI path (for example `/mydb`) to use it as the default database for actions that do not specify one. TLS, authentication source, replica set, and other connection options can be appended as query parameters.
 
 ### Authentication
 
@@ -106,7 +97,7 @@ The MongoDB connector authenticates using a username and password.
 
 1. In your MongoDB deployment, create a dedicated user for {{kib}} with the minimum privileges required for your use case. For read-only access, grant the `read` role on the target databases. For write access from workflows, also grant `readWrite`.
 2. Note the username and password.
-3. In {{kib}}, create a MongoDB connector and enter the host, port, default database, and the credentials from step 1.
+3. In {{kib}}, create a MongoDB connector. Enter the connection URI (including the database name in the path if you want a default) and the credentials from step 1.
 
 ::::{note}
 The MongoDB connector connects directly over the native wire protocol. Ensure the MongoDB server is accessible from the {{kib}} host and that any firewall rules allow connections on the configured port.

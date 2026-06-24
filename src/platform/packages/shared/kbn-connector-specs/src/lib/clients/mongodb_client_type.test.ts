@@ -45,7 +45,7 @@ let mockClientInstance: { connect: jest.Mock; close: jest.Mock };
 const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext => ({
   logger: fakeLogger,
   axiosInstance: {} as BuildContext['axiosInstance'],
-  config: { host: 'mongo.example.com', port: 27017 },
+  config: { uri: 'mongodb://mongo.example.com:27017/mydb' },
   network: { ensureUriAllowed: jest.fn(), ensureHostnameAllowed: jest.fn() },
   credential: {
     getAuthHeaders: jest.fn().mockResolvedValue({
@@ -83,34 +83,23 @@ describe('mongodbClientType', () => {
       const result = await mongodbClientType.build(ctx);
 
       expect(ctx.network.ensureHostnameAllowed).toHaveBeenCalledWith('mongo.example.com');
-      expect(MockMongoClient).toHaveBeenCalledWith('mongodb://mongo.example.com:27017', {
+      expect(MockMongoClient).toHaveBeenCalledWith('mongodb://mongo.example.com:27017/mydb', {
         auth: { username: 'alice', password: 'secret' },
-        tls: false,
+        authSource: 'admin',
         serverSelectionTimeoutMS: 10_000,
       });
       expect(mockConnect).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockClientInstance);
     });
 
-    it('defaults port to 27017 when not provided', async () => {
-      const ctx = makeBuildContext({ config: { host: 'mongo.example.com' } });
+    it('passes the URI directly to MongoClient, including mongodb+srv:// schemes', async () => {
+      const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
       await mongodbClientType.build(ctx);
 
+      expect(ctx.network.ensureHostnameAllowed).toHaveBeenCalledWith('cluster0.example.com');
       expect(MockMongoClient).toHaveBeenCalledWith(
-        'mongodb://mongo.example.com:27017',
+        'mongodb+srv://cluster0.example.com/mydb',
         expect.objectContaining({})
-      );
-    });
-
-    it('passes tls: true when config.tls is true', async () => {
-      const ctx = makeBuildContext({
-        config: { host: 'mongo.example.com', port: 27017, tls: true },
-      });
-      await mongodbClientType.build(ctx);
-
-      expect(MockMongoClient).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ tls: true })
       );
     });
 
@@ -130,15 +119,15 @@ describe('mongodbClientType', () => {
       );
     });
 
-    it('throws if config.host is missing', async () => {
+    it('throws if config.uri is missing', async () => {
       const ctx = makeBuildContext({ config: {} });
-      await expect(mongodbClientType.build(ctx)).rejects.toThrow('config.host is required');
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow('config.uri is required');
       expect(MockMongoClient).not.toHaveBeenCalled();
     });
 
     it('throws if config is undefined', async () => {
       const ctx = makeBuildContext({ config: undefined });
-      await expect(mongodbClientType.build(ctx)).rejects.toThrow('config.host is required');
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow('config.uri is required');
       expect(MockMongoClient).not.toHaveBeenCalled();
     });
 
@@ -187,8 +176,8 @@ describe('mongodbClientType', () => {
   describe('isUserError', () => {
     const isUserError = mongodbClientType.isUserError as (err: unknown) => boolean;
 
-    it('returns true for the missing host pre-connect error', () => {
-      expect(isUserError(new Error('config.host is required'))).toBe(true);
+    it('returns true for the missing uri pre-connect error', () => {
+      expect(isUserError(new Error('config.uri is required'))).toBe(true);
     });
 
     it('returns true for the missing credentials pre-connect error', () => {
@@ -220,7 +209,7 @@ describe('mongodbClientType', () => {
     it('returns false for non-Error values', () => {
       expect(isUserError(null)).toBe(false);
       expect(isUserError(undefined)).toBe(false);
-      expect(isUserError('config.host is required')).toBe(false);
+      expect(isUserError('config.uri is required')).toBe(false);
     });
   });
 });

@@ -45,7 +45,6 @@ export const FindInputSchema = lazySchema(() =>
       ),
     limit: z
       .number()
-      .int()
       .min(1)
       .max(MAX_FIND_LIMIT)
       .optional()
@@ -69,7 +68,6 @@ export const AggregateInputSchema = lazySchema(() =>
       ),
     limit: z
       .number()
-      .int()
       .min(1)
       .max(MAX_FIND_LIMIT)
       .optional()
