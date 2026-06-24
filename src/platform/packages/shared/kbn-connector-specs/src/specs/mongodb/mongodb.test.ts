@@ -46,7 +46,7 @@ const makeMongoClient = (dbMock = makeDb()) => ({
 
 const makeCtx = (overrides: Partial<ActionContext> = {}): ActionContext => ({
   client: {} as ActionContext['client'],
-  config: { host: 'localhost', port: 27017, database: 'mydb', tls: false },
+  config: { uri: 'mongodb://localhost:27017/mydb' },
   secrets: { authType: 'basic', username: 'user', password: 'pass' },
   log: loggerMock.create(),
   getClient: jest.fn().mockResolvedValue(makeMongoClient()),
@@ -109,7 +109,7 @@ describe('MongoDBConnector', () => {
       expect(mongoClient.db).toHaveBeenCalledWith('shopdb');
     });
 
-    it('falls back to config.database when action database is omitted', async () => {
+    it('uses the database from the URI path when action database is omitted', async () => {
       const dbMock = makeDb();
       const mongoClient = makeMongoClient(dbMock);
       const ctx = makeCtx({ getClient: jest.fn().mockResolvedValue(mongoClient) });
@@ -121,7 +121,7 @@ describe('MongoDBConnector', () => {
 
     it('throws when no database is resolvable', async () => {
       const ctx = makeCtx({
-        config: { host: 'localhost' },
+        config: { uri: 'mongodb://localhost:27017' },
         getClient: jest.fn().mockResolvedValue(makeMongoClient()),
       });
 

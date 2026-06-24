@@ -45,18 +45,27 @@ import type {
   DeleteOneInput,
 } from './types';
 
-/** Resolve the database name from action input, falling back to connector default config. */
+/** Resolve the database name: action input → URI path → error. */
 const resolveDb = (
   inputDatabase: string | undefined,
   config: Record<string, unknown> | undefined
 ): string => {
-  const name = inputDatabase ?? (config?.database as string | undefined);
-  if (!name) {
-    throw new Error(
-      'database name is required — set it in the action input or as the connector default database'
-    );
+  if (inputDatabase) return inputDatabase;
+
+  const uri = config?.uri as string | undefined;
+  if (uri) {
+    try {
+      const { pathname } = new URL(uri.replace(/^mongodb(\+srv)?:\/\//, 'http://'));
+      const dbFromUri = pathname.slice(1).split('?')[0];
+      if (dbFromUri) return dbFromUri;
+    } catch {
+      // fall through
+    }
   }
-  return name;
+
+  throw new Error(
+    'database name is required — include it in the URI path (mongodb://host/mydb) or pass it in the action input'
+  );
 };
 
 export const MongoDBConnector: ConnectorSpec = {
@@ -78,20 +87,13 @@ export const MongoDBConnector: ConnectorSpec = {
 
   schema: lazySchema(() =>
     z.object({
-      host: z.string().min(1).describe('MongoDB server hostname or IP address.'),
-      port: z
-        .number()
-        .int()
-        .min(1)
-        .max(65535)
-        .optional()
-        .default(27017)
-        .describe('MongoDB port (default: 27017).'),
-      database: z
-        .string()
-        .min(1)
-        .describe('Default database name used when actions omit database.'),
-      tls: z.boolean().optional().default(false).describe('Enable TLS/SSL for the connection.'),
+      uri: z.string().min(1).describe('MongoDB connection URI.').meta({
+        widget: 'text',
+        label: 'Connection URI',
+        placeholder: 'mongodb://hostname:27017/mydb',
+        helpText:
+          'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. Include the database name in the path (e.g. /mydb) to use it as the default for actions. Credentials are authenticated against the admin database by default; append ?authSource=<db> to override.',
+      }),
     })
   ),
 

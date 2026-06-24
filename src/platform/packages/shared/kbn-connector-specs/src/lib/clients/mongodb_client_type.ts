@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MongoClient, MongoServerError } from 'mongodb';
+import type { MongoClient } from 'mongodb';
 import type { ClientTypeSpec } from './client_type_spec';
-
-const MONGO_DEFAULT_PORT = 27017;
 
 /**
  * Decodes an `Authorization: Basic <base64>` header into username/password.
@@ -29,14 +27,14 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
   id: 'mongodb',
 
   async build(ctx) {
-    const host = typeof ctx.config?.host === 'string' ? ctx.config.host : undefined;
-    if (!host) {
-      throw new Error('config.host is required');
+    const uri = typeof ctx.config?.uri === 'string' ? ctx.config.uri : undefined;
+    if (!uri) {
+      throw new Error('config.uri is required');
     }
-    const port = typeof ctx.config?.port === 'number' ? ctx.config.port : MONGO_DEFAULT_PORT;
-    const tls = ctx.config?.tls === true;
 
-    ctx.network.ensureHostnameAllowed(host);
+    // Replace the mongodb scheme so the URL constructor can parse host/port.
+    const { hostname } = new URL(uri.replace(/^mongodb(\+srv)?:\/\//, 'http://'));
+    ctx.network.ensureHostnameAllowed(hostname);
 
     const authHeaders = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(authHeaders.Authorization ?? '');
@@ -46,10 +44,12 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
       );
     }
 
-    const uri = `mongodb://${host}:${port}`;
-    const client = new MongoClient(uri, {
+    const { MongoClient: MongoClientCtor } = await import(/* webpackIgnore: true */ 'mongodb');
+    const client = new MongoClientCtor(uri, {
       auth: { username: credentials.username, password: credentials.password },
-      tls,
+      // Default to admin so credentials created there work without ?authSource=admin in the URI.
+      // URI query params take precedence, so ?authSource=<db> still overrides this.
+      authSource: 'admin',
       serverSelectionTimeoutMS: 10_000,
     });
     await client.connect();
@@ -63,16 +63,19 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
   isUserError(err: unknown): boolean {
     if (err instanceof Error) {
       if (
-        err.message === 'config.host is required' ||
+        err.message === 'config.uri is required' ||
         err.message ===
           'basic auth credentials (username and password) are required for MongoDB connections'
       ) {
         return true;
       }
     }
-    if (err instanceof MongoServerError) {
+    // instanceof MongoServerError can't be used here because the static import of
+    // the mongodb driver is intentionally avoided to keep this module browser-bundle-safe.
+    if (err instanceof Error && err.constructor.name === 'MongoServerError') {
       // 18 = AuthenticationFailed, 13 = Unauthorized
-      return err.code === 18 || err.code === 13;
+      const code = (err as { code?: number }).code;
+      return code === 18 || code === 13;
     }
     return false;
   },
