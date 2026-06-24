@@ -12,7 +12,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 const TIMESTAMP_CANDIDATES = ['@timestamp', 'timestamp', 'time', 'date', 'event.created'];
 const DATE_KEYWORDS = ['date', 'time', 'created', 'updated', 'modified', 'timestamp'];
 
-export function injectTimeFilter(query: string, timeField: string): string {
+function injectTimeFilter(query: string, timeField: string): string {
   const clause = `| WHERE \`${timeField}\` >= ?_tstart AND \`${timeField}\` < ?_tend `;
   const pipeIdx = query.indexOf('|');
   return pipeIdx === -1
@@ -78,7 +78,7 @@ export interface EsqlColumn {
   type: string;
 }
 
-export interface EsqlQueryResult {
+interface EsqlQueryResult {
   columns: EsqlColumn[];
   rows: unknown[][];
 }

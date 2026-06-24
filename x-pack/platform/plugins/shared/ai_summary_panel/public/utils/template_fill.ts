@@ -38,9 +38,6 @@ export function sanitizeHtml(html: string): string {
   }) as string;
 }
 
-export function isTemplate(html: string): boolean {
-  return html.includes(TEMPLATE_SENTINEL);
-}
 
 export function sanitizeTemplate(raw: string): string {
   let s = raw.trim();
@@ -76,19 +73,21 @@ export function fillTemplate(
     tpl = tpl.slice(TEMPLATE_SENTINEL.length);
   }
 
+  // Pre-compute normalized keys once — avoids calling normalizeColumnName O(n) extra times
+  const keys = columns.map((col) => normalizeColumnName(col.name));
+
   // Pre-compute column max values for _pct variants
   const maxValues: Record<string, number> = {};
-  columns.forEach((col, i) => {
-    const key = normalizeColumnName(col.name);
+  columns.forEach((_col, i) => {
     const nums = rows.map((r) => Number(r[i])).filter((v) => isFinite(v));
-    if (nums.length > 0) maxValues[key] = Math.max(...nums);
+    if (nums.length > 0) maxValues[keys[i]] = nums.reduce((a, b) => (b > a ? b : a), -Infinity);
   });
 
   // Each row becomes a plain object: { col_name: value, col_name_pct: 0–100 }
   const rowObjects = rows.map((row) => {
     const obj: Record<string, unknown> = {};
-    columns.forEach((col, i) => {
-      const key = normalizeColumnName(col.name);
+    columns.forEach((_col, i) => {
+      const key = keys[i];
       obj[key] = row[i];
       const max = maxValues[key];
       if (max !== undefined && max !== 0) {
@@ -111,4 +110,3 @@ export function fillTemplate(
 
   return injectCsp(sanitizeHtml(rendered));
 }
-

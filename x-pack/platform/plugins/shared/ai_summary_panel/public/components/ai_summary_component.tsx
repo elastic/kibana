@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import {
@@ -239,14 +239,18 @@ export const AiSummaryComponent = ({
     // savedTemplate intentionally omitted — read via savedTemplateRef to avoid re-triggering.
   }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion]);
 
-  const wrapperCss = css({
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    flex: '1 1 100%',
-    minHeight: 200,
-    background: euiTheme.colors.emptyShade,
-  });
+  const wrapperCss = useMemo(
+    () =>
+      css({
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        flex: '1 1 100%',
+        minHeight: 200,
+        background: euiTheme.colors.emptyShade,
+      }),
+    [euiTheme.colors.emptyShade]
+  );
 
   return (
     <div css={wrapperCss}>

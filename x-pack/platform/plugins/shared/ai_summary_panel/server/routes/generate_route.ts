@@ -176,10 +176,8 @@ export function registerGenerateRoute(
 
       let userMessage: string;
       let systemPrompt: string;
-      let isTemplatePath: boolean;
 
       if (esqlQuery) {
-        isTemplatePath = true;
         systemPrompt = SYSTEM_PROMPT_TEMPLATE;
 
         let columns: EsqlColumn[] = [];
@@ -211,14 +209,13 @@ export function registerGenerateRoute(
           userMessage = `${prompt}\n\nNote: schema unavailable. Generate a suitable template based on the prompt.`;
         }
       } else {
-        isTemplatePath = false;
         systemPrompt = SYSTEM_PROMPT_STATIC;
         userMessage = prompt;
       }
 
       // For static panels, prepend CSP as the first token so the iframe gets it immediately.
       // Template panels skip this — CSP is injected client-side after placeholder fill.
-      if (!isTemplatePath) {
+      if (!esqlQuery) {
         passThrough.write(JSON.stringify({ token: CSP_META }) + '\n');
       }
 

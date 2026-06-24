@@ -51,12 +51,7 @@ export async function streamNdjson(
     // Flush any final line sent without a trailing newline
     const remaining = buffer.trim();
     if (remaining) {
-      try {
-        processLine(remaining);
-      } catch (e) {
-        if (e instanceof Error && e.message !== remaining) throw e;
-        // malformed final fragment — ignore
-      }
+      processLine(remaining);
     }
   } finally {
     reader.releaseLock();
