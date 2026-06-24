@@ -319,7 +319,7 @@ export const getCertsRequestBody = (
           // pings and browser network events alike), so this applies uniformly
           // across both branches regardless of monitor type.
           ...(tags && tags.length > 0 ? [{ terms: { tags } }] : []),
-          // Same rationale as tags above: issuer is present on both branches.
+          // issuer is present regardless of monitor type.
           ...(issuers && issuers.length > 0
             ? [{ terms: { [CERT_ISSUER_COMMON_NAME]: issuers } }]
             : []),
@@ -389,7 +389,6 @@ export const getCertsRequestBody = (
       'labels',
       'tags',
       'error',
-      // For remote (CCS) deep linking; stamped by the source cluster's pipeline.
       'kibanaUrl',
     ],
     collapse: {
@@ -424,8 +423,7 @@ export const getCertsRequestBody = (
   });
 };
 
-// Mirrors `server/lib/remote_result_utils.getRemoteMonitorInfo`. Inlined so
-// this module stays free of server-only deps.
+// Mirrors `server/lib/remote_result_utils.getRemoteMonitorInfo`
 const remoteFromIndex = (index: string, kibanaUrl?: string): RemoteMonitorInfo | undefined => {
   if (!isNonLocalIndexName(index)) {
     return undefined;
@@ -446,8 +444,6 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
     const sha1 = server?.hash?.sha1;
     const sha256 = server?.hash?.sha256;
 
-    // Per-monitor remote info must come from each inner hit's own `_index`:
-    // a fingerprint/common name can recur across clusters.
     const monitors = hit.inner_hits!.monitors.hits.hits.map((monitor) => {
       const monitorPing = monitor._source as Ping & { kibanaUrl?: string };
       const remote = remoteFromIndex(monitor._index, monitorPing?.kibanaUrl);
