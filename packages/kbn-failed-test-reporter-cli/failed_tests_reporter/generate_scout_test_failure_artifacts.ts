@@ -11,12 +11,28 @@ import Path from 'path';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createHash } from 'crypto';
+import { decode } from 'he';
 import fs from 'fs';
 import globby from 'globby';
 import type { BuildkiteMetadata } from './buildkite_metadata';
 
 const SCOUT_TEST_FAILURE_DIR_PATTERN = '.scout/reports/scout-playwright-test-failures-*';
 const SUMMARY_REPORT_FILENAME = 'test-failures-summary.json';
+
+// `processScoutReports` writes the GitHub issue link and failure count into the
+// HTML report (see `updateScoutHtmlReport`), but not into the summary JSON we read
+// below. Parse them back out so the Buildkite/Slack failure summary can render the
+// `[N failures]` link the same way it does for FTR failures.
+const extractGithubIssueDetails = (
+  html: string
+): { githubIssue?: string; failureCount?: number } => {
+  const issueMatch = html.match(/id="github-issue-link"[^>]*href="([^"]*)"/);
+  const countMatch = html.match(/id="failure-count"[^>]*>(\d+)</);
+  return {
+    githubIssue: issueMatch ? decode(issueMatch[1]) : undefined,
+    failureCount: countMatch ? Number(countMatch[1]) : undefined,
+  };
+};
 
 export async function generateScoutTestFailureArtifacts({
   log,
@@ -53,6 +69,7 @@ export async function generateScoutTestFailureArtifacts({
     for (const { name, htmlReportFilename } of summaryData) {
       const htmlFilePath = Path.join(dirPath, htmlReportFilename);
       const failureHTML = fs.readFileSync(htmlFilePath, 'utf-8');
+      const { githubIssue, failureCount } = extractGithubIssueDetails(failureHTML);
 
       const hash = createHash('sha256').update(name).digest('hex');
       const filenameBase = `${
@@ -68,6 +85,8 @@ export async function generateScoutTestFailureArtifacts({
           url: bkMeta.url,
           jobUrl: bkMeta.jobUrl,
           jobName: bkMeta.jobName,
+          ...(githubIssue ? { githubIssue } : {}),
+          ...(failureCount !== undefined ? { failureCount } : {}),
         },
         null,
         2
