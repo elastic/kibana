@@ -90,10 +90,7 @@ export function deriveEntityAnalyticsGoldenToolSequence(
   return (expected?.toolCalls ?? []).map((tc) => tc.id).filter(Boolean);
 }
 
-export function createEntityAnalyticsTrajectoryEvaluator(): Evaluator<
-  DatasetExample,
-  TaskOutput
-> {
+export function createEntityAnalyticsTrajectoryEvaluator(): Evaluator<DatasetExample, TaskOutput> {
   const inner = createTrajectoryEvaluator({
     extractToolCalls: (output) =>
       getToolCallSteps(output as TaskOutput)

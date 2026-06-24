@@ -50,10 +50,7 @@ export function deriveEndpointGoldenToolSequence(
   return [...ENDPOINT_BASELINE_TOOL_SEQUENCE];
 }
 
-export function createEndpointTrajectoryEvaluator(): Evaluator<
-  SecurityDatasetExample,
-  TaskOutput
-> {
+export function createEndpointTrajectoryEvaluator(): Evaluator<SecurityDatasetExample, TaskOutput> {
   const inner = createTrajectoryEvaluator({
     extractToolCalls: (output) =>
       getToolCallSteps(output as TaskOutput)
