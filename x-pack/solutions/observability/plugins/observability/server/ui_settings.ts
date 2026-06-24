@@ -32,6 +32,7 @@ import {
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
+  apmEnableRollupFallback,
   searchExcludedDataTiers,
   enableDiagnosticMode,
 } from '../common/ui_settings_keys';
@@ -202,6 +203,22 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     schema: schema.boolean(),
     value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
+  },
+  [apmEnableRollupFallback]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableRollupFallback', {
+      defaultMessage: 'Rollup interval fallback',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableRollupFallbackDescription', {
+      defaultMessage:
+        'When a service or transaction group is missing from the aggregated metrics for the selected time range, automatically query a more granular rollup interval so it is still shown. This can improve data completeness at the cost of slower queries.',
+    }),
+    schema: schema.boolean(),
+    value: false,
     requiresPageReload: true,
     type: 'boolean',
     solutionViews: ['classic', 'oblt'],

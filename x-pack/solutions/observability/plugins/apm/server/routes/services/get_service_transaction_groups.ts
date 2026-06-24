@@ -12,7 +12,7 @@ import {
   getOutcomeAggregation,
   getDurationFieldForTransactions,
 } from '@kbn/apm-data-access-plugin/server/utils';
-import type { ApmTransactionDocumentType } from '../../../common/document_type';
+import { ApmDocumentType, type ApmTransactionDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -20,13 +20,32 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import type { RollupInterval } from '../../../common/rollup';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 
 const txGroupsDroppedBucketName = '_other';
 export const MAX_NUMBER_OF_TX_GROUPS = 1_000;
+
+// Finer rollup intervals to fall back to (in order) when the requested coarse rollup returns no
+// transaction groups for this service/type. Coarse rollups (e.g. 60m) can be globally present but
+// miss an individual transaction group whose only metric document fell outside the queried window
+// or was never written for that tier, so the row silently disappears. Falling back to a finer tier
+// recovers the data transparently.
+const ROLLUP_FALLBACK_ORDER: RollupInterval[] = [
+  RollupInterval.SixtyMinutes,
+  RollupInterval.TenMinutes,
+  RollupInterval.OneMinute,
+];
+
+function getFinerRollupFallbacks(rollupInterval: RollupInterval): RollupInterval[] {
+  const currentIndex = ROLLUP_FALLBACK_ORDER.indexOf(rollupInterval);
+  if (currentIndex < 0) {
+    return [];
+  }
+  return ROLLUP_FALLBACK_ORDER.slice(currentIndex + 1);
+}
 
 export interface TransactionGroups {
   alertsCount: number;
@@ -43,6 +62,12 @@ export interface ServiceTransactionGroupsResponse {
   maxCountExceeded: boolean;
   transactionOverflowCount: number;
   hasActiveAlerts: boolean;
+  /**
+   * Set when the requested rollup interval returned no transaction groups and a finer rollup
+   * interval was queried instead, so the UI can let the user know the displayed data was recovered
+   * from a more granular (and potentially slower) source.
+   */
+  fellBackToRollupInterval?: RollupInterval;
 }
 
 export async function getServiceTransactionGroups({
@@ -58,6 +83,7 @@ export async function getServiceTransactionGroups({
   rollupInterval,
   useDurationSummary,
   searchQuery,
+  enableRollupFallback = false,
 }: {
   environment: string;
   kuery: string;
@@ -71,95 +97,171 @@ export async function getServiceTransactionGroups({
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
   searchQuery?: string;
+  enableRollupFallback?: boolean;
 }): Promise<ServiceTransactionGroupsResponse> {
   const field = getDurationFieldForTransactions(documentType, useDurationSummary);
 
-  const response = await apmEventClient.search('get_service_transaction_groups', {
-    apm: {
-      sources: [
-        {
-          documentType,
-          rollupInterval,
-        },
-      ],
-    },
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          { term: { [SERVICE_NAME]: serviceName } },
+  async function queryRollupInterval(currentRollupInterval: RollupInterval) {
+    const response = await apmEventClient.search('get_service_transaction_groups', {
+      apm: {
+        sources: [
           {
-            bool: {
-              should: [
-                { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
-                { term: { [TRANSACTION_TYPE]: transactionType } },
-              ],
-            },
+            documentType,
+            rollupInterval: currentRollupInterval,
           },
-          ...rangeQuery(start, end),
-          ...environmentQuery(environment),
-          ...kqlQuery(kuery),
-          ...wildcardQuery(TRANSACTION_NAME, searchQuery),
         ],
       },
-    },
-    aggs: {
-      total_duration: { sum: { field } },
-      transaction_overflow_count: {
-        sum: {
-          field: TRANSACTION_OVERFLOW_COUNT,
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            {
+              bool: {
+                should: [
+                  { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
+                  { term: { [TRANSACTION_TYPE]: transactionType } },
+                ],
+              },
+            },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...wildcardQuery(TRANSACTION_NAME, searchQuery),
+          ],
         },
       },
-      transaction_groups: {
-        terms: {
-          field: TRANSACTION_NAME,
-          size: MAX_NUMBER_OF_TX_GROUPS,
-          order: { _count: 'desc' },
-        },
-        aggs: {
-          transaction_group_total_duration: {
-            sum: { field },
+      aggs: {
+        total_duration: { sum: { field } },
+        transaction_overflow_count: {
+          sum: {
+            field: TRANSACTION_OVERFLOW_COUNT,
           },
-          ...getLatencyAggregation(latencyAggregationType, field),
-          ...getOutcomeAggregation(documentType),
+        },
+        transaction_groups: {
+          terms: {
+            field: TRANSACTION_NAME,
+            size: MAX_NUMBER_OF_TX_GROUPS,
+            order: { _count: 'desc' },
+          },
+          aggs: {
+            transaction_group_total_duration: {
+              sum: { field },
+            },
+            ...getLatencyAggregation(latencyAggregationType, field),
+            ...getOutcomeAggregation(documentType),
+          },
         },
       },
-    },
-  });
+    });
 
-  const totalDuration = response.aggregations?.total_duration.value;
+    const totalDuration = response.aggregations?.total_duration.value;
 
-  const transactionGroups =
-    response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      const errorRate = calculateFailedTransactionRate(bucket);
+    const transactionGroups =
+      response.aggregations?.transaction_groups.buckets.map((bucket) => {
+        const errorRate = calculateFailedTransactionRate(bucket);
 
-      const transactionGroupTotalDuration = bucket.transaction_group_total_duration.value || 0;
+        const transactionGroupTotalDuration = bucket.transaction_group_total_duration.value || 0;
+
+        return {
+          name: bucket.key as string,
+          transactionType,
+          latency: getLatencyValue({
+            latencyAggregationType,
+            aggregation: bucket.latency,
+          }),
+          throughput: calculateThroughputWithRange({
+            start,
+            end,
+            value: bucket.doc_count,
+          }),
+          errorRate,
+          impact: totalDuration ? (transactionGroupTotalDuration * 100) / totalDuration : 0,
+          alertsCount: 0,
+        };
+      }) ?? [];
+
+    return {
+      transactionGroups,
+      maxCountExceeded: (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
+      transactionOverflowCount: response.aggregations?.transaction_overflow_count.value ?? 0,
+    };
+  }
+
+  // Cheap probe: count the distinct transaction groups visible at a given rollup interval for the
+  // exact same filters/time range. Used to detect when a coarse rollup is *partially* missing groups
+  // (the common SDH symptom) without paying for a full re-query unless there is a real gap.
+  async function countTransactionGroups(currentRollupInterval: RollupInterval) {
+    const response = await apmEventClient.search('get_service_transaction_groups_count', {
+      apm: {
+        sources: [
+          {
+            documentType,
+            rollupInterval: currentRollupInterval,
+          },
+        ],
+      },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            {
+              bool: {
+                should: [
+                  { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
+                  { term: { [TRANSACTION_TYPE]: transactionType } },
+                ],
+              },
+            },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...wildcardQuery(TRANSACTION_NAME, searchQuery),
+          ],
+        },
+      },
+      aggs: {
+        transaction_group_count: {
+          cardinality: { field: TRANSACTION_NAME },
+        },
+      },
+    });
+
+    return response.aggregations?.transaction_group_count.value ?? 0;
+  }
+
+  const result = await queryRollupInterval(rollupInterval);
+
+  // Only metric document types are rolled up; raw transaction events have no finer tier to fall
+  // back to.
+  const isRolledUpMetric = documentType === ApmDocumentType.TransactionMetric;
+
+  const finerRollups = getFinerRollupFallbacks(rollupInterval);
+
+  if (enableRollupFallback && isRolledUpMetric && finerRollups.length > 0) {
+    // The finest available tier is the most complete one. If it exposes more transaction groups than
+    // the requested (coarse) rollup, some groups are silently missing from the coarse view (e.g. a
+    // group whose only coarse metric document fell outside the queried window). Re-query at the
+    // finest tier so those groups reappear, and flag it so the UI can inform the user.
+    const finestRollup = finerRollups[finerRollups.length - 1];
+    const finestGroupCount = await countTransactionGroups(finestRollup);
+
+    if (finestGroupCount > result.transactionGroups.length) {
+      const fallbackResult = await queryRollupInterval(finestRollup);
 
       return {
-        name: bucket.key as string,
-        latency: getLatencyValue({
-          latencyAggregationType,
-          aggregation: bucket.latency,
-        }),
-        throughput: calculateThroughputWithRange({
-          start,
-          end,
-          value: bucket.doc_count,
-        }),
-        errorRate,
-        impact: totalDuration ? (transactionGroupTotalDuration * 100) / totalDuration : 0,
-        alertsCount: 0,
+        ...fallbackResult,
+        hasActiveAlerts: false,
+        fellBackToRollupInterval: finestRollup,
       };
-    }) ?? [];
+    }
+  }
 
   return {
-    transactionGroups: transactionGroups.map((transactionGroup) => ({
-      ...transactionGroup,
-      transactionType,
-    })),
-    maxCountExceeded: (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
-    transactionOverflowCount: response.aggregations?.transaction_overflow_count.value ?? 0,
+    ...result,
     hasActiveAlerts: false,
   };
 }

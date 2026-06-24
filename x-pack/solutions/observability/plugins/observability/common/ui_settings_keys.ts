@@ -17,6 +17,7 @@ export const enableInfrastructureAssetCustomDashboards =
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
+export const apmEnableRollupFallback = 'observability:apmEnableRollupFallback';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';

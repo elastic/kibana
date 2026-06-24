@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import { apmEnableRollupFallback } from '@kbn/observability-plugin/common';
 import * as t from 'io-ts';
 import { offsetRt } from '../../../common/comparison_rt';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
@@ -70,11 +71,16 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MergedServiceTransactionGroupsResponse> => {
-    const { params } = resources;
-    const [apmEventClient, apmAlertsClient] = await Promise.all([
+    const { params, context } = resources;
+    const [apmEventClient, apmAlertsClient, coreContext] = await Promise.all([
       getApmEventClient(resources),
       getApmAlertsClient(resources),
+      context.core,
     ]);
+
+    const enableRollupFallback = await coreContext.uiSettings.client.get<boolean>(
+      apmEnableRollupFallback
+    );
 
     const {
       path: { serviceName },
@@ -109,6 +115,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
         documentType,
         rollupInterval,
         useDurationSummary,
+        enableRollupFallback,
         ...commonProps,
       }),
       getServiceTransactionGroupsAlerts({
@@ -117,7 +124,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       }),
     ]);
 
-    const { transactionGroups, maxCountExceeded, transactionOverflowCount } =
+    const { transactionGroups, maxCountExceeded, transactionOverflowCount, fellBackToRollupInterval } =
       serviceTransactionGroups;
 
     const transactionGroupsWithAlerts = joinByKey(
@@ -130,6 +137,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       maxCountExceeded,
       transactionOverflowCount,
       hasActiveAlerts: !!serviceTransactionGroupsAlerts.length,
+      fellBackToRollupInterval,
     };
   },
 });

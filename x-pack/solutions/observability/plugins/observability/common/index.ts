@@ -44,6 +44,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  apmEnableRollupFallback,
   enableDiagnosticMode,
 } from './ui_settings_keys';
 

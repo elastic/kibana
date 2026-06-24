@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { isoToEpochRt, jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import { apmEnableRollupFallback } from '@kbn/observability-plugin/common';
 import {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
@@ -120,21 +121,30 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
     } = params.query;
-    const savedObjectsClient = (await context.core).savedObjects.client;
+    const coreContext = await context.core;
+    const savedObjectsClient = coreContext.savedObjects.client;
 
     const coreStart = await core.start();
 
-    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler] =
-      await Promise.all([
-        getMlClient(resources),
-        getApmEventClient(resources),
-        getApmAlertsClient(resources),
-        getApmSloClient(resources),
-        serviceGroupId
-          ? getServiceGroup({ savedObjectsClient, serviceGroupId })
-          : Promise.resolve(null),
-        getRandomSampler({ coreStart, request, probability }),
-      ]);
+    const [
+      mlClient,
+      apmEventClient,
+      apmAlertsClient,
+      sloClient,
+      serviceGroup,
+      randomSampler,
+      enableRollupFallback,
+    ] = await Promise.all([
+      getMlClient(resources),
+      getApmEventClient(resources),
+      getApmAlertsClient(resources),
+      getApmSloClient(resources),
+      serviceGroupId
+        ? getServiceGroup({ savedObjectsClient, serviceGroupId })
+        : Promise.resolve(null),
+      getRandomSampler({ coreStart, request, probability }),
+      coreContext.uiSettings.client.get<boolean>(apmEnableRollupFallback),
+    ]);
 
     return getServicesItems({
       environment,
@@ -152,6 +162,7 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
       searchQuery,
+      enableRollupFallback,
     });
   },
 });
