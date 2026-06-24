@@ -69,6 +69,7 @@ jest.mock('./services/events', () => ({
 jest.mock('./register', () => ({
   registerApp: jest.fn(),
   registerAnalytics: jest.fn(),
+  buildAgentBuilderAppUpdate: jest.fn(() => ({})),
   buildAgentBuilderDeepLinks: jest.fn(() => []),
 }));
 

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { AppDeepLink, AppMountParameters } from '@kbn/core-application-browser';
+import type { AppDeepLink, AppMountParameters, AppUpdatableFields } from '@kbn/core-application-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceSetup, AppUpdater } from '@kbn/core/public';
+import { isAgentFirst, isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { i18n } from '@kbn/i18n';
 import type { BehaviorSubject } from 'rxjs';
 import { agentBuilderPublicEbtEvents } from '@kbn/agent-builder-common/telemetry';
@@ -18,8 +19,11 @@ import {
   AGENTBUILDER_APP_ID,
   AGENTBUILDER_PATH,
 } from '../common/features';
+import { requestAgentWorkspaceNavigation } from './agent_workspace/agent_workspace_navigation';
 import type { AgentBuilderInternalService } from './services';
 import type { AgentBuilderStartDependencies } from './types';
+
+const DISCOVER_APP_ID = 'discover';
 
 type AgentBuilderDeepLinkSource = AppDeepLink & { readonly isExperimental?: boolean };
 
@@ -61,6 +65,17 @@ export const buildAgentBuilderDeepLinks = (experimentalFeaturesEnabled: boolean)
     (link) => !link.isExperimental || experimentalFeaturesEnabled
   ).map(({ isExperimental: _isExperimental, ...deepLink }) => deepLink);
 
+export const buildAgentBuilderAppUpdate = ({
+  experimentalFeaturesEnabled,
+  isAgentFirstChrome,
+}: {
+  experimentalFeaturesEnabled: boolean;
+  isAgentFirstChrome: boolean;
+}): Partial<AppUpdatableFields> => ({
+  deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled),
+  ...(isAgentFirstChrome ? { visibleIn: [] } : {}),
+});
+
 export const registerApp = ({
   core,
   getServices,
@@ -82,11 +97,23 @@ export const registerApp = ({
     deepLinks: buildAgentBuilderDeepLinks(false),
     defaultPath: '/agents',
     async mount({ element, history, onAppLeave }: AppMountParameters) {
-      const { mountApp } = await import('./application');
       const [coreStart, startDependencies] = await core.getStartServices();
+      const isAgentFirstChrome =
+        isAgentFirst(coreStart.featureFlags) && isNextChrome(coreStart.featureFlags);
+
+      if (isAgentFirstChrome) {
+        const inAppPath = `${history.location.pathname}${history.location.search ?? ''}`;
+        requestAgentWorkspaceNavigation(inAppPath, history.location.state);
+
+        await coreStart.application.navigateToApp(DISCOVER_APP_ID);
+
+        return () => {};
+      }
 
       coreStart.chrome.docTitle.change(AGENT_BUILDER_FULL_TITLE);
       const services = getServices();
+
+      const { mountApp } = await import('./application');
 
       return mountApp({
         core: coreStart,

@@ -22,7 +22,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isAgentFirst, isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { registerLocators } from './locator/register_locators';
-import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
+import { buildAgentBuilderAppUpdate, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 
 const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
@@ -339,9 +339,12 @@ export class AgentBuilderPlugin
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
       .pipe(distinctUntilChanged())
       .subscribe((experimentalFeaturesEnabled) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled),
-        }));
+        this.appUpdater$.next(() =>
+          buildAgentBuilderAppUpdate({
+            experimentalFeaturesEnabled,
+            isAgentFirstChrome,
+          })
+        );
       });
 
     const agentBuilderService: AgentBuilderPluginStart = {

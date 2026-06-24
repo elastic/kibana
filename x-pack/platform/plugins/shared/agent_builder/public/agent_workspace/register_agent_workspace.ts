@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
 import { AgentWorkspaceMount, setAgentWorkspaceMountContext } from './agent_workspace_mount';
+import { clearAgentWorkspaceNavigation } from './agent_workspace_navigation';
 
 export const registerAgentWorkspaceSlot = ({
   core,
@@ -30,4 +31,5 @@ export const registerAgentWorkspaceSlot = ({
 export const unregisterAgentWorkspaceSlot = (): void => {
   unregisterAgentWorkspaceContent();
   setAgentWorkspaceMountContext(null);
+  clearAgentWorkspaceNavigation();
 };
