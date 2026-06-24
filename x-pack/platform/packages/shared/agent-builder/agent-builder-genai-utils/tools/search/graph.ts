@@ -79,8 +79,6 @@ export const createSearchToolGraph = ({
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
 }) => {
-  // `defaultModel` is used by the relevance search tool and the dispatcher. The natural language
-  // search tool receives the `modelProvider` directly so it can opt into the low-effort model.
   const getTools = (state: StateType, defaultModel: ScopedModel) => {
     const relevanceTool = createRelevanceSearchTool({
       model: defaultModel,

@@ -40,8 +40,8 @@ export interface GenerateEsqlResponse {
 }
 
 /**
- * Model input for {@link generateEsql}. Either a `modelProvider` (in which case the low-effort
- * model is selected for generation) or an already-resolved `model` (legacy path).
+ * Model input for {@link generateEsql}.
+ * Either a `modelProvider` (allowing model selection) or an already-resolved `model` (legacy path).
  */
 export type GenerateEsqlModelDeps =
   | { modelProvider: ModelProvider; model?: never }
@@ -116,7 +116,6 @@ export const generateEsql = async ({
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   // Resolve a single ScopedModel once. When a modelProvider is given, use the low-effort model
-  // for the generation flow; otherwise use the model passed directly (legacy callers).
   const model = modelProvider
     ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
     : inputModel!;
