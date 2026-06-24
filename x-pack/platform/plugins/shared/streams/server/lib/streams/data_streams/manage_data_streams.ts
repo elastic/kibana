@@ -424,22 +424,8 @@ export async function simulateClassicStreamTemplate({
     return simulation?.template;
   }
 
-  const indexPatterns = await retryTransientEsErrors(
-    () => esClient.indices.getIndexTemplate({ name: templateName }),
-    { logger }
-  )
-    .then((response) => response.index_templates?.[0]?.index_template?.index_patterns)
-    .catch(() => undefined);
-
-  const pattern = Array.isArray(indexPatterns) ? indexPatterns[0] : indexPatterns;
-  if (typeof pattern !== 'string' || pattern.length === 0) {
-    return undefined;
-  }
-
-  const simulatedIndexName = pattern.replace(/[*?]/g, '0');
-
   const simulation = await retryTransientEsErrors(
-    () => esClient.indices.simulateIndexTemplate({ name: simulatedIndexName }),
+    () => esClient.indices.simulateTemplate({ name: templateName }),
     { logger }
   ).catch(() => undefined);
 

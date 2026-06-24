@@ -223,7 +223,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
     indices: Pick<
       ElasticsearchClient['indices'],
       | 'getDataStream'
-      | 'getIndexTemplate'
+      | 'simulateTemplate'
       | 'simulateIndexTemplate'
       | 'putDataLifecycle'
       | 'deleteDataLifecycle'
@@ -240,12 +240,9 @@ describe('updateDataStreamsLifecycle inherit', () => {
         getDataStream: jest.fn().mockResolvedValue({
           data_streams: [{ name: 'logs-foo-default', template: 'logs-foo-template' }],
         }),
-        getIndexTemplate: jest.fn().mockResolvedValue({
-          index_templates: [{ index_template: { index_patterns: ['logs-foo-*'] } }],
-        }),
-        // Simulating against the resolved pattern (`logs-foo-0`) returns the pristine
-        // template lifecycle without the data stream's lingering ILM overrides.
-        simulateIndexTemplate: jest.fn().mockResolvedValue({
+        // Simulating the template by name returns the pristine template lifecycle
+        // without the data stream's lingering ILM overrides.
+        simulateTemplate: jest.fn().mockResolvedValue({
           template: {
             settings: { index: { lifecycle: { prefer_ilm: false } } },
             lifecycle: {
@@ -255,6 +252,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
             },
           },
         }),
+        simulateIndexTemplate: jest.fn().mockResolvedValue({}),
         putDataLifecycle: jest.fn().mockResolvedValue({}),
         deleteDataLifecycle: jest.fn().mockResolvedValue({}),
         putDataStreamSettings: jest.fn().mockResolvedValue({ data_streams: [] }),
@@ -264,7 +262,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
     mockLogger = createMockLogger();
   });
 
-  it('resolves the template against its index pattern (not the existing data stream) and applies the inherited DSL retention', async () => {
+  it('resolves the template by name (not against the existing data stream) and applies the inherited DSL retention', async () => {
     await updateDataStreamsLifecycle({
       esClient: mockEsClient as unknown as ElasticsearchClient,
       logger: mockLogger as unknown as Logger,
@@ -273,10 +271,10 @@ describe('updateDataStreamsLifecycle inherit', () => {
       isServerless: false,
     });
 
-    // The pattern is resolved to a non-existent index so the simulation is not
-    // contaminated by the data stream's current index.lifecycle settings.
-    expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
-      name: 'logs-foo-0',
+    // Resolving by template name means the simulation is not contaminated by the
+    // data stream's current index.lifecycle settings.
+    expect(mockEsClient.indices.simulateTemplate).toHaveBeenCalledWith({
+      name: 'logs-foo-template',
     });
     expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
       name: 'logs-foo-default',
@@ -286,10 +284,8 @@ describe('updateDataStreamsLifecycle inherit', () => {
     expect(mockEsClient.indices.deleteDataLifecycle).not.toHaveBeenCalled();
   });
 
-  it('fails closed when a backing template exists but has no index patterns', async () => {
-    mockEsClient.indices.getIndexTemplate = jest.fn().mockResolvedValue({
-      index_templates: [{ index_template: { index_patterns: [] } }],
-    });
+  it('fails closed when the backing template cannot be simulated', async () => {
+    mockEsClient.indices.simulateTemplate = jest.fn().mockResolvedValue({});
 
     await expect(
       updateDataStreamsLifecycle({
@@ -553,12 +549,12 @@ describe('updateDataStreamsFailureStore', () => {
 
 describe('simulateClassicStreamTemplate', () => {
   let mockGetDataStream: jest.Mock;
-  let mockGetIndexTemplate: jest.Mock;
+  let mockSimulateTemplate: jest.Mock;
   let mockSimulateIndexTemplate: jest.Mock;
   let mockEsClient: {
     indices: {
       getDataStream: jest.Mock;
-      getIndexTemplate: jest.Mock;
+      simulateTemplate: jest.Mock;
       simulateIndexTemplate: jest.Mock;
     };
   };
@@ -568,8 +564,10 @@ describe('simulateClassicStreamTemplate', () => {
     mockGetDataStream = jest.fn().mockResolvedValue({
       data_streams: [{ name: 'logs-foo-default', template: 'logs-foo-template' }],
     });
-    mockGetIndexTemplate = jest.fn().mockResolvedValue({
-      index_templates: [{ index_template: { index_patterns: ['logs-foo-*'] } }],
+    mockSimulateTemplate = jest.fn().mockResolvedValue({
+      template: {
+        settings: { index: { lifecycle: { name: 'my-ilm-policy', prefer_ilm: true } } },
+      },
     });
     mockSimulateIndexTemplate = jest.fn().mockResolvedValue({
       template: {
@@ -579,14 +577,14 @@ describe('simulateClassicStreamTemplate', () => {
     mockEsClient = {
       indices: {
         getDataStream: mockGetDataStream,
-        getIndexTemplate: mockGetIndexTemplate,
+        simulateTemplate: mockSimulateTemplate,
         simulateIndexTemplate: mockSimulateIndexTemplate,
       },
     };
     mockLogger = createMockLogger();
   });
 
-  it('resolves the backing template index pattern and simulates against it', async () => {
+  it('simulates the backing template by name (not against an index)', async () => {
     const template = await simulateClassicStreamTemplate({
       esClient: mockEsClient as unknown as ElasticsearchClient,
       name: 'logs-foo-default',
@@ -594,14 +592,35 @@ describe('simulateClassicStreamTemplate', () => {
     });
 
     expect(mockGetDataStream).toHaveBeenCalledWith({ name: 'logs-foo-default' });
-    expect(mockGetIndexTemplate).toHaveBeenCalledWith({ name: 'logs-foo-template' });
-    // `logs-foo-*` -> `logs-foo-0`, NOT `logs-foo-default`.
-    expect(mockSimulateIndexTemplate).toHaveBeenCalledWith({ name: 'logs-foo-0' });
-    // The resolved template keeps the ILM policy, so getTemplateLifecycle detects ILM.
+    // Resolving by template name avoids merging in the existing data stream's settings.
+    expect(mockSimulateTemplate).toHaveBeenCalledWith({ name: 'logs-foo-template' });
+    expect(mockSimulateIndexTemplate).not.toHaveBeenCalled();
     expect(getTemplateLifecycle(template!)).toEqual({ ilm: { policy: 'my-ilm-policy' } });
   });
 
-  it('falls back to the stream name when the backing template cannot be resolved', async () => {
+  it('returns the pristine DSL lifecycle for an exact-pattern template even when the data stream has an ILM override (regression)', async () => {
+    // Reproduces a classic stream whose template uses an exact index pattern
+    // (e.g. `my-exact-stream`) and whose data stream has a lingering ILM override.
+    // Resolving by template name must surface the template's DSL retention, not the
+    // override's ILM policy.
+    mockSimulateTemplate.mockResolvedValue({
+      template: {
+        settings: { index: { lifecycle: { prefer_ilm: false } } },
+        lifecycle: { enabled: true, data_retention: '80d' },
+      },
+    });
+
+    const template = await simulateClassicStreamTemplate({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      name: 'my-exact-stream',
+      logger: mockLogger as unknown as Logger,
+    });
+
+    expect(mockSimulateTemplate).toHaveBeenCalledWith({ name: 'logs-foo-template' });
+    expect(getTemplateLifecycle(template!)).toEqual({ dsl: { data_retention: '80d' } });
+  });
+
+  it('falls back to simulating the stream name when the backing template cannot be resolved', async () => {
     mockGetDataStream.mockRejectedValue(new Error('not found'));
 
     await simulateClassicStreamTemplate({
@@ -610,12 +629,12 @@ describe('simulateClassicStreamTemplate', () => {
       logger: mockLogger as unknown as Logger,
     });
 
-    expect(mockGetIndexTemplate).not.toHaveBeenCalled();
+    expect(mockSimulateTemplate).not.toHaveBeenCalled();
     expect(mockSimulateIndexTemplate).toHaveBeenCalledWith({ name: 'logs-foo-default' });
   });
 
   it('returns undefined for an empty simulated template (e.g. replicated streams)', async () => {
-    mockSimulateIndexTemplate.mockResolvedValue({});
+    mockSimulateTemplate.mockResolvedValue({});
 
     const template = await simulateClassicStreamTemplate({
       esClient: mockEsClient as unknown as ElasticsearchClient,
@@ -626,8 +645,8 @@ describe('simulateClassicStreamTemplate', () => {
     expect(template).toBeUndefined();
   });
 
-  it('degrades to undefined when the index template simulation fails', async () => {
-    mockSimulateIndexTemplate.mockRejectedValue(new Error('boom'));
+  it('degrades to undefined when the template simulation fails', async () => {
+    mockSimulateTemplate.mockRejectedValue(new Error('boom'));
 
     const template = await simulateClassicStreamTemplate({
       esClient: mockEsClient as unknown as ElasticsearchClient,
