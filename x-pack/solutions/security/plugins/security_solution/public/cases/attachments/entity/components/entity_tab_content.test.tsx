@@ -162,6 +162,18 @@ describe('EntityTabContent', () => {
     expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
   });
 
+  it('excludes entities that do not match the search term', () => {
+    renderTab({ searchTerm: 'bob' }); // fixture entity name is 'alice'
+    expect(screen.getByTestId(ENTITY_TAB_EMPTY_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(ENTITY_TAB_TABLE_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('shows entities that match the search term', () => {
+    renderTab({ searchTerm: 'alice' });
+    expect(screen.getByTestId(ENTITY_TAB_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(ENTITY_TAB_EMPTY_TEST_ID)).not.toBeInTheDocument();
+  });
+
   it('renders the table (does not hide it) when the privileges request errors', () => {
     useEntityEnginePrivilegesMock.mockReturnValue({
       data: undefined,
