@@ -64,9 +64,7 @@ describe('useDashboardArtifacts', () => {
       })
     );
 
-    const { unmount } = renderHook(() =>
-      useDashboardArtifacts(dashboardArtifacts, mockDashboard)
-    );
+    const { unmount } = renderHook(() => useDashboardArtifacts(dashboardArtifacts, mockDashboard));
 
     unmount();
 
@@ -105,9 +103,7 @@ describe('useDashboardArtifacts', () => {
       { id: 'artifact-last', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' },
     ];
 
-    const { result } = renderHook(() =>
-      useDashboardArtifacts(duplicateArtifacts, mockDashboard)
-    );
+    const { result } = renderHook(() => useDashboardArtifacts(duplicateArtifacts, mockDashboard));
 
     await waitFor(() => {
       expect(result.current.artifactIdByDashboardId.get('dash-1')).toBe('artifact-last');
