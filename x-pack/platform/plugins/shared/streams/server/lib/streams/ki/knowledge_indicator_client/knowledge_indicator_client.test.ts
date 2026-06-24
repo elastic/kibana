@@ -11,6 +11,8 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
+import type { SignificantEventsAlertingContext } from '../../../sig_events/alerting/significant_events_alerting_context';
+import { V1_ALERTS_READER } from '../../../sig_events/alerting/alerts_reader';
 import { computeFeatureUuid } from '@kbn/streams-schema';
 import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from '../data_stream';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
@@ -77,6 +79,16 @@ function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   });
 }
 
+function createAlertingContext(
+  rulesManagementClient: SignificantEventsAlertingContext['rulesClient']
+): SignificantEventsAlertingContext {
+  return {
+    alertingV2Active: false,
+    alertsReader: V1_ALERTS_READER,
+    rulesClient: rulesManagementClient,
+  };
+}
+
 function makeClient(): {
   client: KnowledgeIndicatorClient;
   create: jest.Mock;
@@ -91,15 +103,19 @@ function makeClient(): {
   const deps: KnowledgeIndicatorClientDeps = {
     dataStreamClient,
     esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
-    rulesManagementClient: {
-      createRule: jest.fn().mockResolvedValue(undefined),
-      updateRule: jest.fn().mockResolvedValue(undefined),
-      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-    },
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
   };
-  const client = new KnowledgeIndicatorClient(deps);
+  const rulesManagementClient = {
+    createRule: jest.fn().mockResolvedValue(undefined),
+    updateRule: jest.fn().mockResolvedValue(undefined),
+    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+  };
+  const client = new KnowledgeIndicatorClient(
+    deps,
+    true,
+    createAlertingContext(rulesManagementClient)
+  );
   return { client, create, runEsql: executeAndDecodeSource as jest.Mock, logger };
 }
 
@@ -436,15 +452,19 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     const deps: KnowledgeIndicatorClientDeps = {
       dataStreamClient,
       esClient: { search } as unknown as KnowledgeIndicatorClientDeps['esClient'],
-      rulesManagementClient: {
-        createRule: jest.fn().mockResolvedValue(undefined),
-        updateRule: jest.fn().mockResolvedValue(undefined),
-        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-      },
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
     };
-    const client = new KnowledgeIndicatorClient(deps);
+    const rulesManagementClient = {
+      createRule: jest.fn().mockResolvedValue(undefined),
+      updateRule: jest.fn().mockResolvedValue(undefined),
+      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    };
+    const client = new KnowledgeIndicatorClient(
+      deps,
+      true,
+      createAlertingContext(rulesManagementClient)
+    );
     return { client, runEsql: executeAndDecodeSource as jest.Mock, search };
   }
 

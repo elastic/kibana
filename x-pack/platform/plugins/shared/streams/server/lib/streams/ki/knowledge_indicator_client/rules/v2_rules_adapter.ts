@@ -10,7 +10,7 @@
 import { isBoom } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { stripMetadata } from '@kbn/streams-schema';
+import { stripMetadata, QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
 import { MATCH_LOOKBACK_MINUTES } from '../../../../sig_events/rules/esql/common';
 import {
   STREAMS_RULE_CONSUMER,
@@ -133,12 +133,26 @@ const V2_MATCH_GROUPING_FIELDS = ['_id'] as const;
 
 const V2_QUERY_METADATA_TO_STRIP = ['_source'];
 
+function assertMatchQuery(esqlQuery: string): void {
+  if (deriveQueryType(esqlQuery) === QUERY_TYPE_STATS) {
+    throw new Error(
+      'STATS queries cannot be installed as v2 signal rules until rule-on-rule provisioning (#265778).'
+    );
+  }
+}
+
+function toV2BreachQuery(esqlQuery: string): string {
+  assertMatchQuery(esqlQuery);
+  return stripMetadata(esqlQuery, V2_QUERY_METADATA_TO_STRIP);
+}
+
 /**
  * `body.enabled` is intentionally not forwarded: the v2 create schema doesn't accept it
  * and `RulesClient.createRule` hardcodes `enabled: true` server-side. Callers that want a
  * disabled rule must call `disableRule` after creation.
  */
 function toV2CreateBody(body: CreateRuleBody) {
+  const esqlQuery = body.params.query;
   return {
     kind: 'signal' as const,
     metadata: {
@@ -150,12 +164,13 @@ function toV2CreateBody(body: CreateRuleBody) {
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
-      breach: { query: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
+      breach: { query: toV2BreachQuery(esqlQuery) },
     },
   };
 }
 
 function toV2UpdateBody(body: UpdateRuleBody) {
+  const esqlQuery = body.params.query;
   return {
     metadata: {
       name: body.name,
@@ -166,7 +181,7 @@ function toV2UpdateBody(body: UpdateRuleBody) {
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
-      breach: { query: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
+      breach: { query: toV2BreachQuery(esqlQuery) },
     },
   };
 }

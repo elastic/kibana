@@ -15,7 +15,6 @@ import { z } from '@kbn/zod/v4';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
-import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { searchModeSchema } from '../../../utils/search_mode';
 import {
@@ -197,24 +196,16 @@ const readAllSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const {
-      getKnowledgeIndicatorClient,
-      getAlertingV2RulesClient,
-      scopedClusterClient,
-      licensing,
-      uiSettingsClient,
-    } = await getScopedClients({
-      request,
-    });
+    const scopedClients = await getScopedClients({ request });
+    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
-    const alertsSource = await resolveAlertsSource({
-      uiSettingsClient,
-      alertingV2RulesClient: await getAlertingV2RulesClient(),
-    });
-    const kiClient = await getKnowledgeIndicatorClient();
+    const [kiClient, { alertsReader }] = await Promise.all([
+      scopedClients.getKnowledgeIndicatorClient(),
+      scopedClients.getSignificantEventsAlertingContext(),
+    ]);
     return readSignificantEventsFromAlertsIndices(
       {
         from,
@@ -223,7 +214,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         query,
         streamNames,
         searchMode,
-        alertsSource,
+        alertsReader,
       },
       { kiClient, scopedClusterClient }
     );

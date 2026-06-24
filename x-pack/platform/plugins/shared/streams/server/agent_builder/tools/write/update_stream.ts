@@ -18,6 +18,7 @@ import type {
   ClassicFieldDefinition,
 } from '@kbn/streams-schema';
 import dedent from 'dedent';
+import type { Logger } from '@kbn/core/server';
 import type { GetScopedClients } from '../../../routes/types';
 import { patchIngestAndUpsert } from '../../../lib/streams/helpers/ingest_upsert';
 import {
@@ -108,9 +109,11 @@ const updateStreamSchema = z.object({
 export const createUpdateStreamTool = ({
   getScopedClients,
   writeQueue,
+  logger,
 }: {
   getScopedClients: GetScopedClients;
   writeQueue: StreamsWriteQueue;
+  logger: Logger;
 }): BuiltinToolDefinition<typeof updateStreamSchema> => ({
   id: UPDATE_STREAM,
   type: ToolType.builtin,
@@ -160,11 +163,11 @@ export const createUpdateStreamTool = ({
   handler: async ({ name, changes }, { request }) => {
     const signal = abortSignalFromRequest(request);
     try {
-      const { streamsClient, getKnowledgeIndicatorClient, attachmentClient } =
-        await getScopedClients({
-          request,
-        });
-      const kiClient = await getKnowledgeIndicatorClient();
+      const scopedClients = await getScopedClients({
+        request,
+      });
+      const { streamsClient, attachmentClient } = scopedClients;
+      const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
       if (changes.processing) {
         const validation = validateProcessingJson({ steps: changes.processing });

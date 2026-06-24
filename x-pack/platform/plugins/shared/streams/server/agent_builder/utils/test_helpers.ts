@@ -30,6 +30,7 @@ type ToolScopedClients = Pick<
   | 'streamsClient'
   | 'scopedClusterClient'
   | 'getKnowledgeIndicatorClient'
+  | 'uiSettingsClient'
   | 'attachmentClient'
   | 'taskClient'
 >;
@@ -80,6 +81,7 @@ export const createMockGetScopedClients = () => {
   };
 
   const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue(kiClient);
+  const uiSettingsClient = { get: jest.fn().mockResolvedValue(false) };
 
   const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
     getAttachments: jest.fn().mockResolvedValue([]),
@@ -101,6 +103,7 @@ export const createMockGetScopedClients = () => {
     streamsClient,
     scopedClusterClient,
     getKnowledgeIndicatorClient,
+    uiSettingsClient,
     attachmentClient,
     taskClient,
   };

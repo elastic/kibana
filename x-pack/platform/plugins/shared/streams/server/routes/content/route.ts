@@ -74,10 +74,11 @@ const exportContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, response, context, getScopedClients }) {
+  async handler({ params, request, response, context, getScopedClients, server }) {
     await checkEnabled(context);
 
-    const { getKnowledgeIndicatorClient, streamsClient } = await getScopedClients({ request });
+    const scopedClients = await getScopedClients({ request });
+    const { streamsClient } = scopedClients;
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -89,7 +90,7 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const queryLinks = await kiClient.getStreamToQueryLinksMap([
       params.path.name,
       ...descendants.map((stream) => stream.name),
@@ -210,10 +211,11 @@ const importContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, context, getScopedClients }) {
+  async handler({ params, request, context, getScopedClients, server }) {
     await checkEnabled(context);
 
-    const { getKnowledgeIndicatorClient, streamsClient } = await getScopedClients({ request });
+    const scopedClients = await getScopedClients({ request });
+    const { streamsClient } = scopedClients;
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -223,7 +225,7 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
-    const kiClient = await getKnowledgeIndicatorClient();
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const queryLinks = await kiClient.getStreamToQueryLinksMap([
       params.path.name,
       ...descendants.map(({ name }) => name),
