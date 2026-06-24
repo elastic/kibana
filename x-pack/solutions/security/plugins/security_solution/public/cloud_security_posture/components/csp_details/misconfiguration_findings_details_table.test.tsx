@@ -11,12 +11,6 @@ import { MisconfigurationFindingsDetailsTable } from './misconfiguration_finding
 import { TestProviders } from '../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 
-const mockOpenPreviewPanel = jest.fn();
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({ openPreviewPanel: mockOpenPreviewPanel })),
-}));
-
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   uiMetricService: { trackUiMetric: jest.fn() },
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS: 'visit',
@@ -63,13 +57,12 @@ jest.mock('../../../common/components/links', () => ({
   ),
 }));
 
-const renderTable = (onShowFinding?: (resourceId: string, ruleId: string) => void) =>
+const renderTable = (onShowFinding: (resourceId: string, ruleId: string) => void) =>
   render(
     <TestProviders>
       <MisconfigurationFindingsDetailsTable
         field={EntityIdentifierFields.hostName}
         value="my-host"
-        scopeId="scope-id"
         onShowFinding={onShowFinding}
       />
     </TestProviders>
@@ -80,30 +73,12 @@ describe('MisconfigurationFindingsDetailsTable', () => {
     jest.clearAllMocks();
   });
 
-  it('invokes onShowFinding and does not open the legacy preview panel when the callback is provided', () => {
+  it('invokes onShowFinding with the row identifiers when the preview action is clicked', () => {
     const onShowFinding = jest.fn();
     renderTable(onShowFinding);
 
     fireEvent.click(screen.getByRole('button', { name: 'Preview finding details' }));
 
     expect(onShowFinding).toHaveBeenCalledWith('resource-1', 'rule-1');
-    expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
-  });
-
-  it('falls back to opening the legacy preview panel when no callback is provided', () => {
-    renderTable();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Preview finding details' }));
-
-    expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
-      expect.objectContaining({
-        params: expect.objectContaining({
-          resourceId: 'resource-1',
-          ruleId: 'rule-1',
-          scopeId: 'scope-id',
-          isPreviewMode: true,
-        }),
-      })
-    );
   });
 });

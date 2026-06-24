@@ -11,12 +11,6 @@ import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_
 import { TestProviders } from '../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 
-const mockOpenPreviewPanel = jest.fn();
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({ openPreviewPanel: mockOpenPreviewPanel })),
-}));
-
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   uiMetricService: { trackUiMetric: jest.fn() },
   ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS: 'visit',
@@ -89,7 +83,7 @@ jest.mock('../../../common/components/links', () => ({
 }));
 
 const renderTable = (
-  onShowVulnerability?: (params: {
+  onShowVulnerability: (params: {
     vulnerabilityId: string;
     resourceId: string;
     packageName: string;
@@ -102,7 +96,6 @@ const renderTable = (
       <VulnerabilitiesFindingsDetailsTable
         identityField={EntityIdentifierFields.hostName}
         value="my-host"
-        scopeId="scope-id"
         onShowVulnerability={onShowVulnerability}
       />
     </TestProviders>
@@ -113,7 +106,7 @@ describe('VulnerabilitiesFindingsDetailsTable', () => {
     jest.clearAllMocks();
   });
 
-  it('invokes onShowVulnerability and does not open the legacy preview panel when the callback is provided', () => {
+  it('invokes onShowVulnerability with the row identifiers when the preview action is clicked', () => {
     const onShowVulnerability = jest.fn();
     renderTable(onShowVulnerability);
 
@@ -124,25 +117,6 @@ describe('VulnerabilitiesFindingsDetailsTable', () => {
         vulnerabilityId: 'CVE-1',
         resourceId: 'resource-1',
         eventId: 'event-1',
-      })
-    );
-    expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
-  });
-
-  it('falls back to opening the legacy preview panel when no callback is provided', () => {
-    renderTable();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Preview vulnerability details' }));
-
-    expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
-      expect.objectContaining({
-        params: expect.objectContaining({
-          vulnerabilityId: 'CVE-1',
-          resourceId: 'resource-1',
-          eventId: 'event-1',
-          scopeId: 'scope-id',
-          isPreviewMode: true,
-        }),
       })
     );
   });
