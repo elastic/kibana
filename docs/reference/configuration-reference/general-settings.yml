@@ -1487,6 +1487,19 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: server.xsrf.allowBearerTokens
+        id: settings-xsrf-allowbearertokens
+        description: |
+          When `true`, requests authenticated via `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check. Only `apikey` and `bearer` schemes are exempt; `Basic` and other schemes still require the header.
+
+          It is not recommended to enable this setting unless API clients cannot set custom headers on cross-origin requests.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
   - group: Telemetry settings
     id: telemetry-settings
     settings:
