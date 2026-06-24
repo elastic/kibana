@@ -20,6 +20,12 @@ export const mockContextDependencies = () => ({
   actions: actionsMock.createStart(),
   taskManager: taskManagerMock.createStart(),
   workflowsExtensions: workflowsExtensionsMock.createStart(),
+  externalResumeSigningKey: 'test-signing-key-with-at-least-32-characters',
+  externalCredsStore: {
+    put: jest.fn(),
+    get: jest.fn(),
+    delete: jest.fn(),
+  },
   config: {
     enabled: true,
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
@@ -31,5 +37,6 @@ export const mockContextDependencies = () => ({
       minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
     },
     collectQueueMetrics: false,
+    externalResume: {},
   },
 });

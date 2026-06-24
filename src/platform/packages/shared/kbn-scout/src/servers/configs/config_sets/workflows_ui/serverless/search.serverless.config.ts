@@ -9,6 +9,7 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/serverless/search.serverless.config';
+import { externalResumeServerArgs } from '../external_resume_test_constants';
 
 /**
  * Custom Scout server configuration for Workflows Management UI tests.
@@ -24,6 +25,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--uiSettings.overrides.workflows:ui:enabled=true',
+      ...externalResumeServerArgs,
     ],
   },
 };

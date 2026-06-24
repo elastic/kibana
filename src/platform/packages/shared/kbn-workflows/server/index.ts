@@ -26,6 +26,40 @@ export {
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
 
+export {
+  EXTERNAL_RESUME_API_PATH,
+  EXTERNAL_RESUME_CONSUMED_JTIS_CONTEXT_KEY,
+  EXTERNAL_RESUME_RESUMED_BY_PREFIX,
+  WORKFLOW_EXTERNAL_RESUME_APPLICATION,
+  WORKFLOW_EXTERNAL_RESUME_ROLE,
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+} from './external_resume/constants';
+export { buildExternalResumeUrl } from './external_resume/build_external_resume_url';
+export {
+  createExternalResumeApiKey,
+  invalidateExternalResumeApiKey,
+} from './external_resume/create_external_resume_api_key';
+export type { ExternalResumeApiKey } from './external_resume/create_external_resume_api_key';
+export { getAuthenticatedExternalResumeApiKeyId } from './external_resume/external_resume_api_key_request';
+export {
+  WORKFLOWS_EXTERNAL_CREDS_INDEX,
+  WORKFLOW_EXTERNAL_CRED_PURPOSE,
+} from './external_resume/external_creds_constants';
+export type { WorkflowExternalCredPurpose } from './external_resume/external_creds_constants';
+export { WORKFLOWS_EXTERNAL_CREDS_INDEX_MAPPINGS } from './external_resume/external_creds_mappings';
+export {
+  WorkflowExternalCredsStore,
+  type WorkflowExternalCredsStoreContract,
+} from './external_resume/workflow_external_creds_store';
+export {
+  createExternalResumeTokenPayload,
+  ExternalResumeTokenVerificationError,
+  signExternalResumeToken,
+  verifyExternalResumeToken,
+} from './external_resume/external_resume_token';
+export type { ExternalResumeTokenPayload } from './external_resume/external_resume_token';
+export { resolveExternalResumeSigningKey } from './external_resume/resolve_signing_key';
+
 export type {
   GetManagedWorkflowStatusOptions,
   ManagedWorkflowStatus,

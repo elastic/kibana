@@ -10,6 +10,7 @@
 import { createIndexes } from './create_indexes';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_EXTERNAL_CREDS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './mappings';
@@ -30,14 +31,14 @@ describe('createIndexes', () => {
     jest.clearAllMocks();
   });
 
-  it('creates both workflow indices via createOrUpdateIndex', async () => {
+  it('creates all workflow indices via createOrUpdateIndex', async () => {
     await createIndexes({ esClient, logger });
 
-    // The bootstrap path uses `createOrUpdateIndex` for both indices
+    // The bootstrap path uses `createOrUpdateIndex` for all indices
     // so additive mapping changes flow into already-deployed clusters
     // via `putMapping`. `createIndexWithMappings` is reused internally
     // for the cold-install branch, not invoked directly from here.
-    expect(createOrUpdateIndex).toHaveBeenCalledTimes(2);
+    expect(createOrUpdateIndex).toHaveBeenCalledTimes(3);
     expect(createIndexWithMappings).not.toHaveBeenCalled();
 
     expect(createOrUpdateIndex).toHaveBeenCalledWith(
@@ -45,6 +46,9 @@ describe('createIndexes', () => {
     );
     expect(createOrUpdateIndex).toHaveBeenCalledWith(
       expect.objectContaining({ indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX })
+    );
+    expect(createOrUpdateIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ indexName: WORKFLOWS_EXTERNAL_CREDS_INDEX })
     );
   });
 

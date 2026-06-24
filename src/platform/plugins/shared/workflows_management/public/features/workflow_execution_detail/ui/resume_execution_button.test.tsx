@@ -285,4 +285,41 @@ describe('ResumeExecutionButton', () => {
       expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
     });
   });
+
+  describe('approval mode', () => {
+    const approvalProps = {
+      approvalLabels: { approveLabel: 'Approve', rejectLabel: 'Decline' },
+      resumeMessage: 'Approve deployment?',
+    };
+
+    it('renders approve and reject buttons instead of the JSON modal flow', () => {
+      renderComponent(approvalProps);
+      expect(screen.getByTestId('waitForApprovalCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('approveActionButton')).toHaveTextContent('Approve');
+      expect(screen.getByTestId('rejectActionButton')).toHaveTextContent('Decline');
+      expect(screen.queryByTestId('provideActionButton')).not.toBeInTheDocument();
+    });
+
+    it('submits approved=true when Approve is clicked', async () => {
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('approveActionButton'));
+      await waitFor(() => {
+        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
+          body: JSON.stringify({ input: { approved: true } }),
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('submits approved=false when Decline is clicked', async () => {
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('rejectActionButton'));
+      await waitFor(() => {
+        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
+          body: JSON.stringify({ input: { approved: false } }),
+          version: '2023-10-31',
+        });
+      });
+    });
+  });
 });

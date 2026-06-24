@@ -14,6 +14,7 @@ import {
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
+import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import type { RouteDependencies } from '../types';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
@@ -58,6 +59,11 @@ describe('Execution Routes', () => {
     ok: jest.fn((params?: any) => ({ type: 'ok', ...params })),
     notFound: jest.fn((params?: any) => ({ type: 'notFound', ...params })),
     badRequest: jest.fn((params?: any) => ({ type: 'badRequest', ...params })),
+    custom: jest.fn(({ statusCode, body, headers, bypassErrorFormat }: any) => ({
+      status: statusCode,
+      body,
+      options: { headers, bypassErrorFormat },
+    })),
     customError: jest.fn((params?: any) => ({ type: 'customError', ...params })),
     forbidden: jest.fn((params?: any) => ({ type: 'forbidden', ...params })),
     conflict: jest.fn((params?: any) => ({ type: 'conflict', ...params })),
@@ -89,6 +95,7 @@ describe('Execution Routes', () => {
       cancelAllActiveWorkflowExecutions: jest.fn(),
       getStepExecution: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
+      resumeWorkflowExecutionExternally: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
     };
 
@@ -680,6 +687,66 @@ describe('Execution Routes', () => {
         stepExecutionId: undefined,
       });
       expect(result).toEqual({ type: 'ok', body: logsResponse });
+    });
+  });
+
+  describe('GET /api/workflows/executions/{executionId}/resume/external (external_resume)', () => {
+    const path = '/api/workflows/executions/{executionId}/resume/external';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should resume via signed token and return HTML', async () => {
+      mockApi.resumeWorkflowExecutionExternally.mockResolvedValue({
+        resumedBy: 'api_key:token-jti',
+      });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: {
+          token: 'signed-token',
+          approved: 'true',
+        },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecutionExternally).toHaveBeenCalledWith({
+        token: 'signed-token',
+        approved: 'true',
+        executionId: 'ex-1',
+        spaceId: 'default',
+      });
+      expect(result).toMatchObject({
+        type: 'ok',
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      });
+      expect(typeof result.body).toBe('string');
+      expect(result.body).toContain('Thank you');
+    });
+
+    it('should return HTML error page when resume fails', async () => {
+      mockApi.resumeWorkflowExecutionExternally.mockRejectedValue(
+        new ExternalResumeError('Invalid resume token', 401)
+      );
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { token: 'bad-token', approved: 'false' },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(result).toMatchObject({
+        status: 401,
+        options: {
+          bypassErrorFormat: true,
+          headers: { 'content-type': 'text/html; charset=utf-8' },
+        },
+      });
+      expect(typeof result.body).toBe('string');
+      expect(result.body).toContain('Unable to submit response');
     });
   });
 
