@@ -91,6 +91,15 @@ export const getRuleExecutionsQuerySchema = z
 export type GetRuleExecutionsQuery = z.infer<typeof getRuleExecutionsQuerySchema>;
 
 /**
+ * Pre-parse input shape for callers that build query strings. Fields with a
+ * Zod `.default(...)` are required in {@link GetRuleExecutionsQuery} (the
+ * server-side, post-parse shape) but optional here — the route applies the
+ * default. Array-like fields (`ruleIds`, `outcome`) accept either a single
+ * value or an array, matching {@link arrayOrSingleSchema}.
+ */
+export type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsQuerySchema>;
+
+/**
  * Response shape for a single rule execution row.
  *
  *   - `rule.id` is parsed from the source `kibana.task.id`; `rule.name`

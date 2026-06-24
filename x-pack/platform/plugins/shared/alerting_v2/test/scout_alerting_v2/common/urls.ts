@@ -8,6 +8,7 @@
 import type {
   CountPolicyExecutionEventsParams,
   ListPolicyExecutionHistoryParams,
+  GetRuleExecutionsQueryInput,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_API_PATH,
@@ -15,6 +16,7 @@ import {
   RULE_API_PATH,
   EXECUTION_HISTORY_API_PATH,
   EXECUTION_HISTORY_COUNT_API_PATH,
+  RULE_EXECUTIONS_API_PATH,
 } from './constants';
 
 /**
@@ -106,4 +108,18 @@ export const getCountNewExecutionHistoryEventsUrl = (
 ): string => {
   const params = new URLSearchParams({ since: query.since });
   return `${EXECUTION_HISTORY_COUNT_API_PATH}?${params.toString()}`;
+};
+
+export const getRuleExecutionsUrl = (query?: GetRuleExecutionsQueryInput): string => {
+  if (!query) return RULE_EXECUTIONS_API_PATH;
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      value.forEach((v) => params.append(key, String(v)));
+    } else {
+      params.set(key, String(value));
+    }
+  }
+  return `${RULE_EXECUTIONS_API_PATH}?${params.toString()}`;
 };
