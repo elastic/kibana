@@ -29,6 +29,7 @@ import type { Logger } from '@kbn/logging';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { FleetConfigType } from '../../common/types';
@@ -87,6 +88,7 @@ class AppContextService {
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
+  private workflowsManagementSetup: WorkflowsServerPluginSetup | undefined;
   private includedHiddenTypes: string[] = [
     UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     KibanaSavedObjectType.alertingRuleTemplate,
@@ -348,6 +350,14 @@ class AppContextService {
 
   public getAlertingStart() {
     return this.alertingStart;
+  }
+
+  public setWorkflowsManagementSetup(setup?: WorkflowsServerPluginSetup) {
+    this.workflowsManagementSetup = setup;
+  }
+
+  public getWorkflowsManagementSetup() {
+    return this.workflowsManagementSetup;
   }
 
   public getReportingStart() {

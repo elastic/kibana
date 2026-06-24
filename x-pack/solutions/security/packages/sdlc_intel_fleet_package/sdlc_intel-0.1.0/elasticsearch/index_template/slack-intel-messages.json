@@ -1,0 +1,64 @@
+{
+  "index_patterns": [
+    "slack-intel-messages"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "message": {
+          "properties": {
+            "ts": {
+              "type": "keyword"
+            },
+            "text": {
+              "type": "text"
+            },
+            "thread_ts": {
+              "type": "keyword"
+            },
+            "user_id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "channel": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

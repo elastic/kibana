@@ -288,3 +288,108 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
   })
 );
 export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
+
+const SLACK_MAX_USERS_LIST_LIMIT = 200;
+const SLACK_DEFAULT_USERS_LIST_LIMIT = 200;
+const SLACK_MAX_CONVERSATIONS_HISTORY_LIMIT = 200;
+const SLACK_DEFAULT_CONVERSATIONS_HISTORY_LIMIT = 200;
+
+export interface SlackUsersListMember {
+  id?: string;
+  name?: string;
+  real_name?: string;
+  deleted?: boolean;
+  is_bot?: boolean;
+  profile?: {
+    email?: string;
+    display_name?: string;
+  };
+}
+
+export interface SlackUsersListResponse extends SlackErrorFields {
+  ok: boolean;
+  members?: SlackUsersListMember[];
+  response_metadata?: { next_cursor?: string };
+}
+
+export interface SlackConversationHistoryMessage {
+  type?: string;
+  user?: string;
+  text?: string;
+  ts?: string;
+  thread_ts?: string;
+  reply_count?: number;
+}
+
+export interface SlackConversationsHistoryResponse extends SlackErrorFields {
+  ok: boolean;
+  messages?: SlackConversationHistoryMessage[];
+  has_more?: boolean;
+  response_metadata?: { next_cursor?: string };
+}
+
+export const SlackListUsersInputSchema = lazySchema(() =>
+  z.object({
+    cursor: z
+      .string()
+      .optional()
+      .describe('Pagination cursor from a previous listUsers response (nextCursor).'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(SLACK_MAX_USERS_LIST_LIMIT)
+      .default(SLACK_DEFAULT_USERS_LIST_LIMIT)
+      .describe(`Users per page (1-${SLACK_MAX_USERS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_USERS_LIST_LIMIT}.`),
+    includeDeleted: z
+      .boolean()
+      .default(false)
+      .describe('Include deleted/deactivated users. Defaults to false.'),
+    raw: z
+      .boolean()
+      .optional()
+      .describe('Return the full raw Slack API response instead of a compact ingest result.'),
+  })
+);
+export type SlackListUsersInput = z.infer<typeof SlackListUsersInputSchema>;
+
+export const SlackGetChannelHistoryInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .describe('Channel ID (C.../G...) to fetch message history from.'),
+    oldest: z
+      .string()
+      .optional()
+      .describe(
+        'Only messages after this Unix timestamp (exclusive). Use for incremental ingest checkpoints.'
+      ),
+    latest: z
+      .string()
+      .optional()
+      .describe('Only messages before this Unix timestamp (exclusive).'),
+    cursor: z
+      .string()
+      .optional()
+      .describe('Pagination cursor from a previous getChannelHistory response (nextCursor).'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(SLACK_MAX_CONVERSATIONS_HISTORY_LIMIT)
+      .default(SLACK_DEFAULT_CONVERSATIONS_HISTORY_LIMIT)
+      .describe(
+        `Messages per page (1-${SLACK_MAX_CONVERSATIONS_HISTORY_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_HISTORY_LIMIT}.`
+      ),
+    inclusive: z
+      .boolean()
+      .default(false)
+      .describe('Include messages with oldest/latest timestamps. Defaults to false.'),
+    raw: z
+      .boolean()
+      .optional()
+      .describe('Return the full raw Slack API response instead of a compact ingest result.'),
+  })
+);
+export type SlackGetChannelHistoryInput = z.infer<typeof SlackGetChannelHistoryInputSchema>;

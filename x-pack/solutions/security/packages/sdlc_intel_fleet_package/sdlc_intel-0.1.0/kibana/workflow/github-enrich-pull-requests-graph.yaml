@@ -1,0 +1,238 @@
+version: '1'
+name: SDLC GitHub enrich pull requests graph (GraphQL)
+description: >
+  Tier-3 enrichment workflow. Loads recently updated pull requests from github-intel-pull-requests,
+  fetches reviews and linked closing issues via graph.pullRequestGraph, updates PR documents, and
+  writes closes_issue edges to github-intel-relationships. Run github-activity-pull-requests first.
+  Processes a batch per run with watermark checkpointing.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - enrich
+  - ingest
+  - graphql
+  - pull-requests
+
+consts:
+  orgLogin: elastic
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  pullRequestsIndex: github-intel-pull-requests
+  relationshipsIndex: github-intel-relationships
+  syncSource: github-enrich-pull-requests-graph
+  entityType: pull_request_graph
+  batchSize: 25
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-enrich-pull-requests-graph
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '{{ steps.read_checkpoint.output.hits.hits.0._source.watermark }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      pullRequestsProcessed: 0
+      lastUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '{{ variables.watermark | size }} : 0'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_pull_requests_batch
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.pullRequestsIndex }}'
+      size: '{{ consts.batchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+        - entity.id:
+            order: asc
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+
+  - name: enrich_pull_requests
+    type: foreach
+    foreach: '{{ steps.load_pull_requests_batch.output.hits.hits | json }}'
+    steps:
+      - name: set_pr_context
+        type: data.set
+        with:
+          prRepoName: '{{ foreach.item._source.repository.name }}'
+          prRepoFullName: '{{ foreach.item._source.repository.full_name }}'
+          prEntityId: '{{ foreach.item._source.entity.id }}'
+
+      - name: fetch_pull_request_graph
+        type: github.runQueryTemplate
+        connector-id: '{{ consts.githubConnectorId }}'
+        with:
+          templateId: graph.pullRequestGraph
+          variables:
+            owner: '{{ consts.orgLogin }}'
+            repo: '{{ variables.prRepoName }}'
+            number: '{{ foreach.item._source.entity.number }}'
+
+      - name: backoff_if_needed
+        type: wait
+        if: '{{ steps.fetch_pull_request_graph.output.shouldBackoff }}'
+        with:
+          duration: 60s
+
+      - name: upsert_enriched_pull_request
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.pullRequestsIndex }}'
+          id: '{{ variables.prEntityId }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity:
+              type: pull_request
+              id: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.id }}'
+              url: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.url }}'
+              number: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.number }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            repository:
+              name: '{{ variables.prRepoName }}'
+              full_name: '{{ variables.prRepoFullName }}'
+            github:
+              created_at: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.createdAt }}'
+              updated_at: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.updatedAt }}'
+              state: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.state }}'
+            people:
+              author: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.author.login }}'
+            pull_request:
+              title: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.title }}'
+              body: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.body }}'
+              draft: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.isDraft }}'
+              merged_at: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.mergedAt }}'
+            payload: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest | json }}'
+
+      - name: index_closing_issue_relationships
+        type: foreach
+        foreach: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.closingIssuesReferences.nodes | json }}'
+        steps:
+          - name: upsert_closing_issue_relationship
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              id: '{{ variables.prEntityId }}-closes-{{ foreach.item.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                from: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.url }}'
+                to: '{{ foreach.item.url }}'
+                relation: closes_issue
+                metadata:
+                  org: '{{ consts.orgLogin }}'
+                  issue_number: '{{ foreach.item.number }}'
+                payload: '{{ foreach.item | json }}'
+
+      - name: index_review_relationships
+        type: foreach
+        foreach: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.reviews.nodes | json }}'
+        steps:
+          - name: upsert_review_relationship
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              id: '{{ variables.prEntityId }}-review-{{ foreach.item.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                from: '{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.url }}'
+                to: '{{ foreach.item.author.login }}'
+                relation: reviewed_by
+                metadata:
+                  org: '{{ consts.orgLogin }}'
+                  review_state: '{{ foreach.item.state }}'
+                  submitted_at: '{{ foreach.item.submittedAt }}'
+                payload: '{{ foreach.item | json }}'
+
+      - name: track_batch_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '{{ foreach.item._source.github.updated_at }}'
+          pullRequestsProcessed: '{{ variables.pullRequestsProcessed | plus: 1 }}'
+
+  - name: finalize_watermark
+    type: if
+    condition: 'variables.pullRequestsProcessed : {{ consts.batchSize }}'
+    steps:
+      - name: use_last_updated_watermark
+        type: data.set
+        with:
+          watermark: '{{ variables.lastUpdatedAt }}'
+    else:
+      - name: finalize_if_any_processed
+        type: if
+        condition: "${{ variables.pullRequestsProcessed > 0 }}"
+        steps:
+          - name: use_run_started_watermark
+            type: data.set
+            with:
+              watermark: '{{ variables.runStartedAt }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '{{ variables.watermark }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pull_requests_processed: '{{ variables.pullRequestsProcessed }}'
+          batch_size: '{{ steps.load_pull_requests_batch.output.hits.hits | size }}'
+          rate_limit_remaining: '{{ steps.fetch_pull_request_graph.output.rateLimit.remaining }}'

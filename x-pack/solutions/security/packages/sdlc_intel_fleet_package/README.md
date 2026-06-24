@@ -1,6 +1,6 @@
 # SDLC Intelligence Fleet package
 
-Elastic Fleet integration package for the SDLC Intelligence platform: Elasticsearch index templates, ES|QL views, Kibana dashboards, and GitHub ingest workflow definitions.
+Elastic Fleet integration package for the SDLC Intelligence platform: Elasticsearch index templates, ES|QL views, Kibana dashboards, and GitHub/Slack ingest workflow definitions.
 
 ## Package layout
 
@@ -8,14 +8,15 @@ Elastic Fleet integration package for the SDLC Intelligence platform: Elasticsea
 sdlc_intel-0.1.0/
 ├── manifest.yml
 ├── elasticsearch/
-│   ├── index_template/     # github-intel-* and sdlc-* indices
+│   ├── index_template/     # github-intel-*, slack-intel-*, sdlc-* indices
 │   └── esql_view/
 ├── kibana/
 │   ├── dashboard/
 │   ├── lens/
 │   ├── index_pattern/
-│   └── workflow/           # Import manually until Fleet workflow asset is supported
-│       └── github-catalog-repos.yaml
+│   └── workflow/           # Auto-installed when workflowsManagement plugin is enabled
+│       ├── github-*.yaml
+│       └── slack-*.yaml
 └── docs/
 ```
 
@@ -30,21 +31,48 @@ zip -r ../.target/sdlc_intel-0.1.0.zip .
 
 Install via **Fleet → Integrations → Upload integration** (or your local package registry workflow).
 
-## GitHub ingest workflow
+## Ingest workflows
 
-The **SDLC GitHub catalog repos (GraphQL)** workflow uses the `.github` connector GraphQL ingest plane:
+Workflows use connector ingest actions (`github.runQueryTemplate`, `slack2.listUsers`, `slack2.getChannelHistory`, etc.).
 
-1. Create a **GitHub** connector (`.github`) with a PAT or OAuth token scoped for `read:org`, `read:project`, and `repo`.
-2. Install this Fleet package (creates `github-intel-sync-state` and `github-intel-repos` index templates).
-3. Import the workflow:
-   - **Workflows → Examples → SDLC GitHub catalog repos (GraphQL)**, or
-   - Copy `kibana/workflow/github-catalog-repos.yaml` into Workflows.
-4. Set `consts.githubConnectorId` to your connector instance ID and adjust `consts.orgLogin` if needed.
-5. Enable the workflow (daily schedule + manual trigger).
+1. Create **GitHub** (`.github`) and **Slack** (`.slack2`) connectors with appropriate OAuth scopes.
+2. Install this Fleet package (creates index templates; installs workflow YAML when `workflowsManagement` is available).
+3. If workflows are not auto-installed, import from **Workflows → Examples** or copy YAML from `kibana/workflow/`.
+4. Set connector IDs in each workflow's `consts` and enable.
 
-The workflow paginates up to 15 pages (1,500 repos) per run via `orgCatalog.repos`, writes checkpoints to `github-intel-sync-state`, and upserts repo documents to `github-intel-repos`.
+### GitHub workflows
+
+| Workflow | Schedule | Template / action | Target index |
+|----------|----------|-------------------|--------------|
+| **catalog repos** | daily | `orgCatalog.repos` | `github-intel-repos` |
+| **catalog teams** | daily | `orgCatalog.teams` | `github-intel-teams` |
+| **catalog org members** | daily | `orgCatalog.members` | `github-intel-people` |
+| **catalog team members** | daily | `orgCatalog.teamMembers` | `github-intel-people`, `github-intel-relationships` |
+| **catalog projects** | daily | `orgCatalog.projects` | `github-intel-projects` |
+| **catalog project items** | daily | `orgCatalog.projectItems` | `github-intel-project-items` |
+| **activity issues** | every 30m | `activity.searchIssues` | `github-intel-issues` |
+| **activity pull requests** | every 30m | `activity.searchPullRequests` | `github-intel-pull-requests` |
+| **enrich issues graph** | hourly | `graph.issueGraph` | `github-intel-issues`, `github-intel-comments`, `github-intel-relationships` |
+| **enrich PRs graph** | hourly | `graph.pullRequestGraph` | `github-intel-pull-requests`, `github-intel-relationships` |
+
+**Recommended order:** catalog (repos → teams → org members → team members → projects → project items) → activity (issues → PRs) → enrichment (issues graph → PRs graph).
+
+### Slack workflows
+
+| Workflow | Schedule | Action | Target index |
+|----------|----------|--------|--------------|
+| **catalog users** | daily | `slack2.listUsers` | `slack-intel-people` |
+| **channel history** | hourly | `slack2.getChannelHistory` | `slack-intel-messages` |
+
+Slack OAuth scopes must include `channels:history`, `groups:history`, `users:read`, and channel read scopes.
+
+## Fleet workflow auto-install
+
+When the `workflowsManagement` plugin is enabled, Fleet installs package workflows from `kibana/workflow/*.yaml` during package installation. Workflow IDs follow the pattern `fleet-{spaceId}-{pkgName}-{file-base}`.
 
 ## Related Kibana code
 
 - GitHub GraphQL ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/github/`
-- Bundled workflow example: `src/platform/packages/shared/kbn-workflows/spec/examples/sdlc_github_catalog_repos.yml`
+- Slack ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/slack/`
+- Fleet workflow installer: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_workflow_assets.ts`
+- Bundled workflow examples: `src/platform/packages/shared/kbn-workflows/spec/examples/sdlc_*.yml`

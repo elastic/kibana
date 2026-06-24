@@ -75,6 +75,7 @@ export enum KibanaAssetType {
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
+  workflow = 'workflow',
 }
 
 /*
@@ -97,6 +98,7 @@ export enum KibanaSavedObjectType {
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
   alert = 'alert',
+  workflow = 'workflow',
 }
 
 export enum ElasticsearchAssetType {
@@ -764,6 +766,7 @@ export enum INSTALL_STATES {
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   CREATE_ALERTING_ASSETS = 'create_alerting_assets',
+  CREATE_WORKFLOW_ASSETS = 'create_workflow_assets',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
   REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',

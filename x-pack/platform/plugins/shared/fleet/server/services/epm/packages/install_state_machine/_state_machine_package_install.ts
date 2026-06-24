@@ -61,6 +61,7 @@ import {
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
 import { stepCreateAlertingAssets } from './steps/step_create_alerting_assets';
+import { stepInstallWorkflowAssets } from './steps/step_install_workflow_assets';
 import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
 import { stepResolveDependencies } from './steps/step_resolve_dependencies';
 
@@ -179,6 +180,11 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   create_alerting_assets: {
     onTransition: stepCreateAlertingAssets,
+    nextState: INSTALL_STATES.CREATE_WORKFLOW_ASSETS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_workflow_assets: {
+    onTransition: stepInstallWorkflowAssets,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },

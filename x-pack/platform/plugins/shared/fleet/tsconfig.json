@@ -130,6 +130,7 @@
     "@kbn/scout",
     "@kbn/reporting-common",
     "@kbn/reporting-plugin",
+    "@kbn/workflows-management-plugin",
     "@kbn/user-profile-components",
     "@kbn/css-utils",
     "@kbn/rison",

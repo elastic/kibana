@@ -182,6 +182,85 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
     `,
   },
   {
+    id: 'orgCatalog.projectItems',
+    description:
+      'List items for a GitHub Project v2 by project node id with cursor pagination. Pass projectId from orgCatalog.projects.',
+    pageInfoPath: 'node.items',
+    query: `
+      query OrgCatalogProjectItems($projectId: ID!, $first: Int!, $after: String) {
+        node(id: $projectId) {
+          ... on ProjectV2 {
+            items(first: $first, after: $after) {
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+              nodes {
+                id
+                type
+                createdAt
+                updatedAt
+                content {
+                  __typename
+                  ... on Issue {
+                    id
+                    number
+                    title
+                    url
+                    state
+                    repository {
+                      name
+                      nameWithOwner
+                    }
+                  }
+                  ... on PullRequest {
+                    id
+                    number
+                    title
+                    url
+                    state
+                    repository {
+                      name
+                      nameWithOwner
+                    }
+                  }
+                  ... on DraftIssue {
+                    id
+                    title
+                    body
+                  }
+                }
+                fieldValues(first: 20) {
+                  nodes {
+                    __typename
+                    ... on ProjectV2ItemFieldTextValue {
+                      text
+                      field {
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
+                      }
+                    }
+                    ... on ProjectV2ItemFieldSingleSelectValue {
+                      name
+                      field {
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
+  },
+  {
     id: 'activity.searchIssues',
     description:
       'Search issues org-wide. Pass a GitHub search query (e.g. "org:elastic updated:>2026-06-01 -is:pr").',

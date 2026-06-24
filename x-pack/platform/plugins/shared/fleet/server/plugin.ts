@@ -51,6 +51,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
@@ -189,6 +190,7 @@ export interface FleetSetupDeps {
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -391,6 +393,7 @@ export class FleetPlugin
       config.enableExperimental ?? [],
       config.experimentalFeatures || {}
     );
+    appContextService.setWorkflowsManagementSetup(deps.workflowsManagement);
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {

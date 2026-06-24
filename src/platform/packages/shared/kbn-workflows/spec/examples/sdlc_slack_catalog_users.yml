@@ -1,0 +1,106 @@
+version: '1'
+name: SDLC Slack catalog users
+description: >
+  Catalog workflow. Pages Slack workspace users via slack2.listUsers and upserts
+  slack-intel-people with cursor checkpoints in slack-intel-sync-state.
+enabled: false
+tags:
+  - sdlc
+  - slack
+  - catalog
+  - ingest
+  - people
+
+consts:
+  slackConnectorId: REPLACE_WITH_SLACK_CONNECTOR_ID
+  syncStateIndex: slack-intel-sync-state
+  peopleIndex: slack-intel-people
+  syncSource: slack-catalog-users
+  entityType: slack_user
+  pageSize: 200
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-slack-catalog-users
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        term:
+          sync.source: '{{ consts.syncSource }}'
+
+  - name: init_cursor
+    type: data.set
+    with:
+      cursor: '{{ steps.read_checkpoint.output.hits.hits.0._source.cursor }}'
+      pagesFetched: 0
+
+  - name: paginate_users
+    type: while
+    condition: 'steps.fetch_users.output.hasMore : true'
+    max-iterations: 15
+    steps:
+      - name: fetch_users
+        type: slack2.listUsers
+        connector-id: '{{ consts.slackConnectorId }}'
+        with:
+          limit: '{{ consts.pageSize }}'
+          cursor: '{{ variables.cursor }}'
+
+      - name: index_users
+        type: foreach
+        foreach: '{{ steps.fetch_users.output.users | json }}'
+        steps:
+          - name: upsert_user
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.peopleIndex }}'
+              id: '{{ foreach.item.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                person:
+                  id: '{{ foreach.item.id }}'
+                  login: '{{ foreach.item.name }}'
+                  name: '{{ foreach.item.realName }}'
+                  email: '{{ foreach.item.email }}'
+                payload: '{{ foreach.item | json }}'
+
+      - name: advance_cursor
+        type: data.set
+        with:
+          cursor: '{{ steps.fetch_users.output.nextCursor }}'
+          pagesFetched: '{{ variables.pagesFetched | plus: 1 }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        cursor: '{{ variables.cursor }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pages_fetched: '{{ variables.pagesFetched }}'
+          has_more: '{{ steps.fetch_users.output.hasMore }}'

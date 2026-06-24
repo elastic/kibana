@@ -1,0 +1,126 @@
+version: '1'
+name: SDLC GitHub catalog org members (GraphQL)
+description: >
+  Tier-1 catalog workflow. Pages organization members via GitHub GraphQL (orgCatalog.members),
+  upserts documents into github-intel-people, and maintains github-intel-sync-state checkpoints.
+  Requires a configured .github connector with read:org scope.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - catalog
+  - ingest
+  - graphql
+  - people
+
+consts:
+  orgLogin: elastic
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  peopleIndex: github-intel-people
+  syncSource: github-catalog-org-members
+  entityType: org_member
+  pageSize: 100
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-github-catalog-org-members
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_cursor
+    type: data.set
+    with:
+      cursor: '{{ steps.read_checkpoint.output.hits.hits.0._source.cursor }}'
+      pagesFetched: 0
+
+  - name: paginate_members
+    type: while
+    condition: 'steps.fetch_members.output.pageInfo.hasNextPage : true'
+    max-iterations: 15
+    steps:
+      - name: fetch_members
+        type: github.runQueryTemplate
+        connector-id: '{{ consts.githubConnectorId }}'
+        with:
+          templateId: orgCatalog.members
+          variables:
+            org: '{{ consts.orgLogin }}'
+          first: '{{ consts.pageSize }}'
+          after: '{{ variables.cursor }}'
+
+      - name: backoff_if_needed
+        type: wait
+        if: '{{ steps.fetch_members.output.shouldBackoff }}'
+        with:
+          duration: 60s
+
+      - name: index_members
+        type: foreach
+        foreach: '{{ steps.fetch_members.output.data.organization.membersWithRole.nodes | json }}'
+        steps:
+          - name: upsert_member
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.peopleIndex }}'
+              id: '{{ foreach.item.user.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                person:
+                  login: '{{ foreach.item.user.login }}'
+                  name: '{{ foreach.item.user.name }}'
+                  id: '{{ foreach.item.user.id }}'
+                payload: '{{ foreach.item | json }}'
+
+      - name: advance_cursor
+        type: data.set
+        with:
+          cursor: '{{ steps.fetch_members.output.pageInfo.endCursor }}'
+          pagesFetched: '{{ variables.pagesFetched | plus: 1 }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        cursor: '{{ variables.cursor }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pages_fetched: '{{ variables.pagesFetched }}'
+          has_next_page: '{{ steps.fetch_members.output.pageInfo.hasNextPage }}'
+          rate_limit_remaining: '{{ steps.fetch_members.output.rateLimit.remaining }}'

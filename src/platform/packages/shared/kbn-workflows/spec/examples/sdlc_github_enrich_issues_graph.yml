@@ -1,0 +1,268 @@
+version: '1'
+name: SDLC GitHub enrich issues graph (GraphQL)
+description: >
+  Tier-3 enrichment workflow. Loads recently updated issues from github-intel-issues, fetches
+  parent/sub-issue/comment graph via graph.issueGraph, updates issue documents, and writes comments
+  and hierarchy edges to github-intel-comments and github-intel-relationships. Run github-activity-issues
+  first. Processes a batch per run with watermark checkpointing.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - enrich
+  - ingest
+  - graphql
+  - issues
+
+consts:
+  orgLogin: elastic
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  issuesIndex: github-intel-issues
+  commentsIndex: github-intel-comments
+  relationshipsIndex: github-intel-relationships
+  syncSource: github-enrich-issues-graph
+  entityType: issue_graph
+  batchSize: 25
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-enrich-issues-graph
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '{{ steps.read_checkpoint.output.hits.hits.0._source.watermark }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      issuesProcessed: 0
+      lastUpdatedAt: ''
+
+  - name: ensure_watermark
+    type: data.set
+    if: '{{ variables.watermark | size }} : 0'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_issues_batch
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.issuesIndex }}'
+      size: '{{ consts.batchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+        - entity.id:
+            order: asc
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+
+  - name: enrich_issues
+    type: foreach
+    foreach: '{{ steps.load_issues_batch.output.hits.hits | json }}'
+    steps:
+      - name: set_issue_context
+        type: data.set
+        with:
+          issueRepoName: '{{ foreach.item._source.repository.name }}'
+          issueRepoFullName: '{{ foreach.item._source.repository.full_name }}'
+          issueEntityId: '{{ foreach.item._source.entity.id }}'
+
+      - name: fetch_issue_graph
+        type: github.runQueryTemplate
+        connector-id: '{{ consts.githubConnectorId }}'
+        with:
+          templateId: graph.issueGraph
+          variables:
+            owner: '{{ consts.orgLogin }}'
+            repo: '{{ variables.issueRepoName }}'
+            number: '{{ foreach.item._source.entity.number }}'
+
+      - name: backoff_if_needed
+        type: wait
+        if: '{{ steps.fetch_issue_graph.output.shouldBackoff }}'
+        with:
+          duration: 60s
+
+      - name: upsert_enriched_issue
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.issuesIndex }}'
+          id: '{{ variables.issueEntityId }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity:
+              type: issue
+              id: '{{ steps.fetch_issue_graph.output.data.repository.issue.id }}'
+              url: '{{ steps.fetch_issue_graph.output.data.repository.issue.url }}'
+              number: '{{ steps.fetch_issue_graph.output.data.repository.issue.number }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            repository:
+              name: '{{ variables.issueRepoName }}'
+              full_name: '{{ variables.issueRepoFullName }}'
+            github:
+              created_at: '{{ steps.fetch_issue_graph.output.data.repository.issue.createdAt }}'
+              updated_at: '{{ steps.fetch_issue_graph.output.data.repository.issue.updatedAt }}'
+              state: '{{ steps.fetch_issue_graph.output.data.repository.issue.state }}'
+            people:
+              author: '{{ steps.fetch_issue_graph.output.data.repository.issue.author.login }}'
+            content:
+              title: '{{ steps.fetch_issue_graph.output.data.repository.issue.title }}'
+              body: '{{ steps.fetch_issue_graph.output.data.repository.issue.body }}'
+            hierarchy:
+              parent_issue_ref: '{{ steps.fetch_issue_graph.output.data.repository.issue.parent.url }}'
+            metrics:
+              comments_count: '{{ steps.fetch_issue_graph.output.data.repository.issue.comments.nodes | size }}'
+            payload: '{{ steps.fetch_issue_graph.output.data.repository.issue | json }}'
+
+      - name: index_issue_comments
+        type: foreach
+        foreach: '{{ steps.fetch_issue_graph.output.data.repository.issue.comments.nodes | json }}'
+        steps:
+          - name: upsert_issue_comment
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.commentsIndex }}'
+              id: '{{ foreach.item.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                entity:
+                  type: comment
+                  id: '{{ foreach.item.id }}'
+                org:
+                  login: '{{ consts.orgLogin }}'
+                repository:
+                  name: '{{ variables.issueRepoName }}'
+                  full_name: '{{ variables.issueRepoFullName }}'
+                comment:
+                  body: '{{ foreach.item.body }}'
+                  author: '{{ foreach.item.author.login }}'
+                  issue_ref: '{{ steps.fetch_issue_graph.output.data.repository.issue.url }}'
+                github:
+                  created_at: '{{ foreach.item.createdAt }}'
+                payload: '{{ foreach.item | json }}'
+
+      - name: index_parent_relationship_block
+        type: if
+        condition: "${{ steps.fetch_issue_graph.output.data.repository.issue.parent != null }}"
+        steps:
+          - name: index_parent_relationship
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              id: '{{ variables.issueEntityId }}-child-of-{{ steps.fetch_issue_graph.output.data.repository.issue.parent.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                from: '{{ steps.fetch_issue_graph.output.data.repository.issue.url }}'
+                to: '{{ steps.fetch_issue_graph.output.data.repository.issue.parent.url }}'
+                relation: child_of
+                metadata:
+                  org: '{{ consts.orgLogin }}'
+                payload: '{{ steps.fetch_issue_graph.output.data.repository.issue.parent | json }}'
+
+      - name: index_sub_issue_relationships
+        type: foreach
+        foreach: '{{ steps.fetch_issue_graph.output.data.repository.issue.subIssues.nodes | json }}'
+        steps:
+          - name: upsert_sub_issue_relationship
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              id: '{{ variables.issueEntityId }}-parent-of-{{ foreach.item.id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                from: '{{ steps.fetch_issue_graph.output.data.repository.issue.url }}'
+                to: '{{ foreach.item.url }}'
+                relation: parent_of
+                metadata:
+                  org: '{{ consts.orgLogin }}'
+                payload: '{{ foreach.item | json }}'
+
+      - name: track_batch_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '{{ foreach.item._source.github.updated_at }}'
+          issuesProcessed: '{{ variables.issuesProcessed | plus: 1 }}'
+
+  - name: finalize_watermark
+    type: if
+    condition: 'variables.issuesProcessed : {{ consts.batchSize }}'
+    steps:
+      - name: use_last_updated_watermark
+        type: data.set
+        with:
+          watermark: '{{ variables.lastUpdatedAt }}'
+    else:
+      - name: finalize_if_any_processed
+        type: if
+        condition: "${{ variables.issuesProcessed > 0 }}"
+        steps:
+          - name: use_run_started_watermark
+            type: data.set
+            with:
+              watermark: '{{ variables.runStartedAt }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '{{ variables.watermark }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          issues_processed: '{{ variables.issuesProcessed }}'
+          batch_size: '{{ steps.load_issues_batch.output.hits.hits | size }}'
+          rate_limit_remaining: '{{ steps.fetch_issue_graph.output.rateLimit.remaining }}'

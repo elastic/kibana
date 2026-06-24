@@ -143,6 +143,104 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'foreach', 'while'],
     filename: 'sdlc_github_catalog_repos.yml',
   },
+  {
+    id: 'sdlc_github_catalog_teams',
+    name: 'SDLC GitHub catalog teams (GraphQL)',
+    description:
+      'Pages organization teams via GitHub GraphQL, upserts github-intel-teams, and maintains github-intel-sync-state checkpoints',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'teams', 'foreach', 'while'],
+    filename: 'sdlc_github_catalog_teams.yml',
+  },
+  {
+    id: 'sdlc_github_activity_issues',
+    name: 'SDLC GitHub activity issues (GraphQL)',
+    description:
+      'Org-wide incremental issue search (updated since watermark), upserts github-intel-issues, and maintains sync checkpoints',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'issues', 'foreach', 'while'],
+    filename: 'sdlc_github_activity_issues.yml',
+  },
+  {
+    id: 'sdlc_github_activity_pull_requests',
+    name: 'SDLC GitHub activity pull requests (GraphQL)',
+    description:
+      'Org-wide incremental PR search (updated since watermark), upserts github-intel-pull-requests, and maintains sync checkpoints',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'pull-requests', 'foreach', 'while'],
+    filename: 'sdlc_github_activity_pull_requests.yml',
+  },
+  {
+    id: 'sdlc_github_catalog_org_members',
+    name: 'SDLC GitHub catalog org members (GraphQL)',
+    description:
+      'Pages organization members via GitHub GraphQL, upserts github-intel-people, and maintains sync checkpoints',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'people', 'foreach', 'while'],
+    filename: 'sdlc_github_catalog_org_members.yml',
+  },
+  {
+    id: 'sdlc_github_catalog_team_members',
+    name: 'SDLC GitHub catalog team members (GraphQL)',
+    description:
+      'Pages members per team from github-intel-teams, upserts people and team membership relationships',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'people', 'teams', 'foreach', 'while'],
+    filename: 'sdlc_github_catalog_team_members.yml',
+  },
+  {
+    id: 'sdlc_github_catalog_projects',
+    name: 'SDLC GitHub catalog projects (GraphQL)',
+    description:
+      'Pages organization GitHub Projects v2 via GraphQL, upserts github-intel-projects, and maintains sync checkpoints',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'projects', 'foreach', 'while'],
+    filename: 'sdlc_github_catalog_projects.yml',
+  },
+  {
+    id: 'sdlc_github_enrich_issues_graph',
+    name: 'SDLC GitHub enrich issues graph (GraphQL)',
+    description:
+      'Enriches github-intel-issues with parent/sub-issue/comment graph via graph.issueGraph template',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'issues', 'enrich', 'foreach'],
+    filename: 'sdlc_github_enrich_issues_graph.yml',
+  },
+  {
+    id: 'sdlc_github_enrich_pull_requests_graph',
+    name: 'SDLC GitHub enrich pull requests graph (GraphQL)',
+    description:
+      'Enriches github-intel-pull-requests with reviews and closing issues via graph.pullRequestGraph',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'pull-requests', 'enrich', 'foreach'],
+    filename: 'sdlc_github_enrich_pull_requests_graph.yml',
+  },
+  {
+    id: 'sdlc_github_catalog_project_items',
+    name: 'SDLC GitHub catalog project items (GraphQL)',
+    description:
+      'Pages GitHub Project v2 items per project from github-intel-projects into github-intel-project-items',
+    category: 'security',
+    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'projects', 'foreach', 'while'],
+    filename: 'sdlc_github_catalog_project_items.yml',
+  },
+  {
+    id: 'sdlc_slack_catalog_users',
+    name: 'SDLC Slack catalog users',
+    description: 'Pages Slack workspace users via slack2.listUsers into slack-intel-people',
+    category: 'security',
+    tags: ['scheduled', 'slack', 'ingest', 'sdlc', 'people', 'foreach', 'while'],
+    filename: 'sdlc_slack_catalog_users.yml',
+  },
+  {
+    id: 'sdlc_slack_channel_history',
+    name: 'SDLC Slack channel history',
+    description:
+      'Incremental Slack message ingest per channel via slack2.getChannelHistory into slack-intel-messages',
+    category: 'security',
+    tags: ['scheduled', 'slack', 'ingest', 'sdlc', 'messages', 'foreach', 'while'],
+    filename: 'sdlc_slack_channel_history.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

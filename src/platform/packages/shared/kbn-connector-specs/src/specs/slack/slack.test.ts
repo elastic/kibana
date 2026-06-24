@@ -66,7 +66,7 @@ describe('Slack', () => {
         authorizationUrl: 'https://slack.com/oauth/v2/authorize',
         tokenUrl: 'https://slack.com/api/oauth.v2.access',
         scope:
-          'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+          'channels:history channels:read chat:write files:read groups:history groups:read im:history im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
       },
     });
   });
@@ -88,7 +88,7 @@ describe('Slack', () => {
       defaults: {
         provider: 'slack',
         scope:
-          'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+          'channels:history channels:read chat:write files:read groups:history groups:read im:history im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
       },
       overrides: {
         meta: { scope: { disabled: true } },
@@ -732,6 +732,84 @@ describe('Slack', () => {
 
       expect(result.ok).toBe(false);
       expect(result.message).toBe('Network timeout');
+    });
+  });
+
+  describe('listUsers', () => {
+    it('returns compact users and nextCursor', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          members: [
+            {
+              id: 'U1',
+              name: 'alice',
+              real_name: 'Alice',
+              profile: { email: 'alice@example.com' },
+            },
+            { id: 'U2', name: 'bot', is_bot: true },
+          ],
+          response_metadata: { next_cursor: 'cursor-1' },
+        },
+        headers: {},
+      });
+
+      const result = await Slack.actions.listUsers.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.list', {
+        params: { limit: 200 },
+      });
+      expect(result).toEqual({
+        ok: true,
+        users: [
+          {
+            id: 'U1',
+            name: 'alice',
+            realName: 'Alice',
+            email: 'alice@example.com',
+            displayName: undefined,
+          },
+        ],
+        nextCursor: 'cursor-1',
+        hasMore: true,
+      });
+      expect(Slack.actions.listUsers.isTool).toBe(false);
+    });
+  });
+
+  describe('getChannelHistory', () => {
+    it('returns messages and pagination metadata', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          messages: [{ ts: '123.456', user: 'U1', text: 'hello' }],
+          has_more: false,
+          response_metadata: {},
+        },
+        headers: {},
+      });
+
+      const result = await Slack.actions.getChannelHistory.handler(mockContext, {
+        channel: 'C123',
+        oldest: '100.000',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.history', {
+        params: {
+          channel: 'C123',
+          limit: 200,
+          inclusive: false,
+          oldest: '100.000',
+        },
+      });
+      expect(result).toEqual({
+        ok: true,
+        channel: 'C123',
+        messages: [{ ts: '123.456', user: 'U1', text: 'hello' }],
+        nextCursor: undefined,
+        hasMore: false,
+      });
+      expect(Slack.actions.getChannelHistory.isTool).toBe(false);
     });
   });
 });

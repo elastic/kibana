@@ -1,0 +1,156 @@
+version: '1'
+name: SDLC GitHub catalog project items (GraphQL)
+description: >
+  Tier-1 catalog workflow. Loads projects from github-intel-projects, pages project items via
+  GitHub GraphQL (orgCatalog.projectItems), and upserts github-intel-project-items. Run
+  github-catalog-projects first. Per-project cursor checkpoints in github-intel-sync-state.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - catalog
+  - ingest
+  - graphql
+  - projects
+
+consts:
+  orgLogin: elastic
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  projectsIndex: github-intel-projects
+  projectItemsIndex: github-intel-project-items
+  syncSource: github-catalog-project-items
+  entityType: project_item
+  pageSize: 50
+  projectsPageSize: 200
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-catalog-project-items
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: load_projects
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.projectsIndex }}'
+      size: '{{ consts.projectsPageSize }}'
+      query:
+        match_all: {}
+
+  - name: sync_project_items
+    type: foreach
+    foreach: '{{ steps.load_projects.output.hits.hits | json }}'
+    steps:
+      - name: init_project_context
+        type: data.set
+        with:
+          projectId: '{{ foreach.item._source.project.id }}'
+          projectNumber: '{{ foreach.item._source.project.number }}'
+          projectTitle: '{{ foreach.item._source.project.title }}'
+          itemCursor: ''
+          itemPagesFetched: 0
+
+      - name: read_project_checkpoint
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          size: 1
+          query:
+            ids:
+              values:
+                - '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ variables.projectNumber }}'
+
+      - name: restore_project_cursor
+        type: data.set
+        with:
+          itemCursor: '{{ steps.read_project_checkpoint.output.hits.hits.0._source.cursor }}'
+          itemPagesFetched: 0
+
+      - name: paginate_project_items
+        type: while
+        condition: 'steps.fetch_project_items.output.pageInfo.hasNextPage : true'
+        max-iterations: 15
+        steps:
+          - name: fetch_project_items
+            type: github.runQueryTemplate
+            connector-id: '{{ consts.githubConnectorId }}'
+            with:
+              templateId: orgCatalog.projectItems
+              variables:
+                projectId: '{{ variables.projectId }}'
+              first: '{{ consts.pageSize }}'
+              after: '{{ variables.itemCursor }}'
+
+          - name: backoff_if_needed
+            type: wait
+            if: '{{ steps.fetch_project_items.output.shouldBackoff }}'
+            with:
+              duration: 60s
+
+          - name: index_project_items
+            type: foreach
+            foreach: '{{ steps.fetch_project_items.output.data.node.items.nodes | json }}'
+            steps:
+              - name: upsert_project_item
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.projectItemsIndex }}'
+                  id: '{{ foreach.item.id }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    entity:
+                      type: project_item
+                      id: '{{ foreach.item.id }}'
+                    org:
+                      login: '{{ consts.orgLogin }}'
+                    project:
+                      id: '{{ variables.projectId }}'
+                      number: '{{ variables.projectNumber }}'
+                      title: '{{ variables.projectTitle }}'
+                    github:
+                      created_at: '{{ foreach.item.createdAt }}'
+                      updated_at: '{{ foreach.item.updatedAt }}'
+                    payload: '{{ foreach.item | json }}'
+
+          - name: advance_project_item_cursor
+            type: data.set
+            with:
+              itemCursor: '{{ steps.fetch_project_items.output.pageInfo.endCursor }}'
+              itemPagesFetched: '{{ variables.itemPagesFetched | plus: 1 }}'
+
+      - name: write_project_checkpoint
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ variables.projectNumber }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            project:
+              number: '{{ variables.projectNumber }}'
+            cursor: '{{ variables.itemCursor }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: success
+            stats:
+              project_id: '{{ variables.projectId }}'
+              project_title: '{{ variables.projectTitle }}'
+              pages_fetched: '{{ variables.itemPagesFetched }}'
+              has_next_page: '{{ steps.fetch_project_items.output.pageInfo.hasNextPage }}'
+              rate_limit_remaining: '{{ steps.fetch_project_items.output.rateLimit.remaining }}'

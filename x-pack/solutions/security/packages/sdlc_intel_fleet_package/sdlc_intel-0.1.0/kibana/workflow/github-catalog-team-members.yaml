@@ -1,0 +1,168 @@
+version: '1'
+name: SDLC GitHub catalog team members (GraphQL)
+description: >
+  Tier-1 catalog workflow. Loads teams from github-intel-teams, pages members per team via
+  GitHub GraphQL (orgCatalog.teamMembers), upserts github-intel-people and membership edges
+  into github-intel-relationships. Run github-catalog-teams first. Per-team cursor checkpoints
+  are stored in github-intel-sync-state.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - catalog
+  - ingest
+  - graphql
+  - people
+  - teams
+
+consts:
+  orgLogin: elastic
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  teamsIndex: github-intel-teams
+  peopleIndex: github-intel-people
+  relationshipsIndex: github-intel-relationships
+  syncSource: github-catalog-team-members
+  entityType: team_member
+  pageSize: 100
+  teamsPageSize: 500
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-catalog-team-members
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: load_teams
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.teamsIndex }}'
+      size: '{{ consts.teamsPageSize }}'
+      query:
+        term:
+          team.org: '{{ consts.orgLogin }}'
+
+  - name: sync_team_members
+    type: foreach
+    foreach: '{{ steps.load_teams.output.hits.hits | json }}'
+    steps:
+      - name: init_team_context
+        type: data.set
+        with:
+          teamSlug: '{{ foreach.item._source.team.slug }}'
+          teamName: '{{ foreach.item._source.team.name }}'
+          memberCursor: ''
+          memberPagesFetched: 0
+
+      - name: read_team_checkpoint
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          size: 1
+          query:
+            ids:
+              values:
+                - '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ variables.teamSlug }}'
+
+      - name: restore_team_cursor
+        type: data.set
+        with:
+          memberCursor: '{{ steps.read_team_checkpoint.output.hits.hits.0._source.cursor }}'
+          memberPagesFetched: 0
+
+      - name: paginate_team_members
+        type: while
+        condition: 'steps.fetch_team_members.output.pageInfo.hasNextPage : true'
+        max-iterations: 10
+        steps:
+          - name: fetch_team_members
+            type: github.runQueryTemplate
+            connector-id: '{{ consts.githubConnectorId }}'
+            with:
+              templateId: orgCatalog.teamMembers
+              variables:
+                org: '{{ consts.orgLogin }}'
+                teamSlug: '{{ variables.teamSlug }}'
+              first: '{{ consts.pageSize }}'
+              after: '{{ variables.memberCursor }}'
+
+          - name: backoff_if_needed
+            type: wait
+            if: '{{ steps.fetch_team_members.output.shouldBackoff }}'
+            with:
+              duration: 60s
+
+          - name: index_team_members
+            type: foreach
+            foreach: '{{ steps.fetch_team_members.output.data.organization.team.members.nodes | json }}'
+            steps:
+              - name: upsert_team_member_person
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.peopleIndex }}'
+                  id: '{{ foreach.item.id }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    person:
+                      login: '{{ foreach.item.login }}'
+                      name: '{{ foreach.item.name }}'
+                      id: '{{ foreach.item.id }}'
+                    payload: '{{ foreach.item | json }}'
+
+              - name: upsert_team_membership
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.relationshipsIndex }}'
+                  id: '{{ consts.orgLogin }}-{{ variables.teamSlug }}-{{ foreach.item.id }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    from: '{{ foreach.item.login }}'
+                    to: '{{ variables.teamSlug }}'
+                    relation: member_of_team
+                    metadata:
+                      org: '{{ consts.orgLogin }}'
+                      team_name: '{{ variables.teamName }}'
+                    payload: '{{ foreach.item | json }}'
+
+          - name: advance_team_member_cursor
+            type: data.set
+            with:
+              memberCursor: '{{ steps.fetch_team_members.output.pageInfo.endCursor }}'
+              memberPagesFetched: '{{ variables.memberPagesFetched | plus: 1 }}'
+
+      - name: write_team_checkpoint
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ variables.teamSlug }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            cursor: '{{ variables.memberCursor }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: success
+            stats:
+              team_slug: '{{ variables.teamSlug }}'
+              team_name: '{{ variables.teamName }}'
+              pages_fetched: '{{ variables.memberPagesFetched }}'
+              has_next_page: '{{ steps.fetch_team_members.output.pageInfo.hasNextPage }}'
+              rate_limit_remaining: '{{ steps.fetch_team_members.output.rateLimit.remaining }}'

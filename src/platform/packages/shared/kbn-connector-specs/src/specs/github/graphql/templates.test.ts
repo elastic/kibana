@@ -19,6 +19,7 @@ describe('github graphql templates', () => {
         'orgCatalog.teamMembers',
         'orgCatalog.members',
         'orgCatalog.projects',
+        'orgCatalog.projectItems',
         'activity.searchIssues',
         'activity.searchPullRequests',
         'graph.issueGraph',

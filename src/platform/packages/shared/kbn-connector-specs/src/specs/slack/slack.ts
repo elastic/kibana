@@ -13,22 +13,28 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import {
   SlackCreateConversationInputSchema,
+  SlackGetChannelHistoryInputSchema,
   SlackInviteToConversationInputSchema,
   SlackListChannelsInputSchema,
+  SlackListUsersInputSchema,
   SlackResolveChannelIdInputSchema,
   SlackSearchMessagesInputSchema,
   SlackSendMessageInputSchema,
   SLACK_SEARCH_DEFAULT_COUNT,
   type SlackAssistantSearchContextResponse,
+  type SlackConversationsHistoryResponse,
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
   type SlackCreateConversationInput,
   type SlackErrorFields,
+  type SlackGetChannelHistoryInput,
   type SlackInviteToConversationInput,
   type SlackListChannelsInput,
+  type SlackListUsersInput,
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
   type SlackSendMessageInput,
+  type SlackUsersListResponse,
 } from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
@@ -196,7 +202,7 @@ export const Slack: ConnectorSpec = {
           authorizationUrl: 'https://slack.com/oauth/v2/authorize',
           tokenUrl: 'https://slack.com/api/oauth.v2.access',
           scope:
-            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+            'channels:history channels:read chat:write files:read groups:history groups:read im:history im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
           scopeParamName: 'user_scope',
           accessTokenPath: 'authed_user.access_token',
           tokenType: 'Bearer',
@@ -210,7 +216,7 @@ export const Slack: ConnectorSpec = {
         defaults: {
           provider: 'slack',
           scope:
-            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+            'channels:history channels:read chat:write files:read groups:history groups:read im:history im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
         },
       },
     ],
@@ -439,6 +445,124 @@ export const Slack: ConnectorSpec = {
           source: 'conversations.list',
           pagesFetched,
           nextCursor: cursor,
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/users.list
+    listUsers: {
+      isTool: false,
+      description:
+        'List workspace users with cursor pagination for ingest workflows. Returns compact user records and nextCursor.',
+      input: SlackListUsersInputSchema,
+      handler: async (ctx, input: SlackListUsersInput) => {
+        const typedInput = SlackListUsersInputSchema.parse(input);
+        const params: Record<string, string | number> = {
+          limit: typedInput.limit,
+        };
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackUsersListResponse>({
+          ctx,
+          action: 'listUsers',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${SLACK_API_BASE}/users.list`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'listUsers',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        const members = (response.data.members ?? []).filter((member) => {
+          if (typedInput.includeDeleted) {
+            return true;
+          }
+          return !member.deleted && !member.is_bot;
+        });
+
+        return {
+          ok: true,
+          users: members.map((member) => ({
+            id: member.id,
+            name: member.name,
+            realName: member.real_name,
+            email: member.profile?.email,
+            displayName: member.profile?.display_name,
+          })),
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor),
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.history
+    getChannelHistory: {
+      isTool: false,
+      description:
+        'Fetch channel message history with cursor pagination for ingest workflows. Use oldest for incremental sync checkpoints.',
+      input: SlackGetChannelHistoryInputSchema,
+      handler: async (ctx, input: SlackGetChannelHistoryInput) => {
+        const typedInput = SlackGetChannelHistoryInputSchema.parse(input);
+        const params: Record<string, string | number | boolean> = {
+          channel: typedInput.channel,
+          limit: typedInput.limit,
+          inclusive: typedInput.inclusive,
+        };
+        if (typedInput.oldest) {
+          params.oldest = typedInput.oldest;
+        }
+        if (typedInput.latest) {
+          params.latest = typedInput.latest;
+        }
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsHistoryResponse>({
+          ctx,
+          action: 'getChannelHistory',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${SLACK_API_BASE}/conversations.history`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getChannelHistory',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        return {
+          ok: true,
+          channel: typedInput.channel,
+          messages: response.data.messages ?? [],
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor || response.data.has_more),
         };
       },
     },
