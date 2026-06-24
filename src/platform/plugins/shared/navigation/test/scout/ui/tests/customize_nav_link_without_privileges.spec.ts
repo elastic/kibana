@@ -35,7 +35,10 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      await browserAuth.loginAsAdmin();
+      // The link's visibility is gated by the space's solution view (classic vs
+      // project nav), not by the user's role, so a viewer covers this behavior and
+      // also catches regressions where the link wrongly appears for non-admins.
+      await browserAuth.loginAsViewer();
 
       await page.gotoApp('home');
       await page.testSubj.locator('headerGlobalNav').waitFor({ state: 'visible' });
