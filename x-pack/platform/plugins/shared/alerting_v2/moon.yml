@@ -81,7 +81,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/object-utils'
   - '@kbn/alerting-v2-constants'
-  - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/kibana-react-plugin'
   - '@kbn/kibana-utils-plugin'

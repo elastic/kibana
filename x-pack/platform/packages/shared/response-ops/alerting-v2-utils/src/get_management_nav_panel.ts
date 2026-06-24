@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { isAlertingV2Enabled } from './is_alerting_v2_enabled';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 
 const PANEL_ID = 'alerting_v2_panel';
 
@@ -34,7 +34,9 @@ const PANEL_ID = 'alerting_v2_panel';
  * signature or touching any of the consumer files again.
  */
 export const getAlertingV2ManagementNavPanel = (core: CoreStart): NodeDefinition[] => {
-  if (!isAlertingV2Enabled(core)) {
+  const enabled = core.settings.globalClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false);
+
+  if (!enabled) {
     return [];
   }
 
