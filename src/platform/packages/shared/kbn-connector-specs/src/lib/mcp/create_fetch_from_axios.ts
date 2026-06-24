@@ -38,13 +38,18 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       }
     }
 
+    // Use responseType:'stream' for all methods. MCP's Streamable HTTP transport
+    // can return SSE on both GET (notification channel) and POST (streaming tool
+    // results). Buffering via 'arraybuffer' would stall any SSE response until the
+    // stream closes. The Web Response body handles both JSON and SSE correctly:
+    // the SDK calls .json() for plain responses and reads the body stream for SSE.
     const res = await axiosInstance.request({
       url: urlString,
       method: method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD',
       headers: Object.keys(headers).length ? headers : undefined,
       data: init?.body ?? undefined,
       signal: init?.signal ?? undefined,
-      responseType: 'arraybuffer',
+      responseType: 'stream',
       validateStatus: () => true,
     });
 
@@ -57,7 +62,23 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       }
     }
 
-    return new Response(res.data, {
+    const nodeStream = res.data as NodeJS.ReadableStream;
+    const webStream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        nodeStream.on('data', (chunk: Buffer | string) => {
+          controller.enqueue(
+            typeof chunk === 'string' ? Buffer.from(chunk) : (chunk as Uint8Array)
+          );
+        });
+        nodeStream.on('end', () => controller.close());
+        nodeStream.on('error', (err: Error) => controller.error(err));
+      },
+      cancel() {
+        (nodeStream as { destroy?: () => void }).destroy?.();
+      },
+    });
+
+    return new Response(webStream, {
       status: res.status,
       statusText: res.statusText ?? '',
       headers: resHeaders,
