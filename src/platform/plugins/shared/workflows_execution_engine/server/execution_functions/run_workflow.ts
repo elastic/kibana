@@ -91,11 +91,15 @@ export async function runWorkflow({
   if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
     const cancelledAt = new Date().toISOString();
     await workflowExecutionRepository.updateWorkflowExecution({
-      id: workflowRunId,
-      status: ExecutionStatus.SKIPPED,
-      cancellationReason: 'Event-driven execution disabled by operator',
-      cancelledAt,
-      cancelledBy: 'system',
+      doc: {
+        id: workflowRunId,
+        status: ExecutionStatus.SKIPPED,
+        cancellationReason: 'Event-driven execution disabled by operator',
+        cancelledAt,
+        cancelledBy: 'system',
+      },
+      targetIndex: execution.executionsIndex,
+      ifVersion: workflowExecutionState.getWorkflowDocumentVersion(workflowRunId),
     });
     logger.debug(
       `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`

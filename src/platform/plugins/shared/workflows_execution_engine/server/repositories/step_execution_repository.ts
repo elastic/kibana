@@ -11,6 +11,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
+import type { DocumentVersionsById, DocumentWrite } from './document_version';
+import { getEsDocumentVersion } from './document_version';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
@@ -47,8 +49,16 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
+    const { docs } = await this.searchStepExecutionsWithVersionsByExecutionId(executionId);
+    return docs;
+  }
+
+  public async searchStepExecutionsWithVersionsByExecutionId(
+    executionId: string
+  ): Promise<{ docs: EsWorkflowStepExecution[]; versions: DocumentVersionsById }> {
     const response = await this.esClient.search<EsWorkflowStepExecution>({
       index: this.indexName,
+      seq_no_primary_term: true,
       query: {
         match: { workflowRunId: executionId },
       },
@@ -56,7 +66,18 @@ export class StepExecutionRepository {
       size: 10000, // TODO: without it, it returns up to 10 results by default. We should improve this.
     });
 
-    return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+    const docs: EsWorkflowStepExecution[] = [];
+    const versions: DocumentVersionsById = {};
+    for (const hit of response.hits.hits) {
+      if (hit._source) {
+        docs.push(hit._source);
+        versions[hit._source.id] = getEsDocumentVersion({
+          seqNo: hit._seq_no,
+          primaryTerm: hit._primary_term,
+        });
+      }
+    }
+    return { docs, versions };
   }
 
   /**
@@ -99,6 +120,21 @@ export class StepExecutionRepository {
     sourceExcludes?: StepExecutionField[],
     stepsExecutionIndex?: string
   ): Promise<EsWorkflowStepExecution[]> {
+    const { docs } = await this.getStepExecutionsWithVersionsByIds(
+      stepExecutionIds,
+      sourceIncludes,
+      sourceExcludes,
+      stepsExecutionIndex
+    );
+    return docs;
+  }
+
+  public async getStepExecutionsWithVersionsByIds(
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[],
+    stepsExecutionIndex?: string
+  ): Promise<{ docs: EsWorkflowStepExecution[]; versions: DocumentVersionsById }> {
     const response = await this.esClient.mget<EsWorkflowStepExecution>({
       index: stepsExecutionIndex ?? this.indexName,
       ids: stepExecutionIds,
@@ -109,6 +145,7 @@ export class StepExecutionRepository {
     const outputExplicitlyRequested = !!sourceIncludes?.includes('output' as StepExecutionField);
 
     const stepExecutions: EsWorkflowStepExecution[] = [];
+    const versions: DocumentVersionsById = {};
     for (const doc of response.docs) {
       if ('found' in doc && doc.found && doc._source) {
         const source = doc._source as EsWorkflowStepExecution;
@@ -116,9 +153,13 @@ export class StepExecutionRepository {
           source.output = null;
         }
         stepExecutions.push(source);
+        versions[source.id] = getEsDocumentVersion({
+          seqNo: doc._seq_no,
+          primaryTerm: doc._primary_term,
+        });
       }
     }
-    return stepExecutions;
+    return { docs: stepExecutions, versions };
   }
 
   /**
@@ -129,7 +170,8 @@ export class StepExecutionRepository {
     error: SerializedError,
     stepsExecutionIndex?: string
   ): Promise<void> {
-    const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
+    const { docs: stepExecutions, versions } =
+      await this.searchStepExecutionsWithVersionsByExecutionId(workflowExecutionId);
     const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
 
     if (nonTerminalSteps.length === 0) {
@@ -139,12 +181,15 @@ export class StepExecutionRepository {
     const finishedAt = new Date().toISOString();
     await this.bulkUpsert(
       nonTerminalSteps.map((step) => ({
-        id: step.id,
-        status: ExecutionStatus.FAILED,
-        error,
-        finishedAt,
-      })),
-      stepsExecutionIndex
+        doc: {
+          id: step.id,
+          status: ExecutionStatus.FAILED,
+          error,
+          finishedAt,
+        },
+        targetIndex: stepsExecutionIndex,
+        ifVersion: versions[step.id],
+      }))
     );
   }
 
@@ -154,44 +199,69 @@ export class StepExecutionRepository {
    *   to the backing index that was current when the execution started.
    */
   public async bulkUpsert(
-    stepExecutions: Array<Partial<EsWorkflowStepExecution>>,
-    targetIndex?: string
-  ): Promise<void> {
-    if (stepExecutions.length === 0) {
-      return;
+    writes: Array<DocumentWrite<Partial<EsWorkflowStepExecution>>>
+  ): Promise<DocumentVersionsById> {
+    if (writes.length === 0) {
+      return {};
     }
 
-    stepExecutions.forEach((stepExecution) => {
-      if (!stepExecution.id) {
+    writes.forEach(({ doc }) => {
+      if (!doc.id) {
         throw new Error('Step execution ID is required for upsert');
       }
     });
 
+    const operations: object[] = [];
+    for (const { doc, targetIndex, ifVersion } of writes) {
+      if (!doc.id) {
+        throw new Error('Step execution ID is required for upsert');
+      }
+      const id = doc.id;
+      const timestamp = doc.startedAt ?? new Date().toISOString();
+      const document = {
+        ...doc,
+        '@timestamp': timestamp,
+      };
+
+      if (ifVersion) {
+        operations.push(
+          {
+            update: {
+              _index: targetIndex ?? this.indexName,
+              _id: id,
+              if_seq_no: ifVersion.seqNo,
+              if_primary_term: ifVersion.primaryTerm,
+            },
+          },
+          {
+            doc: document,
+          }
+        );
+      } else {
+        operations.push(
+          {
+            create: {
+              _index: this.indexName,
+              _id: id,
+            },
+          },
+          document
+        );
+      }
+    }
+
     const bulkResponse = await this.esClient.bulk({
       refresh: false,
-      index: targetIndex ?? this.indexName,
-      body: stepExecutions.flatMap((stepExecution) => {
-        const timestamp = stepExecution.startedAt ?? new Date().toISOString();
-        return [
-          { update: { _id: stepExecution.id } },
-          {
-            doc: {
-              ...stepExecution,
-              '@timestamp': timestamp,
-            },
-            doc_as_upsert: true,
-          },
-        ];
-      }),
+      operations,
     });
 
     if (bulkResponse.errors) {
       const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
+        .filter((item) => item.update?.error || item.create?.error)
         .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
+          id: item.update?._id ?? item.create?._id,
+          error: item.update?.error ?? item.create?.error,
+          status: item.update?.status ?? item.create?.status,
         }));
 
       throw new Error(
@@ -200,5 +270,17 @@ export class StepExecutionRepository {
         )}`
       );
     }
+
+    const versions: DocumentVersionsById = {};
+    for (const item of bulkResponse.items) {
+      const op = item.update ?? item.create;
+      if (op?._id && !op.error) {
+        versions[op._id] = getEsDocumentVersion({
+          seqNo: op._seq_no,
+          primaryTerm: op._primary_term,
+        });
+      }
+    }
+    return versions;
   }
 }

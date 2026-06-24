@@ -12,6 +12,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
+import type { DocumentVersionsById, EsDocumentVersion } from '../repositories/document_version';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -62,6 +63,8 @@ export type StepIoStateAccessor = Pick<
   | 'getWorkflowExecutionId'
   | 'getWorkflowExecutionScopeStack'
   | 'getWorkflowExecutionStepExecutionIds'
+  | 'getStepDocumentVersion'
+  | 'setStepDocumentVersions'
   | 'drainPendingStepChanges'
   | 'ingestLoadedStepDocs'
   | 'flushWorkflowDoc'
@@ -84,9 +87,12 @@ export type StepIoStateAccessor = Pick<
  */
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, StepExecutionMetadata> = new Map();
-  private workflowExecution: EsWorkflowExecution;
+  private workflowExecution!: EsWorkflowExecution;
+  private workflowExecutionRepository: WorkflowExecutionRepository;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<StepExecutionMetadata>> = new Map();
+  private workflowDocumentVersions = new Map<string, EsDocumentVersion>();
+  private stepDocumentVersions = new Map<string, EsDocumentVersion>();
 
   private lastFailedStepContext: FailedStepContext | undefined = undefined;
 
@@ -97,11 +103,37 @@ export class WorkflowExecutionState {
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
 
+  constructor(workflowExecutionRepository: WorkflowExecutionRepository);
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository
+    workflowExecutionRepository: WorkflowExecutionRepository
+  );
+  constructor(
+    initialWorkflowExecutionOrRepository: EsWorkflowExecution | WorkflowExecutionRepository,
+    workflowExecutionRepository?: WorkflowExecutionRepository
   ) {
-    this.workflowExecution = initialWorkflowExecution;
+    if (workflowExecutionRepository) {
+      this.workflowExecution = initialWorkflowExecutionOrRepository as EsWorkflowExecution;
+      this.workflowExecutionRepository = workflowExecutionRepository;
+    } else {
+      this.workflowExecutionRepository =
+        initialWorkflowExecutionOrRepository as WorkflowExecutionRepository;
+    }
+  }
+
+  public async load(workflowExecutionId: string, spaceId: string): Promise<void> {
+    const versionedWorkflowExecution =
+      await this.workflowExecutionRepository.getWorkflowExecutionWithVersionById(
+        workflowExecutionId,
+        spaceId
+      );
+
+    if (!versionedWorkflowExecution) {
+      throw new Error(`Workflow execution with ID ${workflowExecutionId} not found`);
+    }
+
+    this.workflowExecution = versionedWorkflowExecution.doc;
+    this.setWorkflowDocumentVersion(workflowExecutionId, versionedWorkflowExecution.version);
   }
 
   public getWorkflowExecution(): EsWorkflowExecution {
@@ -126,6 +158,24 @@ export class WorkflowExecutionState {
 
   public getStepExecutionIdsByStepId(stepId: string): ReadonlyArray<string> | undefined {
     return this.stepIdExecutionIdIndex.get(stepId);
+  }
+
+  public setWorkflowDocumentVersion(id: string, version: EsDocumentVersion): void {
+    this.workflowDocumentVersions.set(id, version);
+  }
+
+  public getWorkflowDocumentVersion(id: string): EsDocumentVersion | undefined {
+    return this.workflowDocumentVersions.get(id);
+  }
+
+  public setStepDocumentVersions(versions: DocumentVersionsById): void {
+    for (const [id, version] of Object.entries(versions)) {
+      this.stepDocumentVersions.set(id, version);
+    }
+  }
+
+  public getStepDocumentVersion(id: string): EsDocumentVersion | undefined {
+    return this.stepDocumentVersions.get(id);
   }
 
   public setLastFailedStepContext(ctx: FailedStepContext): void {
@@ -260,11 +310,19 @@ export class WorkflowExecutionState {
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
 
-    await this.workflowExecutionRepository.updateWorkflowExecution({
-      ...changes,
-      id: this.workflowExecution.id,
-      executionsIndex: this.workflowExecution.executionsIndex,
+    const versions = await this.workflowExecutionRepository.updateWorkflowExecution({
+      doc: {
+        ...changes,
+        id: this.workflowExecution.id,
+        executionsIndex: this.workflowExecution.executionsIndex,
+      },
+      targetIndex: this.workflowExecution.executionsIndex,
+      ifVersion: this.getWorkflowDocumentVersion(this.workflowExecution.id),
     });
+    const version = versions[this.workflowExecution.id];
+    if (version) {
+      this.setWorkflowDocumentVersion(this.workflowExecution.id, version);
+    }
   }
 
   private createStep(step: CreateStepInput) {

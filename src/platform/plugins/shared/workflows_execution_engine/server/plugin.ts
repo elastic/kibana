@@ -1360,8 +1360,10 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       if (context) {
         await workflowExecutionRepository.updateWorkflowExecution({
-          id: executionId,
-          context,
+          doc: {
+            id: executionId,
+            context,
+          },
         });
       }
 

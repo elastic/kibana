@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
+import type { EsDocumentVersion } from '../repositories/document_version';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -57,10 +58,11 @@ export async function resolveInterruptedWorkflowRunTask({
     return 'run_workflow';
   }
 
-  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+  const versionedExecution = await workflowExecutionRepository.getWorkflowExecutionWithVersionById(
     workflowRunId,
     spaceId
   );
+  const execution = versionedExecution?.doc;
 
   if (!execution) {
     logger.warn(
@@ -85,6 +87,8 @@ export async function resolveInterruptedWorkflowRunTask({
     {
       message: taskRecoveryMessages.workflowRunInterrupted,
       stepsExecutionIndex: execution.stepExecutionsIndex,
+      targetIndex: execution.executionsIndex,
+      ifVersion: versionedExecution.version,
     }
   );
 
@@ -121,10 +125,11 @@ export async function resolveInterruptedWorkflowResumeTask({
     return 'resume_workflow';
   }
 
-  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+  const versionedExecution = await workflowExecutionRepository.getWorkflowExecutionWithVersionById(
     workflowRunId,
     spaceId
   );
+  const execution = versionedExecution?.doc;
 
   if (!execution) {
     logger.warn(
@@ -151,6 +156,8 @@ export async function resolveInterruptedWorkflowResumeTask({
     {
       message: taskRecoveryMessages.workflowResumeInterrupted,
       stepsExecutionIndex: execution.stepExecutionsIndex,
+      targetIndex: execution.executionsIndex,
+      ifVersion: versionedExecution.version,
     }
   );
 
@@ -169,20 +176,28 @@ export async function markExecutionFailedTaskRecovery(
     message,
     type = TASK_RECOVERY_ERROR_TYPE,
     stepsExecutionIndex,
+    targetIndex,
+    ifVersion,
   }: {
     message: string;
     type?: typeof TASK_RECOVERY_ERROR_TYPE | 'TaskAttemptsExhaustedError';
     stepsExecutionIndex?: string;
+    targetIndex?: string;
+    ifVersion?: EsDocumentVersion;
   }
 ): Promise<void> {
   const error = { type, message };
   const finishedAt = new Date().toISOString();
 
   await workflowExecutionRepository.updateWorkflowExecution({
-    id: executionId,
-    status: ExecutionStatus.FAILED,
-    error,
-    finishedAt,
+    doc: {
+      id: executionId,
+      status: ExecutionStatus.FAILED,
+      error,
+      finishedAt,
+    },
+    targetIndex,
+    ifVersion,
   });
 
   await stepExecutionRepository.markNonTerminalStepsFailed(executionId, error, stepsExecutionIndex);
@@ -219,10 +234,9 @@ export async function resolveExhaustedWorkflowRunTask({
   }
 
   try {
-    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-      workflowRunId,
-      spaceId
-    );
+    const versionedExecution =
+      await workflowExecutionRepository.getWorkflowExecutionWithVersionById(workflowRunId, spaceId);
+    const execution = versionedExecution?.doc;
     if (execution && !isTerminalStatus(execution.status)) {
       const lastMessage = error instanceof Error ? error.message : String(error);
       await markExecutionFailedTaskRecovery(
@@ -233,6 +247,8 @@ export async function resolveExhaustedWorkflowRunTask({
           type: 'TaskAttemptsExhaustedError',
           message: buildTaskAttemptsExhaustedMessage(lastMessage),
           stepsExecutionIndex: execution.stepExecutionsIndex,
+          targetIndex: execution.executionsIndex,
+          ifVersion: versionedExecution.version,
         }
       );
     }

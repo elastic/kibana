@@ -455,12 +455,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     const stepsExecutionIndex = this.state.getWorkflowExecution().stepExecutionsIndex;
-    const foundSteps = await this.stepRepository.getStepExecutionsByIds(
-      stepExecutionIds,
-      undefined,
-      ['output'],
-      stepsExecutionIndex
-    );
+    const { docs: foundSteps, versions } =
+      await this.stepRepository.getStepExecutionsWithVersionsByIds(
+        stepExecutionIds,
+        undefined,
+        ['output'],
+        stepsExecutionIndex
+      );
 
     // Capture inputs and hand `output`-stripped metadata to state. The
     // `output` sourceExclude above should already drop output from the
@@ -483,6 +484,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       metadata.push(stripIo(step));
     }
     this.state.ingestLoadedStepDocs(metadata);
+    this.state.setStepDocumentVersions(versions);
 
     const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
     if (pinnedIdsToFetch.length > 0) {
@@ -899,7 +901,14 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const flushedIds = Array.from(merged.keys());
     const stepExecutionsIndex = this.state.getWorkflowExecution().stepExecutionsIndex;
-    await this.stepRepository.bulkUpsert(Array.from(merged.values()), stepExecutionsIndex);
+    const versions = await this.stepRepository.bulkUpsert(
+      Array.from(merged.values()).map((doc) => ({
+        doc,
+        targetIndex: stepExecutionsIndex,
+        ifVersion: doc.id ? this.state.getStepDocumentVersion(doc.id) : undefined,
+      }))
+    );
+    this.state.setStepDocumentVersions(versions);
     return flushedIds;
   }
 

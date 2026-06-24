@@ -122,12 +122,14 @@ export class ConcurrencyManager {
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
       await this.workflowExecutionRepository.updateWorkflowExecution({
-        id: currentExecutionId,
-        status: ExecutionStatus.SKIPPED,
-        cancelRequested: true,
-        cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
-        cancelledAt: skipTimestamp,
-        cancelledBy: 'system',
+        doc: {
+          id: currentExecutionId,
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
+          cancelledAt: skipTimestamp,
+          cancelledBy: 'system',
+        },
       });
       return false; // Drop the new execution
     }
@@ -144,12 +146,14 @@ export class ConcurrencyManager {
       const cancellationTimestamp = new Date().toISOString();
       await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
         executionIdsToCancel.map((id) => ({
-          id,
-          status: ExecutionStatus.CANCELLED,
-          cancelRequested: true,
-          cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
-          cancelledAt: cancellationTimestamp,
-          cancelledBy: 'system',
+          doc: {
+            id,
+            status: ExecutionStatus.CANCELLED,
+            cancelRequested: true,
+            cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
+            cancelledAt: cancellationTimestamp,
+            cancelledBy: 'system',
+          },
         }))
       );
 

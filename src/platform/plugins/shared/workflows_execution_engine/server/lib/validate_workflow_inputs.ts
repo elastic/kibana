@@ -60,11 +60,13 @@ export const validateWorkflowInputs = async (
     const message = error instanceof Error ? error.message : String(error);
     try {
       await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'InputValidationError',
-          message: `Workflow input validation failed: ${message}`,
+        doc: {
+          id: workflowExecution.id,
+          status: ExecutionStatus.FAILED,
+          error: {
+            type: 'InputValidationError',
+            message: `Workflow input validation failed: ${message}`,
+          },
         },
       });
     } catch (updateError) {
@@ -82,11 +84,13 @@ export const validateWorkflowInputs = async (
 
     try {
       await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'InputValidationError',
-          message: `Workflow input validation failed: ${issues}`,
+        doc: {
+          id: workflowExecution.id,
+          status: ExecutionStatus.FAILED,
+          error: {
+            type: 'InputValidationError',
+            message: `Workflow input validation failed: ${issues}`,
+          },
         },
       });
     } catch (updateError) {
@@ -105,8 +109,10 @@ export const validateWorkflowInputs = async (
     };
     workflowExecution.context = context;
     await workflowExecutionRepository.updateWorkflowExecution({
-      id: workflowExecution.id,
-      context,
+      doc: {
+        id: workflowExecution.id,
+        context,
+      },
     });
   }
 
