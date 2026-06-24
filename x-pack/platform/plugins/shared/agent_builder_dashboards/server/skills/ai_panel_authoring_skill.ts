@@ -7,7 +7,7 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { manageDashboardTool } from '../tools';
+import { generateDashboardTool } from '../tools';
 import { dashboardTools } from '../../common';
 
 export const aiPanelAuthoringSkill = defineSkillType({
@@ -25,66 +25,68 @@ Use this skill when the user asks for a dashboard panel that Lens cannot produce
 - Mixed layouts combining text, numbers, and charts in one panel
 - Any panel the user describes that does not map to a standard Lens chart type
 - Any panel explicitly described as "AI-generated" or "custom"
+- **Dashboard summary**: when the user asks to summarise the dashboard or highlight what to focus on — use \`type: "ai_dashboard_summary"\`
 
 Do **not** use this skill for standard Lens chart types (line, bar, area, pie, histogram, data table) — use the dashboard-management skill instead.
 
-## How AI Panels Work
+## Panel Schema
 
-An \`ai_panel\` stores a \`prompt\` and an optional \`esqlQuery\`. On every dashboard load, the panel:
-1. Runs the ES|QL query (if provided) to fetch live data
-2. Sends the prompt + data to an LLM
-3. Renders the LLM response as self-contained HTML in a sandboxed iframe
+All panels in \`add_panels\` use \`source: "config"\` with a \`type\` discriminator and a \`config\` object.
 
-The result can be anything HTML can express — the LLM decides the best visual form for the data.
+### \`type: "ai_panel"\` — Custom visualisation
+
+\`\`\`json
+{
+  "source": "config",
+  "type": "ai_panel",
+  "config": {
+    "prompt": "Describe exactly what to render — chart type, data shape, visual style, color scheme.",
+    "esqlQuery": "FROM index | STATS ... | LIMIT 10"
+  },
+  "grid": { "x": 0, "y": 0, "w": 24, "h": 8 }
+}
+\`\`\`
+
+- \`config.prompt\` (required): the more specific, the better. Bad: "show error counts". Good: "A horizontal bar chart of the top 10 services by error count. Bars colored red (#D36086)."
+- \`config.esqlQuery\` (optional): live data context. Generate with \`${platformCoreTools.generateEsql}\` when the panel should reflect real index data.
+
+### \`type: "ai_dashboard_summary"\` — Dashboard summary
+
+Use when the user asks to summarise the dashboard, highlight key metrics, or say what to focus on.
+
+The panel **automatically discovers** all ES|QL panels on the dashboard and generates a concise narrative. No query needed.
+
+\`\`\`json
+{
+  "source": "config",
+  "type": "ai_dashboard_summary",
+  "config": {
+    "customInstructions": "Focus on anomalies and flag anything below target."
+  },
+  "grid": { "x": 0, "y": 0, "w": 48, "h": 8 }
+}
+\`\`\`
+
+Place it at the top of the dashboard, full width (\`w: 48\`). \`config.customInstructions\` is optional.
 
 ## Core Instructions
 
-### Step 1 — Decide if live data is needed
+### Step 1 — Decide if live data is needed (ai_panel only)
 
-If the panel should reflect real index data, use \`${platformCoreTools.generateEsql}\` to produce the ES|QL query. Describe what you want in natural language; include the index name if known. Then pass the generated query as \`esqlQuery\` on the \`ai_panel\` item.
+If the panel should reflect real index data, use \`${platformCoreTools.generateEsql}\` to produce the ES|QL query, then pass it as \`config.esqlQuery\`.
 
-If the panel is static (no index data needed — e.g. a status board with hardcoded values, a welcome card, a layout), skip the query step entirely.
+If the panel is static (hardcoded values, welcome card, layout), omit \`esqlQuery\`.
 
 ### Step 2 — Build the dashboard
 
-Call \`${dashboardTools.manageDashboard}\` with:
+Call \`${dashboardTools.generateDashboard}\` with:
 - A \`set_metadata\` operation first (title + description)
-- An \`add_panels\` operation containing \`kind: "ai_panel"\` items
+- An \`add_panels\` operation with the panel items
 
-For \`kind: "ai_panel"\`:
-- \`prompt\`: describe exactly what to render — chart type, data shape, visual style, color scheme, annotations. The more specific, the better.
-- \`esqlQuery\` (optional): the ES|QL query generated in step 1.
-- \`grid\`: placement and size on the dashboard.
+You may mix \`type: "ai_panel"\`, \`type: "ai_dashboard_summary"\`, \`type: "vis"\` (Lens), and \`type: "markdown"\` in the same \`add_panels\` call.
 
 The connector is resolved automatically — do not ask the user for a connector ID.
-
-### Prompt writing tips
-
-A good \`prompt\` tells the LLM what to render, not just what data to show:
-- Bad: "show error counts"
-- Good: "A horizontal bar chart of the top 10 services by error count. Bars colored red (#D36086). Service name on the Y axis, count on the X axis. No chart title — the dashboard panel title already has one."
-
-You may mix \`kind: "ai_panel"\` with \`kind: "visualization"\` (Lens) and \`kind: "markdown"\` in the same \`add_panels\` call when a dashboard benefits from both.
-
-## Dashboard Summary Panel (\`kind: "ai_dashboard_summary"\`)
-
-Use this when the user asks to **summarise the dashboard** or wants to know what to focus on:
-- "Summarise this dashboard"
-- "What should I pay attention to?"
-- "Give me an overview of the key metrics"
-- "What's important here?"
-
-The panel automatically discovers all ES|QL panels on the dashboard (both \`ai_panel\` and Lens ES|QL panels), runs their queries, and generates a concise narrative. **No prompt or query is needed.**
-
-Add it as a wide panel at the top of the dashboard:
-\`\`\`
-{
-  kind: "ai_dashboard_summary",
-  customInstructions: "Focus on anomalies and flag anything below target.", // optional
-  grid: { x: 0, y: 0, w: 48, h: 8 }
-}
-\`\`\`
 `,
-  getInlineTools: () => [manageDashboardTool()],
+  getInlineTools: () => [generateDashboardTool()],
   getRegistryTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
 });
