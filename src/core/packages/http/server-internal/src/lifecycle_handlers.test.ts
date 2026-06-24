@@ -242,13 +242,29 @@ describe('xsrf post-auth handler', () => {
   });
 
   describe('allowBearerTokens', () => {
-    it('accepts POST with apikey scheme when allowBearerTokens is enabled', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      const getAuthState = createGetAuthState({ http_authentication_scheme: 'apikey' });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'post', headers: {} });
+    const allowBearerConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
+    });
+    const denyBearerConfig = createConfig({
+      xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: false },
+    });
+
+    it.each([
+      { label: 'apikey scheme, POST', scheme: 'apikey', method: 'post' as RouteMethod },
+      { label: 'bearer scheme, POST', scheme: 'bearer', method: 'post' as RouteMethod },
+      { label: 'apikey scheme, DELETE', scheme: 'apikey', method: 'delete' as RouteMethod },
+      {
+        label: 'apikey scheme, POST (kbn-xsrf also present)',
+        scheme: 'apikey',
+        method: 'post' as RouteMethod,
+        extraHeaders: { 'kbn-xsrf': 'xsrf' },
+      },
+    ])('accepts $label when allowBearerTokens is enabled', ({ scheme, method, extraHeaders }) => {
+      const handler = createXsrfPostAuthHandler(
+        allowBearerConfig,
+        createGetAuthState({ http_authentication_scheme: scheme })
+      );
+      const request = forgeRequest({ method, headers: extraHeaders ?? {} });
 
       toolkit.next.mockReturnValue('next' as any);
 
@@ -259,155 +275,45 @@ describe('xsrf post-auth handler', () => {
       expect(result).toEqual('next');
     });
 
-    it('accepts POST with bearer scheme when allowBearerTokens is enabled', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      const getAuthState = createGetAuthState({ http_authentication_scheme: 'bearer' });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'post', headers: {} });
-
-      toolkit.next.mockReturnValue('next' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(responseFactory.badRequest).not.toHaveBeenCalled();
-      expect(toolkit.next).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('next');
-    });
-
-    it('rejects POST with basic scheme even when allowBearerTokens is enabled', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      const getAuthState = createGetAuthState({ http_authentication_scheme: 'basic' });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'post', headers: {} });
-
-      responseFactory.badRequest.mockReturnValue('badRequest' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(toolkit.next).not.toHaveBeenCalled();
-      expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('badRequest');
-    });
-
-    it('rejects POST with apikey scheme when allowBearerTokens is disabled', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: false },
-      });
-      const getAuthState = createGetAuthState({ http_authentication_scheme: 'apikey' });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'post', headers: {} });
-
-      responseFactory.badRequest.mockReturnValue('badRequest' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(toolkit.next).not.toHaveBeenCalled();
-      expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('badRequest');
-    });
-
-    it('rejects POST with unauthenticated request even when allowBearerTokens is enabled', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      const getAuthState = createGetAuthState(); // unauthenticated
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'post', headers: {} });
-
-      responseFactory.badRequest.mockReturnValue('badRequest' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(toolkit.next).not.toHaveBeenCalled();
-      expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('badRequest');
-    });
-
-    it('rejects POST with null scheme even when allowBearerTokens is enabled', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      const getAuthState = createGetAuthState({ http_authentication_scheme: null });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'post', headers: {} });
-
-      responseFactory.badRequest.mockReturnValue('badRequest' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(toolkit.next).not.toHaveBeenCalled();
-      expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('badRequest');
-    });
-
-    it('still accepts POST with apikey scheme and allowBearerTokens when kbn-xsrf is also present', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      const getAuthState = createGetAuthState({ http_authentication_scheme: 'apikey' });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'post', headers: { 'kbn-xsrf': 'xsrf' } });
-
-      toolkit.next.mockReturnValue('next' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(responseFactory.badRequest).not.toHaveBeenCalled();
-      expect(toolkit.next).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('next');
-    });
-
-    it('accepts DELETE with apikey scheme when allowBearerTokens is enabled', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      const getAuthState = createGetAuthState({ http_authentication_scheme: 'apikey' });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'delete', headers: {} });
-
-      toolkit.next.mockReturnValue('next' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(responseFactory.badRequest).not.toHaveBeenCalled();
-      expect(toolkit.next).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('next');
-    });
-
-    it('rejects POST when allowBearerTokens is enabled but auth state object is null', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      // Authenticated status but null state — e.g. a provider that sets no user object
-      const getAuthState: GetAuthState = jest
-        .fn()
-        .mockReturnValue({ status: AuthStatus.authenticated, state: null });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
-      const request = forgeRequest({ method: 'post', headers: {} });
-
-      responseFactory.badRequest.mockReturnValue('badRequest' as any);
-
-      const result = handler(request, responseFactory, toolkit);
-
-      expect(toolkit.next).not.toHaveBeenCalled();
-      expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
-      expect(result).toEqual('badRequest');
-    });
-
-    it('rejects POST when allowBearerTokens is enabled but http_authentication_scheme is undefined', () => {
-      const config = createConfig({
-        xsrf: { allowlist: [], disableProtection: false, allowBearerTokens: true },
-      });
-      // Simulates minimal-auth proxy where http_authentication_scheme is not present on the object
-      const getAuthState: GetAuthState = jest.fn().mockReturnValue({
-        status: AuthStatus.authenticated,
-        state: { username: 'test' } as any,
-      });
-      const handler = createXsrfPostAuthHandler(config, getAuthState);
+    it.each([
+      {
+        label: 'basic scheme, allowBearerTokens enabled',
+        config: allowBearerConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: 'basic' }),
+      },
+      {
+        label: 'apikey scheme, allowBearerTokens disabled',
+        config: denyBearerConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: 'apikey' }),
+      },
+      {
+        label: 'unauthenticated request, allowBearerTokens enabled',
+        config: allowBearerConfig,
+        getAuthState: () => createGetAuthState(), // unauthenticated
+      },
+      {
+        label: 'null scheme, allowBearerTokens enabled',
+        config: allowBearerConfig,
+        getAuthState: () => createGetAuthState({ http_authentication_scheme: null }),
+      },
+      {
+        label: 'authenticated status but null state object',
+        config: allowBearerConfig,
+        getAuthState: (): GetAuthState =>
+          jest.fn().mockReturnValue({ status: AuthStatus.authenticated, state: null }),
+      },
+      {
+        label: 'http_authentication_scheme missing from state',
+        config: allowBearerConfig,
+        getAuthState: (): GetAuthState =>
+          jest.fn().mockReturnValue({
+            status: AuthStatus.authenticated,
+            // Simulates minimal-auth proxy where http_authentication_scheme is not present
+            state: { username: 'test' } as any,
+          }),
+      },
+    ])('rejects POST when $label', ({ config, getAuthState }) => {
+      const handler = createXsrfPostAuthHandler(config, getAuthState());
       const request = forgeRequest({ method: 'post', headers: {} });
 
       responseFactory.badRequest.mockReturnValue('badRequest' as any);
