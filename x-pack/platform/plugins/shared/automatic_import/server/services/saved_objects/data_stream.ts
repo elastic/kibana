@@ -42,6 +42,7 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
           },
           phase: {
             type: 'keyword',
+            ignore_above: 1024,
           },
         },
       },
@@ -95,7 +96,7 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
             job_info: {
               type: 'nested',
               properties: {
-                phase: { type: 'keyword' },
+                phase: { type: 'keyword', ignore_above: 1024 },
               },
             },
           },
