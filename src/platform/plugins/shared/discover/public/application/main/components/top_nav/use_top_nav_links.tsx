@@ -44,6 +44,7 @@ import {
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
+  selectTabRuntimeState,
   selectTabSavedSearchByValueAttributes,
   useCurrentDataView,
   useCurrentTabSelector,
@@ -54,6 +55,7 @@ import {
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
+import { getProfileUrlState } from '../../state_management/utils/get_profile_url_state';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
@@ -154,6 +156,16 @@ export const useTopNavLinks = ({
   );
 
   const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
+  const activeProfileStateDefinition = selectTabRuntimeState(runtimeStateManager, currentTab.id)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.profileState;
+  const profileUrlState = activeProfileStateDefinition
+    ? getProfileUrlState({
+        definition: activeProfileStateDefinition,
+        profileState: currentTab.profileState,
+        profileStateRegistry: services.profileStateRegistry,
+      })
+    : undefined;
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
@@ -233,6 +245,7 @@ export const useTopNavLinks = ({
       hasIntegrations: hasShareIntegration,
       hasUnsavedChanges,
       currentTab,
+      profileUrlState,
       persistedDiscoverSession,
       totalHitsState,
       intl,
@@ -293,6 +306,7 @@ export const useTopNavLinks = ({
     currentDataView,
     currentTab,
     isDataViewMode,
+    profileUrlState,
     openInspector,
     persistedDiscoverSession,
     hasShareIntegration,

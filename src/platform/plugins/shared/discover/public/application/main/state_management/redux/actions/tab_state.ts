@@ -18,10 +18,11 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
-import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
+import { getCurrentTabProfileUrlState } from '../../utils/get_profile_url_state';
 import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
@@ -213,7 +214,34 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
     await Promise.all([
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
+      dispatch(updateProfileUrlStateAndReplaceUrl({ tabId })),
     ]);
+  };
+
+export const updateProfileUrlStateAndReplaceUrl: InternalStateThunkActionCreator<
+  [TabActionPayload],
+  Promise<void>
+> = ({ tabId }) =>
+  async function updateProfileUrlStateAndReplaceUrlThunkFn(
+    _dispatch,
+    getState,
+    { runtimeStateManager, services, urlStateStorage }
+  ) {
+    const currentState = getState();
+
+    if (currentState.tabs.unsafeCurrentId !== tabId) {
+      return;
+    }
+
+    const profileUrlState =
+      getCurrentTabProfileUrlState({
+        getState,
+        runtimeStateManager,
+        profileStateRegistry: services.profileStateRegistry,
+        tabId,
+      }) ?? null;
+
+    await urlStateStorage.set(PROFILE_STATE_URL_KEY, profileUrlState, { replace: true });
   };
 
 /**

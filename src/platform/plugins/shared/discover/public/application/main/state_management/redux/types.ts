@@ -33,6 +33,7 @@ import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
+import type { DiscoverProfileUrlState } from '../../../../../common';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
@@ -185,6 +186,7 @@ export interface TabState extends TabItem {
     serializedSearchSource?: SerializedSearchSourceFields;
     searchSessionId?: string;
   };
+  initialProfileUrlState?: DiscoverProfileUrlState;
 
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
   attributes: {
@@ -204,6 +206,7 @@ export interface TabState extends TabItem {
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   defaultProfileState: DefaultProfileState;
+  profileState: Record<string, object | undefined>;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;

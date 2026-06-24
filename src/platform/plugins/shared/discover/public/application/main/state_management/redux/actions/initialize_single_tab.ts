@@ -25,12 +25,12 @@ import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
-import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { APP_STATE_URL_KEY, type DiscoverProfileUrlState } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
-import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { fetchData, updateAttributes } from './tab_state';
@@ -111,11 +111,20 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // to avoid race conditions if the URL changes during tab initialization,
     // e.g. if the user quickly switches tabs
     const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+    const urlProfileState =
+      urlStateStorage.get<DiscoverProfileUrlState>(PROFILE_STATE_URL_KEY) ?? undefined;
     const urlAppState = {
       ...tabInitialAppState,
       ...(defaultUrlState ??
         cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
     };
+
+    dispatch(
+      internalStateSlice.actions.setInitialProfileUrlState({
+        tabId,
+        initialProfileUrlState: urlProfileState,
+      })
+    );
 
     const discoverTabLoadTracker = scopedEbtManager$
       .getValue()

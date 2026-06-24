@@ -16,6 +16,8 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { ProfileStateRegistry } from '../../../context_awareness';
+import { ProfileStateType } from '../../../context_awareness';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import {
   createTabItem,
@@ -36,6 +38,7 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   attributes: TabState['attributes'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
+  profileState: TabState['profileState'] | undefined;
 };
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
@@ -78,7 +81,7 @@ export interface TabsStorageManager {
     tabId: string,
     tabState: Pick<
       TabStateInLocalStorage,
-      'internalState' | 'attributes' | 'appState' | 'globalState'
+      'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState'
     >
   ) => void;
   loadLocally: (props: {
@@ -99,10 +102,12 @@ export interface TabsStorageManager {
 export const createTabsStorageManager = ({
   urlStateStorage,
   storage,
+  profileStateRegistry,
   enabled,
 }: {
   urlStateStorage: IKbnUrlStateStorage;
   storage: Storage;
+  profileStateRegistry: ProfileStateRegistry;
   enabled?: boolean;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsUrlState>({});
@@ -191,6 +196,7 @@ export const createTabsStorageManager = ({
       attributes: tabState.attributes,
       appState: tabState.appState,
       globalState: tabState.globalState,
+      profileState: getPersistentProfileState(tabState.profileState),
     };
   };
 
@@ -211,6 +217,17 @@ export const createTabsStorageManager = ({
     return state;
   };
 
+  const getPersistentProfileState = (
+    profileState: TabState['profileState'] | undefined
+  ): TabState['profileState'] | undefined => {
+    return getDefinedStateOnly(
+      profileStateRegistry.pickStateByType({
+        profileState: profileState ?? {},
+        stateType: ProfileStateType.Persistent,
+      })
+    );
+  };
+
   const toTabState = (
     tabStateInStorage: TabStateInLocalStorage,
     defaultTabState: Omit<TabState, keyof TabItem>
@@ -221,6 +238,7 @@ export const createTabsStorageManager = ({
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
     );
+    const profileState = getPersistentProfileState(tabStateInStorage.profileState);
 
     let controlGroupState = attributes?.controlGroupState
       ? parseControlGroupJson(JSON.stringify(attributes.controlGroupState))
@@ -251,6 +269,10 @@ export const createTabsStorageManager = ({
       },
       appState: appState || {},
       globalState: globalState || {},
+      profileState: {
+        ...defaultTabState.profileState,
+        ...profileState,
+      },
       esqlVariables,
     };
 
@@ -375,6 +397,7 @@ export const createTabsStorageManager = ({
             attributes: tabStatePartial.attributes,
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
+            profileState: getPersistentProfileState(tabStatePartial.profileState),
           };
         }
         return tab;

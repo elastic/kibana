@@ -14,6 +14,7 @@ import type { AsyncProfileProvider, ContextWithProfileId } from '../profile_serv
 import { AsyncProfileService } from '../profile_service';
 import type { Profile } from '../types';
 import type { RootContext } from './root_profile';
+import type { ProfileStateDefinition } from '../profile_state';
 
 /**
  * Indicates the category of the data source (e.g. logs, alerts, etc.)
@@ -55,17 +56,24 @@ export interface DataSourceProfileProviderParams {
 /**
  * The resulting context object returned by the data source profile provider `resolve` method
  */
-export interface DataSourceContext {
+export interface DataSourceContext<TState extends object = object> {
   /**
    * The category of the current data source
    */
   category: DataSourceCategory;
+  /**
+   * The profile state which should be synced to the URL when this profile is active
+   */
+  profileState?: ProfileStateDefinition<TState>;
 }
 
-export type DataSourceProfileProvider<TProviderContext = {}> = AsyncProfileProvider<
+export type DataSourceProfileProvider<
+  TProviderContext = {},
+  TState extends object = object
+> = AsyncProfileProvider<
   DataSourceProfile,
   DataSourceProfileProviderParams,
-  DataSourceContext & TProviderContext
+  DataSourceContext<TState> & TProviderContext
 >;
 
 export class DataSourceProfileService extends AsyncProfileService<DataSourceProfileProvider> {

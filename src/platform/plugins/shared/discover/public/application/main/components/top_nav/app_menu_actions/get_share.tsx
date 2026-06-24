@@ -33,6 +33,7 @@ interface BuildShareOptionsParams {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   currentTab: TabState;
+  profileUrlState?: DiscoverAppLocatorParams['profileUrlState'];
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
   hasUnsavedChanges: boolean;
@@ -50,6 +51,7 @@ export const buildShareOptions = async ({
   discoverParams,
   services,
   currentTab,
+  profileUrlState,
   persistedDiscoverSession,
   totalHitsState,
   hasUnsavedChanges,
@@ -84,6 +86,7 @@ export const buildShareOptions = async ({
     ...(dataView?.isPersisted()
       ? { dataViewId: dataView?.id }
       : { dataViewSpec: dataView?.toMinimalSpec() }),
+    ...(profileUrlState ? { profileUrlState } : {}),
     filters,
     timeRange,
     refreshInterval,
@@ -256,6 +259,7 @@ export const getShareAppMenuItem = ({
   hasIntegrations,
   hasUnsavedChanges,
   currentTab,
+  profileUrlState,
   persistedDiscoverSession,
   totalHitsState,
   intl,
@@ -265,6 +269,7 @@ export const getShareAppMenuItem = ({
   hasIntegrations: boolean;
   hasUnsavedChanges: boolean;
   currentTab: TabState;
+  profileUrlState?: DiscoverAppLocatorParams['profileUrlState'];
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
   intl: IntlShape;
@@ -278,6 +283,7 @@ export const getShareAppMenuItem = ({
       discoverParams,
       services,
       currentTab,
+      profileUrlState,
       persistedDiscoverSession,
       totalHitsState,
       hasUnsavedChanges,
@@ -309,6 +315,7 @@ export const getShareAppMenuItem = ({
         discoverParams,
         services,
         currentTab,
+        profileUrlState,
         persistedDiscoverSession,
         totalHitsState,
         hasUnsavedChanges,

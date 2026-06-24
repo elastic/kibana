@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, merge, skip, startWith } from 'rxjs';
+import { combineLatest, distinctUntilChanged, merge, skip, startWith } from 'rxjs';
+import { isEqual } from 'lodash';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -20,12 +21,17 @@ import { selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
 import { internalStateActions } from '..';
 import { type DiscoverAppState } from '../types';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+} from '../../../../../../common/constants';
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
 import { createTabPersistableStateObservable } from '../../utils/create_tab_persistable_state_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
+import type { DiscoverProfileUrlState } from '../../../../../../common';
 import { getFieldsToReset } from '../../utils/default_profile_state';
 import {
   createDataViewDataSource,
@@ -50,11 +56,19 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }
 
     dispatch(stopSyncing({ tabId }));
-    const { appState$, createAppStateContainer, globalStateContainer } = createUrlSyncObservables({
+    const {
+      appState$,
+      createAppStateContainer,
+      globalStateContainer,
+      profileUrlState$,
+      setProfileUrlStateFromUrl,
+    } = createUrlSyncObservables({
       tabId,
       dispatch,
       getState,
       internalState$: getInternalState$(),
+      runtimeStateManager,
+      profileStateRegistry: services.profileStateRegistry,
     });
 
     const getCurrentTab = () => selectTab(getState(), tabId);
@@ -188,6 +202,22 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
           stateStorage: urlStateStorage,
         });
 
+      const profileUrlStateSubscription = profileUrlState$.subscribe((profileUrlState) => {
+        const currentProfileUrlState =
+          urlStateStorage.get<DiscoverProfileUrlState>(PROFILE_STATE_URL_KEY);
+
+        if (!isEqual(profileUrlState, currentProfileUrlState)) {
+          void urlStateStorage.set(PROFILE_STATE_URL_KEY, profileUrlState, { replace: true });
+        }
+      });
+
+      const urlProfileStateSubscription = urlStateStorage
+        .change$<DiscoverProfileUrlState>(PROFILE_STATE_URL_KEY)
+        .pipe(distinctUntilChanged((a, b) => isEqual(a, b)))
+        .subscribe((profileUrlState) => {
+          setProfileUrlStateFromUrl(profileUrlState);
+        });
+
       // current state needs to be pushed to url
       dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId })).then(() => {
         startSyncingAppStateWithUrl();
@@ -199,6 +229,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         stopSyncingQueryGlobalStateWithStateContainer();
         stopSyncingAppStateWithUrl();
         stopSyncingGlobalStateWithUrl();
+        profileUrlStateSubscription.unsubscribe();
+        urlProfileStateSubscription.unsubscribe();
         cpsProjectRoutingSubscription?.unsubscribe();
       };
     };
@@ -225,6 +257,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       tabId,
       internalState$: getInternalState$(),
       getState,
+      profileStateRegistry: services.profileStateRegistry,
     }).subscribe(() => {
       dispatch(
         internalStateActions.syncLocallyPersistedTabState({
@@ -249,6 +282,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     services.data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
         data: services.data,
+        profileStateRegistry: services.profileStateRegistry,
         getPersistedDiscoverSession: () => getState().persistedDiscoverSession,
         getCurrentTab,
         getCurrentTabRuntimeState: () => selectTabRuntimeState(runtimeStateManager, tabId),

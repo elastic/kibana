@@ -22,7 +22,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
 import type { ContextHistoryLocationState } from './services/locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { useRootProfile } from '../../context_awareness';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT, useRootProfile } from '../../context_awareness';
 import { ScopedServicesProvider } from '../../components/scoped_services_provider';
 
 export interface ContextUrlParams {
@@ -104,7 +104,9 @@ export function ContextAppRoute() {
     profilesManager.createScopedProfilesManager({
       scopedEbtManager,
       toolkit: {
+        ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: {
+          ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
           addFilter,
           setExpandedDoc,
         },

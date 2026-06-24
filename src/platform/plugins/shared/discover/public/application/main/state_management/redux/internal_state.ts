@@ -429,6 +429,19 @@ export const internalStateSlice = createSlice({
         };
       }),
 
+    setInitialProfileUrlState: (
+      state,
+      action: TabAction<Pick<TabState, 'initialProfileUrlState'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.initialProfileUrlState = action.payload.initialProfileUrlState;
+      }),
+
+    setProfileState: (state, action: TabAction<{ key: string; profileState: object }>) =>
+      withTab(state, { tabId: state.tabs.unsafeCurrentId }, (tab) => {
+        tab.profileState[action.payload.key] = action.payload.profileState;
+      }),
+
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
@@ -664,6 +677,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
+            profileState: tab.profileState,
           });
         });
       },
@@ -758,6 +772,7 @@ export const createInternalStateStore = (
     getContextAwarenessToolkit: (tabId: string) => {
       return createContextAwarenessToolkit({
         internalState,
+        stateRegistry: options.services.profileStateRegistry,
         tabId,
       });
     },

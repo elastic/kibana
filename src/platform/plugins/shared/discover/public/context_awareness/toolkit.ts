@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { OpenInNewTabParams, UpdateESQLQueryFn } from './types';
+import type { ProfileStateAdapter, ProfileStateDefinition } from './profile_state';
 
 /**
  * Host-provided actions that profiles can use in extension point implementations.
@@ -53,6 +54,9 @@ export interface ContextAwarenessToolkit {
    * Optional host actions made available to profile implementations.
    */
   readonly actions: ContextAwarenessToolkitActions;
+  readonly getStateAdapter: <TState extends object>(
+    definition: ProfileStateDefinition<TState>
+  ) => ProfileStateAdapter<TState>;
 }
 
 /**
@@ -60,4 +64,7 @@ export interface ContextAwarenessToolkit {
  */
 export const EMPTY_CONTEXT_AWARENESS_TOOLKIT: ContextAwarenessToolkit = {
   actions: {},
+  getStateAdapter: () => {
+    throw new Error('No state adapter available in empty toolkit');
+  },
 };

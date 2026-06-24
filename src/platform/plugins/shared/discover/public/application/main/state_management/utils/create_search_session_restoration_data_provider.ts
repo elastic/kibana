@@ -10,11 +10,14 @@
 import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { ProfileStateRegistry } from '../../../../context_awareness';
 import type { ReactiveTabRuntimeState, TabState } from '../redux';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '../../../../../common';
+import { getProfileUrlState } from './get_profile_url_state';
 
 export function createSearchSessionRestorationDataProvider(deps: {
   data: DataPublicPluginStart;
+  profileStateRegistry?: ProfileStateRegistry;
   getPersistedDiscoverSession: () => DiscoverSession | undefined;
   getCurrentTab: () => TabState;
   getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
@@ -49,16 +52,32 @@ function createUrlGeneratorState({
   getPersistedDiscoverSession,
   getCurrentTab,
   getCurrentTabRuntimeState,
+  profileStateRegistry,
   shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
+  profileStateRegistry?: ProfileStateRegistry;
   getPersistedDiscoverSession: () => DiscoverSession | undefined;
   getCurrentTab: () => TabState;
   getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
-  const appState = getCurrentTab().appState;
-  const dataView = getCurrentTabRuntimeState().currentDataView$.getValue();
+  const currentTab = getCurrentTab();
+  const appState = currentTab.appState;
+  const currentTabRuntimeState = getCurrentTabRuntimeState();
+  const dataView = currentTabRuntimeState.currentDataView$.getValue();
+  const activeProfileStateDefinition = currentTabRuntimeState.scopedProfilesManager$
+    .getValue()
+    .getContexts().dataSourceContext.profileState;
+  const profileUrlState =
+    activeProfileStateDefinition && profileStateRegistry
+      ? getProfileUrlState({
+          definition: activeProfileStateDefinition,
+          profileState: currentTab.profileState,
+          profileStateRegistry,
+        })
+      : undefined;
+
   return {
     filters: data.query.filterManager.getFilters(),
     dataViewId: dataView?.id,
@@ -83,6 +102,7 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
+    profileUrlState,
     dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
     ...(shouldRestoreSearchSession
       ? {

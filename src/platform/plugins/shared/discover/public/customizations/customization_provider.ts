@@ -101,6 +101,7 @@ export const getExtendedDiscoverStateContainer = ({
       tabId: getCurrentTab().id,
       internalState$: from(internalState),
       getState: internalState.getState,
+      profileStateRegistry: services.profileStateRegistry,
     }),
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
     const persistedTab = fromSavedSearchToSavedObjectTab({

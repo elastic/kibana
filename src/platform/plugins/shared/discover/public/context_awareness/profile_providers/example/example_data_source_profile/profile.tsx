@@ -7,22 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlyout } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { RowControlColumn } from '@kbn/discover-utils';
+import type {
+  RowControlColumn,
+  RowControlComponent,
+  RowControlRowProps,
+} from '@kbn/discover-utils';
 import { AppMenuActionId, getFieldValue } from '@kbn/discover-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
+import { useObservable } from '@kbn/use-observable';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
+import { COLOR_STATE_DEF, type ColorState } from '../../../profile_state';
 
-export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
+interface ExampleDataSourceContext {
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
-}> => ({
+}
+
+type ExampleDataSourceProfileProvider = DataSourceProfileProvider<
+  ExampleDataSourceContext,
+  ColorState
+>;
+
+export const createExampleDataSourceProfileProvider = (): ExampleDataSourceProfileProvider => ({
   profileId: 'example-data-source-profile',
   isExperimental: true,
   profile: {
@@ -61,9 +85,11 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         );
       },
     }),
-    getDocViewer:
-      (prev, { context, toolkit }) =>
-      (params) => {
+    getDocViewer: (prev, { context, toolkit }) => {
+      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_DEF);
+      const colorState$ = stateAdapter.getState$();
+
+      return (params) => {
         const { openInNewTab, updateESQLQuery } = toolkit.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
@@ -91,12 +117,105 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               render: (props) => <RestorableStateDocView {...props} />,
             });
 
+            registry.add({
+              id: 'doc_view_extensible_state_example',
+              title: 'Extensible State Example',
+              order: 2,
+              render: function Render() {
+                const colorState = useObservable(colorState$, stateAdapter.getState());
+                const timestampColorOptions = [
+                  { value: 'neutral', text: 'None' },
+                  { value: 'blue', text: 'Blue' },
+                  { value: 'pink', text: 'Pink' },
+                  { value: 'green', text: 'Green' },
+                ];
+                const rowControlColorOptions = [
+                  { value: 'neutral', text: 'None' },
+                  { value: 'primary', text: 'Primary' },
+                  { value: 'success', text: 'Success' },
+                  { value: 'danger', text: 'Danger' },
+                ];
+                const boxColorOptions = [
+                  { value: 'transparent', text: 'None' },
+                  { value: 'success', text: 'Success' },
+                  { value: 'warning', text: 'Warning' },
+                  { value: 'danger', text: 'Danger' },
+                ];
+
+                return (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                      <EuiTitle size="xs">
+                        <h3>Extensible State Example</h3>
+                      </EuiTitle>
+                      <EuiFlexItem grow={false}>
+                        <EuiFormRow label="Timestamp color (UI state)">
+                          <EuiSelect
+                            options={timestampColorOptions}
+                            value={colorState.timestampColor}
+                            onChange={(e) => {
+                              stateAdapter.updateState({ timestampColor: e.target.value });
+                            }}
+                            aria-label="Select timestamp color"
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFormRow label="Row control color (Persistent state)">
+                          <EuiSelect
+                            options={rowControlColorOptions}
+                            value={colorState.rowControlColor}
+                            onChange={(e) => {
+                              stateAdapter.updateState({
+                                rowControlColor: e.target.value as ColorState['rowControlColor'],
+                              });
+                            }}
+                            aria-label="Select row control color"
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFormRow label="Box color (URL state)">
+                          <EuiSelect
+                            options={boxColorOptions}
+                            value={colorState.boxColor}
+                            onChange={(e) => {
+                              stateAdapter.updateState({
+                                boxColor: e.target.value as ColorState['boxColor'],
+                              });
+                            }}
+                            aria-label="Select box color"
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiPanel
+                          color={colorState.boxColor}
+                          css={{
+                            height: '100px',
+                            width: '100px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <EuiText color={colorState.boxColor}>{colorState.boxColor}</EuiText>
+                        </EuiPanel>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                );
+              },
+            });
+
             return prevValue.docViewsRegistry(registry);
           },
           renderHeader: (props) => <CustomDocViewerHeader {...props} />,
           renderFooter: (props) => <CustomDocViewerFooter {...props} />,
         };
-      },
+      };
+    },
     /**
      * The `getAppMenu` extension point gives access to AppMenuRegistry with methods like `registerCustomItem` and
      * `registerPopoverItem`.
@@ -184,30 +303,49 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         },
       };
     },
-    getRowAdditionalLeadingControls: (prev) => (params) => {
-      const additionalControls = prev(params) || [];
+    getRowAdditionalLeadingControls: (prev, { toolkit }) => {
+      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_DEF);
+      const colorState$ = stateAdapter.getState$();
+      const RowControl = ({
+        Control,
+        rowProps,
+        iconType,
+      }: {
+        Control: RowControlComponent;
+        rowProps: RowControlRowProps;
+        iconType: string;
+      }) => {
+        const colorState = useObservable(colorState$, stateAdapter.getState());
 
-      return [
-        ...additionalControls,
-        ...['chartBarVerticalStack', 'heart', 'inspect'].map(
-          (iconType): RowControlColumn => ({
-            id: `exampleControl_${iconType}`,
-            render: (Control, rowProps) => {
-              return (
-                <Control
-                  data-test-subj={`exampleLogsControl_${iconType}`}
-                  label={`Example ${iconType}`}
-                  tooltipContent={`Example ${iconType}`}
-                  iconType={iconType}
-                  onClick={() => {
-                    alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
-                  }}
-                />
-              );
-            },
-          })
-        ),
-      ];
+        return (
+          <Control
+            data-test-subj={`exampleLogsControl_${iconType}`}
+            label={`Example ${iconType}`}
+            tooltipContent={`Example ${iconType}`}
+            iconType={iconType}
+            onClick={() => {
+              alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
+            }}
+            color={colorState.rowControlColor}
+          />
+        );
+      };
+
+      return (params) => {
+        const additionalControls = prev(params) || [];
+
+        return [
+          ...additionalControls,
+          ...['chartBarVerticalStack', 'heart', 'inspect'].map(
+            (iconType): RowControlColumn => ({
+              id: `exampleControl_${iconType}`,
+              render: (Control, rowProps) => {
+                return <RowControl Control={Control} rowProps={rowProps} iconType={iconType} />;
+              },
+            })
+          ),
+        ];
+      };
     },
     getDefaultAppState: () => () => ({
       breakdownField: 'log.level',
@@ -295,6 +433,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       isMatch: true,
       context: {
         category: DataSourceCategory.Logs,
+        profileState: COLOR_STATE_DEF,
         formatRecord: (record) => JSON.stringify(record, null, 2),
       },
     };
