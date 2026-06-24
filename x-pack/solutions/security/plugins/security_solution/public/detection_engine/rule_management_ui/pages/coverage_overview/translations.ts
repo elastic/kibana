@@ -184,3 +184,72 @@ export const COVERAGE_OVERVIEW_FETCH_ERROR_TITLE = i18n.translate(
     defaultMessage: 'Failed to fetch coverage overview data',
   }
 );
+
+export const INVALID_MITRE_RULES_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.title',
+  {
+    defaultMessage: 'Some rules have outdated MITRE ATT&CK\u00AE mappings',
+  }
+);
+
+export const INVALID_MITRE_RULES_CALLOUT_DESCRIPTION = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.description',
+    {
+      values: { count },
+      defaultMessage:
+        'You have {count, plural, one {# rule that references} other {# rules that reference}} MITRE ATT&CK\u00AE IDs not present in the currently supported version. They may not appear correctly in the coverage matrix.',
+    }
+  );
+
+export const INVALID_MITRE_RULES_VIEW_RULES_BUTTON = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.viewRulesButton',
+  {
+    defaultMessage: 'View rules',
+  }
+);
+
+export const INVALID_MITRE_RULES_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.title',
+  {
+    defaultMessage: 'Rules with outdated MITRE mappings',
+  }
+);
+
+export const INVALID_MITRE_RULES_MODAL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.description',
+  {
+    defaultMessage:
+      'These rules reference MITRE ATT&CK\u00AE tactic, technique, or sub-technique IDs that are not present in the currently supported version. They may not appear correctly in the coverage matrix. Open each rule to update its mappings.',
+  }
+);
+
+export const INVALID_MITRE_RULES_MODAL_CLOSE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const INVALID_MITRE_RULES_MODAL_ENABLED_SECTION = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.enabledSection',
+  {
+    defaultMessage: 'Enabled rules',
+  }
+);
+
+export const INVALID_MITRE_RULES_MODAL_DISABLED_SECTION = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.disabledSection',
+  {
+    defaultMessage: 'Disabled rules',
+  }
+);
+
+export const INVALID_MITRE_IDS_TOOLTIP = (ids: string[]) =>
+  i18n.translate(
+    'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.invalidMitreIdsTooltip',
+    {
+      values: { ids: ids.join(', ') },
+      defaultMessage: 'Invalid MITRE IDs: {ids}',
+    }
+  );

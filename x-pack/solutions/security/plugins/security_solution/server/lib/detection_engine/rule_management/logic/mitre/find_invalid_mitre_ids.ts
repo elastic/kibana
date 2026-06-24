@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  tactics,
+  techniques,
+  subtechniques,
+} from '../../../../../../common/detection_engine/mitre/mitre_tactics_techniques';
+import type { MitreThreatEntityType } from './iterate_mitre_threat_entities';
+import { iterateMitreThreatEntities } from './iterate_mitre_threat_entities';
+
+const validIdsByType: Record<MitreThreatEntityType, Set<string>> = {
+  tactic: new Set(tactics.map((t) => t.id)),
+  technique: new Set(techniques.map((t) => t.id)),
+  subtechnique: new Set(subtechniques.map((t) => t.id)),
+};
+
+/**
+ * Returns the MITRE ATT&CK™ IDs (tactic, technique, or subtechnique) referenced by
+ * a rule's threat mappings that are not present in the currently bundled MITRE
+ * dataset. Returns an empty array when all referenced IDs are known.
+ *
+ * Non-MITRE framework entries are skipped. A missing or empty `threats` value
+ * results in an empty array.
+ */
+export const findInvalidMitreIds = (threats: Threats | undefined): string[] => {
+  const invalidIds: string[] = [];
+
+  for (const { type, id } of iterateMitreThreatEntities(threats)) {
+    if (!validIdsByType[type].has(id)) {
+      invalidIds.push(id);
+    }
+  }
+
+  return invalidIds;
+};
