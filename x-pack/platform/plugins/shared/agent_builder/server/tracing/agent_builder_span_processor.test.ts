@@ -548,5 +548,50 @@ describe('AgentBuilderSpanProcessor', () => {
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
       expect(exported.attributes[GenAISemanticConventions.GenAIWorkflowName]).toBe('my-workflow');
     });
+
+    it('strips tool definitions and description when includeRealNames is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealNames: false }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [GenAISemanticConventions.GenAIToolDefinitions]: JSON.stringify([
+          { name: 'secret_internal_tool', description: 'Does secret things' },
+        ]),
+        [GenAISemanticConventions.GenAIToolDescription]: 'My confidential tool description',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(GenAISemanticConventions.GenAIToolDefinitions in exported.attributes).toBe(false);
+      expect(GenAISemanticConventions.GenAIToolDescription in exported.attributes).toBe(false);
+    });
+
+    it('preserves tool definitions and description when includeRealNames is true', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealNames: true }),
+      });
+
+      const definitions = JSON.stringify([{ name: 'my_tool', description: 'Does things' }]);
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [GenAISemanticConventions.GenAIToolDefinitions]: definitions,
+        [GenAISemanticConventions.GenAIToolDescription]: 'My tool description',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[GenAISemanticConventions.GenAIToolDefinitions]).toBe(definitions);
+      expect(exported.attributes[GenAISemanticConventions.GenAIToolDescription]).toBe(
+        'My tool description'
+      );
+    });
   });
 });

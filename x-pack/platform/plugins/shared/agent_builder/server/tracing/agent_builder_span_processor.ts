@@ -70,13 +70,20 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
 /**
  * Replaces user-created tool, agent, and workflow names with 'custom' to avoid
  * leaking user-chosen identifiers. Built-in tools and agents keep their real names.
+ * `gen_ai.tool.definitions` and `gen_ai.tool.description` are stripped entirely
+ * because they embed arbitrary tool names and descriptions as free-form text/JSON
+ * that cannot be selectively anonymized.
  * Returns the anonymized attributes and the (possibly rewritten) span name.
  */
 function anonymizeNames(
   attributes: Record<string, unknown>,
   spanName: string
 ): { attributes: Record<string, unknown>; spanName: string } {
-  const result = { ...attributes };
+  const {
+    [GenAISemanticConventions.GenAIToolDefinitions]: _defs,
+    [GenAISemanticConventions.GenAIToolDescription]: _desc,
+    ...result
+  } = attributes;
   let finalSpanName = spanName;
 
   const agentName = result[GenAISemanticConventions.GenAIAgentName];
