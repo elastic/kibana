@@ -63,9 +63,17 @@ export class WorkflowsMeteringService {
 
     // Self-managed: no metering (no projectId or deploymentId available)
     if (!instanceGroupId) {
-      this.logger.debug(
-        `[workflows metering] Skipping execution ${execution.id}; no projectId or deploymentId available`
-      );
+      this.logger.debug(() => {
+        return (
+          `[workflows metering] Skipping execution ${execution.id}; no projectId or deploymentId available. ` +
+          `cloudIdentifiers=${JSON.stringify({
+            projectId: projectId ?? null,
+            deploymentId: deploymentId ?? null,
+            provider: cloudSetup?.csp ?? null,
+            region: cloudSetup?.region ?? null,
+          })}`
+        );
+      });
       return;
     }
 
@@ -90,15 +98,24 @@ export class WorkflowsMeteringService {
       instanceGroupType,
       cloudSetup
     );
+    const usageRecords = [usageRecord];
 
-    this.logger.debug(
-      `[workflows metering] Reporting execution ${execution.id} usage record: ${JSON.stringify(
-        usageRecord
-      )}`
-    );
+    this.logger.debug(() => {
+      return (
+        `[workflows metering] Reporting execution ${execution.id} usage records: ` +
+        `cloudIdentifiers=${JSON.stringify({
+          projectId: projectId ?? null,
+          deploymentId: deploymentId ?? null,
+          instanceGroupId,
+          instanceGroupType,
+          provider: cloudSetup?.csp ?? null,
+          region: cloudSetup?.region ?? null,
+        })}, records=${JSON.stringify(usageRecords, undefined, 2)}`
+      );
+    });
 
     try {
-      await this.usageReportingService.reportUsage([usageRecord]);
+      await this.usageReportingService.reportUsage(usageRecords);
       this.logger.debug(
         `[workflows metering] Successfully reported execution ${execution.id} usage record ` +
           `(source=${usageRecord.source.instance_group_id}, sourceType=${usageRecord.source.instance_group_type})`
@@ -107,10 +124,14 @@ export class WorkflowsMeteringService {
       // Log with billing-relevant details per monitoring requirements:
       // project ID, type, and count for impact assessment
       const errorMessage = err instanceof Error ? err.message : String(err);
-      this.logger.error(
-        `Failed to report workflow metering for execution ${execution.id} ` +
-          `(instanceGroupId=${instanceGroupId}, type=${WORKFLOWS_USAGE_TYPE}, quantity=1): ${errorMessage}`
-      );
+      this.logger.error(() => {
+        return (
+          `Failed to report workflow metering for execution ${execution.id} ` +
+          `(instanceGroupId=${instanceGroupId}, instanceGroupType=${instanceGroupType}, ` +
+          `type=${WORKFLOWS_USAGE_TYPE}, quantity=1): ${errorMessage}; ` +
+          `records=${JSON.stringify(usageRecords, undefined, 2)}`
+        );
+      });
     }
   }
 

@@ -100,7 +100,9 @@ describe('UsageReportingService', () => {
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Successfully reported metering')
+      );
     });
 
     it('retries on network error and succeeds', async () => {

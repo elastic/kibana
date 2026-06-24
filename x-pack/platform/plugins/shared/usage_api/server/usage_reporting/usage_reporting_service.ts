@@ -97,6 +97,7 @@ export class UsageReportingService {
   }
 
   private async _sendUsage(records: UsageRecord[]): Promise<Response> {
+    const usageApiUrl = this.usageApiUrl;
     const reqArgs: RequestInit = {
       method: 'post',
       body: JSON.stringify(records),
@@ -106,11 +107,27 @@ export class UsageReportingService {
       },
     };
 
-    if (this.usageApiUrl.startsWith('https')) {
+    if (usageApiUrl.startsWith('https')) {
       reqArgs.agent = this.httpsAgent;
     }
 
-    return fetch(this.usageApiUrl, reqArgs);
+    this.logger.debug(() => {
+      return `Sending metering request: ${JSON.stringify(
+        {
+          url: usageApiUrl,
+          method: reqArgs.method,
+          headers: reqArgs.headers,
+          hasHttpsAgent: Boolean(reqArgs.agent),
+          recordCount: records.length,
+          recordIds: records.map((record) => record.id),
+          records,
+        },
+        undefined,
+        2
+      )}`;
+    });
+
+    return fetch(usageApiUrl, reqArgs);
   }
 
   private get usageApiUrl(): string {
