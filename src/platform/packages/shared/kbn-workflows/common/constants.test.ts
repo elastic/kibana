@@ -10,6 +10,7 @@
 import {
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+  WORKFLOWS_VERSIONING_SETTING_ID,
 } from './constants';
 
 describe('Workflow Feature Flag Constants', () => {
@@ -23,9 +24,15 @@ describe('Workflow Feature Flag Constants', () => {
     );
   });
 
+  it('should export the workflow versioning setting ID', () => {
+    expect(WORKFLOWS_VERSIONING_SETTING_ID).toBe('workflows:versioning:enabled');
+  });
+
   it('should have consistent naming pattern', () => {
     expect(WORKFLOWS_UI_SETTING_ID).toMatch(/^workflows:/);
     expect(WORKFLOWS_UI_SETTING_ID).toMatch(/:enabled$/);
     expect(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID).toMatch(/^workflows:/);
+    expect(WORKFLOWS_VERSIONING_SETTING_ID).toMatch(/^workflows:/);
+    expect(WORKFLOWS_VERSIONING_SETTING_ID).toMatch(/:enabled$/);
   });
 });

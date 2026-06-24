@@ -9,6 +9,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
+import '@emotion/jest';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
@@ -113,6 +114,14 @@ describe('AppHeaderView', () => {
     expect(await screen.findByTestId('app-menu')).toBeInTheDocument();
   });
 
+  it('renders when the only content is a title appendix', () => {
+    renderAppHeader(
+      <AppHeaderView titleAppend={<div data-test-subj="titleAppend">Title append</div>} />
+    );
+
+    expect(screen.getByTestId('titleAppend')).toBeInTheDocument();
+  });
+
   it('renders legacy badge fallback content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getBadge$.mockReturnValue(
@@ -190,5 +199,25 @@ describe('AppHeaderView', () => {
 
     expect(backClick).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
+  });
+
+  describe('borderless flag', () => {
+    it('renders a bottom border by default', () => {
+      renderAppHeader(<AppHeaderView title="Dashboard" />);
+
+      expect(screen.getByTestId('appHeader')).toHaveStyleRule(
+        'border-bottom',
+        expect.stringMatching(/solid/)
+      );
+    });
+
+    it('omits the bottom border when borderless is set', () => {
+      renderAppHeader(<AppHeaderView title="Dashboard" borderless />);
+
+      expect(screen.getByTestId('appHeader')).not.toHaveStyleRule(
+        'border-bottom',
+        expect.stringMatching(/solid/)
+      );
+    });
   });
 });
