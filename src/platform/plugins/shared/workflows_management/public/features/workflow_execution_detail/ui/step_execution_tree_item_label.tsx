@@ -65,7 +65,13 @@ export function StepExecutionTreeItemLabel({
       >
         <span data-test-subj="workflowStepName">
           {attemptNumber !== undefined && (
-            <span css={[styles.attemptNumber, isDangerous && styles.dangerousStepName]}>
+            <span
+              css={[
+                styles.attemptNumber,
+                isDangerous && styles.dangerousStepName,
+                selected && styles.selectedStepName,
+              ]}
+            >
               #{attemptNumber}{' '}
             </span>
           )}
@@ -85,7 +91,7 @@ export function StepExecutionTreeItemLabel({
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {executionTimeMs && status !== ExecutionStatus.WAITING_FOR_INPUT && !isTriggerPseudoStep && (
+      {executionTimeMs !== null && status !== ExecutionStatus.WAITING_FOR_INPUT && !isTriggerPseudoStep && (
         <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>
           <EuiText size="xs" color="subdued">
             {formatDuration(executionTimeMs)}

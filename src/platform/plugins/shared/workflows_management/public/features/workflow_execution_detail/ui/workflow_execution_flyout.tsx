@@ -582,10 +582,10 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     flexShrink: 0,
                   }}
                 >
-                  {selectedLightStep?.stepType && (
+                  {(selectedLightStep?.stepType ?? activeStepExecution?.stepType) && (
                     <StepIcon
-                      stepType={selectedLightStep.stepType}
-                      executionStatus={selectedLightStep.status}
+                      stepType={selectedLightStep?.stepType ?? activeStepExecution?.stepType ?? ''}
+                      executionStatus={selectedLightStep?.status ?? activeStepExecution?.status}
                       size="m"
                       css={{ flexShrink: 0 }}
                     />

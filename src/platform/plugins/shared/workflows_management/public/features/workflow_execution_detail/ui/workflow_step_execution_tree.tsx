@@ -15,7 +15,6 @@ import type {
 } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
-  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
@@ -54,16 +53,19 @@ import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_exe
 const TRIGGER_BOLT_ICON_SVG =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="%23535966" d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"/></svg>';
 
+
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
   euiTheme: EuiThemeComputed,
   selectedId: string | null,
-  onSelectStepExecution: (stepExecutionId: string) => void
+  onSelectStepExecution: (stepExecutionId: string) => void,
+  expandedForeachIds: Set<string>,
+  onToggleForeach: (id: string) => void
 ): EuiTreeViewProps['items'] {
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
-    const status = stepExecution?.status ?? item.status;
+    const status = (stepExecution?.status ?? item.status) ?? undefined;
 
     // If-branch nodes have no real step execution; give them a stable virtual ID
     const ifBranchVirtualId =
@@ -137,16 +139,111 @@ function convertTreeToEuiTreeViewItems(
           attemptNumber={item.attemptNumber}
         />
       ),
-      children:
-        item.children.length > 0
-          ? convertTreeToEuiTreeViewItems(
-              item.children,
-              stepExecutionMap,
-              euiTheme,
-              selectedId,
-              onSelectStepExecution
-            )
-          : undefined,
+      children: (() => {
+        if (item.children.length === 0) return undefined;
+
+        // Detect foreach/while iteration children (have attemptNumber set by flattenIfBranches)
+        const foreachChildAttempts = item.children
+          .map((c) => c.attemptNumber)
+          .filter((n): n is number => n !== undefined);
+
+        if (foreachChildAttempts.length > 0) {
+          const foreachParentId =
+            item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}`;
+          const isExpanded = expandedForeachIds.has(foreachParentId);
+          const uniqueAttempts = [...new Set(foreachChildAttempts)];
+          const maxAttempt = Math.max(...uniqueAttempts);
+          const lastIterChildren = item.children.filter(
+            (c) => c.attemptNumber === maxAttempt
+          );
+          const hiddenAttempts = uniqueAttempts.filter((n) => n !== maxAttempt).sort((a, b) => a - b);
+          const hiddenIterationCount = hiddenAttempts.length;
+          const minHidden = hiddenAttempts[0];
+          const maxHidden = hiddenAttempts[hiddenAttempts.length - 1];
+
+          const visibleChildren = isExpanded ? item.children : lastIterChildren;
+          const euiVisibleChildren = convertTreeToEuiTreeViewItems(
+            visibleChildren,
+            stepExecutionMap,
+            euiTheme,
+            selectedId,
+            onSelectStepExecution,
+            expandedForeachIds,
+            onToggleForeach
+          );
+
+          if (!isExpanded && hiddenIterationCount > 0) {
+            const handleExpand: React.MouseEventHandler = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleForeach(foreachParentId);
+            };
+            const expandButtonItem: EuiTreeViewProps['items'][number] = {
+              id: `foreach-expand-${foreachParentId}`,
+              icon: (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  onClick={handleExpand}
+                  aria-hidden={true}
+                  css={css({ cursor: 'pointer', flexShrink: 0, color: euiTheme.colors.vis.euiColorVisSuccess0 })}
+                >
+                  <path
+                    d="M1 14L15 14V15L1 15L1 14ZM1 1L15 1V2L1 2L1 1ZM4 10L12 10V6L4 6L4 10ZM12 5C12.5523 5 13 5.44771 13 6V10C13 10.5523 12.5523 11 12 11L4 11C3.44772 11 3 10.5523 3 10L3 6C3 5.44772 3.44772 5 4 5L12 5Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              ),
+              label: (
+                <div
+                  onClick={handleExpand}
+                  css={css({
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: euiTheme.size.s,
+                    cursor: 'pointer',
+                    width: '100%',
+                    fontSize: `${euiTheme.font.scale.s * euiTheme.base}px`,
+                    lineHeight: euiTheme.font.lineHeightMultiplier,
+                  })}
+                >
+                  <span css={css({ flexShrink: 0, color: euiTheme.colors.textSubdued, fontVariantNumeric: 'tabular-nums' })}>
+                    #{minHidden}-{maxHidden}
+                  </span>
+                  <div
+                    css={css({
+                      flex: '1 1 auto',
+                      height: 0,
+                      borderTop: euiTheme.border.thin,
+                      alignSelf: 'center',
+                    })}
+                  />
+                </div>
+              ),
+              callback: () => {
+                onToggleForeach(foreachParentId);
+                return foreachParentId;
+              },
+            };
+            return [expandButtonItem, ...euiVisibleChildren];
+          }
+
+          return euiVisibleChildren;
+        }
+
+        return convertTreeToEuiTreeViewItems(
+          item.children,
+          stepExecutionMap,
+          euiTheme,
+          selectedId,
+          onSelectStepExecution,
+          expandedForeachIds,
+          onToggleForeach
+        );
+      })(),
       callback:
         // collapse/expand the tree view item when the button is clicked
         () => {
@@ -188,8 +285,9 @@ const filterStepTree = (
   }, []);
 };
 
-// Flatten if-branch container nodes: promote each branch to a leaf and hoist its
-// children to the same level. Status is derived from whether the branch was taken.
+// Flatten virtual container nodes (if-branch, foreach-iteration, while-iteration):
+// - if-branch: promote branch label as a leaf, hoist its children to the same level
+// - foreach/while-iteration: skip the container, hoist children with the iteration index as attemptNumber
 const flattenIfBranches = (items: StepExecutionTreeItem[]): StepExecutionTreeItem[] =>
   items.flatMap((item) => {
     if (item.stepType === 'if-branch') {
@@ -198,6 +296,14 @@ const flattenIfBranches = (items: StepExecutionTreeItem[]): StepExecutionTreeIte
         { ...item, status: branchTaken ? ExecutionStatus.COMPLETED : ExecutionStatus.SKIPPED, children: [] },
         ...flattenIfBranches(item.children),
       ];
+    }
+    if (item.stepType === 'foreach-iteration' || item.stepType === 'while-iteration') {
+      const iterationIndex = parseInt(item.stepId, 10);
+      const hoistedChildren = item.children.map((child) => ({
+        ...child,
+        attemptNumber: isNaN(iterationIndex) ? undefined : iterationIndex,
+      }));
+      return flattenIfBranches(hoistedChildren);
     }
     return [{ ...item, children: flattenIfBranches(item.children) }];
   });
@@ -216,6 +322,18 @@ export const WorkflowStepExecutionTree = ({
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
+  const [expandedForeachIds, setExpandedForeachIds] = React.useState<Set<string>>(new Set());
+  const onToggleForeach = React.useCallback((id: string) => {
+    setExpandedForeachIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
 
   const failedBeforeSteps =
     execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
@@ -341,7 +459,9 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap,
       euiTheme,
       selectedId,
-      onStepExecutionClick
+      onStepExecutionClick,
+      expandedForeachIds,
+      onToggleForeach
     );
 
     return (
