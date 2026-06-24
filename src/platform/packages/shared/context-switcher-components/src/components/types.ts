@@ -53,6 +53,8 @@ export interface ContextSwitcherEnvironmentConfig {
 }
 
 export interface ContextSwitcherProps {
+  /** When true, renders the trigger as a solution icon button without label or chevron. */
+  iconOnly?: boolean;
   /** Active space info + full list of spaces. */
   spaces: ContextSwitcherSpacesConfig;
   /**

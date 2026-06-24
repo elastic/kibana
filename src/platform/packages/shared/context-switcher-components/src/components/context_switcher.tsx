@@ -95,6 +95,7 @@ const TwoStepContent = ({
  * The two step content is the context menu and the spaces list.
  */
 export const ContextSwitcher = ({
+  iconOnly = false,
   spaces,
   environmentContext,
   footerLinks,
@@ -246,11 +247,12 @@ export const ContextSwitcher = ({
           label={triggerLabel}
           onClick={togglePopover}
           isSelected={isOpen}
+          iconOnly={iconOnly}
         />
       }
       isOpen={isOpen}
       closePopover={closePopover}
-      anchorPosition="downLeft"
+      anchorPosition={iconOnly ? 'rightUp' : 'downLeft'}
       panelStyle={{ width: POPOVER_WIDTH_PX }}
       panelPaddingSize="s"
       ownFocus

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 import { map } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
@@ -25,6 +25,9 @@ export interface ChromeNavigationProps {
   isCollapsed: boolean;
   setWidth: (width: number) => void;
   onToggleCollapsed?: (isCollapsed: boolean) => void;
+  navTopControls?: ReactNode;
+  navFooterControls?: ReactNode;
+  showTopSeparator?: boolean;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
@@ -36,6 +39,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
   }
 
   const { navItems, logoItem, activeItemId, solutionId } = state;
+  const showTopSeparator = props.showTopSeparator ?? isNextChrome;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
@@ -46,7 +50,9 @@ export const Navigation = (props: ChromeNavigationProps) => {
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
-        showTopSeparator={isNextChrome}
+        showTopSeparator={showTopSeparator}
+        navTopControls={props.navTopControls}
+        navFooterControls={props.navFooterControls}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>

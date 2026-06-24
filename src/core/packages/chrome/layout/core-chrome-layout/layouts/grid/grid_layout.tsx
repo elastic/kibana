@@ -18,6 +18,8 @@ import {
   ChromeAppHeaderRenderer,
   ProjectHeader,
   GridLayoutProjectSideNav,
+  AgentFirstProjectSideNav,
+  AgentFirstGlobalHeader,
   HeaderTopBanner,
   ChromelessHeader,
   AppMenuBar,
@@ -184,7 +186,13 @@ export class GridLayout implements LayoutService {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
         } else {
-          header = isNextChromeEnabled ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
+          if (showAgentWorkspace) {
+            header = <AgentFirstGlobalHeader showLogo={false} showSwitcher={false} />;
+            navigation = <AgentFirstProjectSideNav />;
+          } else {
+            header = isNextChromeEnabled ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
+            navigation = <GridLayoutProjectSideNav />;
+          }
           if (isNextChromeEnabled) {
             if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
               applicationTopBar = <ChromeAppHeaderRenderer />;
@@ -192,8 +200,6 @@ export class GridLayout implements LayoutService {
           } else if (hasAppMenu) {
             applicationTopBar = <AppMenuBar />;
           }
-
-          navigation = <GridLayoutProjectSideNav />;
         }
       }
 
