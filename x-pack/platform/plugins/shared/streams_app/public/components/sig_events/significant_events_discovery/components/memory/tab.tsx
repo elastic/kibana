@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { diffLines } from 'diff';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -14,6 +15,8 @@ import {
   EuiButtonIcon,
   EuiComboBox,
   EuiConfirmModal,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFieldText,
   EuiFlexGroup,
@@ -27,6 +30,7 @@ import {
   EuiLoadingSpinner,
   EuiMarkdownFormat,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -41,7 +45,6 @@ import {
 import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import {
   useConsolidateMemory,
@@ -61,6 +64,8 @@ import type { MemoryCategoryNode, MemoryEntry, MemoryVersionRecord } from './typ
 export function MemoryTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  const [selectedChange, setSelectedChange] = useState<MemoryVersionRecord | null>(null);
+  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const {
     ui: { manage: canManage },
@@ -95,153 +100,187 @@ export function MemoryTab() {
         <EuiFlexItem
           grow={2}
           className={css`
-            overflow-y: auto;
             min-height: 0;
           `}
         >
-          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-            <EuiFlexItem>
-              <EuiFieldSearch
-                placeholder={i18n.translate('xpack.streams.memory.searchPlaceholder', {
-                  defaultMessage: 'Search memory entries...',
-                })}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                incremental
-                isClearable
-                fullWidth
-                data-test-subj="streamsMemorySearch"
-              />
-            </EuiFlexItem>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
+            className={css`
+              height: 100%;
+            `}
+          >
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('xpack.streams.memory.scrapeButtonTitle', {
-                  defaultMessage:
-                    'Scrape agent conversations and extract durable knowledge into memory pages.',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="refresh"
-                  aria-label={i18n.translate('xpack.streams.memory.scrapeButton', {
-                    defaultMessage: 'Scrape Conversations',
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                <EuiFlexItem>
+                  <EuiFieldSearch
+                    placeholder={i18n.translate('xpack.streams.memory.searchPlaceholder', {
+                      defaultMessage: 'Search memory entries...',
+                    })}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    incremental
+                    isClearable
+                    fullWidth
+                    data-test-subj="streamsMemorySearch"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    button={
+                      <EuiButtonIcon
+                        iconType="boxesHorizontal"
+                        aria-label={i18n.translate('xpack.streams.memory.workflowActionsButton', {
+                          defaultMessage: 'Workflow actions',
+                        })}
+                        onClick={() => setIsActionsPopoverOpen((v) => !v)}
+                        isDisabled={!canManage}
+                        data-test-subj="streamsMemoryWorkflowActionsButton"
+                      />
+                    }
+                    isOpen={isActionsPopoverOpen}
+                    closePopover={() => setIsActionsPopoverOpen(false)}
+                    panelPaddingSize="none"
+                    anchorPosition="downRight"
+                  >
+                    <EuiContextMenuPanel
+                      items={[
+                        <EuiContextMenuItem
+                          key="scrape"
+                          icon={
+                            scrapeConversations.isLoading ? (
+                              <EuiLoadingSpinner size="s" />
+                            ) : (
+                              'refresh'
+                            )
+                          }
+                          onClick={() => {
+                            scrapeConversations.mutate();
+                            setIsActionsPopoverOpen(false);
+                          }}
+                          disabled={scrapeConversations.isLoading}
+                          data-test-subj="streamsMemoryScrapeButton"
+                        >
+                          {i18n.translate('xpack.streams.memory.scrapeButton', {
+                            defaultMessage: 'Scrape Conversations',
+                          })}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="consolidate"
+                          icon={
+                            consolidateMemory.isLoading ? <EuiLoadingSpinner size="s" /> : 'broom'
+                          }
+                          onClick={() => {
+                            consolidateMemory.mutate();
+                            setIsActionsPopoverOpen(false);
+                          }}
+                          disabled={consolidateMemory.isLoading}
+                          data-test-subj="streamsMemoryConsolidateButton"
+                        >
+                          {i18n.translate('xpack.streams.memory.consolidateButton', {
+                            defaultMessage: 'Consolidate Memory',
+                          })}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="synthesize"
+                          icon={
+                            synthesizeMemory.isLoading ? <EuiLoadingSpinner size="s" /> : 'sparkles'
+                          }
+                          onClick={() => {
+                            synthesizeMemory.mutate();
+                            setIsActionsPopoverOpen(false);
+                          }}
+                          disabled={synthesizeMemory.isLoading}
+                          data-test-subj="streamsMemorySynthesizeButton"
+                        >
+                          {i18n.translate('xpack.streams.memory.synthesizeButton', {
+                            defaultMessage: 'Synthesize Memory',
+                          })}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="detectGaps"
+                          icon={detectGaps.isLoading ? <EuiLoadingSpinner size="s" /> : 'inspect'}
+                          onClick={() => {
+                            detectGaps.mutate();
+                            setIsActionsPopoverOpen(false);
+                          }}
+                          disabled={detectGaps.isLoading}
+                          data-test-subj="streamsMemoryDetectGapsButton"
+                        >
+                          {i18n.translate('xpack.streams.memory.detectGapsButton', {
+                            defaultMessage: 'Detect Gaps',
+                          })}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className={css`
+                overflow-y: auto;
+                min-height: 0;
+              `}
+            >
+              {isSearchActive ? (
+                isSearchLoading ? (
+                  <EuiLoadingSpinner size="l" />
+                ) : (
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    {(searchData?.results ?? []).map((result) => (
+                      <EuiFlexItem key={result.id}>
+                        <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+                          <EuiLink onClick={() => setSelectedEntryId(result.id)}>
+                            <strong>{result.title}</strong>
+                          </EuiLink>
+                          <EuiSpacer size="xs" />
+                          <EuiText size="s">{result.snippet}</EuiText>
+                          <EuiSpacer size="xs" />
+                          <EuiFlexGroup gutterSize="xs" alignItems="center" wrap>
+                            <EuiFlexItem grow={false}>
+                              <EuiText size="xs" color="subdued">
+                                {formatRelativeTime(result.updated_at)} · {result.updated_by}
+                              </EuiText>
+                            </EuiFlexItem>
+                            {result.tags.map((tag) => (
+                              <EuiFlexItem key={tag} grow={false}>
+                                <EuiBadge color="hollow">{tag}</EuiBadge>
+                              </EuiFlexItem>
+                            ))}
+                          </EuiFlexGroup>
+                        </EuiPanel>
+                      </EuiFlexItem>
+                    ))}
+                    {searchData?.results.length === 0 && (
+                      <EuiText color="subdued">
+                        {i18n.translate('xpack.streams.memory.noResults', {
+                          defaultMessage: 'No memory entries found.',
+                        })}
+                      </EuiText>
+                    )}
+                  </EuiFlexGroup>
+                )
+              ) : isTreeLoading ? (
+                <EuiLoadingSpinner size="l" />
+              ) : treeItems.length > 0 ? (
+                <EuiTreeView
+                  items={treeItems}
+                  expandByDefault
+                  aria-label={i18n.translate('xpack.streams.memory.treeAriaLabel', {
+                    defaultMessage: 'Memory entries tree',
                   })}
-                  isLoading={scrapeConversations.isLoading}
-                  isDisabled={!canManage}
-                  onClick={() => scrapeConversations.mutate()}
-                  data-test-subj="streamsMemoryScrapeButton"
                 />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('xpack.streams.memory.consolidateButtonTitle', {
-                  defaultMessage:
-                    'Merge duplicate pages, remove stale entries, and improve categorization.',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="broom"
-                  aria-label={i18n.translate('xpack.streams.memory.consolidateButton', {
-                    defaultMessage: 'Consolidate Memory',
+              ) : (
+                <EuiText color="subdued">
+                  {i18n.translate('xpack.streams.memory.empty', {
+                    defaultMessage:
+                      'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
                   })}
-                  isLoading={consolidateMemory.isLoading}
-                  isDisabled={!canManage}
-                  onClick={() => consolidateMemory.mutate()}
-                  data-test-subj="streamsMemoryConsolidateButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('xpack.streams.memory.synthesizeButtonTitle', {
-                  defaultMessage:
-                    'Synthesize significant events knowledge indicators into new wiki pages.',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="sparkles"
-                  aria-label={i18n.translate('xpack.streams.memory.synthesizeButton', {
-                    defaultMessage: 'Synthesize Memory',
-                  })}
-                  isLoading={synthesizeMemory.isLoading}
-                  isDisabled={!canManage}
-                  onClick={() => synthesizeMemory.mutate()}
-                  data-test-subj="streamsMemorySynthesizeButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="inspect"
-                isLoading={detectGaps.isLoading}
-                onClick={() => detectGaps.mutate()}
-                data-test-subj="streamsMemoryDetectGapsButton"
-              >
-                {i18n.translate('xpack.streams.memory.detectGapsButton', {
-                  defaultMessage: 'Detect Gaps',
-                })}
-              </EuiButton>
+                </EuiText>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-
-          {isSearchActive ? (
-            isSearchLoading ? (
-              <EuiLoadingSpinner size="l" />
-            ) : (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {(searchData?.results ?? []).map((result) => (
-                  <EuiFlexItem key={result.id}>
-                    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-                      <EuiLink onClick={() => setSelectedEntryId(result.id)}>
-                        <strong>{result.title}</strong>
-                      </EuiLink>
-                      <EuiSpacer size="xs" />
-                      <EuiText size="s">{result.snippet}</EuiText>
-                      <EuiSpacer size="xs" />
-                      <EuiFlexGroup gutterSize="xs" alignItems="center" wrap>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="xs" color="subdued">
-                            {formatRelativeTime(result.updated_at)} · {result.updated_by}
-                          </EuiText>
-                        </EuiFlexItem>
-                        {result.tags.map((tag) => (
-                          <EuiFlexItem key={tag} grow={false}>
-                            <EuiBadge color="hollow">{tag}</EuiBadge>
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  </EuiFlexItem>
-                ))}
-                {searchData?.results.length === 0 && (
-                  <EuiText color="subdued">
-                    {i18n.translate('xpack.streams.memory.noResults', {
-                      defaultMessage: 'No memory entries found.',
-                    })}
-                  </EuiText>
-                )}
-              </EuiFlexGroup>
-            )
-          ) : isTreeLoading ? (
-            <EuiLoadingSpinner size="l" />
-          ) : treeItems.length > 0 ? (
-            <EuiTreeView
-              items={treeItems}
-              expandByDefault
-              aria-label={i18n.translate('xpack.streams.memory.treeAriaLabel', {
-                defaultMessage: 'Memory entries tree',
-              })}
-            />
-          ) : (
-            <EuiText color="subdued">
-              {i18n.translate('xpack.streams.memory.empty', {
-                defaultMessage:
-                  'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
-              })}
-            </EuiText>
-          )}
         </EuiFlexItem>
 
         {/* Right column: recent changes */}
@@ -267,10 +306,7 @@ export function MemoryTab() {
               <EuiFlexGroup direction="column" gutterSize="s">
                 {(recentChangesData?.changes ?? []).map((change) => (
                   <EuiFlexItem key={change.id} grow={false}>
-                    <RecentChangeItem
-                      change={change}
-                      onClick={() => setSelectedEntryId(change.entry_id)}
-                    />
+                    <RecentChangeItem change={change} onClick={() => setSelectedChange(change)} />
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>
@@ -287,6 +323,16 @@ export function MemoryTab() {
 
       {selectedEntryId && (
         <EntryFlyout entryId={selectedEntryId} onClose={() => setSelectedEntryId(null)} />
+      )}
+      {selectedChange && (
+        <ChangeFlyout
+          change={selectedChange}
+          onClose={() => setSelectedChange(null)}
+          onViewEntry={(id) => {
+            setSelectedChange(null);
+            setSelectedEntryId(id);
+          }}
+        />
       )}
     </>
   );
@@ -749,6 +795,100 @@ function HistoryPanel({ entryId, entry }: { entryId: string; entry: MemoryEntry 
   );
 }
 
+function ChangeFlyout({
+  change,
+  onClose,
+  onViewEntry,
+}: {
+  change: MemoryVersionRecord;
+  onClose: () => void;
+  onViewEntry: (id: string) => void;
+}) {
+  const needsPreviousVersion = change.change_type !== 'delete' && change.version > 1;
+  const { data: previousVersionData, isLoading: isPrevLoading } = useMemoryVersion(
+    needsPreviousVersion ? change.entry_id : undefined,
+    needsPreviousVersion ? change.version - 1 : undefined
+  );
+
+  const originalContent =
+    change.change_type === 'delete' ? change.content : previousVersionData?.content ?? '';
+  const modifiedContent = change.change_type === 'delete' ? '' : change.content;
+  const isLoading = needsPreviousVersion && isPrevLoading;
+
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      data-test-subj="streamsMemoryChangeFlyout"
+      aria-label={i18n.translate('xpack.streams.memory.changeFlyoutAriaLabel', {
+        defaultMessage: 'Memory change detail',
+      })}
+    >
+      <EuiFlyoutHeader hasBorder={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              color={changeTypeColors[change.change_type] ?? 'default'}
+              iconType={changeTypeIcons[change.change_type] ?? 'dot'}
+            >
+              {change.change_type}
+            </EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2>{change.title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('xpack.streams.memory.changeMeta', {
+            defaultMessage: 'v{version} · {date} · {author}',
+            values: {
+              version: change.version,
+              date: new Date(change.created_at).toLocaleString(),
+              author: change.created_by,
+            },
+          })}
+        </EuiText>
+        {change.change_summary && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              {change.change_summary}
+            </EuiText>
+          </>
+        )}
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        {isLoading ? (
+          <EuiLoadingSpinner size="l" />
+        ) : (
+          <MemoryDiffViewer originalContent={originalContent} modifiedContent={modifiedContent} />
+        )}
+      </EuiFlyoutBody>
+
+      {change.change_type !== 'delete' && (
+        <EuiFlyoutFooter>
+          <EuiButtonEmpty
+            iconType="eye"
+            onClick={() => {
+              onClose();
+              onViewEntry(change.entry_id);
+            }}
+            data-test-subj="streamsMemoryChangeFlyoutViewCurrentPage"
+          >
+            {i18n.translate('xpack.streams.memory.viewCurrentPage', {
+              defaultMessage: 'View current page',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
+      )}
+    </EuiFlyout>
+  );
+}
+
 function MemoryDiffViewer({
   originalContent,
   modifiedContent,
@@ -756,77 +896,60 @@ function MemoryDiffViewer({
   originalContent: string;
   modifiedContent: string;
 }) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<monaco.editor.IDiffEditor | null>(null);
-  const euiTheme = useEuiTheme();
-
-  useLayoutEffect(() => {
-    if (!wrapperRef.current) return;
-
-    const oldModel = monaco.editor.createModel(originalContent, 'markdown');
-    const newModel = monaco.editor.createModel(modifiedContent, 'markdown');
-
-    if (!editorRef.current) {
-      editorRef.current = monaco.editor.createDiffEditor(wrapperRef.current, {
-        automaticLayout: true,
-        theme: CODE_EDITOR_DEFAULT_THEME_ID,
-      });
-    }
-
-    editorRef.current.setModel({ original: oldModel, modified: newModel });
-
-    const commonOptions: monaco.editor.IEditorOptions = {
-      fontSize: 12,
-      lineNumbers: 'off',
-      minimap: { enabled: false },
-      overviewRulerBorder: false,
-      readOnly: true,
-      scrollbar: {
-        alwaysConsumeMouseWheel: false,
-        useShadows: false,
-      },
-      scrollBeyondLastLine: false,
-      wordWrap: 'on',
-      wrappingIndent: 'indent',
-      renderLineHighlight: 'none',
-      contextmenu: false,
-    };
-
-    editorRef.current.updateOptions({
-      ...commonOptions,
-      renderSideBySide: false,
-    });
-    editorRef.current.getOriginalEditor().updateOptions(commonOptions);
-    editorRef.current.getModifiedEditor().updateOptions(commonOptions);
-
-    return () => {
-      oldModel.dispose();
-      newModel.dispose();
-    };
-  }, [originalContent, modifiedContent]);
-
-  useEffect(() => {
-    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
-      monaco.editor.defineTheme(themeId, themeResolver(euiTheme));
-    });
-  }, [euiTheme]);
-
-  useEffect(() => {
-    return () => {
-      editorRef.current?.dispose();
-      editorRef.current = null;
-    };
-  }, []);
+  const { euiTheme } = useEuiTheme();
+  const changes = diffLines(originalContent, modifiedContent);
 
   return (
     <div
-      ref={wrapperRef}
       data-test-subj="streamsMemoryDiffViewer"
       className={css`
-        width: 100%;
-        height: 400px;
+        font-family: ${euiTheme.font.familyCode};
+        font-size: 12px;
+        line-height: 1.6;
+        overflow: auto;
       `}
-    />
+    >
+      {changes.map((part, partIdx) => {
+        const background = part.added
+          ? euiTheme.colors.backgroundBaseSuccess
+          : part.removed
+          ? euiTheme.colors.backgroundBaseDanger
+          : 'transparent';
+        const prefix = part.added ? '+' : part.removed ? '-' : ' ';
+        const prefixColor = part.added
+          ? euiTheme.colors.textSuccess
+          : part.removed
+          ? euiTheme.colors.textDanger
+          : euiTheme.colors.textSubdued;
+        const lines = part.value.split('\n');
+        if (lines[lines.length - 1] === '') lines.pop();
+        return lines.map((line, lineIdx) => (
+          <div
+            key={`${partIdx}-${lineIdx}`}
+            className={css`
+              display: flex;
+              gap: 8px;
+              padding: 0 8px;
+              background-color: ${background};
+              white-space: pre-wrap;
+              word-break: break-word;
+            `}
+          >
+            <span
+              className={css`
+                flex-shrink: 0;
+                width: 10px;
+                color: ${prefixColor};
+                user-select: none;
+              `}
+            >
+              {prefix}
+            </span>
+            <span>{line}</span>
+          </div>
+        ));
+      })}
+    </div>
   );
 }
 
