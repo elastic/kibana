@@ -135,10 +135,17 @@ export const buildMonitorScopingFilter = ({
       ? { terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }
       : undefined;
 
-  const localBranchFilters: estypes.QueryDslQueryContainer[] = [
-    { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
-    ...(hasMonitorIds ? [{ terms: { 'monitor.id': monitorIds! } } as const] : []),
-  ];
+  // When there are no enabled local monitors, omit the local branch entirely.
+  // Otherwise it would collapse to "any local ping" (just the must_not _index
+  // filter) and silently surface certs from disabled/deleted monitors — or
+  // from monitors in other spaces, since space scoping on the local branch
+  // is implicit via `monitor.id` rather than `meta.space_id`.
+  const localBranchFilters: estypes.QueryDslQueryContainer[] | undefined = hasMonitorIds
+    ? [
+        { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
+        { terms: { 'monitor.id': monitorIds! } },
+      ]
+    : undefined;
 
   const remoteBranchFilters: estypes.QueryDslQueryContainer[] = [
     { wildcard: { _index: '*:*' } },
@@ -151,7 +158,7 @@ export const buildMonitorScopingFilter = ({
       bool: {
         minimum_should_match: 1,
         should: [
-          { bool: { filter: localBranchFilters } },
+          ...(localBranchFilters ? [{ bool: { filter: localBranchFilters } }] : []),
           { bool: { filter: remoteBranchFilters } },
         ],
       },

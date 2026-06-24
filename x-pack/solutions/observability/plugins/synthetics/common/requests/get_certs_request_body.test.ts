@@ -265,18 +265,24 @@ describe('getCertsRequestBody', () => {
       expect(spaceFilter).toBeUndefined();
     });
 
-    it('omits the local monitor.id filter from the local branch when no SO ids are passed', () => {
-      // Mirrors the "remote-only deployment" path where the SO list is empty
-      // but CCS is on. The local branch then matches all local pings (rare,
-      // but consistent with overview status semantics).
+    it('omits the local branch entirely when CCS is on and no local SO ids are passed', () => {
+      // Without local enabled monitors the local branch would otherwise collapse
+      // to "match every local ping" (just the `must_not _index: '*:*'` filter)
+      // with no `monitor.id` gating, surfacing certs from disabled, deleted, or
+      // other-space monitors. Only the remote branch should remain.
       const body = getCertsRequestBody(
         { ...ruleParams, monitorIds: [] },
         { ccsEnabled: true, spaceId: 'default' }
       ) as estypes.SearchRequest;
 
-      const { local } = getBranches(body);
-      const monitorIdClause = local.find((f) => f?.terms != null && 'monitor.id' in f.terms);
-      expect(monitorIdClause).toBeUndefined();
+      const scoping = findScopingClause(body);
+      const branches = (scoping?.bool?.should ?? []) as estypes.QueryDslQueryContainer[];
+      expect(branches).toHaveLength(1);
+
+      // The single remaining branch is the remote one, identified by its remote-index wildcard.
+      const [onlyBranch] = branches;
+      const onlyBranchFilter = (onlyBranch?.bool?.filter ?? []) as estypes.QueryDslQueryContainer[];
+      expect(onlyBranchFilter).toEqual(expect.arrayContaining([{ wildcard: { _index: '*:*' } }]));
     });
   });
 });
