@@ -66,13 +66,33 @@ describe('buildGraphAliasPrelude', () => {
     it('guards every slot fill with the stream _index/dataset guard', () => {
       const { esql } = buildGraphAliasPrelude([ctx()]);
       expect(esql).toContain(
-        `CASE((_index LIKE "*${AZURE_STREAM}*" OR \`data_stream.dataset\` == "${AZURE_STREAM}"), COALESCE(MV_FIRST(\`azure.signinlogs.properties.user_principal_name\`)), null)`
+        `CASE((_index LIKE "*${AZURE_STREAM}*" OR \`data_stream.dataset\` == "${AZURE_STREAM}"), COALESCE(TO_STRING(MV_FIRST(\`azure.signinlogs.properties.user_principal_name\`))), null)`
       );
     });
 
     it('reads each source via MV_FIRST so multi-value fields collapse to a single value', () => {
       const { esql } = buildGraphAliasPrelude([ctx()]);
       expect(esql).toContain('MV_FIRST(`azure.signinlogs.properties.user_principal_name`)');
+    });
+
+    it('casts every source to keyword so non-keyword vendor fields (e.g. a long id) do not break COALESCE', () => {
+      // Regression: graph-role destinations are ECS keyword, but a numeric vendor
+      // source (gitlab.audit.target_id is a `long`) made the folded slot-fill
+      // COALESCE type-invalid -> `verification_exception ... must be [keyword],
+      // found ... type [long]`, aborting the whole graph query.
+      const numericSource = ctx({
+        streamName: 'logs-gitlab.audit-default',
+        indexPatterns: ['logs-gitlab.audit-default'],
+        aliases: new Map<string, readonly string[]>([
+          ['user.target.id', ['gitlab.audit.target_id']],
+        ]) as GraphRoleAliasContext['aliases'],
+        featureUuid: 'gitlab-feature-1',
+        confidence: 80,
+      });
+      const { esql } = buildGraphAliasPrelude([numericSource]);
+      expect(esql).toContain('COALESCE(TO_STRING(MV_FIRST(`gitlab.audit.target_id`)))');
+      // the raw, uncast source must never reach the COALESCE (that is the bug).
+      expect(esql).not.toMatch(/COALESCE\(MV_FIRST\(`gitlab\.audit\.target_id`\)\)/);
     });
   });
 
@@ -92,7 +112,7 @@ describe('buildGraphAliasPrelude', () => {
     it('marks a context fired only when an ECS slot was null but a source supplied a value', () => {
       const { esql } = buildGraphAliasPrelude([ctx()]);
       expect(esql).toMatch(
-        /\| EVAL _ki_fired_0 = \(.*\) AND \(\(`user\.email` IS NULL AND COALESCE\(MV_FIRST\(`azure\.signinlogs\.properties\.user_principal_name`\)\) IS NOT NULL\)/
+        /\| EVAL _ki_fired_0 = \(.*\) AND \(\(`user\.email` IS NULL AND COALESCE\(TO_STRING\(MV_FIRST\(`azure\.signinlogs\.properties\.user_principal_name`\)\)\) IS NOT NULL\)/
       );
     });
   });
@@ -122,11 +142,11 @@ describe('buildGraphAliasPrelude', () => {
 
       // Azure source is only ever wrapped by the Azure guard…
       expect(esql).toContain(
-        `CASE((_index LIKE "*${AZURE_STREAM}*" OR \`data_stream.dataset\` == "${AZURE_STREAM}"), COALESCE(MV_FIRST(\`azure.signinlogs.properties.user_principal_name\`)), null)`
+        `CASE((_index LIKE "*${AZURE_STREAM}*" OR \`data_stream.dataset\` == "${AZURE_STREAM}"), COALESCE(TO_STRING(MV_FIRST(\`azure.signinlogs.properties.user_principal_name\`))), null)`
       );
       // …and Okta source only by the Okta guard.
       expect(esql).toContain(
-        `CASE((_index LIKE "*${OKTA_STREAM}*" OR \`data_stream.dataset\` == "${OKTA_STREAM}"), COALESCE(MV_FIRST(\`okta.actor.alternate_id\`)), null)`
+        `CASE((_index LIKE "*${OKTA_STREAM}*" OR \`data_stream.dataset\` == "${OKTA_STREAM}"), COALESCE(TO_STRING(MV_FIRST(\`okta.actor.alternate_id\`))), null)`
       );
       // The Okta source never appears inside an Azure-guarded arm.
       expect(esql).not.toMatch(new RegExp(`${AZURE_STREAM}[^)]*okta\\.actor\\.alternate_id`));

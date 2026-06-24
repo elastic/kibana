@@ -418,4 +418,129 @@ describe('layoutGraph', () => {
       expect(entity2!.position.x).toBeGreaterThan(relNode!.position.x);
     });
   });
+
+  describe('cyclic graphs (must not throw)', () => {
+    it('lays out a self-referential cycle without throwing', () => {
+      // `A` is both the source and the target of action `L` (e.g. a user that
+      // logs itself on/off), so `A → L` and `L → A` form a cycle. `A` also fans
+      // out to a leaf `C`, which makes the cycle reachable from a sink during
+      // the alignment topological sort — the exact shape that used to throw
+      // `CycleException` and abort the entire graph render.
+      const nodes: Array<Node<NodeViewModel>> = [
+        {
+          id: 'A',
+          type: 'entity',
+          position: { x: 0, y: 0 },
+          data: { id: 'A', label: 'Actor', color: 'primary', shape: 'ellipse', icon: 'user' },
+        },
+        {
+          id: 'L',
+          type: 'label',
+          position: { x: 0, y: 0 },
+          data: { id: 'L', label: 'logon', color: 'primary', shape: 'label' },
+        },
+        {
+          id: 'C',
+          type: 'entity',
+          position: { x: 0, y: 0 },
+          data: { id: 'C', label: 'Leaf', color: 'primary', shape: 'hexagon', icon: 'storage' },
+        },
+      ];
+
+      const edges: Array<Edge<EdgeViewModel>> = [
+        { id: 'A-L', source: 'A', target: 'L' },
+        { id: 'L-A', source: 'L', target: 'A' },
+        { id: 'A-C', source: 'A', target: 'C' },
+      ];
+
+      expect(() => layoutGraph(nodes, edges)).not.toThrow();
+
+      const result = layoutGraph(nodes, edges);
+      expect(result.nodes).toHaveLength(3);
+      result.nodes.forEach((node) => {
+        expect(Number.isFinite(node.position.x)).toBe(true);
+        expect(Number.isFinite(node.position.y)).toBe(true);
+      });
+    });
+
+    it('lays out bidirectional entity↔group edges without throwing', () => {
+      // Mirrors the real payload that crashed: a group of stacked actions
+      // (logon/logoff) whose actor entity is also their target, producing both
+      // `entity → group` and `group → entity` edges. The entity also fans out to
+      // a labelled action that reaches a leaf, so the cycle is reachable from a
+      // sink during the alignment pass.
+      const nodes: Array<Node<NodeViewModel>> = [
+        {
+          id: 'entity',
+          type: 'rectangle',
+          position: { x: 0, y: 0 },
+          data: { id: 'entity', label: 'user', color: 'primary', shape: 'rectangle', icon: 'user' },
+        },
+        {
+          id: 'grp',
+          type: 'group',
+          position: { x: 0, y: 0 },
+          data: { id: 'grp', shape: 'group' },
+        },
+        {
+          id: 'logon',
+          type: 'label',
+          position: { x: 0, y: 0 },
+          parentId: 'grp',
+          data: { id: 'logon', label: 'logon', color: 'primary', shape: 'label', parentId: 'grp' },
+        },
+        {
+          id: 'logoff',
+          type: 'label',
+          position: { x: 0, y: 0 },
+          parentId: 'grp',
+          data: { id: 'logoff', label: 'logoff', color: 'primary', shape: 'label', parentId: 'grp' },
+        },
+        {
+          id: 'access',
+          type: 'label',
+          position: { x: 0, y: 0 },
+          data: { id: 'access', label: 'access', color: 'primary', shape: 'label' },
+        },
+        {
+          id: 'leaf',
+          type: 'rectangle',
+          position: { x: 0, y: 0 },
+          data: {
+            id: 'leaf',
+            label: 'Target',
+            color: 'primary',
+            shape: 'rectangle',
+            icon: 'storage',
+          },
+        },
+      ];
+
+      const edges: Array<Edge<EdgeViewModel>> = [
+        { id: 'grp-entity', source: 'grp', target: 'entity' },
+        { id: 'entity-grp', source: 'entity', target: 'grp' },
+        { id: 'grp-logon', source: 'grp', target: 'logon' },
+        { id: 'grp-logoff', source: 'grp', target: 'logoff' },
+        { id: 'logon-grp', source: 'logon', target: 'grp' },
+        { id: 'logoff-grp', source: 'logoff', target: 'grp' },
+        { id: 'entity-access', source: 'entity', target: 'access' },
+        { id: 'access-leaf', source: 'access', target: 'leaf' },
+      ];
+
+      expect(() => layoutGraph(nodes, edges)).not.toThrow();
+
+      const result = layoutGraph(nodes, edges);
+      const entity = result.nodes.find((n) => n.id === 'entity');
+      const grp = result.nodes.find((n) => n.id === 'grp');
+      const leaf = result.nodes.find((n) => n.id === 'leaf');
+
+      expect(entity).toBeDefined();
+      expect(grp).toBeDefined();
+      expect(leaf).toBeDefined();
+      [entity, grp, leaf].forEach((node) => {
+        expect(Number.isFinite(node!.position.x)).toBe(true);
+        expect(Number.isFinite(node!.position.y)).toBe(true);
+      });
+    });
+  });
 });

@@ -114,7 +114,17 @@ const sourceCoalesceExpr = (sources: readonly string[]): string | undefined => {
   if (safeSources.length === 0) {
     return undefined;
   }
-  return `COALESCE(${safeSources.map((source) => `MV_FIRST(${quoteField(source)})`).join(', ')})`;
+  // Every graph-role destination is an ECS keyword identity field, but vendor
+  // source paths can be any ES type (e.g. `gitlab.audit.target_id` is a `long`,
+  // an `*.id` can be numeric, etc.). ES|QL COALESCE/CASE require all branches to
+  // share a single type, and the slot-fill folds these per-stream arms together
+  // with the keyword destination — so a single numeric source aborts the whole
+  // graph query with `verification_exception ... must be [keyword], found ...
+  // type [long]`. Cast each source to keyword via TO_STRING so heterogeneous
+  // vendor types are normalized to the identity slot's type.
+  return `COALESCE(${safeSources
+    .map((source) => `TO_STRING(MV_FIRST(${quoteField(source)}))`)
+    .join(', ')})`;
 };
 
 const resolveContexts = (contexts: GraphRoleAliasContext[]): ResolvedContext[] => {
