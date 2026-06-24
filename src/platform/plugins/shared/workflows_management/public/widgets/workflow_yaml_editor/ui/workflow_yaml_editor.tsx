@@ -599,6 +599,7 @@ export const WorkflowYAMLEditor = ({
         : workflowLookup.steps[highlightedStepId]?.lineStart;
     if (lineStart != null) {
       editorRef.current?.revealLineInCenter(lineStart);
+      editorRef.current?.setPosition({ lineNumber: lineStart, column: 1 });
     }
   }, [isEditorMounted, highlightedStepId, workflowLookup]);
 
