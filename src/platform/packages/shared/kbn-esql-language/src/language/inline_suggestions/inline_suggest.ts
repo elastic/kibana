@@ -11,7 +11,7 @@ import { EsqlQuery } from '@elastic/esql';
 import type { ESQLSource } from '@elastic/esql/types';
 import {
   getRecommendedQueriesTemplates,
-  getTimeAndCategorizationFields,
+  getRelevantSuggestionField,
 } from '../../commands/registry/options/recommended_queries';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getFromCommandHelper } from '../shared/resources_helpers';
@@ -220,7 +220,7 @@ async function getCachedTimeAndCategorizationFields(
     callbacks
   );
 
-  const fieldInfo = await getTimeAndCategorizationFields(getColumnsByType);
+  const fieldInfo = await getRelevantSuggestionField(getColumnsByType);
 
   // Cache the field information
   setToCache(cacheKey, fieldInfo);
