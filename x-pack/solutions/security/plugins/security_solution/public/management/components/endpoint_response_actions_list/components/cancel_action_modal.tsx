@@ -278,19 +278,22 @@ export const CancelActionModal = memo<CancelActionModalProps>(
               </EuiFormRow>
 
               {!isMultiAgentAction && (
-                <EuiFlexGroup gutterSize="xs" direction="column">
-                  <EuiFlexItem>
-                    <EuiText size="xs">
-                      <strong>{OUTPUT_MESSAGES.expandSection.hostname}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem className="eui-textTruncate">
-                    <EuiText size="s" className="eui-textTruncate">
-                      {action.hosts[cancelApiBody.endpoint_ids[0]]?.name ||
-                        cancelApiBody.endpoint_ids[0]}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiFlexGroup gutterSize="xs" direction="column">
+                    <EuiFlexItem>
+                      <EuiText size="xs">
+                        <strong>{OUTPUT_MESSAGES.expandSection.hostname}</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem className="eui-textTruncate">
+                      <EuiText size="s" className="eui-textTruncate">
+                        {action.hosts[cancelApiBody.endpoint_ids[0]]?.name ||
+                          cancelApiBody.endpoint_ids[0]}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
               )}
 
               <EuiSpacer />
