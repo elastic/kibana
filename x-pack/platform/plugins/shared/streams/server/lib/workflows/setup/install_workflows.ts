@@ -15,6 +15,7 @@ import {
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+  STREAMS_KI_SYNC_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -36,6 +37,8 @@ const WORKFLOWS_TO_INSTALL: Array<{
   // Installed in the default space (not global) so its scheduled executions
   // are stored alongside the onboarding executions it triggers.
   { workflowId: STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, spaceId: DEFAULT_SPACE_ID },
+  // Sync runs on its own schedule, independent of extraction state.
+  { workflowId: STREAMS_KI_SYNC_WORKFLOW_ID, spaceId: DEFAULT_SPACE_ID },
 ];
 
 export const installWorkflows = async ({

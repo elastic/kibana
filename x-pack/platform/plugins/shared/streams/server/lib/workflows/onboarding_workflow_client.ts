@@ -24,6 +24,7 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
+import type { SyncWorkflowService } from './sync_workflow';
 
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
 
@@ -193,13 +194,16 @@ export const MAX_STREAMS_PER_QUERY = 10000;
 export class StreamsKIsOnboardingClient {
   private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
   private readonly telemetry: EbtTelemetryClient;
+  private readonly syncWorkflowService: SyncWorkflowService;
 
   constructor({
     managementApi,
     telemetry,
+    syncWorkflowService,
   }: {
     managementApi: WorkflowsServerPluginSetup['management'];
     telemetry: EbtTelemetryClient;
+    syncWorkflowService: SyncWorkflowService;
   }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
@@ -207,6 +211,7 @@ export class StreamsKIsOnboardingClient {
       workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
     this.telemetry = telemetry;
+    this.syncWorkflowService = syncWorkflowService;
   }
 
   /**
@@ -228,6 +233,11 @@ export class StreamsKIsOnboardingClient {
       inputs: toWorkflowInputPayload(inputs),
       request,
     });
+
+    // Lazily schedule the recurring sync workflow on the first KI identification.
+    // Best-effort and idempotent: it self-guards and never throws, so it cannot
+    // affect the onboarding run we just scheduled.
+    await this.syncWorkflowService.ensureScheduled({ request });
 
     this.telemetry.trackOnboardingScheduled({
       stream_name: inputs.streamName,

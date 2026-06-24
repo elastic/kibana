@@ -285,6 +285,7 @@ export {
   sigEventSchema,
   sigEventStatusSchema,
   type SigEvent,
+  isDurable,
   type KnowledgeIndicator,
   type SigEventStatus,
 } from './src/sig_events';

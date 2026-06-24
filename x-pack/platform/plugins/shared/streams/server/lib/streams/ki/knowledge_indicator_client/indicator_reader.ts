@@ -159,6 +159,7 @@ export class IndicatorReader {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
       minSeverityScore?: number;
+      includeExpired?: boolean;
     }
   ): Promise<QueryLink[]> {
     const minSeverityFilter =
@@ -175,15 +176,22 @@ export class IndicatorReader {
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
       ruleUnbackedPostGroupingWhere(filters?.ruleUnbacked ?? 'exclude'),
-      minSeverityFilter
+      minSeverityFilter,
+      filters?.includeExpired ? undefined : IS_NOT_EXPIRED
     );
 
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
     return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
   }
 
-  async getStreamToQueryLinksMap(streamNames: string[]): Promise<Record<string, QueryLink[]>> {
-    const links = await this.getQueryLinks(streamNames, { ruleUnbacked: 'include' });
+  async getStreamToQueryLinksMap(
+    streamNames: string[],
+    options: { includeExpired?: boolean } = {}
+  ): Promise<Record<string, QueryLink[]>> {
+    const links = await this.getQueryLinks(streamNames, {
+      ruleUnbacked: 'include',
+      includeExpired: options.includeExpired,
+    });
     const result: Record<string, QueryLink[]> = {};
     for (const name of streamNames) {
       result[name] = [];
@@ -219,6 +227,7 @@ export class IndicatorReader {
 
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
+      IS_NOT_EXPIRED,
       esql.exp`\`query.rule_backed\` == false`,
       esql.exp`\`query.query_type\` != ${esql.str(QUERY_TYPE_STATS)}`,
       minSeverityFilter
@@ -237,4 +246,5 @@ export class IndicatorReader {
       stream_name: doc['stream.name'],
     }));
   }
+
 }

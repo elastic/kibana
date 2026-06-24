@@ -36,11 +36,13 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => (
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
   const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+  const syncWorkflowService = { ensureScheduled: jest.fn().mockResolvedValue(undefined) };
   const client = new StreamsKIsOnboardingClient({
     managementApi: managementApi as never,
     telemetry,
+    syncWorkflowService,
   });
-  return { client, managementApi, telemetry };
+  return { client, managementApi, telemetry, syncWorkflowService };
 };
 
 describe('StreamsKIsOnboardingClient', () => {
@@ -87,7 +89,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
   describe('run', () => {
     it('fetches the workflow definition and runs it and returns executionId', async () => {
-      const { client, managementApi } = createClient();
+      const { client, managementApi, syncWorkflowService } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
       const result = await client.run({
@@ -100,6 +102,7 @@ describe('StreamsKIsOnboardingClient', () => {
       });
 
       expect(result).toEqual({ executionId: 'execution-id' });
+      expect(syncWorkflowService.ensureScheduled).toHaveBeenCalledWith({ request });
       expect(managementApi.getWorkflow).toHaveBeenCalledWith(
         STREAMS_KI_ONBOARDING_WORKFLOW_ID,
         '*'

@@ -24,6 +24,12 @@ export interface IRulesManagementClient {
 
   /** Best-effort bulk delete: implementations should swallow 404/400 for missing rules. */
   bulkDeleteRules(ids: string[]): Promise<void>;
+
+  /**
+   * Returns all Streams-owned alerting rules with their associated stream name.
+   * Used by the groundedness sweep to process rules per-stream and detect orphans.
+   */
+  findStreamsOwnedRules(): Promise<Array<{ id: string; streamName: string }>>;
 }
 
 /** Rule creation payload, v1-shaped. V2 adapters translate internally. */

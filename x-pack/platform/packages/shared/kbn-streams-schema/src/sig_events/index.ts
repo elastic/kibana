@@ -7,6 +7,7 @@
 
 export { detectionSchema, type Detection } from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
+export { isDurable } from '../queries';
 export type { KnowledgeIndicator } from '../queries';
 export {
   SIG_EVENT_STATUS_OPTIONS,

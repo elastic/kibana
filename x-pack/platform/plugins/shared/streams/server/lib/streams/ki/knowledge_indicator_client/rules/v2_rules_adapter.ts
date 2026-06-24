@@ -64,6 +64,32 @@ export class V2RulesAdapter implements IRulesManagementClient {
     }
   }
 
+  async findStreamsOwnedRules(): Promise<Array<{ id: string; streamName: string }>> {
+    const perPage = 1000;
+    const rules: Array<{ id: string; streamName: string }> = [];
+    let page = 1;
+
+    while (true) {
+      const result = await this.rulesClient.findRules({
+        // v2 Streams rules carry a structured tag sigevents:stream:<name>.
+        filter: 'metadata.tags: "sigevents:stream:*"',
+        perPage,
+        page,
+      });
+
+      for (const rule of result.items) {
+        const tag = rule.metadata.tags.find((t) => t.startsWith('sigevents:stream:'));
+        const streamName = tag?.slice('sigevents:stream:'.length);
+        if (streamName) rules.push({ id: rule.id, streamName });
+      }
+
+      if (page * perPage >= result.total) break;
+      page++;
+    }
+
+    return rules;
+  }
+
   /**
    * Create variant used by `updateRule`'s 404 branch. A 409 here means a concurrent
    * writer (re)created the rule between our `updateRule` 404 and this create — that's
@@ -102,6 +128,10 @@ export class V2RulesNotInstalledAdapter implements IRulesManagementClient {
     this.logger.debug(
       `Skipping v2 rule cleanup for ${ids.length} id(s): alerting v2 plugin is not available.`
     );
+  }
+
+  async findStreamsOwnedRules(): Promise<Array<{ id: string; streamName: string }>> {
+    return [];
   }
 }
 

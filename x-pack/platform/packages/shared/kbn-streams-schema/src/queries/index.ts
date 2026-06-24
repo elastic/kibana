@@ -142,3 +142,7 @@ export interface QueryLink {
 export type KnowledgeIndicator =
   | { type: 'feature'; feature: Feature }
   | { type: 'query'; query: QueryLink };
+
+export function isDurable(ki: Feature | QueryLink): boolean {
+  return ki.expires_at == null;
+}
