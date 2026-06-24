@@ -32,6 +32,7 @@ import {
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
+  LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
 import { convertToRuntimeState } from './runtime_state';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
@@ -464,6 +465,7 @@ export const getMetricVisualization = ({
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
       ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
+      spacing: LENS_METRIC_STATE_DEFAULTS.spacing,
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
   },

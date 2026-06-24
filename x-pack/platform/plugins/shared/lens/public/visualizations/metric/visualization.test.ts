@@ -109,6 +109,12 @@ describe('metric visualization', () => {
     applyColorTo: 'background',
   };
 
+  const getLegacyStateWithoutSpacing = (): MetricVisualizationState => {
+    const legacyState: MetricVisualizationState = { ...fullState };
+    delete legacyState.spacing;
+    return legacyState;
+  };
+
   const fullStateWTrend: Required<
     Omit<
       MetricVisualizationState,
@@ -130,11 +136,28 @@ describe('metric visualization', () => {
         primaryPosition: 'bottom',
         primaryAlign: 'right',
         secondaryAlign: 'right',
+        spacing: 'large',
       });
     });
 
     test('returns persisted state', () => {
       expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
+    });
+
+    test('sets small spacing for persisted state without spacing', () => {
+      expect(
+        visualization.initialize(() => fullState.layerId, getLegacyStateWithoutSpacing())
+      ).toEqual(fullState);
+    });
+
+    test('preserves explicit persisted spacing', () => {
+      const stateWithLargeSpacing: MetricVisualizationState = {
+        ...fullState,
+        spacing: 'large',
+      };
+      expect(visualization.initialize(() => fullState.layerId, stateWithLargeSpacing)).toEqual(
+        stateWithLargeSpacing
+      );
     });
 
     test('removes legacy state property titleWeight', () => {
@@ -609,6 +632,24 @@ describe('metric visualization', () => {
           "type": "expression",
         }
       `);
+    });
+
+    it('keeps legacy persisted metrics on small spacing when building an expression', () => {
+      const initializedState = visualization.initialize(
+        () => fullState.layerId,
+        {
+          ...getLegacyStateWithoutSpacing(),
+          breakdownByAccessor: undefined,
+          collapseFn: undefined,
+        }
+      );
+
+      const expression = visualization.toExpression(
+        initializedState,
+        datasourceLayers
+      ) as ExpressionAstExpression;
+
+      expect(expression.chain[0].arguments.spacing).toEqual(['small']);
     });
 
     it('builds breakdown by metric', () => {
