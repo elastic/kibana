@@ -114,8 +114,8 @@ export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleRespons
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
-  } catch (e) {
-    throw new Error(`Failed to parse rule attachment JSON: ${(e as Error).message}`);
+  } catch {
+    return null;
   }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     return null;
