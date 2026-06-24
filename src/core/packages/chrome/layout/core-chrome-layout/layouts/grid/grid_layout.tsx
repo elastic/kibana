@@ -211,7 +211,7 @@ export class GridLayout implements LayoutService {
 
       return (
         <>
-          <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
+          <GridLayoutGlobalStyles chromeStyle={chromeStyle} hasAgentWorkspace={showAgentWorkspace} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}

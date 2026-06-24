@@ -14,6 +14,7 @@ import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
 import { AgentWorkspaceMount, setAgentWorkspaceMountContext } from './agent_workspace_mount';
 import { clearAgentWorkspaceNavigation } from './agent_workspace_navigation';
+import { clearAgentWorkspaceLeaveHandlers } from './agent_workspace_app_leave';
 
 export const registerAgentWorkspaceSlot = ({
   core,
@@ -32,4 +33,5 @@ export const unregisterAgentWorkspaceSlot = (): void => {
   unregisterAgentWorkspaceContent();
   setAgentWorkspaceMountContext(null);
   clearAgentWorkspaceNavigation();
+  clearAgentWorkspaceLeaveHandlers();
 };
