@@ -9,8 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { APP_ID } from '../../../../../common/constants';
-import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
+import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import { RISK_SCORE_HISTORY_URL } from '../../../../../common/entity_analytics/risk_score/constants';
 import type { RiskScoreHistoryResponse } from '../../../../../common/api/entity_analytics';
 import { GetRiskScoreHistoryRequestQuery } from '../../../../../common/api/entity_analytics';
@@ -48,37 +47,15 @@ export const riskScoreHistoryRoute = (
         async (context, request, response): Promise<IKibanaResponse<RiskScoreHistoryResponse>> => {
           const siemResponse = buildSiemResponse(response);
 
-        try {
-          const {
-            entity_type: entityType,
-            entity_id: entityId,
-            from,
-            to,
-            score_type: scoreType,
-            page_size: pageSize,
-            include_contributions: includeContributions,
-          } = request.query;
-
-          const riskScoreDataClient = (await context.securitySolution).getRiskScoreDataClient();
-
-          const entries = await riskScoreDataClient.getRiskScoreHistory({
-            entityType,
-            entityId,
-            range: { gte: from ?? DEFAULT_FROM, lte: to ?? DEFAULT_TO },
-            scoreType,
-            pageSize: pageSize ?? DEFAULT_PAGE_SIZE,
-            includeContributions: includeContributions ?? false,
-          });
-
-          return response.ok({
-            body: {
-              entity_id: entityId,
+          try {
+            const {
               entity_type: entityType,
               entity_id: entityId,
               from,
               to,
               score_type: scoreType,
               page_size: pageSize,
+              include_contributions: includeContributions,
             } = request.query;
 
             const riskScoreDataClient = (await context.securitySolution).getRiskScoreDataClient();
@@ -89,6 +66,7 @@ export const riskScoreHistoryRoute = (
               range: { gte: from ?? DEFAULT_FROM, lte: to ?? DEFAULT_TO },
               scoreType,
               pageSize: pageSize ?? DEFAULT_PAGE_SIZE,
+              includeContributions: includeContributions ?? false,
             });
 
             return response.ok({
