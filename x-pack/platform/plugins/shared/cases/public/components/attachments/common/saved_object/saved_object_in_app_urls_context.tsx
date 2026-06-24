@@ -13,7 +13,11 @@ import {
 } from '../../../../../common/constants/attachments';
 import type { CaseUI } from '../../../../../common/ui/types';
 import { useSavedObjectInAppUrlsQuery } from './use_saved_object_in_app_url';
-import { getSavedObjectAttachmentAttributes, type SupportedSavedObjectType } from './helpers';
+import {
+  getSavedObjectAttachmentAttributes,
+  isSavedObjectAttachment,
+  type SupportedSavedObjectType,
+} from './helpers';
 
 type UrlsBySoType = Record<SupportedSavedObjectType, Record<string, string | undefined>>;
 
@@ -43,8 +47,8 @@ export const SavedObjectInAppUrlsProvider: React.FC<SavedObjectInAppUrlsProvider
     const mapIds = new Set<string>();
     const searchIds = new Set<string>();
     for (const attachment of caseData.comments) {
-      const attributes = getSavedObjectAttachmentAttributes(attachment);
-      if (attributes) {
+      if (isSavedObjectAttachment(attachment)) {
+        const attributes = getSavedObjectAttachmentAttributes(attachment);
         if (attributes.soType === DASHBOARD_SO_TYPE) {
           dashboardIds.add(attributes.attachmentId);
         } else if (attributes.soType === MAP_SO_TYPE) {

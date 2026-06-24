@@ -20,7 +20,11 @@ import {
   isUnifiedAlertAttachment,
   isUnifiedEventAttachment,
 } from '../../../../common/utils/attachments';
-import { getSavedObjectAttachmentAttributes } from '../../attachments/common/saved_object/helpers';
+import {
+  getSavedObjectAttachmentAttributes,
+  isSavedObjectAttachment,
+} from '../../attachments/common/saved_object/helpers';
+import type { SavedObjectAttachmentAttributes } from '../../attachments/common/saved_object/types';
 import { UNKNOWN } from '../../../common/translations';
 
 /**
@@ -92,7 +96,7 @@ const filterLegacyEventCommentByIds = (
  */
 const filterSavedObjectCommentBySearchTerm = (
   comment: AttachmentUIV2,
-  attributes: NonNullable<ReturnType<typeof getSavedObjectAttachmentAttributes>>,
+  attributes: SavedObjectAttachmentAttributes,
   searchTerm: string
 ): AttachmentUIV2 | null => {
   const term = searchTerm.toLowerCase();
@@ -133,8 +137,8 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         if (isLegacyEventAttachment(comment)) {
           return filterLegacyEventCommentByIds(comment, searchTerm);
         }
-        const savedObjectAttributes = getSavedObjectAttachmentAttributes(comment);
-        if (savedObjectAttributes) {
+        if (isSavedObjectAttachment(comment)) {
+          const savedObjectAttributes = getSavedObjectAttachmentAttributes(comment);
           return filterSavedObjectCommentBySearchTerm(comment, savedObjectAttributes, searchTerm);
         }
         if (isUnifiedEventAttachment(comment) || isUnifiedAlertAttachment(comment)) {

@@ -10,7 +10,10 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../../../common/mock';
 import { basicCase } from '../../../../containers/mock';
-import { DASHBOARD_ATTACHMENT_TYPE } from '../../../../../common/constants/attachments';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  MAP_ATTACHMENT_TYPE,
+} from '../../../../../common/constants/attachments';
 import type { CaseUI, AttachmentUIV2 } from '../../../../../common/ui/types';
 import { UnifiedAttachmentTypeRegistry } from '../../../../client/attachment_framework/unified_attachment_registry';
 import { registerInternalAttachments } from '../..';
@@ -47,6 +50,27 @@ const caseWithDashboardAttachment = (attachmentId: string): CaseUI =>
         type: DASHBOARD_ATTACHMENT_TYPE,
         attachmentId,
         metadata: { title: 'D', soType: 'dashboard' },
+      } as unknown as AttachmentUIV2,
+    ],
+  } as CaseUI);
+
+const caseWithSavedObjectAttachment = ({
+  attachmentId,
+  type,
+  soType,
+}: {
+  attachmentId: string;
+  type: string;
+  soType: string;
+}): CaseUI =>
+  ({
+    ...basicCase,
+    comments: [
+      {
+        id: 'comment-1',
+        type,
+        attachmentId,
+        metadata: { title: 'Saved object', soType },
       } as unknown as AttachmentUIV2,
     ],
   } as CaseUI);
@@ -123,6 +147,41 @@ describe('AttachSavedObjectModal', () => {
     expect(attachedBtn).toBeDisabled();
     expect(attachedBtn).toHaveTextContent('Attached');
     expect(otherBtn).not.toBeDisabled();
+  });
+
+  it('does not mark a different saved object type with the same id as attached', () => {
+    useFindSavedObjectsMock.mockReturnValue({
+      items: [
+        { id: 'shared-id', type: 'dashboard', meta: { title: 'Dashboard' } },
+        { id: 'shared-id', type: 'map', meta: { title: 'Map' } },
+      ],
+      total: 2,
+      isLoading: false,
+    });
+
+    renderModal(
+      caseWithSavedObjectAttachment({
+        attachmentId: 'shared-id',
+        type: DASHBOARD_ATTACHMENT_TYPE,
+        soType: 'dashboard',
+      })
+    );
+
+    const [dashboardBtn, mapBtn] = screen.getAllByTestId('cases-attach-so-button-shared-id');
+    expect(dashboardBtn).toBeDisabled();
+    expect(mapBtn).not.toBeDisabled();
+  });
+
+  it('ignores malformed saved object attachments when deriving attached state', () => {
+    renderModal(
+      caseWithSavedObjectAttachment({
+        attachmentId: 'map-1',
+        type: MAP_ATTACHMENT_TYPE,
+        soType: 'unknown',
+      })
+    );
+
+    expect(screen.getByTestId('cases-attach-so-button-map-1')).not.toBeDisabled();
   });
 
   it('forwards row clicks to the attach action with the matching saved object', async () => {

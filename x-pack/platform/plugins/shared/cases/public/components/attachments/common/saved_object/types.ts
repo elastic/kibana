@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
-import type { SupportedSavedObjectType } from './helpers';
+import type { SavedObjectAttachmentType, SupportedSavedObjectType } from './helpers';
+import type { AttachmentUIV2 } from '../../../../../common/ui/types';
 
 export interface SavedObjectMeta {
   icon?: string;
@@ -39,3 +40,12 @@ export interface SavedObjectAttachmentAttributes {
   soType: SupportedSavedObjectType;
   title?: string;
 }
+
+export type SavedObjectAttachmentUI = AttachmentUIV2 & {
+  type: SavedObjectAttachmentType;
+  attachmentId: string;
+  metadata: {
+    soType: SupportedSavedObjectType;
+    title?: string;
+  };
+};

@@ -12,7 +12,9 @@ import { renderWithTestingProviders } from '../../../../common/mock';
 import { basicCase } from '../../../../containers/mock';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_SO_TYPE,
   MAP_ATTACHMENT_TYPE,
+  MAP_SO_TYPE,
 } from '../../../../../common/constants/attachments';
 import type { CaseUI, AttachmentUIV2 } from '../../../../../common/ui/types';
 import { SavedObjectAttachmentsTable } from './saved_object_attachments_table';
@@ -33,7 +35,10 @@ const soAttachment = (
     id,
     type,
     attachmentId,
-    metadata: { title },
+    metadata: {
+      title,
+      soType: type === DASHBOARD_ATTACHMENT_TYPE ? DASHBOARD_SO_TYPE : MAP_SO_TYPE,
+    },
     createdAt,
     createdBy: { username: 'alice', fullName: 'Alice A' },
   } as unknown as AttachmentUIV2);

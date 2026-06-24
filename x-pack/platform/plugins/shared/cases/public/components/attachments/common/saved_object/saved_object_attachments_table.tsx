@@ -17,7 +17,7 @@ import type { CaseUI, AttachmentUIV2 } from '../../../../../common/ui/types';
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { SavedObjectLink } from './saved_object_link';
 import { useSavedObjectInAppUrls } from './use_saved_object_in_app_url';
-import { getSavedObjectAttachmentAttributes } from './helpers';
+import { getSavedObjectAttachmentAttributes, isSavedObjectAttachment } from './helpers';
 import * as i18n from './translations';
 
 interface SavedObjectAttachmentRow {
@@ -60,10 +60,10 @@ const formatCreatedBy = (createdBy: AttachmentUIV2['createdBy'] | undefined): st
  * title fallback) that the helper doesn't carry.
  */
 const extractRow = (attachment: AttachmentUIV2): SavedObjectAttachmentRow | null => {
-  const attributes = getSavedObjectAttachmentAttributes(attachment);
-  if (!attributes) {
+  if (!isSavedObjectAttachment(attachment)) {
     return null;
   }
+  const attributes = getSavedObjectAttachmentAttributes(attachment);
 
   return {
     id: attachment.id,

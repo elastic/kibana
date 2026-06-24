@@ -18,8 +18,10 @@ import {
   SUPPORTED_SO_TYPES,
   SAVED_OBJECT_ATTACHMENT_TYPES,
   canAccessSavedObject,
-  getAttachedSavedObjectIds,
+  getAttachedSavedObjectKeys,
   getSavedObjectAttachmentAttributes,
+  getSavedObjectKey,
+  isSavedObjectAttachment,
 } from './helpers';
 import type { FoundSavedObject } from './types';
 
@@ -34,6 +36,9 @@ const baseComment = {
   updatedAt: null,
   updatedBy: null,
 } as unknown as AttachmentUIV2;
+
+const extractAttributes = (attachment: AttachmentUIV2) =>
+  isSavedObjectAttachment(attachment) ? getSavedObjectAttachmentAttributes(attachment) : null;
 
 describe('saved_object/helpers', () => {
   describe('constant tables', () => {
@@ -69,14 +74,12 @@ describe('saved_object/helpers', () => {
 
   describe('getSavedObjectAttachmentAttributes', () => {
     it('returns null for non-SO attachment types', () => {
-      expect(
-        getSavedObjectAttachmentAttributes({ ...baseComment, type: 'user' } as AttachmentUIV2)
-      ).toBeNull();
+      expect(extractAttributes({ ...baseComment, type: 'user' } as AttachmentUIV2)).toBeNull();
     });
 
     it('extracts attributes for a dashboard attachment', () => {
       expect(
-        getSavedObjectAttachmentAttributes({
+        extractAttributes({
           ...baseComment,
           type: DASHBOARD_ATTACHMENT_TYPE,
           attachmentId: 'dash-1',
@@ -87,7 +90,7 @@ describe('saved_object/helpers', () => {
 
     it('extracts attributes for a map attachment', () => {
       expect(
-        getSavedObjectAttachmentAttributes({
+        extractAttributes({
           ...baseComment,
           type: MAP_ATTACHMENT_TYPE,
           attachmentId: 'map-1',
@@ -98,7 +101,7 @@ describe('saved_object/helpers', () => {
 
     it('extracts attributes for a discover-session attachment', () => {
       expect(
-        getSavedObjectAttachmentAttributes({
+        extractAttributes({
           ...baseComment,
           type: DISCOVER_SESSION_ATTACHMENT_TYPE,
           attachmentId: 'search-1',
@@ -106,9 +109,28 @@ describe('saved_object/helpers', () => {
         } as unknown as AttachmentUIV2)
       ).toEqual({ attachmentId: 'search-1', soType: 'search', title: 'A saved search' });
     });
+
+    it('returns null for malformed SO attachments', () => {
+      expect(
+        extractAttributes({
+          ...baseComment,
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          metadata: { title: 'Missing id', soType: 'dashboard' },
+        } as unknown as AttachmentUIV2)
+      ).toBeNull();
+
+      expect(
+        extractAttributes({
+          ...baseComment,
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          attachmentId: 'dash-1',
+          metadata: { title: 'Bad SO type', soType: 'unknown' },
+        } as unknown as AttachmentUIV2)
+      ).toBeNull();
+    });
   });
 
-  describe('getAttachedSavedObjectIds', () => {
+  describe('getAttachedSavedObjectKeys', () => {
     const soAttachment = (id: string, type: string, attachmentId: string, soType: string) =>
       ({
         ...baseComment,
@@ -119,24 +141,30 @@ describe('saved_object/helpers', () => {
       } as unknown as AttachmentUIV2);
 
     it('returns an empty set when there are no comments', () => {
-      expect(getAttachedSavedObjectIds([])).toEqual(new Set());
+      expect(getAttachedSavedObjectKeys([])).toEqual(new Set());
     });
 
-    it('collects ids from every SO-typed comment', () => {
-      const ids = getAttachedSavedObjectIds([
+    it('collects keys from every SO-typed comment', () => {
+      const keys = getAttachedSavedObjectKeys([
         soAttachment('a', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
         soAttachment('b', MAP_ATTACHMENT_TYPE, 'map-1', 'map'),
         soAttachment('c', DISCOVER_SESSION_ATTACHMENT_TYPE, 'search-1', 'search'),
       ]);
-      expect(ids).toEqual(new Set(['dash-1', 'map-1', 'search-1']));
+      expect(keys).toEqual(
+        new Set([
+          getSavedObjectKey('dashboard', 'dash-1'),
+          getSavedObjectKey('map', 'map-1'),
+          getSavedObjectKey('search', 'search-1'),
+        ])
+      );
     });
 
     it('ignores non-SO attachment types', () => {
-      const ids = getAttachedSavedObjectIds([
+      const keys = getAttachedSavedObjectKeys([
         soAttachment('a', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'dashboard'),
         { ...baseComment, id: 'x', type: 'user' } as unknown as AttachmentUIV2,
       ]);
-      expect(ids).toEqual(new Set(['dash-1']));
+      expect(keys).toEqual(new Set([getSavedObjectKey('dashboard', 'dash-1')]));
     });
   });
 

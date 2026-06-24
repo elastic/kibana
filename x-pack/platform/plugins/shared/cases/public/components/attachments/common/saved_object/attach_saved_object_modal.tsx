@@ -30,7 +30,8 @@ import { useFindSavedObjects } from './use_find_saved_objects';
 import { useAttachSavedObject } from './use_attach_saved_object';
 import {
   canAccessSavedObject,
-  getAttachedSavedObjectIds,
+  getAttachedSavedObjectKeys,
+  getSavedObjectKey,
   SO_TYPE_TO_ATTACHMENT_TYPE,
   SUPPORTED_SO_TYPES,
   type SupportedSavedObjectType,
@@ -80,8 +81,8 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
     }
   }, [contextTagging]);
   const { unifiedAttachmentTypeRegistry } = useCasesContext();
-  const [attachedSavedObjectIds, setAttachedSavedObjectIds] = useState<Set<string>>(() =>
-    getAttachedSavedObjectIds(caseData.comments)
+  const [attachedSavedObjectKeys, setAttachedSavedObjectKeys] = useState<Set<string>>(() =>
+    getAttachedSavedObjectKeys(caseData.comments)
   );
   const caseOwner = caseData.owner;
   const modalTitleId = useGeneratedHtmlId();
@@ -126,12 +127,13 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
         // unhandled-rejection bucket and leave the modal open for retry.
         return;
       }
-      setAttachedSavedObjectIds((prev) => {
-        if (prev.has(savedObject.id)) {
+      const key = getSavedObjectKey(savedObject.type, savedObject.id);
+      setAttachedSavedObjectKeys((prev) => {
+        if (prev.has(key)) {
           return prev;
         }
         const next = new Set(prev);
-        next.add(savedObject.id);
+        next.add(key);
         return next;
       });
     },
@@ -198,6 +200,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
 
   const renderRow = useCallback(
     (savedObject: FoundSavedObject) => {
+      const savedObjectKey = getSavedObjectKey(savedObject.type, savedObject.id);
       const title = savedObject.meta.title || `${savedObject.type} [id=${savedObject.id}]`;
       const inAppPath = savedObject.meta.inAppUrl?.path;
       // Only expose a clickable link when the user has the in-app capability;
@@ -209,12 +212,12 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
 
       return (
         <SavedObjectRow
-          key={savedObject.id}
+          key={savedObjectKey}
           savedObject={savedObject}
           title={title}
           typeLabel={getDisplayName(savedObject.type)}
           href={href}
-          isAttached={attachedSavedObjectIds.has(savedObject.id)}
+          isAttached={attachedSavedObjectKeys.has(savedObjectKey)}
           isAttachInFlight={attachInFlightId === savedObject.id}
           isAttachingAny={isAttaching}
           taggingApi={taggingApi}
@@ -225,7 +228,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
     [
       application.capabilities,
       attachInFlightId,
-      attachedSavedObjectIds,
+      attachedSavedObjectKeys,
       getDisplayName,
       handleAttach,
       http.basePath,
@@ -295,7 +298,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
               data-test-subj="cases-attach-so-list"
             >
               {items.map((savedObject) => (
-                <EuiFlexItem key={savedObject.id} grow={false}>
+                <EuiFlexItem key={getSavedObjectKey(savedObject.type, savedObject.id)} grow={false}>
                   {renderRow(savedObject)}
                 </EuiFlexItem>
               ))}
