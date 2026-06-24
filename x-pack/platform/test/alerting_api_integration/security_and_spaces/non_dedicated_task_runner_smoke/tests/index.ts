@@ -21,6 +21,7 @@ export default function nonDedicatedTaskRunnerSmokeTests({
       await tearDown(getService);
     });
 
+    // Verify that Kibana can schedule and execute tasks when useDedicatedTaskRunner: false
     loadTestFile(require.resolve('../../group3/tests/alerting/run_soon'));
   });
 }
