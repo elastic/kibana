@@ -221,6 +221,9 @@ import type {
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
 import type {
+  GetAnomalyOverviewRequestParamsInput,
+  GetAnomalyOverviewRequestBodyInput,
+  GetAnomalyOverviewResponse,
   GetAnomalySummaryRequestParamsInput,
   GetAnomalySummaryRequestBodyInput,
   GetAnomalySummaryResponse,
@@ -1827,6 +1830,25 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   */
+  async getAnomalyOverview(props: GetAnomalyOverviewProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetAnomalyOverview`);
+    return this.kbnClient
+      .request<GetAnomalyOverviewResponse>({
+        path: replaceParams(
+          '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
    */
   async getAnomalySummary(props: GetAnomalySummaryProps) {
@@ -3156,7 +3178,10 @@ the immediately preceding revision in `old_values`.
     this.log.info(`${new Date().toISOString()} Calling API RuleChangesHistory`);
     return this.kbnClient
       .request<RuleChangesHistoryResponse>({
-        path: replaceParams('/internal/detection_engine/rules/{ruleId}/history', props.params),
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/history/_list',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -4069,6 +4094,10 @@ export interface FindRulesProps {
 }
 export interface GetAllTranslationStatsDashboardMigrationProps {
   params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
+}
+export interface GetAnomalyOverviewProps {
+  params: GetAnomalyOverviewRequestParamsInput;
+  body: GetAnomalyOverviewRequestBodyInput;
 }
 export interface GetAnomalySummaryProps {
   params: GetAnomalySummaryRequestParamsInput;
