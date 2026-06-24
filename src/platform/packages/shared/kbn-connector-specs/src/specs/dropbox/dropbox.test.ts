@@ -242,6 +242,19 @@ describe('Dropbox', () => {
       });
       expect(result).toEqual(mockJson);
     });
+
+    it('returns metadata without tags if get_tags call fails', async () => {
+      mockCallTool
+        .mockResolvedValueOnce({ content: mockContent }) // get_file_metadata succeeds
+        .mockRejectedValueOnce(new Error('Unknown tool')); // get_tags fails
+
+      const result = await Dropbox.actions.getFileMetadata.handler(mockContext, {
+        path: '/Documents/report.pdf',
+        retrieveTags: true,
+      });
+
+      expect(result).toEqual(mockJson);
+    });
   });
 
   describe('getFileContent action', () => {

@@ -67,7 +67,8 @@ export const Dropbox: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://www.dropbox.com/oauth2/authorize',
           tokenUrl: 'https://api.dropboxapi.com/oauth2/token',
-          scope: 'account_info.read files.metadata.read files.content.read sharing.read sharing.write',
+          scope:
+            'account_info.read files.metadata.read files.content.read sharing.read sharing.write',
         },
         overrides: {
           meta: {
@@ -150,17 +151,21 @@ export const Dropbox: ConnectorSpec = {
             return data;
           }
 
-          const tagsResult = await mcp.callTool({ name: 'get_tags', arguments: { paths } });
-          const tagsData = parseJsonTextFromContentParts(tagsResult.content) as {
-            paths_to_tags?: Array<{ path: string; tags: Array<{ tag_text?: string }> }>;
-          };
+          try {
+            const tagsResult = await mcp.callTool({ name: 'get_tags', arguments: { paths } });
+            const tagsData = parseJsonTextFromContentParts(tagsResult.content) as {
+              paths_to_tags?: Array<{ path: string; tags: Array<{ tag_text?: string }> }>;
+            };
 
-          const tagsByPath: Record<string, string[]> = {};
-          for (const entry of tagsData?.paths_to_tags ?? []) {
-            tagsByPath[entry.path] = entry.tags.map((t) => t.tag_text ?? '').filter(Boolean);
+            const tagsByPath: Record<string, string[]> = {};
+            for (const entry of tagsData?.paths_to_tags ?? []) {
+              tagsByPath[entry.path] = entry.tags.map((t) => t.tag_text ?? '').filter(Boolean);
+            }
+
+            return { ...(data as object), tagsByPath };
+          } catch {
+            return data;
           }
-
-          return { ...(data as object), tagsByPath };
         });
       },
     },
@@ -198,18 +203,22 @@ export const Dropbox: ConnectorSpec = {
             return metadata;
           }
 
-          const tagsResult = await mcp.callTool({
-            name: 'get_tags',
-            arguments: { paths: [input.path] },
-          });
-          const tagsData = parseJsonTextFromContentParts(tagsResult.content) as {
-            paths_to_tags?: Array<{ path: string; tags: Array<{ tag_text?: string }> }>;
-          };
+          try {
+            const tagsResult = await mcp.callTool({
+              name: 'get_tags',
+              arguments: { paths: [input.path] },
+            });
+            const tagsData = parseJsonTextFromContentParts(tagsResult.content) as {
+              paths_to_tags?: Array<{ path: string; tags: Array<{ tag_text?: string }> }>;
+            };
 
-          const tags =
-            tagsData?.paths_to_tags?.[0]?.tags.map((t) => t.tag_text ?? '').filter(Boolean) ?? [];
+            const tags =
+              tagsData?.paths_to_tags?.[0]?.tags.map((t) => t.tag_text ?? '').filter(Boolean) ?? [];
 
-          return { ...(metadata as object), tags };
+            return { ...(metadata as object), tags };
+          } catch {
+            return metadata;
+          }
         });
       },
     },

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import type { FetchLike } from '@kbn/mcp-client';
 
 /**
@@ -73,22 +73,7 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       resolveSseReady?.();
       resolveSseReady = null;
 
-      const nodeStream = res.data as NodeJS.ReadableStream;
-      const webStream = new ReadableStream<Uint8Array>({
-        start(controller) {
-          nodeStream.on('data', (chunk: Buffer | string) => {
-            controller.enqueue(
-              typeof chunk === 'string' ? Buffer.from(chunk) : (chunk as Uint8Array)
-            );
-          });
-          nodeStream.on('end', () => controller.close());
-          nodeStream.on('error', (err: Error) => controller.error(err));
-        },
-        cancel() {
-          (nodeStream as { destroy?: () => void }).destroy?.();
-        },
-      });
-
+      const webStream = createWebStream(res);
       return new Response(webStream, {
         status: res.status,
         statusText: res.statusText ?? '',
@@ -133,4 +118,22 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       headers: resHeaders,
     });
   };
+}
+
+/** Converts the Node.js Readable from an Axios `responseType:'stream'` response into the
+ *  web-API ReadableStream<Uint8Array> expected by the Fetch-compatible Response constructor. */
+function createWebStream(res: AxiosResponse) {
+  const nodeStream = res.data as NodeJS.ReadableStream;
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      nodeStream.on('data', (chunk: Buffer | string) => {
+        controller.enqueue(typeof chunk === 'string' ? Buffer.from(chunk) : (chunk as Uint8Array));
+      });
+      nodeStream.on('end', () => controller.close());
+      nodeStream.on('error', (err: Error) => controller.error(err));
+    },
+    cancel() {
+      (nodeStream as { destroy?: () => void }).destroy?.();
+    },
+  });
 }
