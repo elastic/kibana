@@ -122,6 +122,7 @@ export const useMemoryMutations = () => {
       title?: string;
       content?: string;
       tags?: string[];
+      categories?: string[];
       change_summary?: string;
     }) =>
       core.http.put<MemoryEntry>(`${MEMORY_BASE}/entries/${id}`, {
