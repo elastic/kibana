@@ -309,6 +309,26 @@ describe('CancelActionModal', () => {
       });
     });
 
+    it('should call mutateAsync with multiple endpoint_ids when multiple agents are selected', async () => {
+      const action = buildMultiAgentPendingAction();
+      renderModal(action);
+      const firstAgentOption = renderResult.getByText('Host-agent-a');
+      await userEvent.click(firstAgentOption);
+      const secondAgentOption = renderResult.getByText('Host-agent-b');
+      await userEvent.click(secondAgentOption);
+      const submitButton = renderResult
+        .getByText(UX_MESSAGES.cancelActionModalSubmitButonLabel)
+        .closest('button')!;
+      await userEvent.click(submitButton);
+      await waitFor(() => {
+        expect(mutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint_ids: expect.arrayContaining(['agent-a', 'agent-b']),
+          })
+        );
+      });
+    });
+
     it('should include force flag in the cancel request body when toggled', async () => {
       const action = buildSingleAgentPendingAction({ agentType: 'endpoint' });
       renderModal(action);

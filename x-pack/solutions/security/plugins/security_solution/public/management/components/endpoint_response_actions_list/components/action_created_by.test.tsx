@@ -67,7 +67,7 @@ describe('ActionCreatedBy', () => {
       renderResult = appTestContext.render(
         <ActionCreatedBy action={action} data-test-subj="test" />
       );
-      expect(renderResult.getByTestId('ruleName')).not.toBeNull();
+      expect(renderResult.getByTestId('test-ruleName')).not.toBeNull();
     });
 
     it('should not render the user avatar', () => {
