@@ -14,8 +14,8 @@ import { RuleStateStatus } from '../../../types/rule_state';
 import { RelatedAlertEpisodesList } from './related_list';
 
 jest.mock('../../related/related_alert_episode', () => ({
-  RelatedAlertEpisode: ({ episode }: { episode: AlertEpisode }) => (
-    <div data-test-subj="mockRelatedAlertEpisode">{episode['episode.id']}</div>
+  RelatedAlertEpisode: ({ episode, ruleName }: { episode: AlertEpisode; ruleName: string }) => (
+    <div data-test-subj="mockRelatedAlertEpisode">{ruleName || episode['episode.id']}</div>
   ),
 }));
 
@@ -58,9 +58,23 @@ describe('RelatedAlertEpisodesList', () => {
 
     expect(screen.getAllByTestId('mockRelatedAlertEpisode')).toHaveLength(2);
     expect(screen.getByTestId('alertingV2RelatedEpisodesList')).toBeInTheDocument();
+    expect(screen.getAllByText('Test Rule')).toHaveLength(2);
+  });
 
-    expect(screen.getByText('ep-1')).toBeInTheDocument();
-    expect(screen.getByText('ep-2')).toBeInTheDocument();
+  it('uses the episode id label when the rule is missing', () => {
+    render(
+      <I18nProvider>
+        <RelatedAlertEpisodesList
+          rows={[makeRow('ep-missing-rule')]}
+          ruleState={{ status: RuleStateStatus.not_found, ruleId: 'rule-1' }}
+          getEpisodeAction={() => undefined}
+          getGroupAction={() => undefined}
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Episode ID: ep-missing-rule')).toBeInTheDocument();
   });
 
   it('renders nothing inside the list when rows is empty', () => {

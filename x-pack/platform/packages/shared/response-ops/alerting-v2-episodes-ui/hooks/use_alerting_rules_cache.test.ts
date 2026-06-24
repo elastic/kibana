@@ -80,7 +80,7 @@ describe('useAlertingRulesCache', () => {
       expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
         query: {
           filter: `id: "${ruleId}"`,
-          perPage: 1,
+          perPage: 1000,
           page: 1,
         },
       })
@@ -115,7 +115,7 @@ describe('useAlertingRulesCache', () => {
       items: [fetchedRule],
       total: 1,
       page: 1,
-      perPage: 2,
+      perPage: 1000,
     } as FindRulesResponse);
 
     const { result, rerender } = renderHook(
@@ -132,7 +132,7 @@ describe('useAlertingRulesCache', () => {
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: `(id: "${presentRuleId}" OR id: "${missingRuleId}")`,
-        perPage: 2,
+        perPage: 1000,
         page: 1,
       },
     });

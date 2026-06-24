@@ -50,7 +50,8 @@ describe('RelatedAlertEpisode', () => {
     render(
       <RelatedAlertEpisode
         episode={makeEpisode({ 'episode.id': 'ep-3', severity: 'high' })}
-        rule={rule}
+        ruleName={ruleName}
+        groupingFields={groupingFields}
         href="/app/management/alertingV2/episodes/ep-3"
       />
     );

@@ -13,6 +13,7 @@ import {
 } from '../../related/related_alert_episode';
 import type { AlertEpisode } from '../../../queries/episodes_query';
 import { isRuleLoaded, type RuleState } from '../../../types/rule_state';
+import { getRelatedEpisodeMissingRuleTitle } from './translations';
 
 export interface RelatedAlertEpisodesListProps {
   rows: AlertEpisode[];
@@ -27,7 +28,7 @@ export interface RelatedAlertEpisodesListProps {
   compressed?: boolean;
 }
 
-const getRuleDisplayFromState = (ruleState: RuleState) => {
+const getRuleDisplayFromState = (ruleState: RuleState, episodeId: string | undefined) => {
   if (isRuleLoaded(ruleState)) {
     return {
       ruleName: ruleState.rule.metadata.name,
@@ -35,7 +36,10 @@ const getRuleDisplayFromState = (ruleState: RuleState) => {
     };
   }
 
-  return { ruleName: '', groupingFields: [] };
+  return {
+    ruleName: episodeId ? getRelatedEpisodeMissingRuleTitle(episodeId) : '',
+    groupingFields: [],
+  };
 };
 
 export function RelatedAlertEpisodesList({
@@ -46,13 +50,12 @@ export function RelatedAlertEpisodesList({
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedAlertEpisodesListProps) {
-  const { ruleName, groupingFields } = getRuleDisplayFromState(ruleState);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="alertingV2RelatedEpisodesList">
       {rows.map((row) => {
         const relatedId = row['episode.id'];
         const relatedGroupHash = row.group_hash;
+        const { ruleName, groupingFields } = getRuleDisplayFromState(ruleState, relatedId);
         return (
           <RelatedAlertEpisode
             key={relatedId}
