@@ -23,12 +23,7 @@ export const SectionError: React.FunctionComponent<Props> = ({
   actions,
   ...rest
 }) => {
-  const {
-    error: errorString,
-    cause: topLevelCause,
-    message,
-    attributes,
-  } = error;
+  const { error: errorString, cause: topLevelCause, message, attributes } = error;
   const cause = topLevelCause ?? attributes?.causes;
 
   return (
