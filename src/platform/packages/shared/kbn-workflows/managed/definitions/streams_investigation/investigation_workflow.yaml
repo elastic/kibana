@@ -57,6 +57,11 @@ steps:
     with:
       timeout: 1800s
       message: |
+        First, call the load_skill tool with skill significant-events-memory.
+        Memory tools are not available until that skill is loaded. Then use memory_search and memory_read (and ki_search if helpful) for prior incidents, known failure modes, and service topology relevant to the issue below.
+
+        When logs or memory identify a likely code-level defect, confirm it in source using any available code-access tools or connectors before finalizing root cause. If source code cannot be retrieved, note that in gaps_found.
+
         Investigate the root cause of the following issue:
 
         {{ inputs.message }}
