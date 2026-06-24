@@ -6,6 +6,7 @@
  */
 
 import type { EsClient, apiTest } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { EntityType } from '@kbn/entity-store/common';
 
@@ -258,78 +259,65 @@ const relationshipIdsPath = (relationshipKey: string): string =>
   `entity.relationships.${relationshipKey}.ids`;
 
 /**
- * Polls the LATEST index until an entity's `<relationshipKey>.ids` contains the
- * expected target EUID, or until timeout. Returns the matching `_source`.
+ * Asserts that an entity's `<relationshipKey>.ids` contains the expected target
+ * EUID. Callers use `triggerMaintainerRun(..., { sync: true })` so the task has
+ * already settled — poll with a short window to absorb ES refresh lag.
  */
 export const waitForRelationshipIds = async (
   esClient: EsClient,
   relationshipKey: string,
   entityId: string,
-  expectedTargetId: string,
-  timeoutMs = 30_000
-): Promise<Record<string, unknown>> => {
+  expectedTargetId: string
+): Promise<void> => {
   const idsPath = relationshipIdsPath(relationshipKey);
-  const start = Date.now();
-  let lastIds: unknown;
-
-  while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_ALIAS });
-    const response = await esClient.search({
-      index: LATEST_ALIAS,
-      query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
-      size: 1,
-    });
-    const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
-    if (source) {
-      const ids = normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath]);
-      lastIds = ids;
-      if (ids.includes(expectedTargetId)) {
-        return source;
-      }
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-
-  throw new Error(
-    `Timed out waiting for entity '${entityId}' ${idsPath} to include '${expectedTargetId}' ` +
-      `after ${timeoutMs}ms (last seen: ${JSON.stringify(lastIds)})`
-  );
+  await expect
+    .poll(
+      async () => {
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
+        const response = await esClient.search({
+          index: LATEST_ALIAS,
+          query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+          size: 1,
+        });
+        const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+        return source
+          ? normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath])
+          : [];
+      },
+      { timeout: 30_000, intervals: [200] }
+    )
+    .toContain(expectedTargetId);
 };
 
 /**
- * Polls the LATEST index and asserts that an entity's `<relationshipKey>.ids`
- * does NOT gain the given target within the timeout (shorter default for
- * negative tests).
+ * Asserts that an entity's `<relationshipKey>.ids` does NOT contain the given
+ * target. Callers use `triggerMaintainerRun(..., { sync: true })` so the task
+ * has already settled — poll with a short window to absorb ES refresh lag.
  */
 export const assertNoRelationshipId = async (
   esClient: EsClient,
   relationshipKey: string,
   entityId: string,
-  unexpectedTargetId: string,
-  timeoutMs = 10_000
+  unexpectedTargetId: string
 ): Promise<void> => {
   const idsPath = relationshipIdsPath(relationshipKey);
-  const start = Date.now();
-
-  while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_ALIAS });
-    const response = await esClient.search({
-      index: LATEST_ALIAS,
-      query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
-      size: 1,
-    });
-    const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
-    if (source) {
-      const ids = normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath]);
-      if (ids.includes(unexpectedTargetId)) {
-        throw new Error(
-          `Entity '${entityId}' unexpectedly gained ${idsPath} '${unexpectedTargetId}' — ` +
-            `expected it to stay unresolved`
-        );
-      }
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
+  await expect
+    .poll(
+      async () => {
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
+        const response = await esClient.search({
+          index: LATEST_ALIAS,
+          query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+          size: 1,
+        });
+        const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+        return source
+          ? normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath])
+          : [];
+      },
+      { timeout: 10_000, intervals: [200] }
+    )
+    .not.toContain(unexpectedTargetId);
 };
 
 const RESOLVED_TO_PATH = 'entity.relationships.resolution.resolved_to';

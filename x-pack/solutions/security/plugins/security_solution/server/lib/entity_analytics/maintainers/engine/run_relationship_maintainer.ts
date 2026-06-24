@@ -341,6 +341,11 @@ export const runRelationshipMaintainer = async ({
   // is cheaper and stronger than trusting all callers.
   assertValidNamespace(namespace);
 
+  // Capture run-start time as the watermark. Using end-of-run would exclude any
+  // entity whose last_seen advanced between query execution and run completion —
+  // a silent permanent gap on busy stores with long paginated runs.
+  const runStartTimestamp = new Date().toISOString();
+
   const readClient = cpsEsClient ?? esClient;
 
   let totalBuckets = 0;
@@ -401,6 +406,6 @@ export const runRelationshipMaintainer = async ({
     totalWriteErrors,
     totalIterations,
     truncated,
-    lastRunTimestamp: new Date().toISOString(),
+    lastRunTimestamp: runStartTimestamp,
   };
 };
