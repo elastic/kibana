@@ -67,7 +67,7 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
-  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  v4: () => RULE_EXECUTION_UUID,
 }));
 jest.mock('../lib/wrap_scoped_cluster_client', () => ({
   createWrappedScopedClusterClientFactory: jest.fn(),
@@ -100,7 +100,7 @@ describe('Task Runner Cancel', () => {
     mockedTaskInstance = mockTaskInstance();
 
     alertingEventLoggerInitializer = {
-      executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      executionId: RULE_EXECUTION_UUID,
       savedObjectId: mockedTaskInstance.params.alertId,
       savedObjectType: RULE_SAVED_OBJECT_TYPE,
       spaceId: mockedTaskInstance.params.spaceId,
@@ -538,6 +538,11 @@ describe('Task Runner Cancel', () => {
         consumer: 'bar',
       },
     });
+    expect(alertingEventLogger.initialize).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({ executionId: RULE_EXECUTION_UUID }),
+      })
+    );
     expect(alertingEventLogger.addOrUpdateRuleData).toHaveBeenCalledWith({
       name: mockedRuleTypeSavedObject.name,
       consumer: mockedRuleTypeSavedObject.consumer,
