@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { ROUTE_VERSIONS } from '../../common/constants';
 import { APIRoutes } from '../../common/types';
 import { MockRouter } from '../../__mocks__/router.mock';
 import { defineRegionPolicyRoutes } from './region_policy';
@@ -50,6 +51,7 @@ describe('Region Policy Routes', () => {
         context,
         method: 'get',
         path: APIRoutes.REGION_POLICY,
+        version: ROUTE_VERSIONS.v1,
       });
       defineRegionPolicyRoutes({ logger: mockLogger, router: mockRouter.router });
     });
@@ -86,6 +88,7 @@ describe('Region Policy Routes', () => {
         context,
         method: 'put',
         path: APIRoutes.REGION_POLICY,
+        version: ROUTE_VERSIONS.v1,
       });
       defineRegionPolicyRoutes({ logger: mockLogger, router: mockRouter.router });
     });
@@ -112,6 +115,26 @@ describe('Region Policy Routes', () => {
     it('validates that allowed_regions is an array of {csp, region} objects', () => {
       mockRouter.shouldThrow({ body: { allowed_regions: ['not-an-object'] } });
     });
+
+    it('rejects allowed_regions exceeding maxSize of 100', () => {
+      const tooManyRegions = Array.from({ length: 101 }, (_, i) => ({
+        csp: 'aws',
+        region: `us-east-${i}`,
+      }));
+      mockRouter.shouldThrow({ body: { allowed_regions: tooManyRegions } });
+    });
+
+    it('rejects csp strings exceeding maxLength of 64', () => {
+      mockRouter.shouldThrow({
+        body: { allowed_regions: [{ csp: 'a'.repeat(65), region: 'us-east-1' }] },
+      });
+    });
+
+    it('rejects region strings exceeding maxLength of 128', () => {
+      mockRouter.shouldThrow({
+        body: { allowed_regions: [{ csp: 'aws', region: 'r'.repeat(129) }] },
+      });
+    });
   });
 
   describe('DELETE /internal/search_inference_endpoints/region_policy', () => {
@@ -120,6 +143,7 @@ describe('Region Policy Routes', () => {
         context,
         method: 'delete',
         path: APIRoutes.REGION_POLICY,
+        version: ROUTE_VERSIONS.v1,
       });
       defineRegionPolicyRoutes({ logger: mockLogger, router: mockRouter.router });
     });
