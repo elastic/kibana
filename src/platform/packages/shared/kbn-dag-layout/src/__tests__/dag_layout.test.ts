@@ -333,4 +333,51 @@ describe('dagLayout — layout invariants', () => {
       }
     }
   });
+
+  it('no overlap when two sibling diamonds each have a chain lane next to a leaf lane', () => {
+    // Regression for: handleSingleParent drift — chain-lane nodes were shifted
+    // left by half their width, desyncing them from adjacent leaf lanes and
+    // causing the inner lanes of adjacent diamonds to collide.
+    //
+    // Topology (TB):
+    //   gate
+    //   ├─ brA ─ chainA1 ─ chainA2   (chain lane)
+    //   │   └─ leafA                  (leaf lane)
+    //   └─ brB ─ chainB1 ─ chainB2   (chain lane)
+    //       └─ leafB                  (leaf lane)
+    //
+    // Before the fix: leafA <> chainB1 overlap (−100px gap).
+    const nodes = [
+      node('gate'),
+      node('brA'),
+      node('brB'),
+      node('chainA1'),
+      node('leafA'),
+      node('chainB1'),
+      node('leafB'),
+      node('chainA2'),
+      node('chainB2'),
+    ];
+    const edges = [
+      edge('g-brA', 'gate', 'brA'),
+      edge('g-brB', 'gate', 'brB'),
+      edge('brA-cA1', 'brA', 'chainA1'),
+      edge('brA-lA', 'brA', 'leafA'),
+      edge('brB-cB1', 'brB', 'chainB1'),
+      edge('brB-lB', 'brB', 'leafB'),
+      edge('cA1-cA2', 'chainA1', 'chainA2'),
+      edge('cB1-cB2', 'chainB1', 'chainB2'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edges, [], { direction: 'TB' });
+
+    for (let i = 0; i < laid.length; i++) {
+      for (let j = i + 1; j < laid.length; j++) {
+        const a = laid[i];
+        const b = laid[j];
+        const overlapX = a.x < b.x + b.width && a.x + a.width > b.x;
+        const overlapY = a.y < b.y + b.height && a.y + a.height > b.y;
+        expect(overlapX && overlapY).toBe(false);
+      }
+    }
+  });
 });

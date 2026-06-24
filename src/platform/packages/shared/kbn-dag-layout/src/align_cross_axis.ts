@@ -197,14 +197,18 @@ const handleMultipleParents = (
 };
 
 const handleSingleParent = (helpers: AlignHelpers, currNode: string, parent: string): void => {
-  const { g, cross, crossSpan, setCross, prevCross } = helpers;
+  const { g, cross, setCross, prevCross } = helpers;
   const currCross = cross(currNode);
   const siblings = getFilteredSuccessors(g, parent);
 
   if (siblings.length > 1) {
     prevCross[currNode] = currCross;
   } else {
-    const newCross = cross(parent) - crossSpan(currNode) / 2;
+    // dagre coords are centers — a single child aligns center-to-center under
+    // its only parent. (Previously `- crossSpan/2`, which drifted every chain
+    // link left by half its width and desynced it from adjacent leaf lanes,
+    // causing sibling subtrees to overlap.)
+    const newCross = cross(parent);
     prevCross[currNode] = currCross;
     setCross(currNode, roundCross(newCross));
   }
