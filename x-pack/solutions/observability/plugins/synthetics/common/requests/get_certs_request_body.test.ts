@@ -177,7 +177,9 @@ describe('getCertsRequestBody', () => {
       return filters.find((clause) => {
         const should = clause?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
         return should?.some((branch) => {
-          const branchFilters = branch?.bool?.filter as estypes.QueryDslQueryContainer[] | undefined;
+          const branchFilters = branch?.bool?.filter as
+            | estypes.QueryDslQueryContainer[]
+            | undefined;
           return branchFilters?.some(
             (f) => f?.wildcard?._index !== undefined || f?.bool?.must_not !== undefined
           );
