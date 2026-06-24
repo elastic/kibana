@@ -61,7 +61,13 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       ...queryParams
     } = request.query;
 
-    const toList = (value?: string) => (value ? value.split(',').filter(Boolean) : undefined);
+    const toList = (value?: string) =>
+      value
+        ? value
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : undefined;
 
     const ccsEnabled = isCCSEnabled(server);
     const remoteNameList = toList(remoteNames);
