@@ -116,10 +116,8 @@ describe('getSyntheticsCertsRoute', () => {
   });
 
   it('runs the cert search even with no local monitors when CCS is enabled', async () => {
-    // Remote-only monitors have no local saved object, so the route must not
-    // short-circuit on an empty SO list when CCS is on — the search itself is
-    // what surfaces remote certs through the route wrapper's CCS-expanded
-    // index pattern.
+    // Remote-only monitors have no local SO; the search itself surfaces them
+    // via the route wrapper's CCS-expanded index pattern.
     // @ts-expect-error partial implementation for testing
     jest.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
       enabledMonitorQueryIds: [],

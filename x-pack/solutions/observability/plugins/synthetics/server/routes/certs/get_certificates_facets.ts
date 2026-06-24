@@ -65,9 +65,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
     });
 
-    // Same rationale as the cert list route: without CCS, no local monitors
-    // means no certs to facet over. With CCS on, remote-only monitors may
-    // still contribute counts so the search must run.
+    // See `get_certificates.ts` for the CCS short-circuit rationale.
     if (!ccsEnabled && monitors.length === 0) {
       return { data: EMPTY_FACETS };
     }

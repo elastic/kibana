@@ -14,11 +14,9 @@ import { createRemoteMonitorDetailUrl } from '../../utils/remote/remote_monitor_
 
 interface DetailPageLinkProps {
   configId: string;
-  // Set when the cert's monitor came from a remote (CCS) cluster. When the
-  // remote ping carries a `kibanaUrl` we deep-link to the remote Kibana in a
-  // new tab (matches the overview flyout's "View on remote cluster" UX). When
-  // the URL is unknown, we fall back to the local monitor detail page with
-  // `?remoteName=<alias>` so the local Kibana renders the remote ping data.
+  // Remote (CCS) monitor: deep-link to the remote Kibana when `kibanaUrl` is
+  // present (matches the overview flyout), else fall back to local with
+  // `?remoteName=<alias>`.
   remote?: RemoteMonitorInfo;
 }
 

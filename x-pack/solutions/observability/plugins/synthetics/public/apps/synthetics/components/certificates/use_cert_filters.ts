@@ -41,10 +41,8 @@ export interface CertFiltersActions {
 }
 
 /**
- * Backs the Certificates page quick filters with the URL query string so a
- * filtered view survives a refresh and can be shared. Reuses the shared
- * `search`/`monitorTypes`/`tags`/`remoteNames` params and adds the
- * certificates-page `issuers`/`browserResourceTypes`/`party`/`expiringWithin` ones.
+ * Persists the Certificates page quick filters in the URL so a filtered view
+ * survives a refresh and is shareable.
  */
 export const useCertFilters = (): CertFiltersState & CertFiltersActions => {
   const {

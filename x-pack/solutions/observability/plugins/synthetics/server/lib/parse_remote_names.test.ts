@@ -47,7 +47,6 @@ describe('parseRemoteNames', () => {
   });
 
   it('counts the deduplicated length against the cap, not the raw token count', () => {
-    // 60 raw tokens, but only 1 unique → under the cap.
     const raw = Array.from({ length: 60 }, () => 'cluster1').join(',');
     expect(parseRemoteNames(raw, { maxCount: 50 })).toEqual({
       ok: true,

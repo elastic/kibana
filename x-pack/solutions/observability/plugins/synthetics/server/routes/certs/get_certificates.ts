@@ -45,9 +45,8 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       // Comma-separated issuer (certificate authority) common names; scopes the
       // list to certs signed by the selected CA(s).
       issuers: schema.maybe(schema.string({ maxLength: 4096 })),
-      // Comma-separated remote cluster aliases. Honoured only when the
-      // experimental CCS flag is on. Empty/absent means "every configured
-      // cluster" (local + every alias the route wrapper expanded into).
+      // Comma-separated remote cluster aliases; honoured only when CCS is on.
+      // Empty/absent → every configured cluster.
       remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
     }),
   },
@@ -93,10 +92,8 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
     });
 
-    // Without CCS we can short-circuit when there are no local enabled
-    // monitors — no other source of certs to consider. With CCS we may still
-    // have remote-only monitors whose certs are addressable purely through
-    // the CCS-expanded indices, so the search has to run.
+    // Without CCS, no local monitors = no certs. With CCS, remote-only
+    // monitors may still contribute, so the search has to run.
     if (!ccsEnabled && monitors.length === 0) {
       return {
         data: {

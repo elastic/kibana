@@ -170,18 +170,21 @@ describe('getCertsRequestBody', () => {
   });
 
   describe('cross-cluster search (CCS) scoping', () => {
-    // Picks the bool.should clause built by `buildMonitorScopingFilter`. It's
-    // the only filter clause whose `should` is two `bool.filter` branches.
+    // Picks the `bool.should` from `buildMonitorScopingFilter`, identified by
+    // the `_index` marker only its branches carry.
     const findScopingClause = (body: estypes.SearchRequest) => {
       const filters = (body.query?.bool?.filter ?? []) as estypes.QueryDslQueryContainer[];
       return filters.find((clause) => {
         const should = clause?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
-        return should !== undefined && should.every((branch) => branch?.bool?.filter !== undefined);
+        return should?.some((branch) => {
+          const branchFilters = branch?.bool?.filter as estypes.QueryDslQueryContainer[] | undefined;
+          return branchFilters?.some(
+            (f) => f?.wildcard?._index !== undefined || f?.bool?.must_not !== undefined
+          );
+        });
       });
     };
 
-    // Returns the local + remote branches with a hard assertion on shape so the
-    // rest of each test reads cleanly.
     const getBranches = (body: estypes.SearchRequest) => {
       const scoping = findScopingClause(body);
       if (!scoping?.bool?.should) {
@@ -201,7 +204,6 @@ describe('getCertsRequestBody', () => {
 
     it('keeps the local-only monitor.id terms filter when CCS is disabled', () => {
       const body = getCertsRequestBody(ruleParams) as estypes.SearchRequest;
-      // No bool.should scoping clause; just a plain monitor.id terms filter.
       expect(findScopingClause(body)).toBeUndefined();
       const filters = (body.query?.bool?.filter ?? []) as estypes.QueryDslQueryContainer[];
       expect(filters).toEqual(
@@ -217,7 +219,6 @@ describe('getCertsRequestBody', () => {
 
       const { local, remote } = getBranches(body);
 
-      // Local branch: must NOT be a remote ping AND must be in the enabled SO list.
       expect(local).toEqual(
         expect.arrayContaining([
           { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
@@ -225,14 +226,13 @@ describe('getCertsRequestBody', () => {
         ])
       );
 
-      // Remote branch: any monitor on a remote (CCS) cluster, scoped to the active space.
       expect(remote).toEqual(
         expect.arrayContaining([
           { wildcard: { _index: '*:*' } },
           { terms: { 'meta.space_id': ['team-a', '*'] } },
         ])
       );
-      // No alias filter when remoteNames is unset.
+      // remoteNames unset → no alias filter.
       expect(remote.find((f) => f?.bool?.should !== undefined)).toBeUndefined();
     });
 
@@ -266,10 +266,8 @@ describe('getCertsRequestBody', () => {
     });
 
     it('omits the local branch entirely when CCS is on and no local SO ids are passed', () => {
-      // Without local enabled monitors the local branch would otherwise collapse
-      // to "match every local ping" (just the `must_not _index: '*:*'` filter)
-      // with no `monitor.id` gating, surfacing certs from disabled, deleted, or
-      // other-space monitors. Only the remote branch should remain.
+      // Otherwise the local branch collapses to "any local ping", surfacing
+      // certs from disabled, deleted, or other-space monitors.
       const body = getCertsRequestBody(
         { ...ruleParams, monitorIds: [] },
         { ccsEnabled: true, spaceId: 'default' }
@@ -279,7 +277,6 @@ describe('getCertsRequestBody', () => {
       const branches = (scoping?.bool?.should ?? []) as estypes.QueryDslQueryContainer[];
       expect(branches).toHaveLength(1);
 
-      // The single remaining branch is the remote one, identified by its remote-index wildcard.
       const [onlyBranch] = branches;
       const onlyBranchFilter = (onlyBranch?.bool?.filter ?? []) as estypes.QueryDslQueryContainer[];
       expect(onlyBranchFilter).toEqual(expect.arrayContaining([{ wildcard: { _index: '*:*' } }]));
@@ -288,7 +285,6 @@ describe('getCertsRequestBody', () => {
 });
 
 describe('processCertsResult', () => {
-  // Minimal hit factory; `processCertsResult` only reads a handful of fields.
   const buildHit = ({
     index,
     monitorId,
@@ -383,9 +379,8 @@ describe('processCertsResult', () => {
   });
 
   it('derives per-monitor remote from each inner hit independently', () => {
-    // The same fingerprint can legitimately appear on multiple deployments
-    // (e.g. a wildcard cert reused across clusters), so per-monitor remote
-    // info has to come from the inner hit's own _index, not the outer one.
+    // A fingerprint can recur across clusters (e.g. a wildcard cert), so each
+    // monitor's remote must come from its own inner-hit `_index`.
     const result = processCertsResult({
       hits: {
         hits: [

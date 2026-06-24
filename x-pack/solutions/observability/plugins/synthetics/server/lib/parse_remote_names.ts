@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-// Each entry in `remoteNames` becomes a `wildcard { _index: "<alias>:*" }`
-// clause in a `bool.should`. ES enforces an `indices.query.bool.max_clause_count`
-// (default 1024) across the whole compiled query, so an unbounded list can both
-// slow queries down and trip that ceiling. 50 covers realistic cross-cluster
-// deployments with room to spare; bump if a customer ever credibly exceeds it.
+// Each name becomes a `wildcard` clause that counts against ES's
+// `indices.query.bool.max_clause_count` (default 1024). 50 is well clear.
 export const MAX_REMOTE_NAMES = 50;
 
 export type ParseRemoteNamesResult =
@@ -17,14 +14,9 @@ export type ParseRemoteNamesResult =
   | { ok: false; reason: 'too_many'; received: number; max: number };
 
 /**
- * Parses the comma-separated `remoteNames` query param into a whitespace-tolerant,
- * deduplicated list of cluster aliases capped at `maxCount`. Returns `undefined`
- * (under `ok: true`) when no names are provided so callers can skip CCS scoping
- * entirely.
- *
- * Trim/dedupe live here so every route gets the same normalization and the
- * downstream ES query builder receives a clean list it can map 1:1 to wildcard
- * clauses.
+ * Parses the comma-separated `remoteNames` query param: trims, drops empties,
+ * dedupes, and caps at `maxCount`. Returns `undefined` (under `ok: true`)
+ * when nothing is provided so callers can skip CCS scoping entirely.
  */
 export const parseRemoteNames = (
   raw: string | undefined,

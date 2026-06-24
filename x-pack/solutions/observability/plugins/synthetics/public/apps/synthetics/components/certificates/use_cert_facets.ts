@@ -12,19 +12,14 @@ import { getCertFacets } from '../../state/certs/api';
 import { SyntheticsRefreshContext } from '../../contexts';
 
 /**
- * Fetches global distinct-cert counts per quick-filter value. These are independent
- * of the active quick-filter selection (so sibling values keep their counts), and
- * refresh alongside the certificates list via the shared refresh context.
- *
- * `remoteNames` scopes facet counts to the selected remote clusters, so the
- * counts stay consistent with what the certificates list is showing under the
- * same Cluster filter. Local certs are always included.
+ * Global distinct-cert counts per quick-filter value (independent of the active
+ * selection, so sibling counts don't disappear). `remoteNames` scopes the
+ * remote branch only; local certs are always counted.
  */
 export const useCertFacets = (remoteNames?: string[]): CertFacets | undefined => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
-  // Stabilize the array reference across renders so useFetcher only re-runs
-  // when the actual cluster selection changes
+  // Stable reference: re-run only when the selection actually changes.
   const remoteNamesKey = remoteNames?.join(',') ?? '';
   const stableRemoteNames = useMemo(
     () => (remoteNamesKey ? remoteNamesKey.split(',') : undefined),

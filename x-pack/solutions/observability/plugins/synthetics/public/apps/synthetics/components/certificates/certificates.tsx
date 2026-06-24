@@ -87,10 +87,7 @@ export const CertificatesPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  // Honour the URL-driven cluster selection so that an external link
-  // (e.g. from a Lens in another space) lands on a pre-filtered view. The
-  // dedicated "Cluster" quick filter is intentionally not added here yet —
-  // tracked as a follow-up to issue #273622.
+  // URL-driven cluster selection — see #273622 for the planned quick filter.
   const facets = useCertFacets(remoteNames);
 
   const monitorTypeOptions = useMemo(

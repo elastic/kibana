@@ -121,8 +121,7 @@ describe('CertMonitors', () => {
       const link = getByTestId('syntheticsMonitorPageLinkRemoteLink') as HTMLAnchorElement;
       expect(link).toBeInTheDocument();
       expect(link.target).toBe('_blank');
-      // Path includes the remote configId; query string carries no remoteName
-      // because the link is a deep link to the remote Kibana itself.
+      // External link → no `remoteName=` query param.
       expect(link.href).toContain('https://remote-1.kibana');
       expect(link.href).toContain('remote-cfg-1');
       expect(link.href).not.toContain('remoteName=');
