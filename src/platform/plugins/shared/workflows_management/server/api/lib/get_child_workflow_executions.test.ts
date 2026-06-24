@@ -10,10 +10,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getChildWorkflowExecutions } from './get_child_workflow_executions';
 
+const WORKFLOW_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
+const STEP_BACKING_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
+
 describe('getChildWorkflowExecutions', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-
-  const TEST_STEP_EXECUTIONS_BACKING_INDEX = '.workflows-steps-000001';
 
   const baseParams = {
     workflowExecutionIndex: '.workflows-executions',
@@ -25,7 +26,6 @@ describe('getChildWorkflowExecutions', () => {
   const parentDoc = {
     spaceId: 'default',
     stepExecutionIds: ['step-1', 'step-2'],
-    stepExecutionsIndex: TEST_STEP_EXECUTIONS_BACKING_INDEX,
   };
 
   const createWorkflowExecuteStep = (
@@ -34,6 +34,8 @@ describe('getChildWorkflowExecutions', () => {
     status = 'completed'
   ) => ({
     found: true,
+    _id: id,
+    _index: STEP_BACKING_INDEX,
     _source: {
       id,
       stepId: `step-${id}`,
@@ -52,6 +54,8 @@ describe('getChildWorkflowExecutions', () => {
 
   const createRegularStep = (id: string, status = 'completed') => ({
     found: true,
+    _id: id,
+    _index: STEP_BACKING_INDEX,
     _source: {
       id,
       stepId: `step-${id}`,
@@ -67,31 +71,50 @@ describe('getChildWorkflowExecutions', () => {
     },
   });
 
+  const createWorkflowExecutionHit = (id: string, source: Record<string, unknown>) => ({
+    found: true,
+    _id: id,
+    _index: WORKFLOW_BACKING_INDEX,
+    _source: source,
+  });
+
   beforeEach(() => {
     mockEsClient = {
-      get: jest.fn(),
       mget: jest.fn(),
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      indices: {
+        getDataStream: jest.fn().mockImplementation(({ name }: { name: string }) => ({
+          data_streams: [
+            {
+              indices: [
+                {
+                  index_name: name.includes('steps') ? STEP_BACKING_INDEX : WORKFLOW_BACKING_INDEX,
+                },
+              ],
+            },
+          ],
+        })),
+      },
     } as any;
     jest.clearAllMocks();
   });
 
-  it('should throw when parent execution is not found (404)', async () => {
-    const notFoundError = new Error('Not found');
-    Object.assign(notFoundError, { meta: { statusCode: 404 } });
-    mockEsClient.get.mockRejectedValue(notFoundError);
+  it('returns empty array when parent execution is not found', async () => {
+    mockEsClient.mget.mockResolvedValueOnce({ docs: [{ found: false }] } as any);
 
     await expect(
       getChildWorkflowExecutions({
         ...baseParams,
         esClient: mockEsClient,
       })
-    ).rejects.toThrow('Not found');
+    ).resolves.toEqual([]);
   });
 
-  it('should return empty array when spaceId does not match', async () => {
-    mockEsClient.get.mockResolvedValue({
-      _source: { ...parentDoc, spaceId: 'other-space' },
+  it('returns empty array when spaceId does not match', async () => {
+    mockEsClient.mget.mockResolvedValueOnce({
+      docs: [createWorkflowExecutionHit('parent-exec-1', { ...parentDoc, spaceId: 'other-space' })],
     } as any);
+
     const result = await getChildWorkflowExecutions({
       ...baseParams,
       esClient: mockEsClient,
@@ -100,60 +123,66 @@ describe('getChildWorkflowExecutions', () => {
     expect(result).toEqual([]);
   });
 
-  it('should return empty array when no workflow.execute steps exist', async () => {
-    mockEsClient.get.mockResolvedValue({ _source: parentDoc } as any);
-    mockEsClient.mget.mockResolvedValue({
-      docs: [createRegularStep('step-1'), createRegularStep('step-2')],
-    } as any);
-    const result = await getChildWorkflowExecutions({
-      ...baseParams,
-      esClient: mockEsClient,
-    });
-
-    expect(result).toEqual([]);
-    expect(mockEsClient.mget).toHaveBeenCalledTimes(1);
-  });
-
-  it('should skip workflow.execute steps that are not in terminal status', async () => {
-    mockEsClient.get.mockResolvedValue({ _source: parentDoc } as any);
-    mockEsClient.mget.mockResolvedValue({
-      docs: [createWorkflowExecuteStep('step-1', 'child-exec-1', 'running')],
-    } as any);
-    const result = await getChildWorkflowExecutions({
-      ...baseParams,
-      esClient: mockEsClient,
-    });
-
-    expect(result).toEqual([]);
-  });
-
-  it('should fetch child executions and their steps', async () => {
-    mockEsClient.get.mockResolvedValue({ _source: parentDoc } as any);
-    // Parent step executions (mget #1)
+  it('returns empty array when no workflow.execute steps exist', async () => {
     mockEsClient.mget
       .mockResolvedValueOnce({
+        docs: [createWorkflowExecutionHit('parent-exec-1', parentDoc)],
+      } as any)
+      .mockResolvedValueOnce({
+        docs: [createRegularStep('step-1'), createRegularStep('step-2')],
+      } as any);
+
+    const result = await getChildWorkflowExecutions({
+      ...baseParams,
+      esClient: mockEsClient,
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it('skips workflow.execute steps that are not terminal', async () => {
+    mockEsClient.mget
+      .mockResolvedValueOnce({
+        docs: [createWorkflowExecutionHit('parent-exec-1', parentDoc)],
+      } as any)
+      .mockResolvedValueOnce({
+        docs: [createWorkflowExecuteStep('step-1', 'child-exec-1', 'running')],
+      } as any);
+
+    const result = await getChildWorkflowExecutions({
+      ...baseParams,
+      esClient: mockEsClient,
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it('fetches child executions and their steps through data stream mget helpers', async () => {
+    mockEsClient.mget
+      .mockResolvedValueOnce({
+        docs: [createWorkflowExecutionHit('parent-exec-1', parentDoc)],
+      } as any)
+      .mockResolvedValueOnce({
         docs: [createWorkflowExecuteStep('step-1', 'child-exec-1')],
-      } as any) // Child execution docs (mget #2)
+      } as any)
       .mockResolvedValueOnce({
         docs: [
-          {
-            _id: 'child-exec-1',
-            found: true,
-            _source: {
-              spaceId: 'default',
-              workflowId: 'child-wf-1',
-              workflowDefinition: { name: 'Child Workflow' },
-              status: 'completed',
-              stepExecutionIds: ['child-step-1', 'child-step-2'],
-              stepExecutionsIndex: TEST_STEP_EXECUTIONS_BACKING_INDEX,
-            },
-          },
+          createWorkflowExecutionHit('child-exec-1', {
+            id: 'child-exec-1',
+            spaceId: 'default',
+            workflowId: 'child-wf-1',
+            workflowDefinition: { name: 'Child Workflow' },
+            status: 'completed',
+            stepExecutionIds: ['child-step-1', 'child-step-2'],
+          }),
         ],
-      } as any) // Child step executions (mget #3)
+      } as any)
       .mockResolvedValueOnce({
         docs: [
           {
             found: true,
+            _id: 'child-step-1',
+            _index: STEP_BACKING_INDEX,
             _source: {
               id: 'child-step-1',
               stepId: 'do_something',
@@ -171,6 +200,7 @@ describe('getChildWorkflowExecutions', () => {
           },
         ],
       } as any);
+
     const result = await getChildWorkflowExecutions({
       ...baseParams,
       esClient: mockEsClient,
@@ -188,49 +218,57 @@ describe('getChildWorkflowExecutions', () => {
     );
     expect(result[0].stepExecutions).toHaveLength(1);
     expect(result[0].stepExecutions[0].id).toBe('child-step-1');
+    expect(mockEsClient.mget).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        docs: [{ _index: WORKFLOW_BACKING_INDEX, _id: 'parent-exec-1' }],
+        _source_includes: ['spaceId', 'stepExecutionIds'],
+      })
+    );
+    expect(mockEsClient.mget).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        docs: [
+          { _index: STEP_BACKING_INDEX, _id: 'step-1' },
+          { _index: STEP_BACKING_INDEX, _id: 'step-2' },
+        ],
+        _source_excludes: ['input', 'output'],
+      })
+    );
   });
 
-  it('should use _source_includes for parent GET and child mget', async () => {
-    mockEsClient.get.mockResolvedValue({ _source: parentDoc } as any);
+  it('falls back to workflowRunId search for child docs without stepExecutionIds', async () => {
     mockEsClient.mget
-      .mockResolvedValueOnce({ docs: [createRegularStep('step-1')] } as any)
-      .mockResolvedValue({ docs: [] } as any);
-    await getChildWorkflowExecutions({
-      ...baseParams,
-      esClient: mockEsClient,
-    });
-
-    expect(mockEsClient.get).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _source_includes: ['spaceId', 'stepExecutionIds', 'stepExecutionsIndex'],
-      })
-    );
-  });
-
-  it('should use backing index for parent step mget when stepExecutionsIndex is pinned', async () => {
-    mockEsClient.get.mockResolvedValue({ _source: parentDoc } as any);
-    mockEsClient.mget.mockResolvedValue({
-      docs: [createRegularStep('step-1')],
-    } as any);
-
-    await getChildWorkflowExecutions({
-      ...baseParams,
-      esClient: mockEsClient,
-    });
-
-    expect(mockEsClient.mget).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: TEST_STEP_EXECUTIONS_BACKING_INDEX,
-        ids: ['step-1', 'step-2'],
-      })
-    );
-  });
-
-  it('should return empty array when parent has no pinned stepExecutionsIndex', async () => {
-    mockEsClient.get.mockResolvedValue({
-      _source: {
-        spaceId: 'default',
-        stepExecutionIds: ['step-1'],
+      .mockResolvedValueOnce({
+        docs: [createWorkflowExecutionHit('parent-exec-1', parentDoc)],
+      } as any)
+      .mockResolvedValueOnce({
+        docs: [createWorkflowExecuteStep('step-1', 'child-exec-1')],
+      } as any)
+      .mockResolvedValueOnce({
+        docs: [
+          createWorkflowExecutionHit('child-exec-1', {
+            id: 'child-exec-1',
+            spaceId: 'default',
+            workflowId: 'child-wf-1',
+            workflowDefinition: { name: 'Child Workflow' },
+            status: 'completed',
+          }),
+        ],
+      } as any);
+    mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any).mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              id: 'child-step-1',
+              stepId: 'do_something',
+              status: 'completed',
+              workflowRunId: 'child-exec-1',
+              spaceId: 'default',
+            },
+          },
+        ],
       },
     } as any);
 
@@ -239,30 +277,34 @@ describe('getChildWorkflowExecutions', () => {
       esClient: mockEsClient,
     });
 
-    expect(result).toEqual([]);
-    expect(mockEsClient.mget).not.toHaveBeenCalled();
+    expect(result[0].stepExecutions).toHaveLength(1);
+    expect(mockEsClient.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        index: '.workflows-steps',
+        query: { match: { workflowRunId: 'child-exec-1' } },
+      })
+    );
   });
 
-  it('should filter out child executions from a different space', async () => {
-    mockEsClient.get.mockResolvedValue({ _source: parentDoc } as any);
+  it('filters out child executions from a different space', async () => {
     mockEsClient.mget
+      .mockResolvedValueOnce({
+        docs: [createWorkflowExecutionHit('parent-exec-1', parentDoc)],
+      } as any)
       .mockResolvedValueOnce({
         docs: [createWorkflowExecuteStep('step-1', 'child-exec-1')],
       } as any)
       .mockResolvedValueOnce({
         docs: [
-          {
-            _id: 'child-exec-1',
-            found: true,
-            _source: {
-              spaceId: 'other-space',
-              workflowId: 'child-wf-1',
-              status: 'completed',
-              stepExecutionIds: [],
-            },
-          },
+          createWorkflowExecutionHit('child-exec-1', {
+            spaceId: 'other-space',
+            workflowId: 'child-wf-1',
+            status: 'completed',
+            stepExecutionIds: [],
+          }),
         ],
       } as any);
+
     const result = await getChildWorkflowExecutions({
       ...baseParams,
       esClient: mockEsClient,

@@ -15,6 +15,10 @@ import type {
 } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import {
+  getExecutionByIdFromDataStream,
+  getStepExecutionsByIdsFromDataStream,
+} from './execution_data_stream_reads';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -27,12 +31,10 @@ interface GetWorkflowExecutionParams {
   includeOutput?: boolean;
 }
 
-const RECENT_BACKING_INDEX_LOOKUP_COUNT = 3;
-
 export const getWorkflowExecution = async ({
   esClient,
   logger,
-  workflowExecutionIndex: _workflowExecutionIndex,
+  workflowExecutionIndex,
   stepsExecutionIndex,
   workflowExecutionId,
   spaceId,
@@ -40,47 +42,12 @@ export const getWorkflowExecution = async ({
   includeOutput = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
-    const { data_streams: dataStreams } = await esClient.indices.getDataStream({
-      name: _workflowExecutionIndex,
+    const doc = await getExecutionByIdFromDataStream({
+      esClient,
+      dataStream: workflowExecutionIndex,
+      id: workflowExecutionId,
+      spaceId,
     });
-    const recentBackingIndices =
-      dataStreams[0]?.indices
-        .map((index) => index.index_name)
-        .filter((indexName): indexName is string => Boolean(indexName))
-        .slice(-RECENT_BACKING_INDEX_LOOKUP_COUNT)
-        .reverse() ?? [];
-
-    const mgetResponse =
-      recentBackingIndices.length > 0
-        ? await esClient.mget<EsWorkflowExecution>({
-            docs: recentBackingIndices.map((index) => ({
-              _index: index,
-              _id: workflowExecutionId,
-            })),
-          })
-        : { docs: [] };
-
-    const mgetDocs = mgetResponse.docs
-      .map((hit) => ('found' in hit && hit.found ? hit._source ?? null : null))
-      .filter((source): source is EsWorkflowExecution => source !== null)
-      .filter((source) => source.spaceId === spaceId);
-
-    if (mgetDocs.length > 1) {
-      throw new Error(`Found duplicate workflow execution ID ${workflowExecutionId}`);
-    }
-
-    const doc =
-      mgetDocs[0] ??
-      (
-        await esClient.search<EsWorkflowExecution>({
-          index: _workflowExecutionIndex,
-          query: { ids: { values: [workflowExecutionId] } },
-          size: 2,
-        })
-      ).hits.hits
-        .map((hit) => hit._source ?? null)
-        .filter((source): source is EsWorkflowExecution => source !== null)
-        .filter((source) => source.spaceId === spaceId)[0];
 
     if (!doc || doc.spaceId !== spaceId) {
       return null;
@@ -90,12 +57,10 @@ export const getWorkflowExecution = async ({
     if (!includeInput) sourceExcludes.push('input');
     if (!includeOutput) sourceExcludes.push('output');
 
-    const stepExecutions = await getStepExecutionsByWorkflowExecution({
+    const stepExecutions = await getStepExecutionsByIdsFromDataStream({
       esClient,
-      stepsExecutionIndex: doc.stepExecutionsIndex,
-      stepsExecutionIndexAlias: stepsExecutionIndex,
-      workflowExecutionId,
-      stepExecutionIds: doc.stepExecutionIds,
+      dataStream: stepsExecutionIndex,
+      ids: doc.stepExecutionIds ?? [],
       sourceExcludes,
     });
 

@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { getWorkflowExecution } from './get_workflow_execution';
 
 const TEST_BACKING_INDEX = '.ds-.workflows-executions-2026.06.22-000001';
+const TEST_STEP_BACKING_INDEX = '.ds-.workflows-step-executions-2026.06.22-000001';
 
 describe('getWorkflowExecution', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
@@ -58,14 +59,26 @@ describe('getWorkflowExecution', () => {
         docs: [
           {
             found: true,
+            _id: executionId,
+            _index: TEST_BACKING_INDEX,
             _source: baseExecutionDoc,
           },
         ],
       } as any);
       mockEsClient.mget.mockResolvedValueOnce({
         docs: [
-          { found: true, _source: { stepId: 's1', status: 'completed', globalExecutionIndex: 0 } },
-          { found: true, _source: { stepId: 's2', status: 'completed', globalExecutionIndex: 1 } },
+          {
+            found: true,
+            _id: 'step-doc-1',
+            _index: TEST_STEP_BACKING_INDEX,
+            _source: { stepId: 's1', status: 'completed', globalExecutionIndex: 0 },
+          },
+          {
+            found: true,
+            _id: 'step-doc-2',
+            _index: TEST_STEP_BACKING_INDEX,
+            _source: { stepId: 's2', status: 'completed', globalExecutionIndex: 1 },
+          },
         ],
       } as any);
     });
@@ -153,6 +166,8 @@ describe('getWorkflowExecution', () => {
         docs: [
           {
             found: true,
+            _id: executionId,
+            _index: TEST_BACKING_INDEX,
             _source: { ...baseExecutionDoc, stepExecutionIds: undefined },
           },
         ],
@@ -229,12 +244,14 @@ describe('getWorkflowExecution', () => {
 
     it('should return the execution DTO with step executions', async () => {
       mockEsClient.mget.mockResolvedValueOnce({
-        docs: [{ found: true, _source: baseExecutionDoc }],
+        docs: [{ found: true, _id: executionId, _index: TEST_BACKING_INDEX, _source: baseExecutionDoc }],
       } as any);
       mockEsClient.mget.mockResolvedValueOnce({
         docs: [
           {
             found: true,
+            _id: 'step-doc-1',
+            _index: TEST_STEP_BACKING_INDEX,
             _source: {
               stepId: 's1',
               status: 'completed',
@@ -244,6 +261,8 @@ describe('getWorkflowExecution', () => {
           },
           {
             found: true,
+            _id: 'step-doc-2',
+            _index: TEST_STEP_BACKING_INDEX,
             _source: {
               stepId: 's2',
               status: 'completed',
