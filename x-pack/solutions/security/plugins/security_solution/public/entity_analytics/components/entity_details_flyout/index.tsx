@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
 import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
 import type { EntityType } from '../../../../common/search_strategy';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
+import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
+import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
 import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
@@ -24,12 +27,55 @@ export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;
 export const FIELDS_TABLE_TAB_TEST_ID = `${PREFIX}FieldsTableTab` as const;
 
+type RiskInputsTabWithAlertPreviewProps<T extends EntityType> = Omit<
+  RiskInputsTabProps<T>,
+  'openAlertPreview'
+> & { scopeId: string };
+
+/**
+ * Owns the legacy expandable-flyout alert-preview navigation and composes the
+ * context-agnostic {@link RiskInputsTab}, so the tab itself has no dependency on
+ * `useExpandableFlyoutApi`.
+ */
+const RiskInputsTabWithAlertPreview = <T extends EntityType>({
+  entityType,
+  entityName,
+  entityId,
+  scopeId,
+}: RiskInputsTabWithAlertPreviewProps<T>) => {
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const openAlertPreview = useCallback(
+    (id: string, indexName: string) =>
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id,
+          indexName,
+          scopeId,
+          isPreviewMode: true,
+          banner: ALERT_PREVIEW_BANNER,
+        },
+      }),
+    [openPreviewPanel, scopeId]
+  );
+
+  return (
+    <RiskInputsTab
+      entityType={entityType}
+      entityName={entityName}
+      entityId={entityId}
+      openAlertPreview={openAlertPreview}
+    />
+  );
+};
+
 export const getRiskInputTab = <T extends EntityType>({
   entityType,
   entityName,
   scopeId,
   entityId,
-}: RiskInputsTabProps<T>) => ({
+}: RiskInputsTabWithAlertPreviewProps<T>) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
   name: (
@@ -39,7 +85,7 @@ export const getRiskInputTab = <T extends EntityType>({
     />
   ),
   content: (
-    <RiskInputsTab
+    <RiskInputsTabWithAlertPreview
       entityType={entityType}
       entityName={entityName}
       scopeId={scopeId}
