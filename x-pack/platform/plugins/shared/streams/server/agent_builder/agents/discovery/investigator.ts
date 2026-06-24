@@ -47,9 +47,6 @@ export function createSigEventsInvestigatorAgent({
           tool_ids: [...SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS],
         },
       ],
-      // Grants smlSearch + executeConnectorSubAction so the agent can discover and
-      // invoke system connectors (e.g. Slack) without hard-coding connector IDs.
-      enable_elastic_capabilities: true,
     },
   } as const;
 }
