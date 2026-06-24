@@ -45,6 +45,15 @@ jest.mock('./schedule_flyout', () => ({
   SchedulesFlyout: () => <div data-test-subj="mock-schedules-flyout" />,
 }));
 
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
+jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
+  ...jest.requireActual('../../../attack_discovery/pages/use_find_attack_discoveries'),
+  useFindAttackDiscoveries: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('AttacksPageContent', () => {
