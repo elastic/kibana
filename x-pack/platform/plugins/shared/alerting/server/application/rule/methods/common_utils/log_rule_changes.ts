@@ -121,8 +121,8 @@ export async function logRuleChanges({
       });
     } catch (e) {
       logger.debug(
-        `Unable to transform rule change SO "${JSON.stringify(
-          ruleSO.attributes
+        `Unable to transform rule saved object "${JSON.stringify(
+          ruleSO.id
         )}" to serializable format: ${e}`
       );
     }
