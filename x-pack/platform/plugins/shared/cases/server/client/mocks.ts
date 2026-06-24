@@ -286,6 +286,7 @@ export const createCasesClientMockArgs = () => {
     fileService: createFileServiceMock(),
     config: ConfigSchema.validate({}),
     casesEventBus: createCasesEventBusMock(),
+    domainEvents: { publish: jest.fn() },
     request: httpServerMock.createKibanaRequest(),
   };
 };
@@ -315,6 +316,7 @@ export const createCasesClientFactoryMockArgs = () => {
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     casesEventBus: createCasesEventBusMock(),
+    domainEvents: { publish: jest.fn() },
   };
 };
 

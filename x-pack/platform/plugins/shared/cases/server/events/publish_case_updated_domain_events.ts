@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { domainEventBus } from '@kbn/domain-events';
+import type { DomainEventsServiceStart } from '@kbn/core-domain-events-server';
 import {
   CASE_UPDATED_EVENT_TYPE,
   CASE_STATUS_CHANGED_EVENT_TYPE,
@@ -16,6 +16,7 @@ import type { CaseSavedObjectTransformed } from '../common/types/case';
 import type { CaseUpdatedEventPayload, CaseStatusChangedEventPayload } from './types';
 
 export interface PublishCaseUpdatedDomainEventsParams {
+  domainEvents: DomainEventsServiceStart;
   request: KibanaRequest;
   payload: CaseUpdatedEventPayload;
   previousCase?: CaseSavedObjectTransformed;
@@ -48,12 +49,13 @@ export const getCaseStatusChangedPayloadIfApplicable = ({
 };
 
 export const publishCaseUpdatedDomainEvents = ({
+  domainEvents,
   request,
   payload,
   previousCase,
   updatedCase,
 }: PublishCaseUpdatedDomainEventsParams): void => {
-  domainEventBus.publish({
+  domainEvents.publish({
     type: CASE_UPDATED_EVENT_TYPE,
     payload,
     request,
@@ -66,7 +68,7 @@ export const publishCaseUpdatedDomainEvents = ({
   });
 
   if (caseStatusChangedPayload) {
-    domainEventBus.publish({
+    domainEvents.publish({
       type: CASE_STATUS_CHANGED_EVENT_TYPE,
       payload: caseStatusChangedPayload,
       request,

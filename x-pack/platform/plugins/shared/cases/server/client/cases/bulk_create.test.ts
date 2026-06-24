@@ -64,7 +64,7 @@ describe('bulkCreate', () => {
   });
 
   describe('workflow events', () => {
-    it('emits caseCreated events on successful bulk create', async () => {
+    it('publishes cases.caseCreated events on successful bulk create', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSO, { ...caseSO, id: 'mock-id-2' }],
@@ -72,17 +72,17 @@ describe('bulkCreate', () => {
 
       await bulkCreate({ cases: [getCases()[0], getCases()[0]] }, clientArgs, casesClientMock);
 
-      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledTimes(2);
-      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenNthCalledWith(
-        1,
-        clientArgs.request,
-        { caseId: 'mock-id-1', owner: caseSO.attributes.owner }
-      );
-      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenNthCalledWith(
-        2,
-        clientArgs.request,
-        { caseId: 'mock-id-2', owner: caseSO.attributes.owner }
-      );
+      expect(clientArgs.domainEvents.publish).toHaveBeenCalledTimes(2);
+      expect(clientArgs.domainEvents.publish).toHaveBeenNthCalledWith(1, {
+        type: 'cases.caseCreated',
+        payload: { caseId: 'mock-id-1', owner: caseSO.attributes.owner },
+        request: clientArgs.request,
+      });
+      expect(clientArgs.domainEvents.publish).toHaveBeenNthCalledWith(2, {
+        type: 'cases.caseCreated',
+        payload: { caseId: 'mock-id-2', owner: caseSO.attributes.owner },
+        request: clientArgs.request,
+      });
     });
   });
 

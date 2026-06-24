@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-jest.mock('@kbn/domain-events', () => ({
-  domainEventBus: {
-    publish: jest.fn(),
-  },
-}));
-
-import { domainEventBus } from '@kbn/domain-events';
 import { ATTACHMENTS_ADDED_EVENT_TYPE } from '@kbn/domain-events/events/cases';
 import { comment, actionComment, mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
@@ -208,8 +201,8 @@ describe('bulkCreate', () => {
 
     await bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs);
 
-    expect(domainEventBus.publish).toHaveBeenCalledTimes(1);
-    expect(domainEventBus.publish).toHaveBeenCalledWith({
+    expect(clientArgs.domainEvents.publish).toHaveBeenCalledTimes(1);
+    expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
       type: ATTACHMENTS_ADDED_EVENT_TYPE,
       payload: expect.objectContaining({
         caseId,

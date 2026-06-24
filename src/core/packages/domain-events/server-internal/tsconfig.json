@@ -14,8 +14,9 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-http-server",
-    "@kbn/core-http-server-mocks",
-    "@kbn/zod"
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-domain-events-server",
+    "@kbn/domain-events"
   ]
 }

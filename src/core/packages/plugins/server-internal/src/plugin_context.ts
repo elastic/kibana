@@ -326,6 +326,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     dataStreams: {
       registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
     },
+    domainEvents: {
+      subscribe: (type, handler) => deps.domainEvents.subscribe(type, handler),
+      subscribeAll: (handler) => deps.domainEvents.subscribeAll(handler),
+    },
     userStorage: {
       register: deps.userStorage.register,
     },
@@ -431,6 +435,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
+    domainEvents: {
+      publish: (event) => deps.domainEvents.publish(event),
     },
     userStorage: {
       asScoped: deps.userStorage.asScoped,

@@ -6,7 +6,6 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { domainEventBus } from '@kbn/domain-events';
 import {
   CASE_UPDATED_EVENT_TYPE,
   CASE_STATUS_CHANGED_EVENT_TYPE,
@@ -16,15 +15,10 @@ import {
   publishCaseUpdatedDomainEvents,
 } from './publish_case_updated_domain_events';
 
-jest.mock('@kbn/domain-events', () => ({
-  domainEventBus: {
-    publish: jest.fn(),
-  },
-}));
-
 describe('publishCaseUpdatedDomainEvents', () => {
   const request = httpServerMock.createKibanaRequest();
-  const publishMock = domainEventBus.publish as jest.Mock;
+  const publishMock = jest.fn();
+  const domainEvents = { publish: publishMock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -32,6 +26,7 @@ describe('publishCaseUpdatedDomainEvents', () => {
 
   it('publishes caseUpdated only when updated fields do not include a status change', () => {
     publishCaseUpdatedDomainEvents({
+      domainEvents,
       request,
       payload: {
         caseId: 'case-1',
@@ -54,6 +49,7 @@ describe('publishCaseUpdatedDomainEvents', () => {
 
   it('publishes caseUpdated and caseStatusChanged when status actually changed', () => {
     publishCaseUpdatedDomainEvents({
+      domainEvents,
       request,
       payload: {
         caseId: 'case-1',
@@ -94,6 +90,7 @@ describe('publishCaseUpdatedDomainEvents', () => {
 
   it('does not publish caseStatusChanged when status field is unchanged', () => {
     publishCaseUpdatedDomainEvents({
+      domainEvents,
       request,
       payload: {
         caseId: 'case-1',

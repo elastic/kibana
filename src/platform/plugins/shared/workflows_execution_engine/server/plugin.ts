@@ -17,7 +17,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { domainEventBus } from '@kbn/domain-events';
 import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
@@ -138,6 +137,10 @@ export class WorkflowsExecutionEnginePlugin
   private initializePromise?: Promise<void>;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
+  /** Set in start(); the domain-event subscriber registered during setup() defers to it. */
+  private triggerEventHandler?: TriggerEventHandler;
+  /** Unsubscribe for the domain-event bus subscription registered during setup(). */
+  private domainEventsUnsubscribe?: () => void;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -160,6 +163,12 @@ export class WorkflowsExecutionEnginePlugin
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
+
+    // Subscriptions must be registered during setup(); the handler is created in start(),
+    // and events are only published at runtime (after start), so deferring is safe.
+    this.domainEventsUnsubscribe = core.domainEvents.subscribeAll((event) =>
+      this.triggerEventHandler?.handleDomainEvent(event)
+    );
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -1341,10 +1350,8 @@ export class WorkflowsExecutionEnginePlugin
       },
     };
 
-    /**
-     * Subscribe to all domain events and handle them with the trigger event handler.
-     */
-    domainEventBus.subscribeAll((event) => triggerEventHandler.handleDomainEvent(event));
+    // The domain-event subscriber registered in setup() defers to this handler.
+    this.triggerEventHandler = triggerEventHandler;
 
     return {
       workflowEventLoggerService,
@@ -1359,7 +1366,9 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.domainEventsUnsubscribe?.();
+  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {

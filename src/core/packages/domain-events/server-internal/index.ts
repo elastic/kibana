@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DomainEventBusImpl } from './src/domain_event_bus_impl';
-export type { DomainEvent, DomainEventBus, DomainEventMap, DomainEventType } from './src/types';
+export { DomainEventsService } from './src/domain_events_service';

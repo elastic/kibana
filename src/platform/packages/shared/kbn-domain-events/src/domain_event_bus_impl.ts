@@ -73,6 +73,3 @@ export class DomainEventBusImpl implements DomainEventBus {
     });
   }
 }
-
-/** One bus per Kibana Node process; all importers share this instance. */
-export const domainEventBus = new DomainEventBusImpl();

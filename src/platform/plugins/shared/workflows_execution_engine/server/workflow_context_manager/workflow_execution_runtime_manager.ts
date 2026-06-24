@@ -10,7 +10,6 @@
 import agent from 'elastic-apm-node';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { domainEventBus } from '@kbn/domain-events';
 import {
   WORKFLOW_STARTED_EVENT_TYPE,
   WORKFLOW_TERMINATED_EVENT_TYPE,
@@ -551,7 +550,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private publishWorkflowStartedDomainEvent(): void {
-    domainEventBus.publish({
+    this.coreStart?.domainEvents.publish({
       type: WORKFLOW_STARTED_EVENT_TYPE,
       payload: {
         spaceId: this.workflowExecution.spaceId,
@@ -577,7 +576,7 @@ export class WorkflowExecutionRuntimeManager {
     const stepName = failedStepContext?.stepName || stepId;
     const stepExecutionId = failedStepContext?.stepExecutionId;
 
-    domainEventBus.publish({
+    this.coreStart?.domainEvents.publish({
       type: WORKFLOW_TERMINATED_EVENT_TYPE,
       payload: {
         status: execution.status,

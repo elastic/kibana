@@ -63,6 +63,7 @@ import { EmailNotificationService } from '../services/notifications/email_notifi
 import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
+import type { DomainEventsServiceStart } from '@kbn/core-domain-events-server';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -83,6 +84,7 @@ interface CasesClientFactoryArgs {
   usageCounter?: IUsageCounter;
   config: ConfigType;
   casesEventBus?: CasesEventBus;
+  domainEvents: DomainEventsServiceStart;
   closeReasonValidator?: (
     closeReason: string,
     owner: string,
@@ -192,6 +194,7 @@ export class CasesClientFactory {
       usageCounter: this.options.usageCounter,
       config: this.options.config,
       casesEventBus: this.options.casesEventBus,
+      domainEvents: this.options.domainEvents,
       request,
       closeReasonValidator: boundCloseReasonValidator,
     });

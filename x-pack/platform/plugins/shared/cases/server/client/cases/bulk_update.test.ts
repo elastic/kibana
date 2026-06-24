@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-jest.mock('@kbn/domain-events', () => ({
-  domainEventBus: {
-    publish: jest.fn(),
-  },
-}));
-
-import { domainEventBus } from '@kbn/domain-events';
 import {
   CASE_UPDATED_EVENT_TYPE,
   CASE_STATUS_CHANGED_EVENT_TYPE,
@@ -92,7 +85,7 @@ describe('update', () => {
     it('emits caseUpdated events for updated cases', async () => {
       await bulkUpdate(cases, clientArgs, casesClientMock);
 
-      expect(domainEventBus.publish).toHaveBeenCalledWith({
+      expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
         type: CASE_UPDATED_EVENT_TYPE,
         payload: {
           caseId: mockCases[0].id,
@@ -101,16 +94,6 @@ describe('update', () => {
         },
         request: clientArgs.request,
       });
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
-        clientArgs.request,
-        {
-          caseId: mockCases[0].id,
-          owner: mockCases[0].attributes.owner,
-          updatedFields: ['assignees'],
-        },
-        expect.anything()
-      );
     });
 
     it('emits caseUpdated events with only fields that actually changed', async () => {
@@ -133,7 +116,7 @@ describe('update', () => {
         casesClientMock
       );
 
-      expect(domainEventBus.publish).toHaveBeenCalledWith({
+      expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
         type: CASE_UPDATED_EVENT_TYPE,
         payload: {
           caseId: mockCases[0].id,
@@ -142,7 +125,7 @@ describe('update', () => {
         },
         request: clientArgs.request,
       });
-      expect(domainEventBus.publish).toHaveBeenCalledWith({
+      expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
         type: CASE_STATUS_CHANGED_EVENT_TYPE,
         payload: {
           caseId: mockCases[0].id,
@@ -152,16 +135,6 @@ describe('update', () => {
         },
         request: clientArgs.request,
       });
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
-      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
-        clientArgs.request,
-        {
-          caseId: mockCases[0].id,
-          owner: mockCases[0].attributes.owner,
-          updatedFields: ['status'],
-        },
-        expect.anything()
-      );
     });
 
     it('does not notify if the case does not exist', async () => {

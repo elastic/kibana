@@ -31,13 +31,6 @@ jest.mock('../build_workflow_context', () => {
     buildWorkflowContext: jest.fn(),
   };
 });
-jest.mock('@kbn/domain-events', () => ({
-  domainEventBus: {
-    publish: jest.fn(),
-  },
-}));
-
-import { domainEventBus } from '@kbn/domain-events';
 import { WORKFLOW_TERMINATED_EVENT_TYPE } from '@kbn/domain-events/events/workflows';
 const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
   typeof buildWorkflowContext
@@ -127,7 +120,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       }
     });
 
-    fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
+    fakeCoreStart = {
+      domainEvents: { publish: jest.fn() },
+    } as unknown as jest.Mocked<CoreStart>;
     fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;
 
     stepIoService = {
@@ -1028,8 +1023,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
       await underTest.saveState();
       await underTest.saveState();
 
-      expect(domainEventBus.publish).toHaveBeenCalledTimes(1);
-      expect(domainEventBus.publish).toHaveBeenCalledWith(
+      expect(fakeCoreStart.domainEvents.publish).toHaveBeenCalledTimes(1);
+      expect(fakeCoreStart.domainEvents.publish).toHaveBeenCalledWith(
         expect.objectContaining({ type: WORKFLOW_TERMINATED_EVENT_TYPE })
       );
     });

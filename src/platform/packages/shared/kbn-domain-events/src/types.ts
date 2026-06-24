@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DomainEventMap, DomainEventType } from '../events';
 
 export type { DomainEventMap, DomainEventType } from '../events';

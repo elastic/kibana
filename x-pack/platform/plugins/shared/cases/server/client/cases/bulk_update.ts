@@ -748,6 +748,7 @@ export const bulkUpdate = async (
       };
 
       publishCaseUpdatedDomainEvents({
+        domainEvents: clientArgs.domainEvents,
         request: clientArgs.request,
         payload,
         previousCase: casesMap.get(updatedCase.id),

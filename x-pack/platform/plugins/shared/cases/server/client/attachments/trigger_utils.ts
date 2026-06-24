@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { domainEventBus } from '@kbn/domain-events';
 import { ATTACHMENTS_ADDED_EVENT_TYPE } from '@kbn/domain-events/events/cases';
 import type { Case } from '../../../common/types/domain';
 import type { Owner } from '../../../common/constants/types';
@@ -17,7 +16,7 @@ export function emitAttachmentsAddedEvent(
   attachmentIds: string[],
   attachmentType: string
 ): void {
-  domainEventBus.publish({
+  clientArgs.domainEvents.publish({
     type: ATTACHMENTS_ADDED_EVENT_TYPE,
     payload: {
       caseId: updatedCase.id,
@@ -27,10 +26,4 @@ export function emitAttachmentsAddedEvent(
     },
     request: clientArgs.request,
   });
-  // clientArgs.casesEventBus?.emitAttachmentsAdded(clientArgs.request, {
-  //   caseId: updatedCase.id,
-  //   attachmentIds,
-  //   attachmentType,
-  //   owner: updatedCase.owner as Owner,
-  // });
 }

@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-jest.mock('@kbn/domain-events', () => ({
-  domainEventBus: {
-    publish: jest.fn(),
-  },
-}));
-
-import { domainEventBus } from '@kbn/domain-events';
 import { ATTACHMENTS_ADDED_EVENT_TYPE } from '@kbn/domain-events/events/cases';
 import {
   MAX_COMMENT_LENGTH,
@@ -156,7 +149,7 @@ describe('addComment', () => {
       clientArgs
     );
 
-    expect(domainEventBus.publish).toHaveBeenCalledWith({
+    expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
       type: ATTACHMENTS_ADDED_EVENT_TYPE,
       payload: expect.objectContaining({
         caseId,

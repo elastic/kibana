@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DomainEventBusImpl } from './src/domain_event_bus_impl';
-export type { DomainEvent, DomainEventBus, DomainEventMap, DomainEventType } from './src/types';
+export type { DomainEventsServiceSetup, DomainEventsServiceStart } from './src/contracts';
+
+/** Re-export the envelope and catalog types for convenience. */
+export type {
+  DomainEvent,
+  DomainEventBus,
+  DomainEventMap,
+  DomainEventType,
+} from '@kbn/domain-events';
