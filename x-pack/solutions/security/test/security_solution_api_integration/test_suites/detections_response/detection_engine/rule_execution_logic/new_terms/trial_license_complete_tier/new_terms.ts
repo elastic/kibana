@@ -1274,60 +1274,63 @@ export default ({ getService }: FtrProviderContext) => {
         expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
-      platinumOnlyIt('suppression per rule execution should work for manual rule runs', async () => {
-        const id = uuidv4();
-        const firstTimestamp = moment(new Date()).subtract(3, 'h');
-        const firstDocument = {
-          id,
-          '@timestamp': firstTimestamp.toISOString(),
-          agent: {
-            name: 'agent-1',
-          },
-        };
-        const secondDocument = {
-          id,
-          '@timestamp': moment(firstTimestamp).add(1, 'm').toISOString(),
-          agent: {
-            name: 'agent-1',
-          },
-        };
-        const thirdDocument = {
-          id,
-          '@timestamp': moment(firstTimestamp).add(3, 'm').toISOString(),
-          agent: {
-            name: 'agent-1',
-          },
-        };
+      platinumOnlyIt(
+        'suppression per rule execution should work for manual rule runs',
+        async () => {
+          const id = uuidv4();
+          const firstTimestamp = moment(new Date()).subtract(3, 'h');
+          const firstDocument = {
+            id,
+            '@timestamp': firstTimestamp.toISOString(),
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          const secondDocument = {
+            id,
+            '@timestamp': moment(firstTimestamp).add(1, 'm').toISOString(),
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          const thirdDocument = {
+            id,
+            '@timestamp': moment(firstTimestamp).add(3, 'm').toISOString(),
+            agent: {
+              name: 'agent-1',
+            },
+          };
 
-        await indexListOfDocuments([firstDocument, secondDocument, thirdDocument]);
+          await indexListOfDocuments([firstDocument, secondDocument, thirdDocument]);
 
-        const rule: NewTermsRuleCreateProps = {
-          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
-          new_terms_fields: ['agent.name'],
-          query: `id: "${id}"`,
-          index: ['ecs_compliant'],
-          history_window_start: 'now-1h',
-          from: 'now-35m',
-          interval: '30m',
-          alert_suppression: {
-            group_by: ['agent.name'],
-          },
-        };
+          const rule: NewTermsRuleCreateProps = {
+            ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+            new_terms_fields: ['agent.name'],
+            query: `id: "${id}"`,
+            index: ['ecs_compliant'],
+            history_window_start: 'now-1h',
+            from: 'now-35m',
+            interval: '30m',
+            alert_suppression: {
+              group_by: ['agent.name'],
+            },
+          };
 
-        const createdRule = await createRule(supertest, log, rule);
-        const alerts = await getAlerts(supertest, log, es, createdRule);
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits).toHaveLength(0);
+          expect(alerts.hits.hits).toHaveLength(0);
 
-        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
-          startDate: moment(firstTimestamp).subtract(5, 'm'),
-          endDate: moment(firstTimestamp).add(10, 'm'),
-        });
+          const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+            startDate: moment(firstTimestamp).subtract(5, 'm'),
+            endDate: moment(firstTimestamp).add(10, 'm'),
+          });
 
-        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
-        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits).toHaveLength(1);
-      });
+          await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+          const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+          expect(allNewAlerts.hits.hits).toHaveLength(1);
+        }
+      );
 
       platinumOnlyIt(
         'suppression with time window should work for manual rule runs and update alert',
