@@ -63,6 +63,9 @@ export class OasConverter {
 
   #addComponents(components: { [id: string]: OpenAPIV3.SchemaObject }) {
     Object.entries(components).forEach(([id, schema]) => {
+      if (this.#sharedSchemas.get(id) === schema) {
+        return;
+      }
       if (this.#onCollision !== 'ignore') {
         const existing = this.#sharedSchemas.get(id);
         if (existing && !schemasMatch(existing, schema)) {

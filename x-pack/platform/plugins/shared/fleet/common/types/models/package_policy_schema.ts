@@ -66,6 +66,26 @@ export const DeprecationInfoSchema = schema.object(
   { meta: { id: 'deprecation_info' } }
 );
 
+const PackagePolicyInputDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'package_policy_input_deprecation_info' } }
+);
+
+const PackagePolicyStreamDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'package_policy_stream_deprecation_info' } }
+);
+
+const SimplifiedPackagePolicyInputDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'simplified_package_policy_input_deprecation_info' } }
+);
+
+const SimplifiedPackagePolicyStreamDeprecationInfoSchema = DeprecationInfoSchema.extends(
+  {},
+  { meta: { id: 'simplified_package_policy_stream_deprecation_info' } }
+);
+
 const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
@@ -102,7 +122,7 @@ const PackagePolicyStreamsSchema = {
       })
     )
   ),
-  deprecated: schema.maybe(DeprecationInfoSchema),
+  deprecated: schema.maybe(PackagePolicyStreamDeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
 
@@ -127,7 +147,7 @@ export const PackagePolicyInputsSchema = {
       })
     )
   ),
-  deprecated: schema.maybe(DeprecationInfoSchema),
+  deprecated: schema.maybe(PackagePolicyInputDeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
 
@@ -414,82 +434,80 @@ export const SimplifiedVarsSchema = schema.recordOf(
   }
 );
 
-export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
-  schema.string({ maxLength: 1024 }),
-  schema.object({
-    enabled: schema.maybe(
-      schema.boolean({
-        meta: {
-          description: 'Enable or disable that input. Defaults to `true` (enabled).',
-        },
-      })
-    ),
-    deprecated: schema.maybe(DeprecationInfoSchema),
-    vars: schema.maybe(SimplifiedVarsSchema),
-    condition: schema.maybe(
-      schema.nullable(
-        schema.string({
-          maxLength: 10000,
+export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      enabled: schema.maybe(
+        schema.boolean({
           meta: {
-            description: 'Agent condition expression to evaluate whether to apply this input.',
+            description: 'Enable or disable that input. Defaults to `true` (enabled).',
           },
         })
-      )
-    ),
-    streams: schema.maybe(
-      schema.recordOf(
-        schema.string({ maxLength: 1024 }),
-        schema.object({
-          enabled: schema.maybe(
-            schema.boolean({
-              meta: {
-                description: 'Enable or disable that stream. Defaults to `true` (enabled).',
-              },
-            })
-          ),
-          vars: schema.maybe(SimplifiedVarsSchema),
-          var_group_selections: VarGroupSelectionsSchema,
-          deprecated: schema.maybe(DeprecationInfoSchema),
-          condition: schema.maybe(
-            schema.nullable(
-              schema.string({
-                maxLength: 10000,
+      ),
+      deprecated: schema.maybe(SimplifiedPackagePolicyInputDeprecationInfoSchema),
+      vars: schema.maybe(SimplifiedVarsSchema),
+      condition: schema.maybe(
+        schema.nullable(
+          schema.string({
+            maxLength: 10000,
+            meta: {
+              description: 'Agent condition expression to evaluate whether to apply this input.',
+            },
+          })
+        )
+      ),
+      streams: schema.maybe(
+        schema.recordOf(
+          schema.string(),
+          schema.object({
+            enabled: schema.maybe(
+              schema.boolean({
                 meta: {
-                  description:
-                    'Agent condition expression to evaluate whether to apply this stream.',
+                  description: 'Enable or disable that stream. Defaults to `true` (enabled).',
                 },
               })
-            )
-          ),
-        }),
-        {
-          meta: {
-            description:
-              'Input streams. Refer to the integration documentation to know which streams are available.',
-          },
-        }
-      )
-    ),
-  }),
-  {
-    meta: {
-      description:
-        'Package policy inputs. Refer to the integration documentation to know which inputs are available.',
-    },
-  }
-);
-
-export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
-  SimplifiedPackagePolicyInputRecordSchema
+            ),
+            vars: schema.maybe(SimplifiedVarsSchema),
+            var_group_selections: VarGroupSelectionsSchema,
+            deprecated: schema.maybe(SimplifiedPackagePolicyStreamDeprecationInfoSchema),
+            condition: schema.maybe(
+              schema.nullable(
+                schema.string({
+                  maxLength: 10000,
+                  meta: {
+                    description:
+                      'Agent condition expression to evaluate whether to apply this stream.',
+                  },
+                })
+              )
+            ),
+          }),
+          {
+            meta: {
+              description:
+                'Input streams. Refer to the integration documentation to know which streams are available.',
+            },
+          }
+        )
+      ),
+    }),
+    {
+      meta: {
+        description:
+          'Package policy inputs. Refer to the integration documentation to know which inputs are available.',
+      },
+    }
+  )
 );
 
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
 
 function validateAdditionalDatastreamsPermissions(values: string[]) {
   for (const val of values) {
     if (!val.match(VALIDATE_DATASTREAMS_PERMISSION_REGEX)) {
-      return `${val} is not a valid datastream permissions, it should match logs|metrics|traces|synthetics|profiles)-*`;
+      return `${val} is not a valid datastream permissions, it should match logs|metrics|traces|synthetics|profiling)-*`;
     }
   }
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { metaFields, schema } from '@kbn/config-schema';
 import { joi2JsonInternal } from '../parse';
 import { createCtx } from './context';
 import { OasSchemaCollisionError } from './schema_collision';
@@ -43,6 +43,80 @@ describe('shared-schema id collision detection', () => {
     ctx.addSharedSchema('reused', { ...baseShape });
     expect(() => ctx.addSharedSchema('reused', { ...baseShape })).not.toThrow();
     expect(ctx.getSharedSchemas()).toEqual({ reused: baseShape });
+  });
+
+  it('ignores transient OAS generator annotations when comparing shared schemas', () => {
+    const ctx = createCtx();
+    const transientShape = () => ({
+      type: 'object' as const,
+      [metaFields.META_FIELD_X_OAS_DISCRIMINATOR]: 'a',
+      [metaFields.META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE]: true,
+      properties: {
+        a: {
+          type: 'string' as const,
+          [metaFields.META_FIELD_X_OAS_OPTIONAL]: true,
+        },
+      },
+    });
+    const storedShape = transientShape();
+    ctx.addSharedSchema('reused', storedShape as never);
+
+    const mutatedStoredShape = storedShape as Record<string, unknown>;
+    delete mutatedStoredShape[metaFields.META_FIELD_X_OAS_DISCRIMINATOR];
+    delete mutatedStoredShape[metaFields.META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE];
+    delete (storedShape.properties.a as Record<string, unknown>)[
+      metaFields.META_FIELD_X_OAS_OPTIONAL
+    ];
+
+    expect(() => ctx.addSharedSchema('reused', transientShape() as never)).not.toThrow();
+    expect(ctx.getSharedSchemas()).toEqual({
+      reused: transientShape(),
+    });
+  });
+
+  it('still detects collisions after transient metadata is removed', () => {
+    const ctx = createCtx();
+    const storedShape = {
+      ...baseShape,
+      [metaFields.META_FIELD_X_OAS_DISCRIMINATOR]: 'a',
+    };
+    ctx.addSharedSchema('id_collision', storedShape);
+    delete (storedShape as Record<string, unknown>)[metaFields.META_FIELD_X_OAS_DISCRIMINATOR];
+
+    expect(() => ctx.addSharedSchema('id_collision', { ...extendedShape })).toThrowError(
+      OasSchemaCollisionError
+    );
+  });
+
+  it('treats processed discriminator wrappers as equivalent during collision comparison', () => {
+    const ctx = createCtx();
+    const branchRefs = [
+      { $ref: '#/components/schemas/condition_filter' },
+      { $ref: '#/components/schemas/group_filter' },
+    ];
+
+    ctx.addSharedSchema('reused_discriminated_union', {
+      type: 'array',
+      items: {
+        oneOf: branchRefs,
+        discriminator: {
+          propertyName: 'type',
+          mapping: {
+            condition: '#/components/schemas/condition_filter',
+            group: '#/components/schemas/group_filter',
+          },
+        },
+      },
+    } as never);
+
+    expect(() =>
+      ctx.addSharedSchema('reused_discriminated_union', {
+        type: 'array',
+        items: {
+          anyOf: branchRefs,
+        },
+      } as never)
+    ).not.toThrow();
   });
 
   it('throws OasSchemaCollisionError when the same id is registered with a different shape', () => {

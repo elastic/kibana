@@ -7,15 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEqual } from 'lodash';
+import { metaFields } from '@kbn/config-schema';
+import { cloneDeep, isEqual } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 
 const ISSUE_URL = 'https://github.com/elastic/kibana/issues/271809';
 
+const TRANSIENT_SCHEMA_KEYS = new Set<string>([
+  metaFields.META_FIELD_X_OAS_OPTIONAL,
+  metaFields.META_FIELD_X_OAS_DISCRIMINATOR,
+  metaFields.META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
+]);
+
+const normalizeProcessedDiscriminator = (schema: Record<string, unknown>): void => {
+  if ('discriminator' in schema && Array.isArray(schema.oneOf) && !('anyOf' in schema)) {
+    schema.anyOf = schema.oneOf;
+    delete schema.oneOf;
+    delete schema.discriminator;
+  }
+};
+
+const removeTransientSchemaKeys = (value: unknown): void => {
+  if (Array.isArray(value)) {
+    value.forEach(removeTransientSchemaKeys);
+    return;
+  }
+
+  if (!value || typeof value !== 'object') {
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  normalizeProcessedDiscriminator(record);
+  TRANSIENT_SCHEMA_KEYS.forEach((key) => delete record[key]);
+  Object.values(record).forEach(removeTransientSchemaKeys);
+};
+
 /**
- * Shared schemas are stripped of transient internal annotations before registration.
+ * Shared schemas can be mutated by OAS post-processing before they are compared
+ * against later registrations. Ignore transient generator annotations so collision
+ * detection only sees the public schema shape.
  */
-export const schemasMatch = isEqual;
+export const normalizeSchemaForCollision = (
+  schema: OpenAPIV3.SchemaObject
+): OpenAPIV3.SchemaObject => {
+  const normalized = cloneDeep(schema);
+  removeTransientSchemaKeys(normalized);
+  return normalized;
+};
+
+export const schemasMatch = (
+  previous: OpenAPIV3.SchemaObject,
+  next: OpenAPIV3.SchemaObject
+): boolean => {
+  return isEqual(normalizeSchemaForCollision(previous), normalizeSchemaForCollision(next));
+};
 
 const propertyNames = (schema: OpenAPIV3.SchemaObject): string[] => {
   return schema.properties ? Object.keys(schema.properties).sort() : [];
