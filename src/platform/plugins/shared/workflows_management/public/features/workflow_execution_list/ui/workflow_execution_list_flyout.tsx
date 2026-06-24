@@ -13,7 +13,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -43,7 +42,7 @@ export const WorkflowExecutionListFlyout = ({
     >
       <EuiFlyoutHeader>
         <EuiFlexGroup
-          justifyContent="spaceBetween"
+          justifyContent="flexEnd"
           alignItems="center"
           gutterSize="none"
           responsive={false}
@@ -53,13 +52,6 @@ export const WorkflowExecutionListFlyout = ({
             borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
           }}
         >
-          <EuiTitle size="xs">
-            <h2 css={{ paddingLeft: '8px' }}>
-              {i18n.translate('workflows.executionListFlyout.title', {
-                defaultMessage: 'Executions',
-              })}
-            </h2>
-          </EuiTitle>
           <EuiButtonIcon
             iconType="cross"
             aria-label={i18n.translate('workflows.executionListFlyout.close', {

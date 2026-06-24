@@ -27,13 +27,38 @@ const Titles = {
   }),
 };
 
+export function buildForeachOutput(
+  stepExecution: WorkflowStepExecutionDto,
+  allStepExecutions: WorkflowStepExecutionDto[]
+): JsonValue {
+  const { stepId } = stepExecution;
+  const byIteration = new Map<number, Record<string, JsonValue>>();
+
+  for (const s of allStepExecutions) {
+    const frame = s.scopeStack?.find((f) => f.stepId === stepId);
+    const iterScope = frame?.nestedScopes.find((sc) => sc.scopeId !== undefined);
+    if (!iterScope?.scopeId) continue;
+    const iterNum = parseInt(iterScope.scopeId, 10);
+    if (isNaN(iterNum)) continue;
+    if (!byIteration.has(iterNum)) byIteration.set(iterNum, {});
+    if (s.output !== undefined && s.output !== null) {
+      byIteration.get(iterNum)![s.stepId] = s.output as JsonValue;
+    }
+  }
+
+  if (byIteration.size === 0) return null;
+  const maxIter = Math.max(...byIteration.keys());
+  return Array.from({ length: maxIter + 1 }, (_, i) => byIteration.get(i) ?? null);
+}
+
 interface StepExecutionDataViewProps {
   stepExecution: WorkflowStepExecutionDto;
   mode: 'input' | 'output';
+  allStepExecutions?: WorkflowStepExecutionDto[];
 }
 
 export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
-  ({ stepExecution, mode }) => {
+  ({ stepExecution, mode, allStepExecutions }) => {
     const { data, title } = useMemo<{ data: JsonValue | undefined; title: string }>(() => {
       if (mode === 'input') {
         return { data: stepExecution.input, title: Titles.input };
@@ -44,9 +69,17 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
             title: Titles.error,
           };
         }
+        const isForeachOrWhile =
+          stepExecution.stepType === 'foreach' || stepExecution.stepType === 'while';
+        if (isForeachOrWhile && stepExecution.output == null && allStepExecutions?.length) {
+          return {
+            data: buildForeachOutput(stepExecution, allStepExecutions),
+            title: Titles.output,
+          };
+        }
         return { data: stepExecution.output, title: Titles.output };
       }
-    }, [mode, stepExecution]);
+    }, [mode, stepExecution, allStepExecutions]);
 
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
       const isOverviewStep = stepExecution.stepType === '__overview';

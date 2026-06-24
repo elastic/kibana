@@ -180,48 +180,36 @@ function convertTreeToEuiTreeViewItems(
             };
             const expandButtonItem: EuiTreeViewProps['items'][number] = {
               id: `foreach-expand-${foreachParentId}`,
-              icon: (
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  onClick={handleExpand}
-                  aria-hidden={true}
-                  css={css({ cursor: 'pointer', flexShrink: 0, color: euiTheme.colors.vis.euiColorVisSuccess0 })}
-                >
-                  <path
-                    d="M1 14L15 14V15L1 15L1 14ZM1 1L15 1V2L1 2L1 1ZM4 10L12 10V6L4 6L4 10ZM12 5C12.5523 5 13 5.44771 13 6V10C13 10.5523 12.5523 11 12 11L4 11C3.44772 11 3 10.5523 3 10L3 6C3 5.44772 3.44772 5 4 5L12 5Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              ),
               label: (
-                <div
+                <span
                   onClick={handleExpand}
                   css={css({
                     display: 'flex',
                     alignItems: 'center',
-                    gap: euiTheme.size.s,
+                    gap: '6px',
                     cursor: 'pointer',
-                    width: '100%',
                     fontSize: `${euiTheme.font.scale.s * euiTheme.base}px`,
                     lineHeight: euiTheme.font.lineHeightMultiplier,
                   })}
                 >
-                  <span css={css({ flexShrink: 0, color: euiTheme.colors.textSubdued, fontVariantNumeric: 'tabular-nums' })}>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden={true}
+                    css={css({ flexShrink: 0, color: euiTheme.colors.vis.euiColorVisSuccess0 })}
+                  >
+                    <path
+                      d="M1 14L15 14V15L1 15L1 14ZM1 1L15 1V2L1 2L1 1ZM4 10L12 10V6L4 6L4 10ZM12 5C12.5523 5 13 5.44771 13 6V10C13 10.5523 12.5523 11 12 11L4 11C3.44772 11 3 10.5523 3 10L3 6C3 5.44772 3.44772 5 4 5L12 5Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <span css={css({ color: euiTheme.colors.textSubdued, fontVariantNumeric: 'tabular-nums' })}>
                     #{minHidden}-{maxHidden}
                   </span>
-                  <div
-                    css={css({
-                      flex: '1 1 auto',
-                      height: 0,
-                      borderTop: euiTheme.border.thin,
-                      alignSelf: 'center',
-                    })}
-                  />
-                </div>
+                </span>
               ),
               callback: () => {
                 onToggleForeach(foreachParentId);

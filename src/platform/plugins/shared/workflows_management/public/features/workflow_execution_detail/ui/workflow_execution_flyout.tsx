@@ -50,6 +50,7 @@ import { getStatusLabel } from '../../../shared/translations/status_translations
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { buildForeachOutput } from './step_execution_data_view';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 
 export interface WorkflowExecutionFlyoutProps {
@@ -525,6 +526,14 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const activeStepExecution = fullStepExecution ?? pseudoStepExecution;
     const stepName = selectedLightStep?.stepId ?? activeStepExecution?.stepId ?? '';
 
+    const activeStepType = selectedLightStep?.stepType ?? activeStepExecution?.stepType;
+    const isForeachOrWhileStep = activeStepType === 'foreach' || activeStepType === 'while';
+    const stepOutputData =
+      activeStepExecution?.error ??
+      (isForeachOrWhileStep && activeStepExecution != null && activeStepExecution.output == null
+        ? buildForeachOutput(activeStepExecution, workflowExecution?.stepExecutions ?? [])
+        : activeStepExecution?.output);
+
     // Widen the flyout DOM element when the step detail panel is open (FlyoutPanels pattern).
     useLayoutEffect(() => {
       const el = document.querySelector<HTMLElement>(`.${FLYOUT_CLASSNAME}`);
@@ -650,7 +659,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
                           defaultMessage: 'Output',
                         })}
-                        data={activeStepExecution?.error ?? activeStepExecution?.output}
+                        data={stepOutputData}
                       />
                     )}
                   </>

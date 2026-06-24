@@ -281,6 +281,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowStepExecutionDetails
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
+              allStepExecutions={workflowExecution?.stepExecutions ?? []}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
               workflowExecutionStatus={workflowExecution?.status}

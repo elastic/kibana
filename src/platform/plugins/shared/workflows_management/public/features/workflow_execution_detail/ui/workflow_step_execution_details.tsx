@@ -36,6 +36,7 @@ import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
+  allStepExecutions?: WorkflowStepExecutionDto[];
   workflowExecutionDuration?: number;
   isLoadingStepData?: boolean;
   workflowExecutionStatus?: ExecutionStatus;
@@ -53,6 +54,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
   ({
     workflowExecutionId,
     stepExecution,
+    allStepExecutions,
     workflowExecutionDuration,
     isLoadingStepData,
     workflowExecutionStatus,
@@ -125,9 +127,11 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     const hasInput = Boolean(stepExecution?.input);
     const hasOutput = Boolean(stepExecution?.output);
     const hasError = Boolean(stepExecution?.error);
+    const isForeachOrWhile =
+      stepExecution?.stepType === 'foreach' || stepExecution?.stepType === 'while';
 
     const showInput = hasInput;
-    const showOutput = hasOutput || hasError;
+    const showOutput = hasOutput || hasError || isForeachOrWhile;
 
     if (!stepExecution) {
       return (
@@ -266,7 +270,11 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   )}
                   {showOutput && (
                     <EuiFlexItem grow={false}>
-                      <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+                      <StepExecutionDataView
+                        stepExecution={stepExecution}
+                        mode="output"
+                        allStepExecutions={allStepExecutions}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
