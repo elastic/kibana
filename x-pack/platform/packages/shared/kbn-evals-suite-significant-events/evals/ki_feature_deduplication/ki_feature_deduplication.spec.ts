@@ -10,7 +10,6 @@ import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
 import { createSpanLatencyEvaluator, getCurrentTraceId } from '@kbn/evals';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/streams-schema';
-import { v4 as uuidv4 } from 'uuid';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -137,18 +136,20 @@ evaluate.describe(
 
             await executorClient.runExperiment(
               {
-                dataset: {
-                  name: `sigevents: KI feature deduplication (${dataset.id})`,
-                  description: `[${dataset.id}] KI feature deduplication across scenarios`,
-                  examples: availableScenarios.map(({ scenario }) => ({
-                    id: scenario.input.scenario_id,
-                    input: {
-                      scenario_id: scenario.input.scenario_id,
-                      stream_name: MANAGED_STREAM_NAME,
-                      iterations: scenario.input.iterations,
-                    },
-                  })),
-                },
+                datasets: [
+                  {
+                    name: `sigevents: KI feature deduplication (${dataset.id})`,
+                    description: `[${dataset.id}] KI feature deduplication across scenarios`,
+                    examples: availableScenarios.map(({ scenario }) => ({
+                      id: scenario.input.scenario_id,
+                      input: {
+                        scenario_id: scenario.input.scenario_id,
+                        stream_name: MANAGED_STREAM_NAME,
+                        iterations: scenario.input.iterations,
+                      },
+                    })),
+                  },
+                ],
                 concurrency: 1,
                 task: async ({
                   input,
@@ -226,19 +227,9 @@ evaluate.describe(
                         }
                         const merged = mergeFeature(existing, baseFeature);
 
-                        accumulated.update({
-                          ...merged,
-                          uuid: existing.uuid,
-                          status: 'active',
-                          last_seen: new Date().toISOString(),
-                        });
+                        accumulated.update(merged);
                       } else {
-                        accumulated.add({
-                          ...baseFeature,
-                          uuid: uuidv4(),
-                          status: 'active',
-                          last_seen: new Date().toISOString(),
-                        });
+                        accumulated.add(baseFeature);
                       }
                     }
                   }

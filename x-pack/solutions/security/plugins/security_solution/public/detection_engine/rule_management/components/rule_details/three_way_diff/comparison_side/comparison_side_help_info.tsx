@@ -42,7 +42,12 @@ export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps)
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={togglePopover}
+      aria-label={i18n.VERSION_COMPARISON_HELP_ARIA_LABEL}
+    >
       <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.upgradeHelpText"

@@ -10,7 +10,7 @@ import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceClient, InferenceConnector } from '@kbn/inference-common';
 
 import { runEvaluations } from '.';
 import { type DefaultAttackDiscoveryGraph } from '../../graphs/default_attack_discovery_graph';
@@ -52,6 +52,7 @@ const connectorTimeout = 1000;
 const datasetName = 'test-dataset';
 const evaluatorConnectorId = 'test-evaluator-connector-id';
 const getInferenceConnectorById = jest.fn();
+const inferenceClient = {} as InferenceClient;
 const langSmithApiKey = 'test-api-key';
 const logger = loggerMock.create();
 const connectors = [mockExperimentConnector];
@@ -104,6 +105,7 @@ describe('runEvaluations', () => {
       datasetName,
       evaluatorConnectorId,
       getInferenceConnectorById,
+      inferenceClient,
       graphs,
       langSmithApiKey,
       logger,
@@ -132,6 +134,7 @@ describe('runEvaluations', () => {
       datasetName,
       evaluatorConnectorId,
       getInferenceConnectorById,
+      inferenceClient,
       graphs,
       langSmithApiKey,
       logger,

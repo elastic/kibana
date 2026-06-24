@@ -17,6 +17,7 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -366,18 +367,26 @@ const RiskInputsTabContent = <T extends EntityType>({
     const columns: Array<EuiBasicTableColumn<InputAlert>> = [
       {
         render: (data: InputAlert) => (
-          <EuiButtonIcon
-            iconType="expand"
-            data-test-subj={EXPAND_ALERT_TEST_ID}
-            onClick={() => openAlertPreview(data._id, data.input.index)}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.right.alertPreview.ariaLabel',
-              {
-                defaultMessage: 'Preview alert with id {id}',
-                values: { id: data._id },
-              }
-            )}
-          />
+          <EuiToolTip
+            content={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.ariaLabel', {
+              defaultMessage: 'Preview alert with id {id}',
+              values: { id: data._id },
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="expand"
+              data-test-subj={EXPAND_ALERT_TEST_ID}
+              onClick={() => openAlertPreview(data._id, data.input.index)}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.right.alertPreview.ariaLabel',
+                {
+                  defaultMessage: 'Preview alert with id {id}',
+                  values: { id: data._id },
+                }
+              )}
+            />
+          </EuiToolTip>
         ),
         width: '5%',
       },

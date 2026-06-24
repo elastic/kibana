@@ -23,6 +23,7 @@ import { getTestRunDetailLink } from '../common/links/test_details_link';
 import { useStepDetailLink } from './hooks/use_step_detail_page';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { useDateFormat } from '../../../../hooks/use_date_format';
+import { useGetUrlParams } from '../../hooks';
 import { useUrlSpaceId } from '../../hooks/use_url_space_id';
 
 export const StepRunDate = () => {
@@ -45,6 +46,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
   const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
   const startedAt = formatter(data?.details?.timestamp);
 
   const { stepIndex, monitorId } = useParams<{ stepIndex: string; monitorId: string }>();
@@ -67,6 +69,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
         locationId: selectedLocation?.id,
         checkGroup: data?.details?.previous?.checkGroup,
         spaceId,
+        remoteName,
       });
     }
     if (data?.details?.next?.checkGroup) {
@@ -76,6 +79,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
         locationId: selectedLocation?.id,
         checkGroup: data?.details?.next?.checkGroup,
         spaceId,
+        remoteName,
       });
     }
   }
@@ -98,6 +102,9 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
           {startedAtWrapped}
         </EuiButtonEmpty>
       }
+      aria-label={i18n.translate('xpack.synthetics.stepPageNavigation.popoverAriaLabel', {
+        defaultMessage: 'Check navigation menu',
+      })}
     >
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>

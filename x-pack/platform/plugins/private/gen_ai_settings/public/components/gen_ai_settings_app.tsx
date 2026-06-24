@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import {
   AI_CHAT_EXPERIENCE_TYPE,
@@ -101,15 +100,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   }, [setBreadcrumbs, showAiBreadcrumb]);
 
   const handleNavigateToSpaces = useCallback(() => {
-    const basePath = http.basePath.get();
-    const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
-    const spacesPath = `/kibana/spaces/edit/${spaceId}${isPermissionsBased ? '/roles' : ''}`;
+    const spacesPath = `/kibana/spaces/edit/${http.spaceId}${isPermissionsBased ? '/roles' : ''}`;
 
     application.navigateToApp('management', {
       path: spacesPath,
       openInNewTab: true,
     });
-  }, [application, http.basePath, isPermissionsBased]);
+  }, [application, http.spaceId, isPermissionsBased]);
 
   async function handleSave() {
     const tokenUsageTrackingTurnedOn =

@@ -17,8 +17,8 @@ import type {
 import { SavedObjectsClient, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   AGENT_BUILDER_OVERVIEW_DASHBOARD_ID,
-  AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
   AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION,
+  AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
 } from './constants';
 import { overviewDashboard } from './assets/overview_dashboard';
 

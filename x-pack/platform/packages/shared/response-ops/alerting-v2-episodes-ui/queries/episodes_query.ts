@@ -13,6 +13,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   ALERT_ACTIONS_DATA_STREAM,
   PAGE_SIZE_ESQL_VARIABLE,
+  HISTOGRAM_EPISODE_LIMIT,
 } from '../constants';
 
 export interface AlertEpisode {
@@ -24,6 +25,8 @@ export interface AlertEpisode {
   first_timestamp: string;
   last_timestamp: string;
   duration: number;
+  /** ISO timestamp of the first event where episode.status === 'active'. */
+  triggered_at?: string;
   last_ack_action?: 'ack' | 'unack';
   last_assignee_uid?: string | null;
   last_snooze_action?: 'snooze' | 'unsnooze';
@@ -32,6 +35,8 @@ export interface AlertEpisode {
   last_tags?: string[];
   /** JSON string from the latest **non-empty** alert `data` (see `addEpisodeAggregation`) */
   episode_data?: string | null;
+  /** Latest top-level `severity` from a breached rule event, when present. */
+  severity?: string | null;
 }
 
 /**
@@ -50,6 +55,7 @@ export const ALERT_EPISODE_FIELDS = [
   'first_timestamp',
   'last_timestamp',
   'duration',
+  'triggered_at',
   'last_ack_action',
   'last_assignee_uid',
   'last_snooze_action',
@@ -57,6 +63,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_deactivate_action',
   'last_tags',
   'episode_data',
+  'severity',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -64,6 +71,15 @@ export interface EpisodesFilterState {
   status?: string | null;
   /** Rule ID or null */
   ruleId?: string | null;
+  /** Group hash — narrows to a single per-rule series (used for deep-links from rule details). */
+  groupHash?: string | null;
+  /**
+   * Display-only companion to `groupHash`. When a deep-link carries the
+   * resolved grouping field values (e.g. `{ "host.name": "web-01" }`), the
+   * destination chip can render `host=web-01` without re-running the DSL
+   * lookup. Does NOT affect the query — `buildEpisodesQuery` ignores it.
+   */
+  groupingValues?: Record<string, string | null> | null;
   /** Query string for full-text search */
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
@@ -97,7 +113,7 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };
@@ -135,6 +151,24 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
   }
   const clause = trimmed.map((t) => `MV_CONTAINS(last_tags, ${escapeStringValue(t)})`).join(' OR ');
   query.pipe(`WHERE (${clause})`);
+};
+
+const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
+  if (filterState.status) {
+    query.where`effective_status == ${filterState.status}`;
+  }
+  if (filterState.ruleId) {
+    query.where`rule.id == ${filterState.ruleId}`;
+  }
+  if (filterState.groupHash) {
+    query.where`group_hash == ${filterState.groupHash}`;
+  }
+  if (filterState.tags?.length) {
+    addTagsFilter(query, filterState.tags);
+  }
+  if (filterState.assigneeUid) {
+    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  }
 };
 
 /**
@@ -185,23 +219,81 @@ export const buildEpisodesQuery = (
 
   const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
 
-  if (filterState?.status) {
-    query.where`effective_status == ${filterState.status}`;
-  }
-
-  if (filterState?.ruleId) {
-    query.where`rule.id == ${filterState.ruleId}`;
-  }
-
-  if (filterState?.tags?.length) {
-    addTagsFilter(query, filterState.tags);
-  }
-
-  if (filterState?.assigneeUid) {
-    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  if (filterState) {
+    applyFilterState(query, filterState);
   }
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS
   );
+};
+
+/**
+ * Builds an ES|QL query that computes six KPI counts in a single STATS pass.
+ * Uses indicator EVALs (CASE-based 0/1 columns) so all aggregations can share
+ * one STATS command without sub-queries.
+ *
+ * Counts: active_alerts, firing_rules, assigned_to_me, unassigned, acknowledged, snoozed.
+ */
+export const buildEpisodesKpisQuery = (
+  spaceId: string,
+  currentUserUid?: string,
+  filterState?: EpisodesFilterState
+): string => {
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+
+  if (filterState) {
+    applyFilterState(query, filterState);
+  }
+
+  // Indicator columns — null for distinct count, 1/0 for sum-based counts.
+  // When there's no current user (anonymous/proxy-authenticated), nothing can be
+  // "assigned to me", so the indicator is always 0.
+  // prettier-ignore
+  query
+    .pipe`EVAL _active_rule_id = CASE(effective_status == "active", \`rule.id\`, null)`
+    .pipe(
+      currentUserUid
+        ? `EVAL _assigned_to_me = CASE(last_assignee_uid == ${escapeStringValue(currentUserUid)}, 1, 0)`
+        : `EVAL _assigned_to_me = 0`
+    )
+    .pipe`EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)`
+    .pipe`EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)`
+    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snooze_expiry IS NULL OR TO_DATETIME(snooze_expiry) > NOW()), 1, 0)`
+    .pipe`STATS
+      alerts_count   = COUNT(*),
+      firing_rules   = COUNT_DISTINCT(_active_rule_id),
+      assigned_to_me = SUM(_assigned_to_me),
+      unassigned     = SUM(_is_unassigned),
+      acknowledged   = SUM(_is_acked),
+      snoozed        = SUM(_is_snoozed)`;
+
+  return query.print('basic');
+};
+
+/**
+ * Builds a lightweight ESQL query for histogram data.
+ * Returns only the fields needed for overlap counting; no SORT.
+ * Time range is applied by the caller via executeEsqlQuery's input.timeRange.
+ */
+export const buildEpisodesHistogramQuery = (
+  spaceId: string,
+  filterState?: EpisodesFilterState,
+  breakdownField?: string
+): ComposerQuery => {
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+
+  if (filterState) {
+    applyFilterState(query, filterState);
+  }
+
+  const keepFields: string[] = [
+    'first_timestamp',
+    'last_timestamp',
+    'episode.status',
+    'effective_status',
+  ];
+  if (breakdownField) keepFields.push(breakdownField);
+
+  return query.keep(...(keepFields as [string, ...string[]])).limit(HISTOGRAM_EPISODE_LIMIT);
 };

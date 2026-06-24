@@ -63,6 +63,7 @@ export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimati
 // Agent builder settings
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
+export const AGENT_BUILDER_BASH_SUPPORT_SETTING_ID = 'agentBuilder:bashSupport';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
 export const AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID =
   'agentBuilder:uiamOAuthClientManagement';
@@ -170,7 +171,6 @@ export const OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS =
   'observability:streamsSigEventsIndexPatterns';
 export const OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';
-export const OBSERVABILITY_STREAMS_ENABLE_MEMORY = 'observability:streamsEnableMemory';
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 =
   'observability:streamsEnableSignificantEventsAlertingV2';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';

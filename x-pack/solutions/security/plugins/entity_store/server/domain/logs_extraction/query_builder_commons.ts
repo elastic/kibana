@@ -7,7 +7,6 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
-  conditionToESQL,
   isAlwaysCondition,
   isAndCondition,
   isFilterCondition,
@@ -16,6 +15,8 @@ import {
   isOrCondition,
   type Condition,
 } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
+import { castEntityField, castField } from '../../../common/esql/cast';
 import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
@@ -44,6 +45,8 @@ export const MAIN_ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
 export const TIMESTAMP_FIELD = '@timestamp';
+
+export const NULLIFY_UNMAPPED_FIELDS_SETTING = 'SET unmapped_fields="nullify";';
 
 export interface PaginationParams {
   timestampCursor: string;
@@ -121,7 +124,7 @@ export function aggregationStats(fields: EntityField[], renameToRecent: boolean 
     .map((field) => {
       const { retention, destination: dest } = field;
       const finalDest = renameToRecent ? recentData(dest) : dest;
-      const castedSrc = castSrcType(field);
+      const castedSrc = castEntityField(field);
       switch (retention.operation) {
         case 'collect_values':
           return `${finalDest} = VALUES(${castedSrc})`;
@@ -152,29 +155,6 @@ export function fieldsToKeep(definitionFields: EntityField[], defaultFields: str
     });
 
   return [...new Set(allFieldPatterns)].join(',\n');
-}
-
-export function castSrcType(field: EntityField): string {
-  switch (field.mapping?.type) {
-    case 'keyword':
-      return `TO_STRING(${field.source})`;
-    case 'date':
-      return `TO_DATETIME(${field.source})`;
-    case 'boolean':
-      return `TO_BOOLEAN(${field.source})`;
-    case 'long':
-      return `TO_LONG(${field.source})`;
-    case 'integer':
-      return `TO_INTEGER(${field.source})`;
-    case 'float':
-      return `TO_DOUBLE(${field.source})`;
-    case 'ip':
-      return `TO_IP(${field.source})`;
-    case 'scaled_float':
-      return `${field.source}`;
-    default:
-      return field.source;
-  }
 }
 
 export function extractPaginationParams(
@@ -225,10 +205,11 @@ function fieldValueToEsqlExpression(value: FieldValueSchema): string {
     return `"${escapeEsqlStringLiteral(value)}"`;
   }
   if ('source' in value) {
-    return `TO_STRING(${value.source})`;
+    return castField(value.source);
   }
   const { fields, sep } = value.composition;
   const escapedSep = escapeEsqlStringLiteral(sep);
+  // CONCAT requires string arguments — always use TO_STRING for compositions.
   const parts = fields.flatMap((f, i) =>
     i === 0 ? [`TO_STRING(${f})`] : [`"${escapedSep}"`, `TO_STRING(${f})`]
   );
@@ -243,13 +224,17 @@ export interface BuildSetFieldsByConditionPostStatsContext {
 
 /**
  * Builds ESQL EVAL CASE fragments for when-condition field overrides (pre-STATS by default).
- * Pass `postStats` for after-STATS rows in logs extraction (main vs CCS differs by `useRecentDataPrefix`).
+ * Pass `postStats` for after-STATS rows in logs extraction (main vs remote differs by `useRecentDataPrefix`).
  */
-export function buildSetFieldsByCondition(
+export function buildSetFieldsByConditionAssignments(
   setFieldsByCondition: SetFieldsByCondition,
   postStats?: BuildSetFieldsByConditionPostStatsContext
 ): string {
   const { condition, fields: overrideFields } = setFieldsByCondition;
+
+  if (Object.keys(overrideFields).length === 0) {
+    throw new Error('buildSetFieldsByConditionAssignments: fields must not be empty');
+  }
 
   if (postStats) {
     const logicalToColumn = buildPostStatsLogicalToColumnMap(
@@ -259,29 +244,38 @@ export function buildSetFieldsByCondition(
     const resolveColumn = (logical: string) => logicalToColumn.get(logical) ?? logical;
     const remappedCondition = mapConditionFieldsForPostStats(condition, resolveColumn);
     const conditionEsql = conditionToESQL(remappedCondition);
-    const evals = Object.entries(overrideFields).map(([field, value]) => {
-      const targetCol = resolveColumn(field);
-      const valueExpr = fieldValueToEsqlExpressionAfterStats(
-        value,
-        postStats.entityFields,
-        logicalToColumn
-      );
-      return `${targetCol} = CASE((${conditionEsql}), ${valueExpr}, ${targetCol})`;
-    });
-    return `| EVAL ${evals.join(',\n    ')}`;
+    return Object.entries(overrideFields)
+      .map(([field, value]) => {
+        const targetCol = resolveColumn(field);
+        const valueExpr = fieldValueToEsqlExpressionAfterStats(
+          value,
+          postStats.entityFields,
+          logicalToColumn
+        );
+        return `${targetCol} = CASE((${conditionEsql}), ${valueExpr}, ${targetCol})`;
+      })
+      .join(',\n    ');
   }
 
   const conditionEsql = conditionToESQL(condition);
-  const evals = Object.entries(overrideFields).map(([field, value]) => {
-    const valueExpr = fieldValueToEsqlExpression(value);
-    return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${field})`;
-  });
-  return `| EVAL ${evals.join(',\n    ')}`;
+  return Object.entries(overrideFields)
+    .map(([field, value]) => {
+      const valueExpr = fieldValueToEsqlExpression(value);
+      return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${castField(field)})`;
+    })
+    .join(',\n    ');
+}
+
+export function buildSetFieldsByCondition(
+  setFieldsByCondition: SetFieldsByCondition,
+  postStats?: BuildSetFieldsByConditionPostStatsContext
+): string {
+  return `| EVAL ${buildSetFieldsByConditionAssignments(setFieldsByCondition, postStats)}`;
 }
 
 /**
  * Maps logical field paths (entity `fields[].source` / `fields[].destination`) to ESQL column names
- * after STATS: `recent.<destination>` when `useRecentDataPrefix` is true (main extraction), else `<destination>` (CCS).
+ * after STATS: `recent.<destination>` when `useRecentDataPrefix` is true (main extraction), else `<destination>` (remote).
  */
 export function buildPostStatsLogicalToColumnMap(
   entityFields: EntityField[],

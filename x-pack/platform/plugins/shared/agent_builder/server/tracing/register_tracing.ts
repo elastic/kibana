@@ -18,7 +18,8 @@ import {
 import {
   initInferenceTracerProvider,
   shutdownInferenceTracerProvider,
-  EVAL_RUN_ID_BAGGAGE_KEY,
+  EXECUTION_ID_BAGGAGE_KEY,
+  EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
 } from '@kbn/inference-tracing';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -140,7 +141,8 @@ export const registerTracingExporter = async ({
 
   processors.push(
     new EvalSpanProcessor([
-      { baggageKey: EVAL_RUN_ID_BAGGAGE_KEY },
+      { baggageKey: EXECUTION_ID_BAGGAGE_KEY },
+      { baggageKey: EVAL_EXPERIMENT_ID_BAGGAGE_KEY },
       { baggageKey: SPACE_ID_BAGGAGE_KEY, attributeKey: DATA_STREAM_NAMESPACE_ATTR },
     ])
   );

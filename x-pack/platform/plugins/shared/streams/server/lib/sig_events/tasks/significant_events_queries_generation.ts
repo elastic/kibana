@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * @deprecated Queries generation is now handled via the onboarding workflow (streams_ki/onboarding.yaml).
+ * This task definition is kept for reference and will be removed in a follow-up.
+ */
+
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
@@ -57,10 +62,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 streamsClient,
                 inferenceClient,
                 soClient,
-                getFeatureClient,
-                getQueryClient,
+                getKnowledgeIndicatorClient,
                 scopedClusterClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: fakeRequest,
               });
@@ -68,10 +71,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
 
               try {
-                const [featureClient, queryClient] = await Promise.all([
-                  getFeatureClient(),
-                  getQueryClient(),
-                ]);
+                const kiClient = await getKnowledgeIndicatorClient();
 
                 const result = await generateKIQueries(
                   { streamName, connectorId: connectorIdOverride },
@@ -79,15 +79,15 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     streamsClient,
                     inferenceClient,
                     soClient,
-                    featureClient,
-                    queryClient,
+                    kiClient,
                     esClient: scopedClusterClient.asCurrentUser,
-                    uiSettingsClient,
+                    featureFlags: taskContext.server.core.featureFlags,
                     searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
                     request: fakeRequest,
                     logger: taskLogger,
                     signal: runContext.abortController.signal,
                     telemetry: taskContext.telemetry,
+                    agentBuilderTools: taskContext.server.agentBuilder?.tools,
                   }
                 );
 

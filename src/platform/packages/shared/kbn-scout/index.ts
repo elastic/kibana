@@ -49,7 +49,6 @@ export {
   CopySavedObjectsToSpaceFlyout,
   buildContentListSearch,
   buildContentListUrlRegex,
-  DataViewsManagementPage,
   ListingTable,
   SavedObjectsManagementPage,
 } from './src/playwright/page_objects';
@@ -76,6 +75,7 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
+  ScoutSpaceParallelFixture,
   SpaceSolutionView,
 } from './src/playwright';
 

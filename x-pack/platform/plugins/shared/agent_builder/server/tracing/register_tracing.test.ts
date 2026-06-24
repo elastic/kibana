@@ -26,7 +26,8 @@ jest.mock('@kbn/core/server', () => {
 jest.mock('@kbn/inference-tracing', () => ({
   initInferenceTracerProvider: jest.fn(),
   shutdownInferenceTracerProvider: jest.fn().mockResolvedValue(undefined),
-  EVAL_RUN_ID_BAGGAGE_KEY: 'eval.run.id.baggage.key',
+  EXECUTION_ID_BAGGAGE_KEY: 'execution.id.baggage.key',
+  EVAL_EXPERIMENT_ID_BAGGAGE_KEY: 'experiment.id.baggage.key',
 }));
 
 jest.mock('./global_bridge_processor', () => ({
@@ -192,7 +193,8 @@ describe('registerTracingExporter', () => {
     expect(initInferenceTracerProvider).toHaveBeenCalledTimes(1);
     expect(MockedAgentBuilderProcessor).toHaveBeenCalledTimes(1);
     expect(MockedEvalSpanProcessor).toHaveBeenCalledWith([
-      { baggageKey: 'eval.run.id.baggage.key' },
+      { baggageKey: 'execution.id.baggage.key' },
+      { baggageKey: 'experiment.id.baggage.key' },
       { baggageKey: 'agent_builder.space_id', attributeKey: DATA_STREAM_NAMESPACE_ATTR },
     ]);
     const [providerOpts] = jest.mocked(initInferenceTracerProvider).mock.calls[0];

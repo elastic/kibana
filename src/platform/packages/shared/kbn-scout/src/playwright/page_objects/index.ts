@@ -13,8 +13,10 @@ import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
 import { DashboardApp } from './dashboard_app';
+import { DataGrid } from './data_grid';
 import { DataViewsManagementPage } from './data_views_management_page';
 import { DashboardLinks } from './dashboard_links';
+import { DataViewEditorPage } from './data_view_editor_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
@@ -32,6 +34,8 @@ import { LoginPage } from './login_page';
 import { HomePage } from './home_page';
 import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
+import { UnifiedFieldList } from './unified_field_list';
+import { UnifiedTabs } from './unified_tabs';
 import {
   ContentListWrapper,
   buildContentListSearch,
@@ -43,6 +47,7 @@ import type { KibanaUrl } from '../../common/services/kibana_url';
 export {
   ContentListWrapper,
   CopySavedObjectsToSpaceFlyout,
+  DataGrid,
   DataViewsManagementPage,
   ListingTable,
   SavedObjectsManagementPage,
@@ -60,10 +65,12 @@ export interface PageObjectsFixtures {
 
 export interface PageObjects {
   datePicker: DatePicker;
+  dataGrid: DataGrid;
   dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
   dashboard: DashboardApp;
   dashboardLinks: DashboardLinks;
+  dataViewEditor: DataViewEditorPage;
   filterBar: FilterBar;
   listingTable: ListingTable;
   home: HomePage;
@@ -80,6 +87,8 @@ export interface PageObjects {
   login: LoginPage;
   overlays: OverlaysPage;
   visualize: VisualizeApp;
+  unifiedFieldList: UnifiedFieldList;
+  unifiedTabs: UnifiedTabs;
 }
 
 /**
@@ -91,6 +100,8 @@ export interface PageObjects {
 export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
+    dataGrid: createLazyPageObject(DataGrid, fixtures.page),
+    dataViewEditor: createLazyPageObject(DataViewEditorPage, fixtures.page),
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
@@ -118,5 +129,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     overlays: createLazyPageObject(OverlaysPage, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
+    unifiedFieldList: createLazyPageObject(UnifiedFieldList, fixtures.page),
+    unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
   };
 }
