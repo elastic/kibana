@@ -16,6 +16,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
     'Resolves administers relationships from raw_identifiers on entity documents ' +
     '(Active Directory: user → host and host → host via managedObjects)',
   interval: '1d',
+  timeout: '1h',
   initialState: {},
   run: async ({ esClient, logger, status, crudClient, abortController }) => {
     const namespace = status.metadata.namespace;
