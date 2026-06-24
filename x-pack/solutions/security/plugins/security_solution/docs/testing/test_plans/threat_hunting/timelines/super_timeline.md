@@ -1,6 +1,6 @@
 # Test plan: Super Timeline <!-- omit from toc -->
 
-**Status**: `in progress — PR 2 of 5`
+**Status**: `in progress — PR 3 of 5`
 
 ## Summary <!-- omit from toc -->
 
@@ -90,4 +90,29 @@ No browser entry point in this PR. Run the unit tests:
 
 ```bash
 node scripts/jest x-pack/solutions/security/plugins/security_solution/public/timelines/components/super_timeline/use_open_super_timeline.test.ts
+```
+
+---
+
+## PR 3 — Multi-source notes aggregation
+
+### What this introduces
+
+- `makeSelectNotesBySavedObjectIds(ids: string[])` selector in the notes Redux store — filters
+  the flat note pool by any of the source timeline IDs.
+- **Notes tab**: when `isSuperTimeline`, dispatches `fetchNotesBySavedObjectIds(superTimelineSourceIds)`
+  on mount and renders notes read-only (no add-note input, no SaveTimelineCallout).
+
+### Why
+
+Notes live in a flat Redux pool keyed by `noteId`. A single-id selector already existed;
+extending it to multiple IDs is a filter over the same pool — no note objects are copied or
+cloned, so duplication is structurally impossible.
+
+### How to verify
+
+No browser entry point in this PR. Run the unit tests:
+
+```bash
+node scripts/jest x-pack/solutions/security/plugins/security_solution/public/notes/store/notes.slice.test.ts
 ```
