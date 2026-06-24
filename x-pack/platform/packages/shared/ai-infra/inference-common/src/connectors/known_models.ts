@@ -179,6 +179,18 @@ export const knownModels: ModelDefinition[] = [
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
+  {
+    id: 'claude-4.7-opus',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 200000,
+  },
+  {
+    id: 'claude-4.8-opus',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 200000,
+  },
   // OpenAI o-series reasoning models
   {
     id: 'o3-mini',

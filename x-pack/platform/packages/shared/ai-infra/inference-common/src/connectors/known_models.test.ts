@@ -40,6 +40,14 @@ describe('getModelDefinition', () => {
       id: 'claude-4.5-haiku',
       contextWindow: 200000,
     });
+    expect(getModelDefinition('anthropic-claude-4.7-opus')).toMatchObject({
+      id: 'claude-4.7-opus',
+      contextWindow: 200000,
+    });
+    expect(getModelDefinition('anthropic-claude-4.8-opus')).toMatchObject({
+      id: 'claude-4.8-opus',
+      contextWindow: 200000,
+    });
   });
 
   it('returns the expected models for common google full model names', () => {

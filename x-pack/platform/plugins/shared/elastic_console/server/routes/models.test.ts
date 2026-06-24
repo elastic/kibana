@@ -56,7 +56,14 @@ describe('registerModelsRoute', () => {
   });
 
   it('registers the OpenAI-compatible models route', () => {
-    registerModelsRoute({ router, coreSetup: coreSetup as CoreSetup, logger });
+    registerModelsRoute({
+      router,
+      coreSetup: coreSetup as unknown as CoreSetup<
+        ElasticConsoleStartDependencies,
+        ElasticConsolePluginStart
+      >,
+      logger,
+    });
 
     const [config] = router.get.mock.calls[0];
     expect(config.path).toBe('/internal/elastic_ramen/v1/models');
@@ -75,7 +82,14 @@ describe('registerModelsRoute', () => {
       createConnector({ connectorId: 'unknown-model' }),
     ]);
 
-    registerModelsRoute({ router, coreSetup: coreSetup as CoreSetup, logger });
+    registerModelsRoute({
+      router,
+      coreSetup: coreSetup as unknown as CoreSetup<
+        ElasticConsoleStartDependencies,
+        ElasticConsolePluginStart
+      >,
+      logger,
+    });
 
     const [, handler] = router.get.mock.calls[0];
     await handler({}, request, response);
@@ -109,7 +123,7 @@ describe('registerModelsRoute', () => {
       },
     });
 
-    const [{ body }] = response.ok.mock.calls[0];
+    const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     const serializedBody = JSON.parse(JSON.stringify(body));
     expect(serializedBody.data[0].context_window_size).toBe(1000000);
     expect(serializedBody.data[1]).not.toHaveProperty('context_window_size');
