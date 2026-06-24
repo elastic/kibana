@@ -19,6 +19,7 @@ import { appContextService } from '../../../../app_context';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
+import { getSpaceScopedAssetId } from '../../../kibana/assets/install';
 import { saveKibanaAssetsRefs } from '../../install';
 import { MAX_CONCURRENT_RULE_CREATION_OPERATIONS } from '../../../../../constants';
 import { generateTemplateIndexPattern } from '../../../elasticsearch/template/template';
@@ -41,24 +42,31 @@ export async function createAlertingRuleFromTemplate(
     alertTemplateArchiveAsset: ArchiveAsset;
     spaceId?: string;
     pkgName: string;
+    installAsAdditionalSpace?: boolean;
   }
 ): Promise<KibanaAssetReference> {
   const { rulesClient, logger } = deps;
-  const { pkgName, alertTemplateArchiveAsset, spaceId } = params;
+  const { pkgName, alertTemplateArchiveAsset, spaceId, installAsAdditionalSpace } = params;
   const ruleId = getRuleId({ pkgName, templateId: alertTemplateArchiveAsset.id, spaceId });
   try {
     if (!rulesClient) {
       throw new FleetError('Rules client is not available');
     }
 
-    const template = await rulesClient
-      .getTemplate({ id: alertTemplateArchiveAsset.id })
-      .catch((err) => {
-        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          return undefined;
-        }
-        throw err;
-      });
+    // When the package was installed in an additional space its alerting_rule_template SOs
+    // were saved with a space-scoped hashed ID (originId = archive ID). Look up by that
+    // hashed ID so the template can be found in this space.
+    const templateLookupId =
+      installAsAdditionalSpace && spaceId
+        ? getSpaceScopedAssetId(alertTemplateArchiveAsset.id, spaceId)
+        : alertTemplateArchiveAsset.id;
+
+    const template = await rulesClient.getTemplate({ id: templateLookupId }).catch((err) => {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return undefined;
+      }
+      throw err;
+    });
     if (!template) {
       throw new FleetError(`Rule template ${alertTemplateArchiveAsset.id} not found`);
     }
@@ -274,11 +282,31 @@ export async function createInactivityMonitoringTemplate(
 export async function stepCreateAlertingAssets(
   context: Pick<
     InstallContext,
-    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'request'
+    | 'logger'
+    | 'savedObjectsClient'
+    | 'packageInstallContext'
+    | 'spaceId'
+    | 'request'
+    | 'installedPkg'
   > & { installAsAdditionalSpace?: boolean }
 ) {
-  const { logger, savedObjectsClient, packageInstallContext, spaceId, installAsAdditionalSpace } =
-    context;
+  const {
+    logger,
+    savedObjectsClient,
+    packageInstallContext,
+    spaceId,
+    installAsAdditionalSpace: explicitInstallAsAdditionalSpace,
+    installedPkg,
+  } = context;
+
+  // When called from the state machine the flag is not set on InstallContext; derive it from
+  // the package's primary installation space so that secondary-space reinstalls save refs to
+  // additional_spaces_installed_kibana instead of installed_kibana.
+  const installAsAdditionalSpace =
+    explicitInstallAsAdditionalSpace ??
+    (installedPkg
+      ? (installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId
+      : false);
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -317,7 +345,7 @@ export async function stepCreateAlertingAssets(
       async (alertTemplate) => {
         const ref = await createAlertingRuleFromTemplate(
           { rulesClient, logger },
-          { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName }
+          { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName, installAsAdditionalSpace }
         );
 
         assetRefs.push(ref);
@@ -325,6 +353,14 @@ export async function stepCreateAlertingAssets(
       { concurrency: MAX_CONCURRENT_RULE_CREATION_OPERATIONS }
     );
 
-    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, spaceId, false, true);
+    await saveKibanaAssetsRefs(
+      savedObjectsClient,
+      pkgName,
+      assetRefs,
+      spaceId,
+      installAsAdditionalSpace ?? false,
+      true,
+      [KibanaSavedObjectType.alert]
+    );
   });
 }

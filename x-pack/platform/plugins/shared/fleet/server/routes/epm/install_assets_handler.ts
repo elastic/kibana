@@ -26,10 +26,7 @@ import type {
   InstallRuleAssetsRequestSchema,
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
-import {
-  createInactivityMonitoringTemplate,
-  stepCreateAlertingAssets,
-} from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_assets';
+import { stepCreateAlertingAssets } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_assets';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
   request: KibanaRequest,
@@ -89,6 +86,12 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
     const installAsAdditionalSpace =
       (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceToInstallId;
 
+    const packageInstallContext = {
+      packageInfo,
+      paths: installedPkgWithAssets.paths,
+      archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
+    };
+
     await installKibanaAssetsAndReferences({
       savedObjectsClient: spaceScopedClient,
       logger,
@@ -98,17 +101,17 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       spaceId: spaceToInstallId,
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,
-      packageInstallContext: {
-        packageInfo,
-        paths: installedPkgWithAssets.paths,
-        archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
-      },
+      packageInstallContext,
     });
 
-    await createInactivityMonitoringTemplate(
-      { logger, savedObjectsClient: spaceScopedClient },
-      { packageInfo, spaceId: spaceToInstallId, installAsAdditionalSpace }
-    );
+    await stepCreateAlertingAssets({
+      logger,
+      savedObjectsClient: spaceScopedClient,
+      packageInstallContext,
+      spaceId: spaceToInstallId,
+      request,
+      installAsAdditionalSpace,
+    });
   }
 
   return response.ok({ body: { success: true } });

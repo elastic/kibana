@@ -12,6 +12,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { appContextService } from '../../../../app_context';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
+import { getSpaceScopedAssetId } from '../../../kibana/assets/install';
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { saveKibanaAssetsRefs } from '../../install';
@@ -158,6 +159,83 @@ describe('createAlertingRuleFromTemplate', () => {
       deferred: false,
       type: 'alert',
     });
+  });
+
+  it('should look up template by hashed space-scoped ID when installAsAdditionalSpace is true', async () => {
+    const hashedId = getSpaceScopedAssetId('template-id', 'my-space');
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: hashedId,
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    const result = await createAlertingRuleFromTemplate(
+      { rulesClient, logger },
+      {
+        alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
+        pkgName: 'test-package',
+        spaceId: 'my-space',
+        installAsAdditionalSpace: true,
+      }
+    );
+
+    expect(rulesClient.getTemplate).toHaveBeenCalledWith({ id: hashedId });
+    expect(rulesClient.create).toHaveBeenCalledWith({
+      data: {
+        enabled: false,
+        alertTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      },
+      options: { id: 'fleet-my-space-test-package-template-id' },
+    });
+    expect(result).toEqual({
+      id: 'fleet-my-space-test-package-template-id',
+      deferred: false,
+      type: 'alert',
+    });
+  });
+
+  it('should use the original archive ID for template lookup when installAsAdditionalSpace is false', async () => {
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: 'template-id',
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    await createAlertingRuleFromTemplate(
+      { rulesClient, logger },
+      {
+        alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
+        pkgName: 'test-package',
+        spaceId: 'my-space',
+        installAsAdditionalSpace: false,
+      }
+    );
+
+    expect(rulesClient.getTemplate).toHaveBeenCalledWith({ id: 'template-id' });
   });
 });
 
@@ -585,7 +663,135 @@ describe('stepCreateAlertingAssets', () => {
       ],
       DEFAULT_SPACE_ID,
       false,
-      true
+      true,
+      ['alert']
+    );
+  });
+
+  it('saves rule refs to additional_spaces_installed_kibana when installAsAdditionalSpace is true', async () => {
+    const hashedTemplateId = getSpaceScopedAssetId('template-id', 'my-space');
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: hashedTemplateId,
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    jest
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequest)
+      .mockResolvedValue(rulesClient);
+
+    const context = {
+      savedObjectsClient,
+      spaceId: 'my-space',
+      installAsAdditionalSpace: true,
+      packageInstallContext: {
+        packageInfo: { name: 'elastic_agent' },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'elastic_agent-0.0.1/kibana/alerting_rule_template/template-1.json',
+              Buffer.from(JSON.stringify({ id: 'template-id' })),
+            ],
+          ])
+        ),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
+
+    await stepCreateAlertingAssets(context as any);
+
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      expect.anything(),
+      'elastic_agent',
+      [
+        {
+          id: 'fleet-my-space-elastic_agent-template-id',
+          type: 'alert',
+          deferred: false,
+        },
+      ],
+      'my-space',
+      true,
+      true,
+      ['alert']
+    );
+  });
+
+  it('derives installAsAdditionalSpace=true from installedPkg when flag is not explicit and spaceId differs from primary', async () => {
+    const hashedTemplateId = getSpaceScopedAssetId('template-id', 'my-space');
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: hashedTemplateId,
+        ruleTypeId: 'rule-type-id',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: {},
+        schedule: { interval: '1m' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    jest
+      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequest)
+      .mockResolvedValue(rulesClient);
+
+    // No installAsAdditionalSpace — the function must derive it from installedPkg
+    const context = {
+      savedObjectsClient,
+      spaceId: 'my-space',
+      installedPkg: {
+        attributes: { installed_kibana_space_id: DEFAULT_SPACE_ID },
+      },
+      packageInstallContext: {
+        packageInfo: { name: 'elastic_agent' },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'elastic_agent-0.0.1/kibana/alerting_rule_template/template-1.json',
+              Buffer.from(JSON.stringify({ id: 'template-id' })),
+            ],
+          ])
+        ),
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
+
+    await stepCreateAlertingAssets(context as any);
+
+    // Because spaceId ('my-space') !== installed_kibana_space_id ('default'), the function
+    // must behave as an additional-space install and save refs to additional_spaces_installed_kibana.
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      expect.anything(),
+      'elastic_agent',
+      [
+        {
+          id: 'fleet-my-space-elastic_agent-template-id',
+          type: 'alert',
+          deferred: false,
+        },
+      ],
+      'my-space',
+      true, // saveAsAdditionnalSpace
+      true,
+      ['alert']
     );
   });
 });
