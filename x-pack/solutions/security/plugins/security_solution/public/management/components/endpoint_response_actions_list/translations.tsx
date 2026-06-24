@@ -221,7 +221,7 @@ export const UX_MESSAGES = Object.freeze({
     }
   ),
   cancelActionModalSubmitButonLabel: i18n.translate(
-    'xpack.securitySolution.responseActionsList.action.cancelActionModalSubmitButonLabel',
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalSubmitButtonLabel',
     { defaultMessage: 'Submit' }
   ),
   cancelActionModalActionAlreadyComplete: i18n.translate(

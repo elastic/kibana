@@ -354,13 +354,14 @@ describe('Response actions history', () => {
       render({ agentIds: 'agent-a' });
 
       expect(
-        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
+        Array.from(renderResult.getByTestId(testPrefix).querySelectorAll('thead th'))
           .slice(0)
           .map((col) => col.textContent)
       ).toEqual([
         UX_MESSAGES.screenReaderExpand,
         TABLE_COLUMN_NAMES.time,
         TABLE_COLUMN_NAMES.command,
+        TABLE_COLUMN_NAMES.user,
         TABLE_COLUMN_NAMES.comments,
         TABLE_COLUMN_NAMES.status,
         TABLE_COLUMN_NAMES.actions,
@@ -371,7 +372,7 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
 
       expect(
-        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
+        Array.from(renderResult.getByTestId(testPrefix).querySelectorAll('thead th'))
           .slice(0)
           .map((col) => col.textContent)
       ).toEqual([

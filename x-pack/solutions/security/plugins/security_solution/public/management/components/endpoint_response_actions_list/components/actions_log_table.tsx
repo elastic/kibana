@@ -274,10 +274,11 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           },
         },
         {
+          field: 'createdBy',
           name: TABLE_COLUMN_NAMES.user,
           width: !showHostNames ? '21%' : '14%',
           truncateText: true,
-          render: (action: ActionListApiResponse['data'][number]) => {
+          render: (_, action: ActionListApiResponse['data'][number]) => {
             return <ActionCreatedBy action={action} data-test-subj={getTestId('column')} />;
           },
         },

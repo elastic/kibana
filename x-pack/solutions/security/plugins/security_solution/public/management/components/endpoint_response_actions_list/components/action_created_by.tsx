@@ -45,7 +45,7 @@ export const ActionCreatedBy = memo<ActionCreatedByProps>(
       return (
         <EuiToolTip content={UX_MESSAGES.triggeredByRule} anchorClassName="eui-textTruncate">
           <SecuritySolutionLinkAnchor
-            data-test-subj="ruleName"
+            data-test-subj={getTestId('ruleName')}
             deepLinkId={SecurityPageName.rules}
             path={getRuleDetailsUrl(ruleId)}
           >
