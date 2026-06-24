@@ -1,0 +1,38 @@
+---
+id: kibDevDocsChromeNavigation
+slug: /kibana-dev-docs/chrome/navigation
+title: Chrome Navigation
+description: Learn more about our adaptive side navigation system.
+tags: ['kibana', 'chrome', 'navigation', 'sidenav', 'badges', 'shared-ux']
+date: 2026-02-04
+---
+
+# Chrome Navigation
+
+Documentation for solution-focused side navigation (`@kbn/ui-side-navigation`) lives in the package wiki. Use these entry points:
+
+## Product
+
+- [Solution-focused side navigation — overview](../../src/platform/kbn-ui/side-navigation/README.md)
+- [Primary menu](../../src/platform/kbn-ui/side-navigation/wiki/product/primary-menu.md) (footer, More overflow)
+- [Secondary menu](../../src/platform/kbn-ui/side-navigation/wiki/product/secondary-menu.md) (listing pages)
+- [Expanded / collapsed modes](../../src/platform/kbn-ui/side-navigation/wiki/product/modes.md)
+- [Badges](../../src/platform/kbn-ui/side-navigation/wiki/product/badges.md)
+- [Content and labels](../../src/platform/kbn-ui/side-navigation/wiki/product/content-and-labels.md)
+- [Active state](../../src/platform/kbn-ui/side-navigation/wiki/product/active-state.md)
+
+## Engineering
+
+- [API reference](../../src/platform/kbn-ui/side-navigation/wiki/engineering/api-reference.md) — `Navigation` props, structure, examples
+- [Architecture](../../src/platform/kbn-ui/side-navigation/wiki/engineering/architecture.md)
+- [Accessibility](../../src/platform/kbn-ui/side-navigation/wiki/engineering/accessibility.md)
+- [Testing and troubleshooting](../../src/platform/kbn-ui/side-navigation/wiki/engineering/testing-and-troubleshooting.md)
+- [Kibana integration](../../src/platform/kbn-ui/side-navigation/wiki/engineering/kibana-integration.md)
+
+## Local development
+
+```bash
+yarn kbn bootstrap
+yarn storybook shared_ux   # http://localhost:9001
+node scripts/jest src/platform/kbn-ui/side-navigation
+```
