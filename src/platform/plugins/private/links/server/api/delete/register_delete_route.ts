@@ -10,13 +10,17 @@
 import { MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_DELETE_DESCRIPTION, LINKS_ID_DESCRIPTION } from '../constants';
 import { deleteLinksOASOperationObject } from '../oas_examples';
 import { deleteLinks } from './delete';
+import { logRequest } from '../log_request';
 
-export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerDeleteRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  logger: Logger
+) {
   const deleteRoute = router.delete({
     path: `${LINKS_API_PATH}/{id}`,
     summary: `Delete a links library item`,
@@ -71,9 +75,10 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest({ body: { message: e.message } });
+        const message = e.stack ?? e.message;
+        logRequest(logger, req, 'error', message);
+        throw e;
       }
-
       return res.noContent();
     }
   );

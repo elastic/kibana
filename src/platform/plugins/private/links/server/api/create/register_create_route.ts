@@ -8,15 +8,19 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_CREATE_DESCRIPTION } from '../constants';
 import { createLinksOASOperationObject } from '../oas_examples';
 import { create } from './create';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';
+import { logRequest } from '../log_request';
 
-export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerCreateRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  logger: Logger
+) {
   const createRoute = router.post({
     path: LINKS_API_PATH,
     summary: 'Create a links library item',
@@ -56,7 +60,9 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest({ body: { message: e.message } });
+        const message = e.stack ?? e.message;
+        logRequest(logger, req, 'error', message);
+        throw e;
       }
     }
   );

@@ -10,14 +10,15 @@
 import { MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, LINKS_ID_DESCRIPTION, LINKS_READ_DESCRIPTION } from '../constants';
 import { readLinksOASOperationObject } from '../oas_examples';
 import { read } from './read';
 import { readResponseBodySchema } from './schemas';
+import { logRequest } from '../log_request';
 
-export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>, logger: Logger) {
   const readRoute = router.get({
     path: `${LINKS_API_PATH}/{id}`,
     summary: `Get a links library item by ID`,
@@ -73,7 +74,9 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest({ body: { message: e.message } });
+        const message = e.stack ?? e.message;
+        logRequest(logger, req, 'error', message);
+        throw e;
       }
     }
   );

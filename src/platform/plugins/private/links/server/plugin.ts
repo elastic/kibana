@@ -8,7 +8,13 @@
  */
 
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 
 import { LINKS_EMBEDDABLE_TYPE } from '../common';
@@ -19,7 +25,11 @@ import { linksSavedObjectDefinition } from './links_saved_object';
 import type { LinksByValueState } from './types';
 
 export class LinksServerPlugin implements Plugin<object, object> {
-  constructor() {}
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   public setup(
     core: CoreSetup,
@@ -35,7 +45,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
       getSchema: () => linksEmbeddableSchema,
     });
 
-    registerRoutes(core.http);
+    registerRoutes(core.http, this.logger);
 
     return {};
   }

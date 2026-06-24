@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpServiceSetup, RequestHandlerContext } from '@kbn/core/server';
+import type { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 
 import { registerCreateRoute } from './create';
 import { registerReadRoute } from './read';
@@ -15,11 +15,11 @@ import { registerUpdateRoute } from './update';
 import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
 
-export function registerRoutes(http: HttpServiceSetup) {
+export function registerRoutes(http: HttpServiceSetup, logger: Logger) {
   const { versioned: versionedRouter } = http.createRouter<RequestHandlerContext>();
-  registerCreateRoute(versionedRouter);
-  registerReadRoute(versionedRouter);
-  registerUpdateRoute(versionedRouter);
-  registerDeleteRoute(versionedRouter);
-  registerSearchRoute(versionedRouter);
+  registerCreateRoute(versionedRouter, logger);
+  registerReadRoute(versionedRouter, logger);
+  registerUpdateRoute(versionedRouter, logger);
+  registerDeleteRoute(versionedRouter, logger);
+  registerSearchRoute(versionedRouter, logger);
 }
