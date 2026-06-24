@@ -10,6 +10,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowList } from './workflow_list';
@@ -185,9 +186,12 @@ describe('WorkflowList', () => {
     });
   });
 
-  const renderComponent = (overrides: Partial<typeof defaultProps> = {}) => {
+  const renderComponent = (
+    overrides: Partial<typeof defaultProps> = {},
+    initialEntries?: string[]
+  ) => {
     return render(
-      <TestProvider>
+      <TestProvider initialEntries={initialEntries}>
         <WorkflowList {...defaultProps} {...overrides} />
       </TestProvider>
     );
@@ -308,6 +312,35 @@ describe('WorkflowList', () => {
       const nameLink = screen.getByTestId('workflowNameLink');
       expect(nameLink).toBeInTheDocument();
       expect(nameLink).toHaveTextContent('My Test Workflow');
+    });
+
+    it('keeps workflow name links clean while preserving list search params in route state', async () => {
+      const user = userEvent.setup();
+      const RouteStateProbe = () => {
+        const location = useLocation<{ workflowsListSearch?: string } | undefined>();
+        return (
+          <span data-test-subj="workflowListSearchRouteState">
+            {location.state?.workflowsListSearch ?? ''}
+          </span>
+        );
+      };
+
+      render(
+        <TestProvider initialEntries={['/?tags=prod&enabled=true']}>
+          <WorkflowList {...defaultProps} />
+          <RouteStateProbe />
+        </TestProvider>
+      );
+
+      const nameLink = screen.getByTestId('workflowNameLink');
+
+      expect(nameLink).toHaveAttribute('href', '/wf-1');
+
+      await user.click(nameLink);
+
+      expect(screen.getByTestId('workflowListSearchRouteState')).toHaveTextContent(
+        '?tags=prod&enabled=true'
+      );
     });
 
     it('renders workflow description', () => {

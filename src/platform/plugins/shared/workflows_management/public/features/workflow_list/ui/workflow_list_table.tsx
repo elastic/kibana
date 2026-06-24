@@ -36,6 +36,7 @@ import {
   WorkflowStatus,
 } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
+import { getWorkflowDetailRouteState } from '../../../shared/utils/workflow_navigation';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 const MAX_VISIBLE_TAGS = 2;
@@ -60,6 +61,7 @@ export interface WorkflowListTableProps {
   canUpdateWorkflow: boolean;
   canDeleteWorkflow: boolean;
   canExecuteWorkflow: boolean;
+  workflowsListSearch?: string;
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
   onSortChange?: (field: WorkflowSortField, order: 'asc' | 'desc') => void;
@@ -85,6 +87,7 @@ export const WorkflowListTable = ({
   canUpdateWorkflow,
   canDeleteWorkflow,
   canExecuteWorkflow,
+  workflowsListSearch = '',
   sortField,
   sortOrder,
   onSortChange,
@@ -117,7 +120,10 @@ export const WorkflowListTable = ({
                     {canReadWorkflow ? (
                       <EuiLink>
                         <Link
-                          to={`/${item.id}`}
+                          to={{
+                            pathname: `/${item.id}`,
+                            state: getWorkflowDetailRouteState(workflowsListSearch),
+                          }}
                           css={css`
                             white-space: nowrap;
                             overflow: hidden;
@@ -364,6 +370,7 @@ export const WorkflowListTable = ({
       canCreateWorkflow,
       canDeleteWorkflow,
       getEditHref,
+      workflowsListSearch,
       onToggleWorkflow,
       onCloneWorkflow,
       onExportWorkflow,

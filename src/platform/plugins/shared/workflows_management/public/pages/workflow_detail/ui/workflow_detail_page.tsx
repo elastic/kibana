@@ -11,6 +11,7 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,6 +42,10 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import {
+  getWorkflowsListPathFromDetailRouteState,
+  type WorkflowDetailRouteState,
+} from '../../../shared/utils/workflow_navigation';
 
 const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
@@ -58,6 +63,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
   const { application } = useKibana().services;
+  const location = useLocation<WorkflowDetailRouteState | undefined>();
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
@@ -135,8 +141,15 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [setSelectedExecution]);
 
   const onBackToWorkflows = useCallback(() => {
+    const workflowsListPath = getWorkflowsListPathFromDetailRouteState(location.state);
+
+    if (workflowsListPath) {
+      application.navigateToApp(PLUGIN_ID, { path: workflowsListPath });
+      return;
+    }
+
     application.navigateToApp(PLUGIN_ID);
-  }, [application]);
+  }, [application, location.state]);
 
   if (error) {
     if (isLoadWorkflowNotFoundError(error)) {

@@ -18,17 +18,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  parseWorkflowsUrlSearchParams,
+  serializeWorkflowsUrlSearchParams,
+} from './url_search_params';
 import { PLUGIN_ID } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { ImportWorkflowsFlyout } from '../../features/import_workflows/ui/import_workflows_flyout';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { WorkflowList } from '../../features/workflow_list';
-import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
@@ -40,51 +43,20 @@ export function WorkflowsPage() {
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy', 'tags']);
   const { euiTheme } = useEuiTheme();
   const location = useLocation();
-  const history = useHistory();
 
-  // Keep filters in local state (not in URL)
-  const [filters, setFilters] = useState<Partial<WorkflowsSearchParams>>({});
-
-  // Derive search from URL params + local filters
   const search = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return {
-      size: Number(params.get('size')) || WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
-      page: Number(params.get('page')) || 1,
-      query: params.get('query') || '',
-      ...filters, // merge in filters from state
-    };
-  }, [location.search, filters]);
+    return parseWorkflowsUrlSearchParams(location.search);
+  }, [location.search]);
 
-  // Update search: sync query/page/size to URL, keep filters in state
   const setSearch = useCallback(
     (newSearch: WorkflowsSearchParams) => {
-      // Extract URL params and filter params
-      const { query, page, size, ...restFilters } = newSearch;
-
-      // Update URL with query, page, size (only if non-default)
-      const params = new URLSearchParams();
-
-      if (query) {
-        params.set('query', query);
-      }
-
-      // Only add page if not default (1)
-      if (page && page !== 1) {
-        params.set('page', String(page));
-      }
-
-      // Only add size if not default
-      if (size && size !== WORKFLOWS_TABLE_INITIAL_PAGE_SIZE) {
-        params.set('size', String(size));
-      }
-
-      history.replace({ search: params.toString() });
-
-      // Update local filter state
-      setFilters(restFilters);
+      const serializedSearch = serializeWorkflowsUrlSearchParams(newSearch);
+      void application.navigateToApp(PLUGIN_ID, {
+        path: serializedSearch ? `?${serializedSearch}` : '',
+        replace: true,
+      });
     },
-    [history]
+    [application]
   );
 
   const [showImportFlyout, setShowImportFlyout] = useState(false);
@@ -185,7 +157,12 @@ export function WorkflowsPage() {
                     values={filtersData?.enabled || []}
                     selectedValues={search.enabled || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch({ ...search, enabled: newValues });
+                      setSearch({
+                        ...search,
+                        enabled: newValues.map(
+                          (value) => String(value).trim().toLowerCase() === 'true'
+                        ),
+                      });
                     }}
                   />
                 </EuiFilterGroup>
@@ -198,7 +175,7 @@ export function WorkflowsPage() {
                     values={filtersData?.createdBy || []}
                     selectedValues={search.createdBy || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch({ ...search, createdBy: newValues });
+                      setSearch({ ...search, createdBy: newValues.map(String) });
                     }}
                   />
                 </EuiFilterGroup>
@@ -211,7 +188,7 @@ export function WorkflowsPage() {
                     values={filtersData?.tags || []}
                     selectedValues={search.tags || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch({ ...search, tags: newValues });
+                      setSearch({ ...search, tags: newValues.map(String) });
                     }}
                   />
                 </EuiFilterGroup>

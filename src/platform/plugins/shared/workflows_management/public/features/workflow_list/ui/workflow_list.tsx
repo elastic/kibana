@@ -18,6 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
@@ -48,6 +49,7 @@ interface WorkflowListProps {
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
+  const location = useLocation();
   const {
     canCreateWorkflow,
     canReadWorkflow,
@@ -261,7 +263,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   );
 
   const getEditHref = useCallback(
-    (item: WorkflowListItemDto) => application.getUrlForApp('workflows', { path: `/${item.id}` }),
+    (item: WorkflowListItemDto) =>
+      application.getUrlForApp('workflows', {
+        path: `/${item.id}`,
+      }),
     [application]
   );
 
@@ -374,6 +379,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onExportWorkflow={handleExportWorkflow}
         onRequestRun={setExecuteWorkflow}
         getEditHref={getEditHref}
+        workflowsListSearch={location.search}
         canCreateWorkflow={!!canCreateWorkflow}
         canReadWorkflow={!!canReadWorkflow}
         canReadWorkflowExecution={!!canReadWorkflowExecution}
