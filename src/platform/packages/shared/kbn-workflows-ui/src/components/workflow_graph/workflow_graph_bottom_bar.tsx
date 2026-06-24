@@ -80,6 +80,11 @@ export interface WorkflowDetailBottomBarProps {
    * setting in the settings popover.
    */
   disableAutoCollapse?: boolean;
+  /**
+   * When false, the view-toggle (Graph / YAML switch) is hidden. Use this
+   * to suppress the toggle when the graph view is not available.
+   */
+  showViewToggle?: boolean;
 }
 
 // Figma Shadow/Medium composite.
@@ -298,6 +303,7 @@ export function WorkflowDetailBottomBar({
   testWorkflowButtonCompact,
   bottomOffset = 0,
   disableAutoCollapse = false,
+  showViewToggle = true,
 }: WorkflowDetailBottomBarProps) {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -413,13 +419,16 @@ export function WorkflowDetailBottomBar({
             <EuiFlexItem grow={false}>{toolsSlot}</EuiFlexItem>
           )}
 
-          <EuiFlexItem grow={false}>
-            <VerticalDivider />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <ViewToggle editorView={editorView} onEditorViewChange={onEditorViewChange} />
-          </EuiFlexItem>
+          {showViewToggle ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <VerticalDivider />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ViewToggle editorView={editorView} onEditorViewChange={onEditorViewChange} />
+              </EuiFlexItem>
+            </>
+          ) : null}
 
           {testWorkflowButton ? (
             <EuiFlexItem

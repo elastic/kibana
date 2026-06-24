@@ -418,6 +418,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
             testWorkflowButton={testWorkflowButton}
             testWorkflowButtonCompact={testWorkflowButtonCompact}
             disableAutoCollapse={!hideControlsMenu}
+            showViewToggle={isVisualEditorEnabled}
           />
         </EuiFlexItem>
         {isExecutionGraphEnabled && (
