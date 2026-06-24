@@ -33,10 +33,7 @@ export interface ToolsServiceStart {
   getHealthClient(opts: { request: KibanaRequest }): ToolHealthClient;
   /**
    * Execute an inline (un-persisted) tool draft using the same runtime path
-   * the agent would use at call time. Powers the chat tool-authoring dry-run.
-   * Validates the configuration via the matching tool type's `validateForCreate`,
-   * then runs the handler through the scoped runner. No persistence, no
-   * health tracking.
+   * the agent would use at call time.
    */
   executeDraft(opts: ExecuteDraftParams): Promise<RunToolReturn>;
 }

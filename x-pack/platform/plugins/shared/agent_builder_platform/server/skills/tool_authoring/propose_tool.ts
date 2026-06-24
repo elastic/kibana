@@ -31,7 +31,7 @@ const esqlParamSchema = z.object({
       'Defaults to false. Set true only when the query works correctly with the parameter unset.'
     ),
   defaultValue: z
-    .union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))])
+    .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())])
     .optional()
     .describe(
       "Only allowed when 'optional: true'. Type must match 'type' (e.g. integer for 'integer', ISO string for 'date')."

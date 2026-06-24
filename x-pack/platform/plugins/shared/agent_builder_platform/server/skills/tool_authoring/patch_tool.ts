@@ -28,7 +28,7 @@ const paramShape = z.object({
   description: z.string(),
   optional: z.boolean().optional(),
   defaultValue: z
-    .union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))])
+    .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())])
     .optional(),
 });
 
