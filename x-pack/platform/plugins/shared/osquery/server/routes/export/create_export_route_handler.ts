@@ -178,7 +178,7 @@ export const createExportRouteHandler =
       try {
         await esClient.closePointInTime({ id });
       } catch (e) {
-        // Leaked PITs consume cluster memory until keep_alive expires (5m).
+        // An unclosed PIT holds cluster memory until keep_alive expires (5m).
         // Surface at warn so cluster-memory pressure is visible in ops dashboards.
         logger.warn(`Failed to close PIT ${id}: ${e instanceof Error ? e.message : String(e)}`);
       }

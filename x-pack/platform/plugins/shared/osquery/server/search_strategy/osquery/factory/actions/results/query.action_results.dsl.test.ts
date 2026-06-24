@@ -605,7 +605,7 @@ describe('buildActionResultsQuery', () => {
     const getAggFilterMust = (result: any) =>
       result.aggs.aggs.aggs.responses_by_action_id.filter.bool.must;
 
-    it('always scopes the aggregation by space_id (fail-closed)', () => {
+    it('scopes the aggregation by space_id', () => {
       const result = buildActionResultsQuery({ ...baseOptions, spaceId: 'my-space' });
       expect(JSON.stringify(getAggFilterMust(result))).toContain('space_id');
     });

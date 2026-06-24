@@ -42,8 +42,8 @@ export interface ExportResultsRequestOptions extends RequestBasicOptions {
   /** Integration namespaces used to resolve the space-aware index pattern. */
   integrationNamespaces?: string[];
   /**
-   * Active space of the request. Used to enforce a `space_id` filter so results
-   * from other spaces are never exported (cross-space read prevention).
+   * Active space of the request. Used to apply the `space_id` filter so exported
+   * results are scoped to the active space.
    */
   spaceId?: string;
   /** When true, requests `track_total_hits: true` (first page only). */

@@ -22,14 +22,14 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const osqueryPublicApiVersion = '2023-10-31';
 
-  const probeIndex = 'logs-osquery_manager.result_cross_space_it';
-  const indexTemplateName = 'osquery-results-cross-space-it';
-  const scheduleId = `cross-space-it-${Date.now()}`;
+  const probeIndex = 'logs-osquery_manager.result_space_scoping_it';
+  const indexTemplateName = 'osquery-results-space-scoping-it';
+  const scheduleId = `space-scoping-it-${Date.now()}`;
   const executionCount = 7;
 
-  const defaultSecret = 'DEFAULT_SPACE_OK';
-  const foreignSecret = 'FOREIGN_SPACE_SECRET';
-  const foreignSpaceId = 'cross-space-it-secret';
+  const defaultMarker = 'SPACE_A_MARKER';
+  const otherMarker = 'SPACE_B_MARKER';
+  const otherSpaceId = 'space-scoping-it-b';
 
   const recreateProbeIndex = async () => {
     await es.indices.delete({ index: probeIndex }, { ignore: [404] });
@@ -70,16 +70,16 @@ export default function ({ getService }: FtrProviderContext) {
       {
         ...base,
         space_id: 'default',
-        elastic_agent: { id: 'cross-space-it-agent-default' },
-        agent: { id: 'cross-space-it-agent-default' },
-        osquery: { result: { marker: defaultSecret } },
+        elastic_agent: { id: 'space-scoping-it-agent-a' },
+        agent: { id: 'space-scoping-it-agent-a' },
+        osquery: { result: { marker: defaultMarker } },
       },
       {
         ...base,
-        space_id: foreignSpaceId,
-        elastic_agent: { id: 'cross-space-it-agent-foreign' },
-        agent: { id: 'cross-space-it-agent-foreign' },
-        osquery: { result: { marker: foreignSecret } },
+        space_id: otherSpaceId,
+        elastic_agent: { id: 'space-scoping-it-agent-b' },
+        agent: { id: 'space-scoping-it-agent-b' },
+        osquery: { result: { marker: otherMarker } },
       },
     ];
 
@@ -93,14 +93,14 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: indexTemplateName }, { ignore: [404] });
   };
 
-  describe('Scheduled query results cross-space isolation', () => {
+  describe('Scheduled query results space scoping', () => {
     before(async () => {
       await recreateProbeIndex();
       await seedResults();
     });
     after(deleteResults);
 
-    it('results endpoint returns only the caller-space rows, never another space', async () => {
+    it('results endpoint returns only rows from the active space', async () => {
       const { body } = await supertest
         .get(
           `/api/osquery/scheduled_results/${scheduleId}/${executionCount}/results?page=0&pageSize=100`
@@ -115,14 +115,13 @@ export default function ({ getService }: FtrProviderContext) {
         (edge) => edge._source?.space_id ?? (edge.fields?.space_id as string[] | undefined)?.[0]
       );
 
-      // The default-space row is visible; the foreign-space row is not.
-      // Pre-fix the unscoped `result*` fallback returned BOTH rows.
-      expect(spaceIds).not.to.contain(foreignSpaceId);
-      expect(JSON.stringify(body)).not.to.contain(foreignSecret);
-      expect(JSON.stringify(body)).to.contain(defaultSecret);
+      // The default-space row is returned; the other-space row is filtered out.
+      expect(spaceIds).not.to.contain(otherSpaceId);
+      expect(JSON.stringify(body)).not.to.contain(otherMarker);
+      expect(JSON.stringify(body)).to.contain(defaultMarker);
     });
 
-    it('export endpoint never streams another space rows', async () => {
+    it('export endpoint streams only rows from the active space', async () => {
       const response = await supertest
         .post(
           `/api/osquery/scheduled_results/${scheduleId}/${executionCount}/_export?format=ndjson`
@@ -135,9 +134,9 @@ export default function ({ getService }: FtrProviderContext) {
       // supertest returns the streamed body as text/buffer for file downloads.
       const exported = response.text ?? String(response.body);
 
-      // Pre-fix the export streamed the foreign-space row (and its payload).
-      expect(exported).not.to.contain(foreignSecret);
-      expect(exported).not.to.contain(foreignSpaceId);
+      // The export is scoped to the active space, so the other-space row is absent.
+      expect(exported).not.to.contain(otherMarker);
+      expect(exported).not.to.contain(otherSpaceId);
     });
   });
 }

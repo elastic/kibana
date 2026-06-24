@@ -30,12 +30,12 @@ export default function ({ getService }: FtrProviderContext) {
   // queries this data stream when it actually exists (newDataStreamIndexExists),
   // so the test must create it as a real data stream rather than a plain index.
   const responsesIndex = 'logs-osquery_manager.action.responses-default';
-  const indexTemplateName = 'osquery-action-results-cross-space-it';
-  const actionId = `action-cross-space-it-${Date.now()}`;
+  const indexTemplateName = 'osquery-action-results-space-scoping-it';
+  const actionId = `action-space-scoping-it-${Date.now()}`;
 
-  const defaultAgent = 'action-cross-space-it-agent-default';
-  const foreignAgent = 'action-cross-space-it-agent-foreign';
-  const foreignSpaceId = 'action-cross-space-it-secret';
+  const spaceAAgent = 'action-space-scoping-it-agent-a';
+  const spaceBAgent = 'action-space-scoping-it-agent-b';
+  const otherSpaceId = 'action-space-scoping-it-b';
 
   // Install a higher-priority data stream template with the field types the
   // action_results query/aggregation rely on, then (re)create the data stream.
@@ -85,16 +85,16 @@ export default function ({ getService }: FtrProviderContext) {
       {
         ...base,
         space_id: 'default',
-        agent_id: defaultAgent,
-        agent: { id: defaultAgent },
-        elastic_agent: { id: defaultAgent },
+        agent_id: spaceAAgent,
+        agent: { id: spaceAAgent },
+        elastic_agent: { id: spaceAAgent },
       },
       {
         ...base,
-        space_id: foreignSpaceId,
-        agent_id: foreignAgent,
-        agent: { id: foreignAgent },
-        elastic_agent: { id: foreignAgent },
+        space_id: otherSpaceId,
+        agent_id: spaceBAgent,
+        agent: { id: spaceBAgent },
+        elastic_agent: { id: spaceBAgent },
       },
     ];
 
@@ -109,14 +109,14 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: indexTemplateName }, { ignore: [404] });
   };
 
-  describe('Action results cross-space isolation', () => {
+  describe('Action results space scoping', () => {
     before(async () => {
       await recreateResponsesIndex();
       await seedResponses();
     });
     after(deleteResponses);
 
-    it('returns only caller-space responses and never another space (hits + aggregation)', async () => {
+    it('returns only active-space responses (hits + aggregation)', async () => {
       const { body } = await supertest
         .get(`/api/osquery/action_results/${actionId}?page=0&pageSize=100&kuery=`)
         .set('kbn-xsrf', 'true')
@@ -128,14 +128,13 @@ export default function ({ getService }: FtrProviderContext) {
         (edge) => edge._source?.space_id ?? (edge.fields?.space_id as string[] | undefined)?.[0]
       );
 
-      // The default-space response is visible; the foreign-space one is not.
-      // Pre-fix an unscoped query returned BOTH responses.
-      expect(spaceIds).not.to.contain(foreignSpaceId);
-      expect(JSON.stringify(body)).not.to.contain(foreignAgent);
-      expect(JSON.stringify(body)).not.to.contain(foreignSpaceId);
-      expect(JSON.stringify(body)).to.contain(defaultAgent);
+      // The default-space response is returned; the other-space one is filtered out.
+      expect(spaceIds).not.to.contain(otherSpaceId);
+      expect(JSON.stringify(body)).not.to.contain(spaceBAgent);
+      expect(JSON.stringify(body)).not.to.contain(otherSpaceId);
+      expect(JSON.stringify(body)).to.contain(spaceAAgent);
 
-      // The aggregation must be space-scoped too, so its counts match the
+      // The aggregation is space-scoped too, so its counts match the
       // space-scoped hits (only the single default-space response is counted).
       expect(aggregations?.totalResponded).to.eql(1);
     });

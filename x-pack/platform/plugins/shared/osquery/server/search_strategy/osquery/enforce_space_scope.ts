@@ -9,23 +9,21 @@ import type { ISearchRequestParams } from '@kbn/search-types';
 import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
 
 /**
- * Mandatory, centralized space scoping for every osquery search-strategy query.
+ * Centralizes the `space_id` filter for every osquery search-strategy query.
  *
- * This is a SECURITY choke point. It injects the `space_id` filter into the
- * top-level `query.bool.filter` of the DSL produced by any factory builder, so
- * that all osquery ES reads — current and future factory types — are scoped to
- * the caller's active space even if an individual DSL builder forgets to add
- * the filter. It is fail-closed: `spaceId` is required and a clause is always
- * added.
+ * It injects the `space_id` filter into the top-level `query.bool.filter` of the
+ * DSL produced by any factory builder, so all osquery query types — current and
+ * future — share one space-scoping implementation rather than repeating it per
+ * builder.
  *
  * Note on the "spaceId is applied twice" appearance at the dispatch site: the
  * `action_results` and `scheduled_action_results` builders compute their count
- * aggregations inside a `global` aggregation, which by ES semantics IGNORES the
+ * aggregations inside a `global` aggregation, which by ES semantics ignores the
  * top-level `query` filter this helper scopes. The hit context and that global
  * aggregation context are therefore two independent filter scopes — this helper
  * cannot reach the latter, so those builders inject `buildSpaceIdFilter(spaceId)`
- * into the aggregation's own filter as well. Same value, two distinct controls:
- * this one scopes the returned hits (`_source`), the builder scopes the counts
+ * into the aggregation's own filter as well. Same value, two scopes: this one
+ * scopes the returned hits (`_source`), the builder scopes the counts
  * (`rows_count` / responded / success / error) so they match the hits.
  */
 export const enforceSpaceScope = (

@@ -317,7 +317,7 @@ describe('getScheduledQueryResultsRoute', () => {
       );
     });
 
-    it('falls back to the default space (fail-closed) when the spaces service is unavailable', async () => {
+    it('falls back to the default space when the spaces service is unavailable', async () => {
       const mockSearchFn = await runWithActiveSpace(undefined);
 
       expect(mockSearchFn).toHaveBeenCalledWith(

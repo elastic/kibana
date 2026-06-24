@@ -92,7 +92,7 @@ describe('updateActionTagsRoute', () => {
     expect(primarySearch.query.bool.filter).toContainEqual({ term: { space_id: 'my-space' } });
   });
 
-  describe('scheduled-results existence check (cross-space oracle)', () => {
+  describe('scheduled-results existence check', () => {
     it('scopes the scheduled-results check to the active space', async () => {
       // No live/rule action found -> route falls through to the scheduled check.
       mockEsClient.search
@@ -106,22 +106,21 @@ describe('updateActionTagsRoute', () => {
       expect(scheduledSearch.query.bool.filter).toContainEqual({
         term: { schedule_id: 'schedule-1' },
       });
-      // The scheduled check MUST be space-scoped — it previously was not, which
-      // leaked a cross-space existence oracle (400 vs 404).
+      // The scheduled check is space-scoped along with the rest of the lookups.
       expect(scheduledSearch.query.bool.filter).toContainEqual({ term: { space_id: 'my-space' } });
     });
 
-    it('returns 404 (not 400) when the schedule exists only in another space', async () => {
-      // Primary lookup misses, and because the scheduled check is now space-scoped,
-      // a foreign-space schedule_id yields 0 hits here -> 404, not the 400 oracle.
+    it('returns 404 when the schedule does not exist in the active space', async () => {
+      // Primary lookup misses, and because the scheduled check is space-scoped,
+      // a schedule_id from another space yields 0 hits here -> 404.
       mockEsClient.search
         .mockResolvedValueOnce({ hits: { hits: [] } }) // primary lookup: miss
         .mockResolvedValueOnce({ hits: { total: { value: 0 } } }); // scoped scheduled check: miss
 
-      const response = await callRoute('foreign-schedule', 'default');
+      const response = await callRoute('other-space-schedule', 'default');
 
       expect(response.notFound).toHaveBeenCalledWith({
-        body: { message: 'Action foreign-schedule not found' },
+        body: { message: 'Action other-space-schedule not found' },
       });
       expect(response.badRequest).not.toHaveBeenCalled();
     });

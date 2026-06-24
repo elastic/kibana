@@ -91,10 +91,10 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     });
   });
 
-  it('fails closed: defaults to the default space when no spaceId is provided', async () => {
+  it('defaults to the default space when no spaceId is provided', async () => {
     const filter = await runResultsSearch(undefined);
 
-    // Absence of a space must NEVER produce an unscoped query.
+    // No active space resolves to the default space, which still applies a space_id filter.
     expect(JSON.stringify(filter)).toContain('space_id');
     expect(filter).toContainEqual({
       bool: {

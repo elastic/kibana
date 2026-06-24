@@ -8,7 +8,7 @@
 import { buildSpaceIdFilter } from './build_space_id_filter';
 
 describe('buildSpaceIdFilter', () => {
-  it('always returns a clause (fail-closed: never unscoped)', () => {
+  it('always returns a filter clause', () => {
     expect(buildSpaceIdFilter('default')).toBeDefined();
     expect(buildSpaceIdFilter('my-space')).toBeDefined();
   });

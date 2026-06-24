@@ -281,7 +281,7 @@ describe('getResultCountsForActions', () => {
       });
     });
 
-    it('always applies a space_id filter (never an unscoped query)', async () => {
+    it('always applies the space_id filter', async () => {
       const esClient = createMockEsClient({
         aggregations: { action_ids: { buckets: [] } },
       });

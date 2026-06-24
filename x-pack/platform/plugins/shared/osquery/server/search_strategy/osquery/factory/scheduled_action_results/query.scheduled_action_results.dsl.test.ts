@@ -151,9 +151,9 @@ describe('buildScheduledActionResultsQuery', () => {
     expect(hasSpaceFilter).toBe(false);
   });
 
-  it('always scopes the aggregation by space_id (fail-closed)', () => {
+  it('scopes the aggregation by space_id', () => {
     // The aggregation runs in its own (global) filter context that the central
-    // enforceSpaceScope does not reach, so it must carry a space_id clause itself.
+    // enforceSpaceScope does not reach, so it carries a space_id clause itself.
     const result = buildScheduledActionResultsQuery({ ...defaultOptions, spaceId: 'my-space' });
     const aggs = result.aggs as Record<string, Record<string, unknown>>;
     const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
