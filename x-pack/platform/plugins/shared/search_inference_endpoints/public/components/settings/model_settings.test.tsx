@@ -239,6 +239,29 @@ describe('ModelSettings', () => {
     expect(screen.getByTestId('save-settings-button')).toBeEnabled();
   });
 
+  it('shows unsaved changes bottom bar when form becomes dirty', () => {
+    mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('unsaved-changes-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('unsaved-changes-save-button')).toBeInTheDocument();
+  });
+
+  it('does not show unsaved changes bottom bar when form is clean', () => {
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.queryByTestId('unsaved-changes-bar')).not.toBeInTheDocument();
+  });
+
   it('save button stays disabled when validation fails, even if dirty', () => {
     mockUseDefaultModelSettings.mockReturnValue({
       ...defaultModelSettingsState,
