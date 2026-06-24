@@ -9,7 +9,6 @@ import { isPlainObject } from 'lodash';
 import type { ExternalReferenceSOAttachmentPayload } from '../../common/types/domain';
 import { AttachmentType, ExternalReferenceStorageType } from '../../common/types/domain';
 import type { AttachmentAttributesV2 } from '../../common/types/domain/attachment/v2';
-import { UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP } from '../../common/constants/attachments';
 import type { AttachmentRequestAttributes } from '../common/types/attachments_v1';
 
 /**
@@ -27,16 +26,12 @@ export const isCommentRequestTypeExternalReferenceSO = (
 /**
  * Narrows to a unified attachment backed by a saved object reference.
  *
- * Two gates: (1) the unified `type` is registered in the
- * legacy <-> unified storage map (only registered migrated SO-backed subtypes
- * qualify), and (2) `metadata.soType` is a non-empty string. Per-subtype zod
- * schemas additionally lock `soType` to a literal so a forged value cannot
- * pass write validation.
+ * `metadata.soType` is the SO-backed marker. It's trusted because per-subtype
+ * zod schemas lock it to a literal on write; new SO-backed types just need
+ * such a schema, no server allowlist required.
  *
- * Note: this is intentionally distinct from `isUnifiedReferenceAttachmentRequest`,
- * which also requires `attachmentId` to be present. This guard tolerates a
- * missing `attachmentId` because read paths inspect raw saved-object attributes
- * where `attachmentId` may live only in `references` (self-heal path).
+ * Unlike `isUnifiedReferenceAttachmentRequest`, this tolerates a missing
+ * `attachmentId` since read paths may find it only in `references` (self-heal).
  */
 export const isUnifiedAttachmentWithSoReference = (
   context: Partial<AttachmentAttributesV2> | Record<string, unknown>
@@ -46,8 +41,7 @@ export const isUnifiedAttachmentWithSoReference = (
   metadata: { soType: string } & Record<string, unknown>;
 } & Record<string, unknown> => {
   const ctx = context as Record<string, unknown> | null | undefined;
-  const type = ctx?.type;
-  if (typeof type !== 'string' || UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP[type] == null) {
+  if (typeof ctx?.type !== 'string') {
     return false;
   }
   const metadata = ctx?.metadata;
