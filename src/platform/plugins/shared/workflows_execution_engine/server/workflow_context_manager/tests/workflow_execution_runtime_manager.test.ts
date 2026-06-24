@@ -297,6 +297,38 @@ describe('WorkflowExecutionRuntimeManager', () => {
         expect(labels).not.toHaveProperty('event_trigger_id');
         expect(labels).not.toHaveProperty('event_chain_depth');
       });
+
+      it('persists traceParent from the active transaction', async () => {
+        Object.defineProperty(agent, 'currentTraceparent', {
+          configurable: true,
+          enumerable: true,
+          get: () => '00-active-trace-span-01',
+        });
+
+        await underTest.start();
+
+        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            traceParent: '00-active-trace-span-01',
+          })
+        );
+
+        Reflect.deleteProperty(agent, 'currentTraceparent');
+      });
+
+      it('does not overwrite inherited root trace identifiers for child executions', async () => {
+        workflowExecution.triggeredBy = 'workflow-step';
+        workflowExecution.traceId = 'inherited-trace-id';
+        workflowExecution.entryTransactionId = 'inherited-entry-txn';
+
+        await underTest.start();
+
+        const updates = (
+          workflowExecutionState.updateWorkflowExecution as jest.Mock
+        ).mock.calls.map((call) => call[0] as Record<string, unknown>);
+        expect(updates.some((update) => 'traceId' in update)).toBe(false);
+        expect(updates.some((update) => 'entryTransactionId' in update)).toBe(false);
+      });
     });
   });
 

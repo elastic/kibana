@@ -14,8 +14,11 @@
 
 import type agent from 'elastic-apm-node';
 
+const DEFAULT_TRACE_PARENT_TRANSACTION_NAME = 'workflow task schedule';
+
 type ApmAgentInternals = typeof agent & {
   setCurrentTransaction: (transaction: agent.Transaction) => void;
+  currentTraceparent?: string | null;
 };
 
 type TransactionInternals = agent.Transaction & {
@@ -56,4 +59,48 @@ export function getTraceId(transaction: agent.Transaction): string | undefined {
  */
 export function setCurrentTransaction(apm: typeof agent, transaction: agent.Transaction): void {
   (apm as ApmAgentInternals).setCurrentTransaction(transaction);
+}
+
+export function getCurrentTraceParent(apm: typeof agent): string | undefined {
+  const traceparent = (apm as ApmAgentInternals).currentTraceparent;
+  return typeof traceparent === 'string' && traceparent ? traceparent : undefined;
+}
+
+export async function withTraceParent<T>(
+  apm: typeof agent,
+  traceParent: string | undefined,
+  run: () => Promise<T>,
+  options?: { transactionName?: string }
+): Promise<T> {
+  if (!traceParent) {
+    return run();
+  }
+
+  const currentTraceParent = getCurrentTraceParent(apm);
+  if (currentTraceParent === traceParent) {
+    return run();
+  }
+
+  const transaction = apm.startTransaction(
+    options?.transactionName ?? DEFAULT_TRACE_PARENT_TRANSACTION_NAME,
+    'workflow',
+    {
+      childOf: traceParent,
+    }
+  );
+
+  try {
+    const result = await run();
+    if (transaction) {
+      transaction.outcome = 'success';
+    }
+    return result;
+  } catch (err) {
+    if (transaction) {
+      transaction.outcome = 'failure';
+    }
+    throw err;
+  } finally {
+    transaction?.end();
+  }
 }

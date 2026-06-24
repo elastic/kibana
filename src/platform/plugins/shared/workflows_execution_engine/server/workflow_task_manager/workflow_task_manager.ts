@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import agent from 'elastic-apm-node';
 import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -14,6 +15,7 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
 import { generateExecutionTaskScope } from '../utils';
+import { withTraceParent } from '../workflow_context_manager/apm_internal';
 
 /** Stable task id so idle-timeout (workflow + enclosing step) resumes dedupe per execution. */
 export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
@@ -64,19 +66,25 @@ export class WorkflowTaskManager {
 
     await this.taskManager.removeIfExists(taskId);
 
-    const task = await this.taskManager.schedule(
-      {
-        id: taskId,
-        taskType: WORKFLOW_RESUME_TASK_TYPE,
-        params: {
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-        } satisfies ResumeWorkflowExecutionParams,
-        state: {},
-        runAt: resumeAt,
-        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
-      },
-      { request: fakeRequest }
+    const task = await withTraceParent(
+      agent,
+      workflowExecution.traceParent,
+      () =>
+        this.taskManager.schedule(
+          {
+            id: taskId,
+            taskType: WORKFLOW_RESUME_TASK_TYPE,
+            params: {
+              workflowRunId: workflowExecution.id,
+              spaceId: workflowExecution.spaceId,
+            } satisfies ResumeWorkflowExecutionParams,
+            state: {},
+            runAt: resumeAt,
+            scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+          },
+          { request: fakeRequest }
+        ),
+      { transactionName: 'workflow global timeout resume schedule' }
     );
 
     return {
@@ -93,19 +101,25 @@ export class WorkflowTaskManager {
     resumeAt: Date;
     fakeRequest: KibanaRequest;
   }): Promise<{ taskId: string }> {
-    const task = await this.taskManager.schedule(
-      {
-        id: v4(),
-        taskType: WORKFLOW_RESUME_TASK_TYPE,
-        params: {
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-        } satisfies ResumeWorkflowExecutionParams,
-        state: {},
-        runAt: resumeAt,
-        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
-      },
-      { request: fakeRequest }
+    const task = await withTraceParent(
+      agent,
+      workflowExecution.traceParent,
+      () =>
+        this.taskManager.schedule(
+          {
+            id: v4(),
+            taskType: WORKFLOW_RESUME_TASK_TYPE,
+            params: {
+              workflowRunId: workflowExecution.id,
+              spaceId: workflowExecution.spaceId,
+            } satisfies ResumeWorkflowExecutionParams,
+            state: {},
+            runAt: resumeAt,
+            scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+          },
+          { request: fakeRequest }
+        ),
+      { transactionName: 'workflow resume schedule' }
     );
 
     return {
@@ -117,23 +131,31 @@ export class WorkflowTaskManager {
     executionId,
     spaceId,
     fakeRequest,
+    traceParent,
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    traceParent?: string;
   }): Promise<{ taskId: string }> {
-    const task = await this.taskManager.schedule(
-      {
-        id: v4(),
-        taskType: WORKFLOW_RESUME_TASK_TYPE,
-        params: {
-          workflowRunId: executionId,
-          spaceId,
-        } satisfies ResumeWorkflowExecutionParams,
-        state: {},
-        scope: [`workflow:execution:${executionId}`],
-      },
-      fakeRequest ? { request: fakeRequest } : undefined
+    const task = await withTraceParent(
+      agent,
+      traceParent,
+      () =>
+        this.taskManager.schedule(
+          {
+            id: v4(),
+            taskType: WORKFLOW_RESUME_TASK_TYPE,
+            params: {
+              workflowRunId: executionId,
+              spaceId,
+            } satisfies ResumeWorkflowExecutionParams,
+            state: {},
+            scope: [`workflow:execution:${executionId}`],
+          },
+          fakeRequest ? { request: fakeRequest } : undefined
+        ),
+      { transactionName: 'workflow immediate resume schedule' }
     );
 
     return {
@@ -143,7 +165,7 @@ export class WorkflowTaskManager {
 
   async forceRunIdleTasks(
     workflowExecutionId: string,
-    options?: { spaceId: string; fakeRequest?: KibanaRequest }
+    options?: { spaceId: string; fakeRequest?: KibanaRequest; traceParent?: string }
   ): Promise<void> {
     const scopeTerm = {
       term: {
@@ -200,6 +222,7 @@ export class WorkflowTaskManager {
         executionId: workflowExecutionId,
         spaceId: options.spaceId,
         fakeRequest: options.fakeRequest,
+        traceParent: options.traceParent,
       });
       await this.taskManager.runSoon(taskId);
     }

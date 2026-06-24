@@ -69,6 +69,7 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 import { generateExecutionTaskScope } from './utils';
+import { withTraceParent } from './workflow_context_manager/apm_internal';
 import {
   buildWorkflowContext,
   type WorkflowExecutionForInputRendering,
@@ -717,6 +718,13 @@ export class WorkflowsExecutionEnginePlugin
         ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
         ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
         ...(dispatchEventId ? { dispatchEventId } : {}),
+        ...(typeof context.rootTraceId === 'string' ? { traceId: context.rootTraceId } : {}),
+        ...(typeof context.rootEntryTransactionId === 'string'
+          ? { entryTransactionId: context.rootEntryTransactionId }
+          : {}),
+        ...(typeof context.parentTraceParent === 'string'
+          ? { traceParent: context.parentTraceParent }
+          : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -879,7 +887,17 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
+        const { default: apm } = await import('elastic-apm-node');
+        await withTraceParent(
+          apm,
+          workflowExecution.traceParent,
+          () => plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest }),
+          {
+            transactionName: isChildExecution
+              ? 'workflow child execution schedule'
+              : 'workflow execution schedule',
+          }
+        );
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -1288,10 +1306,16 @@ export class WorkflowsExecutionEnginePlugin
         });
       }
 
+      const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+        executionId,
+        spaceId
+      );
+
       await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId,
         fakeRequest: request,
+        traceParent: execution?.traceParent,
       });
 
       await plugins.taskManager
@@ -1305,7 +1329,11 @@ export class WorkflowsExecutionEnginePlugin
         });
 
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId);
+      await workflowTaskManager.forceRunIdleTasks(executionId, {
+        spaceId,
+        fakeRequest: request,
+        traceParent: execution?.traceParent,
+      });
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;

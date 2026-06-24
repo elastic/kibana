@@ -18,7 +18,12 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
+import {
+  getAlertingRuleId,
+  getCurrentTraceParent,
+  getTraceId,
+  setCurrentTransaction,
+} from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { StepIoService } from './step_io_service';
@@ -328,6 +333,9 @@ export class WorkflowExecutionRuntimeManager {
     });
 
     const existingTransaction = agent.currentTransaction;
+    const inheritsRootTrace =
+      this.workflowExecution.triggeredBy === 'workflow-step' &&
+      typeof this.workflowExecution.traceId === 'string';
 
     if (existingTransaction) {
       // Check if this is triggered by alerting (has alerting labels) or task manager directly
@@ -371,7 +379,7 @@ export class WorkflowExecutionRuntimeManager {
 
         // Store the workflow transaction ID (not the alerting transaction ID)
         const workflowTransactionId = workflowTransaction.ids?.['transaction.id'];
-        if (workflowTransactionId) {
+        if (workflowTransactionId && !inheritsRootTrace) {
           this.workflowLogger?.logDebug('Storing workflow transaction ID', {
             transaction: { workflow_transaction_id: workflowTransactionId },
           });
@@ -386,7 +394,7 @@ export class WorkflowExecutionRuntimeManager {
         // Capture trace ID from the workflow transaction
         const realTraceId = getTraceId(workflowTransaction);
 
-        if (realTraceId) {
+        if (realTraceId && !inheritsRootTrace) {
           this.workflowLogger?.logDebug('Captured APM trace ID from workflow transaction', {
             trace: { trace_id: realTraceId },
           });
@@ -417,7 +425,7 @@ export class WorkflowExecutionRuntimeManager {
 
         // Store the task transaction ID in the workflow execution
         const taskTransactionId = existingTransaction.ids?.['transaction.id'];
-        if (taskTransactionId) {
+        if (taskTransactionId && !inheritsRootTrace) {
           this.workflowLogger?.logDebug('Storing task transaction ID', {
             transaction: { task_transaction_id: taskTransactionId },
           });
@@ -432,7 +440,7 @@ export class WorkflowExecutionRuntimeManager {
         // Capture trace ID from the task transaction
         const realTraceId = getTraceId(existingTransaction);
 
-        if (realTraceId) {
+        if (realTraceId && !inheritsRootTrace) {
           this.workflowLogger?.logDebug('Captured APM trace ID from task transaction', {
             trace: { trace_id: realTraceId },
           });
@@ -440,6 +448,13 @@ export class WorkflowExecutionRuntimeManager {
             traceId: realTraceId,
           });
         }
+      }
+
+      const currentTraceParent = getCurrentTraceParent(agent);
+      if (currentTraceParent) {
+        this.workflowExecutionState.updateWorkflowExecution({
+          traceParent: currentTraceParent,
+        });
       }
 
       // Set the transaction outcome to success by default

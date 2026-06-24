@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import agent from 'elastic-apm-node';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { JsonObject } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
@@ -15,7 +16,7 @@ import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { StrategyResult } from '../types';
-import { toExecutionModel } from '../utils';
+import { buildChildWorkflowTraceContext, toExecutionModel } from '../utils';
 
 export class WorkflowExecuteAsyncStrategy {
   constructor(
@@ -47,6 +48,7 @@ export class WorkflowExecuteAsyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
+          ...buildChildWorkflowTraceContext(agent, workflowExecution),
         },
         request
       );
