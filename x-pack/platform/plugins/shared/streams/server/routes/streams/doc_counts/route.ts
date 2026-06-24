@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { StreamDocsStat } from '../../../../common';
 import { createServerRoute } from '../../create_server_route';
@@ -29,7 +30,7 @@ const degradedDocCountsRoute = createServerRoute({
   params: z.object({
     query: z
       .object({
-        stream: z.string().optional(),
+        stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
       })
       .optional(),
   }),
@@ -58,7 +59,7 @@ const totalDocCountsRoute = createServerRoute({
   params: z.object({
     query: z
       .object({
-        stream: z.string().optional(),
+        stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
       })
       .optional(),
   }),
@@ -91,7 +92,7 @@ const failedDocCountsRoute = createServerRoute({
     query: z.object({
       start: z.coerce.number(),
       end: z.coerce.number(),
-      stream: z.string().optional(),
+      stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
@@ -122,7 +123,7 @@ const ingestionDocCountsRoute = createServerRoute({
     query: z.object({
       start: z.coerce.number(),
       end: z.coerce.number(),
-      stream: z.string().optional(),
+      stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
