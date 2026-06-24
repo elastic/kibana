@@ -1163,7 +1163,7 @@ describe('AutomaticImportSavedObjectService', () => {
       await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-update-ds-integration');
     });
 
-    it('should update data stream phase and clear it on terminal status', async () => {
+    it('should update the data stream phase', async () => {
       const integrationParams: IntegrationParams = {
         ...mockIntegrationParams,
         integrationId: 'test-phase-integration',
@@ -1193,18 +1193,6 @@ describe('AutomaticImportSavedObjectService', () => {
         'test-phase-integration'
       );
       expect(withPhase.attributes.job_info.phase).toBe('mapping_to_ecs');
-
-      await savedObjectService.updateDataStreamSavedObjectAttributes({
-        integrationId: 'test-phase-integration',
-        dataStreamId: 'test-phase-ds',
-        status: TASK_STATUSES.completed,
-      });
-
-      const completed = await savedObjectService.getDataStream(
-        'test-phase-ds',
-        'test-phase-integration'
-      );
-      expect(completed.attributes.job_info.phase).toBeUndefined();
 
       await savedObjectsClient.delete(
         DATA_STREAM_SAVED_OBJECT_TYPE,

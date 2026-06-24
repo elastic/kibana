@@ -664,7 +664,6 @@ export class AutomaticImportSavedObjectService {
         job_info: {
           ...dataStream.attributes.job_info,
           status,
-          ...(this.isTerminalTaskStatus(status) ? { phase: undefined } : {}),
         },
       };
 
@@ -679,13 +678,5 @@ export class AutomaticImportSavedObjectService {
       this.logger.error(`Failed to update data stream ${dataStreamId}: ${error}`);
       throw error;
     }
-  }
-
-  private isTerminalTaskStatus(status: keyof typeof TASK_STATUSES): boolean {
-    return (
-      status === TASK_STATUSES.completed ||
-      status === TASK_STATUSES.failed ||
-      status === TASK_STATUSES.cancelled
-    );
   }
 }
