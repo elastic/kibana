@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EuiSuperSelectWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
@@ -30,6 +30,7 @@ export class ComposeDiscoverPage {
    * create now uses a single unified editor and the heuristic split runs on Apply.
    */
   public readonly alertSummaryEditorButton: Locator;
+  public readonly sandboxPanel: Locator;
   public readonly sandboxCloseButton: Locator;
   public readonly sandboxSearchButton: Locator;
   public readonly sandboxApplyButton: Locator;
@@ -42,6 +43,8 @@ export class ComposeDiscoverPage {
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
   public readonly createEsqlRuleCard: Locator;
+  public readonly modeSelect: Locator;
+  public readonly modeSelector: EuiSuperSelectWrapper;
   public readonly cancelButton: Locator;
   /**
    * Callout shown after Apply when the query has a base but no alert condition
@@ -63,6 +66,7 @@ export class ComposeDiscoverPage {
     this.openEditorButton = this.page.testSubj.locator('composeDiscoverOpenEditor');
     this.editQueryButton = this.page.testSubj.locator('composeDiscoverEditQuery');
     this.alertSummaryEditorButton = this.page.testSubj.locator('esqlSummaryOpenEditor');
+    this.sandboxPanel = this.page.testSubj.locator('querySandbox');
     this.sandboxCloseButton = this.page.testSubj.locator('querySandboxClose');
     this.sandboxSearchButton = this.page.testSubj.locator('composeDiscoverRunQuery');
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
@@ -73,6 +77,8 @@ export class ComposeDiscoverPage {
     this.relatedDashboardsInput = this.flyout.locator(
       'input[placeholder="Link related dashboards for investigation"]'
     );
+    this.modeSelect = this.page.testSubj.locator('composeDiscoverModeSelect');
+    this.modeSelector = new EuiSuperSelectWrapper(page, 'composeDiscoverModeSelect');
     this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');

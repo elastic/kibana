@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from './types';
-import { isAlertConditionStepId } from './types';
+import { isAlertConditionStepId, isBuilderConditionStepId } from './types';
 import type { ComposeFormValues } from './compose_form_types';
 import { getBreachQuery } from './compose_form_types';
 import { getEsqlSummaryState } from './compose_discover_form/esql_query_summary_section';
@@ -78,6 +78,8 @@ export interface ComposeDiscoverFooterProps {
   isCreate: boolean;
   hasValidationErrors: boolean;
   yamlHasErrors: boolean;
+  isBuilderMode: boolean;
+  isBuilderStepValid: boolean;
   isSaving: boolean;
   onNext: () => void;
   onFinalSubmit: () => void;
@@ -94,6 +96,8 @@ export const ComposeDiscoverFooter = ({
   isCreate,
   hasValidationErrors,
   yamlHasErrors,
+  isBuilderMode,
+  isBuilderStepValid,
   isSaving,
   onNext,
   onFinalSubmit,
@@ -104,6 +108,7 @@ export const ComposeDiscoverFooter = ({
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const watchedQuery = useWatch<ComposeFormValues, 'query'>({ name: 'query' });
 
+  const isBuilderStep = currentStep ? isBuilderConditionStepId(currentStep.id) : false;
   const isConditionStep = currentStep ? isAlertConditionStepId(currentStep.id) : false;
 
   /*
@@ -126,9 +131,10 @@ export const ComposeDiscoverFooter = ({
     alertConditionState !== undefined && alertConditionState !== 'success';
 
   const nextDisabled =
-    uiState.childOpen ||
+    (!isBuilderMode && uiState.childOpen) ||
     hasValidationErrors ||
-    (isConditionStep && !uiState.queryCommitted) ||
+    (isConditionStep && !isBuilderStep && !uiState.queryCommitted) ||
+    (isBuilderStep && !isBuilderStepValid) ||
     invalidAlertCondition;
 
   const getNextTooltip = (): string | undefined => {
@@ -206,8 +212,8 @@ export const ComposeDiscoverFooter = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="arrowLeft"
-                  isDisabled={uiState.childOpen}
-                  onClick={() => dispatch({ type: 'GO_BACK' })}
+                  isDisabled={!isBuilderMode && uiState.childOpen}
+                  onClick={() => dispatch({ type: 'GO_BACK', isBuilderMode })}
                   data-test-subj="composeDiscoverBack"
                 >
                   {BACK_BUTTON_LABEL}
