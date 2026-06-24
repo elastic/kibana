@@ -23,6 +23,7 @@ import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 import { GraphFlyoutPage } from './graph_flyout_page';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
+export { AddExceptionButtonType } from './add_exception_flyout';
 
 export interface SecurityPageObjects extends PageObjects {
   addExceptionFlyoutPage: AddExceptionFlyoutPage;
