@@ -121,7 +121,8 @@
     "@kbn/cps",
     "@kbn/core-ui-settings-browser",
     "@kbn/management-settings-ids",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-chrome-app-menu-components"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
