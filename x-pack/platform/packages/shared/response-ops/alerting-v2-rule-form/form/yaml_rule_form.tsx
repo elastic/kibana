@@ -53,6 +53,9 @@ export interface YamlRuleFormProps {
   onBlurSync?: (values: FormValues) => void;
   /** When true, fill the available flyout height below the field label. */
   fullHeight?: boolean;
+  /** Forwarded to the editor; fires with `true` when the YAML buffer has
+   *  schema/syntax markers, `false` when clean. */
+  onValidate?: (hasErrors: boolean) => void;
 }
 
 const yamlRuleFormLabel = (
@@ -120,6 +123,7 @@ export const YamlRuleForm = ({
   setYamlText,
   onBlurSync,
   fullHeight = false,
+  onValidate,
 }: YamlRuleFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const { reset } = useFormContext<FormValues>();
@@ -174,6 +178,7 @@ export const YamlRuleForm = ({
       value={yamlText}
       onChange={handleYamlChange}
       onBlur={handleBlur}
+      onValidate={onValidate}
       esqlCallbacks={esqlCallbacks}
       isReadOnly={isReadOnly}
       height={editorHeight}
