@@ -12,7 +12,7 @@ paths:
       operationId: BulkUpsertAssetCriticalityRecords
       summary: Bulk upsert asset criticality records
       description: |
-        **DEPRECATED.** Use the Entity Store APIs to bulk set asset criticality.
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset criticality.
 
         Bulk upsert up to 1000 asset criticality records.
 

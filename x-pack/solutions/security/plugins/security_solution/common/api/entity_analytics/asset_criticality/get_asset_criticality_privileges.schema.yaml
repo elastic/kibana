@@ -12,7 +12,7 @@ paths:
       operationId: AssetCriticalityGetPrivileges
       summary: Get Asset Criticality Privileges
       description: |
-        **DEPRECATED.** Use the Entity Store APIs to check privileges managing asset criticality.
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to check privileges for managing asset criticality.
       responses:
         '200':
           description: Successful response

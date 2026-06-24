@@ -12,7 +12,7 @@ paths:
       operationId: GetAssetCriticalityStatus
       summary: Get Asset Criticality Status
       description: |
-        **DEPRECATED.** Use the Entity Store APIs to get asset criticality for a specific entity.
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to get asset criticality status for a specific entity.
       responses:
         '200':
           description: Successful response

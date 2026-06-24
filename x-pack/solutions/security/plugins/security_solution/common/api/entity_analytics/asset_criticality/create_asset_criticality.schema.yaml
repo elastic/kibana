@@ -12,7 +12,7 @@ paths:
       operationId: CreateAssetCriticalityRecord
       summary: Upsert an asset criticality record
       description: |
-        **DEPRECATED.** Use the Entity Store APIs to set asset criticality for an entity.
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset criticality to an entity.
 
         Create or update an asset criticality record for a specific entity.
 
