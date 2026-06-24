@@ -14,6 +14,10 @@ import React, { useEffect, useRef } from 'react';
 import { AGENTBUILDER_PATH } from '../../common/features';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
+import {
+  clearAgentWorkspaceNavigation,
+  setAgentWorkspaceScopedHistory,
+} from './agent_workspace_navigation';
 
 const mountRootStyles = css`
   display: flex;
@@ -69,6 +73,7 @@ export function AgentWorkspaceMount() {
       const { mountApp } = await import('../application');
       const { core, plugins, getServices } = context;
       const history = createAgentScopedHistory();
+      setAgentWorkspaceScopedHistory(history);
 
       const unmount = await mountApp({
         core,
@@ -98,6 +103,7 @@ export function AgentWorkspaceMount() {
     return () => {
       cancelled = true;
       appLeaveHandlerRef.current = null;
+      setAgentWorkspaceScopedHistory(null);
       if (unmountRef.current) {
         unmountRef.current();
         unmountRef.current = null;
