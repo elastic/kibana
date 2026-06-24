@@ -58,7 +58,7 @@ export class EsqlService {
     // It doesn't return hidden indices
     const sources = (await client.indices.resolveIndex({
       name: sourcesToQuery,
-      expand_wildcards: ['open', 'closed'],
+      expand_wildcards: mode === 'lookup' ? ['open', 'closed'] : 'open',
       mode,
     })) as ResolveIndexResponse;
 
