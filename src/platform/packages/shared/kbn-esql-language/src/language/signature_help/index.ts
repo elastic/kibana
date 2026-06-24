@@ -8,13 +8,13 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { Parser } from '@elastic/esql';
 import { within, Walker } from '@elastic/esql';
 import type { ESQLFunction } from '@elastic/esql/types';
 import {
   getFormattedFunctionSignature,
   getFunctionDefinition,
 } from '../../commands/definitions/utils';
+import { parseEsqlQueryForAnalysis } from '../../commands/definitions/utils/ast';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { findSubquery } from '../shared/subqueries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
@@ -51,7 +51,7 @@ export async function getSignatureHelp(
 
   // Corrects the query to be able to work with incomplete syntax
   const correctedQuery = correctQuerySyntax(fullText, offset);
-  const { root } = Parser.parse(correctedQuery);
+  const { root } = parseEsqlQueryForAnalysis(correctedQuery);
 
   const commandAtOffset = [...root.commands].reverse().find((cmd) => offset >= cmd.location.min);
 

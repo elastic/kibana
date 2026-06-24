@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker, within, Parser } from '@elastic/esql';
+import { Walker, within } from '@elastic/esql';
+import { parseEsqlQueryForAnalysis } from '../../commands/definitions/utils/ast';
 
 interface DocumentHighlightItem {
   start: number;
@@ -22,7 +23,7 @@ export function getDocumentHighlightItems(
   fullText: string,
   offset: number
 ): DocumentHighlightItem[] {
-  const { root } = Parser.parse(fullText);
+  const { root } = parseEsqlQueryForAnalysis(fullText);
 
   // Single walk: find the target column at cursor and collect all columns grouped by name
   let targetName: string | undefined;

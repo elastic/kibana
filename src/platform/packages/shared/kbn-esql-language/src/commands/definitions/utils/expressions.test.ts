@@ -11,7 +11,13 @@ import type { SupportedDataType } from '../types';
 import { FunctionDefinitionTypes } from '../types';
 import type { ESQLColumnData } from '../../registry/types';
 import { Location } from '../../registry/types';
-import { buildPartialMatcher, getAssignmentExpressionRoot, getExpressionType } from './expressions';
+import {
+  buildPartialMatcher,
+  getAssignmentExpressionRoot,
+  getExpressionType,
+  resolveArgumentTypes,
+} from './expressions';
+import { normalizeExpressionParens } from './ast';
 import { setTestFunctions } from './test_functions';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { getAutocompleteCursorContext } from '../../../language/shared/parse_for_autocomplete_query';
@@ -40,6 +46,8 @@ describe('getExpressionType', () => {
         `Failed to parse expression "${expression}": ${errors.map((e) => e.message).join(', ')}`
       );
     }
+
+    normalizeExpressionParens(root);
 
     return root.commands[1].args[0];
   };
@@ -249,6 +257,12 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('test(1., "foo")'))).toBe('long');
     });
 
+    it('treats parenthesized literals as literals for signature matching', () => {
+      expect(getExpressionType(getASTForExpression('accepts_dates(("2024-01-01"), "")'))).toBe(
+        'keyword'
+      );
+    });
+
     it('supports nested functions', () => {
       expect(
         getExpressionType(getASTForExpression('test(1., test(test(test(returns_keyword()))))'))
@@ -309,6 +323,18 @@ describe('getExpressionType', () => {
 
     it('supports COUNT(*)', () => {
       expect(getExpressionType(getASTForExpression('COUNT(*)'))).toBe<SupportedDataType>('long');
+    });
+
+    it('resolves literal masks through expression parens', () => {
+      const { root } = Parser.parse('FROM index | EVAL test(("foo"))');
+      normalizeExpressionParens(root);
+      const fn = root.commands[1].args[0];
+
+      if (!fn || Array.isArray(fn) || fn.type !== 'function') {
+        throw new Error('Expected function expression');
+      }
+
+      expect(resolveArgumentTypes(fn.args).literalMask).toEqual([true]);
     });
 
     it.each(['IN', 'NOT IN'])('returns boolean for %s subquery expressions', (operator) => {

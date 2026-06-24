@@ -115,4 +115,24 @@ describe('WHERE Validation', () => {
     // this is a scenario that was failing because "or" didn't accept "null"
     whereExpectErrors('from a_index | where textField == "a" or null', []);
   });
+
+  describe('parenthesized expressions', () => {
+    test('validates unknown columns inside parens', () => {
+      whereExpectErrors('from a_index | where (unknownColumn > 0)', [
+        'Unknown column "unknownColumn"',
+      ]);
+    });
+
+    test('validates type errors inside parens', () => {
+      whereExpectErrors('from a_index | where (textField + 1)', [
+        getNoValidCallSignatureError('+', ['text', 'integer']),
+      ]);
+    });
+
+    test('accepts valid boolean expressions inside parens', () => {
+      whereExpectErrors('from a_index | where (doubleField > 0)', []);
+      whereExpectErrors('from a_index | where (doubleField > 0) AND booleanField', []);
+      whereExpectErrors('from a_index | where NOT (doubleField > 0)', []);
+    });
+  });
 });

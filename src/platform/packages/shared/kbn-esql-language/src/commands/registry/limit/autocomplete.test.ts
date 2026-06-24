@@ -108,6 +108,7 @@ describe('LIMIT Autocomplete', () => {
       ];
 
       await limitExpectSuggestions('from a | limit 10 by integerField, ', expected);
+      await limitExpectSuggestions('from a | limit 10 by (integerField), ', expected);
     });
   });
 

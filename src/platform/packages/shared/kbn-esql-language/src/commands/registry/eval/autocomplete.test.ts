@@ -651,4 +651,40 @@ describe('EVAL Autocomplete', () => {
       ]);
     });
   });
+
+  describe('parenthesized expressions', () => {
+    test('suggests fields and functions at the start of a parenthesized RHS', async () => {
+      await evalExpectSuggestions('from a | eval col0 = (', [
+        ...getFieldNamesByType('any'),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+      ]);
+    });
+
+    test('suggests function parameters inside parens on assignment RHS', async () => {
+      const expectedDoubleIntegerFields = getFieldNamesByType(['integer', 'long']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedDoubleIntegerFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval col0 = (round(doubleField, ',
+        [PLACEHOLDER_CONFIG.number.snippet],
+        mockCallbacks
+      );
+    });
+
+    test('suggests operators after a complete field inside parens on assignment RHS', async () => {
+      await evalExpectSuggestions('from a | eval col0 = (doubleField ', [
+        '\n',
+        ', ',
+        '| ',
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['double']
+        ),
+      ]);
+    });
+  });
 });

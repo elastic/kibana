@@ -8,7 +8,8 @@
  */
 
 import type { ESQLSource } from '@elastic/esql/types';
-import { Parser, isSource } from '@elastic/esql';
+import { isSource } from '@elastic/esql';
+import { parseEsqlQueryForAnalysis } from '@kbn/esql-language';
 
 /**
  * Extracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.
@@ -20,7 +21,7 @@ export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
   const indexNames: string[] = [];
 
   // parse esql query and find lookup indices in the query, traversing the AST
-  const { root } = Parser.parse(esqlQuery);
+  const { root } = parseEsqlQueryForAnalysis(esqlQuery);
   // find all join commands
   root.commands.forEach((command) => {
     if (command.name === 'join') {

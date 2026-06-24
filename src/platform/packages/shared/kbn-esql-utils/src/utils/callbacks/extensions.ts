@@ -10,7 +10,8 @@
 import type { RecommendedField, RecommendedQuery, ESQLRegistrySolutionId } from '@kbn/esql-types';
 import { REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import type { HttpStart } from '@kbn/core/public';
-import { Parser, isSource } from '@elastic/esql';
+import { isSource } from '@elastic/esql';
+import { parseEsqlQueryForAnalysis } from '@kbn/esql-language';
 import { cacheParametrizedAsyncFunction } from './utils/cache';
 
 interface EditorExtensions {
@@ -28,7 +29,7 @@ export const analyzeSourceQuery = (
 ): { indexPattern: string; commandName: string } | undefined => {
   if (!queryString.trim()) return undefined;
   try {
-    const { root } = Parser.parse(queryString);
+    const { root } = parseEsqlQueryForAnalysis(queryString);
     const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
     if (!sourceCommand) return undefined;
 

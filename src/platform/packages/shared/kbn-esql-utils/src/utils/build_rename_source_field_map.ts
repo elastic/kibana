@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, Parser } from '@elastic/esql';
+import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
+import { parseEsqlQueryForAnalysis } from '@kbn/esql-language';
 import type { ESQLCommandSummary } from '@kbn/esql-language/src/commands/registry/types';
 import { getSummaryPerCommand } from './get_query_summary';
 
@@ -109,7 +110,7 @@ function resolveOneField(
 }
 
 function buildContext(query: string): RenameResolutionContext {
-  const { root } = Parser.parse(query);
+  const { root } = parseEsqlQueryForAnalysis(query);
   const commandSummaries: CommandWithSummary[] = root.commands.map((cmd) => ({
     cmd,
     summary: getSummaryPerCommand(query, cmd),

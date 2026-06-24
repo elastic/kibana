@@ -17,7 +17,7 @@ import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
-import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
+import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
@@ -25,6 +25,7 @@ import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
+import { parseEsqlQueryForAnalysis } from './ast';
 
 export const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -413,7 +414,7 @@ export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undef
 
 export function getIndexSourcesFromQuery(query: string): string[] {
   try {
-    const { root } = Parser.parse(query);
+    const { root } = parseEsqlQueryForAnalysis(query);
     return getSourcesFromCommands(root.commands, 'index').map(({ name }) => name);
   } catch {
     return [];

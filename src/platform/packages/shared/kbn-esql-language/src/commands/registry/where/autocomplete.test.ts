@@ -154,6 +154,14 @@ describe('WHERE Autocomplete', () => {
       );
     });
 
+    test('after a parenthesized date literal comparison', async () => {
+      await whereExpectSuggestions('from a | where dateField == ("2024-01-01") ', [
+        '\n',
+        ...getOperatorSuggestions(logicalOperators),
+        '| ',
+      ]);
+    });
+
     test('after a logical operator', async () => {
       for (const op of ['and', 'or']) {
         await whereExpectSuggestions(`from a | where keywordField >= keywordField ${op} `, [
@@ -349,6 +357,14 @@ describe('WHERE Autocomplete', () => {
         ],
         mockCallbacks
       );
+      await whereExpectSuggestions(
+        'from index | WHERE (doubleField) in ( textField, ',
+        [
+          ...getFieldNamesByType('double'),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
+        ],
+        mockCallbacks
+      );
     });
 
     test('suggestions after IS (NOT) NULL', async () => {
@@ -377,6 +393,69 @@ describe('WHERE Autocomplete', () => {
 
     test('pipe suggestion after complete expression', async () => {
       expect(await whereSuggest('from index | WHERE doubleField != doubleField ')).toContainEqual(
+        expect.objectContaining({
+          label: '|',
+        })
+      );
+    });
+  });
+
+  describe('parenthesized expressions', () => {
+    test('suggests operators after a field name inside parens', async () => {
+      await whereExpectSuggestions('from a | where (keywordField ', [
+        '!= $0',
+        '< $0',
+        '<= $0',
+        '== $0',
+        '> $0',
+        '>= $0',
+        ...getOperatorSuggestions([
+          ...patternMatchOperators,
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
+      ]);
+    });
+
+    test('suggests fields and functions after a logical operator inside parens', async () => {
+      await whereExpectSuggestions('from a | where (keywordField >= keywordField AND ', [
+        ...getFieldNamesByType('any'),
+        ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
+      ]);
+    });
+
+    test('suggests pattern operators after NOT inside parens', async () => {
+      await whereExpectSuggestions(
+        'from index | WHERE (keywordField NOT ',
+        getOperatorSuggestions(
+          [...patternMatchOperators, ...inOperators].filter((op) => !op.name.startsWith('not '))
+        )
+      );
+    });
+
+    test('suggests operators after an arithmetic expression inside parens', async () => {
+      await whereExpectSuggestions('FROM index | WHERE (doubleField + doubleField ', [
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'any',
+          { operators: true, skipAssign: true },
+          ['double'],
+          [':']
+        ),
+      ]);
+    });
+
+    test('suggests pipe after a complete parenthesized expression', async () => {
+      const whereSuggest = async (query: string) => {
+        const cursorPosition = query.length;
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
+        if (!command) {
+          throw new Error('Command not found in the parsed query');
+        }
+        return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
+      };
+
+      expect(await whereSuggest('from index | WHERE (doubleField != doubleField) ')).toContainEqual(
         expect.objectContaining({
           label: '|',
         })

@@ -8,11 +8,15 @@
  */
 
 import type { ESQLAstCommand } from '@elastic/esql/types';
-import { Parser } from '@elastic/esql';
-import { esqlCommandRegistry, type ESQLCommandSummary } from '@kbn/esql-language';
+import {
+  esqlCommandRegistry,
+  normalizeExpressionParens,
+  parseEsqlQueryForAnalysis,
+  type ESQLCommandSummary,
+} from '@kbn/esql-language';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
 
-function processCommand(
+function processNormalizedCommand(
   command: ESQLAstCommand,
   query: string,
   targetSets: {
@@ -50,6 +54,21 @@ function processCommand(
   }
 }
 
+function processExternalCommand(
+  command: ESQLAstCommand,
+  query: string,
+  targetSets: {
+    newColumns: Set<string>;
+    renamedColumnsPairs: Set<[string, string]>;
+    metadataColumns: Set<string>;
+    aggregates: Set<FieldSummary>;
+    grouping: Set<FieldSummary>;
+  }
+): void {
+  normalizeExpressionParens(command);
+  processNormalizedCommand(command, query, targetSets);
+}
+
 /**
  * Analyzes the provided ES|QL query and returns a summary of new columns,
  * renamed columns, and metadata columns introduced by the commands in the query.
@@ -57,7 +76,7 @@ function processCommand(
  * @returns An object containing sets of new columns, renamed column pairs, metadata columns, aggregates, and grouping.
  */
 export function getQuerySummary(query: string): ESQLCommandSummary {
-  const { root } = Parser.parse(query);
+  const { root } = parseEsqlQueryForAnalysis(query);
 
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
@@ -66,7 +85,7 @@ export function getQuerySummary(query: string): ESQLCommandSummary {
   const allGroupings = new Set<FieldSummary>();
 
   for (const command of root.commands) {
-    processCommand(command, query, {
+    processNormalizedCommand(command, query, {
       newColumns: allNewColumns,
       renamedColumnsPairs: allRenamedColumnsPairs,
       metadataColumns: allMetadataColumns,
@@ -92,7 +111,11 @@ export function getQuerySummaryPerCommandType(
   query: string,
   commandType: string
 ): ESQLCommandSummary[] {
-  const { root } = Parser.parseQuery(query);
+  const result = parseEsqlQueryForAnalysis(query);
+  if (result.errors.length) {
+    throw result.errors[0];
+  }
+  const { root } = result;
   const summaries: ESQLCommandSummary[] = [];
 
   for (const command of root.commands) {
@@ -106,7 +129,7 @@ export function getQuerySummaryPerCommandType(
     const allAggregates = new Set<FieldSummary>();
     const allGroupings = new Set<FieldSummary>();
 
-    processCommand(command, query, {
+    processNormalizedCommand(command, query, {
       newColumns: allNewColumns,
       renamedColumnsPairs: allRenamedColumnsPairs,
       metadataColumns: allMetadataColumns,
@@ -136,7 +159,7 @@ export function getSummaryPerCommand(query: string, command: ESQLAstCommand): ES
   const allAggregates = new Set<FieldSummary>();
   const allGroupings = new Set<FieldSummary>();
 
-  processCommand(command, query, {
+  processExternalCommand(command, query, {
     newColumns: allNewColumns,
     renamedColumnsPairs: allRenamedColumnsPairs,
     metadataColumns: allMetadataColumns,

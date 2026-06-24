@@ -15,6 +15,7 @@ import { esqlCommandRegistry } from '../../commands/registry';
 import type { ICommandCallbacks } from '../../commands/registry/types';
 import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { getMessageFromId } from '../../commands/definitions/utils';
+import { normalizeExpressionParens } from '../../commands/definitions/utils/ast';
 import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
@@ -64,6 +65,9 @@ async function validateAst(
   const messages: ESQLMessage[] = [];
 
   const parsingResult = EsqlQuery.fromSrc(queryString);
+
+  // Unwrap redundant expression parens once, so command validators never special-case them.
+  normalizeExpressionParens(parsingResult.ast);
 
   const headerCommands = parsingResult.ast.header ?? [];
 

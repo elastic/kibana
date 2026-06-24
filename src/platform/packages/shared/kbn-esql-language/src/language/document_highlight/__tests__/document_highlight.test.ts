@@ -32,6 +32,12 @@ describe('getDocumentHighlightItems()', () => {
     expect(highlights).toHaveLength(2);
   });
 
+  test('highlights fields inside expression parens', () => {
+    const query = 'FROM index | WHERE (field1) > field2 | STATS count() BY (field1)';
+    const highlights = getHighlights(query, 'field1');
+    expect(highlights).toHaveLength(2);
+  });
+
   test('highlights field used in multiple commands', () => {
     const query = 'FROM index | EVAL x = name | WHERE name != "" | SORT name';
     const highlights = getHighlights(query, 'name');

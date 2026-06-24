@@ -14,10 +14,10 @@ import {
   isMap,
   isStringLiteral,
   LeafPrinter,
-  Parser,
   Walker,
 } from '@elastic/esql';
 
+import { parseEsqlQueryForAnalysis } from '@kbn/esql-language';
 import type { ESQLAstQueryExpression, ESQLFunction, ESQLMap } from '@elastic/esql/types';
 import { replaceColumnNamesIfRenamed } from './query_parsing_helpers';
 
@@ -66,7 +66,7 @@ export type ESQLColumnsWithHighlights = Record<string, ESQLHighlightTags>;
  */
 export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighlights {
   const columnsWithHighlights: ESQLColumnsWithHighlights = {};
-  const { root } = Parser.parse(query);
+  const { root } = parseEsqlQueryForAnalysis(query);
 
   const highlightFunctionsCandidates = Walker.findAll(
     root,

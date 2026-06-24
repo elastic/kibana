@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser, PromQLParser, Walker } from '@elastic/esql';
+import { isParens, isSubQuery, Parser, PromQLParser, Walker } from '@elastic/esql';
 import type { ESQLAstItem, ESQLAstQueryExpression } from '@elastic/esql/types';
 import { EDITOR_MARKER } from '../constants';
 import {
@@ -15,6 +15,7 @@ import {
   correctQuerySyntax,
   getBracketsToClose,
   isMarkerNode,
+  normalizeExpressionParens,
   removeAutocompleteMarkers,
 } from './ast';
 
@@ -164,5 +165,73 @@ describe('removeAutocompleteMarkers', () => {
     // Before cleaning, the marker leaks into inlineCast.castType (a plain string property).
     expect(JSON.stringify(root)).toContain(EDITOR_MARKER);
     expect(JSON.stringify(removeAutocompleteMarkers(root))).not.toContain(EDITOR_MARKER);
+  });
+});
+
+describe('normalizeExpressionParens', () => {
+  const parse = (query: string) => Parser.parse(query).root;
+
+  const countExpressionParens = (node: ESQLAstQueryExpression): number => {
+    let count = 0;
+    Walker.walk(node, {
+      visitAny: (current) => {
+        if (isParens(current) && !isSubQuery(current)) {
+          count++;
+        }
+      },
+    });
+    return count;
+  };
+
+  const lastCommandArgs = (root: ESQLAstQueryExpression) =>
+    root.commands[root.commands.length - 1].args;
+
+  it('unwraps a top-level expression paren into its inner node', () => {
+    const root = normalizeExpressionParens(parse('FROM index | EVAL (field)'));
+    const [arg] = lastCommandArgs(root);
+
+    expect(arg).toMatchObject({ type: 'column' });
+    expect(countExpressionParens(root)).toBe(0);
+  });
+
+  it('flattens redundant nested parens', () => {
+    const root = normalizeExpressionParens(parse('FROM index | EVAL ((field))'));
+    const [arg] = lastCommandArgs(root);
+
+    expect(arg).toMatchObject({ type: 'column' });
+    expect(countExpressionParens(root)).toBe(0);
+  });
+
+  it('unwraps parens used as operator operands', () => {
+    const root = normalizeExpressionParens(parse('FROM index | WHERE (a + b) > 0'));
+
+    expect(countExpressionParens(root)).toBe(0);
+  });
+
+  it('unwraps parens inside a BY option', () => {
+    const root = normalizeExpressionParens(parse('FROM index | STATS COUNT(*) BY (field)'));
+
+    expect(countExpressionParens(root)).toBe(0);
+  });
+
+  it('unwraps parens inside IN list values', () => {
+    const root = normalizeExpressionParens(parse('FROM index | WHERE foo IN (1, (2 + 3))'));
+
+    expect(countExpressionParens(root)).toBe(0);
+  });
+
+  it('preserves subquery parens', () => {
+    const root = normalizeExpressionParens(parse('FROM index | WHERE field IN (FROM other)'));
+
+    let subQueryCount = 0;
+    Walker.walk(root, {
+      visitAny: (current) => {
+        if (isSubQuery(current)) {
+          subQueryCount++;
+        }
+      },
+    });
+
+    expect(subQueryCount).toBe(1);
   });
 });

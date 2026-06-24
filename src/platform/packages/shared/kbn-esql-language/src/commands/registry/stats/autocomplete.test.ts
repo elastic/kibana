@@ -168,6 +168,14 @@ describe('STATS Autocomplete', () => {
         ]);
       });
 
+      test('suggests fields and functions at the start of a parenthesized assignment RHS', async () => {
+        await statsExpectSuggestions('from a | stats col0 = (', [
+          ...allAggFunctions,
+          ...allGroupingFunctions,
+          ...allEvalFunctionsForStats,
+        ]);
+      });
+
       test('on space after aggregate field', async () => {
         await statsExpectSuggestions('from a | stats a=min(integerField) ', [
           '\n',
@@ -547,6 +555,17 @@ describe('STATS Autocomplete', () => {
           ]);
         });
 
+        it('suggests operators after a field name inside parens in WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE (keywordField ', [
+            ...getOperatorSuggestions([
+              ...comparisonFunctions,
+              ...patternMatchOperators,
+              ...inOperators,
+              ...nullCheckOperators,
+            ]),
+          ]);
+        });
+
         it('suggests after operator', async () => {
           const expectedFieldsStrings = getFieldNamesByType(['text', 'keyword']);
           (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
@@ -642,6 +661,10 @@ describe('STATS Autocomplete', () => {
         ]);
 
         await statsExpectSuggestions('from a | stats a=max(b) BY integerField, keywor', [
+          ...expected,
+          ...getFieldNamesByType('any').filter((name) => name !== 'integerField'),
+        ]);
+        await statsExpectSuggestions('from a | stats a=max(b) BY (integerField), keywor', [
           ...expected,
           ...getFieldNamesByType('any').filter((name) => name !== 'integerField'),
         ]);

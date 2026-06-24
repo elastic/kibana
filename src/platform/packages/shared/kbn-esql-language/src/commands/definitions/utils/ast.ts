@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isList, isOptionNode, Walker } from '@elastic/esql';
+import { isList, isOptionNode, isParens, isSubQuery, Parser, Walker } from '@elastic/esql';
 import type { PromQLAstNode } from '@elastic/esql';
 import type {
+  ESQLAstExpression,
   ESQLFunction,
+  ESQLParens,
+  ESQLProperNode,
   ESQLSingleAstItem,
   ESQLAstItem,
   ESQLCommandOption,
   ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
+  ESQLAstCommand,
 } from '@elastic/esql/types';
 import { EDITOR_MARKER } from '../constants';
 import { endsWithComma, endsWithWhitespace } from './regex';
@@ -179,6 +183,47 @@ export function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
     option: findOption(command.args, offset),
     node,
   };
+}
+
+/**
+ * Removes non-subquery expression parens in place, flattening nested groups like `((a))`.
+ * Preserves structural parens such as subqueries/forks (`FROM (...)`).
+ */
+export function normalizeExpressionParens<T extends ESQLAstQueryExpression | ESQLAstCommand>(
+  root: T
+): T {
+  Walker.replaceAll(
+    root,
+    (node) => isParens(node) && !isSubQuery(node),
+    (node) => {
+      let inner: ESQLAstExpression = node as ESQLParens;
+
+      while (isParens(inner) && !isSubQuery(inner)) {
+        inner = inner.child;
+      }
+
+      return inner as ESQLProperNode;
+    }
+  );
+
+  return root;
+}
+
+/**
+ * Parses a query for semantic analysis, unwrapping expression-only parens.
+ * Use `Parser.parse` for source-preserving flows; PromQL queries are left untouched.
+ */
+export function parseEsqlQueryForAnalysis(
+  query: string,
+  options?: Parameters<typeof Parser.parse>[1]
+): ReturnType<typeof Parser.parse> {
+  const result = Parser.parse(query, options);
+
+  if (!result.root.commands.some(({ name }) => name === 'promql')) {
+    normalizeExpressionParens(result.root);
+  }
+
+  return result;
 }
 
 /**

@@ -157,6 +157,14 @@ describe('esql query helpers', () => {
       ).toBe('event.timefield');
     });
 
+    it('should return the time field when the bucket field is parenthesized', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'from a | stats meow = avg(bytes) by bucket((event.timefield), 200, ?_tstart, ?_tend)'
+        )
+      ).toBe('event.timefield');
+    });
+
     it('should return the time field if the column is casted', () => {
       expect(
         getTimeFieldFromESQLQuery(
@@ -195,6 +203,12 @@ describe('esql query helpers', () => {
 
     it('should correctly parse KQL full text embedded query', () => {
       expect(getKqlSearchQueries('FROM a | WHERE KQL("""full text""")')).toStrictEqual([
+        'full text',
+      ]);
+    });
+
+    it('should correctly parse parenthesized KQL full text embedded query', () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL(("""full text"""))')).toStrictEqual([
         'full text',
       ]);
     });
@@ -920,6 +934,12 @@ describe('esql query helpers', () => {
       expect(getCategorizeColumns(esql)).toEqual(expected);
     });
 
+    it('should return the columns used in parenthesized categorize', () => {
+      const esql = 'FROM index | STATS COUNT() BY (categorize(field1))';
+      const expected = ['categorize(field1)'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
     it('should return the columns used in categorize for multiple breakdowns', () => {
       const esql = 'FROM index | STATS COUNT() BY categorize(field1), field2';
       const expected = ['categorize(field1)'];
@@ -1019,6 +1039,12 @@ describe('esql query helpers', () => {
       expect(getCategorizeField(esql)).toEqual(expected);
     });
 
+    it('should return the field used in parenthesized categorize', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize((field1))';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
     it('should return the field used in categorize for multiple breakdowns', () => {
       const esql = 'FROM index | STATS COUNT() BY categorize(field1), field2';
       const expected = ['field1'];
@@ -1061,6 +1087,14 @@ describe('esql query helpers', () => {
     it('should return bare SPARKLINE expression as column id using source text', () => {
       const esql =
         'FROM index | STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([
+        'SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)',
+      ]);
+    });
+
+    it('should return parenthesized bare SPARKLINE expression as column id', () => {
+      const esql =
+        'FROM index | STATS (SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)) BY Pattern=CATEGORIZE(msg)';
       expect(getSparklineColumns(esql)).toEqual([
         'SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)',
       ]);

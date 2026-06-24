@@ -317,4 +317,32 @@ describe('SORT Autocomplete', () => {
       await sortExpectSuggestions('from a | sort keywordField NULLS LAST ', ['\n', ', ', '| ']);
     });
   });
+
+  describe('parenthesized expressions', () => {
+    test('suggests modifiers and expression operators after a field name inside parens', async () => {
+      await sortExpectSuggestions('from a | sort (keywordField ', [
+        '\n',
+        ', ',
+        '| ',
+        'ASC',
+        'DESC',
+        'NULLS FIRST',
+        'NULLS LAST',
+        ...stringOperatorSuggestions,
+      ]);
+    });
+
+    test('suggests sort modifiers after a complete parenthesized expression', async () => {
+      await sortExpectSuggestions('from a | sort (keywordField) ', [
+        '\n',
+        ', ',
+        '| ',
+        'ASC',
+        'DESC',
+        'NULLS FIRST',
+        'NULLS LAST',
+        ...stringOperatorSuggestions,
+      ]);
+    });
+  });
 });

@@ -109,6 +109,18 @@ ROUND(
       await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
     });
 
+    test('function hover still works when arguments are parenthesized', async () => {
+      await assertGetHoverItem(`from a | eval round((doubleField))`, 'round', [
+        getFunctionDefinition('round')!.description,
+        `\`\`\`none
+ROUND(
+  number:double|integer|long|unsigned_long,  
+  decimals?:integer|long
+): double|integer|long|unsigned_long
+\`\`\``,
+      ]);
+    });
+
     test('nested function name', async () => {
       await assertGetHoverItem(`from a | stats avg(round(numberField))`, 'round', [
         getFunctionDefinition('round')!.description,
@@ -136,6 +148,12 @@ ROUND(
 
     test('column name type is displayed on hover for columns inside functions', async () => {
       await assertGetHoverItem(`from a | eval newField = max(doubleField)`, 'doubleField', [
+        '**doubleField**: double',
+      ]);
+    });
+
+    test('column name type is displayed on hover inside expression parens', async () => {
+      await assertGetHoverItem(`from a | eval newField = (doubleField) + 10`, 'doubleField', [
         '**doubleField**: double',
       ]);
     });

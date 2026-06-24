@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Parser, WrappingPrettyPrinter } from '@elastic/esql';
-import { CommandNames } from '@kbn/esql-language';
+import { CommandNames, parseEsqlQueryForAnalysis } from '@kbn/esql-language';
 import type {
   ESQLAstChangePointCommand,
   ESQLAstQueryExpression,
@@ -24,7 +24,7 @@ import { sanitazeESQLInput } from './sanitaze_input';
 export const hasChangePointCommand = (esql?: string): boolean => {
   if (!esql) return false;
   try {
-    const { root } = Parser.parse(esql);
+    const { root } = parseEsqlQueryForAnalysis(esql);
     return root.commands.some((cmd) => cmd.name === CommandNames.CHANGE_POINT);
   } catch {
     return false;
@@ -43,7 +43,7 @@ export const getChangePointOutputColumnNames = (
 ): { typeColumn: string; pvalueColumn: string } | undefined => {
   if (!esql) return undefined;
   try {
-    const { root } = Parser.parse(esql);
+    const { root } = parseEsqlQueryForAnalysis(esql);
     const cp = root.commands.find((c) => c.name === CommandNames.CHANGE_POINT) as
       | ESQLAstChangePointCommand
       | undefined;
@@ -67,7 +67,7 @@ export const getChangePointSeriesColumns = (
 ): { valueColumn: string; timeColumn: string } | undefined => {
   if (!esql) return undefined;
   try {
-    const { root } = Parser.parse(esql);
+    const { root } = parseEsqlQueryForAnalysis(esql);
     const cp = root.commands.find((c) => c.name === CommandNames.CHANGE_POINT) as
       | ESQLAstChangePointCommand
       | undefined;

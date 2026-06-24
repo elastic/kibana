@@ -156,6 +156,10 @@ describe('STATS Validation', () => {
           []
         );
         statsExpectErrors(
+          'from a_index | stats avg(doubleField), percentile(doubleField, 50) BY (ipField)',
+          []
+        );
+        statsExpectErrors(
           'from a_index | stats avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
           []
         );
@@ -174,6 +178,13 @@ describe('STATS Validation', () => {
         ]);
         statsExpectErrors(
           'from a_index | stats avg(doubleField) by textField, percentile(doubleField, 50) by ipField',
+          ['Function PERCENTILE not allowed in BY']
+        );
+        statsExpectErrors('from a_index | stats avg(doubleField) by (wrongField)', [
+          'Unknown column "wrongField"',
+        ]);
+        statsExpectErrors(
+          'from a_index | stats avg(doubleField) by (percentile(doubleField, 20))',
           ['Function PERCENTILE not allowed in BY']
         );
       });

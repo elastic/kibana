@@ -14,6 +14,7 @@ import {
   correctPromqlQuerySyntax,
   correctQuerySyntax,
   findAstPosition,
+  normalizeExpressionParens,
   removeAutocompleteMarkers,
 } from '../../commands/definitions/utils/ast';
 import { getCursorContext } from './get_cursor_context';
@@ -38,7 +39,7 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
 
   return {
     innerText,
-    root: removeAutocompleteMarkers(root),
+    root: normalizeExpressionParens(removeAutocompleteMarkers(root)),
     tokens,
   };
 }

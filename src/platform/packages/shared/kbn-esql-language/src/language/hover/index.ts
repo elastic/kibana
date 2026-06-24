@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { Walker, within, Parser } from '@elastic/esql';
+import { Walker, within } from '@elastic/esql';
 
 import type { ESQLFunction, ESQLSingleAstItem, ESQLSource } from '@elastic/esql/types';
 
@@ -20,6 +20,7 @@ import { getQueryForFields } from '../shared/get_query_for_fields';
 import { getFunctionArgumentHover } from './get_function_argument_hover';
 import { getColumnHover } from './get_column_hover';
 import { findSubquery } from '../shared/subqueries_helpers';
+import { parseEsqlQueryForAnalysis } from '../../commands/definitions/utils/ast';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -27,7 +28,7 @@ interface HoverContent {
 
 export async function getHoverItem(fullText: string, offset: number, callbacks?: ESQLCallbacks) {
   const correctedQuery = correctQuerySyntax(fullText, offset);
-  const { root } = Parser.parse(correctedQuery);
+  const { root } = parseEsqlQueryForAnalysis(correctedQuery);
 
   const commandAtOffset = [...root.commands].reverse().find((cmd) => offset >= cmd.location.min);
 

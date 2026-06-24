@@ -1,4 +1,15 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(node_modules/.bin/ts-node --version)",
+      "Bash(rg -n \"parens|visitParens|Parens\" /home/vabar/Projects/esql-js/src/visitor/*.ts)",
+      "Bash(rg -rn \"parens\" src/ast/visitor/)",
+      "Bash(rg -rn \"columnsAfter\\\\\\(|\\\\.summary\\\\\\(\" --glob '!*.test.ts' commands/registry)",
+      "Bash(rg -rn \"getExpressionColumnName|getExpressionColumnNames|unwrapExpressionParens|unwrapExpressionParensSingle|getExpressionLiteral\\\\b|getExpressionColumn\\\\b|getExpressionFunction\\\\b\" -g '*.test.ts' .)",
+      "Bash(rg -rn \"parseAutocompleteQuery|findAutocompleteAstPosition|getAutocompleteCursorContext|Parser.parse\" __tests__/autocomplete)",
+      "Bash(rg -rln \"validateQuery\\\\\\(|validateQuery \" -g '*.test.ts' .)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -15,8 +26,8 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(gh *)",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/strip-review-event.mjs"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/strip-review-event.mjs",
+            "if": "Bash(gh *)"
           }
         ]
       }

@@ -113,4 +113,27 @@ describe('EVAL Validation', () => {
         ]);
       }
   });
+
+  describe('parenthesized expressions', () => {
+    test('raises error on unknown field inside parens', () => {
+      evalExpectErrors('from a_index | eval col0 = (unknownColumn)', [
+        'Unknown column "unknownColumn"',
+      ]);
+    });
+
+    test('validates type errors inside parens on assignment RHS', () => {
+      evalExpectErrors('from a_index | eval col0 = (textField + 1)', [
+        getNoValidCallSignatureError('+', ['text', 'integer']),
+      ]);
+    });
+
+    test('accepts valid expressions inside parens on assignment RHS', () => {
+      evalExpectErrors('from a_index | eval col0 = (doubleField > 0)', []);
+      evalExpectErrors('from a_index | eval col0 = (round(doubleField))', []);
+    });
+
+    test('accepts parenthesized literals for inline casts', () => {
+      evalExpectErrors('from a_index | eval col0 = ("2024-01-01")::datetime', []);
+    });
+  });
 });

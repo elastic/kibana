@@ -169,6 +169,25 @@ describe('getSignatureHelp', () => {
   field?:integer
 ): long`);
     });
+
+    it('should filter signatures when arguments are parenthesized', async () => {
+      const columnsMap = new Map([['field1', { type: 'integer' }]]);
+
+      mockGetColumnsByTypeRetriever.mockReturnValue({
+        getColumnsByType: jest.fn().mockResolvedValue(new Map()),
+        getColumnMap: jest.fn().mockResolvedValue(columnsMap),
+      });
+
+      const query = 'FROM logs | EVAL result = COUNT((field1))';
+      const offset = query.indexOf('field1') + 'field1'.length;
+
+      const result = await getSignatureHelp(query, offset, mockCallbacks);
+
+      expect(result).toBeDefined();
+      expect(result?.signatures[0].label).toBe(`COUNT(
+  field?:integer
+): long`);
+    });
   });
 
   describe('variadic functions', () => {

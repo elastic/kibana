@@ -111,6 +111,7 @@ export const runCommandsValidationSuite = (setup: Setup) => {
     testErrorsAndWarnings('from a_index | dissect textField', [
       "SyntaxError: missing QUOTED_STRING at '<EOF>'",
     ]);
+    testErrorsAndWarnings('from a_index | dissect (textField) "%{firstWord}"', []);
     testErrorsAndWarnings('from a_index | dissect textField 2', [
       "SyntaxError: mismatched input '2' expecting QUOTED_STRING",
     ]);
@@ -160,12 +161,17 @@ export const runCommandsValidationSuite = (setup: Setup) => {
     testErrorsAndWarnings('from a_index | eval a=round(doubleField), ', [
       expect.stringContaining('SyntaxError:'),
     ]);
+    testErrorsAndWarnings('from a_index | eval col0 = ("2024-01-01")::datetime', []);
 
     for (const wrongOp of ['*', '/', '%']) {
       testErrorsAndWarnings(`from a_index | eval ${wrongOp}+ doubleField`, [
         expect.stringContaining('SyntaxError:'),
       ]);
     }
+  });
+
+  describe('stats', () => {
+    testErrorsAndWarnings('from a_index | stats avg(doubleField) by (ipField)', []);
   });
 
   describe('sort', () => {
