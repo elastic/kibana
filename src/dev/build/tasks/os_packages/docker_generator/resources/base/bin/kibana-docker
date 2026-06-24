@@ -85,6 +85,7 @@ kibana_vars=(
     elasticsearch.ssl.verificationMode
     elasticsearch.username
     externalUrl.policy
+    i18n.allowLocaleCookie
     i18n.defaultLocale
     i18n.locale
     i18n.locales
@@ -136,6 +137,7 @@ kibana_vars=(
     monitoring.ui.min_interval_seconds
     newsfeed.enabled
     node.roles
+    notifications.connectors.default.email
     ops.cGroupOverrides.cpuAcctPath
     ops.cGroupOverrides.cpuPath
     ops.interval

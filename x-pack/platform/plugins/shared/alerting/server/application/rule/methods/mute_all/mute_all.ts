@@ -48,10 +48,6 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
       operation: WriteOperations.MuteAll,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

@@ -1,0 +1,89 @@
+{
+  "sha1": "775b7f7ae6ad531928077d4f9e8111b26e330222",
+  "tests": [
+    {
+      "id": "fd81d6f4f94014d-c770ca813d09ddf",
+      "title": "POST /api/core/capabilities - user with graph:all exposes graph navlink and full read/save/delete capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_graph_all.spec.ts",
+        "line": 22,
+        "column": 12
+      }
+    },
+    {
+      "id": "450ce3fc881e1c0-81303bbac425f2e",
+      "title": "POST /api/core/capabilities - user with graph:read exposes graph navlink with show but not save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_graph_read.spec.ts",
+        "line": 22,
+        "column": 12
+      }
+    },
+    {
+      "id": "7821ede7bfa8380-ef7d91558b7bd4b",
+      "title": "POST /api/core/capabilities - user without graph privileges hides graph navlink and zero-outs feature capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_no_graph.spec.ts",
+        "line": 22,
+        "column": 12
+      }
+    },
+    {
+      "id": "535d1985b889f24-f1e3aa88a5577c3",
+      "title": "POST /s/<space>/api/core/capabilities - space with graph disabled hides graph navlink in the scoped capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_space_disabled.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "a647882ce9a9e9d-bbafdeadda6b70a",
+      "title": "POST /s/<space>/api/core/capabilities - space with graph enabled exposes graph navlink in the scoped capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_space_enabled.spec.ts",
+        "line": 29,
+        "column": 12
+      }
+    },
+    {
+      "id": "8fdc525910fa8f1-15a0bfe293e8de5",
+      "title": "POST /internal/graph/graphExplore - secrepo data returns the expected vertices and connections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/graph_explore.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    }
+  ]
+}

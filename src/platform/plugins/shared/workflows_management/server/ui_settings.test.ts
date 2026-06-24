@@ -8,7 +8,7 @@
  */
 
 import { createCoreSetupMock } from '@kbn/core-lifecycle-server-mocks/src/core_setup.mock';
-import { WORKFLOWS_UI_SETTING_ID, WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
+import { WORKFLOWS_UI_SETTING_ID, WORKFLOWS_VERSIONING_SETTING_ID } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { registerUISettings } from './ui_settings';
 
@@ -41,34 +41,24 @@ describe('Workflows Management UI Settings', () => {
     registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
     expect(coreSetupMock.uiSettings.register).toHaveBeenCalledTimes(1);
+    expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledTimes(1);
   });
 
-  it('should register read-only visual editor flag for kibana.yml overrides only', () => {
+  it('should register hidden workflow change history ui setting as global', () => {
     registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
-    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
+    expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledWith(
       expect.objectContaining({
-        [WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID]: {
-          description: expect.any(String),
-          name: expect.any(String),
+        [WORKFLOWS_VERSIONING_SETTING_ID]: expect.objectContaining({
           schema: expect.any(Object),
           value: false,
           readonly: true,
+          readonlyMode: 'ui',
           requiresPageReload: true,
-        },
+          scope: 'global',
+        }),
       })
     );
-  });
-
-  it('should not expose visual editor flag in advanced settings categories', () => {
-    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
-
-    const registered = coreSetupMock.uiSettings.register.mock.calls[0][0] as Record<
-      string,
-      { category?: string[] }
-    >;
-
-    expect(registered[WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID].category).toBeUndefined();
   });
 
   it('should include license text if serverless is false', () => {

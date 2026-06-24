@@ -87,18 +87,20 @@ describe('WorkflowDetailHeader', () => {
       hasYamlSchemaValidationErrors = false,
       serverValid = true,
       isSaving = false,
+      isManaged = false,
     }: {
       isValid?: boolean;
       hasChanges?: boolean;
       hasYamlSchemaValidationErrors?: boolean;
       serverValid?: boolean;
       isSaving?: boolean;
+      isManaged?: boolean;
     } = {}
   ) => {
     const store = createMockStore();
 
     // Set up the workflow in the store (with server-side valid flag)
-    store.dispatch(setWorkflow({ ...mockWorkflow, valid: serverValid }));
+    store.dispatch(setWorkflow({ ...mockWorkflow, managed: isManaged, valid: serverValid }));
     store.dispatch(setYamlString(hasChanges ? 'modified yaml' : mockWorkflow.yaml));
 
     if (!isValid) {
@@ -189,6 +191,91 @@ describe('WorkflowDetailHeader', () => {
     });
     const toggle = result.getByRole('switch');
     expect(toggle).toBeDisabled();
+  });
+
+  it('enables run workflow button when yaml is valid', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    const button = result.getByTestId('runWorkflowHeaderButton');
+    expect(button).toBeEnabled();
+  });
+
+  it('shows the managed badge for managed workflows', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isManaged: true,
+    });
+
+    expect(result.getByTestId('workflowDetailManagedBadge')).toHaveTextContent('Managed');
+  });
+
+  it('keeps the enabled toggle editable for managed workflows', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isManaged: true,
+    });
+
+    expect(result.getByRole('switch')).not.toBeDisabled();
+  });
+
+  it('disables saving managed workflow YAML', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+      isManaged: true,
+    });
+
+    expect(result.getByTestId('saveWorkflowHeaderButton')).toBeDisabled();
+  });
+
+  it('shows the unsaved changes confirmation when running with unsaved changes', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+
+    expect(
+      result.getByTestId('runWorkflowWithUnsavedChangesConfirmationModal')
+    ).toBeInTheDocument();
+    expect(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain')).toBeInTheDocument();
+  });
+
+  it('stores the run confirmation preference when confirming with the checkbox selected', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+    fireEvent.click(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
+    fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
+
+    expect(localStorage.getItem(SkipUnsavedRunConfirmationStorageKey)).toBe('true');
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
+  });
+
+  it('skips the unsaved changes confirmation when the preference is stored', () => {
+    localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
+  });
+
+  it('disables run workflow button while save is in flight', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+      isSaving: true,
+    });
+
+    const runButton = result.getByTestId('runWorkflowHeaderButton');
+
+    expect(runButton).toBeDisabled();
+    fireEvent.click(runButton);
+
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(false);
   });
 
   it('disables executions tab when user cannot read workflow executions', () => {

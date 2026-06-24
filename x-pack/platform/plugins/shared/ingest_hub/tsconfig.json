@@ -20,6 +20,9 @@
     "@kbn/cloud-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/scout",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-query",
+    "@kbn/fleet-plugin",
+    "@kbn/i18n-react"
   ]
 }

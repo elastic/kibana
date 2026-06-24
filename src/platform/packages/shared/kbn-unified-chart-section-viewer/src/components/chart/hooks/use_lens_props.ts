@@ -12,6 +12,7 @@ import {
   type LensAttributes,
   type LensConfig,
   type LensESQLDataset,
+  type LensLegendConfig,
   type LensSeriesLayer,
   type LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
@@ -39,7 +40,7 @@ import {
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { reportChartSectionError } from '../utils/report_chart_section_error';
+import { useReportChartSectionError } from './use_report_chart_section_error';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -67,6 +68,7 @@ export const useLensProps = ({
   chartRef,
   chartLayers,
   yBounds,
+  legend,
   error,
   userMessages,
   profileId,
@@ -79,11 +81,13 @@ export const useLensProps = ({
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
+  legend?: LensLegendConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
+  const reportError = useReportChartSectionError();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
   // Builder errors are folded into `effectiveError` so the same "no datasource" fallback applies.
@@ -98,7 +102,17 @@ export const useLensProps = ({
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, description, chartLayers, yBounds, effectiveError, userMessages, profileId]);
+  }, [
+    query,
+    title,
+    description,
+    chartLayers,
+    yBounds,
+    legend,
+    effectiveError,
+    userMessages,
+    profileId,
+  ]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
@@ -112,6 +126,7 @@ export const useLensProps = ({
       description,
       chartLayers,
       yBounds,
+      legend,
     });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -200,7 +215,7 @@ export const useLensProps = ({
               return of(null);
             }
             lastBuildErrorKeyRef.current = errorKey;
-            reportChartSectionError({
+            reportError({
               error: buildErr,
               source: 'useLensProps',
               labels: {
@@ -240,6 +255,7 @@ export const useLensProps = ({
     euiTheme.size.base,
     profileIdRef,
     chartIdRef,
+    reportError,
   ]);
 
   return lensPropsContext;
@@ -251,12 +267,14 @@ const buildLensParams = ({
   description,
   chartLayers,
   yBounds,
+  legend,
 }: {
   query: string;
   title: string;
   description?: string;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
+  legend?: LensLegendConfig;
 }): LensConfig => {
   return {
     chartType: 'xy',
@@ -265,9 +283,7 @@ const buildLensParams = ({
       esql: query,
     },
     title,
-    legend: {
-      show: false,
-    },
+    legend: legend ?? { show: false },
     axisTitleVisibility: {
       showXAxisTitle: false,
       showYAxisTitle: false,

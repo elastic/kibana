@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useSidebarPanel } from '@kbn/core-chrome-sidebar-context';
@@ -75,12 +76,14 @@ export const SidebarHeader: FC<SidebarHeaderProps> = ({ title, children, onClose
               {actions && <EuiFlexItem grow={false}>{actions}</EuiFlexItem>}
               {onClose && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="cross"
-                    onClick={onClose}
-                    aria-label={closeSidebarLabel}
-                    color="text"
-                  />
+                  <EuiToolTip content={closeSidebarLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="cross"
+                      onClick={onClose}
+                      aria-label={closeSidebarLabel}
+                      color="text"
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

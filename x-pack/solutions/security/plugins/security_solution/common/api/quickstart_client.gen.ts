@@ -28,12 +28,24 @@ import type {
   SetAlertTagsRequestBodyInput,
   SetAlertTagsResponse,
 } from './detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type {
+  SearchAttacksRequestBodyInput,
+  SearchAttacksResponse,
+} from './detection_engine/attacks/search/search_route.gen';
 import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
 import type { ReadPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
+import type {
+  ReviewRuleInstallationRequestBodyInput,
+  ReviewRuleInstallationResponse,
+} from './detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type {
+  ReviewRuleUpgradeRequestBodyInput,
+  ReviewRuleUpgradeResponse,
+} from './detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
 import type {
   PerformRulesBulkActionRequestQueryInput,
   PerformRulesBulkActionRequestBodyInput,
@@ -209,6 +221,14 @@ import type {
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
 import type {
+  GetAnomalyOverviewRequestParamsInput,
+  GetAnomalyOverviewRequestBodyInput,
+  GetAnomalyOverviewResponse,
+  GetAnomalySummaryRequestParamsInput,
+  GetAnomalySummaryRequestBodyInput,
+  GetAnomalySummaryResponse,
+} from './entity_analytics/anomaly_summary/anomaly_summary.gen';
+import type {
   BulkUpsertAssetCriticalityRecordsRequestBodyInput,
   BulkUpsertAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
@@ -367,6 +387,10 @@ import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
+import type {
+  GetRiskScoreHistoryRequestQueryInput,
+  GetRiskScoreHistoryResponse,
+} from './entity_analytics/risk_engine/risk_score_history_route.gen';
 import type {
   UploadWatchlistCsvRequestParamsInput,
   UploadWatchlistCsvResponse,
@@ -1806,6 +1830,44 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   */
+  async getAnomalyOverview(props: GetAnomalyOverviewProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetAnomalyOverview`);
+    return this.kbnClient
+      .request<GetAnomalyOverviewResponse>({
+        path: replaceParams(
+          '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   */
+  async getAnomalySummary(props: GetAnomalySummaryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetAnomalySummary`);
+    return this.kbnClient
+      .request<GetAnomalySummaryResponse>({
+        path: replaceParams(
+          '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get the asset criticality record for a specific entity.
    */
   async getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
@@ -2120,6 +2182,23 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
+   */
+  async getRiskScoreHistory(props: GetRiskScoreHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRiskScoreHistory`);
+    return this.kbnClient
+      .request<GetRiskScoreHistoryResponse>({
+        path: '/api/risk_score/history',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3045,6 +3124,38 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Lists prebuilt detection rules that can be installed
+   */
+  async reviewRuleInstallation(props: ReviewRuleInstallationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReviewRuleInstallation`);
+    return this.kbnClient
+      .request<ReviewRuleInstallationResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/installation/_review',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Lists currently installed prebuilt detection rules that have newer versions available.
+   */
+  async reviewRuleUpgrade(props: ReviewRuleUpgradeProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReviewRuleUpgrade`);
+    return this.kbnClient
+      .request<ReviewRuleUpgradeResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/upgrade/_review',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async riskEngineGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
     return this.kbnClient
@@ -3067,7 +3178,10 @@ the immediately preceding revision in `old_values`.
     this.log.info(`${new Date().toISOString()} Calling API RuleChangesHistory`);
     return this.kbnClient
       .request<RuleChangesHistoryResponse>({
-        path: replaceParams('/internal/detection_engine/rules/{ruleId}/history', props.params),
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/history/_list',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -3135,7 +3249,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
     return this.kbnClient
       .request<RunScriptActionResponse>({
-        path: '/api/endpoint/action/runscript',
+        path: '/api/endpoint/action/run_script',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3183,6 +3297,22 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     return this.kbnClient
       .request<SearchAlertsResponse>({
         path: '/api/detection_engine/signals/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
+   */
+  async searchAttacks(props: SearchAttacksProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchAttacks`);
+    return this.kbnClient
+      .request<SearchAttacksResponse>({
+        path: '/api/detection_engine/attacks/search',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3965,6 +4095,14 @@ export interface FindRulesProps {
 export interface GetAllTranslationStatsDashboardMigrationProps {
   params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
 }
+export interface GetAnomalyOverviewProps {
+  params: GetAnomalyOverviewRequestParamsInput;
+  body: GetAnomalyOverviewRequestBodyInput;
+}
+export interface GetAnomalySummaryProps {
+  params: GetAnomalySummaryRequestParamsInput;
+  body: GetAnomalySummaryRequestBodyInput;
+}
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
 }
@@ -4012,6 +4150,9 @@ export interface GetPolicyResponseProps {
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
+}
+export interface GetRiskScoreHistoryProps {
+  query: GetRiskScoreHistoryRequestQueryInput;
 }
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
@@ -4130,6 +4271,12 @@ export interface ReadRuleExecutionResultsProps {
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
+export interface ReviewRuleInstallationProps {
+  body: ReviewRuleInstallationRequestBodyInput;
+}
+export interface ReviewRuleUpgradeProps {
+  body: ReviewRuleUpgradeRequestBodyInput;
+}
 export interface RuleChangesHistoryProps {
   query: RuleChangesHistoryRequestQueryInput;
   params: RuleChangesHistoryRequestParamsInput;
@@ -4150,6 +4297,9 @@ export interface ScheduleRiskEngineNowProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchAttacksProps {
+  body: SearchAttacksRequestBodyInput;
 }
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;

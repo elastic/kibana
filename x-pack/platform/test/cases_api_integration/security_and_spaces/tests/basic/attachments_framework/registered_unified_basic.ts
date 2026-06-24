@@ -56,8 +56,12 @@ export default ({ getService }: FtrProviderContext): void => {
           'security.endpoint': '16a05a198eed9dda49ac2997921142b7b6b602d9',
           'security.event': '0337735d3e57178e44b426e41e616aae57fd794d',
           'security.alert': '1bd2e2db3314929fbd4b03feae1010c09b2e97cd',
+          'security.timeline': 'ccf37f135657dfa479411f88ee44ec3fd8863720',
           'observability.alert': 'fd6ee185111ca9bd45e98e5414428399583a7e5e',
           'stack.alert': '3c45f9f2b29831df4d9c7262c59d3a7e2f29b9ee',
+          dashboard: 'f90453ec712ce4505cc425e7e881e1d58ea274c3',
+          discoverSession: 'e4d51ad49552db8d708898824dcd9fb06372e321',
+          map: '37745ed7a0f005fb14522c5cc7c1ba3d9e0df579',
         });
       });
     });

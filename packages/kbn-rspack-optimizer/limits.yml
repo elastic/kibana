@@ -90,7 +90,8 @@ pageLoadAssetSize:
   inbox: 1294
   indexLifecycleManagement: 39553
   indexManagement: 316
-  inference: 5564
+  inference: 5751
+  inferenceWorkflows: 25000
   infra: 45673
   ingestHub: 1923
   ingestPipelines: 270
@@ -124,6 +125,7 @@ pageLoadAssetSize:
   navigation: 10081
   newsfeed: 9707
   noDataPage: 630
+  notificationCenter: 332
   observability: 3614
   observabilityAgentBuilder: 679
   observabilityAIAssistant: 1967

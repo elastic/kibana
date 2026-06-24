@@ -9,13 +9,13 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   buildCreateRuleData,
   getActionPolicyUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -24,7 +24,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     const readerCredentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-      READ_ROLE
+      ALERTING_V2_ACTION_POLICIES_READ_ROLE
     );
     readerHeaders = { ...readerCredentials.apiKeyHeader };
   });
@@ -89,7 +89,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({
         id: created.id,
-        type: 'global',
         enabled: true,
         snoozedUntil: null,
         matcher: null,
@@ -101,16 +100,16 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
   );
 
   apiTest(
-    'get: returns type:"single_rule" with ruleId for a single-rule policy',
+    'get: returns the rule.id matcher for a rule-scoped policy',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-get-single' } })
+        buildCreateRuleData({ metadata: { name: 'rule-for-get-scoped' } })
       );
+      const matcher = `rule.id: "${rule.id}"`;
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
-          name: 'single-rule-policy',
-          type: 'single_rule',
-          ruleId: rule.id,
+          name: 'rule-scoped-policy',
+          matcher,
         })
       );
 
@@ -119,8 +118,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.type).toBe('single_rule');
-      expect(response.body.ruleId).toBe(rule.id);
+      expect(response.body.matcher).toBe(matcher);
     }
   );
 
@@ -159,7 +157,9 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
   apiTest(
     'authorization: 200 with full alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+      );
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'writer-can-also-get' })
       );

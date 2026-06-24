@@ -18,7 +18,8 @@ viewer:
     - names:
         - '.alerts*'
         - '.preview.alerts*'
-        - '.adhoc.alerts*'
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -44,6 +45,8 @@ viewer:
         - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
+        - '.entity_analytics.entity-leads*'
+        - '.entity_analytics.watchlists.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -111,8 +114,9 @@ editor:
         - '.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
-        - '.internal.adhoc.alerts*'
-        - '.adhoc.alerts*'
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
+        - '.internal.adhoc.alerts-security.attack.discovery.alerts*'
         - 'risk-score.risk-score-*'
       privileges:
         - 'read'
@@ -129,6 +133,7 @@ editor:
         - 'entities-latest-*'
       privileges:
         - 'read'
+        - 'view_index_metadata'
         - 'write'
       allow_restricted_indices: false
     - names:
@@ -196,6 +201,14 @@ t1_analyst:
         - write
         - maintenance
     - names:
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
         - .lists*
         - .items*
         - apm-*-transaction*
@@ -233,7 +246,7 @@ t1_analyst:
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_actions.read
@@ -264,6 +277,14 @@ t2_analyst:
         - write
         - maintenance
     - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
         - .lists*
         - .items*
         - apm-*-transaction*
@@ -282,7 +303,6 @@ t2_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -291,8 +311,10 @@ t2_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
   applications:
     - application: 'kibana-.kibana'
@@ -306,7 +328,7 @@ t2_analyst:
         - feature_securitySolutionNotes.read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -338,9 +360,11 @@ t3_analyst:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .alerts-security*
@@ -349,6 +373,14 @@ t3_analyst:
         - read
         - write
         - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -364,7 +396,6 @@ t3_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
@@ -432,8 +463,10 @@ threat_intelligence_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .lists*
@@ -450,6 +483,14 @@ threat_intelligence_analyst:
         - write
         - maintenance
     - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
@@ -457,7 +498,6 @@ threat_intelligence_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
       privileges:
@@ -507,17 +547,20 @@ rule_author:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .alerts-security*
         - .siem-signals-*
         - .internal.preview.alerts-security*
         - .preview.alerts-security*
-        - .internal.adhoc.alerts-security*
-        - .adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -538,7 +581,6 @@ rule_author:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
@@ -610,8 +652,9 @@ soc_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -697,8 +740,9 @@ detections_admin:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -774,8 +818,9 @@ platform_engineer:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
         - risk-score.risk-score-*
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -790,6 +835,7 @@ platform_engineer:
         - 'entities-latest-*'
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - '.ml-anomalies-*'
@@ -863,7 +909,6 @@ endpoint_operations_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -874,16 +919,25 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
         - maintenance
     - names:
-        - .asset-criticality.asset-criticality-*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
+        - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
+      privileges:
+        - read
+        - view_index_metadata
         - write
   applications:
     - application: 'kibana-.kibana'
@@ -956,7 +1010,6 @@ endpoint_policy_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -964,8 +1017,10 @@ endpoint_policy_manager:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .lists*
@@ -979,8 +1034,9 @@ endpoint_policy_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write

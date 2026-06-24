@@ -25,7 +25,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
 import {
@@ -63,6 +62,7 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { getTestRunTooltipContent } from '../../../shared/ui';
 import { EditorSettingsPopover } from '../../../widgets/workflow_yaml_editor/ui/editor_settings_popover';
 import { KeyboardShortcutsPopover } from '../../../widgets/workflow_yaml_editor/ui/keyboard_shortcuts_popover';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -179,15 +179,13 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     ]
   );
 
-  const [isExecutionGraphEnabled] = useUiSetting$<boolean>(
-    WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
-    false
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID
+  );
+  const isExecutionGraphEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID
   );
 
-  const [isVisualEditorEnabled] = useUiSetting$<boolean>(
-    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
-    false
-  );
 
   const { editorView, setEditorView, graphDirection, setGraphDirection } = useWorkflowUrlState();
   const showGraph = isVisualEditorEnabled && editorView === 'graph';

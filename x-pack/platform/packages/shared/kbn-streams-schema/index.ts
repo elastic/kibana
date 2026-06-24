@@ -207,11 +207,11 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
+  LifecycleDetection,
+  EventLifecycleResponse,
 } from './src/api/significant_events';
 export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
@@ -226,15 +226,16 @@ export {
 
 export {
   type Feature,
+  type FeatureUpsert,
   type FeatureWithFilter,
   type BaseFeature,
   type IdentifiedFeature,
   type IgnoredFeature,
-  type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
+  CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   INFERRED_FEATURE_TYPES,
   isFeature,
@@ -242,13 +243,15 @@ export {
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
+  computeFeatureUuid,
+  normalizeFeatureSlug,
   mergeFeature,
   toBaseFeature,
   featureSchema,
+  featureUpsertSchema,
   baseFeatureSchema,
   identifiedFeatureSchema,
   ignoredFeatureSchema,
-  featureStatusSchema,
 } from './src/feature';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
@@ -274,37 +277,33 @@ export type { IdentifyFeaturesResult, IterationResult } from './src/api/features
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
-  type GenerateInsightsResult,
-  type Insight,
-  type InsightCore,
-  type InsightEvidence,
-  type InsightImpactLevel,
-  type InsightImpactLevelNumeric,
-  type InsightUserEvaluation,
-  type InsightMeta,
-  type SaveInsightBody,
-  insightSchema,
-  insightCoreSchema,
-  insightMetaSchema,
-  insightEvidenceSchema,
-  insightImpactLevelSchema,
-  insightImpactLevelNumericSchema,
-  insightUserEvaluationSchema,
-  INSIGHT_IMPACT_LEVEL_MAP,
-  getImpactLevel,
-} from './src/insights';
-export {
+  SIG_EVENT_STATUS_OPTIONS,
+  SIG_EVENT_IMPACT_OPTIONS,
   detectionSchema,
   type Detection,
   discoverySchema,
   type Discovery,
-  verdictSchema,
-  type Verdict,
   sigEventSchema,
+  sigEventStatusSchema,
+  sigEventImpactSchema,
   type SigEvent,
+  type KnowledgeIndicator,
+  type SigEventStatus,
+  type SigEventImpact,
 } from './src/sig_events';
-export type { OnboardingResult } from './src/onboarding';
-export { OnboardingStep } from './src/onboarding';
+export type {
+  StreamsKIsOnboardingResult,
+  StreamsKIsOnboardingFeaturesResult,
+  StreamsKIsOnboardingQueriesResult,
+  StreamsKIsOnboardingStatusResult,
+} from './src/onboarding';
+export {
+  StreamsKIsOnboardingStep,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+} from './src/onboarding';
+export type { SigEventsWorkflowStatusResult } from './src/workflows';
+export { SigEventsWorkflowStatus } from './src/workflows';
+
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 
@@ -319,6 +318,7 @@ export {
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   STREAMS_INFERENCE_PARENT_FEATURE_ID,
   STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID,
   STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,

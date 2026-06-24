@@ -8,22 +8,25 @@
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { z } from '@kbn/zod/v4';
 import {
   SECURITY_ALERTS_TOOL_ID,
-  SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
 } from '../../tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { relatedAlertsInlineToolSchema } from '../../../../common/api/alert_analysis/related_alerts';
+import {
+  findRelatedAlerts,
+  RELATED_ALERTS_INLINE_MAX_RESULTS,
+} from '../../../lib/alert_analysis/services/find_related_alerts';
 
 export const alertAnalysisSkill = defineSkillType({
   id: 'alert-analysis',
   name: 'alert-analysis',
   basePath: 'skills/security/alerts',
   description:
-    'Alert triage and investigation: fetch alerts, find related alerts by shared entities, ' +
-    'correlate with Security Labs threat intelligence, assess severity, and determine disposition. ' +
-    'Use when investigating a specific alert, triaging alert queues, or understanding alert context.',
+    'Alert triage and investigation: fetch alerts, correlate related alerts via a focused inline tool, ' +
+    'enrich with Security Labs threat intelligence, and assess entity risk to determine disposition.',
   content: `# Alert Analysis Guide
 
 ## When to Use This Skill
@@ -46,7 +49,7 @@ Use this skill when:
 ### 2. Find Related Alerts
 - Use 'security.alert-analysis.get-related-alerts' to find alerts sharing entities with the investigated alert
 - Specify the alert ID and an appropriate time window (default 24h, extend to 168h for slow attacks)
-- If you already have entity values (host.name, user.name, source.ip, destination.ip) from a previous tool call, pass them as optional parameters to skip refetching the alert
+- If you already have entity values (host.name, user.name, source.ip, destination.ip) from a previous tool call, pass them as optional parameters; any missing values are merged from the alert document
 - Review the related alerts for patterns: same rule triggering, escalating severity, or multi-stage attack chains
 
 ### 3. Search Security Labs
@@ -73,6 +76,13 @@ Use this skill when:
 - Recommend specific next steps based on disposition
 - Reference the entity-analytics skill for deeper entity profiling or asset criticality review
 
+## Tool Selection Guardrails
+- For list/prioritization questions (e.g. "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
+- For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
+- For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
+- For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
+- Do NOT use platform.core.search or workflow tools for related-alert correlation when an alertId is available.
+
 ## Best Practices
 - Always start with the alert details before expanding investigation scope
 - Use entity relationships to efficiently find related security data
@@ -80,29 +90,6 @@ Use this skill when:
 - Prioritize high-severity alerts and entities with critical asset criticality
 - Document your analysis reasoning for future reference
 - Cross-reference multiple data points before making disposition decisions`,
-  referencedContent: [
-    {
-      relativePath: './queries',
-      name: 'related-by-entities',
-      content: `# Find Alerts Related by Shared Entities
-
-\`\`\`esql
-FROM .alerts-security.alerts-* METADATA _id, _index
-| WHERE (
-    host.name == "ENTITY_VALUE_PLACEHOLDER" OR
-    user.name == "ENTITY_VALUE_PLACEHOLDER" OR
-    source.ip == "ENTITY_VALUE_PLACEHOLDER" OR
-    destination.ip == "ENTITY_VALUE_PLACEHOLDER"
-  )
-| WHERE @timestamp >= NOW() - 7 DAYS
-| KEEP _id, _index, @timestamp, kibana.alert.rule.name, kibana.alert.severity,
-       kibana.alert.workflow_status, host.name, user.name, source.ip,
-       destination.ip, message
-| SORT @timestamp DESC
-| LIMIT 100
-\`\`\``,
-    },
-  ],
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,
@@ -113,215 +100,49 @@ FROM .alerts-security.alerts-* METADATA _id, _index
       id: 'security.alert-analysis.get-related-alerts',
       type: ToolType.builtin,
       description:
-        'Find alerts that share entities (host.name, user.name, source.ip, destination.ip) with a given alert. Returns related alerts within the specified time window. Pass entity values directly if already available to skip refetching the alert.',
-      schema: z.object({
-        alertId: z.string().describe('The _id of the alert to find related alerts for'),
-        timeWindowHours: z
-          .number()
-          .min(1)
-          .max(168)
-          .default(24)
-          .describe('Time window in hours to search for related alerts (1-168, default 24)'),
-        hostNames: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: host.name values from the alert. If provided along with other entity fields, skips fetching the alert.'
-          ),
-        userNames: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: user.name values from the alert. If provided along with other entity fields, skips fetching the alert.'
-          ),
-        sourceIps: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: source.ip values from the alert. If provided along with other entity fields, skips fetching the alert.'
-          ),
-        destIps: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: destination.ip values from the alert. If provided along with other entity fields, skips fetching the alert.'
-          ),
-      }),
-      handler: async (
-        {
+        'Find alerts that share entities (host.name, user.name, source.ip, destination.ip) with a given alert. Returns related alerts within the specified time window. Pass entity values directly when already available; missing values are merged from the alert.',
+      schema: relatedAlertsInlineToolSchema,
+      handler: async (args, context) => {
+        const { alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps } =
+          relatedAlertsInlineToolSchema.parse(args);
+
+        const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
+
+        const result = await findRelatedAlerts(context.esClient.asCurrentUser, {
           alertId,
+          alertsIndex,
           timeWindowHours,
-          hostNames: providedHostNames,
-          userNames: providedUserNames,
-          sourceIps: providedSourceIps,
-          destIps: providedDestIps,
-        },
-        context
-      ) => {
-        const id = String(alertId);
-        const hours = Number(timeWindowHours);
-        try {
-          const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
+          maxResults: RELATED_ALERTS_INLINE_MAX_RESULTS,
+          hostNames,
+          userNames,
+          sourceIps,
+          destIps,
+        });
 
-          const hasProvidedEntities =
-            (Array.isArray(providedHostNames) && providedHostNames.length > 0) ||
-            (Array.isArray(providedUserNames) && providedUserNames.length > 0) ||
-            (Array.isArray(providedSourceIps) && providedSourceIps.length > 0) ||
-            (Array.isArray(providedDestIps) && providedDestIps.length > 0);
-
-          let hostNames: string[];
-          let userNames: string[];
-          let sourceIps: string[];
-          let destIps: string[];
-
-          if (hasProvidedEntities) {
-            hostNames = Array.isArray(providedHostNames) ? providedHostNames : [];
-            userNames = Array.isArray(providedUserNames) ? providedUserNames : [];
-            sourceIps = Array.isArray(providedSourceIps) ? providedSourceIps : [];
-            destIps = Array.isArray(providedDestIps) ? providedDestIps : [];
-          } else {
-            const alertResult = await context.esClient.asCurrentUser.get({
-              index: alertsIndex,
-              id,
-            });
-
-            const alertSource = alertResult._source as Record<string, unknown> | undefined;
-            if (!alertSource) {
-              return {
-                results: [
-                  {
-                    type: ToolResultType.error,
-                    data: { message: `Alert ${id} not found or has no source data.` },
-                  },
-                ],
-              };
-            }
-
-            hostNames = getNestedValues(alertSource, 'host.name');
-            userNames = getNestedValues(alertSource, 'user.name');
-            sourceIps = getNestedValues(alertSource, 'source.ip');
-            destIps = getNestedValues(alertSource, 'destination.ip');
-          }
-
-          const hasEntities =
-            hostNames.length > 0 ||
-            userNames.length > 0 ||
-            sourceIps.length > 0 ||
-            destIps.length > 0;
-
-          if (!hasEntities) {
-            return {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    message: 'No entity values found on the source alert to correlate.',
-                    relatedAlerts: [],
-                  },
-                },
-              ],
-            };
-          }
-
-          const shouldClauses: Array<{ terms: Record<string, string[]> }> = [];
-          if (hostNames.length > 0) shouldClauses.push({ terms: { 'host.name': hostNames } });
-          if (userNames.length > 0) shouldClauses.push({ terms: { 'user.name': userNames } });
-          if (sourceIps.length > 0) shouldClauses.push({ terms: { 'source.ip': sourceIps } });
-          if (destIps.length > 0) shouldClauses.push({ terms: { 'destination.ip': destIps } });
-
-          const searchResult = await context.esClient.asCurrentUser.search({
-            index: alertsIndex,
-            size: 50,
-            query: {
-              bool: {
-                must: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: `now-${hours}h`,
-                      },
-                    },
-                  },
-                ],
-                should: shouldClauses,
-                minimum_should_match: 1,
-                must_not: [{ ids: { values: [id] } }],
-              },
-            },
-            sort: [{ '@timestamp': 'desc' }],
-            _source: [
-              '@timestamp',
-              'kibana.alert.rule.name',
-              'kibana.alert.severity',
-              'kibana.alert.risk_score',
-              'kibana.alert.workflow_status',
-              'kibana.alert.reason',
-              'kibana.alert.rule.threat',
-              'host.name',
-              'user.name',
-              'source.ip',
-              'destination.ip',
-              'process.name',
-              'process.executable',
-              'file.name',
-              'file.path',
-              'message',
-            ],
-            ignore_unavailable: true,
-          });
-
-          const relatedAlerts = searchResult.hits.hits.map((hit) => ({
-            _id: hit._id,
-            _index: hit._index,
-            ...(hit._source as Record<string, unknown>),
-          }));
-
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  message: `Found ${relatedAlerts.length} related alerts sharing entities with alert ${id}.`,
-                  sourceEntities: {
-                    hostNames,
-                    userNames,
-                    sourceIps,
-                    destIps,
-                  },
-                  relatedAlerts,
-                },
-              },
-            ],
-          };
-        } catch (error) {
+        if (!result.ok) {
           return {
             results: [
               {
                 type: ToolResultType.error,
-                data: {
-                  message: `Failed to find related alerts: ${
-                    error instanceof Error ? error.message : String(error)
-                  }`,
-                },
+                data: { message: result.message },
               },
             ],
           };
         }
+
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                message: result.message,
+                sourceEntities: result.sourceEntities,
+                relatedAlerts: result.relatedAlerts,
+              },
+            },
+          ],
+        };
       },
     },
   ],
 });
-
-function getNestedValues(obj: Record<string, unknown>, path: string): string[] {
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current == null || typeof current !== 'object') return [];
-    current = (current as Record<string, unknown>)[part];
-  }
-  if (typeof current === 'string') return [current];
-  if (Array.isArray(current)) {
-    return current.filter((v): v is string => typeof v === 'string');
-  }
-  return [];
-}

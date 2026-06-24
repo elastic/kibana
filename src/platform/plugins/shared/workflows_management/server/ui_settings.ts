@@ -11,8 +11,9 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
-  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+  WORKFLOWS_VERSIONING_SETTING_ID,
 } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../common';
@@ -52,18 +53,39 @@ export const registerUISettings = (
       requiresPageReload: true,
       category: ['general'],
     },
-    [WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID]: {
-      name: i18n.translate('workflowsManagement.uiSettings.visualEditor.name', {
-        defaultMessage: 'Workflow graph editor',
+    [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: {
+      description: i18n.translate(
+        'workflowsManagement.uiSettings.experimentalFeatures.description',
+        {
+          defaultMessage: 'Enables experimental features for Elastic Workflows.',
+        }
+      ),
+      name: i18n.translate('workflowsManagement.uiSettings.experimentalFeatures.name', {
+        defaultMessage: 'Elastic Workflows: Experimental Features',
       }),
-      description: i18n.translate('workflowsManagement.uiSettings.visualEditor.description', {
+      schema: schema.boolean(),
+      value: false,
+      experimental: true,
+      requiresPageReload: true,
+      readonly: false,
+    },
+  });
+
+  uiSettings.registerGlobal({
+    [WORKFLOWS_VERSIONING_SETTING_ID]: {
+      name: i18n.translate('workflowsManagement.uiSettings.changeHistory.name', {
+        defaultMessage: 'Workflow version history',
+      }),
+      description: i18n.translate('workflowsManagement.uiSettings.changeHistory.description', {
         defaultMessage:
-          'Enables the read-only workflow graph editor. Configure via `uiSettings.overrides` in kibana.yml only.',
+          'Internal gate for workflow version history (change-history writes and read routes).',
       }),
       schema: schema.boolean(),
       value: false,
       readonly: true,
+      readonlyMode: 'ui',
       requiresPageReload: true,
+      scope: 'global',
     },
   });
 };

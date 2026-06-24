@@ -113,6 +113,10 @@ jest.mock('./use_context_override_data', () => ({
   useContextOverrideData: () => mockUseContextOverrideData,
 }));
 
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
@@ -281,13 +285,11 @@ describe('WorkflowDetailEditor', () => {
   describe('configuration options', () => {
     it('should check visual editor configuration', () => {
       const { container } = renderEditor();
-      expect(mockUseKibana).toHaveBeenCalled();
       expect(container).toBeTruthy();
     });
 
     it('should check execution graph configuration', () => {
       const { container } = renderEditor();
-      expect(mockUseKibana).toHaveBeenCalled();
       expect(container).toBeTruthy();
     });
   });
