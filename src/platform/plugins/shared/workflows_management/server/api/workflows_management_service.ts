@@ -93,6 +93,7 @@ export interface SearchExecutionsViewParams {
   from?: number;
   size?: number;
   trackTotalHits?: boolean;
+  includeManagedExecutions?: boolean;
 }
 
 export interface SearchWorkflowExecutionsParams {
