@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-types';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-import { convertRuleToDiffable } from '../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import type {
   RuleResponse,
@@ -21,6 +19,7 @@ import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleParams } from '../../../../rule_schema';
 import { SERVER_APP_ID } from '../../../../../../../common';
+import { calculateRuleFieldsDiff } from '../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
@@ -100,7 +99,7 @@ export const restoreRuleFromHistory = async ({
 
   await validateMlAuth(mlAuthz, existingRule.type);
 
-  if (isEqual(convertRuleToDiffable(existingRule), convertRuleToDiffable(snapshotRule))) {
+  if (areRulesEqual(existingRule, snapshotRule)) {
     return { rule: existingRule, no_change: true };
   }
 
@@ -134,3 +133,15 @@ export const restoreRuleFromHistory = async ({
 
   return { rule: convertAlertingRuleToRuleResponse(updatedRule) };
 };
+
+function areRulesEqual(ruleA: RuleResponse, ruleB: RuleResponse): boolean {
+  const fieldsDiff = calculateRuleFieldsDiff({ ruleA, ruleB });
+
+  let equal = true;
+
+  for (const fieldDiff of Object.values(fieldsDiff)) {
+    equal &&= fieldDiff.is_equal;
+  }
+
+  return equal;
+}
