@@ -131,7 +131,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -292,7 +291,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -399,7 +397,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -537,7 +534,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -582,7 +578,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -626,7 +621,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -669,7 +663,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -697,7 +690,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -741,7 +733,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -783,7 +774,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -991,7 +981,6 @@ describe('current status route', () => {
         },
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       } as any);
 
@@ -1068,7 +1057,6 @@ describe('current status route', () => {
         },
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       } as any);
 
@@ -1132,7 +1120,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const overviewStatusService = new OverviewStatusService(routeContext);
@@ -1241,7 +1228,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1326,7 +1312,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1423,7 +1408,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1496,7 +1480,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1550,7 +1533,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1587,7 +1569,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1626,7 +1607,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
           security: {
             authz: {
               mode: { useRbacForRequest: () => true },
@@ -1711,7 +1691,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
           security: {
             authz: {
               mode: { useRbacForRequest: () => true },
@@ -1757,7 +1736,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
           security: {
             authz: {
               mode: { useRbacForRequest: () => false },
@@ -1804,7 +1782,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -1849,7 +1826,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -1864,7 +1840,7 @@ describe('current status route', () => {
       expect(queryFilter).toBeUndefined();
     });
 
-    it('includes meta.space_id filter when CCS is disabled', async () => {
+    it('skips CCS-only aggregations and decoration on serverless', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
       esClient.search.mockResponseOnce(
@@ -1896,57 +1872,7 @@ describe('current status route', () => {
         spaceId: 'default',
         syntheticsEsClient,
         server: {
-          isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
-        },
-      };
-
-      const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
-
-      await overviewStatusService.getOverviewStatus();
-
-      // Verify the ES query DOES contain a meta.space_id filter
-      const searchCall = esClient.search.mock.calls[0][0] as any;
-      const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
-      expect(spaceFilter).toBeDefined();
-      expect(spaceFilter.terms['meta.space_id']).toContain('default');
-    });
-
-    it('does not populate remote field when CCS is disabled', async () => {
-      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
-
-      esClient.search.mockResponseOnce(
-        getEsResponse({
-          buckets: [
-            {
-              key: {
-                monitorId: 'id1',
-                locationId: japanLoc.id,
-              },
-              status: {
-                key: japanLoc.id,
-                top: [
-                  {
-                    metrics: {
-                      'monitor.status': 'up',
-                    },
-                    sort: ['2022-09-15T16:19:16.724Z'],
-                  },
-                ],
-              },
-            },
-          ],
-        })
-      );
-
-      const routeContext: any = {
-        request: { query: {} },
-        syntheticsEsClient,
-        server: {
-          isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
+          isElasticsearchServerless: true,
         },
       };
 
@@ -1955,7 +1881,19 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      // Remote field should not be populated when CCS is disabled.
+      // Active-space filter is still applied (single-space view) and the request
+      // omits CCS-only sub-aggs (`index_name`, `location_name`).
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      expect(spaceFilter).toBeDefined();
+      expect(spaceFilter.terms['meta.space_id']).toContain('default');
+
+      const monitorAggs = searchCall.aggs.monitors.aggs;
+      expect(monitorAggs.index_name).toBeUndefined();
+      expect(monitorAggs.location_name).toBeUndefined();
+
+      // No remote decoration without CCS.
       expect(result.upConfigs.id1).toBeDefined();
       expect(result.upConfigs.id1.remote).toBeUndefined();
     });
