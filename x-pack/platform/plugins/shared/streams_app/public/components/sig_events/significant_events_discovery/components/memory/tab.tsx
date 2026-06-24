@@ -80,6 +80,51 @@ export function MemoryTab() {
   const synthesizeMemory = useSynthesizeMemory();
   const detectGaps = useDetectGaps();
 
+  const workflowActions: Array<{
+    key: string;
+    icon: string;
+    label: string;
+    testSubj: string;
+    mutation: { isLoading: boolean; mutate: () => void };
+  }> = [
+    {
+      key: 'scrape',
+      icon: 'refresh',
+      label: i18n.translate('xpack.streams.memory.scrapeButton', {
+        defaultMessage: 'Scrape Conversations',
+      }),
+      testSubj: 'streamsMemoryScrapeButton',
+      mutation: scrapeConversations,
+    },
+    {
+      key: 'consolidate',
+      icon: 'broom',
+      label: i18n.translate('xpack.streams.memory.consolidateButton', {
+        defaultMessage: 'Consolidate Memory',
+      }),
+      testSubj: 'streamsMemoryConsolidateButton',
+      mutation: consolidateMemory,
+    },
+    {
+      key: 'synthesize',
+      icon: 'sparkles',
+      label: i18n.translate('xpack.streams.memory.synthesizeButton', {
+        defaultMessage: 'Synthesize Memory',
+      }),
+      testSubj: 'streamsMemorySynthesizeButton',
+      mutation: synthesizeMemory,
+    },
+    {
+      key: 'detectGaps',
+      icon: 'inspect',
+      label: i18n.translate('xpack.streams.memory.detectGapsButton', {
+        defaultMessage: 'Detect Gaps',
+      }),
+      testSubj: 'streamsMemoryDetectGapsButton',
+      mutation: detectGaps,
+    },
+  ];
+
   const isSearchActive = searchQuery.length >= 2;
 
   const treeItems = useMemo(() => {
@@ -144,74 +189,22 @@ export function MemoryTab() {
                     anchorPosition="downRight"
                   >
                     <EuiContextMenuPanel
-                      items={[
+                      items={workflowActions.map((action) => (
                         <EuiContextMenuItem
-                          key="scrape"
+                          key={action.key}
                           icon={
-                            scrapeConversations.isLoading ? (
-                              <EuiLoadingSpinner size="s" />
-                            ) : (
-                              'refresh'
-                            )
+                            action.mutation.isLoading ? <EuiLoadingSpinner size="s" /> : action.icon
                           }
                           onClick={() => {
-                            scrapeConversations.mutate();
+                            action.mutation.mutate();
                             setIsActionsPopoverOpen(false);
                           }}
-                          disabled={scrapeConversations.isLoading}
-                          data-test-subj="streamsMemoryScrapeButton"
+                          disabled={action.mutation.isLoading}
+                          data-test-subj={action.testSubj}
                         >
-                          {i18n.translate('xpack.streams.memory.scrapeButton', {
-                            defaultMessage: 'Scrape Conversations',
-                          })}
-                        </EuiContextMenuItem>,
-                        <EuiContextMenuItem
-                          key="consolidate"
-                          icon={
-                            consolidateMemory.isLoading ? <EuiLoadingSpinner size="s" /> : 'broom'
-                          }
-                          onClick={() => {
-                            consolidateMemory.mutate();
-                            setIsActionsPopoverOpen(false);
-                          }}
-                          disabled={consolidateMemory.isLoading}
-                          data-test-subj="streamsMemoryConsolidateButton"
-                        >
-                          {i18n.translate('xpack.streams.memory.consolidateButton', {
-                            defaultMessage: 'Consolidate Memory',
-                          })}
-                        </EuiContextMenuItem>,
-                        <EuiContextMenuItem
-                          key="synthesize"
-                          icon={
-                            synthesizeMemory.isLoading ? <EuiLoadingSpinner size="s" /> : 'sparkles'
-                          }
-                          onClick={() => {
-                            synthesizeMemory.mutate();
-                            setIsActionsPopoverOpen(false);
-                          }}
-                          disabled={synthesizeMemory.isLoading}
-                          data-test-subj="streamsMemorySynthesizeButton"
-                        >
-                          {i18n.translate('xpack.streams.memory.synthesizeButton', {
-                            defaultMessage: 'Synthesize Memory',
-                          })}
-                        </EuiContextMenuItem>,
-                        <EuiContextMenuItem
-                          key="detectGaps"
-                          icon={detectGaps.isLoading ? <EuiLoadingSpinner size="s" /> : 'inspect'}
-                          onClick={() => {
-                            detectGaps.mutate();
-                            setIsActionsPopoverOpen(false);
-                          }}
-                          disabled={detectGaps.isLoading}
-                          data-test-subj="streamsMemoryDetectGapsButton"
-                        >
-                          {i18n.translate('xpack.streams.memory.detectGapsButton', {
-                            defaultMessage: 'Detect Gaps',
-                          })}
-                        </EuiContextMenuItem>,
-                      ]}
+                          {action.label}
+                        </EuiContextMenuItem>
+                      ))}
                     />
                   </EuiPopover>
                 </EuiFlexItem>
@@ -388,27 +381,32 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
     }
   }, [entry]);
 
+  const editTagLabels = editTags.map((t) => t.label);
+  const isDirty =
+    isEditing &&
+    !!entry &&
+    (editTitle !== entry.title ||
+      editContent !== entry.content ||
+      editTagLabels.length !== entry.tags.length ||
+      editTagLabels.some((tag, i) => tag !== entry.tags[i]));
+
   const handleSave = useCallback(() => {
     if (!entry) return;
-    const titleChanged = editTitle !== entry.title;
-    const contentChanged = editContent !== entry.content;
-    const tagsChanged = editTags.map((t) => t.label).join('\n') !== entry.tags.join('\n');
-
-    if (titleChanged || contentChanged || tagsChanged) {
-      updateEntry.mutate(
-        {
-          id: entry.id,
-          ...(titleChanged ? { title: editTitle } : {}),
-          ...(contentChanged ? { content: editContent } : {}),
-          tags: editTags.map((t) => t.label),
-          change_summary: 'Manual edit via UI',
-        },
-        { onSuccess: () => setIsEditing(false) }
-      );
-    } else {
+    if (!isDirty) {
       setIsEditing(false);
+      return;
     }
-  }, [entry, editTitle, editContent, editTags, updateEntry]);
+    updateEntry.mutate(
+      {
+        id: entry.id,
+        ...(editTitle !== entry.title ? { title: editTitle } : {}),
+        ...(editContent !== entry.content ? { content: editContent } : {}),
+        tags: editTagLabels,
+        change_summary: 'Manual edit via UI',
+      },
+      { onSuccess: () => setIsEditing(false) }
+    );
+  }, [entry, isDirty, editTitle, editContent, editTagLabels, updateEntry]);
 
   const handleDelete = useCallback(() => {
     if (entry) {
@@ -417,20 +415,12 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
   }, [entry, deleteEntry, onClose]);
 
   const handleClose = useCallback(() => {
-    if (!isEditing || !entry) {
-      onClose();
-      return;
-    }
-    const dirty =
-      editTitle !== entry.title ||
-      editContent !== entry.content ||
-      editTags.map((t) => t.label).join('\n') !== entry.tags.join('\n');
-    if (dirty) {
+    if (isDirty) {
       setShowDiscardModal(true);
     } else {
       onClose();
     }
-  }, [isEditing, entry, editTitle, editContent, editTags, onClose]);
+  }, [isDirty, onClose]);
 
   return (
     <>
@@ -631,59 +621,91 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
       </EuiFlyout>
 
       {showDeleteModal && entry && (
-        <EuiConfirmModal
-          aria-label={i18n.translate('xpack.streams.memory.deleteConfirmAriaLabel', {
-            defaultMessage: 'Confirm delete memory entry',
-          })}
-          title={i18n.translate('xpack.streams.memory.deleteConfirmTitle', {
-            defaultMessage: 'Delete memory entry',
-          })}
+        <DeleteEntryModal
+          title={entry.title}
           onCancel={() => setShowDeleteModal(false)}
           onConfirm={handleDelete}
-          cancelButtonText={i18n.translate('xpack.streams.memory.deleteConfirmCancel', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('xpack.streams.memory.deleteConfirmButton', {
-            defaultMessage: 'Delete',
-          })}
-          buttonColor="danger"
-        >
-          {i18n.translate('xpack.streams.memory.deleteConfirmBody', {
-            defaultMessage:
-              'Are you sure you want to delete "{title}"? This action cannot be undone.',
-            values: { title: entry.title },
-          })}
-        </EuiConfirmModal>
+        />
       )}
 
       {showDiscardModal && (
-        <EuiConfirmModal
-          aria-label={i18n.translate('xpack.streams.memory.discardConfirmAriaLabel', {
-            defaultMessage: 'Confirm discard changes',
-          })}
-          title={i18n.translate('xpack.streams.memory.discardConfirmTitle', {
-            defaultMessage: 'Discard unsaved changes?',
-          })}
+        <DiscardChangesModal
           onCancel={() => setShowDiscardModal(false)}
           onConfirm={() => {
             setShowDiscardModal(false);
             setIsEditing(false);
             onClose();
           }}
-          cancelButtonText={i18n.translate('xpack.streams.memory.discardConfirmCancel', {
-            defaultMessage: 'Keep editing',
-          })}
-          confirmButtonText={i18n.translate('xpack.streams.memory.discardConfirmButton', {
-            defaultMessage: 'Discard',
-          })}
-          buttonColor="danger"
-        >
-          {i18n.translate('xpack.streams.memory.discardConfirmBody', {
-            defaultMessage: 'You have unsaved changes. Are you sure you want to discard them?',
-          })}
-        </EuiConfirmModal>
+        />
       )}
     </>
+  );
+}
+
+function DeleteEntryModal({
+  title,
+  onCancel,
+  onConfirm,
+}: {
+  title: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <EuiConfirmModal
+      aria-label={i18n.translate('xpack.streams.memory.deleteConfirmAriaLabel', {
+        defaultMessage: 'Confirm delete memory entry',
+      })}
+      title={i18n.translate('xpack.streams.memory.deleteConfirmTitle', {
+        defaultMessage: 'Delete memory entry',
+      })}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={i18n.translate('xpack.streams.memory.deleteConfirmCancel', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('xpack.streams.memory.deleteConfirmButton', {
+        defaultMessage: 'Delete',
+      })}
+      buttonColor="danger"
+    >
+      {i18n.translate('xpack.streams.memory.deleteConfirmBody', {
+        defaultMessage: 'Are you sure you want to delete "{title}"? This action cannot be undone.',
+        values: { title },
+      })}
+    </EuiConfirmModal>
+  );
+}
+
+function DiscardChangesModal({
+  onCancel,
+  onConfirm,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <EuiConfirmModal
+      aria-label={i18n.translate('xpack.streams.memory.discardConfirmAriaLabel', {
+        defaultMessage: 'Confirm discard changes',
+      })}
+      title={i18n.translate('xpack.streams.memory.discardConfirmTitle', {
+        defaultMessage: 'Discard unsaved changes?',
+      })}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={i18n.translate('xpack.streams.memory.discardConfirmCancel', {
+        defaultMessage: 'Keep editing',
+      })}
+      confirmButtonText={i18n.translate('xpack.streams.memory.discardConfirmButton', {
+        defaultMessage: 'Discard',
+      })}
+      buttonColor="danger"
+    >
+      {i18n.translate('xpack.streams.memory.discardConfirmBody', {
+        defaultMessage: 'You have unsaved changes. Are you sure you want to discard them?',
+      })}
+    </EuiConfirmModal>
   );
 }
 
