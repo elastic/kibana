@@ -7,11 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import {
   buildChangePointCards,
   formatAnnotationTimestamp,
   getCardForRow,
 } from './derive_change_point_cards';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const makeTable = (columns: Datatable['columns'], rows: Datatable['rows']): Datatable => ({
+  type: 'datatable',
+  columns,
+  rows,
+});
 
 // ─── Shared ES|QL queries ────────────────────────────────────────────────────
 
@@ -20,6 +29,9 @@ const ESQL_NO_BY =
 
 const ESQL_WITH_HOST_BY =
   'FROM idx | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket BY host';
+
+const ESQL_MULTI_BY =
+  'FROM idx | STATS avg_bytes = AVG(bytes) BY host, service, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket BY host, service';
 
 // ─── Shared column schemas ───────────────────────────────────────────────────
 
@@ -68,21 +80,18 @@ describe('derive_change_point_cards', () => {
   });
 
   describe('buildChangePointCards', () => {
+    // Shared table used by multiple single-series tests below.
+    const noByTable = makeTable(COLUMNS_NO_BY, [
+      { bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12, type: '', pvalue: null },
+      { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
+    ]);
+
     it('returns undefined without a table', () => {
       expect(buildChangePointCards({ table: undefined, esql: ESQL_NO_BY })).toBeUndefined();
     });
 
     it('builds one card with annotations from typed rows', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_NO_BY,
-        rows: [
-          { bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12, type: '', pvalue: null },
-          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
-        ],
-      };
-
-      const cards = buildChangePointCards({ table, esql: ESQL_NO_BY });
+      const cards = buildChangePointCards({ table: noByTable, esql: ESQL_NO_BY });
 
       expect(cards).toHaveLength(1);
       expect(cards![0].lineEsql).toContain('FROM idx');
@@ -118,19 +127,15 @@ describe('derive_change_point_cards', () => {
       // Holds with change points detected
       expect(
         buildChangePointCards({
-          table: {
-            type: 'datatable' as const,
-            columns: columnsBase,
-            rows: [
-              {
-                'customer_full_name.keyword': 'Ahmed Al Gomez',
-                'products.base_price': 28.98,
-                category: "Men's Shoes",
-                type: 'mean_shift',
-                pvalue: 0.001,
-              },
-            ],
-          },
+          table: makeTable(columnsBase, [
+            {
+              'customer_full_name.keyword': 'Ahmed Al Gomez',
+              'products.base_price': 28.98,
+              category: "Men's Shoes",
+              type: 'mean_shift',
+              pvalue: 0.001,
+            },
+          ]),
           esql: rawEsql,
         })
       ).toBeUndefined();
@@ -138,7 +143,7 @@ describe('derive_change_point_cards', () => {
       // Holds with an empty result set too
       expect(
         buildChangePointCards({
-          table: { type: 'datatable' as const, columns: columnsBase, rows: [] },
+          table: makeTable(columnsBase, []),
           esql: rawEsql,
         })
       ).toBeUndefined();
@@ -147,16 +152,7 @@ describe('derive_change_point_cards', () => {
     it('does not append WHERE for a single-series query without CHANGE_POINT BY', () => {
       // Without an explicit CHANGE_POINT ... BY, all rows belong to one series and the line
       // query must go out unmodified regardless of what extra columns appear in the result.
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_NO_BY,
-        rows: [
-          { bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12, type: '', pvalue: null },
-          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
-        ],
-      };
-
-      const cards = buildChangePointCards({ table, esql: ESQL_NO_BY });
+      const cards = buildChangePointCards({ table: noByTable, esql: ESQL_NO_BY });
 
       expect(cards).toHaveLength(1);
       expect(cards![0].lineEsql).not.toContain('WHERE');
@@ -165,10 +161,8 @@ describe('derive_change_point_cards', () => {
     });
 
     it('builds separate line queries per entity via WHERE when CHANGE_POINT uses BY', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_WITH_HOST,
-        rows: [
+      const cards = buildChangePointCards({
+        table: makeTable(COLUMNS_WITH_HOST, [
           {
             host: 'a',
             bucket: '2023-11-15T00:00:00.000Z',
@@ -183,10 +177,9 @@ describe('derive_change_point_cards', () => {
             type: 'mean_shift',
             pvalue: 0.002,
           },
-        ],
-      };
-
-      const cards = buildChangePointCards({ table, esql: ESQL_WITH_HOST_BY });
+        ]),
+        esql: ESQL_WITH_HOST_BY,
+      });
 
       expect(cards).toHaveLength(2);
       expect(cards![0].lineEsql).toContain('| WHERE host == "a"');
@@ -199,10 +192,9 @@ describe('derive_change_point_cards', () => {
       // must go out unmodified regardless of what extra columns appear in the result table.
       const esqlWithHostNoBy =
         'FROM idx | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket';
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_WITH_HOST,
-        rows: [
+
+      const cards = buildChangePointCards({
+        table: makeTable(COLUMNS_WITH_HOST, [
           {
             host: 'a',
             bucket: '2023-11-15T00:00:00.000Z',
@@ -217,69 +209,69 @@ describe('derive_change_point_cards', () => {
             type: 'mean_shift',
             pvalue: 0.002,
           },
-        ],
-      };
-
-      const cards = buildChangePointCards({ table, esql: esqlWithHostNoBy });
+        ]),
+        esql: esqlWithHostNoBy,
+      });
 
       expect(cards).toHaveLength(1);
       expect(cards![0].lineEsql).not.toContain('WHERE');
     });
 
     it('returns undefined when all rows have null type and no change points are detected (no BY)', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_NO_BY,
-        rows: [{ bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: null, pvalue: null }],
-      };
-      expect(buildChangePointCards({ table, esql: ESQL_NO_BY })).toBeUndefined();
+      expect(
+        buildChangePointCards({
+          table: makeTable(COLUMNS_NO_BY, [
+            { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: null, pvalue: null },
+          ]),
+          esql: ESQL_NO_BY,
+        })
+      ).toBeUndefined();
     });
 
     it('returns undefined for CHANGE_POINT BY when no change points are detected', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_WITH_HOST,
-        rows: [
-          {
-            host: 'a',
-            bucket: '2023-11-15T00:00:00.000Z',
-            avg_bytes: 14,
-            type: null,
-            pvalue: null,
-          },
-          {
-            host: 'b',
-            bucket: '2023-11-16T00:00:00.000Z',
-            avg_bytes: 20,
-            type: null,
-            pvalue: null,
-          },
-        ],
-      };
-      expect(buildChangePointCards({ table, esql: ESQL_WITH_HOST_BY })).toBeUndefined();
+      expect(
+        buildChangePointCards({
+          table: makeTable(COLUMNS_WITH_HOST, [
+            {
+              host: 'a',
+              bucket: '2023-11-15T00:00:00.000Z',
+              avg_bytes: 14,
+              type: null,
+              pvalue: null,
+            },
+            {
+              host: 'b',
+              bucket: '2023-11-16T00:00:00.000Z',
+              avg_bytes: 20,
+              type: null,
+              pvalue: null,
+            },
+          ]),
+          esql: ESQL_WITH_HOST_BY,
+        })
+      ).toBeUndefined();
     });
 
     it('returns undefined when type is set but pvalue is null (no valid change point)', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_NO_BY,
-        rows: [
-          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: null },
-        ],
-      };
-      expect(buildChangePointCards({ table, esql: ESQL_NO_BY })).toBeUndefined();
+      expect(
+        buildChangePointCards({
+          table: makeTable(COLUMNS_NO_BY, [
+            { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: null },
+          ]),
+          esql: ESQL_NO_BY,
+        })
+      ).toBeUndefined();
     });
 
     it('does not use "No change points detected" title when type and pvalue are set but timestamp is null', () => {
       // Regression: a change point at the edge of the time range may have a null bucket timestamp.
       // The annotation cannot be rendered, but the change point was still detected.
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_NO_BY,
-        rows: [{ bucket: null, avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 }],
-      };
-
-      const cards = buildChangePointCards({ table, esql: ESQL_NO_BY });
+      const cards = buildChangePointCards({
+        table: makeTable(COLUMNS_NO_BY, [
+          { bucket: null, avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
+        ]),
+        esql: ESQL_NO_BY,
+      });
 
       expect(cards).toHaveLength(1);
       // Annotation could not be rendered (no valid timestamp), but a change point was detected.
@@ -295,68 +287,57 @@ describe('derive_change_point_cards', () => {
       expect(getCardForRow([], { host: 'a', bucket: '2023-01-01T00:00:00.000Z' })).toBeUndefined();
     });
 
-    it('returns the card for a no-BY query when the row is a change point', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_NO_BY,
-        rows: [
+    describe('no-BY query', () => {
+      const cards = buildChangePointCards({
+        table: makeTable(COLUMNS_NO_BY, [
           { bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12, type: '', pvalue: null },
           { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
-        ],
-      };
-      const cards = buildChangePointCards({ table, esql: ESQL_NO_BY })!;
-      expect(cards).toHaveLength(1);
+        ]),
+        esql: ESQL_NO_BY,
+      })!;
 
-      expect(
-        getCardForRow(cards, {
-          bucket: '2023-11-15T00:00:00.000Z',
-          avg_bytes: 14,
-          type: 'mean_shift',
-          pvalue: 0.001,
-        })
-      ).toBe(cards[0]);
-    });
+      it('returns the card when the row is a change point', () => {
+        expect(cards).toHaveLength(1);
 
-    it('returns undefined for a no-BY query when the row is not a change point', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_NO_BY,
-        rows: [
-          { bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12, type: '', pvalue: null },
-          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
-        ],
-      };
-      const cards = buildChangePointCards({ table, esql: ESQL_NO_BY })!;
+        expect(
+          getCardForRow(cards, {
+            bucket: '2023-11-15T00:00:00.000Z',
+            avg_bytes: 14,
+            type: 'mean_shift',
+            pvalue: 0.001,
+          })
+        ).toBe(cards[0]);
+      });
 
-      // Empty type — not a change point row
-      expect(
-        getCardForRow(cards, {
-          bucket: '2023-11-14T00:00:00.000Z',
-          avg_bytes: 12,
-          type: '',
-          pvalue: null,
-        })
-      ).toBeUndefined();
+      it('returns undefined when the row is not a change point', () => {
+        // Empty type — not a change point row
+        expect(
+          getCardForRow(cards, {
+            bucket: '2023-11-14T00:00:00.000Z',
+            avg_bytes: 12,
+            type: '',
+            pvalue: null,
+          })
+        ).toBeUndefined();
 
-      // Null type — not a change point row
-      expect(
-        getCardForRow(cards, {
-          bucket: '2023-11-14T00:00:00.000Z',
-          avg_bytes: 12,
-          type: null,
-          pvalue: null,
-        })
-      ).toBeUndefined();
+        // Null type — not a change point row
+        expect(
+          getCardForRow(cards, {
+            bucket: '2023-11-14T00:00:00.000Z',
+            avg_bytes: 12,
+            type: null,
+            pvalue: null,
+          })
+        ).toBeUndefined();
+      });
     });
 
     it('returns undefined for a BY query when the row belongs to a change-point entity but is not itself a change point', () => {
       // CHANGE_POINT ... BY host, type/pvalue in schema (no WHERE filter applied).
       // host=web-1 has a detected change point. The result also contains non-change-point
       // rows for the same host (other time buckets). Those rows must not return a card.
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_WITH_HOST,
-        rows: [
+      const cards = buildChangePointCards({
+        table: makeTable(COLUMNS_WITH_HOST, [
           // Change point row
           {
             host: 'web-1',
@@ -385,9 +366,9 @@ describe('derive_change_point_cards', () => {
             bucket: '2023-11-12T00:00:00.000Z',
             avg_bytes: 12,
           },
-        ],
-      };
-      const cards = buildChangePointCards({ table, esql: ESQL_WITH_HOST_BY })!;
+        ]),
+        esql: ESQL_WITH_HOST_BY,
+      })!;
       expect(cards).toHaveLength(1);
 
       // Change point row — should match
@@ -432,10 +413,8 @@ describe('derive_change_point_cards', () => {
     });
 
     it('matches a single-BY row to its card', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_WITH_HOST,
-        rows: [
+      const cards = buildChangePointCards({
+        table: makeTable(COLUMNS_WITH_HOST, [
           {
             host: 'web-1',
             bucket: '2023-11-15T00:00:00.000Z',
@@ -450,9 +429,9 @@ describe('derive_change_point_cards', () => {
             type: 'dip',
             pvalue: 0.02,
           },
-        ],
-      };
-      const cards = buildChangePointCards({ table, esql: ESQL_WITH_HOST_BY })!;
+        ]),
+        esql: ESQL_WITH_HOST_BY,
+      })!;
       expect(cards).toHaveLength(2);
 
       expect(
@@ -474,10 +453,8 @@ describe('derive_change_point_cards', () => {
     });
 
     it('returns undefined when no card matches the row entity', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_WITH_HOST,
-        rows: [
+      const cards = buildChangePointCards({
+        table: makeTable(COLUMNS_WITH_HOST, [
           {
             host: 'web-1',
             bucket: '2023-11-15T00:00:00.000Z',
@@ -485,9 +462,9 @@ describe('derive_change_point_cards', () => {
             type: 'mean_shift',
             pvalue: 0.001,
           },
-        ],
-      };
-      const cards = buildChangePointCards({ table, esql: ESQL_WITH_HOST_BY })!;
+        ]),
+        esql: ESQL_WITH_HOST_BY,
+      })!;
       expect(cards).toHaveLength(1);
 
       expect(
@@ -496,8 +473,6 @@ describe('derive_change_point_cards', () => {
     });
 
     it('matches a multi-BY row to its card and does not cross-match', () => {
-      const esqlMultiBy =
-        'FROM idx | STATS avg_bytes = AVG(bytes) BY host, service, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket BY host, service';
       const columnsMultiBy = [
         { id: 'host', name: 'host', meta: { type: 'string' as const } },
         { id: 'service', name: 'service', meta: { type: 'string' as const } },
@@ -506,10 +481,8 @@ describe('derive_change_point_cards', () => {
         { id: 'type', name: 'type', meta: { type: 'string' as const } },
         { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
       ];
-      const table = {
-        type: 'datatable' as const,
-        columns: columnsMultiBy,
-        rows: [
+      const cards = buildChangePointCards({
+        table: makeTable(columnsMultiBy, [
           {
             host: 'web-1',
             service: 'api',
@@ -526,9 +499,9 @@ describe('derive_change_point_cards', () => {
             type: 'dip',
             pvalue: 0.02,
           },
-        ],
-      };
-      const cards = buildChangePointCards({ table, esql: esqlMultiBy })!;
+        ]),
+        esql: ESQL_MULTI_BY,
+      })!;
       expect(cards).toHaveLength(2);
 
       const apiCard = getCardForRow(cards, {
@@ -546,17 +519,15 @@ describe('derive_change_point_cards', () => {
         pvalue: 0.02,
       });
 
-      expect(apiCard).not.toBeUndefined();
-      expect(webCard).not.toBeUndefined();
+      expect(apiCard).toBeDefined();
+      expect(webCard).toBeDefined();
       // Same host but different service — must not cross-match.
       expect(apiCard).not.toBe(webCard);
     });
 
     it('handles null entity column values without throwing', () => {
-      const table = {
-        type: 'datatable' as const,
-        columns: COLUMNS_WITH_HOST,
-        rows: [
+      const cards = buildChangePointCards({
+        table: makeTable(COLUMNS_WITH_HOST, [
           {
             host: null,
             bucket: '2023-11-15T00:00:00.000Z',
@@ -564,15 +535,57 @@ describe('derive_change_point_cards', () => {
             type: 'mean_shift',
             pvalue: 0.001,
           },
-        ],
-      };
-      const cards = buildChangePointCards({ table, esql: ESQL_WITH_HOST_BY })!;
+        ]),
+        esql: ESQL_WITH_HOST_BY,
+      })!;
       expect(cards).toHaveLength(1);
 
       // Row with null host matches the card whose entity label also serializes null
       expect(
         getCardForRow(cards, {
           host: null,
+          bucket: '2023-11-15T00:00:00.000Z',
+          type: 'mean_shift',
+          pvalue: 0.001,
+        })
+      ).toBe(cards[0]);
+    });
+
+    it('matches the correct card when a BY column is absent from the result table schema', () => {
+      // Regression: getCardForRow was using unfiltered byColumns to reconstruct the entity
+      // label, while buildChangePointCards uses entityColumnIds (byColumns filtered to columns
+      // present in the table). When a BY column is absent, the two labels diverged and
+      // getCardForRow always returned undefined.
+
+      // "service" is in the BY clause but absent from the result table columns.
+      const columnsHostOnly = [
+        { id: 'host', name: 'host', meta: { type: 'string' as const } },
+        { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+        { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+        { id: 'type', name: 'type', meta: { type: 'string' as const } },
+        { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
+      ];
+
+      const cards = buildChangePointCards({
+        table: makeTable(columnsHostOnly, [
+          {
+            host: 'web-1',
+            bucket: '2023-11-15T00:00:00.000Z',
+            avg_bytes: 14,
+            type: 'mean_shift',
+            pvalue: 0.001,
+          },
+        ]),
+        esql: ESQL_MULTI_BY,
+      })!;
+      expect(cards).toHaveLength(1);
+      // The card entity label must only use columns present in the table (host, not service).
+      expect(cards[0].entityValues).toEqual({ host: 'web-1' });
+
+      // getCardForRow must resolve the same label and return the card.
+      expect(
+        getCardForRow(cards, {
+          host: 'web-1',
           bucket: '2023-11-15T00:00:00.000Z',
           type: 'mean_shift',
           pvalue: 0.001,

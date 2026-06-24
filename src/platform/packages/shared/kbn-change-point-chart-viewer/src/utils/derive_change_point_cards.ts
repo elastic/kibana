@@ -398,7 +398,8 @@ export const getCardForRow = (
     return firstCard;
   }
 
-  const entityLabel = byColumns.map((col) => `${col}=${serializeCell(row[col])}`).join(', ');
+  const entityCols = Object.keys(firstCard.entityValues);
+  const entityLabel = entityCols.map((col) => `${col}=${serializeCell(row[col])}`).join(', ');
   const card = cards.find((c) => c.id === `cp-card-${entityLabel}`);
   if (!card) return undefined;
 

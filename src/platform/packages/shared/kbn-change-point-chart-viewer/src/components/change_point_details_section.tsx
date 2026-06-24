@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiFlexGrid,
@@ -99,19 +99,19 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
       : card.changePointTypes.length > 0
       ? card.changePointTypes.map(humaniseType).join(', ')
       : undefined;
-  const description =
-    impactLevel !== undefined
-      ? rowType !== undefined
-        ? getChangePointTypeDescription(rowType, impactLevel)
-        : card.changePointTypes.length > 0
-        ? card.changePointTypes
-            .map((t) => getChangePointTypeDescription(t, impactLevel))
-            .filter(Boolean)
-            .join(' ')
-        : undefined
-      : undefined;
+
+  const description = useMemo(() => {
+    if (impactLevel === undefined) return undefined;
+    if (rowType !== undefined) return getChangePointTypeDescription(rowType, impactLevel);
+    if (card.changePointTypes.length === 0) return undefined;
+    return card.changePointTypes
+      .map((t) => getChangePointTypeDescription(t, impactLevel))
+      .filter(Boolean)
+      .join(' ');
+  }, [impactLevel, rowType, card.changePointTypes]);
 
   const statItems: Array<{ label: string; value: NonNullable<React.ReactNode> }> = [];
+  const showMetric = useMemo(() => hasStatsCommand(card.lineEsql), [card.lineEsql]);
 
   if (changePointTime) {
     statItems.push({
@@ -131,7 +131,7 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
     });
   }
 
-  if (hasStatsCommand(card.lineEsql)) {
+  if (showMetric) {
     statItems.push({
       label: i18n.translate('changePointChartViewer.details.metricLabel', {
         defaultMessage: 'Metric',
@@ -149,16 +149,17 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
     });
   }
 
-  if (pvalue !== undefined && impactLevel !== undefined) {
+  if (pvalue !== undefined) {
+    // impactLevel is guaranteed to be defined because pvalue is defined
     statItems.push({
       label: i18n.translate('changePointChartViewer.details.pvalueLabel', {
         defaultMessage: 'p-value',
       }),
       value: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={PVALUE_IMPACT_COLORS[impactLevel]}>
-              {IMPACT_LEVEL_LABELS[impactLevel]}
+            <EuiBadge color={PVALUE_IMPACT_COLORS[impactLevel!]}>
+              {IMPACT_LEVEL_LABELS[impactLevel!]}
             </EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{formatPvalueLabel(pvalue)}</EuiFlexItem>

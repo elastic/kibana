@@ -11,6 +11,13 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChangePointDetailsSection } from './change_point_details_section';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
+
+const fieldFormats = {
+  getDefaultInstance: () => ({
+    convertToText: (value: number) => new Date(value).toLocaleString(),
+  }),
+} as unknown as UnifiedHistogramServices['fieldFormats'];
 
 const card: ChangePointCardModel = {
   id: 'card-1',
@@ -42,6 +49,7 @@ describe('ChangePointDetailsSection', () => {
           pvalue: 0.0009927188290498323,
         }}
         seriesColumns={{ valueColumn: 'avg_bytes', timeColumn: 'day' }}
+        fieldFormats={fieldFormats}
       />
     );
 
