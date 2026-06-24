@@ -74,9 +74,7 @@ export const resolveClosedIndexAdjustments = async (
       const backingResolved = await esClient.indices.resolveIndex(resolveArgs(backingIndexNames));
 
       const closedBackingNames = new Set(
-        backingResolved.indices
-          .filter((i) => i.attributes?.includes('closed'))
-          .map((i) => i.name)
+        backingResolved.indices.filter((i) => i.attributes?.includes('closed')).map((i) => i.name)
       );
 
       for (const ds of resolved.data_streams) {

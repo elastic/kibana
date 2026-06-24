@@ -168,7 +168,9 @@ describe('LogsExtractionClient', () => {
 
     mockLogger = loggerMock.create();
     mockEsClient = {
-      indices: { resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }) },
+      indices: {
+        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      },
     } as unknown as jest.Mocked<ElasticsearchClient>;
     mockDataViewsService = {
       get: jest.fn(),

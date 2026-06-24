@@ -12,7 +12,7 @@ import { resolveClosedIndexAdjustments } from './resolve_closed_indices';
 const makeEsClient = (resolveIndexImpl: jest.Mock) =>
   ({
     indices: { resolveIndex: resolveIndexImpl },
-  }) as unknown as ElasticsearchClient;
+  } as unknown as ElasticsearchClient);
 
 const emptyResolve = { indices: [], aliases: [], data_streams: [] };
 
