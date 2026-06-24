@@ -50,6 +50,8 @@ export interface MemoryVersionRecord {
   name: string;
   title: string;
   content: string;
+  tags: string[];
+  categories: string[];
   change_type: MemoryChangeType;
   change_summary: string;
   created_at: string;
