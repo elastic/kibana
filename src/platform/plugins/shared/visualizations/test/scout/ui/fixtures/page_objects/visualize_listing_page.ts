@@ -8,7 +8,6 @@
  */
 
 import { type ScoutPage, type Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { ContentListWrapper } from '@kbn/scout';
 
 /**
@@ -26,6 +25,7 @@ export class VisualizeListingPage {
   readonly tableRows: Locator;
   readonly emptyPrompt: Locator;
   readonly newVisButton: Locator;
+  readonly newVisDialogGroups: Locator;
   readonly dashboardFlowPrompt: Locator;
   readonly contentEditorFlyoutTitle: Locator;
   readonly contentEditorNameInput: Locator;
@@ -40,6 +40,9 @@ export class VisualizeListingPage {
     this.tableRows = page.locator('tr', { has: this.contentList.itemLinks });
     this.emptyPrompt = page.testSubj.locator('emptyListPrompt');
     this.newVisButton = page.testSubj.locator('newItemButton');
+    // First step of the new-visualization wizard opened by `showNewVisModal`;
+    // the legacy FTR `waitForVisualizationSelectPage` keyed on the same subject.
+    this.newVisDialogGroups = page.testSubj.locator('visNewDialogGroups');
     this.dashboardFlowPrompt = page.testSubj.locator('visualize-dashboard-flow-prompt');
     this.contentEditorFlyoutTitle = page.testSubj.locator('flyoutTitle');
     this.contentEditorNameInput = page.testSubj.locator('nameInput');
@@ -74,6 +77,11 @@ export class VisualizeListingPage {
     return this.tableRows.count();
   }
 
+  /** Click the header create button, opening the new-visualization wizard. */
+  async clickCreateNewVisualization() {
+    await this.newVisButton.click();
+  }
+
   /**
    * Locate a row by the title rendered in the `Column.Name` cell. Matches the
    * `EuiBasicTable` row containing an item link with the given text.
@@ -104,8 +112,9 @@ export class VisualizeListingPage {
    *
    * The flyout's `MetadataForm` debounces field validation, and the content
    * editor keeps `saveButton` disabled until validation settles (clicking it
-   * mid-validation is a no-op). Waiting for it to be enabled is therefore enough
-   * to click once and have the save take effect.
+   * mid-validation is a no-op). Playwright's click actionability waits for the
+   * button to be enabled, so the save only fires once validation has settled —
+   * no explicit enablement assertion is needed in the page object.
    */
   async editVisualizationDetails({ title, description }: { title?: string; description?: string }) {
     if (title !== undefined) {
@@ -114,7 +123,6 @@ export class VisualizeListingPage {
     if (description !== undefined) {
       await this.contentEditorDescriptionInput.fill(description);
     }
-    await expect(this.contentEditorSaveButton).toBeEnabled();
     await this.contentEditorSaveButton.click();
     await this.contentEditorFlyoutTitle.waitFor({ state: 'hidden' });
   }
