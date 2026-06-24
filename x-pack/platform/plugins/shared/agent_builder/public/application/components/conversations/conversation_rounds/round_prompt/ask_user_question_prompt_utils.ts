@@ -19,8 +19,9 @@ import {
   type ReportHitlPromptShownParams,
   type ReportHitlQuestionAnsweredParams,
 } from '@kbn/agent-builder-common/telemetry';
+import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useAgentId, useConversation } from '../../../../hooks/use_conversation';
+import { useAgentId } from '../../../../hooks/use_conversation';
 export { promptContainerStyles as containerStyles } from './prompt_container.styles';
 
 /** In-progress (mutable) answer for a single question, before it is mapped to the wire shape. */
@@ -131,8 +132,7 @@ export const useAskUserQuestionTelemetry = ({
     services: { analytics },
   } = useKibana();
   const agentId = useAgentId();
-  const { conversation } = useConversation();
-  const conversationId = conversation?.id;
+  const conversationId = useConversationId();
   const hasReportedShownRef = useRef(false);
 
   const reportPromptShown = useCallback(() => {
