@@ -8,10 +8,19 @@
  */
 
 /**
- * Combined repro for two rollup / source-resolution symptoms relevant to the APM "Query Quality"
- * advanced settings PoC. Both rely on the same idea: APM views read pre-aggregated metrics at a
- * `rollupInterval` chosen from the requested bucket count, so manipulating a single rollup tier for
- * a service/transaction changes what shows up.
+ * Combined repro for two rollup / source-resolution symptoms addressed by the APM rollup-interval
+ * fallback option (advanced setting `observability:apmEnableRollupFallback`, default off). Both rely
+ * on the same idea: APM views read pre-aggregated metrics at a `rollupInterval` chosen from the
+ * requested bucket count, so manipulating a single rollup tier for a service/transaction changes
+ * what shows up.
+ *
+ * With the fallback OFF (default), the affected service/transaction group is missing for the wider
+ * time range (it only exists in a finer rollup tier). With the fallback ON, APM detects that a finer
+ * tier exposes more entities than the selected coarse tier and transparently re-queries the finer
+ * tier, so the missing entities reappear without the user changing the time range.
+ *
+ * Toggle the option in either Stack Management -> Advanced Settings -> "Rollup interval fallback"
+ * (`observability:apmEnableRollupFallback`) or APM -> Settings -> General settings, then refresh.
  *
  * Both parts anchor their data to the end of the range (`range.to`), so the scenario works with
  * synthtrace's default `1m` window (no `--from`/`--to`):
@@ -25,28 +34,27 @@
  *   - `VisibleTransactionDefault`   - appears in both "Last 24 hours" and "Last 48 hours"
  *   - `InvisibleTransactionDefault` - its trace sample is within 24h, but its 60m transaction metric
  *                                     is shifted ~8h further back so it falls outside the 24h range
- * Symptom: the transaction group is missing in "Last 24 hours" but appears in "Last 48 hours", even
- * though a trace sample exists within the last 24 hours. The long transaction is ~46 minutes.
+ * Symptom (fallback OFF): in the service's Transactions table at "Last 24 hours", only
+ * `VisibleTransactionDefault` is listed even though a trace sample for `InvisibleTransactionDefault`
+ * exists within the last 24 hours. With fallback ON, both transaction groups are listed. The long
+ * transaction is ~46 minutes.
  *
- * Part B - Table query quality source visibility
- * ----------------------------------------------
+ * Part B - Service inventory source visibility
+ * --------------------------------------------
  * Three steady services so synthtrace emits 1m/10m/60m `service_transaction` rollups:
  *   - `synth-quality-baseline-a` / `synth-quality-baseline-b` - full rollups, always listed
  *   - `synth-quality-accurate-only`                            - 60m metrics dropped in the pipeline
  * The Service Inventory list (`GET /internal/apm/services`) queries the `documentType`/`rollupInterval`
- * chosen by `usePreferredDataSourceAndBucketSize({ intent: 'table' })`. With the Kibana time picker
- * set to "Last 24 hours":
- *     fastest / fast / default -> ServiceTransactionMetric @ 60m  (accurate-only service hidden)
- *     accurate / mostAccurate  -> ServiceTransactionMetric @ 10m  (accurate-only service visible)
- * Toggle Stack Management -> Advanced Settings -> "Table query quality"
- * (`observability:apmQueryQualityTables`) between `default` and `accurate` and refresh to see it.
+ * chosen from the selected time range. With the Kibana time picker set to "Last 24 hours" the source
+ * resolves to ServiceTransactionMetric @ 60m, where `synth-quality-accurate-only` has no documents.
+ * Symptom (fallback OFF): `synth-quality-accurate-only` is missing from the inventory. With fallback
+ * ON, it reappears (recovered from the finer 10m/1m tier).
  *
  * IMPORTANT - the Part B effect is time-window sensitive in the KIBANA TIME PICKER (not the ingest
- * range). The table source only resolves to 60m at `default` AND to 10m at `accurate` for a picker
- * window of roughly 15-36h, so set the Kibana time picker to "Last 24 hours". For WIDER picker
- * windows (e.g. Last 7 days) even `accurate` resolves to 60m, so the accurate-only service stays
- * hidden at every quality level (it looks like it "never shows"). For much NARROWER windows (e.g.
- * Last 15 minutes) the source resolves to 1m at every level, so it is always visible.
+ * range). The source only resolves to the coarse 60m tier (where the accurate-only service is
+ * missing) for a picker window of roughly 15-36h, so set the Kibana time picker to "Last 24 hours".
+ * For much NARROWER windows (e.g. Last 15 minutes) the source resolves to 1m, so the service is
+ * always visible regardless of the fallback setting.
  *
  * Notes:
  * - All services share one `service.environment` (derived from this filename + optional `suffix`
@@ -96,7 +104,7 @@ const HIDDEN_IN_DEFAULT = 'InvisibleTransactionDefault';
 const LONG_TRANSACTION_DURATION_MS = 46 * 60 * 1000;
 const METRIC_TIMESTAMP_SHIFT_MS = 8 * 60 * 60 * 1000;
 
-// Part B - table query quality source visibility
+// Part B - service inventory source visibility
 const BASELINE_A_BASE = 'synth-quality-baseline-a';
 const BASELINE_B_BASE = 'synth-quality-baseline-b';
 const ACCURATE_ONLY_BASE = 'synth-quality-accurate-only';
@@ -264,7 +272,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }: ScenarioI
           ),
       ];
 
-      // Part B - table query quality source visibility.
+      // Part B - service inventory source visibility.
       const baselineA = apm
         .service({ name: baselineAName, environment, agentName: 'go' })
         .instance('instance-a');
