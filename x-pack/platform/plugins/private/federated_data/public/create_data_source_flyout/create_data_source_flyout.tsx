@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -106,7 +106,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>(
     initialDataSource?.type ?? 's3'
@@ -210,45 +209,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         authenticationMode
       )
     );
-
-  const onTestConnection = useCallback(
-    async (data: CreateDataSourceFlyoutFormValues) => {
-      setIsTestingConnection(true);
-
-      const baseName = data.name.trim();
-      const testName = `${baseName}_test`;
-
-      const payload = applyAuthenticationModeToDataSource(
-        { ...data, name: testName, type: dataSourceType } as DataSourceWithSecrets,
-        authenticationMode
-      );
-
-      try {
-        await dataSourcesClient.add(payload);
-
-        try {
-          await dataSourcesClient.getById(testName);
-          toasts.addSuccess(createDataSourceFlyoutStrings.testConnectionSuccess());
-        } catch (e) {
-          toasts.addDanger(
-            createDataSourceFlyoutStrings.testConnectionFailed(getFlyoutSaveErrorMessage(e))
-          );
-        }
-      } catch (e) {
-        toasts.addDanger(
-          createDataSourceFlyoutStrings.testConnectionFailed(getFlyoutSaveErrorMessage(e))
-        );
-      } finally {
-        try {
-          await dataSourcesClient.delete(testName);
-        } catch {
-          // Ignore deletion errors; test data sources are best-effort cleanup.
-        }
-        setIsTestingConnection(false);
-      }
-    },
-    [authenticationMode, dataSourceType, dataSourcesClient, toasts]
-  );
 
   const onSubmit = async (data: CreateDataSourceFlyoutFormValues) => {
     setSaveError(undefined);
@@ -368,25 +328,12 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  data-test-subj="createDataSourceFlyoutTestConnection"
-                  iconType="play"
-                  iconSide="left"
-                  type="button"
-                  onClick={handleSubmit(onTestConnection)}
-                  isLoading={isTestingConnection}
-                  disabled={isSaving || isTestingConnection}
-                >
-                  {createDataSourceFlyoutStrings.testConnectionButton()}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
                   fill
                   type="submit"
                   data-test-subj="createDataSourceFlyoutSubmit"
                   onClick={handleSubmit(onSubmit)}
                   isLoading={isSaving}
-                  disabled={isSaving || isTestingConnection}
+                  disabled={isSaving}
                 >
                   {createDataSourceFlyoutStrings.saveButton()}
                 </EuiButton>

@@ -58,20 +58,4 @@ export const createDataSourceFlyoutStrings = {
     i18n.translate('dataSets.createFlyout.saveButton', {
       defaultMessage: 'Save',
     }),
-
-  testConnectionButton: () =>
-    i18n.translate('dataSets.createFlyout.testConnectionButton', {
-      defaultMessage: 'Test Connection',
-    }),
-
-  testConnectionSuccess: () =>
-    i18n.translate('dataSets.createFlyout.testConnectionSuccess', {
-      defaultMessage: 'Connection test succeeded.',
-    }),
-
-  testConnectionFailed: (message: string) =>
-    i18n.translate('dataSets.createFlyout.testConnectionFailed', {
-      defaultMessage: 'Connection test failed: {message}',
-      values: { message },
-    }),
 };

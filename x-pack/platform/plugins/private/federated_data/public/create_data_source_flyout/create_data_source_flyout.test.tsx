@@ -28,7 +28,7 @@ const createClientMock = (): DataSourcesClient =>
   } as unknown as DataSourcesClient);
 
 describe('CreateDataSourceFlyout', () => {
-  it('renders core actions and disables save/test while saving', async () => {
+  it('renders core actions and disables save while saving', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
     let resolveSave: (value: string | null) => void;
@@ -62,20 +62,17 @@ describe('CreateDataSourceFlyout', () => {
       </EuiProvider>
     );
 
-    expect(getByTestId('createDataSourceFlyoutTestConnection')).toBeInTheDocument();
     expect(getByTestId('createDataSourceFlyoutSubmit')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
 
     await waitFor(() => {
       expect(getByTestId('createDataSourceFlyoutSubmit')).toBeDisabled();
-      expect(getByTestId('createDataSourceFlyoutTestConnection')).toBeDisabled();
     });
 
     resolveSave!(null);
     await waitFor(() => {
       expect(getByTestId('createDataSourceFlyoutSubmit')).not.toBeDisabled();
-      expect(getByTestId('createDataSourceFlyoutTestConnection')).not.toBeDisabled();
     });
   });
 });
