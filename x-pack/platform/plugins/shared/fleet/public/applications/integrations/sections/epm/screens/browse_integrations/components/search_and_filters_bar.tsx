@@ -9,8 +9,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
@@ -22,6 +22,7 @@ import {
   EuiScreenReaderOnly,
   EuiSelectable,
   EuiSpacer,
+  EuiToolTip,
   mathWithUnits,
   useEuiTheme,
 } from '@elastic/eui';
@@ -37,7 +38,11 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { CategoryFacet } from '../../home/category_facets';
 
 import { useUrlFilters, useAddUrlFilters } from '../hooks/url_filters';
-import { useUrlCategories, useSetUrlCategory } from '../hooks/url_categories';
+import {
+  useUrlCategories,
+  useSetUrlCategory,
+  useUrlDefaultCategories,
+} from '../hooks/url_categories';
 import type {
   BrowseIntegrationSortType,
   IntegrationStatusFilterType,
@@ -122,6 +127,10 @@ const SortFilter: React.FC = () => {
     <EuiFilterGroup compressed>
       <EuiPopover
         id="browseIntegrationsSortPopover"
+        aria-label={i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortPopoverAriaLabel',
+          { defaultMessage: 'Sort options' }
+        )}
         isOpen={isOpen}
         closePopover={closePopover}
         panelPaddingSize="s"
@@ -208,6 +217,10 @@ const SetupMethodFilter: React.FC<{
   return (
     <EuiPopover
       id="browseIntegrationsSetupMethodPopover"
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodPopoverAriaLabel',
+        { defaultMessage: 'Setup method options' }
+      )}
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
@@ -303,6 +316,10 @@ const SignalFilter: React.FC<{
   return (
     <EuiPopover
       id="browseIntegrationsSignalPopover"
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalPopoverAriaLabel',
+        { defaultMessage: 'Signal type options' }
+      )}
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
@@ -339,6 +356,85 @@ const SignalFilter: React.FC<{
   );
 };
 
+const ContentFilter: React.FC<{
+  selected?: boolean;
+  onChange: (show: boolean) => void;
+}> = ({ selected = false, onChange }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+
+  const options: EuiSelectableOption[] = useMemo(
+    () => [
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentShowContentPacksOption',
+          { defaultMessage: 'Show content packs' }
+        ),
+        key: 'show',
+        checked: selected ? 'on' : undefined,
+        'data-test-subj': 'browseIntegrations.searchBar.contentShowContentPacksOption',
+      },
+    ],
+    [selected]
+  );
+
+  const activeCount = selected ? 1 : 0;
+
+  const onSelectionChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const isSelected = newOptions.some(
+        (option) => option.key === 'show' && option.checked === 'on'
+      );
+      onChange(isSelected);
+      closePopover();
+    },
+    [onChange, closePopover]
+  );
+
+  return (
+    <EuiPopover
+      id="browseIntegrationsContentPopover"
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentPopoverAriaLabel',
+        { defaultMessage: 'Content options' }
+      )}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="s"
+      button={
+        <EuiFilterButton
+          data-test-subj="browseIntegrations.searchBar.contentBtn"
+          iconType="arrowDown"
+          onClick={togglePopover}
+          isSelected={isOpen}
+          numFilters={activeCount}
+          hasActiveFilters={selected}
+          numActiveFilters={activeCount}
+        >
+          <FormattedMessage
+            id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentLabel"
+            defaultMessage="Content"
+          />
+        </EuiFilterButton>
+      }
+    >
+      <EuiSelectable
+        data-test-subj="browseIntegrations.searchBar.contentSelectableList"
+        searchable={false}
+        options={options}
+        onChange={onSelectionChange}
+        listProps={{
+          showIcons: true,
+          style: { minWidth: 250 },
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+};
+
 interface SearchBarProps {
   categories?: CategoryFacet[];
   availableSubCategories?: CategoryFacet[];
@@ -348,6 +444,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
   const urlFilters = useUrlFilters();
   const addUrlFilters = useAddUrlFilters();
   const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
+  const urlDefaultCategories = useUrlDefaultCategories();
   const setUrlCategory = useSetUrlCategory();
   const styles = useMemoCss(searchBarStyles);
 
@@ -371,16 +468,31 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
     : undefined;
 
   const categoryBadgeLabel = useMemo(() => {
-    const selectedSubCategoryTitle =
-      selectedSubCategory && availableSubCategories
-        ? availableSubCategories.find((subCat) => subCat.id === selectedSubCategory)?.title
-        : undefined;
+    if (selectedCategory) {
+      const selectedSubCategoryTitle =
+        selectedSubCategory && availableSubCategories
+          ? availableSubCategories.find((subCat) => subCat.id === selectedSubCategory)?.title
+          : undefined;
 
-    if (selectedCategoryTitle && selectedSubCategoryTitle) {
-      return `${selectedCategoryTitle}, ${selectedSubCategoryTitle}`;
+      if (selectedCategoryTitle && selectedSubCategoryTitle) {
+        return `${selectedCategoryTitle}, ${selectedSubCategoryTitle}`;
+      }
+      return selectedCategoryTitle ?? '';
     }
-    return selectedCategoryTitle ?? '';
-  }, [availableSubCategories, selectedCategoryTitle, selectedSubCategory]);
+
+    // Multi-default categories from URL search params
+    const defaultTitles = urlDefaultCategories
+      .map((catId) => categories?.find((c) => c.id === catId)?.title)
+      .filter(Boolean) as string[];
+    return defaultTitles.join(', ');
+  }, [
+    availableSubCategories,
+    categories,
+    selectedCategory,
+    selectedCategoryTitle,
+    selectedSubCategory,
+    urlDefaultCategories,
+  ]);
 
   const handleCategoryBadgeDismiss = useCallback(() => {
     if (selectedSubCategory) {
@@ -404,7 +516,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
       onChange={(e) => setSearchTerms(e.target.value)}
       fullWidth
       prepend={
-        selectedCategoryTitle ? (
+        categoryBadgeLabel ? (
           <EuiFormPrepend
             label={
               <>
@@ -493,11 +605,20 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
     [addUrlFilters]
   );
 
+  const handleContentChange = useCallback(
+    (show: boolean) => {
+      addUrlFilters({ showContent: show ? true : undefined });
+    },
+    [addUrlFilters]
+  );
+
   const handleSubCategoryClick = useCallback(
     (subCategoryId: string) => {
-      setUrlCategory({ category: selectedCategory, subCategory: subCategoryId });
+      const parentId =
+        availableSubCategories?.find((c) => c.id === subCategoryId)?.parent_id ?? selectedCategory;
+      setUrlCategory({ category: parentId, subCategory: subCategoryId });
     },
-    [selectedCategory, setUrlCategory]
+    [availableSubCategories, selectedCategory, setUrlCategory]
   );
 
   const visibleSubCategories = useMemo(
@@ -540,6 +661,7 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
               testSubjPrefix="browseIntegrations.searchBar"
               popoverId="browseIntegrationsStatusPopover"
             />
+            <ContentFilter selected={urlFilters.showContent} onChange={handleContentChange} />
           </EuiFilterGroup>
         </EuiFlexItem>
 
@@ -586,17 +708,29 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
                 <EuiPopover
                   data-test-subj="browseIntegrations.showMoreSubCategoriesButton"
                   id="browseIntegrationsMoreSubCategories"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.moreSubCategoriesPopoverAriaLabel',
+                    { defaultMessage: 'More subcategories' }
+                  )}
                   button={
-                    <EuiButtonIcon
-                      display="base"
-                      onClick={() => setIsSubCategoryPopoverOpen((prev) => !prev)}
-                      iconType="boxesHorizontal"
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.showMoreSubCategories',
                         { defaultMessage: 'Show more subcategories' }
                       )}
-                      size="s"
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        display="base"
+                        onClick={() => setIsSubCategoryPopoverOpen((prev) => !prev)}
+                        iconType="boxesHorizontal"
+                        aria-label={i18n.translate(
+                          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.showMoreSubCategories',
+                          { defaultMessage: 'Show more subcategories' }
+                        )}
+                        size="s"
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isSubCategoryPopoverOpen}
                   closePopover={() => setIsSubCategoryPopoverOpen(false)}
