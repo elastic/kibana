@@ -66,8 +66,8 @@ async function _deleteGhostPackagePolicies(
 
   const objects = policyIds.map((id) => ({ id, type: AGENT_POLICY_SAVED_OBJECT_TYPE }));
   const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
-    if (isSavedObjectErrorResult(so)) {
-      acc.set(so.id, so.error.statusCode === 404 ? false : true);
+    if (isSavedObjectErrorResult(so) && so.error.statusCode === 404) {
+      acc.set(so.id, false);
     } else {
       acc.set(so.id, true);
     }
