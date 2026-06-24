@@ -872,7 +872,7 @@ paths:
       summary: Get all case templates
       operationId: getCaseTemplatesDefaultSpace
       description: |
-        Returns a paginated list of case templates. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the templates you're seeking.
+        Returns a paginated list of case templates. Requires the Cases feature to be enabled in the space.
       tags:
         - cases
       parameters:
@@ -906,7 +906,7 @@ paths:
       summary: Get a case template by ID
       operationId: getCaseTemplateDefaultSpace
       description: |
-        Returns the details of a case template. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the template you're seeking.
+        Returns the details of a case template. Requires the Cases feature to be enabled in the space.
       tags:
         - cases
       parameters:
