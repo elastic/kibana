@@ -106,7 +106,7 @@ export async function logRuleChanges({
         },
         isSystemAction
       );
-      const ruleSnapshot = serializeRuleDomain(ruleDomain);
+      const ruleSnapshot = transformRuleDomainToRuleChangeHistorySnapshot(ruleDomain);
 
       changes.push({
         timestamp: new Date(timestamp).toISOString(),
@@ -159,28 +159,40 @@ function getRuleType(
   }
 }
 
-function serializeRuleDomain(ruleDomain: RuleDomain): RuleChangeHistorySnapshot {
-  const {
-    monitoring: _monitoring,
-    executionStatus: _executionStatus,
-    lastRun: _lastRun,
-    nextRun: _nextRun,
-    running: _running,
-    lastEnabledAt: _lastEnabledAt,
-    activeSnoozes: _activeSnoozes,
-    isSnoozedUntil: _isSnoozedUntil,
-    viewInAppRelativeUrl: _viewInAppRelativeUrl,
-    scheduledTaskId: _scheduledTaskId,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    ...purifiedRuleDomain
-  } = ruleDomain;
-
+function transformRuleDomainToRuleChangeHistorySnapshot(
+  ruleDomain: RuleDomain
+): RuleChangeHistorySnapshot {
   return {
-    ...purifiedRuleDomain,
+    id: ruleDomain.id,
+    enabled: ruleDomain.enabled,
+    name: ruleDomain.name,
+    tags: ruleDomain.tags,
+    alertTypeId: ruleDomain.alertTypeId,
+    consumer: ruleDomain.consumer,
+    schedule: ruleDomain.schedule,
+    actions: ruleDomain.actions,
+    systemActions: ruleDomain.systemActions,
+    params: ruleDomain.params,
+    mapped_params: ruleDomain.mapped_params,
+    createdBy: ruleDomain.createdBy,
+    updatedBy: ruleDomain.updatedBy,
     createdAt: normalizeDate(ruleDomain.createdAt, new Date()),
     updatedAt: normalizeDate(ruleDomain.updatedAt, new Date()),
-  };
+    apiKey: ruleDomain.apiKey,
+    apiKeyOwner: ruleDomain.apiKeyOwner,
+    apiKeyCreatedByUser: ruleDomain.apiKeyCreatedByUser,
+    uiamApiKey: ruleDomain.uiamApiKey,
+    throttle: ruleDomain.throttle,
+    muteAll: ruleDomain.muteAll,
+    notifyWhen: ruleDomain.notifyWhen,
+    snoozedInstances: ruleDomain.snoozedInstances,
+    snoozeSchedule: ruleDomain.snoozeSchedule,
+    revision: ruleDomain.revision,
+    alertDelay: ruleDomain.alertDelay,
+    legacyId: ruleDomain.legacyId,
+    flapping: ruleDomain.flapping,
+    artifacts: ruleDomain.artifacts,
+  } satisfies { [K in keyof Required<RuleChangeHistorySnapshot>]: RuleChangeHistorySnapshot[K] };
 }
 
 function normalizeDate(value: string | number | Date, fallback: Date): string {
