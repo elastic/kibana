@@ -145,6 +145,21 @@ describe('EpisodeRuleCell', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
+  it('renders the raw ruleId when the rule id is missing from bulk get', () => {
+    const row = makeRow({ 'rule.id': 'deleted-rule' });
+    render(
+      <EpisodeRuleCell
+        {...baseCellProps}
+        columnId="rule.id"
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={1}
+      />
+    );
+    expect(screen.getByText('deleted-rule')).toBeInTheDocument();
+  });
+
   it('renders the raw ruleId when the rule is not in cache', () => {
     const row = makeRow({ 'rule.id': 'unknown-rule' });
     render(
