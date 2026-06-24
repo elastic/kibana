@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
+import { createMemoryHistory } from 'history';
+import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -59,14 +61,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
 
+  const embeddableScopedHistory = useMemo(() => {
+    const memoryHistory = createMemoryHistory();
+    return new CoreScopedHistory(memoryHistory, '');
+  }, []);
+
   const kibanaServices = useMemo(
     () => ({
       ...coreStart,
       plugins: {
         ...services.startDependencies,
       },
+      appParams: {
+        history: embeddableScopedHistory,
+        isAgentWorkspaceMount: false,
+      },
     }),
-    [coreStart, services.startDependencies]
+    [coreStart, embeddableScopedHistory, services.startDependencies]
   );
 
   const { persistedConversationId, updatePersistedConversationId } = usePersistedConversationId({

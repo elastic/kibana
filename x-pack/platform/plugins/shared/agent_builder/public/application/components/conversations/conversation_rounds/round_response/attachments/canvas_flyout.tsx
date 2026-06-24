@@ -138,9 +138,13 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
 
-  const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
+  const useAgentWorkspaceOverlay = isAgentWorkspaceMount && !isSidebar;
+  const flyoutType =
+    isSidebar || isNarrowViewport || useAgentWorkspaceOverlay ? 'overlay' : 'push';
   const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
-  const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
+  const flyoutSize =
+    isSidebar || isNarrowViewport ? 'full' : useAgentWorkspaceOverlay ? '100%' : width;
+  const flyoutMaxWidth = useAgentWorkspaceOverlay ? '100%' : DEFAULT_CANVAS_WIDTH;
 
   const flyoutBodyStyles = css`
     padding-top: ${euiTheme.size.m};
@@ -161,8 +165,8 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       ownFocus={false}
       outsideClickCloses={true}
       minWidth={CANVAS_MIN_WIDTH}
-      maxWidth={DEFAULT_CANVAS_WIDTH}
-      resizable={!isSidebar && !isNarrowViewport}
+      maxWidth={flyoutMaxWidth}
+      resizable={!isSidebar && !isNarrowViewport && !useAgentWorkspaceOverlay}
       size={flyoutSize}
       type={flyoutType}
       hideCloseButton

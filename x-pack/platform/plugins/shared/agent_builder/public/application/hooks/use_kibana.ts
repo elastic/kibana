@@ -12,7 +12,7 @@ import type { AgentBuilderStartDependencies } from '../../types';
 
 export type StartServices = CoreStart & {
   plugins: AgentBuilderStartDependencies;
-  appParams: { history: ScopedHistory; isAgentWorkspaceMount?: boolean };
+  appParams?: { history: ScopedHistory; isAgentWorkspaceMount?: boolean };
 };
 
 const useTypedKibana = () => useKibana<StartServices>();
