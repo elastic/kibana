@@ -81,6 +81,7 @@ import {
   resolveTemplateFieldsForClose,
   resolveGlobalFields,
 } from './validators';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -645,7 +646,7 @@ export const bulkUpdate = async (
           .map((t) => [`${t.id}@${t.version}`, t] as const)
       ).values(),
     ];
-    const templateFieldsByKey = new Map(
+    const templateFieldsByKey = new Map<string, InlineField[]>(
       await Promise.all(
         closingCasesTemplates.map(async ({ id, version }) => {
           const fields = await resolveTemplateFieldsForClose({
@@ -654,7 +655,7 @@ export const bulkUpdate = async (
             templatesService,
             logger,
           });
-          return [`${id}@${version}`, fields] as const;
+          return [`${id}@${version}`, fields] as [string, InlineField[]];
         })
       )
     );
