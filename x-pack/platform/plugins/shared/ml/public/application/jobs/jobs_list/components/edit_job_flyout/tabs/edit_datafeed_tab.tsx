@@ -124,6 +124,25 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
         </>
       )}
       <EuiForm>
+        {totalProjectCount > 1 && projects ? (
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.datafeed.projectRoutingLabel"
+                defaultMessage="Project scope"
+              />
+            }
+          >
+            <MlProjectPickerPanel
+              projectRouting={datafeedProjectRouting}
+              onProjectRoutingChange={onProjectRoutingChange}
+              projects={projects}
+              totalProjectCount={totalProjectCount}
+              disabled={datafeedRunning}
+              displayDisabledTooltip={false}
+            />
+          </EuiFormRow>
+        ) : null}
         <EuiFormRow
           label={
             <FormattedMessage
@@ -186,25 +205,6 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
             disabled={datafeedRunning}
           />
         </EuiFormRow>
-        {totalProjectCount > 1 && projects ? (
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.datafeed.projectRoutingLabel"
-                defaultMessage="Project scope"
-              />
-            }
-          >
-            <MlProjectPickerPanel
-              projectRouting={datafeedProjectRouting}
-              onProjectRoutingChange={onProjectRoutingChange}
-              projects={projects}
-              totalProjectCount={totalProjectCount}
-              disabled={datafeedRunning}
-              displayDisabledTooltip={false}
-            />
-          </EuiFormRow>
-        ) : null}
       </EuiForm>
     </>
   );
