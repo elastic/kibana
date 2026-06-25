@@ -67,6 +67,7 @@ describe('EnterParallelNodeImpl', () => {
       navigateToNode: jest.fn(),
       getCurrentNodeScope: jest.fn().mockReturnValue([]),
       setScopeStack: jest.fn(),
+      setWorkflowError: jest.fn(),
     } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
 
     stepRuntime = {
@@ -161,6 +162,17 @@ describe('EnterParallelNodeImpl', () => {
       foreach: JSON.stringify(['a', 'b', 'c']),
     });
     expect(persistedState?.total).toBe(3);
+  });
+
+  it('throws a single clear "must evaluate to an array" error for a non-array foreach', async () => {
+    // A foreach that renders to a scalar string (not a JSON array) used to leak a
+    // raw "Unable to parse rendered parallel foreach value" JSON error. Both the
+    // parse-failure and the non-array cases must now surface the same author-facing
+    // message that names the offending expression.
+    node = makeNode({ foreach: 'not-an-array' });
+    await expect(build().run()).rejects.toThrow(
+      /foreach expression must evaluate to an array, but "not-an-array" did not/
+    );
   });
 
   it('finishes with index-aligned aggregate output when all branches complete', async () => {

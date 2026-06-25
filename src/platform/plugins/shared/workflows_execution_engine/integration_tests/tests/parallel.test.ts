@@ -570,7 +570,7 @@ steps:
     type: slack
     connector-id: ${FakeConnectors.slack1.name}
     with:
-      message: 'status={{ steps.enrich.output.status }};total={{ steps.enrich.output.total }}'
+      message: 'status={{ steps.enrich.output.status }};total={{ steps.enrich.output.total }};scan={{ steps.enrich.output.branches.scan.status }}'
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
@@ -613,11 +613,23 @@ steps:
       expect(output.results.map((r) => r.status)).toEqual(['completed', 'completed']);
     });
 
-    it('exposes the aggregate output to a downstream step', () => {
+    it('also exposes a `branches.<name>` keyed projection (#17834 contract)', () => {
+      const [parallelExecution] = stepExecutionsFor(workflowRunFixture, 'enrich');
+      const output = parallelExecution.output as {
+        branches: Record<string, { status: string; output?: unknown; error?: unknown }>;
+      };
+      expect(Object.keys(output.branches).sort()).toEqual(['geo', 'scan']);
+      expect(output.branches.scan.status).toBe('completed');
+      expect(output.branches.geo.status).toBe('completed');
+      expect(output.branches.scan).toHaveProperty('output');
+      expect(output.branches.scan.error).toBeUndefined();
+    });
+
+    it('exposes the aggregate output (incl. `branches.<name>`) to a downstream step', () => {
       expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           id: FakeConnectors.slack1.id,
-          params: { message: 'status=completed;total=2' },
+          params: { message: 'status=completed;total=2;scan=completed' },
         })
       );
     });
@@ -780,6 +792,122 @@ steps:
           params: { message: 'hash:abc123' },
         })
       );
+    });
+  });
+
+  describe('failure modes', () => {
+    // A parallel step over N items where EVERY branch fails (uses the
+    // always-throwing fake connector), serialized with concurrency.max=1 so the
+    // fail-fast vs settled difference is observable in how many branches ran.
+    // NOTE: branches fail via a *step* failure (connector error) — NOT
+    // `workflow.fail`, which terminates the whole workflow globally and so would
+    // mask the per-mode branch-scheduling behaviour.
+    const ITEMS = ['0', '1', '2', '3'];
+
+    const buildFailingYaml = (mode?: 'fail-fast' | 'settled') => `
+consts:
+  items: '${JSON.stringify(ITEMS)}'
+steps:
+  - name: fanOut
+    type: parallel
+    foreach: '{{ consts.items }}'
+    concurrency: { max: 1 }
+    ${mode ? `mode: ${mode}` : ''}
+    steps:
+      - name: alwaysFail
+        type: slack
+        connector-id: ${FakeConnectors.constantlyFailing.name}
+        with:
+          message: 'branch {{ foreach.index }}'
+`;
+
+    const driveToTerminal = async (fixture: WorkflowRunFixture) => {
+      let guard = 0;
+      while (getExecution(fixture)?.status === ExecutionStatus.WAITING && guard < 20) {
+        await fixture.resumeWorkflow();
+        guard += 1;
+      }
+    };
+
+    describe('fail-fast (default): stops scheduling not-yet-started branches', () => {
+      let workflowRunFixture: WorkflowRunFixture;
+
+      beforeAll(async () => {
+        workflowRunFixture = new WorkflowRunFixture();
+        jest.clearAllMocks();
+        await workflowRunFixture.runWorkflow({ workflowYaml: buildFailingYaml() });
+        await driveToTerminal(workflowRunFixture);
+      });
+
+      it('contains branch failures: the parallel step completes and the workflow continues', () => {
+        // Branch failures are reported via the aggregate, NOT escalated to a
+        // whole-workflow failure (the documented contract: "handle failures in a
+        // step AFTER the parallel via steps.<id>.output"). The parallel step
+        // successfully produced an aggregate, so it COMPLETED and the workflow
+        // reaches a terminal non-failed state.
+        const [parallel] = stepExecutionsFor(workflowRunFixture, 'fanOut');
+        expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
+        expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+      });
+
+      it('does NOT run all branches (short-circuits after the first failure)', () => {
+        // With max=1 and fail-fast, only the first branch starts; the remaining
+        // branches are skipped rather than run.
+        const branchRuns = stepExecutionsFor(workflowRunFixture, 'alwaysFail').length;
+        expect(branchRuns).toBeLessThan(ITEMS.length);
+      });
+
+      it('aggregate output reports failed status with skipped branches', () => {
+        const [parallel] = stepExecutionsFor(workflowRunFixture, 'fanOut');
+        const output = parallel.output as {
+          total: number;
+          succeeded: number;
+          failed: number;
+          status: string;
+          results: Array<{ status: string }>;
+        };
+        expect(output.total).toBe(ITEMS.length);
+        expect(output.status).toBe('failed');
+        expect(output.failed).toBeGreaterThanOrEqual(1);
+        expect(output.results.some((r) => r.status === 'skipped')).toBe(true);
+      });
+    });
+
+    describe('settled: runs EVERY branch to a terminal state despite failures', () => {
+      let workflowRunFixture: WorkflowRunFixture;
+
+      beforeAll(async () => {
+        workflowRunFixture = new WorkflowRunFixture();
+        jest.clearAllMocks();
+        await workflowRunFixture.runWorkflow({ workflowYaml: buildFailingYaml('settled') });
+        await driveToTerminal(workflowRunFixture);
+      });
+
+      it('contains branch failures: the parallel step completes and the workflow continues', () => {
+        const [parallel] = stepExecutionsFor(workflowRunFixture, 'fanOut');
+        expect(parallel.status).toBe(ExecutionStatus.COMPLETED);
+        expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+      });
+
+      it('runs the branch body once per item (no branch is skipped)', () => {
+        expect(stepExecutionsFor(workflowRunFixture, 'alwaysFail').length).toBe(ITEMS.length);
+      });
+
+      it('aggregate output reports every branch failed', () => {
+        const [parallel] = stepExecutionsFor(workflowRunFixture, 'fanOut');
+        const output = parallel.output as {
+          total: number;
+          succeeded: number;
+          failed: number;
+          status: string;
+          results: Array<{ status: string }>;
+        };
+        expect(output.total).toBe(ITEMS.length);
+        expect(output.failed).toBe(ITEMS.length);
+        expect(output.succeeded).toBe(0);
+        expect(output.status).toBe('failed');
+        expect(output.results.every((r) => r.status === 'failed')).toBe(true);
+      });
     });
   });
 });

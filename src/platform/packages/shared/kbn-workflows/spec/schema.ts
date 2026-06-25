@@ -599,7 +599,11 @@ export const ParallelStepConfigSchema = z.object({
     .describe('Dynamic fan-out branch body executed once per item. Used with `foreach`.'),
   branches: z
     .array(ParallelBranchSchema)
-    .min(1)
+    .min(2, {
+      message:
+        'A static `parallel` step must declare at least two branches; a single-branch parallel is ' +
+        'degenerate (use a plain step sequence instead).',
+    })
     .optional()
     .describe(
       'Static scatter-gather: a fixed set of named branches, each with its own body, run ' +
@@ -627,11 +631,10 @@ export const ParallelStepObjectSchema = BaseStepSchema.extend({
 });
 
 // Exactly one mode. Dynamic requires `steps`; static must not use top-level `steps`.
-const parallelModeRefinement = (step: {
-  foreach?: unknown;
-  branches?: unknown;
-  steps?: unknown;
-}): boolean => {
+// Accepts `unknown` so it can be used as a refinement on any parallel-step schema
+// variant (whose inferred output differs per call site); narrows internally.
+const parallelModeRefinement = (value: unknown): boolean => {
+  const step = (value ?? {}) as { foreach?: unknown; branches?: unknown; steps?: unknown };
   const hasForeach = step.foreach !== undefined;
   const hasBranches = step.branches !== undefined;
   if (hasForeach === hasBranches) return false;
@@ -642,9 +645,31 @@ const PARALLEL_MODE_REFINEMENT_MESSAGE =
   'A "parallel" step must use either dynamic fan-out (`foreach` + `steps`) or static ' +
   '`branches`, but not both. With `foreach`, provide `steps`; with `branches`, omit `steps`.';
 
-export const ParallelStepSchema = ParallelStepObjectSchema.refine(parallelModeRefinement, {
-  message: PARALLEL_MODE_REFINEMENT_MESSAGE,
-});
+// Static `branches[].name` doubles as the result `key` in the aggregate output,
+// so duplicate names would make name-keyed correlation ambiguous (two results
+// sharing a `key`). Require names to be unique within a single parallel step.
+const parallelBranchNamesUniqueRefinement = (value: unknown): boolean => {
+  const step = (value ?? {}) as { branches?: Array<{ name?: unknown }> };
+  if (!Array.isArray(step.branches)) return true;
+  const names = step.branches
+    .map((branch) => branch?.name)
+    .filter((name): name is string => typeof name === 'string');
+  return new Set(names).size === names.length;
+};
+const PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE =
+  'Static `parallel` branch names must be unique within a step; each `name` is used as the ' +
+  'result `key` in the aggregate output.';
+
+// Single source of truth for applying the parallel-step refinements. The base
+// `ParallelStepObjectSchema` is kept extendable (a `ZodEffects` from `.refine()`
+// cannot be `.extend()`ed), so callers extend the base first and then route it
+// through here to attach the refinements with consistent predicates + messages.
+const applyParallelModeRefinement = <T extends z.ZodTypeAny>(schema: T) =>
+  schema
+    .refine(parallelModeRefinement, { message: PARALLEL_MODE_REFINEMENT_MESSAGE })
+    .refine(parallelBranchNamesUniqueRefinement, { message: PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE });
+
+export const ParallelStepSchema = applyParallelModeRefinement(ParallelStepObjectSchema);
 export type ParallelStep = z.infer<typeof ParallelStepObjectSchema>;
 
 export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
@@ -654,7 +679,11 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
     steps: z.array(stepSchema).min(1).optional(),
     branches: z
       .array(ParallelBranchSchema.extend({ steps: z.array(stepSchema).min(1) }))
-      .min(1)
+      .min(2, {
+        message:
+          'A static `parallel` step must declare at least two branches; a single-branch parallel ' +
+          'is degenerate (use a plain step sequence instead).',
+      })
       .optional(),
   });
 
@@ -663,7 +692,7 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
     return schema.partial().required({ type: true });
   }
 
-  return schema.refine(parallelModeRefinement, { message: PARALLEL_MODE_REFINEMENT_MESSAGE });
+  return applyParallelModeRefinement(schema);
 };
 
 export const MergeStepConfigSchema = z.object({

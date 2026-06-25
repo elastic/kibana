@@ -18,6 +18,7 @@ import type { EnterParallelNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type {
   ParallelBranchResult,
   ParallelBranchState,
+  ParallelNamedBranchResult,
   ParallelStepOutput,
   ParallelStepState,
 } from './types';
@@ -261,6 +262,7 @@ export class EnterParallelNodeImpl implements NodeImplementation {
 
     // Apply the recorded statuses synchronously (no await between read and write).
     const advancedByIndex = new Map(advanced.map(({ index, result }) => [index, result]));
+    let branchFailedThisTick = false;
     for (const branch of state.branches) {
       const result = advancedByIndex.get(branch.index);
       if (result !== undefined) {
@@ -269,10 +271,26 @@ export class EnterParallelNodeImpl implements NodeImplementation {
         if (result.status === 'timed_out') {
           branch.timedOut = true;
         }
+        if (result.status === 'failed') {
+          branchFailedThisTick = true;
+        }
         if (TERMINAL_BRANCH_STATUSES.has(result.status) && branch.finishedAt === undefined) {
           branch.finishedAt = Date.now();
         }
       }
+    }
+
+    // Contain branch failures. A branch body step that fails calls `failStep`,
+    // which sets the *workflow-level* error as a side effect. Left in place, the
+    // execution loop's `catchError` would escalate that to a whole-workflow
+    // failure the moment this parallel step parks — aborting after the FIRST
+    // failed branch and so breaking `settled` (and even fail-fast's drain) and
+    // leaving the aggregate output unwritten. The parallel step owns branch
+    // failure accounting itself (tracked in `state.branches` and surfaced via
+    // the aggregate `results[]` / `failed` / `status`), so we clear the leaked
+    // workflow error here. Final disposition is decided in `finish()`.
+    if (branchFailedThisTick) {
+      this.wfExecutionRuntimeManager.setWorkflowError(undefined);
     }
 
     // Catch poll/yield branches that exceeded their per-branch budget while
@@ -665,8 +683,47 @@ export class EnterParallelNodeImpl implements NodeImplementation {
       status: failed > 0 ? 'failed' : 'completed',
     };
 
+    // Static mode (#17834): also expose results keyed by branch name so authors
+    // can read `steps.<p>.output.branches.<name>.{status,output,error}`. Names are
+    // schema-guaranteed present and unique here, so the map is lossless. Dynamic
+    // `foreach` mode keeps only the index-aligned `results[]` (its keys are items,
+    // which need not be unique).
+    const namedBranches = this.buildNamedBranchProjection(results);
+    if (namedBranches !== undefined) {
+      output.branches = namedBranches;
+    }
+
     this.stepExecutionRuntime.finishStep(output);
     this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
+  }
+
+  /**
+   * Builds the static-mode `branches` projection: results keyed by branch name.
+   * Returns `undefined` in dynamic `foreach` mode (no static branch definitions),
+   * so the aggregate omits the field entirely there.
+   */
+  private buildNamedBranchProjection(
+    results: ParallelBranchResult[]
+  ): Record<string, ParallelNamedBranchResult> | undefined {
+    const staticBranches = this.node.branches;
+    if (staticBranches === undefined) {
+      return undefined;
+    }
+
+    // `results` is built as `branches.map(...)` just above, so every branch has a
+    // terminal-status result entry here; key the projection off it.
+    const projection: Record<string, ParallelNamedBranchResult> = {};
+    for (const result of results) {
+      const name = staticBranches[result.index]?.name;
+      if (name !== undefined) {
+        projection[name] = {
+          status: result.status,
+          ...(result.output !== undefined && { output: result.output }),
+          ...(result.error !== undefined && { error: result.error }),
+        };
+      }
+    }
+    return projection;
   }
 
   private resolveMode(): ParallelMode {
@@ -719,17 +776,23 @@ export class EnterParallelNodeImpl implements NodeImplementation {
       ? this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression)
       : this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
 
+    // A rendered string is accepted only if it is a JSON array literal (e.g. a
+    // template that produced `"[1,2,3]"`). Anything else — a scalar like
+    // `"hello"`, or `"{...}"` — is conceptually "foreach is not an array", so we
+    // funnel both the parse failure and the non-array result into the SAME clear
+    // message instead of leaking a raw JSON parse error to the author.
     if (typeof resolved === 'string') {
       try {
         resolved = JSON.parse(resolved);
       } catch {
-        throw new Error(`Unable to parse rendered parallel foreach value: ${resolved}`);
+        resolved = undefined;
       }
     }
 
     if (!Array.isArray(resolved)) {
       throw new Error(
-        `Parallel step "${this.node.stepId}" foreach expression must evaluate to an array.`
+        `Parallel step "${this.node.stepId}" foreach expression must evaluate to an array, ` +
+          `but "${expression}" did not. Provide a literal array or an expression that resolves to one.`
       );
     }
 

@@ -924,9 +924,36 @@ describe('ParallelStepSchema', () => {
   it('rejects a static branch with an empty body', () => {
     const result = ParallelStepSchema.safeParse({
       ...staticParallel,
-      branches: [{ name: 'a', steps: [] }],
+      branches: [
+        { name: 'a', steps: [] },
+        { name: 'b', steps: [{ name: 'sb', type: 'console', with: { message: 'b' } }] },
+      ],
     });
     expect(result.success).toBe(false);
+  });
+
+  it('rejects a static parallel with a single branch (requires >= 2)', () => {
+    const result = ParallelStepSchema.safeParse({
+      name: 'fan-out',
+      type: 'parallel',
+      branches: [{ name: 'only', steps: [{ name: 's', type: 'console', with: { message: 'x' } }] }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects duplicate static branch names (name doubles as the aggregate key)', () => {
+    const result = ParallelStepSchema.safeParse({
+      ...staticParallel,
+      branches: [
+        { name: 'dup', steps: [{ name: 's1', type: 'console', with: { message: '1' } }] },
+        { name: 'dup', steps: [{ name: 's2', type: 'console', with: { message: '2' } }] },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts distinct static branch names', () => {
+    expect(ParallelStepSchema.safeParse(staticParallel).success).toBe(true);
   });
 
   it('rejects mixing foreach and branches', () => {

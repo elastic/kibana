@@ -82,6 +82,17 @@ export interface ParallelBranchResult {
   durationMs?: number;
 }
 
+/**
+ * A single branch's result keyed by branch name in the static aggregate
+ * projection. Mirrors `{ status, output, error }` from the ticket contract
+ * (#17834) so authors can read `steps.<p>.output.branches.<name>.output`.
+ */
+export interface ParallelNamedBranchResult {
+  status: 'completed' | 'failed' | 'skipped' | 'timed_out';
+  output?: unknown;
+  error?: unknown;
+}
+
 /** Aggregate output of a parallel step. */
 export interface ParallelStepOutput extends Record<string, unknown> {
   results: ParallelBranchResult[];
@@ -89,4 +100,11 @@ export interface ParallelStepOutput extends Record<string, unknown> {
   succeeded: number;
   failed: number;
   status: 'completed' | 'failed';
+  /**
+   * Static mode only: results keyed by branch name, matching the #17834
+   * contract (`steps.<p>.output.branches.<name>.{status,output,error}`). Absent
+   * in dynamic `foreach` mode (where keys are items, not unique names) — use
+   * the index-aligned `results[]` there instead.
+   */
+  branches?: Record<string, ParallelNamedBranchResult>;
 }

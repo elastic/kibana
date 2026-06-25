@@ -28,7 +28,10 @@ steps:
     type: elasticsearch.bulk
     with:
       index: '{{ consts.indexName }}'
-      refresh: true
+      # The ES bulk connector schema types `refresh` as an enum string
+      # ('true' | 'false' | 'wait_for'), NOT a boolean — `refresh: true`
+      # fails workflow validation.
+      refresh: 'true'
       operations:
         - { name: 'apple' }
         - { name: 'banana' }
