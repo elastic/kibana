@@ -55,10 +55,8 @@ const ruleIdArraySchema = arrayOrSingleSchema(
 
 export const getRuleExecutionsQuerySchema = z
   .object({
-    ruleIds: ruleIdArraySchema.optional().describe(`Rule id filter.`),
-    outcome: outcomeArraySchema
-      .optional()
-      .describe('Outcome filter. Pass one or more of success | failure.'),
+    ruleId: ruleIdArraySchema.optional().describe(`Rule id filter. `),
+    outcome: outcomeArraySchema.optional().describe('Outcome filter. '),
     from: z.iso
       .datetime()
       .optional()

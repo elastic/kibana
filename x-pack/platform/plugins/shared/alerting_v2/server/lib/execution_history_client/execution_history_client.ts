@@ -43,7 +43,7 @@ export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
   public async getRuleExecutions(
     query: GetRuleExecutionsQuery
   ): Promise<GetRuleExecutionsResponse> {
-    const { ruleIds, outcome: outcomes, from, to, sort, sortOrder, page, perPage } = query;
+    const { ruleId: ruleIds, outcome: outcomes, from, to, sort, sortOrder, page, perPage } = query;
 
     const results = await this.eventLog.findRuleExecutions({
       spaceId: this.spaceId,

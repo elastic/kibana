@@ -62,44 +62,44 @@ describe('rule_execution_history_schema', () => {
         });
       });
 
-      it('does not inject ruleIds / outcome / from / to when missing', () => {
+      it('does not inject ruleId / outcome / from / to when missing', () => {
         const parsed = getRuleExecutionsQuerySchema.parse({});
-        expect(parsed).not.toHaveProperty('ruleIds');
+        expect(parsed).not.toHaveProperty('ruleId');
         expect(parsed).not.toHaveProperty('outcome');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
       });
     });
 
-    describe('ruleIds', () => {
+    describe('ruleId', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = getRuleExecutionsQuerySchema.parse({ ruleIds: 'rule-x' });
-        expect(parsed.ruleIds).toEqual(['rule-x']);
+        const parsed = getRuleExecutionsQuerySchema.parse({ ruleId: 'rule-x' });
+        expect(parsed.ruleId).toEqual(['rule-x']);
       });
 
-      it('accepts an array of valid rule ids', () => {
+      it('accepts an array of valid rule ids (repeated `?ruleId=…` style)', () => {
         const parsed = getRuleExecutionsQuerySchema.parse({
-          ruleIds: ['rule-x', 'rule-y'],
+          ruleId: ['rule-x', 'rule-y'],
         });
-        expect(parsed.ruleIds).toEqual(['rule-x', 'rule-y']);
+        expect(parsed.ruleId).toEqual(['rule-x', 'rule-y']);
       });
 
       it('rejects an empty string', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleIds: '' }).success).toBe(false);
+        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: '' }).success).toBe(false);
       });
 
       it('rejects an empty array', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleIds: [] }).success).toBe(false);
+        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: [] }).success).toBe(false);
       });
 
       it('rejects an array entry that is an empty string', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleIds: ['rule-x', ''] }).success).toBe(
+        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: ['rule-x', ''] }).success).toBe(
           false
         );
       });
 
       it('rejects strings longer than 256 chars', () => {
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleIds: 'a'.repeat(257) }).success).toBe(
+        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: 'a'.repeat(257) }).success).toBe(
           false
         );
       });
@@ -107,7 +107,7 @@ describe('rule_execution_history_schema', () => {
       it('rejects an array entry longer than 256 chars', () => {
         expect(
           getRuleExecutionsQuerySchema.safeParse({
-            ruleIds: ['rule-x', 'a'.repeat(257)],
+            ruleId: ['rule-x', 'a'.repeat(257)],
           }).success
         ).toBe(false);
       });
@@ -117,7 +117,7 @@ describe('rule_execution_history_schema', () => {
           { length: RULE_EXECUTIONS_MAX_RULE_ID_FILTER + 1 },
           (_, i) => `rule-${i}`
         );
-        expect(getRuleExecutionsQuerySchema.safeParse({ ruleIds: tooMany }).success).toBe(false);
+        expect(getRuleExecutionsQuerySchema.safeParse({ ruleId: tooMany }).success).toBe(false);
       });
 
       it('accepts an array at the exact rule-id filter cap', () => {
@@ -125,8 +125,8 @@ describe('rule_execution_history_schema', () => {
           { length: RULE_EXECUTIONS_MAX_RULE_ID_FILTER },
           (_, i) => `rule-${i}`
         );
-        const parsed = getRuleExecutionsQuerySchema.parse({ ruleIds: justRight });
-        expect(parsed.ruleIds).toHaveLength(RULE_EXECUTIONS_MAX_RULE_ID_FILTER);
+        const parsed = getRuleExecutionsQuerySchema.parse({ ruleId: justRight });
+        expect(parsed.ruleId).toHaveLength(RULE_EXECUTIONS_MAX_RULE_ID_FILTER);
       });
     });
 
@@ -290,7 +290,7 @@ describe('rule_execution_history_schema', () => {
 
     it('round-trips a fully populated query (with already-array fields)', () => {
       const input = {
-        ruleIds: ['rule-x', 'rule-y'],
+        ruleId: ['rule-x', 'rule-y'],
         outcome: ['success', 'failure'] as const,
         from: '2026-06-01T00:00:00Z',
         to: '2026-06-02T00:00:00Z',
