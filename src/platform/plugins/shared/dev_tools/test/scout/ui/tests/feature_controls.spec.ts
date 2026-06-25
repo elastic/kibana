@@ -35,7 +35,10 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
     }
     await expect(pageObjects.devTools.readOnlyBadge).toBeVisible();
-    await expect(pageObjects.devTools.readOnlyBadge).toHaveText('Read only');
+    await expect(pageObjects.devTools.readOnlyBadge).toHaveAttribute(
+      'data-test-badge-label',
+      'Read only'
+    );
   });
 
   test('users without dev tools privileges cannot access dev tools UI', async ({

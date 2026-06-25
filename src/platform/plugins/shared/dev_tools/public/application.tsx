@@ -9,9 +9,11 @@
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import useObservable from 'react-use/lib/useObservable';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
+import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type {
@@ -42,6 +44,7 @@ interface DevToolsWrapperProps {
   appServices: AppServices;
   location: RouteComponentProps['location'];
   startServices: DevToolsStartServices;
+  chrome: ChromeStart;
   badges?: AppHeaderBadge[];
 }
 
@@ -65,6 +68,21 @@ export const staticStyles = {
   devAppContainer: devAppContainerStyles,
 
   devApp: devAppContainerStyles,
+
+  devAppTabBeta: css`
+    vertical-align: middle;
+  `,
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    ...staticStyles,
+    tabs: css`
+      padding-left: ${euiTheme.size.s};
+    `,
+  };
 };
 
 function DevToolsWrapper({
@@ -74,10 +92,13 @@ function DevToolsWrapper({
   appServices,
   location,
   startServices,
+  chrome,
   badges,
 }: DevToolsWrapperProps) {
+  const styles = useStyles();
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
+  const chromeStyle = useObservable(chrome.getChromeStyle$(), chrome.getChromeStyle());
 
   useEffect(
     () => () => {
@@ -92,6 +113,30 @@ function DevToolsWrapper({
     docTitleService.setTitle(activeDevTool.title);
     breadcrumbService.setBreadcrumbs(activeDevTool.title);
   }, [activeDevTool, docTitleService, breadcrumbService]);
+
+  const isReadOnly = Boolean(badges?.length);
+
+  useEffect(() => {
+    // In solution view the read only badge is rendered by AppHeader via the `badges` prop.
+    // In classic view AppHeader is not rendered, so the badge is set on the chrome header instead.
+    if (chromeStyle !== 'classic' || !isReadOnly) {
+      return;
+    }
+
+    chrome.setBadge({
+      text: i18n.translate('devTools.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('devTools.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save',
+      }),
+      iconType: 'readOnly',
+    });
+
+    return () => {
+      chrome.setBadge(undefined);
+    };
+  }, [chrome, chromeStyle, isReadOnly]);
 
   const headerTabs = useMemo<AppHeaderTab[]>(
     () =>
@@ -111,12 +156,46 @@ function DevToolsWrapper({
   );
 
   return (
-    <main css={staticStyles.devApp}>
-      <AppHeader
-        title={i18n.translate('devTools.appHeader.title', { defaultMessage: 'Developer tools' })}
-        tabs={headerTabs}
-        badges={badges}
-      />
+    <main css={styles.devApp}>
+      {chromeStyle === 'classic' ? (
+        <EuiTabs css={styles.tabs}>
+          {devTools.map((currentDevTool) => (
+            <EuiTab
+              key={currentDevTool.id}
+              disabled={currentDevTool.isDisabled()}
+              isSelected={currentDevTool === activeDevTool}
+              onClick={() => {
+                if (!currentDevTool.isDisabled()) {
+                  history.push(`/${currentDevTool.id}`);
+                }
+              }}
+            >
+              <EuiToolTip content={currentDevTool.tooltipContent}>
+                <span tabIndex={0}>
+                  {currentDevTool.title}{' '}
+                  {currentDevTool.isBeta && (
+                    <EuiBetaBadge
+                      size="s"
+                      css={styles.devAppTabBeta}
+                      label={i18n.translate('devTools.badge.betaLabel', {
+                        defaultMessage: 'Beta',
+                      })}
+                    />
+                  )}
+                </span>
+              </EuiToolTip>
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ) : (
+        <AppHeader
+          title={i18n.translate('devTools.appHeader.devToolsTitle', {
+            defaultMessage: 'Dev Tools',
+          })}
+          tabs={headerTabs}
+          badges={badges}
+        />
+      )}
       <div
         css={staticStyles.devAppContainer}
         role="tabpanel"
@@ -215,6 +294,7 @@ export function renderApp(
                     devTools={devTools}
                     appServices={appServices}
                     startServices={startServices}
+                    chrome={chrome}
                     badges={badges}
                   />
                 )}
