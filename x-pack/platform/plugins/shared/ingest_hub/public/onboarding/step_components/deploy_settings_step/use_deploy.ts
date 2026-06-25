@@ -243,6 +243,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     deploySettingsStep,
     deployAndDetectStep,
     updateDeployAndDetectStep,
+    getLatestFailedPackages,
     registerDeployHandler,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -368,13 +369,18 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         'receiving'
       );
 
+      // Merge with packages that failed in a prior run but weren't retried in this one.
+      // Use the ref-backed getter to get the freshest value, not the stale closure.
+      const previouslyFailed = getLatestFailedPackages().filter((pkg) => !targets.includes(pkg));
+      const mergedFailed = [...previouslyFailed, ...newFailed];
+
       setIsDeploying(false);
-      setFailedPackages(newFailed);
+      setFailedPackages(mergedFailed);
       updateDeployAndDetectStep({
         isDeploying: false,
         serviceStatuses: newServiceStatuses,
         policyIdsByPackage,
-        failedPackages: newFailed,
+        failedPackages: mergedFailed,
         deployErrors: errorsByPackage,
       });
     },
@@ -387,6 +393,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       namespace,
       onContinue,
       updateDeployAndDetectStep,
+      getLatestFailedPackages,
       deployAndDetectStep.serviceStatuses,
       deployAndDetectStep.failedPackages,
     ]

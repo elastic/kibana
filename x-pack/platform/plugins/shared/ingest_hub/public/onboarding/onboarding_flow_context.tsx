@@ -58,6 +58,7 @@ interface OnboardingFlowState {
   setSelectedServiceIds: (ids: string[]) => void;
   deployAndDetectStep: DeployAndDetectStepState;
   updateDeployAndDetectStep: (update: Partial<DeployAndDetectStepState>) => void;
+  getLatestFailedPackages: () => string[];
   registerDeployHandler: (fn: (packageNames?: string[]) => void) => void;
   retryDeploy: (packageNames?: string[]) => void;
 }
@@ -150,6 +151,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [setPersistedDeployAndDetectStep]
   );
 
+  const getLatestFailedPackages = useCallback(
+    () => persistedDeployAndDetectStepRef.current?.failedPackages ?? [],
+    []
+  );
+
   const registerDeployHandler = useCallback((fn: (packageNames?: string[]) => void) => {
     deployHandlerRef.current = fn;
   }, []);
@@ -184,6 +190,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         setSelectedServiceIds,
         deployAndDetectStep,
         updateDeployAndDetectStep,
+        getLatestFailedPackages,
         registerDeployHandler,
         retryDeploy,
       }}
