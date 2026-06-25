@@ -12,19 +12,19 @@ import {
 } from './fetch_trace_root_span_by_trace_id';
 import * as createCallApmApi from './create_call_apm_api';
 
-jest.mock('@elastic/apm-rum', () => ({
-  apm: {
-    captureError: jest.fn(),
-  },
-}));
-
 const signal = new AbortController().signal;
 
 describe('fetchRootSpanByTraceId', () => {
   const callApmApiSpy = jest.spyOn(createCallApmApi, 'callApmApi');
+  let captureErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    captureErrorSpy = jest.spyOn(apm, 'captureError').mockImplementation(() => {});
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    captureErrorSpy.mockRestore();
   });
 
   it('captures APM error with kibana_meta_operation_id label and re-throws when callApmApi fails', async () => {
@@ -35,7 +35,7 @@ describe('fetchRootSpanByTraceId', () => {
       fetchRootSpanByTraceId({ traceId: 'trace-1', start: 'from', end: 'to' }, signal)
     ).rejects.toThrow('boom');
 
-    expect(apm.captureError).toHaveBeenCalledWith(error, {
+    expect(captureErrorSpy).toHaveBeenCalledWith(error, {
       labels: { kibana_meta_operation_id: FETCH_TRACE_ROOT_SPAN_OPERATION_ID },
     });
   });
@@ -49,6 +49,6 @@ describe('fetchRootSpanByTraceId', () => {
       fetchRootSpanByTraceId({ traceId: 'trace-1', start: 'from', end: 'to' }, signal)
     ).rejects.toThrow('aborted');
 
-    expect(apm.captureError).not.toHaveBeenCalled();
+    expect(captureErrorSpy).not.toHaveBeenCalled();
   });
 });
