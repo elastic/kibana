@@ -23,6 +23,11 @@ import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
 import { StreamingProvider } from './context/streaming/streaming_context';
 import { AgentWorkspaceLinkInterceptor } from './context/agent_workspace_link_interceptor';
 import { AgentWorkspaceDocTitle } from '../agent_workspace/agent_workspace_doc_title';
+import {
+  createAgentWorkspaceFlyoutDefaults,
+  resolveAgentWorkspaceFlyoutContainer,
+} from '../agent_workspace/agent_workspace_flyout_defaults';
+import { EuiComponentDefaultsProvider } from '@elastic/eui';
 
 export const mountApp = async ({
   core,
@@ -51,7 +56,7 @@ export const mountApp = async ({
   const queryClient = new QueryClient();
   await services.accessChecker.initAccess();
 
-  const appTree = (
+  const appContent = (
     <KibanaContextProvider services={kibanaServices}>
       <ApplicationUsageTrackingProvider>
         <I18nProvider>
@@ -87,6 +92,18 @@ export const mountApp = async ({
       </ApplicationUsageTrackingProvider>
     </KibanaContextProvider>
   );
+
+  const agentWorkspaceFlyoutDefaults = isAgentWorkspaceMount
+    ? createAgentWorkspaceFlyoutDefaults(resolveAgentWorkspaceFlyoutContainer(element))
+    : undefined;
+
+  const appTree = agentWorkspaceFlyoutDefaults
+    ? (
+        <EuiComponentDefaultsProvider componentDefaults={agentWorkspaceFlyoutDefaults}>
+          {appContent}
+        </EuiComponentDefaultsProvider>
+      )
+    : appContent;
 
   ReactDOM.render(core.rendering.addContext(appTree), element);
 
