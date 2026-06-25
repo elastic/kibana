@@ -13,13 +13,16 @@ For Elastic Security known issues, refer to [Elastic Security known issues](docs
 Applies to: {{stack}} 9.3.6
 
 **Details**
+
 Multipage Canvas visualizations stop advancing after one page when in autoplay mode
 
 **Workaround**
+
 Manually advance to the next page or upgrade to 9.3.7 or later.
 
 **Resolved**
-This issue is resolved in 9.3.7.
+
+This issue is resolved in 9.3.7. 
 
 ::::
 
