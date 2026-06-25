@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
@@ -58,6 +58,7 @@ describe('CasesListAppHeader', () => {
       wrapperProps: { permissions: buildCasesPermissions({ settings: false }) },
     });
 
+    expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).not.toBeInTheDocument();
     expect(screen.queryByTestId('configure-case-button')).not.toBeInTheDocument();
   });
 
@@ -79,6 +80,6 @@ describe('CasesListAppHeader', () => {
     });
 
     expect(screen.queryByTestId('createNewCaseBtn')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('configure-case-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).not.toBeInTheDocument();
   });
 });
