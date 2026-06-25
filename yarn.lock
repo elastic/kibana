@@ -2336,10 +2336,11 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_116.4.0_prerelease_003.tgz":
-  version "116.3.1"
-  resolved "file:./eui_116.4.0_prerelease_003.tgz#4d4380aec2e4ad7bfd55e04317ac60c140045b4e"
+"@elastic/eui@file:./eui_116.4.0_prerelease_004.tgz":
+  version "116.4.0"
+  resolved "file:./eui_116.4.0_prerelease_004.tgz#c66faffd9ab08fe538e508fcdb8f2c1aa3cdfdc1"
   dependencies:
+    "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
