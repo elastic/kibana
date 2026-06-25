@@ -7,13 +7,7 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
-import { AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER } from '../dashboard/constants';
-
-/**
- * Source data stream for the current space. The placeholder is replaced with the
- * current space id when the skill content is materialized (see convertBuiltinSkill).
- */
-const TRACES_SOURCE = `traces-agent_builder.otel-${AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER}`;
+import { AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID, createTracesEsqlTool } from './inline_tools';
 
 export const agentBuilderTracesSkill = defineSkillType({
   id: 'agent-builder-traces',
@@ -53,48 +47,57 @@ Do **not** use this skill when:
 
 ## Data Source
 
-Agent Builder ships its traces as OpenTelemetry spans to the ES|QL source for the current space:
+Agent Builder ships its traces as OpenTelemetry spans to a per-space ES|QL source:
 
 \`\`\`
-${TRACES_SOURCE}
+traces-agent_builder.otel-<space-id>
 \`\`\`
 
-Always query this exact source — it is already scoped to the current Kibana space. Do not use a
+Always use the \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` inline tool for trace questions.
+It resolves the current space's index automatically. Do not use a
 \`traces-agent_builder.otel-*\` wildcard, which would mix in other spaces' traces.
+
+If you need to run ES|QL manually, use the exact index returned by the inline tool.
 
 Always constrain the time range with \`@timestamp\` to the window the user asked about (default to
 the last 24 hours when they do not specify one).
 
-### Span names (\`name\` field)
+### Span names (\`span.name\` field)
 
-- \`"Converse"\` — one span per conversation turn.
-- \`"ExecuteAgent"\` — one span per agent execution.
-- \`"ChatComplete"\` — one span per LLM call (token usage lives here).
-- \`"Tool:<toolId>"\` — one span per tool call. Match with \`STARTS_WITH(name, "Tool:")\`.
+Span names follow the OTel \`{operation} {identifier}\` convention:
+
+- \`chat <model>\` — one span per LLM call (token usage lives here). Match with \`span.name LIKE "chat *"\`.
+- \`execute_tool <toolId>\` — one span per tool call. Match with \`span.name LIKE "execute_tool *"\`.
+- \`invoke_agent <name>\` — agent or conversation spans. Distinguish with \`attributes.elastic.inference.span.kind\`:
+  - \`"CHAIN"\` — one span per conversation turn.
+  - \`"AGENT"\` — one span per agent execution.
 
 ### Useful fields
 
 - \`attributes.gen_ai.usage.input_tokens\` / \`attributes.gen_ai.usage.output_tokens\` — wrap in \`TO_LONG(...)\` before aggregating.
 - \`attributes.gen_ai.request.model\` — model name.
-- \`attributes.gen_ai.system\` — provider/system.
-- \`attributes.elastic.agent.id\` — agent id.
+- \`attributes.gen_ai.provider.name\` — provider name.
+- \`attributes.gen_ai.agent.id\` — agent id (hashed for custom agents in exported traces).
 - \`duration\` — span duration in **nanoseconds**; divide by \`1000000000.0\` for seconds.
 - \`status.code\` — equals \`"Error"\` for failed spans.
 
 ## How to Answer
 
-Use ${platformCoreTools.executeEsql} to run the query, and ${platformCoreTools.generateEsql}
-if you need help translating a complex request into ES|QL. Prefer compact \`STATS\` aggregations
-over returning raw spans, and report the numbers in plain language.
+1. Call \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` with the user's question.
+2. Use ${platformCoreTools.executeEsql} only when you already have a validated ES|QL query from the inline tool.
+3. Prefer compact \`STATS\` aggregations over returning raw spans, and report the numbers in plain language.
 
-### Example queries
+### Example query patterns
+
+These patterns assume the current space traces index. Replace \`<traces-index>\` with the index
+returned by the inline tool.
 
 Total tokens by model (last 24h):
 
 \`\`\`esql
-FROM ${TRACES_SOURCE}
+FROM <traces-index>
 | WHERE @timestamp >= NOW() - 24 hours
-| WHERE name == "ChatComplete"
+| WHERE span.name LIKE "chat *"
 | STATS \`Total Tokens\` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))
       + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens))
     BY \`Model\` = attributes.gen_ai.request.model
@@ -104,19 +107,19 @@ FROM ${TRACES_SOURCE}
 LLM requests by provider:
 
 \`\`\`esql
-FROM ${TRACES_SOURCE}
+FROM <traces-index>
 | WHERE @timestamp >= NOW() - 24 hours
-| WHERE name == "ChatComplete"
-| STATS \`Requests\` = COUNT(*) BY \`Provider\` = attributes.gen_ai.system
+| WHERE span.name LIKE "chat *"
+| STATS \`Requests\` = COUNT(*) BY \`Provider\` = attributes.gen_ai.provider.name
 | SORT \`Requests\` DESC
 \`\`\`
 
 Conversation latency (avg and p95, seconds):
 
 \`\`\`esql
-FROM ${TRACES_SOURCE}
+FROM <traces-index>
 | WHERE @timestamp >= NOW() - 24 hours
-| WHERE name == "Converse"
+| WHERE span.name LIKE "invoke_agent *" AND attributes.elastic.inference.span.kind == "CHAIN"
 | EVAL duration_sec = duration / 1000000000.0
 | STATS \`Avg (s)\` = ROUND(AVG(duration_sec), 2), \`P95 (s)\` = ROUND(PERCENTILE(duration_sec, 95), 2)
 \`\`\`
@@ -124,21 +127,21 @@ FROM ${TRACES_SOURCE}
 Tool success rate:
 
 \`\`\`esql
-FROM ${TRACES_SOURCE}
+FROM <traces-index>
 | WHERE @timestamp >= NOW() - 24 hours
-| WHERE STARTS_WITH(name, "Tool:")
+| WHERE span.name LIKE "execute_tool *"
 | STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == "Error"
-| EVAL \`Success Rate (%)\` = ROUND((total - errors) / total * 100, 2)
+| EVAL \`Success Rate (%)\` = ROUND((total - errors) * 100.0 / total, 2)
 | KEEP \`Success Rate (%)\`
 \`\`\`
 
 Most-used tools:
 
 \`\`\`esql
-FROM ${TRACES_SOURCE}
+FROM <traces-index>
 | WHERE @timestamp >= NOW() - 24 hours
-| WHERE STARTS_WITH(name, "Tool:")
-| STATS \`Tool Calls\` = COUNT(*) BY \`Tool\` = name
+| WHERE span.name LIKE "execute_tool *"
+| STATS \`Tool Calls\` = COUNT(*) BY \`Tool\` = span.name
 | SORT \`Tool Calls\` DESC
 | LIMIT 15
 \`\`\`
@@ -147,9 +150,10 @@ FROM ${TRACES_SOURCE}
 
 - If a query returns no rows, explain that the time window may be empty or that
   \`xpack.agentBuilder.tracing.send_to_self\` is not enabled. Do not fabricate values.
-- Token fields can be missing on non-LLM spans; always filter to \`name == "ChatComplete"\`
+- Token fields can be missing on non-LLM spans; always filter to \`span.name LIKE "chat *"\`
   before aggregating token usage.
 - \`duration\` is in nanoseconds — never report it raw; convert to seconds (or ms) for the user.
 `,
-  getRegistryTools: () => [platformCoreTools.executeEsql, platformCoreTools.generateEsql],
+  getInlineTools: () => [createTracesEsqlTool()],
+  getRegistryTools: () => [platformCoreTools.executeEsql],
 });

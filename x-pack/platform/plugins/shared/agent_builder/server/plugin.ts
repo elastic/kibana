@@ -31,7 +31,6 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
-import { registerSkills } from './skills/register_skills';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
@@ -163,10 +162,6 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
       trackingService: this.trackingService,
     });
-
-    if (this.config.tracing.send_to_self) {
-      registerSkills(serviceSetups);
-    }
 
     const smlTools = createSmlTools({
       getAgentContextLayer: () => {
