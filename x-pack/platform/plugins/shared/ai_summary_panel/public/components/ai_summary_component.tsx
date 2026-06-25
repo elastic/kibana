@@ -19,6 +19,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
+import { fetchEsqlData } from '../utils/fetch_esql_data';
+import type { EsqlDataResult } from '../utils/fetch_esql_data';
 import {
   fillTemplate,
   sanitizeTemplate,
@@ -26,7 +28,6 @@ import {
   injectCsp,
   sanitizeHtml,
 } from '../utils/template_fill';
-import type { TemplateColumn } from '../utils/template_fill';
 
 interface AiSummaryComponentProps {
   embeddableId: string;
@@ -38,11 +39,6 @@ interface AiSummaryComponentProps {
   generationVersion: number;
   savedTemplate: string | undefined;
   onTemplateChange: (template: string) => void;
-}
-
-interface EsqlDataResult {
-  columns: TemplateColumn[];
-  rows: unknown[][];
 }
 
 const iframeContainerCss = css({
@@ -115,15 +111,11 @@ export const AiSummaryComponent = ({
     setIsLoading(true);
     setError(undefined);
 
-    const http = getServices().http;
+    const { search } = getServices();
 
     // Fast path — esqlQuery panel with stored template: run query only, no LLM.
     if (template && esqlQuery) {
-      http
-        .post<EsqlDataResult>('/internal/ai_summary_panel/esql_data', {
-          body: JSON.stringify({ esqlQuery, timeRange }),
-          signal: controller.signal,
-        })
+      fetchEsqlData(search, esqlQuery, timeRange, controller.signal)
         .then(({ columns, rows }) => {
           if (controller.signal.aborted) return;
           setHtml(fillTemplate(template, columns, rows));
@@ -191,11 +183,7 @@ export const AiSummaryComponent = ({
 
     // Fetch data in parallel with LLM (template panels only)
     if (esqlQuery) {
-      http
-        .post<EsqlDataResult>('/internal/ai_summary_panel/esql_data', {
-          body: JSON.stringify({ esqlQuery, timeRange }),
-          signal: controller.signal,
-        })
+      fetchEsqlData(search, esqlQuery, timeRange, controller.signal)
         .then((data) => {
           if (controller.signal.aborted) return;
           esqlData = data;
@@ -210,6 +198,7 @@ export const AiSummaryComponent = ({
         });
     }
 
+    const http = getServices().core.http;
     streamGenerate(
       http,
       { prompt, esqlQuery, timeRange },

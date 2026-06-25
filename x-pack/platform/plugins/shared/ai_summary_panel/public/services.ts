@@ -6,14 +6,20 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 
-let services: CoreStart | undefined;
+interface Services {
+  core: CoreStart;
+  search: ISearchGeneric;
+}
 
-export const setServices = (core: CoreStart) => {
-  services = core;
+let services: Services | undefined;
+
+export const setServices = (core: CoreStart, search: ISearchGeneric) => {
+  services = { core, search };
 };
 
-export const getServices = (): CoreStart => {
+export const getServices = (): Services => {
   if (!services) throw new Error('AiSummaryPanel services not initialized');
   return services;
 };

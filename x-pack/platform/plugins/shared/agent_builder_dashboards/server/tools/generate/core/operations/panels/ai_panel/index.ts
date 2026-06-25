@@ -24,7 +24,7 @@ export const aiPanelConfigSchema = z.object({
     ),
   esqlQuery: z
     .string()
-    .max(10000)
+    .max(1_000_000)
     .optional()
     .describe(
       '(optional) An ES|QL query whose results are passed as live data context when the panel renders.'

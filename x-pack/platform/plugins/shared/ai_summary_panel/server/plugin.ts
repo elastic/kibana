@@ -11,7 +11,6 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { AI_SUMMARY_PANEL_EMBEDDABLE_TYPE, AI_SUMMARY_PANEL_APP_NAME } from '../common/constants';
 import { aiSummaryPanelEmbeddableSchema } from './embeddable/schemas';
 import { registerGenerateRoute } from './routes/generate_route';
-import { registerEsqlDataRoute } from './routes/esql_data_route';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -30,7 +29,6 @@ export class AiSummaryPanelPlugin implements Plugin<void, void, SetupDeps, Start
 
     const router = core.http.createRouter();
     registerGenerateRoute(router, core.getStartServices);
-    registerEsqlDataRoute(router);
   }
 
   start(_core: CoreStart, _plugins: StartDeps) {}

@@ -18,6 +18,8 @@
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
     "@kbn/esql-utils",
+    "@kbn/search-types",
+    "@kbn/data-plugin",
     "@kbn/code-editor",
     "@kbn/monaco"
   ],

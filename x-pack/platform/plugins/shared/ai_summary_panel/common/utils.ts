@@ -7,8 +7,8 @@
 
 // @ is a common ES|QL field prefix (e.g. @timestamp) — convert to "_at_" so the resulting
 // identifier preserves word boundaries wherever @ appears:
-//   "@timestamp"  → "at_timestamp"  (leading @ → leading underscore stripped)
-//   "field@name"  → "field_at_name" (mid-word @ → clean separation on both sides)
+//   "@timestamp"  → "at_timestamp"  (@→_at_, leading _ then stripped by last replace)
+//   "field@name"  → "field_at_name" (clean separator on both sides)
 const AT_SIGN = /@/g;
 // Any remaining non-alphanumeric characters become underscores.
 const NON_ALPHANUMERIC = /[^a-zA-Z0-9]+/g;

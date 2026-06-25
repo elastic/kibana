@@ -12,7 +12,8 @@
     "requiredPlugins": [
       "embeddable",
       "dashboard",
-      "inference"
+      "inference",
+      "data"
     ]
   }
 }

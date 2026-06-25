@@ -51,8 +51,8 @@ const SYSTEM_PROMPT_TEMPLATE = `You are a data visualization assistant embedded 
 Generate a reusable HTML template using Liquid template syntax. The template is filled with real ES|QL query results at render time — do NOT embed literal data values.
 
 DATA MODEL available in the template:
-- rows: array of row objects. Column names are normalized (dots/special chars → underscores).
-  e.g. category.keyword → row.category_keyword, @timestamp → row.timestamp
+- rows: array of row objects. Column names are normalized: dots/special chars → underscores, @ → at_.
+  e.g. category.keyword → row.category_keyword, @timestamp → row.at_timestamp
 - _pct variants: pre-computed percentage of each numeric column's max value (0–100).
   e.g. row.total_revenue_pct
 - max: object of column max values. e.g. max.total_revenue
@@ -151,7 +151,7 @@ export function registerGenerateRoute(
       validate: {
         body: schema.object({
           prompt: schema.string({ minLength: 1, maxLength: 10_000 }),
-          esqlQuery: schema.maybe(schema.string({ maxLength: 10_000 })),
+          esqlQuery: schema.maybe(schema.string({ maxLength: 1_000_000 })),
           timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
         }),
       },
@@ -199,7 +199,9 @@ export function registerGenerateRoute(
           const schemaLines = columns
             .map(
               (c, i) =>
-                `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)}) → placeholder: {{${columnKeys[i]}}}`
+                `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)}) → placeholder: {{${
+                  columnKeys[i]
+                }}}`
             )
             .join('\n');
           const sampleSection =

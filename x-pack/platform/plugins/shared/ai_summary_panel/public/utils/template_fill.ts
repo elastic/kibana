@@ -98,7 +98,11 @@ export function fillTemplate(
       if (max !== undefined) {
         const num = Number(row[i]);
         obj[`${key}_pct`] =
-          max === 0 ? 0 : isFinite(num) ? Math.min(100, Math.max(0, Math.round((num / max) * 100))) : 0;
+          max === 0
+            ? 0
+            : isFinite(num)
+            ? Math.min(100, Math.max(0, Math.round((num / max) * 100)))
+            : 0;
       }
     });
     return obj;

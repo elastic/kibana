@@ -31,7 +31,9 @@ import { CodeEditor } from '@kbn/code-editor';
 import { HANDLEBARS_LANG_ID } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { getServices } from '../services';
+import { fetchEsqlData } from '../utils/fetch_esql_data';
 
 const EXAMPLE_PROMPTS = [
   i18n.translate('aiSummaryPanel.editFlyout.example1', {
@@ -88,11 +90,14 @@ export const EditAiPanelFlyout = ({
     setPreviewData(null);
     setPreviewError(null);
     try {
-      const result = await getServices().http.post<PreviewData>(
-        '/internal/ai_summary_panel/esql_data',
-        { body: JSON.stringify({ esqlQuery: draftEsqlQuery, timeRange }) }
+      const controller = new AbortController();
+      const result = await fetchEsqlData(
+        getServices().search,
+        draftEsqlQuery,
+        timeRange,
+        controller.signal
       );
-      setPreviewData({ ...result, rows: result.rows.slice(0, 10) });
+      setPreviewData({ columns: result.columns, rows: result.rows.slice(0, 10) });
     } catch (err) {
       setPreviewError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -227,14 +232,16 @@ export const EditAiPanelFlyout = ({
 
           <EuiSpacer size="s" />
 
-          <EuiCallOut
-            size="s"
-            color="primary"
-            title={i18n.translate('aiSummaryPanel.editFlyout.timeRangeHint', {
-              defaultMessage:
-                'When a date field is found in your index, a time range filter is injected automatically to connect to the dashboard time picker.',
-            })}
-          />
+          {draftEsqlQuery.trim() && !getTimeFieldFromESQLQuery(draftEsqlQuery) && (
+            <EuiCallOut
+              size="s"
+              color="primary"
+              title={i18n.translate('aiSummaryPanel.editFlyout.timeRangeHint', {
+                defaultMessage:
+                  'To connect to the dashboard time picker, add a WHERE clause with named time parameters: WHERE order_date >= ?_tstart AND order_date < ?_tend',
+              })}
+            />
+          )}
 
           <EuiSpacer size="s" />
 
