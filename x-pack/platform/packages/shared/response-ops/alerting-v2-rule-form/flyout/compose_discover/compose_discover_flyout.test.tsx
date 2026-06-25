@@ -71,7 +71,13 @@ jest.mock('./compose_discover_form', () => {
 });
 
 jest.mock('./query_sandbox_flyout', () => ({
-  QuerySandboxFlyout: () => <div data-test-subj="composeDiscoverChildMock" />,
+  QuerySandboxFlyout: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="composeDiscoverChildMock">
+      <button data-test-subj="composeDiscoverChildMockClose" onClick={onClose} type="button">
+        Close sandbox
+      </button>
+    </div>
+  ),
 }));
 
 jest.mock('./use_esql_providers', () => ({
@@ -195,6 +201,39 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(screen.queryByRole('group', { name: /Step \d+ of \d+/ })).not.toBeInTheDocument();
       expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+    });
+
+    it('renders Query sandbox button in YAML mode only', () => {
+      renderFlyout();
+
+      expect(screen.queryByTestId('composeDiscoverYamlQuerySandbox')).not.toBeInTheDocument();
+
+      clickEditMode('yaml');
+
+      expect(screen.getByTestId('composeDiscoverYamlQuerySandbox')).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverYamlQuerySandbox')).toHaveTextContent(
+        'Query sandbox'
+      );
+
+      clickEditMode('form');
+
+      expect(screen.queryByTestId('composeDiscoverYamlQuerySandbox')).not.toBeInTheDocument();
+    });
+
+    it('reopens Query sandbox after manual close in YAML mode', () => {
+      renderFlyout();
+
+      clickEditMode('yaml');
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('composeDiscoverYamlQuerySandbox'));
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
     });
   });
 
