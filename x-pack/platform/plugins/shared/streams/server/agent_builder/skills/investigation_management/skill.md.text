@@ -136,7 +136,7 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` returne
 - Status `running` — investigation is in progress; poll again in a minute.
 - Status `completed` — investigation finished; the execution output contains the RCA findings.
 - Status `failed` — investigation failed; the output contains error details.
-- Status `waiting_for_input` — the workflow is paused awaiting input; use `platform.core.resume_workflow_execution` with the `step_execution_id` and required fields.
+- Status `waiting_for_input` — the workflow is paused awaiting input; the status response includes a `waiting_input` object describing the expected `input` (and its `schema`). Resume with `platform.core.resume_workflow_execution`, passing the same `executionId` and an `input` object conforming to `waiting_input.schema`.
 
 ### Presenting results
 
