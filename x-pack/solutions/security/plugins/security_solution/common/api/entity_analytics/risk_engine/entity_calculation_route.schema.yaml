@@ -75,10 +75,6 @@ components:
           type: string
           maxLength: 1000
           example: 'host:HW-UUID-ABC'
-        refresh:
-          type: string
-          enum: [wait_for]
-          description: If 'wait_for' the request will wait for the index refresh.
 
     RiskScoresEntityCalculationResponse:
       type: object

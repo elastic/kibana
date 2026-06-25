@@ -62,7 +62,6 @@ export const useCalculateEntityRiskScore = ({
         identifier_type: identifierType,
         identifier,
         entity_id: entityId,
-        refresh: 'wait_for',
       });
       return;
     }
@@ -71,7 +70,6 @@ export const useCalculateEntityRiskScore = ({
       mutate({
         identifier_type: identifierType,
         identifier,
-        refresh: 'wait_for',
       });
     }
   }, [
