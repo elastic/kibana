@@ -52,11 +52,15 @@ export const DlmPhasesSelector = ({
   const frozenInitiallyActiveRef = useRef(value.frozen.enabled);
 
   const isFrozenStillActiveFromExisting = frozenInitiallyActiveRef.current && value.frozen.enabled;
+  const hasFrozenRepositoryAccessOrAlreadyActive =
+    hasDefaultSnapshotRepository ||
+    canCreateDefaultSnapshotRepository ||
+    isFrozenStillActiveFromExisting;
   const shouldShowFrozenPhase =
     !serverless &&
-    (hasDefaultSnapshotRepository ||
-      canCreateDefaultSnapshotRepository ||
-      isFrozenStillActiveFromExisting);
+    enterprise &&
+    createDefaultRepositoryUrl &&
+    hasFrozenRepositoryAccessOrAlreadyActive;
   const validation = validateDurations(value);
 
   const updateValue = useCallback(
@@ -100,7 +104,7 @@ export const DlmPhasesSelector = ({
         </EuiFlexItem>
       )}
 
-      {shouldShowFrozenPhase && enterprise && createDefaultRepositoryUrl && (
+      {shouldShowFrozenPhase && (
         <EuiFlexItem grow={false}>
           <FrozenPhaseCard
             id={frozenCheckboxId}
