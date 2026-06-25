@@ -87,6 +87,24 @@ vars:
     required: false
     show_user: true
     default: Product_Area__c
+  - name: google_drive_connector_id
+    type: text
+    title: Google Drive connector ID
+    description: >
+      Kibana connector ID for the Google Drive (.google_drive) connector used by SDLC design-doc
+      enrichment workflows.
+    multi: false
+    required: false
+    show_user: true
+  - name: gdrive_roadmap_folder_ids
+    type: text
+    title: Google Drive roadmap folder IDs
+    description: >
+      Comma-separated shared Drive folder IDs to catalog roadmap documents (PRDs, OKRs, release
+      docs). Use the folder ID from each folder URL. Leave blank to skip folder catalog.
+    multi: true
+    required: false
+    show_user: true
 policy_templates:
   - name: sdlc_intel
     title: SDLC Intelligence

@@ -18,6 +18,8 @@ consts:
   productAreaField: REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD
   sdhRepoPattern: REPLACE_WITH_SDH_REPO_PATTERN
   sdhLabel: REPLACE_WITH_SDH_LABEL
+  gdriveConnectorId: REPLACE_WITH_GDRIVE_CONNECTOR_ID
+  roadmapFolderIds: REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS
 `;
 
   it('substitutes connector and org placeholders from package policy vars', () => {
@@ -29,6 +31,8 @@ consts:
       salesforce_product_area_field: 'Product_Area__c',
       sdh_repo_pattern: 'sdh-*',
       sdh_label: 'sdh',
+      google_drive_connector_id: 'gdrive-conn-4',
+      gdrive_roadmap_folder_ids: ['folder-roadmap-1', 'folder-okrs-2'],
       org_login: 'my-org',
     });
 
@@ -40,6 +44,8 @@ consts:
     expect(result).toContain('productAreaField: Product_Area__c');
     expect(result).toContain('sdhRepoPattern: sdh-*');
     expect(result).toContain('sdhLabel: sdh');
+    expect(result).toContain('gdriveConnectorId: gdrive-conn-4');
+    expect(result).toContain('roadmapFolderIds: folder-roadmap-1,folder-okrs-2');
     expect(result).not.toContain('REPLACE_WITH_ORG_LOGIN');
     expect(result).not.toContain('REPLACE_WITH_GITHUB_CONNECTOR_ID');
     expect(result).not.toContain('REPLACE_WITH_SLACK_CONNECTOR_ID');
@@ -48,6 +54,19 @@ consts:
     expect(result).not.toContain('REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD');
     expect(result).not.toContain('REPLACE_WITH_SDH_REPO_PATTERN');
     expect(result).not.toContain('REPLACE_WITH_SDH_LABEL');
+    expect(result).not.toContain('REPLACE_WITH_GDRIVE_CONNECTOR_ID');
+    expect(result).not.toContain('REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS');
+  });
+
+  it('joins multi-value roadmap folder IDs for workflow substitution', () => {
+    const result = substituteWorkflowConnectorIds(
+      'roadmapFolderIds: REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS',
+      {
+        gdrive_roadmap_folder_ids: 'folder-a, folder-b',
+      }
+    );
+
+    expect(result).toContain('roadmapFolderIds: folder-a, folder-b');
   });
 
   it('leaves placeholders when vars are missing', () => {
@@ -61,5 +80,7 @@ consts:
     expect(result).toContain('REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD');
     expect(result).toContain('REPLACE_WITH_SDH_REPO_PATTERN');
     expect(result).toContain('REPLACE_WITH_SDH_LABEL');
+    expect(result).toContain('REPLACE_WITH_GDRIVE_CONNECTOR_ID');
+    expect(result).toContain('REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS');
   });
 });

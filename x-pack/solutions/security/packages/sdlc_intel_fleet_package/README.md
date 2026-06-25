@@ -46,12 +46,14 @@ When adding the integration policy, set:
 | `sdh_repo_pattern` | GitHub search repo qualifier for SDH repos (default: `sdh-*`) |
 | `sdh_label` | GitHub label for SDH issues in product repos (default: `sdh`) |
 | `salesforce_product_area_field` | Salesforce Case product area field (default: `Product_Area__c`) |
+| `google_drive_connector_id` | Google Drive (`.google_drive`) connector ID for design-doc workflows |
+| `gdrive_roadmap_folder_ids` | Comma-separated shared Drive folder IDs for roadmap catalog (`multi: true`) |
 
 If vars are unset, workflows retain `REPLACE_WITH_*` placeholders for manual editing.
 
 ## ILM retention
 
-Fleet installs `elasticsearch/ilm_policy/sdlc_intel_retention.json` during package install (unless Fleet internal ILM is disabled). All 22 index templates reference `index.lifecycle.name: sdlc_intel_retention`.
+Fleet installs `elasticsearch/ilm_policy/sdlc_intel_retention.json` during package install (unless Fleet internal ILM is disabled). All 24 index templates reference `index.lifecycle.name: sdlc_intel_retention`.
 
 | Phase | Age | Action |
 |-------|-----|--------|
@@ -144,6 +146,43 @@ Relationship types in `github-intel-relationships`:
 | `customer_case_links_sdh` | Salesforce Case Id | SDH issue URL |
 | `sdh_links_product` | SDH issue URL | Product issue URL |
 
+### Phase D — Google Drive design docs (metadata only)
+
+Closes the **intent vs execution** gap: GitHub/SDH issues are the execution layer; roadmap docs in Drive (PRDs, OKRs, release decision docs) are the planning layer.
+
+Two complementary signals (metadata only — no file content in Elasticsearch):
+
+```text
+Signal 1 — configured roadmap folders (intent catalog)
+  gdrive-catalog-roadmap-docs
+    → gdrive-intel-documents (links.catalog_source = roadmap_folder)
+
+Signal 2 — issue body URL extraction (execution references)
+  github-extract-drive-links
+    → gdrive-intel-documents (links.catalog_source = issue_body_url)
+    → github-intel-relationships (issue_references_design_doc)
+```
+
+| Workflow | Schedule | Action | Target index |
+|----------|----------|--------|--------------|
+| **catalog roadmap docs** (optional) | daily | `parseCommaSeparatedIds` + `listFilesIngest` per folder | `gdrive-intel-documents` |
+| **extract Drive links** | every 2h | `parseDriveUrlsFromText` + `getFileMetadata` | `gdrive-intel-documents`, `github-intel-relationships` |
+
+**Recommended order:** Set `gdrive_roadmap_folder_ids` (for example Team Roadmaps, Product Specs, OKRs) → enable **gdrive-catalog-roadmap-docs** → run GitHub activity + SDH catalogs → **github-extract-drive-links**.
+
+Join targets in `github-extract-drive-links`:
+
+- **Epic/product issues** (`github-intel-issues`) — `issue_target: epic` when `hierarchy.ticket_type == Epic`, else `product`
+- **SDH issues** (`github-intel-sdh-issues`) — `issue_target: sdh`
+
+Example analytics enabled by `sdlc-design-doc-coverage-view`:
+
+- Epic linked to roadmap doc, doc last modified months before epic closed → delivery may have diverged from spec
+- Roadmap doc in configured folder with no linked GitHub epic → planning without tracked execution
+- Roadmap doc owner email ≠ epic assignee → cross-team ownership gap
+
+Do **not** bulk-download Google Docs content into Elasticsearch. Agents can call `downloadFile` on demand.
+
 ## Dashboards
 
 | Dashboard | Data source | Purpose |
@@ -155,12 +194,13 @@ Relationship types in `github-intel-relationships`:
 | **SDLC Epic phase gates** | `sdlc-epic-phases` + `sdlc-epic-tickets-by-repo-view` | Child ticket coverage, PR linkage, gate pass rates |
 | **SDLC Ingest health** | `sdlc-ingest-health-view` | Checkpoint lag, stale workflows, last run status |
 | **SDLC Salesforce feedback loop** | `sdlc-salesforce-feedback-view`, `sdlc-feedback-loop-enriched-view` | Case ↔ SDH linkage and Case → SDH → product three-hop view |
+| **SDLC Design doc coverage** | `sdlc-design-doc-coverage-view` | Epic/product/SDH issues linked to Google Drive design docs |
 
 ## Fleet workflow auto-install
 
 When the `workflowsManagement` plugin is enabled, Fleet installs package workflows from `kibana/workflow/*.yaml` during package installation. Workflow IDs follow the pattern `fleet-{spaceId}-{pkgName}-{file-base}`.
 
-Connector IDs, org login, Salesforce field names, SDH repo pattern, and SDH label from the integration policy vars replace `REPLACE_WITH_GITHUB_CONNECTOR_ID`, `REPLACE_WITH_SLACK_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD`, `REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD`, `REPLACE_WITH_SDH_REPO_PATTERN`, `REPLACE_WITH_SDH_LABEL`, and `REPLACE_WITH_ORG_LOGIN` during install.
+Connector IDs, org login, Salesforce field names, SDH repo pattern, SDH label, Google Drive connector ID, and roadmap folder IDs from the integration policy vars replace `REPLACE_WITH_GITHUB_CONNECTOR_ID`, `REPLACE_WITH_SLACK_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD`, `REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD`, `REPLACE_WITH_SDH_REPO_PATTERN`, `REPLACE_WITH_SDH_LABEL`, `REPLACE_WITH_GDRIVE_CONNECTOR_ID`, `REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS`, and `REPLACE_WITH_ORG_LOGIN` during install.
 
 On package uninstall, workflow assets are deleted via `workflowsManagement.deleteWorkflows`.
 
@@ -169,6 +209,7 @@ On package uninstall, workflow assets are deleted via `workflowsManagement.delet
 ```bash
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/specs/github/graphql/templates.test.ts
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/specs/slack/slack.test.ts
+node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/google_drive.test.ts
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/salesforce.test.ts
 node scripts/jest src/platform/packages/shared/kbn-workflows/spec/examples/sdlc_intel_package.test.ts
 node scripts/jest x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_workflow_assets.test.ts
@@ -179,6 +220,7 @@ node scripts/jest x-pack/platform/plugins/shared/fleet/server/services/epm/packa
 - GitHub GraphQL ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/github/`
 - Slack ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/slack/`
 - Salesforce ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/`
+- Google Drive ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/`
 - Fleet workflow installer: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_workflow_assets.ts`
 - Fleet workflow uninstall: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/remove.ts`
 - Bundled workflow examples: `src/platform/packages/shared/kbn-workflows/spec/examples/sdlc_*.yml`

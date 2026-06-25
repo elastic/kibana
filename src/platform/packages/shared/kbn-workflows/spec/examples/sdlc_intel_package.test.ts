@@ -131,4 +131,23 @@ describe('SDLC intel golden-path assets', () => {
     expect(manifest).toContain('salesforce_product_area_field');
     expect(manifest).toContain('sdh_label');
   });
+
+  it('includes Phase D Google Drive design-doc assets', () => {
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/gdrive-intel-documents.json'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/gdrive-catalog-roadmap-docs.yaml'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/github-extract-drive-links.yaml'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/esql_view/sdlc_design_doc_coverage.yml'))
+    ).toBe(true);
+
+    const manifest = fs.readFileSync(path.join(FLEET_PACKAGE_ROOT, 'manifest.yml'), 'utf8');
+    expect(manifest).toContain('google_drive_connector_id');
+    expect(manifest).toContain('gdrive_roadmap_folder_ids');
+  });
 });

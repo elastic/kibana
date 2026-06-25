@@ -27,7 +27,25 @@ const SALESFORCE_CASE_GITHUB_FIELD_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_CASE_G
 const SALESFORCE_PRODUCT_AREA_FIELD_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD';
 const SDH_REPO_PATTERN_PLACEHOLDER = 'REPLACE_WITH_SDH_REPO_PATTERN';
 const SDH_LABEL_PLACEHOLDER = 'REPLACE_WITH_SDH_LABEL';
+const GDRIVE_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_GDRIVE_CONNECTOR_ID';
+const GDRIVE_ROADMAP_FOLDER_IDS_PLACEHOLDER = 'REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS';
 const ORG_LOGIN_PLACEHOLDER = 'REPLACE_WITH_ORG_LOGIN';
+
+const formatManifestVarForSubstitution = (value: unknown): string | undefined => {
+  if (Array.isArray(value)) {
+    const joined = value
+      .map((item) => String(item).trim())
+      .filter((item) => item.length > 0)
+      .join(',');
+    return joined.length > 0 ? joined : undefined;
+  }
+
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim();
+  }
+
+  return undefined;
+};
 
 export const substituteWorkflowConnectorIds = (
   yaml: string,
@@ -41,6 +59,8 @@ export const substituteWorkflowConnectorIds = (
   const salesforceProductAreaField = vars.salesforce_product_area_field;
   const sdhRepoPattern = vars.sdh_repo_pattern;
   const sdhLabel = vars.sdh_label;
+  const googleDriveConnectorId = vars.google_drive_connector_id;
+  const gdriveRoadmapFolderIds = formatManifestVarForSubstitution(vars.gdrive_roadmap_folder_ids);
   const orgLogin = vars.org_login;
 
   if (typeof githubConnectorId === 'string' && githubConnectorId.length > 0) {
@@ -66,6 +86,12 @@ export const substituteWorkflowConnectorIds = (
   }
   if (typeof sdhLabel === 'string' && sdhLabel.length > 0) {
     result = result.replaceAll(SDH_LABEL_PLACEHOLDER, sdhLabel);
+  }
+  if (typeof googleDriveConnectorId === 'string' && googleDriveConnectorId.length > 0) {
+    result = result.replaceAll(GDRIVE_CONNECTOR_PLACEHOLDER, googleDriveConnectorId);
+  }
+  if (gdriveRoadmapFolderIds) {
+    result = result.replaceAll(GDRIVE_ROADMAP_FOLDER_IDS_PLACEHOLDER, gdriveRoadmapFolderIds);
   }
   if (typeof orgLogin === 'string' && orgLogin.length > 0) {
     result = result.replaceAll(ORG_LOGIN_PLACEHOLDER, orgLogin);

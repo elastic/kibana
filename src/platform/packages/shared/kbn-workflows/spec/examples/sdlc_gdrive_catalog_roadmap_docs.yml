@@ -1,0 +1,157 @@
+version: '1'
+name: SDLC Google Drive catalog roadmap docs
+description: >
+  Tier-1 optional Google Drive roadmap catalog. Iterates configured shared roadmap folder IDs,
+  lists file metadata via google_drive.listFilesIngest (no content download), and upserts
+  gdrive-intel-documents with per-folder checkpoints. Complements github-extract-drive-links,
+  which catches one-off Drive URLs referenced from GitHub issue bodies.
+enabled: false
+tags:
+  - sdlc
+  - google_drive
+  - catalog
+  - ingest
+  - documents
+  - design
+  - roadmap
+
+consts:
+  gdriveConnectorId: REPLACE_WITH_GDRIVE_CONNECTOR_ID
+  roadmapFolderIds: REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS
+  syncStateIndex: gdrive-intel-sync-state
+  documentsIndex: gdrive-intel-documents
+  syncSource: gdrive-catalog-roadmap-docs
+  entityType: roadmap_folder
+  pageSize: 250
+  initialWatermark: '2024-01-01T00:00:00.000Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-gdrive-catalog-roadmap-docs
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: init_roadmap_folder_list
+    type: google_drive.parseCommaSeparatedIds
+    connector-id: '{{ consts.gdriveConnectorId }}'
+    with:
+      value: '{{ consts.roadmapFolderIds }}'
+
+  - name: catalog_each_roadmap_folder
+    type: foreach
+    foreach: '${{ steps.init_roadmap_folder_list.output.items | json }}'
+    steps:
+      - name: init_folder_context
+        type: data.set
+        with:
+          folderId: '${{ foreach.item }}'
+          pageToken: ''
+          pagesFetched: 0
+          filesIndexed: 0
+
+      - name: read_folder_checkpoint
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          size: 1
+          query:
+            bool:
+              must:
+                - term:
+                    sync.source: '{{ consts.syncSource }}'
+                - term:
+                    entity_type: '{{ consts.entityType }}'
+                - term:
+                    folder.id: '${{ variables.folderId }}'
+
+      - name: init_folder_state
+        type: data.set
+        with:
+          watermark: '${{ steps.read_folder_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+          runStartedAt: '{{ execution.startedAt }}'
+
+      - name: ensure_folder_watermark
+        type: data.set
+        if: '${{ variables.watermark == null || variables.watermark == "" }}'
+        with:
+          watermark: '{{ consts.initialWatermark }}'
+
+      - name: paginate_roadmap_folder_files
+        type: while
+        condition: 'steps.list_roadmap_folder_files.output.hasMore : true'
+        max-iterations: 20
+        steps:
+          - name: list_roadmap_folder_files
+            type: google_drive.listFilesIngest
+            connector-id: '{{ consts.gdriveConnectorId }}'
+            with:
+              folderId: '${{ variables.folderId }}'
+              modifiedAfter: '${{ variables.watermark }}'
+              pageSize: '{{ consts.pageSize }}'
+              pageToken: '${{ variables.pageToken }}'
+
+          - name: index_roadmap_folder_files
+            type: foreach
+            foreach: '${{ steps.list_roadmap_folder_files.output.files | json }}'
+            steps:
+              - name: upsert_roadmap_file_metadata
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.documentsIndex }}'
+                  id: '${{ foreach.item.id }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    file:
+                      id: '${{ foreach.item.id }}'
+                      name: '${{ foreach.item.name }}'
+                      mime_type: '${{ foreach.item.mimeType }}'
+                      size: '${{ foreach.item.size ?? 0 }}'
+                      created_at: '${{ foreach.item.createdTime }}'
+                      modified_at: '${{ foreach.item.modifiedTime }}'
+                      web_view_link: '${{ foreach.item.webViewLink }}'
+                      parent_folder_ids: '${{ foreach.item.parents | json }}'
+                      owner_email: '${{ foreach.item.owners[0].emailAddress ?? "" }}'
+                      owner_name: '${{ foreach.item.owners[0].displayName ?? "" }}'
+                    links:
+                      catalog_folder_id: '${{ variables.folderId }}'
+                      catalog_source: roadmap_folder
+                    payload: '${{ foreach.item | json }}'
+
+          - name: advance_folder_pagination
+            type: data.set
+            with:
+              pageToken: '${{ steps.list_roadmap_folder_files.output.nextPageToken ?? "" }}'
+              pagesFetched: '${{ variables.pagesFetched + 1 }}'
+              filesIndexed: '${{ variables.filesIndexed + steps.list_roadmap_folder_files.output.files.size }}'
+
+      - name: write_folder_checkpoint
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-${{ variables.folderId }}-{{ consts.entityType }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            folder:
+              id: '${{ variables.folderId }}'
+            watermark: '${{ variables.runStartedAt }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: success
+            stats:
+              pages_fetched: '${{ variables.pagesFetched }}'
+              files_indexed: '${{ variables.filesIndexed }}'
+              has_more: '${{ steps.list_roadmap_folder_files.output.hasMore ?? false }}'

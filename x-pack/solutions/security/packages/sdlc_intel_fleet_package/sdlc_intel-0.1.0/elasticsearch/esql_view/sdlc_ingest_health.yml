@@ -1,6 +1,6 @@
 name: sdlc-ingest-health-view
 query: |
-  FROM github-intel-sync-state, salesforce-intel-sync-state
+  FROM github-intel-sync-state, salesforce-intel-sync-state, gdrive-intel-sync-state
   | EVAL
       sync_source = sync.source,
       entity = entity_type,

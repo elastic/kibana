@@ -355,6 +355,24 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['scheduled', 'github', 'ingest', 'sdlc', 'issues', 'sdh', 'feedback', 'label'],
     filename: 'sdlc_github_catalog_sdh_labeled_issues.yml',
   },
+  {
+    id: 'sdlc_gdrive_catalog_roadmap_docs',
+    name: 'SDLC Google Drive catalog roadmap docs',
+    description:
+      'Catalogs configured shared roadmap folder IDs via listFilesIngest into gdrive-intel-documents',
+    category: 'security',
+    tags: ['scheduled', 'google_drive', 'ingest', 'sdlc', 'documents', 'design', 'roadmap', 'foreach', 'while'],
+    filename: 'sdlc_gdrive_catalog_roadmap_docs.yml',
+  },
+  {
+    id: 'sdlc_github_extract_drive_links',
+    name: 'SDLC GitHub extract Drive links',
+    description:
+      'Extracts Drive URLs from GitHub/SDH issue bodies, fetches metadata, writes issue_references_design_doc edges',
+    category: 'security',
+    tags: ['scheduled', 'github', 'google_drive', 'ingest', 'sdlc', 'documents', 'design', 'enrich'],
+    filename: 'sdlc_github_extract_drive_links.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

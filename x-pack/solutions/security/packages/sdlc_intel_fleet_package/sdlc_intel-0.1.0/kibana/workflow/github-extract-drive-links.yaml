@@ -1,0 +1,323 @@
+version: '1'
+name: SDLC GitHub extract Drive links
+description: >
+  Tier-3 enrichment workflow. Scans product GitHub issues and SDH issues for docs.google.com /
+  drive.google.com URLs, fetches Drive file metadata (no content download), upserts
+  gdrive-intel-documents, and writes issue_references_design_doc edges to
+  github-intel-relationships. Join targets: epics/product issues and SDH issues.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - google_drive
+  - enrich
+  - ingest
+  - documents
+  - design
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  gdriveConnectorId: REPLACE_WITH_GDRIVE_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  productIssuesIndex: github-intel-issues
+  sdhIssuesIndex: github-intel-sdh-issues
+  documentsIndex: gdrive-intel-documents
+  relationshipsIndex: github-intel-relationships
+  syncSource: github-extract-drive-links
+  entityType: drive_link_extract
+  issueBatchSize: 100
+  initialWatermark: '2024-01-01T00:00:00Z'
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-extract-drive-links
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 2h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      productLinksWritten: 0
+      sdhLinksWritten: 0
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: load_product_issues_with_drive_urls
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.productIssuesIndex }}'
+      size: '{{ consts.issueBatchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+            - query_string:
+                query: 'docs.google.com OR drive.google.com'
+                fields:
+                  - content.body
+                  - content.title
+                  - content.searchable
+
+  - name: extract_drive_links_from_product_issues
+    type: foreach
+    foreach: '${{ steps.load_product_issues_with_drive_urls.output.hits.hits | json }}'
+    steps:
+      - name: set_product_issue_context
+        type: data.set
+        with:
+          issueEntityId: '${{ foreach.item._source.entity.id }}'
+          issueUrl: '${{ foreach.item._source.entity.url }}'
+          issueNumber: '${{ foreach.item._source.entity.number }}'
+          issueRepo: '${{ foreach.item._source.repository.full_name }}'
+          issueTicketType: '${{ foreach.item._source.hierarchy.ticket_type ?? "" }}'
+          searchableText: '${{ foreach.item._source.content.title }} ${{ foreach.item._source.content.body }}'
+
+      - name: parse_product_issue_drive_urls
+        type: google_drive.parseDriveUrlsFromText
+        connector-id: '{{ consts.gdriveConnectorId }}'
+        with:
+          text: '${{ variables.searchableText }}'
+
+      - name: index_product_issue_drive_links
+        type: foreach
+        foreach: '${{ steps.parse_product_issue_drive_urls.output.links | json }}'
+        steps:
+          - name: fetch_drive_metadata_for_product_issue
+            type: google_drive.getFileMetadata
+            connector-id: '{{ consts.gdriveConnectorId }}'
+            with:
+              fileIds:
+                - '${{ foreach.item.fileId }}'
+
+          - name: upsert_drive_document_from_product_issue
+            type: elasticsearch.index
+            if: '${{ steps.fetch_drive_metadata_for_product_issue.output.files.size > 0 }}'
+            with:
+              index: '{{ consts.documentsIndex }}'
+              id: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                file:
+                  id: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].id }}'
+                  name: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].name }}'
+                  mime_type: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].mimeType }}'
+                  size: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].size ?? 0 }}'
+                  created_at: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].createdTime }}'
+                  modified_at: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].modifiedTime }}'
+                  web_view_link: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].webViewLink }}'
+                  parent_folder_ids: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].parents | json }}'
+                  owner_email: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].owners[0].emailAddress ?? "" }}'
+                  owner_name: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].owners[0].displayName ?? "" }}'
+                  shared: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].shared ?? false }}'
+                  trashed: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].trashed ?? false }}'
+                links:
+                  discovered_from_issue_url: '${{ variables.issueUrl }}'
+                  discovered_from_issue_target: '${{ variables.issueTicketType == "Epic" ? "epic" : "product" }}'
+                  source_url: '${{ foreach.item.url }}'
+                  catalog_source: issue_body_url
+                payload: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0] | json }}'
+
+          - name: write_product_issue_design_doc_relationship
+            type: elasticsearch.index
+            if: '${{ steps.fetch_drive_metadata_for_product_issue.output.files.size > 0 }}'
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              id: '${{ variables.issueEntityId }}-issue_references_design_doc-${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                from: '${{ variables.issueUrl }}'
+                to: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].webViewLink }}'
+                relation: issue_references_design_doc
+                metadata:
+                  org: '{{ consts.orgLogin }}'
+                  issue_target: '${{ variables.issueTicketType == "Epic" ? "epic" : "product" }}'
+                  issue_url: '${{ variables.issueUrl }}'
+                  issue_number: '${{ variables.issueNumber }}'
+                  repo: '${{ variables.issueRepo }}'
+                  drive_file_id: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].id }}'
+                  drive_file_name: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].name }}'
+                  drive_web_view_link: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].webViewLink }}'
+                  link_source: issue_body_url
+
+          - name: count_product_design_doc_link
+            type: data.set
+            if: '${{ steps.fetch_drive_metadata_for_product_issue.output.files.size > 0 }}'
+            with:
+              productLinksWritten: '${{ variables.productLinksWritten + 1 }}'
+
+  - name: load_sdh_issues_with_drive_urls
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.sdhIssuesIndex }}'
+      size: '{{ consts.issueBatchSize }}'
+      sort:
+        - github.updated_at:
+            order: asc
+      query:
+        bool:
+          must:
+            - term:
+                org.login: '{{ consts.orgLogin }}'
+            - range:
+                github.updated_at:
+                  gt: '{{ variables.watermark }}'
+            - query_string:
+                query: 'docs.google.com OR drive.google.com'
+                fields:
+                  - content.body
+                  - content.title
+                  - content.searchable
+
+  - name: extract_drive_links_from_sdh_issues
+    type: foreach
+    foreach: '${{ steps.load_sdh_issues_with_drive_urls.output.hits.hits | json }}'
+    steps:
+      - name: set_sdh_issue_context
+        type: data.set
+        with:
+          issueEntityId: '${{ foreach.item._source.entity.id }}'
+          issueUrl: '${{ foreach.item._source.entity.url }}'
+          issueNumber: '${{ foreach.item._source.entity.number }}'
+          issueRepo: '${{ foreach.item._source.repository.full_name }}'
+          searchableText: '${{ foreach.item._source.content.title }} ${{ foreach.item._source.content.body }}'
+
+      - name: parse_sdh_issue_drive_urls
+        type: google_drive.parseDriveUrlsFromText
+        connector-id: '{{ consts.gdriveConnectorId }}'
+        with:
+          text: '${{ variables.searchableText }}'
+
+      - name: index_sdh_issue_drive_links
+        type: foreach
+        foreach: '${{ steps.parse_sdh_issue_drive_urls.output.links | json }}'
+        steps:
+          - name: fetch_drive_metadata_for_sdh_issue
+            type: google_drive.getFileMetadata
+            connector-id: '{{ consts.gdriveConnectorId }}'
+            with:
+              fileIds:
+                - '${{ foreach.item.fileId }}'
+
+          - name: upsert_drive_document_from_sdh_issue
+            type: elasticsearch.index
+            if: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files.size > 0 }}'
+            with:
+              index: '{{ consts.documentsIndex }}'
+              id: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                file:
+                  id: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].id }}'
+                  name: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].name }}'
+                  mime_type: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].mimeType }}'
+                  size: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].size ?? 0 }}'
+                  created_at: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].createdTime }}'
+                  modified_at: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].modifiedTime }}'
+                  web_view_link: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].webViewLink }}'
+                  parent_folder_ids: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].parents | json }}'
+                  owner_email: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].owners[0].emailAddress ?? "" }}'
+                  owner_name: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].owners[0].displayName ?? "" }}'
+                  shared: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].shared ?? false }}'
+                  trashed: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].trashed ?? false }}'
+                links:
+                  discovered_from_issue_url: '${{ variables.issueUrl }}'
+                  discovered_from_issue_target: sdh
+                  source_url: '${{ foreach.item.url }}'
+                  catalog_source: issue_body_url
+                payload: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0] | json }}'
+
+          - name: write_sdh_issue_design_doc_relationship
+            type: elasticsearch.index
+            if: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files.size > 0 }}'
+            with:
+              index: '{{ consts.relationshipsIndex }}'
+              id: '${{ variables.issueEntityId }}-issue_references_design_doc-${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].id }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                from: '${{ variables.issueUrl }}'
+                to: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].webViewLink }}'
+                relation: issue_references_design_doc
+                metadata:
+                  org: '{{ consts.orgLogin }}'
+                  issue_target: sdh
+                  issue_url: '${{ variables.issueUrl }}'
+                  issue_number: '${{ variables.issueNumber }}'
+                  repo: '${{ variables.issueRepo }}'
+                  drive_file_id: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].id }}'
+                  drive_file_name: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].name }}'
+                  drive_web_view_link: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].webViewLink }}'
+                  link_source: issue_body_url
+
+          - name: count_sdh_design_doc_link
+            type: data.set
+            if: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files.size > 0 }}'
+            with:
+              sdhLinksWritten: '${{ variables.sdhLinksWritten + 1 }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        watermark: '{{ variables.runStartedAt }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          product_links_written: '${{ variables.productLinksWritten }}'
+          sdh_links_written: '${{ variables.sdhLinksWritten }}'

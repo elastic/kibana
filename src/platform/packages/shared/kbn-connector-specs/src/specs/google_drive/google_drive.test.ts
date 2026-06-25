@@ -12,7 +12,7 @@ import {
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
 } from '../../connector_utils';
 import type { ActionContext } from '../../connector_spec';
-import { GoogleDriveConnector } from './google_drive';
+import { GoogleDriveConnector, parseCommaSeparatedIds, parseDriveUrlsFromText } from './google_drive';
 
 describe('GoogleDriveConnector', () => {
   const mockClient = {
@@ -73,6 +73,103 @@ describe('GoogleDriveConnector', () => {
           meta: { scope: { disabled: true } },
         },
       });
+    });
+  });
+
+  it('should define agent-facing actions as tools and ingest actions as workflow-only', () => {
+    const ingestActions = new Set(['listFilesIngest', 'parseDriveUrlsFromText', 'parseCommaSeparatedIds']);
+
+    for (const actionName of Object.keys(GoogleDriveConnector.actions)) {
+      if (ingestActions.has(actionName)) {
+        expect(GoogleDriveConnector.actions[actionName].isTool).toBe(false);
+      } else {
+        expect(GoogleDriveConnector.actions[actionName].isTool).toBe(true);
+      }
+    }
+  });
+
+  describe('parseDriveUrlsFromText', () => {
+    it('extracts Google Docs and Drive file URLs from text', () => {
+      const text =
+        'Design doc: https://docs.google.com/document/d/abc123/edit and backup https://drive.google.com/file/d/xyz789/view';
+      expect(parseDriveUrlsFromText(text)).toEqual([
+        { fileId: 'abc123', url: 'https://docs.google.com/document/d/abc123' },
+        { fileId: 'xyz789', url: 'https://drive.google.com/file/d/xyz789' },
+      ]);
+    });
+
+    it('returns empty array for text without drive links', () => {
+      expect(parseDriveUrlsFromText('no links here')).toEqual([]);
+    });
+  });
+
+  describe('parseDriveUrlsFromText action', () => {
+    it('returns parsed links from connector action', async () => {
+      const result = await GoogleDriveConnector.actions.parseDriveUrlsFromText.handler(mockContext, {
+        text: 'See https://docs.google.com/document/d/doc1/edit',
+      });
+
+      expect(result).toEqual({
+        ok: true,
+        links: [{ fileId: 'doc1', url: 'https://docs.google.com/document/d/doc1' }],
+      });
+    });
+  });
+
+  describe('parseCommaSeparatedIds', () => {
+    it('splits comma-separated folder IDs', () => {
+      expect(parseCommaSeparatedIds('folder-a, folder-b,folder-c')).toEqual([
+        'folder-a',
+        'folder-b',
+        'folder-c',
+      ]);
+    });
+  });
+
+  describe('parseCommaSeparatedIds action', () => {
+    it('returns items for foreach workflows', async () => {
+      const result = await GoogleDriveConnector.actions.parseCommaSeparatedIds.handler(mockContext, {
+        value: '1abc, 2def',
+      });
+
+      expect(result).toEqual({
+        ok: true,
+        items: ['1abc', '2def'],
+      });
+    });
+  });
+
+  describe('listFilesIngest action', () => {
+    it('lists shared-drive folder files with pagination metadata', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          files: [{ id: 'file-1', name: 'Roadmap', mimeType: 'application/vnd.google-apps.document' }],
+          nextPageToken: 'token-2',
+        },
+      });
+
+      const result = await GoogleDriveConnector.actions.listFilesIngest.handler(mockContext, {
+        folderId: 'folder-abc',
+        modifiedAfter: '2024-01-01T00:00:00.000Z',
+        pageSize: 250,
+      });
+
+      expect(result).toEqual({
+        ok: true,
+        files: [{ id: 'file-1', name: 'Roadmap', mimeType: 'application/vnd.google-apps.document' }],
+        nextPageToken: 'token-2',
+        hasMore: true,
+      });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://www.googleapis.com/drive/v3/files',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            supportsAllDrives: true,
+            includeItemsFromAllDrives: true,
+            q: "'folder-abc' in parents and trashed=false and modifiedTime > '2024-01-01T00:00:00.000Z'",
+          }),
+        })
+      );
     });
   });
 
@@ -641,7 +738,7 @@ describe('GoogleDriveConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(result).toEqual({ files: [mockResponse.data] });
     });
@@ -669,15 +766,15 @@ describe('GoogleDriveConnector', () => {
       expect(mockClient.get).toHaveBeenCalledTimes(3);
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-2',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-3',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(result).toEqual({
         files: [mockResponse1.data, mockResponse2.data, mockResponse3.data],
