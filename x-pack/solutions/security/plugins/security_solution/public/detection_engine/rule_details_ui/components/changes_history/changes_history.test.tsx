@@ -165,6 +165,113 @@ describe('RuleChangesHistory', () => {
     expect(screen.getByTestId('ruleChangesHistoryDiff')).not.toHaveTextContent('BrandNewRule');
   });
 
+  it('auto-selects the newest item from fresh data when stale cache had a different first item', async () => {
+    const staleItem = createHistoryItem({
+      id: 'create-stale',
+      action: 'rule_create',
+      rule: { name: 'StaleRule' } as RuleResponse,
+    });
+    const freshItem = createHistoryItem({
+      id: 'update-fresh',
+      action: 'rule_update',
+      rule: { name: 'FreshRule', revision: 1, rule_source: { type: 'internal' } } as RuleResponse,
+      old_values: { name: 'StaleRule' },
+    });
+
+    // Simulate stale cache: data present but background refetch in progress.
+    mockUseInfiniteChangeHistory.mockReturnValue(
+      mockUseInfiniteQueryResult([staleItem], { isFetching: true })
+    );
+
+    const { rerender } = render(
+      <TestProviders>
+        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+      </TestProviders>
+    );
+
+    // Stale item is shown immediately while fetch is in progress.
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('StaleRule');
+    });
+
+    // Fresh data arrives: new item prepended, fetch complete.
+    mockUseInfiniteChangeHistory.mockReturnValue(
+      mockUseInfiniteQueryResult([freshItem, staleItem])
+    );
+    rerender(
+      <TestProviders>
+        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+      </TestProviders>
+    );
+
+    // Selection advances to the newest item from the server response.
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('FreshRule');
+    });
+  });
+
+  it('preserves a manual selection made while the first-page fetch was still in progress', async () => {
+    const staleItem = createHistoryItem({
+      id: 'create-stale',
+      action: 'rule_create',
+      rule: { name: 'StaleRule' } as RuleResponse,
+    });
+    const anotherStaleItem = createHistoryItem({
+      id: 'update-stale',
+      action: 'rule_update',
+      rule: {
+        name: 'AnotherStaleRule',
+        revision: 1,
+        rule_source: { type: 'internal' },
+      } as RuleResponse,
+      old_values: { name: 'StaleRule' },
+    });
+    const freshItem = createHistoryItem({
+      id: 'update-fresh',
+      action: 'rule_update',
+      rule: { name: 'FreshRule', revision: 2, rule_source: { type: 'internal' } } as RuleResponse,
+      old_values: { name: 'AnotherStaleRule' },
+    });
+
+    // Stale cache has two items; the newest is auto-selected while fetching.
+    mockUseInfiniteChangeHistory.mockReturnValue(
+      mockUseInfiniteQueryResult([anotherStaleItem, staleItem], { isFetching: true })
+    );
+
+    const { rerender } = render(
+      <TestProviders>
+        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('AnotherStaleRule');
+    });
+
+    // User manually selects the older item before the fetch completes.
+    fireEvent.click(screen.getByTestId('ruleChangeHistoryItem-create-stale'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('StaleRule');
+    });
+
+    // Fresh data arrives with a brand-new item at the top.
+    mockUseInfiniteChangeHistory.mockReturnValue(
+      mockUseInfiniteQueryResult([freshItem, anotherStaleItem, staleItem])
+    );
+    rerender(
+      <TestProviders>
+        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+      </TestProviders>
+    );
+
+    // The manual selection is preserved; fresh data does not override it.
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('StaleRule');
+    });
+    expect(screen.getByTestId('ruleChangesHistoryDiff')).not.toHaveTextContent('FreshRule');
+  });
+
   it('shows nothing-selected state when the first page has no diffable items', async () => {
     const disableItem = createHistoryItem({ id: 'disable-1', action: 'rule_disable' });
     const enableItem = createHistoryItem({ id: 'enable-1', action: 'rule_enable' });
@@ -218,11 +325,16 @@ function createHistoryItem(
 interface MockUseInfiniteQueryResultOptions {
   hasNextPage?: boolean;
   fetchNextPage?: jest.Mock;
+  isFetching?: boolean;
 }
 
 function mockUseInfiniteQueryResult(
   items: RuleHistoryItem[],
-  { hasNextPage = false, fetchNextPage = jest.fn() }: MockUseInfiniteQueryResultOptions = {}
+  {
+    hasNextPage = false,
+    fetchNextPage = jest.fn(),
+    isFetching = false,
+  }: MockUseInfiniteQueryResultOptions = {}
 ) {
   return {
     data: {
@@ -237,7 +349,7 @@ function mockUseInfiniteQueryResult(
       ],
     },
     isLoading: false,
-    isFetching: false,
+    isFetching,
     isFetchingNextPage: false,
     fetchNextPage,
     hasNextPage,

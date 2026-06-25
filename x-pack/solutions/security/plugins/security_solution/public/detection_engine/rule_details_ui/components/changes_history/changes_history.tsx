@@ -78,11 +78,20 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
     [trackingStartedAt]
   );
 
-  useChangeHistoryAutoSelection({
+  const { lockSelectionDecision } = useChangeHistoryAutoSelection({
     ruleId,
     items,
+    isFetchingFirstPage: isFetching && !isFetchingNextPage,
     setSelectedItem,
   });
+
+  const handleSelectItem = useCallback(
+    (item: RuleHistoryItem) => {
+      lockSelectionDecision();
+      setSelectedItem(item);
+    },
+    [lockSelectionDecision, setSelectedItem]
+  );
 
   const styles = useMemo(
     () => ({
@@ -185,7 +194,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
             isLoading={isLoading || isFetching}
             startedAt={changeHistoryStartedAt}
             onLoadMore={handleNextPageLoading}
-            onSelectItem={setSelectedItem}
+            onSelectItem={handleSelectItem}
             onRestore={restoreFromHistory}
           />
         </EuiFlyoutBody>
