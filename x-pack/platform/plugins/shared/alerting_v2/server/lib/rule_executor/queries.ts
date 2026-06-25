@@ -17,7 +17,7 @@ export interface ActiveAlertGroupHash {
 }
 
 /**
- Returns all group hashes for a rule that are currently in a non-inactive episode state
+ * Returns all group hashes for a rule that are currently in a non-inactive episode state
  * (pending, active, or recovering). Used to detect which alerts need recovery events.
  */
 export const getActiveAlertGroupHashesQuery = ({
