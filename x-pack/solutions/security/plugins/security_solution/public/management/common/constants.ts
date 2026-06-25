@@ -59,3 +59,6 @@ export const MANAGEMENT_DEFAULT_SORT_FIELD = 'created_at';
 // --[ DEFAULTS ]---------------------------------------------------------------------------
 /** The default polling interval for API calls that require a refresh interval */
 export const DEFAULT_POLL_INTERVAL = 10000;
+
+// LocalStorage key used to store Response Console entered command history
+export const RESPONSE_CONSOLE_STORAGE_KEY = 'xpack.securitySolution.Responder';

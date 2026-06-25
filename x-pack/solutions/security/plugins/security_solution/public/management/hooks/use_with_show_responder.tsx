@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { RESPONSE_CONSOLE_STORAGE_KEY } from '../common/constants';
 import { type SupportedHostOsType } from '../../../common/endpoint/constants';
 import { useLicense } from '../../common/hooks/use_license';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
@@ -77,7 +78,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             platform: platform as SupportedHostOsType,
           }),
           'data-test-subj': `${agentType}ResponseActionsConsole`,
-          storagePrefix: 'xpack.securitySolution.Responder',
+          storagePrefix: RESPONSE_CONSOLE_STORAGE_KEY,
           TitleComponent: () => {
             return (
               <AgentInfo

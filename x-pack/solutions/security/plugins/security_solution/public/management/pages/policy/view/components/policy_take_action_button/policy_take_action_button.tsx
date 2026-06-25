@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiModal } from '@elastic/eui';
-import { BulkResponseConsole } from './bulk_response_console';
+import { EuiButton } from '@elastic/eui';
+import { BulkResponseConsoleModal } from './bulk_response_console';
 import {
   type ContextMenuItemNavByRouterProps,
   ContextMenuWithRouterSupport,
@@ -37,18 +37,18 @@ export const PolicyTakeActionButton = memo<PolicyTakeActionButtonProps>(
       ];
     }, []);
 
+    const handleUserActionUiOnCloseHandler = useCallback(() => {
+      setShowActionType(undefined);
+    }, []);
+
     const userActionUi = useMemo(() => {
       switch (showActionType) {
         case 'respond':
-          return <BulkResponseConsole />;
+          return <BulkResponseConsoleModal onClose={handleUserActionUiOnCloseHandler} />;
         default:
           return null;
       }
-    }, [showActionType]);
-
-    const closeDialogHandler = useCallback(() => {
-      setShowActionType(undefined);
-    }, []);
+    }, [handleUserActionUiOnCloseHandler, showActionType]);
 
     return (
       <>
@@ -69,7 +69,7 @@ export const PolicyTakeActionButton = memo<PolicyTakeActionButtonProps>(
           // isNavigationDisabled={!canReadPolicies}
         />
 
-        {showActionType && <EuiModal onClose={closeDialogHandler}>{userActionUi}</EuiModal>}
+        {userActionUi}
       </>
     );
   }
