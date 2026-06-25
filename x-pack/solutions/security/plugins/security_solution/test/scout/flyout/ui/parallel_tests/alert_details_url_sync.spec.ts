@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 
 const RIGHT = 'right';
 
