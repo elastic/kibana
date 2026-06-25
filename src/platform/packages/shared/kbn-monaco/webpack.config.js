@@ -9,7 +9,36 @@
 
 // @ts-check
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
+const { REPO_ROOT } = require('@kbn/repo-info');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
+
+// Sources copied alongside the webpack bundle so the built package is self-contained for the dist build.
+const BUILD_SOURCE_PATHS = {
+  include: ['src/**/*', 'index.ts', 'server.ts'],
+  exclude: [
+    '**/*.config.js',
+    '**/*.mock.*',
+    '**/*.test.*',
+    '**/*.stories.*',
+    '**/__jest_/**',
+    '**/__snapshots__/**',
+    '**/integration_tests/**',
+    '**/mocks/**',
+    '**/scripts/**',
+    '**/storybook/**',
+    '**/test_fixtures/**',
+    '**/test_helpers/**',
+  ],
+};
+
+// Build outputs live under target/build so the in-source tree stays clean and the dist build can pick them up.
+const PACKAGE_BUILD_DIR = path.resolve(
+  REPO_ROOT,
+  'target/build',
+  path.relative(REPO_ROOT, __dirname)
+);
+const WORKERS_OUTPUT_DIR = path.resolve(PACKAGE_BUILD_DIR, 'target_workers');
 
 /**
  * @typedef {(import('./src/register_globals').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
@@ -47,7 +76,7 @@ const workerConfig = (languages) => ({
   devtool: process.env.NODE_ENV === 'production' ? false : 'cheap-source-map',
   target: 'web',
   output: {
-    path: path.resolve(__dirname, 'target_workers'),
+    path: WORKERS_OUTPUT_DIR,
     filename: ({ chunk }) => `${chunk.name}.editor.worker.js`,
   },
   resolve: {
@@ -57,7 +86,18 @@ const workerConfig = (languages) => ({
       'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),
     },
   },
-  plugins: [new NodeLibsBrowserPlugin()],
+  plugins: [
+    new NodeLibsBrowserPlugin(),
+    new CopyPlugin({
+      patterns: BUILD_SOURCE_PATHS.include.map((from) => ({
+        from,
+        to: PACKAGE_BUILD_DIR,
+        context: __dirname,
+        globOptions: { ignore: BUILD_SOURCE_PATHS.exclude, dot: false },
+        noErrorOnMissing: true,
+      })),
+    }),
+  ],
   stats: 'errors-only',
   module: {
     rules: [

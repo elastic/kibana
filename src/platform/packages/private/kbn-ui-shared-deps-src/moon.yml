@@ -33,13 +33,9 @@ fileGroups:
     - '!src/entry.js'
     - '!**/*.config.js'
     - '!target/**/*'
-    - version_dependencies.txt
 tasks:
   extract-version-dependencies:
-    command: node
     args:
-      - scripts/extract_version_dependencies.js
-      - src/platform/packages/private/kbn-ui-shared-deps-src/version_dependencies.txt
       - '--collect'
       - '@babel/plugin-transform-numeric-separator'
       - '--collect'
@@ -61,26 +57,8 @@ tasks:
       - '--collect'
       - webpack
       - '--transitive'
-    env:
-      CI_STATS_DISABLED: 'true'
-    inputs:
-      - /package.json
-      - /yarn.lock
-    outputs:
-      - version_dependencies.txt
-    options:
-      runFromWorkspaceRoot: true
   build-webpack:
-    command: yarn
-    args:
-      - build
-    deps:
-      - ~:extract-version-dependencies
-      - ^:build-webpack
     inputs:
-      - '@group(src)'
-      - package.json
-      - webpack.config.js
       - /src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-ui-theme/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-i18n/**/*.{js,ts,tsx}
@@ -110,22 +88,3 @@ tasks:
       - /src/core/packages/chrome/browser-context/**/*.{js,ts,tsx}
       - /src/core/packages/di/browser/**/*.{js,ts,tsx}
       - '!/src/**/*.test.{js,ts,tsx}'
-    outputs:
-      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
-  watch-webpack:
-    type: run
-    options:
-      persistent: true
-    command: yarn
-    args:
-      - build
-      - '--watch'
-    deps:
-      - extract-version-dependencies
-      - ^:build-webpack
-    inputs:
-      - '@group(src)'
-      - package.json
-      - webpack.config.js
-    outputs:
-      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
