@@ -32,11 +32,11 @@ is_auto_commit_disabled() {
 # a stack, so committing to one branch desyncs every branch above it; we disable
 # auto-commit for stacks and let the check fail with the command to run locally.
 #
-# Read at build time from GitHub's native stack metadata so it is correct even
-# when the PR was created ready-for-review (no draft window for a labeler to win).
-# Fails open (treats the PR as non-stacked) on any error, preserving the default
-# auto-commit behavior for the common single-PR case. Cached per build since
-# every auto-fix step calls this.
+# Cached per build since every auto-fix step calls this, but only a *confident*
+# determination is cached: either the `gh` query succeeded, or there is no way to
+# query at all (no token/`gh`), which is stable for the whole build. A transient
+# query failure is left uncached so a later step retries, rather than poisoning
+# the whole build with a spurious "not a stack" that would re-enable auto-commit.
 is_stacked_pr() {
   is_pr || return 1
 
@@ -44,27 +44,35 @@ is_stacked_pr() {
   if command -v buildkite-agent >/dev/null 2>&1; then
     cached="$(buildkite-agent meta-data get is_stacked_pr --default "" 2>/dev/null || true)"
   fi
-  if [[ -z "$cached" ]]; then
-    cached="false"
-    local token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
-    if [[ -n "$token" && -n "${GITHUB_PR_BASE_OWNER:-}" && -n "${GITHUB_PR_BASE_REPO:-}" ]] && command -v gh >/dev/null 2>&1; then
-      local size
-      size="$(GH_TOKEN="$token" gh api graphql \
-        -f owner="$GITHUB_PR_BASE_OWNER" \
-        -f repo="$GITHUB_PR_BASE_REPO" \
-        -F number="$GITHUB_PR_NUMBER" \
-        -f query='query($owner: String!, $repo: String!, $number: Int!) { repository(owner: $owner, name: $repo) { pullRequest(number: $number) { stack { size } } } }' \
-        --jq '.data.repository.pullRequest.stack.size // 0' 2>/dev/null || echo 0)"
+  if [[ -n "$cached" ]]; then
+    [[ "$cached" == "true" ]]
+    return
+  fi
+
+  local determined="" result="false"
+  local token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+  if [[ -z "$token" || -z "${GITHUB_PR_BASE_OWNER:-}" || -z "${GITHUB_PR_BASE_REPO:-}" ]] || ! command -v gh >/dev/null 2>&1; then
+    determined="true"
+  else
+    local size
+    if size="$(GH_TOKEN="$token" gh api graphql \
+      -f owner="$GITHUB_PR_BASE_OWNER" \
+      -f repo="$GITHUB_PR_BASE_REPO" \
+      -F number="$GITHUB_PR_NUMBER" \
+      -f query='query($owner: String!, $repo: String!, $number: Int!) { repository(owner: $owner, name: $repo) { pullRequest(number: $number) { stack { size } } } }' \
+      --jq '.data.repository.pullRequest.stack.size // 0' 2>/dev/null)"; then
+      determined="true"
       if [[ "$size" =~ ^[0-9]+$ && "$size" -ge 2 ]]; then
-        cached="true"
+        result="true"
       fi
-    fi
-    if command -v buildkite-agent >/dev/null 2>&1; then
-      buildkite-agent meta-data set is_stacked_pr "$cached" 2>/dev/null || true
     fi
   fi
 
-  [[ "$cached" == "true" ]]
+  if [[ "$determined" == "true" ]] && command -v buildkite-agent >/dev/null 2>&1; then
+    buildkite-agent meta-data set is_stacked_pr "$result" 2>/dev/null || true
+  fi
+
+  [[ "$result" == "true" ]]
 }
 
 should_enable_fips() {
