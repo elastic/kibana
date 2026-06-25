@@ -53,7 +53,7 @@ export const registerBulkGetRoute = (
       const body: v1.BulkGetResponseHTTP = response.saved_objects.map((obj) => {
         if (isSavedObjectErrorResult(obj)) {
           return toSavedObjectWithMeta(obj);
-        } else { 
+        } else {
           return injectMetaAttributes(obj, managementService);
         }
       });
