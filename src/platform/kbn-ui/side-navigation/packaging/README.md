@@ -22,9 +22,9 @@ Artifacts are written to `src/platform/kbn-ui/side-navigation/target/`.
 ## Usage
 
 ```tsx
-import { SideNavigation } from '@kbn/ui-side-navigation';
+import { KbnSideNavigation } from '@kbn/ui-side-navigation';
 
-<SideNavigation
+<KbnSideNavigation
   items={navigationItems}
   logo={logoConfig}
   isCollapsed={false}

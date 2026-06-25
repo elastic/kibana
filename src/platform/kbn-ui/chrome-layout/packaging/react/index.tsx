@@ -30,14 +30,26 @@ import { LayoutDebugOverlay } from '../../src/debug/layout_debug_overlay';
 // React import is needed for JSX transform.
 void React;
 
-export type { ChromeLayoutProps, ChromeStyle, GridLayoutGlobalStylesProps };
+export type {
+  ChromeLayoutProps as KbnChromeLayoutProps,
+  ChromeStyle as KbnChromeStyle,
+  GridLayoutGlobalStylesProps as KbnGridLayoutGlobalStylesProps,
+};
 
 /** Alias for the external package. */
-export type ChromeLayoutConfig = LayoutConfig;
-export type ChromeLayoutConfigProviderProps = LayoutConfigProviderProps;
+export type KbnChromeLayoutConfig = LayoutConfig;
+export type KbnChromeLayoutConfigProviderProps = LayoutConfigProviderProps;
 
-export { ChromeLayout, GridLayoutGlobalStyles, CommonGlobalAppStyles, LayoutDebugOverlay };
+export {
+  ChromeLayout as KbnChromeLayout,
+  GridLayoutGlobalStyles as KbnGridLayoutGlobalStyles,
+  CommonGlobalAppStyles as KbnCommonGlobalAppStyles,
+  LayoutDebugOverlay as KbnChromeLayoutDebugOverlay,
+};
 
-export const ChromeLayoutConfigProvider = LayoutConfigProvider;
+export const KbnChromeLayoutConfigProvider = LayoutConfigProvider;
 
-export { useLayoutConfig, useLayoutUpdate };
+export {
+  useLayoutConfig as useKbnChromeLayoutConfig,
+  useLayoutUpdate as useKbnChromeLayoutUpdate,
+};

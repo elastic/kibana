@@ -22,10 +22,10 @@ import type * as React from 'react';
 type ReactNode = string | number | boolean | null | undefined | React.ReactElement;
 
 /** Chrome style variants applied to the layout. */
-export type ChromeStyle = 'classic' | 'project';
+export type KbnChromeStyle = 'classic' | 'project';
 
 /** Pixel dimensions for each layout area. */
-export interface LayoutDimensions {
+export interface KbnChromeLayoutDimensions {
   bannerHeight: number;
   footerHeight: number;
   headerHeight: number;
@@ -39,7 +39,7 @@ export interface LayoutDimensions {
 }
 
 /** Full layout state including derived presence flags. */
-export interface LayoutState extends LayoutDimensions {
+export interface KbnChromeLayoutState extends KbnChromeLayoutDimensions {
   hasBanner: boolean;
   hasFooter: boolean;
   hasSidebar: boolean;
@@ -49,11 +49,11 @@ export interface LayoutState extends LayoutDimensions {
   hasApplicationBottomBar: boolean;
 }
 
-type SlotProps = LayoutState;
+type SlotProps = KbnChromeLayoutState;
 type Slot = ReactNode | ((props: SlotProps) => ReactNode);
 
-/** Configuration provided to ChromeLayoutConfigProvider. */
-export interface ChromeLayoutConfig {
+/** Configuration provided to KbnChromeLayoutConfigProvider. */
+export interface KbnChromeLayoutConfig {
   bannerHeight?: number;
   headerHeight?: number;
   footerHeight?: number;
@@ -64,17 +64,17 @@ export interface ChromeLayoutConfig {
   applicationMarginTop?: number;
   applicationMarginBottom?: number;
   applicationMarginRight?: number;
-  chromeStyle?: ChromeStyle;
+  chromeStyle?: KbnChromeStyle;
 }
 
-/** Props for the ChromeLayoutConfigProvider component. */
-export interface ChromeLayoutConfigProviderProps {
-  value: ChromeLayoutConfig;
+/** Props for the KbnChromeLayoutConfigProvider component. */
+export interface KbnChromeLayoutConfigProviderProps {
+  value: KbnChromeLayoutConfig;
   children: ReactNode;
 }
 
-/** Named slots accepted by ChromeLayout. */
-export interface ChromeLayoutSlots {
+/** Named slots accepted by KbnChromeLayout. */
+export interface KbnChromeLayoutSlots {
   header?: Slot | null;
   navigation?: Slot | null;
   banner?: Slot | null;
@@ -84,22 +84,26 @@ export interface ChromeLayoutSlots {
   applicationBottomBar?: Slot | null;
 }
 
-/** Props accepted by the ChromeLayout component. */
-export interface ChromeLayoutProps extends ChromeLayoutSlots {
+/** Props accepted by the KbnChromeLayout component. */
+export interface KbnChromeLayoutProps extends KbnChromeLayoutSlots {
   children: Slot;
 }
 
-/** Props accepted by GridLayoutGlobalStyles. */
-export interface GridLayoutGlobalStylesProps {
-  chromeStyle?: ChromeStyle;
+/** Props accepted by KbnGridLayoutGlobalStyles. */
+export interface KbnGridLayoutGlobalStylesProps {
+  chromeStyle?: KbnChromeStyle;
 }
 
-export declare function ChromeLayout(props: ChromeLayoutProps): React.ReactNode;
-export declare function ChromeLayoutConfigProvider(
-  props: ChromeLayoutConfigProviderProps
+export declare function KbnChromeLayout(props: KbnChromeLayoutProps): React.ReactNode;
+export declare function KbnChromeLayoutConfigProvider(
+  props: KbnChromeLayoutConfigProviderProps
 ): React.ReactNode;
-export declare function useLayoutUpdate(): (updates: Partial<ChromeLayoutConfig>) => void;
-export declare function useLayoutConfig(): ChromeLayoutConfig;
-export declare function LayoutDebugOverlay(): React.ReactNode;
-export declare function GridLayoutGlobalStyles(props: GridLayoutGlobalStylesProps): React.ReactNode;
-export declare function CommonGlobalAppStyles(): React.ReactNode;
+export declare function useKbnChromeLayoutUpdate(): (
+  updates: Partial<KbnChromeLayoutConfig>
+) => void;
+export declare function useKbnChromeLayoutConfig(): KbnChromeLayoutConfig;
+export declare function KbnChromeLayoutDebugOverlay(): React.ReactNode;
+export declare function KbnGridLayoutGlobalStyles(
+  props: KbnGridLayoutGlobalStylesProps
+): React.ReactNode;
+export declare function KbnCommonGlobalAppStyles(): React.ReactNode;

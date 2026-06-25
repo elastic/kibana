@@ -18,7 +18,11 @@ import {
   EuiHeaderLogo,
 } from '@elastic/eui';
 
-import { ChromeLayout, ChromeLayoutConfigProvider, GridLayoutGlobalStyles } from '../../..';
+import {
+  KbnChromeLayout,
+  KbnChromeLayoutConfigProvider,
+  KbnGridLayoutGlobalStyles,
+} from '@kbn/ui-chrome-layout';
 
 const App = () => {
   const layoutConfig = {
@@ -28,9 +32,9 @@ const App = () => {
 
   return (
     <EuiProvider colorMode="light">
-      <GridLayoutGlobalStyles chromeStyle="project" />
-      <ChromeLayoutConfigProvider value={layoutConfig}>
-        <ChromeLayout
+      <KbnGridLayoutGlobalStyles chromeStyle="project" />
+      <KbnChromeLayoutConfigProvider value={layoutConfig}>
+        <KbnChromeLayout
           header={
             <EuiHeader>
               <EuiHeaderLogo iconType="logoElastic">Elastic</EuiHeaderLogo>
@@ -47,7 +51,7 @@ const App = () => {
           <div style={{ padding: '24px' }}>
             <EuiText>
               <h1>
-                <EuiCode>ChromeLayout</EuiCode> Example
+                <EuiCode>KbnChromeLayout</EuiCode> Example
               </h1>
               <p>
                 This example renders the chrome layout with a header slot and a navigation slot.
@@ -62,8 +66,8 @@ const App = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
-        </ChromeLayout>
-      </ChromeLayoutConfigProvider>
+        </KbnChromeLayout>
+      </KbnChromeLayoutConfigProvider>
     </EuiProvider>
   );
 };

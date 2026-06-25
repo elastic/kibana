@@ -12,7 +12,12 @@
     "resolveJsonModule": true,
     "noImplicitAny": false,
     "baseUrl": ".",
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "paths": {
+      "@kbn/ui-chrome-layout": [
+        "../react/index.tsx"
+      ]
+    }
   },
   "include": [
     "src/**/*"

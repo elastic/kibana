@@ -13,6 +13,11 @@
     "noImplicitAny": false,
     "baseUrl": ".",
     "outDir": "target/types",
+    "paths": {
+      "@kbn/ui-side-navigation": [
+        "../react/index.tsx"
+      ]
+    },
   },
   "include": [
     "src/**/*"
