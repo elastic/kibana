@@ -400,10 +400,6 @@ export class DiscoverApp {
     await this.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex });
   }
 
-  async openDocViewerTab(tabId: string) {
-    await this.page.testSubj.click(`docViewerTab-${tabId}`);
-  }
-
   async isDocViewerTabSelected(tabId: string): Promise<boolean> {
     const selected = await this.page.testSubj
       .locator(`docViewerTab-${tabId}`)
