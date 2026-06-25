@@ -102,15 +102,15 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
   };
 };
 
-export interface RegionCspPair {
+export interface CspRegion {
   csp: string;
   region: string;
 }
 
 export interface RegionPolicyBody {
-  allowed_regions?: RegionCspPair[];
+  allowed_regions?: CspRegion[];
   allowed_geos?: string[];
-  fallback_region?: RegionCspPair;
+  fallback_region?: CspRegion;
 }
 
 export interface RegionPolicyResponse {
