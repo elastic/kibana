@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { EuiProgress } from '@elastic/eui';
 import type {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
@@ -73,6 +74,16 @@ export function ExpressionWrapper({
   paddingTop,
   abortController,
 }: ExpressionWrapperProps) {
+  const [isShowingApproximate, setIsShowingApproximate] = useState(false);
+
+  const wrappedOnData$ = useCallback<NonNullable<ReactExpressionRendererProps['onData$']>>(
+    (data, adapters, partial) => {
+      setIsShowingApproximate(Boolean(partial));
+      onData$?.(data, adapters, partial);
+    },
+    [onData$]
+  );
+
   if (!expression) return null;
   return (
     <>
@@ -83,16 +94,20 @@ export function ExpressionWrapper({
         style={style}
         data-test-subj="lens-embeddable"
       >
+        {isShowingApproximate && (
+          <EuiProgress size="xs" color="accent" position="absolute" style={{ zIndex: 2 }} />
+        )}
         <ExpressionRendererComponent
           padding={noPadding ? undefined : 's'}
           paddingTop={paddingTop}
           variables={variables}
           allowCache={true}
+          partial={true}
           expression={expression}
           interactive={interactive}
           searchContext={searchContext}
           searchSessionId={searchSessionId}
-          onData$={onData$}
+          onData$={wrappedOnData$}
           onRender$={onRender$}
           inspectorAdapters={lensInspector.getInspectorAdapters()}
           renderMode={renderMode}

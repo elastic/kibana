@@ -12,6 +12,7 @@ import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types'
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchMethods } from '@kbn/search-types';
+import { Observable } from 'rxjs';
 import type {
   Datatable,
   DatatableColumn,
@@ -46,7 +47,7 @@ declare global {
 }
 
 type Input = KibanaContext | null;
-type Output = Promise<Datatable>;
+type Output = Observable<Datatable>;
 
 interface Arguments {
   query: string;
@@ -238,193 +239,254 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         return getSideEffectFunction(inspectorAdapters);
       },
     },
-    async fn(
+    fn(
       input,
       { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId, getExecutionContext }
     ) {
-      const { searchService, uiSettings } = await getStartDependencies(() => {
-        const request = getKibanaRequest?.();
-        if (!request) {
-          throw new Error(
-            'A KibanaRequest is required to run queries on the server. ' +
-              'Please provide a request object to the expression execution params.'
+      return new Observable<Datatable>((subscriber) => {
+        let startTime = Date.now();
+        const logInspectorRequest = () => {
+          if (!inspectorAdapters.requests) {
+            inspectorAdapters.requests = new RequestAdapter();
+          }
+          const request = inspectorAdapters.requests.start(
+            titleForInspector ??
+              i18n.translate('data.search.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+            {
+              description:
+                descriptionForInspector ??
+                i18n.translate('data.search.es_search.dataRequest.description', {
+                  defaultMessage:
+                    'This request queries Elasticsearch to fetch the data for the visualization.',
+                }),
+            },
+            startTime
           );
-        }
+          startTime = Date.now();
+          return request;
+        };
 
-        return request;
-      });
+        const formatError = (error: any) => {
+          if (!error.attributes) {
+            error.message = `Unexpected error from Elasticsearch: ${error.message}`;
+          } else {
+            const { type, reason } = extractTypeAndReason(error.attributes);
+            if (type === 'parsing_exception') {
+              error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
+            } else {
+              error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+            }
+          }
+          return error;
+        };
 
-      // this is for backward compatibility, if the query is of fields or functions type
-      // and the query is not set with ?? in the query, we should set it
-      // https://github.com/elastic/elasticsearch/pull/122459
-      const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
-      const esQueryConfigs = getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0]);
-      const params: ESQLSearchParams = {
-        query: fixedQuery,
-        time_zone: esQueryConfigs.dateFormatTZ
-          ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
-          : 'UTC',
-        locale,
-        include_execution_metadata: true,
-      };
+        const logInspectorStats = (
+          inspectorReq: ReturnType<typeof logInspectorRequest>,
+          rawResponse: any,
+          params: ESQLSearchParams,
+          requestParams: any
+        ) => {
+          inspectorReq
+            .stats({
+              hits: {
+                label: i18n.translate('data.search.es_search.hitsLabel', {
+                  defaultMessage: 'Hits',
+                }),
+                value: `${rawResponse.values.length}`,
+                description: i18n.translate('data.search.es_search.hitsDescription', {
+                  defaultMessage: 'The number of documents returned by the query.',
+                }),
+              },
+              ...(rawResponse?.took && {
+                queryTime: {
+                  label: i18n.translate('data.search.es_search.queryTimeLabel', {
+                    defaultMessage: 'Query time',
+                  }),
+                  value: i18n.translate('data.search.es_search.queryTimeValue', {
+                    defaultMessage: '{queryTime}ms',
+                    values: { queryTime: rawResponse.took },
+                  }),
+                  description: i18n.translate('data.search.es_search.queryTimeDescription', {
+                    defaultMessage:
+                      'The time it took to process the query. ' +
+                      'Does not include the time to send the request or parse it in the browser.',
+                  }),
+                },
+              }),
+              ...(rawResponse &&
+                'documents_found' in rawResponse && {
+                  documentsProcessed: {
+                    label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
+                      defaultMessage: 'Documents processed',
+                    }),
+                    value: rawResponse.documents_found,
+                    description: i18n.translate(
+                      'data.search.es_search.documentsProcessedDescription',
+                      {
+                        defaultMessage: 'The number of documents processed by the query.',
+                      }
+                    ),
+                  },
+                }),
+            })
+            .json(params)
+            .ok({ json: { rawResponse }, requestParams });
+        };
 
-      if (input) {
-        const namedParams = getNamedParams(fixedQuery, input.timeRange, input.esqlVariables);
-
-        if (namedParams.length) {
-          params.params = namedParams;
-        }
-
-        const timeFilter =
-          input.timeRange &&
-          getTime(undefined, input.timeRange, {
-            fieldName: timeField,
+        (async () => {
+          const { searchService, uiSettings } = await getStartDependencies(() => {
+            const request = getKibanaRequest?.();
+            if (!request) {
+              throw new Error(
+                'A KibanaRequest is required to run queries on the server. ' +
+                  'Please provide a request object to the expression execution params.'
+              );
+            }
+            return request;
           });
 
-        // Used for debugging & inside automated tests to simulate a slow query
-        const delayFilter: Filter | undefined = window.ELASTIC_ESQL_DELAY_SECONDS
-          ? {
-              meta: {},
-              query: {
-                error_query: {
-                  indices: [
-                    {
-                      name: '*',
-                      error_type: 'warning',
-                      stall_time_seconds: window.ELASTIC_ESQL_DELAY_SECONDS,
-                    },
-                  ],
-                },
-              },
+          const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
+          const esQueryConfigs = getEsQueryConfig(
+            uiSettings as Parameters<typeof getEsQueryConfig>[0]
+          );
+          const params: ESQLSearchParams = {
+            query: fixedQuery,
+            time_zone: esQueryConfigs.dateFormatTZ
+              ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
+              : 'UTC',
+            locale,
+            include_execution_metadata: true,
+          };
+
+          if (input) {
+            const namedParams = getNamedParams(fixedQuery, input.timeRange, input.esqlVariables);
+            if (namedParams.length) {
+              params.params = namedParams;
             }
-          : undefined;
 
-        const filters = [
-          ...(ignoreGlobalFilters ? [] : input.filters ?? []),
-          ...(timeFilter ? [timeFilter] : []),
-          ...(delayFilter ? [delayFilter] : []),
-        ];
+            const timeFilter =
+              input.timeRange &&
+              getTime(undefined, input.timeRange, {
+                fieldName: timeField,
+              });
 
-        const inputQuery = ignoreGlobalFilters ? [] : input.query || [];
-        params.filter = buildEsQuery(undefined, inputQuery, filters, esQueryConfigs);
-      }
+            const delayFilter: Filter | undefined = window.ELASTIC_ESQL_DELAY_SECONDS
+              ? {
+                  meta: {},
+                  query: {
+                    error_query: {
+                      indices: [
+                        {
+                          name: '*',
+                          error_type: 'warning',
+                          stall_time_seconds: window.ELASTIC_ESQL_DELAY_SECONDS,
+                        },
+                      ],
+                    },
+                  },
+                }
+              : undefined;
 
-      let startTime = Date.now();
-      const logInspectorRequest = () => {
-        if (!inspectorAdapters.requests) {
-          inspectorAdapters.requests = new RequestAdapter();
-        }
+            const filters = [
+              ...(ignoreGlobalFilters ? [] : input.filters ?? []),
+              ...(timeFilter ? [timeFilter] : []),
+              ...(delayFilter ? [delayFilter] : []),
+            ];
 
-        const request = inspectorAdapters.requests.start(
-          titleForInspector ??
-            i18n.translate('data.search.dataRequest.title', {
-              defaultMessage: 'Data',
-            }),
-          {
-            description:
-              descriptionForInspector ??
-              i18n.translate('data.search.es_search.dataRequest.description', {
-                defaultMessage:
-                  'This request queries Elasticsearch to fetch the data for the visualization.',
-              }),
-          },
-          startTime
-        );
-        startTime = Date.now();
+            const inputQuery = ignoreGlobalFilters ? [] : input.query || [];
+            params.filter = buildEsQuery(undefined, inputQuery, filters, esQueryConfigs);
+          }
 
-        return request;
-      };
-
-      try {
-        const { rawResponse, requestParams } = await searchService.esql(
-          {
+          const searchParams = {
             query: fixedQuery,
             params: params.params,
             filter: params.filter as estypes.QueryDslQueryContainer | undefined,
             timeZone: params.time_zone,
             locale: params.locale,
-          },
-          {
+          };
+
+          const searchOptions = {
             abortSignal,
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
             dropNullColumns: true,
             includeExecutionMetadata: true,
-          }
-        );
+          };
 
-        // Inspector logging on success
-        logInspectorRequest()
-          .stats({
-            hits: {
-              label: i18n.translate('data.search.es_search.hitsLabel', {
-                defaultMessage: 'Hits',
-              }),
-              value: `${rawResponse.values.length}`,
-              description: i18n.translate('data.search.es_search.hitsDescription', {
-                defaultMessage: 'The number of documents returned by the query.',
-              }),
-            },
-            ...(rawResponse?.took && {
-              queryTime: {
-                label: i18n.translate('data.search.es_search.queryTimeLabel', {
-                  defaultMessage: 'Query time',
-                }),
-                value: i18n.translate('data.search.es_search.queryTimeValue', {
-                  defaultMessage: '{queryTime}ms',
-                  values: { queryTime: rawResponse.took },
-                }),
-                description: i18n.translate('data.search.es_search.queryTimeDescription', {
-                  defaultMessage:
-                    'The time it took to process the query. ' +
-                    'Does not include the time to send the request or parse it in the browser.',
-                }),
-              },
-            }),
-            ...(rawResponse &&
-              'documents_found' in rawResponse && {
-                documentsProcessed: {
-                  label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
-                    defaultMessage: 'Documents processed',
-                  }),
-                  value: rawResponse.documents_found,
-                  description: i18n.translate(
-                    'data.search.es_search.documentsProcessedDescription',
-                    {
-                      defaultMessage: 'The number of documents processed by the query.',
-                    }
-                  ),
-                },
-              }),
-          })
-          .json(params)
-          .ok({ json: { rawResponse }, requestParams });
+          const querySummary = getQuerySummary(fixedQuery);
+          const isStatsQuery = querySummary.aggregates.size > 0 || querySummary.grouping.size > 0;
 
-        // Map to Datatable
-        return mapResponseToDatatable(rawResponse as any, query, input);
-      } catch (error) {
-        // Inspector logging on error
-        logInspectorRequest()
-          .json(params)
-          .error({
-            json: 'attributes' in error ? error.attributes : { message: error.message },
-          });
+          if (isStatsQuery) {
+            let exactDone = false;
 
-        // Error formatting
-        if (!error.attributes) {
-          error.message = `Unexpected error from Elasticsearch: ${error.message}`;
-        } else {
-          const { type, reason } = extractTypeAndReason(error.attributes);
-          if (type === 'parsing_exception') {
-            error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
+            searchService
+              .esql(
+                { ...searchParams, query: `SET approximation=true;\n${fixedQuery}` },
+                searchOptions
+              )
+              .then(({ rawResponse }) => {
+                if (!subscriber.closed && !exactDone) {
+                  const approxDatatable = mapResponseToDatatable(rawResponse as any, query, input);
+                  approxDatatable.meta = { ...approxDatatable.meta, approximate: true };
+                  subscriber.next(approxDatatable);
+                }
+              })
+              .catch(() => {});
+
+            try {
+              const { rawResponse, requestParams } = await searchService.esql(
+                searchParams,
+                searchOptions
+              );
+              exactDone = true;
+              logInspectorStats(logInspectorRequest(), rawResponse, params, requestParams);
+              if (!subscriber.closed) {
+                subscriber.next(mapResponseToDatatable(rawResponse as any, query, input));
+                subscriber.complete();
+              }
+            } catch (error) {
+              exactDone = true;
+              logInspectorRequest()
+                .json(params)
+                .error({
+                  json: 'attributes' in error ? error.attributes : { message: error.message },
+                });
+              if (!subscriber.closed) {
+                subscriber.error(formatError(error));
+              }
+            }
           } else {
-            error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+            try {
+              const { rawResponse, requestParams } = await searchService.esql(
+                searchParams,
+                searchOptions
+              );
+              logInspectorStats(logInspectorRequest(), rawResponse, params, requestParams);
+              if (!subscriber.closed) {
+                subscriber.next(mapResponseToDatatable(rawResponse as any, query, input));
+                subscriber.complete();
+              }
+            } catch (error) {
+              logInspectorRequest()
+                .json(params)
+                .error({
+                  json: 'attributes' in error ? error.attributes : { message: error.message },
+                });
+              if (!subscriber.closed) {
+                subscriber.error(formatError(error));
+              }
+            }
           }
-        }
-        throw error;
-      }
+        })().catch((error) => {
+          if (!subscriber.closed) {
+            subscriber.error(error);
+          }
+        });
+      });
     },
   };
 

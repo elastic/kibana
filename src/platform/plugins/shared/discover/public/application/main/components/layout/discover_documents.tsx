@@ -155,7 +155,8 @@ function DiscoverDocumentsComponent({
   const documentState = useDataState(dataStateContainer.data$.documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
-    documentState.fetchStatus === FetchStatus.PARTIAL;
+    documentState.fetchStatus === FetchStatus.PARTIAL ||
+    documentState.isApproximate === true;
 
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
   // It's just necessary for non ES|QL requests since they don't have a partial result state, that's

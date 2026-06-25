@@ -121,6 +121,17 @@ export function fetchAll(
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
+          onPartialResponse: ({ records, esqlQueryColumns, esqlHeaderWarning }) => {
+            dataSubjects.documents$.next({
+              fetchStatus: FetchStatus.PARTIAL,
+              result: records,
+              esqlQueryColumns,
+              esqlHeaderWarning,
+              interceptedWarnings: [],
+              query,
+              isApproximate: true,
+            });
+          },
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';

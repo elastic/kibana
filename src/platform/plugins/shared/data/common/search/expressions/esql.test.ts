@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { lastValueFrom } from 'rxjs';
 import type { UiSettingsCommon } from '@kbn/data-views-plugin/common';
 import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
@@ -68,7 +69,7 @@ describe('getEsqlFn', () => {
       getMockSearchService([{ name: 'column1', type: 'string' }], [['value1']])
     );
 
-    const result = await esqlFn.fn(null, { query: 'FROM index' }, createExecutionContext());
+    const result = await lastValueFrom(esqlFn.fn(null, { query: 'FROM index' }, createExecutionContext()));
 
     expect(result?.type).toEqual('datatable');
     expect(() => JSON.stringify(result)).not.toThrow();
@@ -92,11 +93,11 @@ describe('getEsqlFn', () => {
     it('should include global query and filters in params.filter when ignoreGlobalFilters is false', async () => {
       const mockSearchService = getMockSearchService([], []);
 
-      await createEsqlFn(mockSearchService).fn(
+      await lastValueFrom(createEsqlFn(mockSearchService).fn(
         input,
         { query: 'FROM index', ignoreGlobalFilters: false },
         createExecutionContext()
-      );
+      ));
 
       const params = mockSearchService.esql.mock.calls[0][0];
       expect(params.query).toBe('FROM index');
@@ -108,11 +109,11 @@ describe('getEsqlFn', () => {
     it('should exclude global query and filters from params.filter when ignoreGlobalFilters is true', async () => {
       const mockSearchService = getMockSearchService([], []);
 
-      await createEsqlFn(mockSearchService).fn(
+      await lastValueFrom(createEsqlFn(mockSearchService).fn(
         input,
         { query: 'FROM index', ignoreGlobalFilters: true },
         createExecutionContext()
-      );
+      ));
 
       const params = mockSearchService.esql.mock.calls[0][0];
       expect(params.query).toBe('FROM index');
@@ -125,11 +126,11 @@ describe('getEsqlFn', () => {
   it('resolves meta.sourceParams.sourceField through RENAME to the underlying field', async () => {
     const mockSearchService = getMockSearchService([{ name: 'new_name', type: 'keyword' }]);
 
-    const result = await createEsqlFn(mockSearchService).fn(
+    const result = await lastValueFrom(createEsqlFn(mockSearchService).fn(
       null,
       { query: 'FROM index | RENAME old_name AS new_name' },
       createExecutionContext()
-    );
+    ));
 
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('old_name');
     expect(result?.columns?.[0]?.name).toBe('new_name');
@@ -138,11 +139,11 @@ describe('getEsqlFn', () => {
   it('keeps meta.sourceParams.sourceField as the ES column name without RENAME', async () => {
     const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
 
-    const result = await createEsqlFn(mockSearchService).fn(
+    const result = await lastValueFrom(createEsqlFn(mockSearchService).fn(
       null,
       { query: 'FROM index' },
       createExecutionContext()
-    );
+    ));
 
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('host');
   });
@@ -150,11 +151,11 @@ describe('getEsqlFn', () => {
   it('resolves chained RENAME pipeline for meta.sourceParams.sourceField', async () => {
     const mockSearchService = getMockSearchService([{ name: 'c', type: 'keyword' }]);
 
-    const result = await createEsqlFn(mockSearchService).fn(
+    const result = await lastValueFrom(createEsqlFn(mockSearchService).fn(
       null,
       { query: 'FROM index | RENAME a AS b | RENAME b AS c' },
       createExecutionContext()
-    );
+    ));
 
     expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('a');
     expect(result?.columns?.[0]?.name).toBe('c');
@@ -167,11 +168,11 @@ describe('getEsqlFn', () => {
     ]);
 
     const query = 'FROM index | STATS cnt = COUNT(*) BY region = country';
-    const result = await createEsqlFn(mockSearchService).fn(
+    const result = await lastValueFrom(createEsqlFn(mockSearchService).fn(
       null,
       { query },
       createExecutionContext()
-    );
+    ));
 
     const regionColumn = result?.columns?.find((col) => col.name === 'region');
     expect(regionColumn?.meta?.sourceParams?.sourceField).toBe('country');

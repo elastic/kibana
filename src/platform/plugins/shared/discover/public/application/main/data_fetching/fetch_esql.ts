@@ -58,6 +58,7 @@ export interface FetchEsqlParams {
     title: string;
     description: string;
   };
+  onPartialResponse?: (partialResponse: RecordsFetchResponse) => void;
 }
 
 export function fetchEsql({
@@ -75,6 +76,7 @@ export function fetchEsql({
   searchSessionId,
   projectRouting,
   inspectorConfig,
+  onPartialResponse,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -96,6 +98,7 @@ export function fetchEsql({
             projectRouting,
           },
           searchSessionId,
+          partial: true,
         });
         abortSignal?.addEventListener('abort', (e) => {
           contract.cancel((e.target as AbortSignal)?.reason);
@@ -135,6 +138,15 @@ export function fetchEsql({
 
               return scopedProfilesManager.resolveDocumentProfile({ record });
             });
+
+            if (table.meta?.approximate && onPartialResponse) {
+              onPartialResponse({
+                records: finalData,
+                interceptedWarnings: [],
+                esqlQueryColumns,
+                esqlHeaderWarning,
+              });
+            }
           }
         });
         return lastValueFrom(execution).then(() => {
