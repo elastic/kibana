@@ -28,7 +28,6 @@ import {
   flushCancelOnGateFailureMetadata,
   type GetPipelineOptions,
   prHasFIPSLabel,
-  doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 
