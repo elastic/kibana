@@ -8,7 +8,7 @@
  */
 import React, { Suspense, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { isMac } from '@kbn/shared-ux-utility';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
@@ -29,6 +29,36 @@ const LazyHelpPopover = React.lazy(async () => {
   const module = await import('./help_popover');
   return { default: module.HelpPopover };
 });
+
+const CONTROL_GROUP_CLASS = 'unifiedDataTableToolbarControlGroup';
+const CONTROL_ICON_BUTTON_CLASS = 'unifiedDataTableToolbarControlIconButton';
+
+function EsqlMenuIconButton({ children }: { children: React.ReactNode }) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      className={CONTROL_ICON_BUTTON_CLASS}
+      css={css`
+        .euiToolTipAnchor .euiButtonIcon {
+          inline-size: ${euiTheme.size.xl};
+          block-size: ${euiTheme.size.xl};
+          border-radius: inherit;
+
+          &:hover,
+          &:active,
+          &:focus {
+            background: transparent;
+            animation: none !important;
+            transform: none !important;
+          }
+        }
+      `}
+    >
+      {children}
+    </div>
+  );
+}
 
 export function ESQLMenu({
   hideHistory,
@@ -61,23 +91,37 @@ export function ESQLMenu({
   wasStarredRef.current = isStarred;
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="center"
-      responsive={false}
+    <div
+      className={CONTROL_GROUP_CLASS}
       css={css`
+        position: relative;
+        overflow: hidden;
         border-radius: ${euiTheme.border.radius.small};
+        display: inline-flex;
+        align-items: stretch;
+        flex-direction: row;
         border: ${euiTheme.border.thin};
         background: ${euiTheme.colors.emptyShade};
-        padding: ${euiTheme.size.xs};
+
+        &::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
+          border-radius: inherit;
+          pointer-events: none;
+        }
+
+        .${CONTROL_ICON_BUTTON_CLASS} + .${CONTROL_ICON_BUTTON_CLASS} {
+          border-inline-start: ${euiTheme.border.width.thin} solid
+            ${euiTheme.colors.borderBasePlain};
+        }
       `}
     >
-      <EuiFlexItem grow={false}>
+      <EsqlMenuIconButton>
         <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
-            size="xs"
             aria-label={searchPlaceholder}
             onClick={onToggleVisor}
             isDisabled={!onToggleVisor}
@@ -85,14 +129,13 @@ export function ESQLMenu({
             color="text"
           />
         </EuiToolTip>
-      </EuiFlexItem>
+      </EsqlMenuIconButton>
       {!hideHistory && (
-        <EuiFlexItem grow={false}>
+        <EsqlMenuIconButton>
           <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
             <StardustWrapper active={showStardust}>
               <EuiButtonIcon
                 iconType={isStarred ? 'starFill' : 'star'}
-                size="xs"
                 aria-label={starredQueryLabel}
                 className={!isStarred ? 'cm-favorite-button--empty' : ''}
                 onClick={onToggleStarredQuery}
@@ -102,14 +145,13 @@ export function ESQLMenu({
               />
             </StardustWrapper>
           </EuiToolTip>
-        </EuiFlexItem>
+        </EsqlMenuIconButton>
       )}
       {!hideHistory && (
-        <EuiFlexItem grow={false}>
+        <EsqlMenuIconButton>
           <EuiToolTip position="top" content={historyLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="clockCounter"
-              size="xs"
               aria-label={historyLabel}
               onClick={(e: React.MouseEvent) => {
                 onToggleHistory?.();
@@ -120,15 +162,14 @@ export function ESQLMenu({
               color="text"
             />
           </EuiToolTip>
-        </EuiFlexItem>
+        </EsqlMenuIconButton>
       )}
-      <EuiFlexItem grow={false}>
+      <EsqlMenuIconButton>
         <Suspense
           fallback={
             <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="question"
-                size="xs"
                 aria-label={helpLabel}
                 data-test-subj="esql-help-popover-button"
                 color="text"
@@ -139,7 +180,7 @@ export function ESQLMenu({
         >
           <LazyHelpPopover onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged} />
         </Suspense>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EsqlMenuIconButton>
+    </div>
   );
 }
