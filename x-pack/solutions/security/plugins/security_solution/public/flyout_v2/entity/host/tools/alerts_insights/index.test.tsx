@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertsInsights } from '.';
+import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const mockOpenSystemFlyout = jest.fn();
 
@@ -114,6 +115,13 @@ describe('<AlertsInsights />', () => {
     expect(header).toHaveAttribute('data-title', 'Alerts');
     expect(header).toHaveAttribute('data-label', 'my-host');
     expect(header).toHaveAttribute('data-icon-type', 'storage');
+  });
+
+  it('renders the table inside a scrollable flyout body', () => {
+    const { getByTestId } = render(<AlertsInsights value="my-host" />);
+    const body = getByTestId(ALERTS_INSIGHTS_TOOL_TEST_ID);
+    expect(body).toBeInTheDocument();
+    expect(body).toContainElement(getByTestId('mockAlertsDetailsTable'));
   });
 
   it('forwards the host name and entity id to the alerts table', () => {

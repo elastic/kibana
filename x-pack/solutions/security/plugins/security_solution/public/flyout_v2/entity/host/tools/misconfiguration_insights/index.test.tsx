@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MisconfigurationInsights } from '.';
+import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const mockOpenSystemFlyout = jest.fn();
 
@@ -106,6 +107,13 @@ describe('<MisconfigurationInsights />', () => {
     expect(header).toHaveAttribute('data-title', 'Misconfigurations');
     expect(header).toHaveAttribute('data-label', 'my-host');
     expect(header).toHaveAttribute('data-icon-type', 'storage');
+  });
+
+  it('renders the table inside a scrollable flyout body', () => {
+    const { getByTestId } = render(<MisconfigurationInsights value="my-host" />);
+    const body = getByTestId(MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID);
+    expect(body).toBeInTheDocument();
+    expect(body).toContainElement(getByTestId('mockMisconfigurationFindingsDetailsTable'));
   });
 
   it('forwards the host name and entity id to the findings table', () => {

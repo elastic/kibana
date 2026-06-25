@@ -20,6 +20,7 @@ import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use
 import { Misconfiguration } from '../../../../csp/misconfiguration';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
+import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.host.misconfigurationInsights.title',
@@ -71,13 +72,15 @@ export const MisconfigurationInsights = memo(
             iconType="storage"
           />
         </EuiFlyoutHeader>
-        <MisconfigurationFindingsDetailsTable
-          field={EntityIdentifierFields.hostName}
-          value={value}
-          entityId={entityId}
-          entityType={EntityType.host}
-          onShowFinding={onShowFinding}
-        />
+        <div className="eui-yScroll" data-test-subj={MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID}>
+          <MisconfigurationFindingsDetailsTable
+            field={EntityIdentifierFields.hostName}
+            value={value}
+            entityId={entityId}
+            entityType={EntityType.host}
+            onShowFinding={onShowFinding}
+          />
+        </div>
       </>
     );
   }
