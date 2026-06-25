@@ -270,6 +270,15 @@
       "tags": ["platform", "agent-builder", "skill-selection"],
       "ciLabels": ["evals:skill-selection-benchmark"],
       "serverConfigSet": "evals_skill_selection"
+    },
+    {
+      "id": "siem-readiness",
+      "name": "SIEM Readiness",
+      "slackChannel": "#siem-readiness",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness/playwright.config.ts",
+      "tags": ["security", "siem-readiness"],
+      "ciLabels": ["evals:siem-readiness"],
+      "serverConfigSet": "evals_tracing"
     }
   ]
 }
