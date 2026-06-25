@@ -15,6 +15,7 @@ import { ExecutionStatus, isTerminalStatus, pickManagedWorkflowFields } from '@k
 
 import { BUCKET_SIZE_MS, METERING_SOURCE_ID, WORKFLOWS_USAGE_TYPE } from './constants';
 
+const TEMP_ECH_METERING_PROVIDER = 'aws';
 const TEMP_ECH_METERING_REGION = 'eu-west-1';
 
 /**
@@ -187,7 +188,7 @@ export class WorkflowsMeteringService {
     };
 
     if (instanceGroupType !== 'serverless_project') {
-      source.provider = cloudSetup?.csp;
+      source.provider = TEMP_ECH_METERING_PROVIDER;
       source.region = TEMP_ECH_METERING_REGION;
     }
 

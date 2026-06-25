@@ -379,7 +379,7 @@ describe('WorkflowsMeteringService', () => {
       const record: UsageRecord = mockUsageReportingService.reportUsage.mock.calls[0][0][0];
       expect(record.source.instance_group_id).toBe('deploy-789');
       expect(record.source.instance_group_type).toBe('stateful_deployment');
-      expect(record.source.provider).toBe('gcp');
+      expect(record.source.provider).toBe('aws');
       expect(record.source.region).toBe('eu-west-1');
     });
   });
