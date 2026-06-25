@@ -8,12 +8,24 @@
  */
 
 import {
+  parseBooleanFilterValue,
   parseWorkflowsUrlSearchParams,
   serializeWorkflowsUrlSearchParams,
 } from './url_search_params';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
 
 describe('workflows URL search params', () => {
+  describe('parseBooleanFilterValue', () => {
+    it('parses boolean filter values from normalized strings', () => {
+      expect(parseBooleanFilterValue('true')).toBe(true);
+      expect(parseBooleanFilterValue(' false ')).toBe(false);
+    });
+
+    it('returns undefined for invalid boolean filter values', () => {
+      expect(parseBooleanFilterValue('maybe')).toBeUndefined();
+    });
+  });
+
   describe('parseWorkflowsUrlSearchParams', () => {
     it('returns default list params when the URL has no search params', () => {
       expect(parseWorkflowsUrlSearchParams('')).toEqual({

@@ -24,6 +24,7 @@ import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
+  parseBooleanFilterValue,
   parseWorkflowsUrlSearchParams,
   serializeWorkflowsUrlSearchParams,
 } from './url_search_params';
@@ -157,11 +158,13 @@ export function WorkflowsPage() {
                     values={filtersData?.enabled || []}
                     selectedValues={search.enabled || []}
                     onSelectedValuesChanged={(newValues) => {
+                      const enabled = newValues
+                        .map(parseBooleanFilterValue)
+                        .filter((value): value is boolean => value !== undefined);
+
                       setSearch({
                         ...search,
-                        enabled: newValues.map(
-                          (value) => String(value).trim().toLowerCase() === 'true'
-                        ),
+                        enabled,
                       });
                     }}
                   />

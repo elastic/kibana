@@ -38,15 +38,28 @@ const getStringArrayParam = (params: URLSearchParams, name: string): string[] | 
   return values.length > 0 ? values : undefined;
 };
 
+export const parseBooleanFilterValue = (value: string | number | boolean): boolean | undefined => {
+  const normalizedValue = String(value).trim().toLowerCase();
+
+  if (normalizedValue === 'true') {
+    return true;
+  }
+
+  if (normalizedValue === 'false') {
+    return false;
+  }
+
+  return undefined;
+};
+
 const getBooleanArrayParam = (
   params: URLSearchParams,
   name: string
 ): WorkflowsSearchParams['enabled'] => {
   const values = params
     .getAll(name)
-    .map((value) => value.trim().toLowerCase())
-    .filter((value): value is 'true' | 'false' => value === 'true' || value === 'false')
-    .map((value) => value === 'true');
+    .map(parseBooleanFilterValue)
+    .filter((value): value is boolean => value !== undefined);
 
   return values.length > 0 ? values : undefined;
 };
