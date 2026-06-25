@@ -193,6 +193,20 @@ describe('ComposeDiscoverFooter', () => {
       expect(onYamlSave).toHaveBeenCalledTimes(1);
     });
 
+    it('enables YAML save for a non-representable alert + standalone rule', () => {
+      const { onYamlSave } = renderFooter({
+        stateOverrides: { yamlMode: true, queryCommitted: true, mode: 'edit' },
+        propsOverrides: { isCreate: false },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverYamlSubmit')).not.toBeDisabled();
+      fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
+      expect(onYamlSave).toHaveBeenCalledTimes(1);
+    });
+
     it('disables YAML submit when hasValidationErrors is true', () => {
       renderFooter({
         stateOverrides: { yamlMode: true },

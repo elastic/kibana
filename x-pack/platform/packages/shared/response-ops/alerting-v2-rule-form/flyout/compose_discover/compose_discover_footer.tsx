@@ -154,7 +154,12 @@ export const ComposeDiscoverFooter = ({
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {
-    const yamlSaveDisabled = submitDisabled || yamlHasErrors;
+    /*
+     * Gate YAML Save on validity only, not the form-shape `submitDisabled`, so
+     * non-representable rules (e.g. alert + standalone) stay savable — they never
+     * produce a 'success' summary state.
+     */
+    const yamlSaveDisabled = hasValidationErrors || yamlHasErrors;
     const yamlSaveDisabledTooltip = yamlHasErrors
       ? i18n.translate('xpack.alertingV2.composeDiscover.flyout.yamlSaveDisabledTooltip', {
           defaultMessage: 'Fix the errors highlighted in the YAML editor, then save the rule.',
