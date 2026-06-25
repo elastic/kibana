@@ -81,9 +81,9 @@ export const RolloverRestrictionFields: FunctionComponent = () => (
 export const RolloverFields: FunctionComponent = () => (
   <>
     <RolloverTriggerFields />
-    <EuiSpacer size="s" />
+    <EuiSpacer />
     <RolloverRestrictionFields />
-    <EuiSpacer size="xs" />
+    <EuiSpacer />
     <RolloverRecommendedDefaultsButton />
   </>
 );

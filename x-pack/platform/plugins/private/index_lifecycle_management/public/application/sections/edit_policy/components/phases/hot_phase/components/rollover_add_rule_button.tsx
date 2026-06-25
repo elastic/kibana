@@ -10,8 +10,11 @@ import {
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiIconTip,
   EuiPopover,
   EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import type { RolloverField } from '../../../../constants';
@@ -36,7 +39,11 @@ export const RolloverAddRuleButton = <T extends RolloverField>({
   onAdd,
 }: RolloverAddRuleButtonProps<T>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const availableFields = allFields.filter((field) => !activeFields.includes(field));
+  const availableFields = allFields
+    .filter((field) => !activeFields.includes(field))
+    .sort((a, b) =>
+      rolloverFieldConfig[a].menuLabel.localeCompare(rolloverFieldConfig[b].menuLabel)
+    );
 
   if (availableFields.length === 0) {
     return (
@@ -66,18 +73,36 @@ export const RolloverAddRuleButton = <T extends RolloverField>({
       panelPaddingSize="none"
     >
       <EuiContextMenuPanel
-        items={availableFields.map((field) => (
-          <EuiContextMenuItem
-            key={field}
-            onClick={() => {
-              onAdd(field);
-              setIsPopoverOpen(false);
-            }}
-            data-test-subj={`rolloverAddField-${field}`}
-          >
-            {rolloverFieldConfig[field].menuLabel}
-          </EuiContextMenuItem>
-        ))}
+        items={availableFields.map((field) => {
+          const config = rolloverFieldConfig[field];
+
+          return (
+            <EuiContextMenuItem
+              key={field}
+              onClick={() => {
+                onAdd(field);
+                setIsPopoverOpen(false);
+              }}
+              data-test-subj={`rolloverAddField-${field}`}
+            >
+              <EuiFlexGroup>
+                <EuiFlexItem grow={true}>
+                  {config.menuLabel}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                {config.deprecationMessage && (
+                  <EuiIconTip
+                    type="warning"
+                    aria-label={config.deprecationMessage}
+                    content={config.deprecationMessage}
+                    disableScreenReaderOutput
+                  />
+                )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiContextMenuItem>
+          );
+        })}
       />
     </EuiPopover>
   );

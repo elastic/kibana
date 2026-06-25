@@ -8,7 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import { get } from 'lodash';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import { useFormContext, useFormData } from '../../../../../../../shared_imports';
 import {
@@ -47,8 +48,7 @@ export const RolloverRecommendedDefaultsButton: FunctionComponent = () => {
       }),
     [formData]
   );
-
-  return (
+  const button = (
     <EuiButtonEmpty
       flush="left"
       size="xs"
@@ -77,5 +77,22 @@ export const RolloverRecommendedDefaultsButton: FunctionComponent = () => {
     >
       {i18nTexts.editPolicy.restoreRecommendedRolloverDefaultsLabel}
     </EuiButtonEmpty>
+  );
+
+  if (!isUsingRecommendedDefaults) {
+    return button;
+  }
+
+  return (
+    <EuiToolTip
+      content={i18n.translate(
+        'xpack.indexLifecycleMgmt.hotPhase.recommendedRolloverDefaultsAppliedTooltip',
+        {
+          defaultMessage: 'Recommended defaults are already applied',
+        }
+      )}
+    >
+      {button}
+    </EuiToolTip>
   );
 };

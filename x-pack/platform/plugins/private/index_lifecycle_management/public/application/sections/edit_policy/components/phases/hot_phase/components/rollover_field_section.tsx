@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { useFormContext } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
@@ -53,7 +53,10 @@ export const RolloverFieldSection = <T extends RolloverField>({
 
         return (
           <>
-            <h4 style={{ fontWeight: 700, marginBottom: 8 }}>{title}...</h4>
+            <EuiTitle size="xxxs">
+              <h6>{title}...</h6>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
 
             <EuiPanel hasShadow={false} hasBorder={false} color="subdued" paddingSize="s">
               {activeFields.map((field, index) => (
@@ -72,7 +75,13 @@ export const RolloverFieldSection = <T extends RolloverField>({
                   />
                 </div>
               ))}
-              <div style={{ display: 'grid', gridTemplateColumns: '28px minmax(0, 1fr)' }}>
+              <div
+                style={{
+                  columnGap: 8,
+                  display: 'grid',
+                  gridTemplateColumns: '28px minmax(0, 1fr)',
+                }}
+              >
                 <span />
                 <div>
                   <RolloverAddRuleButton

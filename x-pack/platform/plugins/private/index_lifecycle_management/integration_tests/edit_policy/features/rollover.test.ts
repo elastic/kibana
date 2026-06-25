@@ -112,7 +112,9 @@ describe('<EditPolicy /> rollover', () => {
 
     await rolloverActions.rollover.setMinDocs('12');
 
-    expect(restoreDefaultsButton).toBeEnabled();
+    await waitFor(() => {
+      expect(screen.getByTestId('rolloverRestoreRecommendedDefaults')).toBeEnabled();
+    });
 
     rolloverActions.rollover.restoreRecommendedDefaults();
 

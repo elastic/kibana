@@ -13,6 +13,7 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiToolTip,
+  useEuiTheme,
   type EuiFieldNumberProps,
 } from '@elastic/eui';
 
@@ -39,6 +40,7 @@ export const RolloverRuleRow = <T extends RolloverField>({
   onRemove,
 }: RolloverRuleRowProps<T>) => {
   const config = rolloverFieldConfig[field];
+  const { euiTheme } = useEuiTheme();
   const removeButtonLabel = i18n.translate(
     'xpack.indexLifecycleMgmt.hotPhase.removeRolloverRuleLabel',
     {
@@ -58,7 +60,16 @@ export const RolloverRuleRow = <T extends RolloverField>({
     </EuiToolTip>
   );
   const conditionPrefix = (
-    <span style={{ alignSelf: 'center', fontSize: 12, textAlign: 'right' }}>{conditionLabel}</span>
+    <span
+      style={{
+        alignSelf: 'center',
+        fontSize: euiTheme.size.m,
+        fontWeight: euiTheme.font.weight.medium,
+        textAlign: 'right',
+      }}
+    >
+      {conditionLabel}
+    </span>
   );
   const fieldNamePrefix = (
     <span
@@ -66,7 +77,8 @@ export const RolloverRuleRow = <T extends RolloverField>({
         alignItems: 'center',
         display: 'inline-flex',
         gap: 4,
-        maxWidth: 188,
+        fontSize: euiTheme.size.m,
+        fontWeight: euiTheme.font.weight.medium,
         whiteSpace: 'nowrap',
       }}
     >
@@ -116,6 +128,7 @@ export const RolloverRuleRow = <T extends RolloverField>({
                         'data-test-subj': config.unitTestSubject,
                         'aria-label': config.unitAriaLabel,
                       }}
+                      buttonColor="primary"
                     />
                   ) : undefined
                 }
