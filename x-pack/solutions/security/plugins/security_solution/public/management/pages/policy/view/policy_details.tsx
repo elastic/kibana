@@ -8,7 +8,8 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { PolicyTakeActionButton } from './components/policy_take_action_button';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
 import { AgentsSummary } from './components/agents_summary';
@@ -58,14 +59,27 @@ export const PolicyDetails = React.memo(() => {
     };
   }, [getAppUrl, routeState?.backLink]);
 
-  const headerRightContent = (
-    <AgentsSummary
-      total={policyAgentStatusSummary?.active ?? 0}
-      online={policyAgentStatusSummary?.online ?? 0}
-      offline={policyAgentStatusSummary?.offline ?? 0}
-      error={policyAgentStatusSummary?.error ?? 0}
-    />
-  );
+  const headerRightContent = useMemo(() => {
+    return (
+      <>
+        <AgentsSummary
+          total={policyAgentStatusSummary?.active ?? 0}
+          online={policyAgentStatusSummary?.online ?? 0}
+          offline={policyAgentStatusSummary?.offline ?? 0}
+          error={policyAgentStatusSummary?.error ?? 0}
+        />
+        <EuiSpacer />
+        <div className="eui-textRight">
+          <PolicyTakeActionButton />
+        </div>
+      </>
+    );
+  }, [
+    policyAgentStatusSummary?.active,
+    policyAgentStatusSummary?.error,
+    policyAgentStatusSummary?.offline,
+    policyAgentStatusSummary?.online,
+  ]);
 
   const backToEndpointList = (
     <BackToExternalAppButton {...backLinkOptions} data-test-subj="policyDetailsBackLink" />
