@@ -435,7 +435,7 @@ host: "0.0.0.0:9515"
 reroute_config: {{reroute_config}}
     `;
 
-    const output = compileTemplate(rerouteConfigVars, getMockedMetaVariable(), streamTemplate);
+    const output = compileTemplate(rerouteConfigVars, streamTemplate);
     expect(output).toEqual({
       input: 'udp',
       host: '0.0.0.0:9515',
@@ -487,7 +487,7 @@ processors:
 {{/if}}
     `;
 
-    const output = compileTemplate(rerouteConfigVars, getMockedMetaVariable(), streamTemplate);
+    const output = compileTemplate(rerouteConfigVars, streamTemplate);
     expect(output.processors).toBeDefined();
     expect(output.processors).toHaveLength(3);
     expect(output.processors[0]).toEqual({ add_locale: null });

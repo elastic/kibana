@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
 import { toCompiledSecretRef } from '../../secrets';
-import { PackageInvalidArchiveError } from '../../../errors';
+import { PackageInvalidArchiveError, PackagePolicyValidationError } from '../../../errors';
 import { appContextService } from '../..';
 
 const handlebars = Handlebars.create();
