@@ -66,7 +66,7 @@ const CACHE_CONFIG_FILES = [
   'packages/kbn-rspack-optimizer/src/plugins/bundle_metrics_plugin.ts',
   'packages/kbn-rspack-optimizer/src/plugins/chunk_preload_manifest_plugin.ts',
   'packages/kbn-rspack-optimizer/limits.yml',
-  'packages/kbn-swc-config/src/browser.ts',
+  'packages/kbn-swc-config/src/browser.js',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
   UiSharedDepsNpm.dllManifestPath,

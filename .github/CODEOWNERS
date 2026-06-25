@@ -518,7 +518,6 @@ src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-presentation-team @e
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-presentation-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
-src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 src/platform/packages/shared/kbn-background-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-bench @elastic/observability-ui
 src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
@@ -688,6 +687,7 @@ src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-ai-team
 src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui @elastic/kibana-core
 src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
+src/platform/packages/shared/kbn-swc-register @elastic/kibana-operations
 src/platform/packages/shared/kbn-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team @elastic/obs-ai-team
 src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-team

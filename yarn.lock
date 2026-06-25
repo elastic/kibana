@@ -4889,10 +4889,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-register@link:src/platform/packages/shared/kbn-babel-register":
-  version "0.0.0"
-  uid ""
-
 "@kbn/babel-transform@link:src/platform/packages/private/kbn-babel-transform":
   version "0.0.0"
   uid ""
@@ -9482,6 +9478,10 @@
   uid ""
 
 "@kbn/swc-config@link:packages/kbn-swc-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/swc-register@link:src/platform/packages/shared/kbn-swc-register":
   version "0.0.0"
   uid ""
 
