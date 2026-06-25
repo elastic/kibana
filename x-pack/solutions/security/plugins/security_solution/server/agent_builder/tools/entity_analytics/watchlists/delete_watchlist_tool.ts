@@ -14,6 +14,8 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
+import { createEntitySourcesService } from '../../../../lib/entity_analytics/watchlists/entity_sources/entity_sources_service';
+import { watchlistEntitySourceTypeName } from '../../../../lib/entity_analytics/watchlists/entity_sources/infra';
 import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
 import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../../constants';
@@ -32,7 +34,8 @@ export const SECURITY_DELETE_WATCHLIST_TOOL_ID = securityTool('delete_watchlist'
 export const deleteWatchlistTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  hasEncryptionKey: boolean
 ): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SECURITY_DELETE_WATCHLIST_TOOL_ID,
@@ -69,16 +72,13 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
         }
       },
     },
-    handler: async (
-      params,
-      { spaceId, esClient, savedObjectsClient, request, prompts, callContext }
-    ) => {
+    handler: async (params, { spaceId, esClient, request, prompts, callContext }) => {
       logger.debug(
         `${SECURITY_DELETE_WATCHLIST_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
       try {
-        const [, startPlugins] = await core.getStartServices();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
 
         const privileges = await getUserWatchlistPrivileges(request, security, spaceId);
@@ -96,10 +96,17 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
           };
         }
 
+        // The watchlist-entity-source saved-object type is registered as hidden=true.
+        // A plain getScopedClient(request) cannot see it; we must opt in explicitly.
+        const soClient = coreStart.savedObjects.getScopedClient(request, {
+          includedHiddenTypes: [watchlistEntitySourceTypeName],
+        });
+
         const client = new WatchlistConfigClient({
-          soClient: savedObjectsClient,
+          soClient,
           esClient: esClient.asCurrentUser,
           internalEsClient: esClient.asInternalUser,
+          securityServiceStart: coreStart.security,
           namespace: spaceId,
           logger,
         });
@@ -156,6 +163,16 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
           };
         }
 
+        const entitySourcesService = createEntitySourcesService({
+          esClient: esClient.asCurrentUser,
+          soClient,
+          logger,
+          namespace: spaceId,
+          getStartServices: core.getStartServices,
+          hasEncryptionKey,
+        });
+
+        await entitySourcesService.deleteWatchlistEntities(params.watchlistId);
         await client.delete(params.watchlistId);
         return {
           results: [

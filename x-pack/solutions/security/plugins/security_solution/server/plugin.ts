@@ -288,7 +288,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
         isServerless: this.isServerless,
       },
-      this.isServerless
+      this.isServerless,
+      plugins.encryptedSavedObjects?.canEncrypt === true
     ).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });

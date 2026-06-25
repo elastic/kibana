@@ -33,6 +33,9 @@ const mockExperimentalFeatures = {
 
 const mockGetFn = jest.fn();
 const mockDeleteFn = jest.fn();
+const mockDeleteWatchlistEntitiesFn = jest.fn();
+const mockGetUserWatchlistPrivileges = jest.fn();
+
 jest.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_config', () => {
   const actual = jest.requireActual(
     '../../../../lib/entity_analytics/watchlists/management/watchlist_config'
@@ -46,7 +49,14 @@ jest.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_conf
   };
 });
 
-const mockGetUserWatchlistPrivileges = jest.fn();
+jest.mock(
+  '../../../../lib/entity_analytics/watchlists/entity_sources/entity_sources_service',
+  () => ({
+    createEntitySourcesService: jest.fn().mockImplementation(() => ({
+      deleteWatchlistEntities: mockDeleteWatchlistEntitiesFn,
+    })),
+  })
+);
 jest.mock(
   '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
   () => ({
@@ -98,7 +108,12 @@ const buildHandlerContextWithPrompts = (
 
 describe('deleteWatchlistTool', () => {
   const mocks = createToolTestMocks();
-  const tool = deleteWatchlistTool(mocks.mockCore, mocks.mockLogger, mockExperimentalFeatures);
+  const tool = deleteWatchlistTool(
+    mocks.mockCore,
+    mocks.mockLogger,
+    mockExperimentalFeatures,
+    true
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -121,10 +136,15 @@ describe('deleteWatchlistTool', () => {
     });
 
     it('is unavailable when the watchlists feature flag is disabled', async () => {
-      const disabledTool = deleteWatchlistTool(mocks.mockCore, mocks.mockLogger, {
-        ...mockExperimentalFeatures,
-        entityAnalyticsWatchlistEnabled: false,
-      });
+      const disabledTool = deleteWatchlistTool(
+        mocks.mockCore,
+        mocks.mockLogger,
+        {
+          ...mockExperimentalFeatures,
+          entityAnalyticsWatchlistEnabled: false,
+        },
+        true
+      );
       const result = await disabledTool.availability!.handler(
         createToolAvailabilityContext(mocks.mockRequest, 'default')
       );
@@ -211,7 +231,8 @@ describe('deleteWatchlistTool', () => {
         expect(error.data.message).toMatch(/system-managed/i);
       });
 
-      it('on accept: deletes without re-fetching', async () => {
+      it('on accept: cleans up entities then deletes without re-fetching', async () => {
+        mockDeleteWatchlistEntitiesFn.mockResolvedValueOnce(undefined);
         mockDeleteFn.mockResolvedValueOnce(undefined);
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
@@ -223,6 +244,7 @@ describe('deleteWatchlistTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(mockGetFn).not.toHaveBeenCalled();
+        expect(mockDeleteWatchlistEntitiesFn).toHaveBeenCalledWith('wl-1');
         expect(mockDeleteFn).toHaveBeenCalledWith('wl-1');
         const other = result.results[0] as OtherResult;
         expect(other.type).toBe(ToolResultType.other);
@@ -263,6 +285,7 @@ describe('deleteWatchlistTool', () => {
     });
 
     it('returns an error result when delete throws after accept', async () => {
+      mockDeleteWatchlistEntitiesFn.mockResolvedValueOnce(undefined);
       mockDeleteFn.mockRejectedValueOnce(new Error('boom'));
       const ctx = buildHandlerContextWithPrompts(mocks, {
         checkStatus: ConfirmationStatus.accepted,
