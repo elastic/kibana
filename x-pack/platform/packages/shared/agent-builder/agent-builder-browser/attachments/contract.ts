@@ -86,6 +86,21 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
 }
 
 /**
+ * EUI button color values, mirrored here to avoid a direct @elastic/eui dependency
+ * in this shared-common package.
+ */
+export type ActionButtonColor =
+  | 'text'
+  | 'accent'
+  | 'accentSecondary'
+  | 'primary'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'neutral'
+  | 'risk';
+
+/**
  * Action button definition for inline-rendered attachments.
  */
 export interface ActionButton {
@@ -95,6 +110,8 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
+  /** Optional EUI button color override (defaults to 'text') */
+  color?: ActionButtonColor;
   /** Whether the action is currently unavailable */
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */

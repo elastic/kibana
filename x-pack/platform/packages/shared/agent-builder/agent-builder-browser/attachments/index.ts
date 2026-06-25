@@ -16,6 +16,7 @@ export type {
   HeaderData,
   HeaderBadge,
   ActionButton,
+  ActionButtonColor,
   AttachmentPreviewState,
   AttachmentLifecycleParams,
 } from './contract';

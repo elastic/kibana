@@ -90,6 +90,7 @@ const mergeInputAttachmentsIntoAttachmentState = async (
           {
             data: input.data,
             ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+            ...(input.description !== undefined ? { description: input.description } : {}),
           },
           ATTACHMENT_REF_ACTOR.user
         );
