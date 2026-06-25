@@ -11,11 +11,14 @@ import type {
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { Subscription } from 'rxjs';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
+import type { TelemetryServiceStart } from '../../common/lib/telemetry';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
@@ -165,6 +168,37 @@ export const registerRuleAttachment = ({
     './rule'
   ).then(({ registerRuleAttachment: register }) => {
     register({ attachments, application, aiRuleCreation, uiSettings });
+  });
+};
+
+/**
+ * Wires save subscriptions for AI rule creation. Dynamically imports
+ * {@link createAiRuleCreationHandler} so Detection Engine API clients, transforms, and Zod
+ * schemas stay off the main `securitySolution` page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — resolves during plugin
+ * start well before a user can save from chat.
+ */
+export const registerAiRuleCreationHandler = ({
+  aiRuleCreation,
+  notifications,
+  agentBuilder,
+  telemetry,
+  register,
+}: {
+  aiRuleCreation: AiRuleCreationService;
+  notifications: NotificationsStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  telemetry: TelemetryServiceStart;
+  register: (subscription: Subscription) => void;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_ai_rule_creation_handler" */
+    '../../detection_engine/common/ai_rule_creation_handler'
+  ).then(({ createAiRuleCreationHandler }) => {
+    register(
+      createAiRuleCreationHandler({ aiRuleCreation, notifications, agentBuilder, telemetry })
+    );
   });
 };
 
