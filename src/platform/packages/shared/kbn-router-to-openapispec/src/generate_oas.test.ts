@@ -793,6 +793,50 @@ describe('generateOpenApiDocument', () => {
         expectedState: 'Generally available',
       },
       {
+        name: 'router with tech_preview stability',
+        routerConfig: {
+          routers: {
+            testRouter: {
+              routes: [
+                {
+                  path: '/test-path/{id}/{path*}',
+                  options: { availability: { stability: 'tech_preview' }, access: 'public' },
+                },
+              ],
+            },
+          },
+          versionedRouters: {},
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path/{id}/{path}',
+        expectedState: 'Technical Preview',
+      },
+      {
+        name: 'versioned router with tech_preview stability',
+        routerConfig: {
+          routers: {},
+          versionedRouters: {
+            testVersionedRouter: {
+              routes: [
+                {
+                  path: '/test-path',
+                  options: {
+                    access: 'public',
+                    options: { availability: { stability: 'tech_preview' } },
+                    security: {
+                      authz: {
+                        requiredPrivileges: ['foo'],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path',
+        expectedState: 'Technical Preview',
+      },
+      {
         name: 'versioned router without availability',
         routerConfig: {
           routers: {},
