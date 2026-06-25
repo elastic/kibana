@@ -20,6 +20,11 @@ export const NO_FABRICATION_EVALUATOR_NAME = 'No Fabrication';
  * Scores negative examples only (see {@link isNegativeExample}). On positive
  * examples it returns `score: null` (N/A) so it does not affect their averages —
  * the symmetric counterpart to gating the quality evaluators off negatives.
+ *
+ * A `null` insights array means the task errored (`runAttackDiscovery` returns
+ * `{ insights: null, errors }` on failure), not that the model refrained, so it
+ * is also scored N/A — otherwise a failed connector on a negative case would be
+ * credited as a flawless refrain and mask infra failures behind a perfect metric.
  */
 export const createNoFabricationEvaluator = (): Evaluator<
   AttackDiscoveryDatasetExample,
@@ -37,7 +42,16 @@ export const createNoFabricationEvaluator = (): Evaluator<
         };
       }
 
-      const count = output?.insights?.length ?? 0;
+      // `null` insights means the task errored, not that the model refrained.
+      if (output?.insights == null) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'Task produced no output (error) — fabrication check not applicable.',
+        };
+      }
+
+      const count = output.insights.length;
       const refrained = count === 0;
 
       return {

@@ -39,11 +39,11 @@ describe('createNoFabricationEvaluator', () => {
     expect(result.label).toBe('PASS');
   });
 
-  it('passes a negative case whose insights are null', async () => {
+  it('returns N/A on a negative case whose task errored (null insights)', async () => {
     const evaluator = createNoFabricationEvaluator();
     const result = await evaluator.evaluate(params(null, { negative: true }));
-    expect(result.score).toBe(1);
-    expect(result.label).toBe('PASS');
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
   });
 
   it('fails a negative case that fabricated insights', async () => {
