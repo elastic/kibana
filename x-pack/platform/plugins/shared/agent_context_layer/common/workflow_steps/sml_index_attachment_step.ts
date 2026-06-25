@@ -40,7 +40,6 @@ const MAX_SML_CONTENT_LENGTH = 50_000;
 const MAX_SML_REFERENCES = 100;
 const MAX_SML_TAGS = 100;
 const MAX_SML_TAG_LENGTH = 100;
-
 const ChunkSchema = z
   .object({
     type: z
