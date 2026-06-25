@@ -899,7 +899,7 @@ describe('runRelationshipMaintainer', () => {
 
     it('omits the @timestamp range from the esql.query filter when disableLookbackWindow is true', async () => {
       const { esClient, search, esql } = makeEsClient();
-      const { crudClient } = makeCrudClient();
+      const { crudClient, entityMetadataClient } = makeClients();
       search.mockResolvedValueOnce(
         successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
       );
@@ -909,6 +909,7 @@ describe('runRelationshipMaintainer', () => {
         logger: loggerMock.create(),
         namespace: 'default',
         crudClient,
+        entityMetadataClient,
         integrations: [{ ...baseConfig, disableLookbackWindow: true }],
       });
       const [esqlArg] = esql.mock.calls[0] as [
