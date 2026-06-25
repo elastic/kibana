@@ -29,6 +29,8 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -184,7 +186,19 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      await this.deps.crudService.createWorkflowDocument(workflowDocumentId, spaceId, document);
+      const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
+      const documentWithVersion = maybeApplyWorkflowVersion(document, undefined, versioningEnabled);
+      const savedDocument = await this.deps.crudService.createWorkflowDocument(
+        workflowDocumentId,
+        spaceId,
+        documentWithVersion
+      );
+      await this.deps.crudService.logWorkflowChangesAfterWrite({
+        workflows: [{ id: workflowDocumentId, document: savedDocument }],
+        action: WorkflowChangeHistoryAction.workflowInstall,
+        spaceId,
+        timestamp: now,
+      });
       return;
     }
 
@@ -221,10 +235,22 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    await this.deps.crudService.writeWorkflowDocumentWithOcc(workflowDocumentId, spaceId, {
-      document,
-      ifSeqNo: existingDocument.seqNo,
-      ifPrimaryTerm: existingDocument.primaryTerm,
+    const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
+    const documentWithVersion = maybeApplyWorkflowVersion(document, existing, versioningEnabled);
+    const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
+      workflowDocumentId,
+      spaceId,
+      {
+        document: documentWithVersion,
+        ifSeqNo: existingDocument.seqNo,
+        ifPrimaryTerm: existingDocument.primaryTerm,
+      }
+    );
+    await this.deps.crudService.logWorkflowChangesAfterWrite({
+      workflows: [{ id: workflowDocumentId, document: savedDocument }],
+      action: WorkflowChangeHistoryAction.workflowUpdate,
+      spaceId,
+      timestamp: now,
     });
   }
 

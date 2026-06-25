@@ -9,6 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
@@ -62,10 +63,12 @@ import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import type {
+  SearchExecutionsViewParams,
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
+import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
@@ -264,7 +267,7 @@ export class WorkflowsManagementApi {
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
-    options?: { includeExecutionHistory?: boolean }
+    options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
     return this.workflowsService.getWorkflows(params, spaceId, options);
   }
@@ -282,6 +285,14 @@ export class WorkflowsManagementApi {
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
     return this.workflowsService.getWorkflow(id, spaceId);
+  }
+
+  public async getHistoryForWorkflow(
+    id: string,
+    spaceId: string,
+    options?: { page?: number; perPage?: number }
+  ): Promise<WorkflowChangesHistoryResponse> {
+    return this.workflowsService.getHistoryForWorkflow(id, spaceId, options);
   }
 
   public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
@@ -750,6 +761,13 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowExecutions(params, spaceId);
   }
 
+  public async searchExecutionsView(
+    params: SearchExecutionsViewParams,
+    spaceId: string
+  ): Promise<estypes.SearchResponse<unknown>> {
+    return this.workflowsService.searchExecutionsView(params, spaceId);
+  }
+
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
@@ -872,7 +890,10 @@ export class WorkflowsManagementApi {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
 
-  public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {
+  public async getWorkflowStats(
+    spaceId: string,
+    options?: { includeExecutionStats?: boolean; includeManagedExecutionStats?: boolean }
+  ) {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
