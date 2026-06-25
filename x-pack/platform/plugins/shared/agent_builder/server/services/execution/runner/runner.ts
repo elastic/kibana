@@ -34,7 +34,10 @@ import type {
   SubAgentExecutor,
   WritableToolResultStore,
 } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import type {
   ConversationStateManager,
   PromptManager,
@@ -235,18 +238,23 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 
-    const experimentalEnabled = await runnerDeps.uiSettings
-      .asScopedToClient(runnerDeps.savedObjects.getScopedClient(request))
-      .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-      .catch(() => false);
+    const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
+      runnerDeps.savedObjects.getScopedClient(request)
+    );
+    const [experimentalEnabled, bashEnabled] = await Promise.all([
+      uiSettingsClient
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+        .catch(() => false),
+      uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+    ]);
     const experimentalFeatures: ExperimentalFeatures = {
-      filestore: true,
       skills: true,
       subagents: experimentalEnabled,
       todos: experimentalEnabled,
       datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
       askUserQuestion: false, // isExperimentalEnabled,
+      bash: bashEnabled,
     };
 
     const allDeps = {
