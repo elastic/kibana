@@ -23,6 +23,7 @@ import type {
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import type { LeasePool } from '../lease_pool';
 import { buildClientLeaseKey } from './build_client_lease_key';
+import { AllowlistDeniedError } from './create_connector_network';
 
 type RecordUnknown = Record<string, unknown>;
 interface FetchOptions {
@@ -142,7 +143,13 @@ export const generateExecutorFunction = ({
           clientType.terminate
         );
       } catch (err) {
-        const isUser = isUserError(err) || (clientType.isUserError?.(err) ?? false);
+        // An allowlist (SSRF) denial is permanent bad config, not a retryable fault:
+        // classify it at the framework seam so every client type benefits, rather than
+        // relying on each client to string-match the message.
+        const isUser =
+          err instanceof AllowlistDeniedError ||
+          isUserError(err) ||
+          (clientType.isUserError?.(err) ?? false);
         throw createTaskRunError(err, isUser ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK);
       }
     };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createConnectorNetwork } from './create_connector_network';
+import { createConnectorNetwork, AllowlistDeniedError } from './create_connector_network';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
 describe('createConnectorNetwork', () => {
@@ -35,19 +35,33 @@ describe('createConnectorNetwork', () => {
     expect(mockConfigUtils.ensureHostnameAllowed).toHaveBeenCalledWith('allowed.example.com');
   });
 
-  it('propagates errors from ensureUriAllowed', () => {
+  it('wraps an ensureUriAllowed denial in AllowlistDeniedError, preserving message and cause', () => {
+    const original = new Error('URI not allowed');
     (mockConfigUtils.ensureUriAllowed as jest.Mock).mockImplementation(() => {
-      throw new Error('URI not allowed');
+      throw original;
     });
     const network = createConnectorNetwork(mockConfigUtils);
-    expect(() => network.ensureUriAllowed('https://denied.example.com')).toThrow('URI not allowed');
+
+    const thrown = (() => {
+      try {
+        network.ensureUriAllowed('https://denied.example.com');
+      } catch (e) {
+        return e;
+      }
+    })();
+
+    expect(thrown).toBeInstanceOf(AllowlistDeniedError);
+    expect((thrown as Error).message).toBe('URI not allowed');
+    expect((thrown as Error).cause).toBe(original);
   });
 
-  it('propagates errors from ensureHostnameAllowed', () => {
+  it('wraps an ensureHostnameAllowed denial in AllowlistDeniedError', () => {
     (mockConfigUtils.ensureHostnameAllowed as jest.Mock).mockImplementation(() => {
       throw new Error('hostname not allowed');
     });
     const network = createConnectorNetwork(mockConfigUtils);
+
+    expect(() => network.ensureHostnameAllowed('denied.example.com')).toThrow(AllowlistDeniedError);
     expect(() => network.ensureHostnameAllowed('denied.example.com')).toThrow(
       'hostname not allowed'
     );

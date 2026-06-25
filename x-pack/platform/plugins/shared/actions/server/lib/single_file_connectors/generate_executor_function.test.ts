@@ -9,9 +9,16 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
 import { setConnectorActionErrorMeta } from '@kbn/connector-specs';
-import type { ActionContext, ConnectorNetwork, ConnectorSpec } from '@kbn/connector-specs';
+import type {
+  ActionContext,
+  BuildContext,
+  ConnectorNetwork,
+  ConnectorSpec,
+} from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import { LeasePool } from '../lease_pool';
+import { createConnectorNetwork } from './create_connector_network';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
@@ -516,6 +523,58 @@ describe('generateExecutorFunction', () => {
 
       expect(thrown).toBeInstanceOf(Error);
       expect(getErrorSource(thrown)).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
+    it('tags an allowlist (SSRF) denial as USER, not a retryable FRAMEWORK error', async () => {
+      // Real network seam over a config that denies every host, i.e. the connector's
+      // serverUrl is no longer on xpack.actions.allowedHosts (tightened after save).
+      const denyingConfigUtils = {
+        ensureUriAllowed: (uri: string) => {
+          throw new Error(
+            `target url "${uri}" is not added to the Kibana config xpack.actions.allowedHosts`
+          );
+        },
+        ensureHostnameAllowed: (host: string) => {
+          throw new Error(
+            `target hostname "${host}" is not added to the Kibana config xpack.actions.allowedHosts`
+          );
+        },
+      } as unknown as ActionsConfigurationUtilities;
+      const network = createConnectorNetwork(denyingConfigUtils);
+
+      const fakeClientType = {
+        id: 'mcp',
+        // build runs the allowlist check at connect time, like mcpClientType does.
+        build: jest.fn(async (ctx: BuildContext) => {
+          ctx.network.ensureUriAllowed('http://denied.example');
+          return {};
+        }),
+        terminate: jest.fn().mockResolvedValue(undefined),
+        // No client-level isUserError on purpose: an allowlist denial must be
+        // classified by the framework seam, not by each client string-matching a message.
+      };
+
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as GetClient)('mcp');
+        return {};
+      });
+
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        network,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.USER);
     });
 
     it('returns {status:error} for an untagged handler error — no getClient involved (regression)', async () => {
