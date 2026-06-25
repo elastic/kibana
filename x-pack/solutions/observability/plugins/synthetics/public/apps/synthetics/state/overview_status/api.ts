@@ -65,10 +65,11 @@ export const fetchStaleStatus = async ({
   pageState: MonitorOverviewPageState;
   monitorQueryIds: string[];
 }): Promise<OverviewStaleStatus> => {
-  const params = toStatusOverviewQueryArgs(pageState);
-  return apiService.get(
+  const { monitorQueryIds: _ignoredMonitorQueryIds, ...params } = toStatusOverviewQueryArgs(pageState);
+  return apiService.post(
     SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
-    { ...params, monitorQueryIds },
-    OverviewStaleStatusCodec
+    { monitorQueryIds },
+    OverviewStaleStatusCodec,
+    params
   );
 };

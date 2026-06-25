@@ -8,7 +8,7 @@ import { OverviewStatusService } from './overview_status_service';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { OverviewStaleStatus, OverviewStatusState } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { OverviewStatusSchema } from '../common';
+import { OverviewStatusSchema, OverviewStatusStaleBodySchema } from '../common';
 
 export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -31,10 +31,11 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = () => 
  * stale ones — kept as a separate request so the main overview stays fast.
  */
 export const createGetStaleStatusRoute: SyntheticsRestApiRouteFactory = () => ({
-  method: 'GET',
+  method: 'POST',
   path: SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
   validate: {
     query: OverviewStatusSchema,
+    body: OverviewStatusStaleBodySchema,
   },
   handler: async (routeContext): Promise<OverviewStaleStatus> => {
     const statusOverview = new OverviewStatusService(routeContext);

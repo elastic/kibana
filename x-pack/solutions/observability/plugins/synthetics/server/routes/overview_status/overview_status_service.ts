@@ -13,7 +13,7 @@ import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import type { OverviewStatusQuery } from '../common';
+import type { OverviewStatusQuery, OverviewStatusStaleBody } from '../common';
 import { getMonitorFilters, MONITOR_STATUS_PING_SEARCH_FIELDS } from '../common';
 import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
@@ -201,7 +201,10 @@ export class OverviewStatusService {
       return { priorRuns: [] };
     }
 
-    const { monitorQueryIds } = this.routeContext.request.query || {};
+    const { monitorQueryIds } =
+      (this.routeContext.request.body as OverviewStatusStaleBody | undefined) ??
+      this.routeContext.request.query ??
+      {};
     const monitorIds = (
       Array.isArray(monitorQueryIds) ? monitorQueryIds : monitorQueryIds ? [monitorQueryIds] : []
     ).filter(Boolean);

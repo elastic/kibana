@@ -20,6 +20,8 @@ import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
 // A datemath expression or ISO-8601 timestamp is well under this; the cap only
 // exists to keep the date-range query params from being unbounded strings.
 const MAX_DATE_RANGE_PARAM_LENGTH = 256;
+const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
+const MAX_MONITOR_QUERY_ID_LENGTH = 256;
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -82,6 +84,15 @@ export const OverviewStatusSchema = schema.object({
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
+
+export const OverviewStatusStaleBodySchema = schema.object({
+  monitorQueryIds: schema.arrayOf(schema.string({ maxLength: MAX_MONITOR_QUERY_ID_LENGTH }), {
+    minSize: 1,
+    maxSize: MAX_MONITOR_QUERY_IDS_IN_BODY,
+  }),
+});
+
+export type OverviewStatusStaleBody = TypeOf<typeof OverviewStatusStaleBodySchema>;
 
 export const MONITOR_SEARCH_FIELDS = [
   'name',
