@@ -8,6 +8,7 @@
 import { useQuery, useMutation, useQueryClient, type UseMutationResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../../util/errors';
 import type {
   MemoryEntry,
   MemoryCategoryNode,
@@ -31,7 +32,11 @@ export const useMemoryTree = () => {
   const { core } = useKibana();
   return useQuery({
     queryKey: memoryKeys.categories,
-    queryFn: () => core.http.get<{ tree: MemoryCategoryNode[] }>(`${MEMORY_BASE}/categories`),
+    queryFn: () =>
+      core.http.get<{
+        tree: MemoryCategoryNode[];
+        uncategorized: Array<{ id: string; name: string; title: string }>;
+      }>(`${MEMORY_BASE}/categories`),
   });
 };
 
@@ -95,12 +100,27 @@ export const useMemoryMutations = () => {
     queryClient.invalidateQueries({ queryKey: memoryKeys.all });
   };
 
+  const onMutationError = (error: unknown) => {
+    core.notifications.toasts.addError(getFormattedError(error), {
+      title: i18n.translate('xpack.streams.memory.mutationError', {
+        defaultMessage: 'Failed to save memory entry.',
+      }),
+    });
+  };
+
   const createEntry = useMutation({
-    mutationFn: (params: { name: string; title: string; content: string; tags?: string[] }) =>
+    mutationFn: (params: {
+      name: string;
+      title: string;
+      content: string;
+      tags?: string[];
+      categories?: string[];
+    }) =>
       core.http.post<MemoryEntry>(`${MEMORY_BASE}/entries`, {
         body: JSON.stringify(params),
       }),
     onSuccess: invalidateMemory,
+    onError: onMutationError,
   });
 
   const updateEntry = useMutation({
@@ -112,18 +132,21 @@ export const useMemoryMutations = () => {
       title?: string;
       content?: string;
       tags?: string[];
+      categories?: string[];
       change_summary?: string;
     }) =>
       core.http.put<MemoryEntry>(`${MEMORY_BASE}/entries/${id}`, {
         body: JSON.stringify(params),
       }),
     onSuccess: invalidateMemory,
+    onError: onMutationError,
   });
 
   const deleteEntry = useMutation({
     mutationFn: (id: string) =>
       core.http.delete<{ deleted: boolean }>(`${MEMORY_BASE}/entries/${id}`),
     onSuccess: invalidateMemory,
+    onError: onMutationError,
   });
 
   return { createEntry, updateEntry, deleteEntry };
@@ -187,6 +210,15 @@ export const useSynthesizeMemory = () => {
     `${MEMORY_BASE}/_synthesize`,
     i18n.translate('xpack.streams.memory.synthesizeActionName', {
       defaultMessage: 'Synthesize memory',
+    })
+  );
+};
+
+export const useDetectGaps = () => {
+  return useMemoryTaskAction(
+    `${MEMORY_BASE}/_detect_gaps`,
+    i18n.translate('xpack.streams.memory.detectGapsActionName', {
+      defaultMessage: 'Detect gaps',
     })
   );
 };
