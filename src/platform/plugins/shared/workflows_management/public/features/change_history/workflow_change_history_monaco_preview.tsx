@@ -134,6 +134,8 @@ export const WorkflowChangeHistoryMonacoPreview = ({
   const [diffCurrentIndex, setDiffCurrentIndex] = useState(0);
   const [diffTotalChanges, setDiffTotalChanges] = useState(0);
   const [compareMode, setCompareMode] = useState<WorkflowChangeHistoryCompareMode>('unified');
+  const compareModeRef = useRef(compareMode);
+  compareModeRef.current = compareMode;
   const [highlightValidationErrors, setHighlightValidationErrors] = useState(true);
   const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
   const [isEditorMounted, setIsEditorMounted] = useState(false);
@@ -164,11 +166,16 @@ export const WorkflowChangeHistoryMonacoPreview = ({
     }
 
     if (hasCompare && compareYaml != null) {
+      const mountCompareMode = compareModeRef.current;
       const originalModel = monaco.editor.createModel(compareYaml, 'yaml');
       const modifiedModel = monaco.editor.createModel(yaml, 'yaml');
-      const diffEditor = monaco.editor.createDiffEditor(container, getDiffEditorOptions('unified'));
+      const diffEditor = monaco.editor.createDiffEditor(
+        container,
+        getDiffEditorOptions(mountCompareMode)
+      );
 
       diffEditor.setModel({ original: originalModel, modified: modifiedModel });
+      configureDiffEditors(diffEditor, mountCompareMode);
       diffEditorRef.current = diffEditor;
       editorRef.current = null;
       setIsEditorMounted(true);
