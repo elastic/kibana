@@ -65,7 +65,7 @@ describe('adUpdateJobConfigTool', () => {
       });
     });
 
-    it('operation=create_calendar_event calls ml.postCalendarEvents', async () => {
+    it('operation=create_calendar_event calls ml.postCalendarEvents with default calendar_id', async () => {
       const ml = createMlMock();
       const event = {
         start_time: '2024-01-01T00:00:00Z',
@@ -78,6 +78,28 @@ describe('adUpdateJobConfigTool', () => {
       );
       expect(ml.postCalendarEvents).toHaveBeenCalledWith({
         calendar_id: 'calendar-my-job',
+        events: [event],
+      });
+    });
+
+    it('operation=create_calendar_event uses provided calendar_id', async () => {
+      const ml = createMlMock();
+      const event = {
+        start_time: '2024-01-01T00:00:00Z',
+        end_time: '2024-01-02T00:00:00Z',
+        description: 'holiday',
+      };
+      await adUpdateJobConfigTool.handler(
+        {
+          operation: 'create_calendar_event',
+          job_id: 'my-job',
+          calendar_id: 'holiday-cal',
+          calendar_event: event,
+        },
+        createContext(ml)
+      );
+      expect(ml.postCalendarEvents).toHaveBeenCalledWith({
+        calendar_id: 'holiday-cal',
         events: [event],
       });
     });

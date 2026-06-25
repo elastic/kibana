@@ -43,6 +43,12 @@ const schema = z.object({
     .optional()
     .describe('Required for update_delayed_data_check.'),
   calendar_event: calendarEventSchema.optional().describe('Required for create_calendar_event.'),
+  calendar_id: z
+    .string()
+    .optional()
+    .describe(
+      'Optional for create_calendar_event. Calendar ID to add the event to. Defaults to "calendar-{job_id}".'
+    ),
 });
 
 export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
@@ -53,7 +59,15 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
     'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event.',
   schema,
   handler: async (
-    { operation, job_id: jobId, memory_limit, query_delay, delayed_data_check, calendar_event },
+    {
+      operation,
+      job_id: jobId,
+      memory_limit,
+      query_delay,
+      delayed_data_check,
+      calendar_event,
+      calendar_id,
+    },
     { esClient }
   ) => {
     const ml = esClient.asCurrentUser.ml;
@@ -91,7 +105,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
               results: [createErrorResult('calendar_event is required for create_calendar_event')],
             };
           }
-          const calendarId = `calendar-${jobId}`;
+          const calendarId = calendar_id ?? `calendar-${jobId}`;
           const response = await ml.postCalendarEvents({
             calendar_id: calendarId,
             events: [calendar_event],
