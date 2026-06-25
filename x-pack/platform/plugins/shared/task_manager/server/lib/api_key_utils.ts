@@ -39,9 +39,13 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
   return user?.authentication_type === 'api_key';
 };
 
+export const hasApiKey = (user: AuthenticatedUser | null, request: KibanaRequest) => {
+  return request.isFakeRequest || (user != null && isRequestApiKeyType(user));
+};
+
 export const requestHasApiKey = (security: SecurityServiceStart, request: KibanaRequest) => {
   const user = security.authc.getCurrentUser(request);
-  return (user && isRequestApiKeyType(user)) || request.isFakeRequest;
+  return hasApiKey(user, request);
 };
 
 export const getApiKeyFromRequest = (request: KibanaRequest) => {
@@ -63,8 +67,8 @@ export const shouldCloneApiKeyFromRequest = (
   options?: GrantApiKeysOpts,
   user: AuthenticatedUser | null = security.authc.getCurrentUser(request)
 ) => {
-  const hasApiKey = (user && isRequestApiKeyType(user)) || request.isFakeRequest;
-  if (!hasApiKey) {
+  const requestCarriesApiKey = (user && isRequestApiKeyType(user)) || request.isFakeRequest;
+  if (!requestCarriesApiKey) {
     return false;
   }
 
@@ -122,13 +126,18 @@ export const createApiKey = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
   security: SecurityServiceStart,
-  options?: GrantApiKeysOpts
+  options?: GrantApiKeysOpts,
+  preResolved?: {
+    user: AuthenticatedUser | null;
+    apiKeyCreatedByUser: boolean;
+  }
 ) => {
   if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
     throw Error('API keys are not enabled, cannot create API key.');
   }
 
-  const user = security.authc.getCurrentUser(request);
+  const user = preResolved?.user ?? security.authc.getCurrentUser(request);
+  const apiKeyCreatedByUser = preResolved?.apiKeyCreatedByUser ?? hasApiKey(user, request);
 
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
   const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, options, user);
@@ -152,8 +161,8 @@ export const createApiKey = async (
     });
   }
 
-  // If the user passed in their own API key, use the API key from the request
-  if (requestHasApiKey(security, request)) {
+  // If the user passed in their own API key or the request is a fake request, use the API key from the request
+  if (apiKeyCreatedByUser) {
     const apiKeyCreateResult = getApiKeyFromRequest(request);
 
     if (!apiKeyCreateResult) {
@@ -193,9 +202,16 @@ export const getApiKeyAndUserScope = async (
   security: SecurityServiceStart,
   options?: GrantApiKeysOpts
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
-  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security, options);
   const user = security.authc.getCurrentUser(request);
   const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, options, user);
+  // When cloning, the resulting key is owned by Task Manager (not the caller), so it must not be
+  // treated as user-created and must be invalidated on task removal.
+  const apiKeyCreatedByUser = hasApiKey(user, request) && !cloneApiKey;
+
+  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security, options, {
+    user,
+    apiKeyCreatedByUser,
+  });
 
   const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
 
@@ -210,7 +226,8 @@ export const getApiKeyAndUserScope = async (
           // Set apiKeyCreatedByUser to true if the request includes its own API key, since we do
           // not want to invalidate a specific API key that was not created by the task manager.
           // Cloned and granted keys are owned by Task Manager and invalidated on task removal.
-          apiKeyCreatedByUser: requestHasApiKey(security, request) && !cloneApiKey,
+          apiKeyCreatedByUser,
+          userProfileId: user?.profile_uid,
         },
       });
     }
