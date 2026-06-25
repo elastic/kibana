@@ -14,9 +14,8 @@ import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { DeploySettingsStepState, ServiceChipState } from '../../onboarding_flow_context';
+import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
-
-const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
 interface ServiceSettingsPersistedState {
   globalRegion: string;
@@ -116,6 +115,16 @@ function buildPackageVars(
   return Object.keys(vars).length > 0 ? vars : undefined;
 }
 
+function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<string> {
+  return new Set((pkgInfo.vars ?? []).map((v) => v.name));
+}
+
+function buildAgentlessPolicyName(services: AwsServiceMatrixEntry[]): string {
+  // truncating serviceIds in policy name to limit the length, the suffix of timestamp should ensure uniqueness
+  const serviceIdsTruncated = services.map((s) => s.id).join('_').slice(0, 100);
+  return `${serviceIdsTruncated}-${Date.now()}`;
+}
+
 interface PackageDeployOutcome {
   policyId?: string;
 }
@@ -160,17 +169,11 @@ async function deployPackage(
     }
   }
 
-  const pkgVarNames = new Set<string>(
-    ((pkgInfo as any).vars ?? []).map((v: any) => v.name as string)
-  );
+  const pkgVarNames = getPackageVarNames(pkgInfo);
   const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
 
-  const serviceIdsPart = services
-    .map((s) => s.id)
-    .join('_')
-    .slice(0, 100);
   const response = await sendCreateAgentlessPolicy({
-    name: `${serviceIdsPart}-${Date.now()}`,
+    name: buildAgentlessPolicyName(services),
     namespace,
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
@@ -259,7 +262,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         .map((id) => AWS_SERVICES_MAP.get(id))
         .filter(
           (s): s is AwsServiceMatrixEntry =>
-            s !== undefined && s.deliveryMethods.some((dm) => dm.method === 'agentless')
+            s !== undefined && s.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)
         ),
     [selectedServiceIds]
   );

@@ -24,13 +24,13 @@ interface PersistedState {
   serviceVars: Record<string, ServiceVars>;
 }
 
-const SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
+export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [persisted, setPersisted] = useSessionStorage<PersistedState>(SESSION_KEY, {
+  const [persisted, setPersisted] = useSessionStorage<PersistedState>(SERVICE_SETTINGS_SESSION_KEY, {
     globalRegion: '',
     serviceVars: {},
   });
