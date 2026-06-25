@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
-import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge, useEuiTheme } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type {
@@ -68,10 +68,6 @@ export const staticStyles = {
   devAppContainer: devAppContainerStyles,
 
   devApp: devAppContainerStyles,
-
-  devAppTabBeta: css`
-    vertical-align: middle;
-  `,
 };
 
 const useStyles = () => {
@@ -171,18 +167,7 @@ function DevToolsWrapper({
               }}
             >
               <EuiToolTip content={currentDevTool.tooltipContent}>
-                <span tabIndex={0}>
-                  {currentDevTool.title}{' '}
-                  {currentDevTool.isBeta && (
-                    <EuiBetaBadge
-                      size="s"
-                      css={styles.devAppTabBeta}
-                      label={i18n.translate('devTools.badge.betaLabel', {
-                        defaultMessage: 'Beta',
-                      })}
-                    />
-                  )}
-                </span>
+                <span tabIndex={0}>{currentDevTool.title}</span>
               </EuiToolTip>
             </EuiTab>
           ))}

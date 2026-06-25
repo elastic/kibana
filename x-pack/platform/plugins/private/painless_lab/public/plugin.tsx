@@ -42,7 +42,6 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
     const devTool = devTools.register({
       id: 'painless_lab',
       order: 7,
-      isBeta: true,
       title: i18n.translate('xpack.painlessLab.displayName', {
         defaultMessage: 'Painless Lab',
       }),

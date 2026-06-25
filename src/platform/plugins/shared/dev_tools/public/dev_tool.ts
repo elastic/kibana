@@ -42,11 +42,6 @@ export class DevToolApp {
   public readonly mount: (params: DevToolMountParams) => AppUnmount | Promise<AppUnmount>;
 
   /**
-   * Mark the navigation tab as beta.
-   */
-  public readonly isBeta?: boolean;
-
-  /**
    * Flag indicating to disable the tab of this dev tool. Navigating to a
    * disabled dev tool will be treated as the navigation to an unknown route
    * (redirect to the console).
@@ -76,8 +71,7 @@ export class DevToolApp {
     enableRouting: boolean,
     order: number,
     toolTipContent = '',
-    disabled = false,
-    isBeta?: boolean
+    disabled = false
   ) {
     this.id = id;
     this.title = title;
@@ -86,7 +80,6 @@ export class DevToolApp {
     this.order = order;
     this.tooltipContent = toolTipContent;
     this.disabled = disabled;
-    this.isBeta = isBeta;
   }
 
   public enable() {
@@ -110,6 +103,5 @@ export const createDevToolApp = ({
   order,
   tooltipContent,
   disabled,
-  isBeta,
 }: CreateDevToolArgs) =>
-  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled, isBeta);
+  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled);
