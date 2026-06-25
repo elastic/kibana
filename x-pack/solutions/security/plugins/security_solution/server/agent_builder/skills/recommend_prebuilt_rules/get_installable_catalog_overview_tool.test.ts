@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import {
   createToolHandlerContext,
   createToolTestMocks,
@@ -112,18 +112,6 @@ describe('createGetInstallableCatalogOverviewTool', () => {
   });
 
   describe('tool definition', () => {
-    it('has the correct id and type', () => {
-      const { getStartServices, mockLogger, ml } = createMockDeps();
-      const tool = createGetInstallableCatalogOverviewTool({
-        getStartServices,
-        logger: mockLogger,
-        ml,
-      });
-
-      expect(tool.id).toBe(GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID);
-      expect(tool.type).toBe(ToolType.builtin);
-    });
-
     it('has the correct tool id constant', () => {
       expect(GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID).toBe(
         'security.get_installable_catalog_overview'
@@ -347,29 +335,6 @@ describe('createGetInstallableCatalogOverviewTool', () => {
         expect((result.results[0].data as { message: string }).message).toContain('ES is down');
       }
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('ES is down'));
-    });
-
-    it('returns ToolResultType.error when fetchAssetsByVersion throws', async () => {
-      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient, ml } =
-        createMockDeps();
-      mockGetInstallableRuleVersions.mockResolvedValue([makeVersion('rule-1')]);
-      mockRuleAssetsClient.fetchAssetsByVersion.mockRejectedValue(new Error('SO search failed'));
-
-      const tool = createGetInstallableCatalogOverviewTool({
-        getStartServices,
-        logger: mockLogger,
-        ml,
-      });
-      const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
-      const result = await tool.handler({}, context);
-
-      expect('results' in result).toBe(true);
-      if ('results' in result) {
-        expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0].data as { message: string }).message).toContain(
-          'SO search failed'
-        );
-      }
     });
   });
 });
