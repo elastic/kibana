@@ -381,8 +381,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         return;
       }
 
-      const widthOf = (n: (typeof nodes)[number]) =>
-        typeof n.width === 'number' ? n.width : 200;
+      const widthOf = (n: (typeof nodes)[number]) => (typeof n.width === 'number' ? n.width : 200);
       const heightOf = (n: (typeof nodes)[number]) =>
         typeof n.height === 'number' ? n.height : 64;
 
