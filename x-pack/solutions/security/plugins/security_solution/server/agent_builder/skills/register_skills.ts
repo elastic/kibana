@@ -57,11 +57,10 @@ export const registerSkills = async ({
   );
 
   agentBuilder.skills.register(getDetectionRuleEditSkill());
-  if (experimentalFeatures.dexAiSkillOnboardPrebuiltRules) {
-    await agentBuilder.skills.register(
-      createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
-    );
-  }
+  // TEMP: registered unconditionally (no feature flag) so the skill is testable on a CI cloud deploy.
+  await agentBuilder.skills.register(
+    createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
+  );
 
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
