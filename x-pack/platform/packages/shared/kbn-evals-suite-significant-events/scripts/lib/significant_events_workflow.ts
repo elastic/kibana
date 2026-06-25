@@ -6,7 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingTypeMapping,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Discovery, Feature } from '@kbn/streams-schema';
 import {
@@ -256,16 +259,14 @@ export async function persistSigEventsDetectionsForSnapshot(
   log: ToolingLog,
   snapshotName: string
 ): Promise<{ index: string; count: number }> {
-  const detectionDocs = await withTempSuperuser(esClient, log, config, async (sysClient) => {
-    const result = await sysClient.search<Record<string, unknown>>({
-      index: SIGEVENTS_DETECTIONS_DATA_STREAM,
-      size: RAW_DATA_STREAM_SEARCH_LIMIT,
-      query: { match_all: {} },
-    });
-    return result.hits.hits.map((hit) => hit._source).filter(Boolean) as Array<
-      Record<string, unknown>
-    >;
-  });
+  const detectionDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
+    readRawDataStreamDocs(
+      sysClient,
+      SIGEVENTS_DETECTIONS_DATA_STREAM,
+      { match_all: {} },
+      'detection(s)'
+    )
+  );
 
   return persistDocsForSnapshot(
     esClient,
@@ -292,18 +293,16 @@ export async function persistSigEventsKnowledgeIndicatorsForSnapshot(
   snapshotName: string,
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<{ index: string; count: number }> {
-  const kiDocs = await withTempSuperuser(esClient, log, config, async (sysClient) => {
-    const result = await sysClient.search<Record<string, unknown>>({
-      index: SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
-      size: RAW_DATA_STREAM_SEARCH_LIMIT,
-      // Scoped to the scenario's stream (KI docs carry `stream.name`), mirroring the
-      // per-stream feature capture — avoids pulling KIs from unrelated streams.
-      query: { term: { 'stream.name': streamName } },
-    });
-    return result.hits.hits.map((hit) => hit._source).filter(Boolean) as Array<
-      Record<string, unknown>
-    >;
-  });
+  // Scoped to the scenario's stream (KI docs carry `stream.name`), mirroring the per-stream
+  // feature capture — avoids pulling KIs from unrelated streams.
+  const kiDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
+    readRawDataStreamDocs(
+      sysClient,
+      SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+      { term: { 'stream.name': streamName } },
+      'knowledge indicator(s)'
+    )
+  );
 
   return persistDocsForSnapshot(
     esClient,
@@ -523,6 +522,38 @@ async function fetchAllPaginated<T>(
   }
 
   return all;
+}
+
+/**
+ * Reads a raw data-stream (using the superuser `sysClient`) and returns every matching `_source`.
+ * Fails loudly when the match exceeds {@link RAW_DATA_STREAM_SEARCH_LIMIT} rather than silently
+ * truncating — a partial snapshot would otherwise only surface as an under-counting eval later.
+ */
+async function readRawDataStreamDocs(
+  sysClient: Client,
+  index: string,
+  query: QueryDslQueryContainer,
+  label: string
+): Promise<Array<Record<string, unknown>>> {
+  const result = await sysClient.search<Record<string, unknown>>({
+    index,
+    size: RAW_DATA_STREAM_SEARCH_LIMIT,
+    track_total_hits: true,
+    query,
+  });
+
+  const total =
+    typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+  if (total > RAW_DATA_STREAM_SEARCH_LIMIT) {
+    throw new Error(
+      `${label}: ${total} docs exceed the capture limit of ${RAW_DATA_STREAM_SEARCH_LIMIT}; ` +
+        `the snapshot would be truncated. Add pagination before re-capturing.`
+    );
+  }
+
+  return result.hits.hits.map((hit) => hit._source).filter(Boolean) as Array<
+    Record<string, unknown>
+  >;
 }
 
 async function persistDocsForSnapshot(
