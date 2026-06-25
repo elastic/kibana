@@ -119,6 +119,7 @@ function buildSupervisesConfig(
       fields: ['entity.id'],
     },
     disableLookbackWindow: true,
+    validateTargetIds: true,
     compositeAggAdditionalFilters: [
       { terms: { 'entity.source': source.entitySources } },
       buildRawIdentifiersExistenceGate({

@@ -412,15 +412,6 @@ export const assertNoRelationshipId = async (
     .not.toContain(unexpectedTargetId);
 };
 
-/** Extracts `entity.relationships.<key>.ids` from a raw ES `_source` object. */
-export const getRelationshipIds = (
-  source: Record<string, unknown>,
-  relationshipKey: string
-): string[] => {
-  const path = relationshipIdsPath(relationshipKey);
-  return normalizeKeywordList(getNestedValue(source, path) ?? source[path]);
-};
-
 /**
  * Triggers a maintainer run by calling the async `run/{id}` endpoint.
  * The route calls `taskManager.runSoon()` — it does NOT wait for completion.

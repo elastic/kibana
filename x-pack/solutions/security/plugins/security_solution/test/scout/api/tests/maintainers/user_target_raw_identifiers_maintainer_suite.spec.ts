@@ -269,13 +269,8 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
 
           // Wait until at least one target is resolved, then assert exact count.
-          const source = await waitForRelationshipIds(
-            esClient,
-            relationshipKey,
-            actor,
-            targetFromEmailA
-          );
-          const ids = getRelationshipIds(source, relationshipKey);
+          await waitForRelationshipIds(esClient, relationshipKey, actor, targetFromEmailA);
+          const ids = await getRelationshipIds(esClient, relationshipKey, actor);
           // 2 from user.email + 2 from user.id = 4 unique EUIDs.
           // The 2 from user.name duplicate user.email and are collapsed by VALUES().
           expect(ids).toHaveLength(4);
@@ -283,6 +278,44 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
           expect(ids).toContain(targetFromEmailB);
           expect(ids).toContain(targetFromIdA);
           expect(ids).toContain(targetFromIdB);
+        }
+      );
+
+      apiTest(
+        `writes only targets that exist as entities, drops phantom raw_identifiers`,
+        async ({ apiClient, esClient }) => {
+          // Scenario: actor has one real report (seeded as an entity) and one
+          // phantom report (raw value only — no entity document). validateTargetIds
+          // must filter the phantom before writing so only the real EUID lands in ids.
+          const realEmail = targetEmail('phantom-real');
+          const realTarget = userId(realEmail);
+          const phantomRawEmail = targetEmail('phantom-ghost');
+          // phantomTarget is intentionally NOT seeded — it has no entity document.
+          const phantomTarget = userId(phantomRawEmail);
+
+          const aEmail = actorEmail('phantom');
+          const actor = userId(aEmail);
+          const futureTs = new Date(Date.now() + 3_600_000).toISOString();
+
+          await seedUserEntity(esClient, { entityId: realTarget, namespace, email: realEmail });
+
+          await seedUserEntity(esClient, {
+            entityId: actor,
+            namespace,
+            email: aEmail,
+            entitySource: requiredEntitySource,
+            relationship: { key: relationshipKey, userEmails: [realEmail, phantomRawEmail] },
+            lastSeen: futureTs,
+            firstSeen: futureTs,
+          });
+
+          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
+
+          // Wait until the real target appears, then assert the phantom is absent.
+          await waitForRelationshipIds(esClient, relationshipKey, actor, realTarget);
+          const ids = await getRelationshipIds(esClient, relationshipKey, actor);
+          expect(ids).toContain(realTarget);
+          expect(ids).not.toContain(phantomTarget);
         }
       );
 
