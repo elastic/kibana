@@ -16,6 +16,370 @@
       }
     },
     {
+      "id": "2ef2b49b5c3928c-9520f0901caa8ed",
+      "title": "backfill cascade delete when rule is deleted deletes associated backfills when their originating rules are deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_delete_rule.spec.ts",
+        "line": 40,
+        "column": 9
+      }
+    },
+    {
+      "id": "9cbf9e9d231c53b-6ecb270dcce0b86",
+      "title": "backfill delete API deletes backfills and verifies they are no longer accessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_delete.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "9cbf9e9d231c53b-c88069ad7ea083b",
+      "title": "backfill delete API returns 404 when deleting a non-existent backfill ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_delete.spec.ts",
+        "line": 156,
+        "column": 7
+      }
+    },
+    {
+      "id": "9cbf9e9d231c53b-137cf2fa1ba271e",
+      "title": "backfill delete API returns 404 when deleting a backfill from a different space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_delete.spec.ts",
+        "line": 170,
+        "column": 7
+      }
+    },
+    {
+      "id": "9cbf9e9d231c53b-7d55917dfce2e20",
+      "title": "backfill delete API returns 403 when a no-privileges user attempts to delete a backfill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_delete.spec.ts",
+        "line": 224,
+        "column": 7
+      }
+    },
+    {
+      "id": "9cbf9e9d231c53b-dc20749b24288d0",
+      "title": "backfill delete API returns 403 when a read-only user attempts to delete a backfill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_delete.spec.ts",
+        "line": 265,
+        "column": 7
+      }
+    },
+    {
+      "id": "5506b4259cd1b76-961f80fe68f548d",
+      "title": "backfill find API finds backfills for a single rule by rule_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_find.spec.ts",
+        "line": 113,
+        "column": 7
+      }
+    },
+    {
+      "id": "5506b4259cd1b76-afb870b011a7a37",
+      "title": "backfill find API finds backfills for multiple rules in a single query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_find.spec.ts",
+        "line": 157,
+        "column": 7
+      }
+    },
+    {
+      "id": "5506b4259cd1b76-9b215162a49f9c5",
+      "title": "backfill find API filters backfills by start date",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_find.spec.ts",
+        "line": 177,
+        "column": 7
+      }
+    },
+    {
+      "id": "5506b4259cd1b76-6ef99c463cd3945",
+      "title": "backfill find API filters backfills by end date",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_find.spec.ts",
+        "line": 216,
+        "column": 7
+      }
+    },
+    {
+      "id": "5506b4259cd1b76-ffc8d9554d2e8ca",
+      "title": "backfill find API filters backfills by initiator=user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_find.spec.ts",
+        "line": 239,
+        "column": 7
+      }
+    },
+    {
+      "id": "5506b4259cd1b76-b76d57c6bafba9a",
+      "title": "backfill find API supports pagination and sorting of backfill results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_find.spec.ts",
+        "line": 261,
+        "column": 7
+      }
+    },
+    {
+      "id": "5506b4259cd1b76-b959f73beb8d658",
+      "title": "backfill find API returns 403 for a user with no Kibana privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_find.spec.ts",
+        "line": 320,
+        "column": 7
+      }
+    },
+    {
+      "id": "532413bb18759a2-aed5a94a46952f4",
+      "title": "backfill get API gets existing backfills by ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_get.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "532413bb18759a2-311026390418351",
+      "title": "backfill get API returns 404 for a non-existent backfill ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_get.spec.ts",
+        "line": 145,
+        "column": 7
+      }
+    },
+    {
+      "id": "532413bb18759a2-c8755a950b71667",
+      "title": "backfill get API returns 404 when getting a backfill from a different space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_get.spec.ts",
+        "line": 159,
+        "column": 7
+      }
+    },
+    {
+      "id": "532413bb18759a2-7dddbff900c4528",
+      "title": "backfill get API returns 403 for a user with no Kibana privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_get.spec.ts",
+        "line": 205,
+        "column": 7
+      }
+    },
+    {
+      "id": "fa689d0bd6646d2-f656dc960ca29a4",
+      "title": "backfill public API schedules, gets, finds, and deletes a backfill via the public API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_public_api.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "efa818aea9db7c1-d3b8c458d331470",
+      "title": "backfill schedule API schedules backfill for two rules successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_schedule.spec.ts",
+        "line": 92,
+        "column": 7
+      }
+    },
+    {
+      "id": "efa818aea9db7c1-56543639763a8ee",
+      "title": "backfill schedule API schedules multiple ranges for a single rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_schedule.spec.ts",
+        "line": 178,
+        "column": 7
+      }
+    },
+    {
+      "id": "efa818aea9db7c1-9b6202118c0931a",
+      "title": "backfill schedule API returns 400 for invalid schedule parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_schedule.spec.ts",
+        "line": 234,
+        "column": 7
+      }
+    },
+    {
+      "id": "efa818aea9db7c1-56db00ab42ce910",
+      "title": "backfill schedule API returns 400 when no rules match the given IDs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_schedule.spec.ts",
+        "line": 351,
+        "column": 7
+      }
+    },
+    {
+      "id": "efa818aea9db7c1-2703b69d250b5a9",
+      "title": "backfill schedule API returns mixed success and error results for a batch request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_schedule.spec.ts",
+        "line": 373,
+        "column": 7
+      }
+    },
+    {
+      "id": "efa818aea9db7c1-3ee5ad1720a85f2",
+      "title": "backfill schedule API includes warning for non-summary actions when run_actions is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_schedule.spec.ts",
+        "line": 479,
+        "column": 7
+      }
+    },
+    {
+      "id": "efa818aea9db7c1-893d77e1ca4bf4d",
+      "title": "backfill schedule API returns 403 for a user with no Kibana privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_schedule.spec.ts",
+        "line": 587,
+        "column": 7
+      }
+    },
+    {
+      "id": "efa818aea9db7c1-b4d01b6db44d3c0",
+      "title": "backfill schedule API returns 403 for a read-only viewer trying to schedule backfill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/backfill_schedule.spec.ts",
+        "line": 623,
+        "column": 7
+      }
+    },
+    {
       "id": "e525ea47223c95a-f83dbbba7a68b4d",
       "title": "Email connector should use the kibana config for aws ses defaults",
       "expectedStatus": "passed",
