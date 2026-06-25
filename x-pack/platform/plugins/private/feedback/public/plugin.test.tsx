@@ -22,11 +22,9 @@ describe('Feedback Plugin', () => {
   const startPlugin = () =>
     plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
 
-  const enableFeedback = () =>
-    coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
+  const enableFeedback = () => coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
 
-  const enableChromeNext = () =>
-    coreStartMock.featureFlags.getBooleanValue.mockReturnValue(true);
+  const enableChromeNext = () => coreStartMock.featureFlags.getBooleanValue.mockReturnValue(true);
 
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
