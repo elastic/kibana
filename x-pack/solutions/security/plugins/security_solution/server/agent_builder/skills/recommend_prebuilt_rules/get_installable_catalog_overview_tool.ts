@@ -12,8 +12,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { getInstallableRuleVersions } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
-import { fetchInstalledRuleVersionsMap } from '../../../lib/detection_engine/prebuilt_rules/logic/fetch_installed_rule_versions_map';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_type';
 import { buildMlAuthz } from '../../../lib/machine_learning/authz';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
@@ -62,7 +62,11 @@ export const createGetInstallableCatalogOverviewTool = ({
       const mlAuthz = buildMlAuthz({ license, ml, request, savedObjectsClient });
 
       const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-      const installedRuleVersionsMap = await fetchInstalledRuleVersionsMap(rulesClient);
+      const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+      const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+      const installedRuleVersionsMap = new Map(
+        installedRuleVersions.map((version) => [version.rule_id, version])
+      );
 
       const installableVersions = await getInstallableRuleVersions(
         ruleAssetsClient,
