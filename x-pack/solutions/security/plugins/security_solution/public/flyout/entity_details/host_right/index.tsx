@@ -11,7 +11,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EuiFlyoutFooter, EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
@@ -355,7 +355,9 @@ export const HostPanel = memo(function HostPanel({
       )}
       {!isPreviewMode && assetInventoryEnabled && (
         <EuiFlyoutFooter>
-          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+          <EuiPanel color="transparent">
+            <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+          </EuiPanel>
         </EuiFlyoutFooter>
       )}
     </>

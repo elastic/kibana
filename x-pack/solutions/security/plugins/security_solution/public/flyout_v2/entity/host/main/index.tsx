@@ -10,7 +10,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
@@ -385,7 +385,9 @@ export const Host: FC<HostProps> = memo(function Host({
         )}
       </EuiFlyoutBody>
       {assetInventoryEnabled && (
-        <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+        <EuiFlyoutFooter>
+          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+        </EuiFlyoutFooter>
       )}
     </>
   );
