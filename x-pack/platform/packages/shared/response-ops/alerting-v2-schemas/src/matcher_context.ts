@@ -15,7 +15,7 @@ export interface MatcherContext {
   last_event_timestamp: string;
   group_hash: string;
   episode_id: string;
-  episode_status: 'inactive' | 'pending' | 'active' | 'recovering' | 'no_data';
+  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
   severity?: 'info' | 'low' | 'medium' | 'high' | 'critical';
   rule: MatcherContextRule;
   data?: Record<string, unknown>;

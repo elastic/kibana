@@ -223,7 +223,7 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
 
     // 'emit' and 'last_known_status' both emit the same `no_data` rule event.
     // The director branches on `rule.no_data_strategy` when computing the next
-    // episode status: 'emit' advances the episode to 'no_data'; 'last_known_status'
+    // episode status: 'emit' sets the episode to 'active'; 'last_known_status'
     // preserves the prior episode status. See `BasicTransitionStrategy`.
     if (strategy === 'emit' || strategy === 'last_known_status') {
       for (const groupHash of noDataGroupHashes) {

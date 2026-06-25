@@ -6,32 +6,21 @@
  */
 
 import { injectable } from 'inversify';
-import type { AlertEventStatus } from '../../../resources/datastreams/alert_events';
 import {
   alertEpisodeStatus,
   alertEventStatus,
   type AlertEpisodeStatus,
+  type AlertEventStatus,
 } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import type { ITransitionStrategy, StateTransitionContext, StateTransitionResult } from './types';
-
-/**
- * Static transitions for non-`no_data` events. The `no_data` column is
- * computed dynamically based on `rule.no_data_strategy` — see
- * {@link BasicTransitionStrategy.getNextState}.
- *
- * `no_data` rule events always carry "no signal about cpu", so the transition
- * decision belongs to the rule's no-data policy, not the FSM table.
- */
-type DeterministicEventStatus = Exclude<AlertEventStatus, 'no_data'>;
 
 @injectable()
 export class BasicTransitionStrategy implements ITransitionStrategy {
   readonly name: string = 'basic';
 
-  protected readonly stateMachine: Record<
-    AlertEpisodeStatus,
-    Record<DeterministicEventStatus, AlertEpisodeStatus>
+  protected readonly stateMachine: Partial<
+    Record<AlertEpisodeStatus, Partial<Record<AlertEventStatus, AlertEpisodeStatus>>>
   > = {
     [alertEpisodeStatus.inactive]: {
       breached: alertEpisodeStatus.pending,
@@ -47,10 +36,6 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     },
     [alertEpisodeStatus.recovering]: {
       breached: alertEpisodeStatus.active,
-      recovered: alertEpisodeStatus.inactive,
-    },
-    [alertEpisodeStatus.no_data]: {
-      breached: alertEpisodeStatus.pending,
       recovered: alertEpisodeStatus.inactive,
     },
   };
@@ -80,7 +65,7 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
       return { status: alertEpisodeStatus.pending };
     }
 
-    const nextState = stateRules[alertEvent.status as DeterministicEventStatus];
+    const nextState = stateRules[alertEvent.status];
 
     return { status: nextState ?? currentAlertEpisodeStatus ?? alertEpisodeStatus.pending };
   }
@@ -90,7 +75,7 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     currentStatus: AlertEpisodeStatus
   ): AlertEpisodeStatus {
     if (rule.no_data_strategy === 'emit') {
-      return alertEpisodeStatus.no_data;
+      return alertEpisodeStatus.active;
     }
     // for all other no_data_strategy types return the last known episode status
     return currentStatus;

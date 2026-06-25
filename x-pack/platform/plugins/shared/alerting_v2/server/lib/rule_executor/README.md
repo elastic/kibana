@@ -217,16 +217,16 @@ The step also keeps a defensive runtime skip if no data-presence query is availa
 
 ### `no_data_strategy` outcomes (no-data partition)
 
-The executor emits the rule event; the director's FSM consumes it and decides the next episode status. The two layers are intentionally separate so the rule event stream stays observable regardless of strategy.
+The executor emits the rule event; the director's FSM consumes it and decides the next episode status.
 
 | `no_data_strategy` | Rule event the step writes | Episode status the FSM lands on |
 | --- | --- | --- |
-| `'emit'` | Drop any `recovered` event recovery emitted for this group; append a `no_data` event. | Advances to `'no_data'`. |
+| `'emit'` | Drop any `recovered` event recovery emitted for this group; append a `no_data` event. | Set the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
 | `'last_known_status'` | Same as `'emit'` — drop any upstream `recovered` event for the group; append a `no_data` event. | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
 | `'recover'` | Force recovery: leave any existing `recovered` event in place, or emit one if recovery skipped this group (e.g. `recovery_strategy: 'none'`). | Follows the normal recovery transitions (`active → recovering → inactive`). |
 | `'none'` | No-op. The recovery step's output stands. When `recovery_strategy` is also `'none'`, no event is written for this group and the episode drifts out of lookback windows over time. | n/a (no event is produced). |
 
-The FSM branch on `no_data_strategy` lives in `BasicTransitionStrategy.getNextStatusForNoData`; transitions out of `'no_data'` are a soft reset (`breached → pending`, `recovered → inactive`, `no_data → no_data`) so threshold-based strategies don't fire prematurely after a data gap.
+The `no_data_strategy` branch lives in `BasicTransitionStrategy.getNextState`. There is no `'no_data'` episode status; the FSM sets the episode to `'active'` for `'emit'`, and falls through to preserve the prior status for `'last_known_status'`.
 
 ### Data-present partition
 
@@ -243,7 +243,7 @@ When the no-data query reports the group as still having data:
 | `no_data_strategy` | What the step writes |
 | --- | --- |
 | absent / `'none'` | Nothing. The step is a no-op apart from the active-groups lookup, which is also skipped when both strategies are off. |
-| `'emit'` | One `no_data` event per active-but-absent group with no data. The FSM advances the episode to `'no_data'`. |
+| `'emit'` | One `no_data` event per active-but-absent group with no data. The FSM lifts the alive episode to `'active'`. |
 | `'last_known_status'` | One `no_data` event per active-but-absent group with no data. The FSM preserves the prior episode status. |
 | `'recover'` | One `recovered` event per active-but-absent group with no data, unless recovery already emitted one. |
 

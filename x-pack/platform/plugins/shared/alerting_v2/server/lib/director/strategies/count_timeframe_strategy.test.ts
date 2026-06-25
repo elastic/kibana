@@ -467,60 +467,29 @@ describe('CountTimeframeStrategy', () => {
         alertEventStatus.recovered,
         alertEpisodeStatus.inactive,
       ],
-      [
-        'inactive',
-        alertEpisodeStatus.inactive,
-        alertEventStatus.no_data,
-        alertEpisodeStatus.inactive,
-      ],
     ])('stays %s', (_label, from, on, to) => {
       expectTransition({ from, on, to, stateTransition });
     });
   });
 
-  describe('no_data interactions', () => {
+  describe("no_data event with no_data_strategy: 'emit'", () => {
     const stateTransition: RuleResponse['state_transition'] = {
       pending_count: 3,
       recovering_count: 3,
     };
 
-    it("does not set status_count when entering 'no_data' under no_data_strategy: 'emit'", () => {
+    it.each<[AlertEpisodeStatus]>([
+      [alertEpisodeStatus.pending],
+      [alertEpisodeStatus.active],
+      [alertEpisodeStatus.recovering],
+    ])('sets the status %s straight to active without setting status_count', (from) => {
       expectTransition({
-        from: alertEpisodeStatus.active,
-        on: alertEventStatus.no_data,
-        to: alertEpisodeStatus.no_data,
-        stateTransition,
-        noDataStrategy: 'emit',
-      });
-    });
-
-    it("preserves the prior status under no_data_strategy: 'last_known_status'", () => {
-      expectTransition({
-        from: alertEpisodeStatus.active,
+        from,
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.active,
         stateTransition,
-        noDataStrategy: 'last_known_status',
-      });
-    });
-
-    it('resets the pending count window on a breach event after no_data status', () => {
-      expectTransition({
-        from: alertEpisodeStatus.no_data,
-        on: alertEventStatus.breached,
-        to: alertEpisodeStatus.pending,
-        stateTransition,
-        statusCount: 7,
-        expectedStatusCount: 1,
-      });
-    });
-
-    it('recovers with no count tracking after no_data status', () => {
-      expectTransition({
-        from: alertEpisodeStatus.no_data,
-        on: alertEventStatus.recovered,
-        to: alertEpisodeStatus.inactive,
-        stateTransition,
+        noDataStrategy: 'emit',
+        statusCount: 2,
       });
     });
   });
