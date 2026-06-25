@@ -53,14 +53,6 @@ export function FieldPicker({
     }
   }, [fieldMap, open]);
 
-  const onClickCallback = useMemo(() => {
-    return hasFields
-      ? () => {
-          setOpen(!open);
-        }
-      : undefined;
-  }, [hasFields, open, setOpen]);
-
   const badgeDescription = i18n.translate('xpack.graph.bar.pickFieldsLabel', {
     defaultMessage: 'Add fields',
   });
