@@ -43,6 +43,8 @@ type MappedRow = Omit<NormalizedRow, 'index'>;
 interface ListTemplateSearchConfig {
   enabled: boolean;
   placeholder?: string;
+  /** Message shown when no search results are found. */
+  noSearchResultsMessage?: string;
 }
 
 interface ListTemplateAddItemConfig {
@@ -59,8 +61,6 @@ export type ListTemplateConfig<Data = SerializableRecord> = {
   mapData?: (data: Data) => MappedRow;
   /** Optional section-level actions. */
   actions?: NavTemplateActionConfig<Data>[];
-  /** Message shown when the data source emits no rows. */
-  emptyMessage: string;
   /** Cap the number of rows rendered to this value. */
   max?: number;
 } & (
@@ -304,7 +304,13 @@ export function ListTemplate<Data extends SerializableRecord = SerializableRecor
             {filteredRows.length === 0 ? (
               <EuiListGroupItem
                 data-test-subj={`nav-extension-${context.slotId}-empty`}
-                label={listConfig.emptyMessage}
+                label={
+                  listConfig.search?.noSearchResultsMessage ??
+                  i18n.translate(
+                    'sharedUXPackages.navigationExtensionTemplates.listTemplate.noSearchResultsMessage',
+                    { defaultMessage: 'No search results found' }
+                  )
+                }
               />
             ) : (
               filteredRows.map((row) => (

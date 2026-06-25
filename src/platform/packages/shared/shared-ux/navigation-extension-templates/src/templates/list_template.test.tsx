@@ -15,7 +15,6 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import type { NavExtensionPointContext } from '../types';
-import type { ListTemplateConfig } from './list_template';
 import { ListTemplate } from './list_template';
 
 interface TestRow extends SerializableRecord {
@@ -43,10 +42,6 @@ const defaultContext: NavExtensionPointContext = {
   surface: 'sidePanel',
 };
 
-const defaultConfig: ListTemplateConfig<TestRow> = {
-  emptyMessage: 'No dashboards yet',
-};
-
 const testRows: TestRow[] = [
   { id: '1', label: 'Alpha dashboard', href: '/app/dashboards#/view/1' },
   { id: '2', label: 'Beta dashboard', href: '/app/dashboards#/view/2' },
@@ -55,8 +50,8 @@ const testRows: TestRow[] = [
 
 const renderListTemplate = ({
   data = testRows,
-  config = defaultConfig,
   context = defaultContext,
+  config = {},
 }: Partial<ComponentProps<typeof ListTemplate<TestRow>>> = {}) => {
   const view = renderWithEuiTheme(<ListTemplate data={data} config={config} context={context} />);
 
@@ -77,7 +72,6 @@ describe('ListTemplate', () => {
   it('caps rendered rows when max is configured', () => {
     renderListTemplate({
       config: {
-        ...defaultConfig,
         max: 2,
       },
     });
@@ -114,7 +108,6 @@ describe('ListTemplate', () => {
   it('renders the heading when configured', () => {
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
       },
     });
@@ -126,7 +119,6 @@ describe('ListTemplate', () => {
     const user = userEvent.setup();
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
         search: { enabled: true, placeholder: 'Search dashboards' },
       },
@@ -149,10 +141,12 @@ describe('ListTemplate', () => {
 
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
-        search: { enabled: true, placeholder: 'Search dashboards' },
-        emptyMessage: 'No matching dashboards for query',
+        search: {
+          enabled: true,
+          placeholder: 'Search dashboards',
+          noSearchResultsMessage: 'No matching dashboards for query',
+        },
       },
     });
 
@@ -173,7 +167,6 @@ describe('ListTemplate', () => {
 
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
         supportAddItem: { enabled: true, onClick: onAddItemHandler },
         search: { enabled: true },
@@ -191,7 +184,6 @@ describe('ListTemplate', () => {
 
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
         actions: [
           { id: 'delete', label: 'Delete', icon: 'trash', onClick: onAction },
@@ -296,9 +288,6 @@ describe('ListTemplate', () => {
           iconType: 'dashboardApp',
         },
       ],
-      config: {
-        emptyMessage: 'No dashboards yet',
-      },
     });
 
     const dashboardLink = screen.getByRole('link', { name: 'Dashboard with icon' });

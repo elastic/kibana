@@ -33,7 +33,11 @@ export const ListTemplateRobustUsage: StoryObj<typeof ListTemplate<ListTemplateD
     config: {
       heading: 'List Template Robust Usage',
       supportAddItem: { enabled: true, onClick: action('addItemAction') },
-      search: { enabled: true, placeholder: 'Search the list' },
+      search: {
+        enabled: true,
+        placeholder: 'Search the list',
+        noSearchResultsMessage: 'No items yet',
+      },
       actions: [
         {
           id: 'delete',
@@ -54,7 +58,6 @@ export const ListTemplateRobustUsage: StoryObj<typeof ListTemplate<ListTemplateD
           onClick: action('copyAction'),
         },
       ],
-      emptyMessage: 'No items yet',
     },
     context: {
       slotId: 'slotId',

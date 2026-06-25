@@ -31,7 +31,6 @@ export const ListTemplateUsage: StoryObj<typeof ListTemplate<ListTemplateData>> 
     })),
     config: {
       max: 5,
-      emptyMessage: 'No items yet',
     },
     context: {
       slotId: 'slotId',
