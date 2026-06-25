@@ -139,7 +139,7 @@ The 8.19.17 release includes the following known issues and fixes.
 ====
 *Details* +
 
-Multipage Canvas visualizations stops advancing after one page when in autoplay mode. 
+Multipage Canvas visualizations stop advancing after one page when in autoplay mode
 
 *Workaround* +
 Manually advance to the next page or upgrade to 8.19.18, 9.3.7.
