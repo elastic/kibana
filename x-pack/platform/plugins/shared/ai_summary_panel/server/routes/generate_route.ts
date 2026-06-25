@@ -13,7 +13,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { runEsqlQuery, sanitizeCellValue } from '../utils/esql_query';
 import type { EsqlColumn } from '../utils/esql_query';
-import { normalizeColumnName } from '../../common/utils';
+import { columnNamesToKeys } from '../../common/utils';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
@@ -195,10 +195,9 @@ export function registerGenerateRoute(
         }
 
         if (columns.length > 0) {
+          const columnKeys = columnNamesToKeys(columns.map((c) => c.name));
           const schemaLines = columns
-            .map(
-              (c) => `  - ${c.name} (${c.type}) → placeholder: {{${normalizeColumnName(c.name)}}}`
-            )
+            .map((c, i) => `  - ${c.name} (${c.type}) → placeholder: {{${columnKeys[i]}}}`)
             .join('\n');
           const sampleSection =
             sampleRows.length > 0

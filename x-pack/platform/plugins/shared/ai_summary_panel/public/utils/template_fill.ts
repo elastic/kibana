@@ -7,7 +7,7 @@
 
 import DOMPurify from 'dompurify';
 import { Liquid } from 'liquidjs';
-import { normalizeColumnName } from '../../common/utils';
+import { columnNamesToKeys } from '../../common/utils';
 
 export const TEMPLATE_SENTINEL = '<!--ai-template-->';
 
@@ -16,7 +16,14 @@ const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-sr
 // Single shared engine — stateless, safe to reuse across renders.
 // dynamicPartials: false disables {% include %} / {% render %} tags which in the
 // browser bundle would otherwise fire synchronous XHR requests.
-const liquid = new Liquid({ strictFilters: false, strictVariables: false, dynamicPartials: false });
+// outputEscape: 'escape' HTML-escapes all {{ variable }} output, providing defense-in-depth
+// against data-injected HTML before DOMPurify runs.
+const liquid = new Liquid({
+  strictFilters: false,
+  strictVariables: false,
+  dynamicPartials: false,
+  outputEscape: 'escape',
+});
 
 export function injectCsp(html: string): string {
   if (html.includes(CSP_META)) return html;
@@ -37,7 +44,6 @@ export function sanitizeHtml(html: string): string {
     FORCE_BODY: false,
   }) as string;
 }
-
 
 export function sanitizeTemplate(raw: string): string {
   let s = raw.trim();
@@ -73,8 +79,7 @@ export function fillTemplate(
     tpl = tpl.slice(TEMPLATE_SENTINEL.length);
   }
 
-  // Pre-compute normalized keys once — avoids calling normalizeColumnName O(n) extra times
-  const keys = columns.map((col) => normalizeColumnName(col.name));
+  const keys = columnNamesToKeys(columns.map((c) => c.name));
 
   // Pre-compute column max values for _pct variants
   const maxValues: Record<string, number> = {};

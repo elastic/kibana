@@ -15,55 +15,64 @@ export const aiPanelAuthoringSkill = defineSkillType({
   name: 'ai-panel-authoring',
   basePath: 'skills/platform/dashboard',
   description:
-    'Creates AI-generated dashboard panels that render anything: KPI cards, status boards, custom chart types Lens does not support, mixed layouts, rich HTML — all driven by a prompt and optional live ES|QL data.',
-  content: `## When to Use This Skill
+    'Creates AI-generated dashboard panels for content that is not chart-based: KPI cards, status boards, mixed text-and-data layouts, narrative summaries. Use only when neither Lens (standard charts) nor Vega (complex/custom charts) is appropriate.',
+  content: `## Panel type decision tree
 
-Use this skill when the user asks for a dashboard panel that Lens cannot produce:
-- KPI cards or metric summaries with custom styling
-- Status boards with color-coded health indicators
-- Chart types Lens does not support: sankey, treemap, radar, word cloud, funnel, calendar heatmap, network graph, bubble chart, gauge
-- Mixed layouts combining text, numbers, and charts in one panel
-- Any panel the user describes that does not map to a standard Lens chart type
-- Any panel explicitly described as "AI-generated" or "custom"
+Three panel types exist. Pick the right one before calling this skill:
 
-Do **not** use this skill for standard Lens chart types (line, bar, area, pie, histogram, data table) — use the dashboard-management skill instead.
+| Content type | Use |
+|---|---|
+| Standard charts — bar, line, area, pie, histogram, data table, metric | \`type: "vis"\` (Lens) via dashboard-management skill |
+| Complex or custom charts — sankey, treemap, radar, word cloud, funnel, network graph, bubble chart, gauge, calendar heatmap | \`type: "vega"\` via vega skill |
+| Non-chart content — KPI cards, status boards, color-coded health indicators, mixed text-and-data layouts, narrative panels, anything that is not fundamentally a chart | \`type: "ai_panel"\` — **this skill** |
+
+Do **not** use \`type: "ai_panel"\` for anything that Lens or Vega can produce. It is the last resort for content that does not fit a chart primitive.
+
+## When \`type: "ai_panel"\` is the right choice
+
+- KPI cards or metric summaries with custom styling or conditional coloring
+- Status boards (e.g. green/yellow/red health per category)
+- Mixed layouts combining text, numbers, and visual elements in one panel
+- Departure-board or table-style panels with custom row coloring
+- Narrative or annotation panels that reference live data
+- Any panel the user explicitly describes as a layout, card, or board rather than a chart
 
 ## Panel Schema
-
-All panels in \`add_panels\` use \`source: "config"\` with a \`type\` discriminator and a \`config\` object.
-
-### \`type: "ai_panel"\` — Custom visualisation
 
 \`\`\`json
 {
   "source": "config",
   "type": "ai_panel",
   "config": {
-    "prompt": "Describe exactly what to render — chart type, data shape, visual style, color scheme.",
+    "prompt": "Describe exactly what to render — layout, data shape, visual style, color scheme.",
     "esqlQuery": "FROM index | STATS ... | LIMIT 10"
   },
   "grid": { "x": 0, "y": 0, "w": 24, "h": 8 }
 }
 \`\`\`
 
-- \`config.prompt\` (required): the more specific, the better. Bad: "show error counts". Good: "A horizontal bar chart of the top 10 services by error count. Bars colored red (#D36086)."
+- \`config.prompt\` (required): be specific. Bad: "show error counts". Good: "A status board with one card per service. Card background: green if error_rate < 1%, yellow if < 5%, red otherwise."
 - \`config.esqlQuery\` (optional): live data context. Generate with \`${platformCoreTools.generateEsql}\` when the panel should reflect real index data.
 
 ## Core Instructions
 
-### Step 1 — Decide if live data is needed
+### Step 1 — Confirm this is not a chart
+
+Only proceed with \`type: "ai_panel"\` if the content cannot be expressed as a Lens chart or a Vega visualisation. If in doubt, prefer Lens or Vega.
+
+### Step 2 — Decide if live data is needed
 
 If the panel should reflect real index data, use \`${platformCoreTools.generateEsql}\` to produce the ES|QL query, then pass it as \`config.esqlQuery\`.
 
 If the panel is static (hardcoded values, welcome card, layout), omit \`esqlQuery\`.
 
-### Step 2 — Build the dashboard
+### Step 3 — Build the dashboard
 
 Call \`${dashboardTools.generateDashboard}\` with:
 - A \`set_metadata\` operation first (title + description)
 - An \`add_panels\` operation with the panel items
 
-You may mix \`type: "ai_panel"\`, \`type: "vis"\` (Lens), and \`type: "markdown"\` in the same \`add_panels\` call.
+You may mix \`type: "ai_panel"\`, \`type: "vis"\` (Lens), \`type: "vega"\`, and \`type: "markdown"\` in the same \`add_panels\` call.
 
 The connector is resolved automatically — do not ask the user for a connector ID.
 `,
