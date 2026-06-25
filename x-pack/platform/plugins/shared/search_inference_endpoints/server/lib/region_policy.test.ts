@@ -19,7 +19,7 @@ describe('region_policy lib', () => {
   });
 
   describe('getRegionPolicy', () => {
-    it('calls GET _inference/_region_policy', async () => {
+    it('calls GET /_inference/_region_policy', async () => {
       const policy = {
         region_policy: {
           allowed_regions: [{ csp: 'aws', region: 'us-east-1' }],
@@ -48,7 +48,7 @@ describe('region_policy lib', () => {
   });
 
   describe('putRegionPolicy', () => {
-    it('calls PUT _inference/_region_policy with the provided body', async () => {
+    it('calls PUT /_inference/_region_policy with the provided body', async () => {
       const body = {
         allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }],
         fallback_region: { csp: 'aws', region: 'us-east-1' },
@@ -77,7 +77,7 @@ describe('region_policy lib', () => {
   });
 
   describe('deleteRegionPolicy', () => {
-    it('calls DELETE _inference/_region_policy', async () => {
+    it('calls DELETE /_inference/_region_policy', async () => {
       mockClient.transport.request.mockResolvedValue(undefined);
 
       await deleteRegionPolicy(mockClient);
