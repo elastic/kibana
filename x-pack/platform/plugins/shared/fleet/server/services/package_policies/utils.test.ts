@@ -62,7 +62,9 @@ describe('Package Policy Utils', () => {
     });
 
     it('should return inputs as empty array when SO attributes has undefined inputs', () => {
-      const attributes = PackagePolicyMocks.generatePackagePolicySOAttributes({ inputs: undefined });
+      const attributes = PackagePolicyMocks.generatePackagePolicySOAttributes({
+        inputs: undefined,
+      });
       const soItem = PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse([
         attributes,
       ]).saved_objects.at(0)!;
