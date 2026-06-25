@@ -161,9 +161,43 @@ export const buildDslSegments = (
     .filter(({ index }) => index !== startStepIndex)
     .map(({ step, index }) => ({ label: step.after, stepIndex: index }));
 
+  // Boundaries introduced by later non-delete phases (e.g. frozen's `min_age`/`frozen_after`).
+  // Without these, a phase like frozen would visually start at the last downsample step instead of
+  // its configured age. They carry no `stepIndex` because no downsample step starts there.
+  const startMs = toMillis(startLabel);
+  const phaseBoundaries: DslBoundary[] = nonDeletePhases.slice(1).flatMap((phase) => {
+    if (!phase.min_age) return [];
+    const ms = toMillis(phase.min_age);
+    if (ms === undefined) return [];
+    // Keep boundaries that fall strictly inside the (start, retention) window.
+    const afterStart = startMs === undefined || ms > startMs;
+    const beforeRetention = retentionMs === undefined || ms < retentionMs;
+    return afterStart && beforeRetention ? [{ label: phase.min_age }] : [];
+  });
+
+  // Insert phase boundaries into the step boundaries without reordering the steps themselves
+  // (step order is preserved intentionally — see the array-order test). Each phase boundary is
+  // placed before the first step boundary that starts later in time, and skipped if a boundary at
+  // the same time already exists (a step boundary at that time keeps its `stepIndex`).
+  const innerBoundaries: DslBoundary[] = [...stepBoundaries];
+  for (const phaseBoundary of phaseBoundaries) {
+    if (innerBoundaries.some((boundary) => boundary.label === phaseBoundary.label)) {
+      continue;
+    }
+    const phaseMs = toMillis(phaseBoundary.label) ?? 0;
+    const insertAt = innerBoundaries.findIndex(
+      (boundary) => (toMillis(boundary.label) ?? 0) > phaseMs
+    );
+    if (insertAt === -1) {
+      innerBoundaries.push(phaseBoundary);
+    } else {
+      innerBoundaries.splice(insertAt, 0, phaseBoundary);
+    }
+  }
+
   const boundaries: DslBoundary[] = [
     { label: startLabel, stepIndex: startStepIndex },
-    ...stepBoundaries,
+    ...innerBoundaries,
     ...(retentionLabel ? [{ label: retentionLabel }] : []),
   ];
   const segmentCount = retentionLabel ? boundaries.length - 1 : boundaries.length;
@@ -269,8 +303,46 @@ export const getPhaseColumnSpans = (phases: SegmentPhase[], segments: TimelineSe
     return phases.map(() => 1);
   }
 
-  const nonDeleteCount = Math.max(segments.filter((segment) => !segment.isDelete).length, 1);
-  return phases.map((phase) => (phase.isDelete ? 1 : nonDeleteCount));
+  // The timeline has more (non-delete) columns than phases because DSL downsample boundaries add
+  // extra columns. Each non-delete phase should span exactly the columns that fall inside its time
+  // range `[phase.min_age, nextNonDeletePhase.min_age)`, so a phase like frozen lines up with its
+  // configured age regardless of whether it starts before or after the downsample steps. Counting
+  // columns per phase (instead of dumping all extras onto the first phase) keeps the spans aligned
+  // with the boundaries and prevents bars from shifting or overlapping.
+  const nonDeletePhases = phases.filter((phase) => !phase.isDelete);
+  const nonDeleteSegments = segments.filter((segment) => !segment.isDelete);
+  const nonDeleteColumns = Math.max(nonDeleteSegments.length, 1);
+
+  const phaseStartMs = nonDeletePhases.map((phase) => toMillis(phase.min_age) ?? 0);
+  // Count how many non-delete columns start within each phase's time range.
+  const spanByNonDeleteIndex = nonDeletePhases.map((_, phaseIndex) => {
+    const startMs = phaseStartMs[phaseIndex];
+    const nextStartMs = phaseStartMs[phaseIndex + 1];
+    return nonDeleteSegments.filter((segment) => {
+      const columnMs = toMillis(segment.leftValue) ?? 0;
+      const afterStart = columnMs >= startMs;
+      const beforeNext = nextStartMs === undefined || columnMs < nextStartMs;
+      return afterStart && beforeNext;
+    }).length;
+  });
+
+  // Make sure every phase spans at least one column and the totals still match the grid columns;
+  // any leftover columns (e.g. from rounding/edge cases) fall onto the first non-delete phase.
+  const normalizedSpans = spanByNonDeleteIndex.map((span) => Math.max(span, 1));
+  const assignedColumns = normalizedSpans.reduce((sum, span) => sum + span, 0);
+  if (normalizedSpans.length > 0 && assignedColumns !== nonDeleteColumns) {
+    normalizedSpans[0] = Math.max(normalizedSpans[0] + (nonDeleteColumns - assignedColumns), 1);
+  }
+
+  let nonDeleteCursor = 0;
+  return phases.map((phase) => {
+    if (phase.isDelete) {
+      return 1;
+    }
+    const span = normalizedSpans[nonDeleteCursor] ?? 1;
+    nonDeleteCursor += 1;
+    return span;
+  });
 };
 
 export const buildDownsamplingSegments = (

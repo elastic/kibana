@@ -271,6 +271,108 @@ describe('Segment Utilities', () => {
       expect(stepIndicesInOrder).toEqual([0, 1, 2]);
     });
 
+    it('adds the frozen phase min_age as a timeline boundary after the downsample steps', () => {
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '10d', label: 'frozen' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+      const downsampleSteps = [
+        { after: '1d', fixed_interval: '1h' },
+        { after: '2d', fixed_interval: '1h' },
+        { after: '4d', fixed_interval: '1h' },
+        { after: '8d', fixed_interval: '1h' },
+      ];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      // The frozen boundary (10d) must appear between the last step (8d) and retention (30d).
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual([
+        '0d',
+        '1d',
+        '2d',
+        '4d',
+        '8d',
+        '10d',
+        '30d',
+      ]);
+      // The frozen boundary carries no downsample step.
+      const frozenSegment = result.downsamplingSegments[5];
+      expect(frozenSegment.stepIndex).toBeUndefined();
+      expect(frozenSegment.step).toBeUndefined();
+    });
+
+    it('does not duplicate a boundary when a downsample step coincides with the frozen min_age', () => {
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '10d', label: 'frozen' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+      const downsampleSteps = [
+        { after: '5d', fixed_interval: '1h' },
+        { after: '10d', fixed_interval: '1d' },
+      ];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual(['0d', '5d', '10d', '30d']);
+      // The 10d boundary keeps the downsample step (index 1) rather than being duplicated.
+      const tenDayIndex = result.timelineSegments.findIndex((s) => s.leftValue === '10d');
+      expect(result.downsamplingSegments[tenDayIndex].stepIndex).toBe(1);
+    });
+
+    it('inserts the frozen boundary before the downsample steps when it starts earlier', () => {
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0s', label: 'hot' },
+        { grow: true, min_age: '10s', label: 'frozen' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+      const downsampleSteps = [
+        { after: '1d', fixed_interval: '1h' },
+        { after: '2d', fixed_interval: '1h' },
+      ];
+
+      const result = buildDslSegments(phases, downsampleSteps);
+
+      // The frozen boundary (10s) is inserted ahead of the first step (1d).
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual([
+        '0s',
+        '10s',
+        '1d',
+        '2d',
+        '30d',
+      ]);
+      // The frozen boundary carries no downsample step.
+      const frozenIndex = result.timelineSegments.findIndex((s) => s.leftValue === '10s');
+      expect(result.downsamplingSegments[frozenIndex].stepIndex).toBeUndefined();
+      expect(result.downsamplingSegments[frozenIndex].step).toBeUndefined();
+    });
+
+    it('adds the frozen boundary when there are no downsample steps', () => {
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '10d', label: 'frozen' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+
+      const result = buildDslSegments(phases, []);
+
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual(['0d', '10d', '30d']);
+    });
+
+    it('does not add a duplicate boundary when frozen min_age equals the start (0d)', () => {
+      const phases: SegmentPhase[] = [
+        { grow: true, min_age: '0d', label: 'hot' },
+        { grow: true, min_age: '0d', label: 'frozen' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+
+      const result = buildDslSegments(phases, []);
+
+      // Frozen at 0d sits on the start boundary, so no extra 0d column is created.
+      expect(result.timelineSegments.map((s) => s.leftValue)).toEqual(['0d', '30d']);
+    });
+
     it('should filter out downsample steps after retention', () => {
       const phases: SegmentPhase[] = [
         { grow: true, min_age: '0d' },
@@ -364,7 +466,7 @@ describe('Segment Utilities', () => {
       expect(spans).toEqual([1, 1]);
     });
 
-    it('should span non-delete phases across multiple segments', () => {
+    it('should span the single non-delete phase across multiple segments', () => {
       const phases: SegmentPhase[] = [{ grow: true }, { grow: false, isDelete: true }];
       const segments: TimelineSegment[] = [
         { grow: 3, leftValue: '0d' },
@@ -376,6 +478,51 @@ describe('Segment Utilities', () => {
       const spans = getPhaseColumnSpans(phases, segments);
 
       expect(spans).toEqual([3, 1]);
+    });
+
+    it('spans each phase by the columns inside its time range (frozen after the steps)', () => {
+      // hot (0d) + frozen (20d) + delete with 2 downsample steps => 3 non-delete columns + 1 delete.
+      const phases: SegmentPhase[] = [
+        { grow: true, label: 'hot', min_age: '0d' },
+        { grow: true, label: 'frozen', min_age: '20d' },
+        { grow: false, isDelete: true, min_age: '30d' },
+      ];
+      const segments: TimelineSegment[] = [
+        { grow: 3, leftValue: '0d' },
+        { grow: 3, leftValue: '10d' },
+        { grow: 3, leftValue: '20d' },
+        { grow: false, leftValue: '30d', isDelete: true },
+      ];
+
+      const spans = getPhaseColumnSpans(phases, segments);
+
+      // hot covers 0d + 10d (span 2), frozen covers 20d (span 1), delete spans 1.
+      expect(spans).toEqual([2, 1, 1]);
+      expect(spans.reduce((a, b) => a + b, 0)).toBe(segments.length);
+    });
+
+    it('spans each phase by its time range when frozen starts before the first step', () => {
+      // frozen (10s) starts before the downsample steps (1d, 2d, 4d), so hot only covers 0s and
+      // frozen absorbs the step columns instead of being squeezed to a single column.
+      const phases: SegmentPhase[] = [
+        { grow: true, label: 'hot', min_age: '0s' },
+        { grow: true, label: 'frozen', min_age: '10s' },
+        { grow: false, isDelete: true, min_age: '30d' },
+      ];
+      const segments: TimelineSegment[] = [
+        { grow: 1, leftValue: '0s' },
+        { grow: 5, leftValue: '10s' },
+        { grow: 6, leftValue: '1d' },
+        { grow: 7, leftValue: '2d' },
+        { grow: 8, leftValue: '4d' },
+        { grow: false, leftValue: '30d', isDelete: true },
+      ];
+
+      const spans = getPhaseColumnSpans(phases, segments);
+
+      // hot covers 0s only (span 1), frozen covers 10s/1d/2d/4d (span 4), delete spans 1.
+      expect(spans).toEqual([1, 4, 1]);
+      expect(spans.reduce((a, b) => a + b, 0)).toBe(segments.length);
     });
   });
 
