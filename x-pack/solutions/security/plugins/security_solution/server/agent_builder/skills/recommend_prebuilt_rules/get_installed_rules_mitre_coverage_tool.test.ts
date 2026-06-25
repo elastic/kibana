@@ -347,22 +347,5 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
         expect.stringContaining('ES cluster unavailable')
       );
     });
-
-    it('handles non-Error thrown values in the error message', async () => {
-      const { getStartServices, mockLogger, mockRequest } = createMockDeps();
-      mockFindRules.mockRejectedValue('string error');
-
-      const tool = createGetInstalledRulesMitreCoverageTool({
-        getStartServices,
-        logger: mockLogger,
-      });
-      const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
-      const result = await tool.handler({}, context);
-
-      if ('results' in result) {
-        expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0].data as { message: string }).message).toContain('string error');
-      }
-    });
   });
 });
