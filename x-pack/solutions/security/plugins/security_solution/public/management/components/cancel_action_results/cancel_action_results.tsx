@@ -8,7 +8,12 @@
 import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
-import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  ActionResponseOutput,
+  MaybeImmutable,
+  ResponseActionCancelOutputContent,
+} from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { RESPONSE_ACTION_STATUS } from '../../common/translations';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
@@ -32,7 +37,14 @@ export const CancelActionResults = memo<CancelActionResultsProps>(
     return useMemo(() => {
       const agentId = _agentId || action.agents[0];
       const agentActionState = action.agentState[agentId];
-      const agentActionResult = action.outputs?.[agentId];
+      const agentActionResult =
+        action.outputs?.[agentId] ??
+        ({
+          wasSuccessful: action.wasSuccessful,
+          isCompleted: action.isCompleted,
+          completedAt: action.completedAt,
+          content: { code: '' } as ResponseActionCancelOutputContent,
+        } as unknown as ActionResponseOutput<ResponseActionCancelOutputContent>);
 
       if (!action.agents.includes(agentId)) {
         window.console.error(
