@@ -6,9 +6,22 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSkeletonText,
+  EuiStat,
+} from '@elastic/eui';
 import type { EuiModalProps } from '@elastic/eui/src/components/modal/modal';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { useFetchAgentByAgentPolicySummary } from '../../../../../hooks/policy/use_fetch_endpoint_policy_agent_summary';
+import { useFetchEndpointPolicy } from '../../../../../hooks/policy/use_fetch_endpoint_policy';
 import { RESPONSE_CONSOLE_STORAGE_KEY } from '../../../../../common/constants';
 import { Console } from '../../../../../components/console';
 import { getEndpointConsoleCommands } from '../../../../../components/endpoint_responder';
@@ -16,15 +29,20 @@ import { useUserPrivileges } from '../../../../../../common/components/user_priv
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 export interface BulkResponseConsoleProps {
-  // TODO:PT define props
-
+  /** The Endpoint (or 3rd party EDR) Integration policy ID */
+  integrationPolicyId: string;
   'data-test-subj'?: string;
 }
 
 export const BulkResponseConsole = memo<BulkResponseConsoleProps>(
-  ({ 'data-test-subj': dataTestSubj }) => {
+  ({ integrationPolicyId, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const authz = useUserPrivileges().endpointPrivileges;
+    const { data: policyDetailsResponse, isLoading } = useFetchEndpointPolicy(integrationPolicyId);
+    const { data: policyAgentCounts, isLoading: isAgentCountsLoading } =
+      useFetchAgentByAgentPolicySummary(policyDetailsResponse?.item.policy_ids ?? [], {
+        enabled: Boolean(policyDetailsResponse?.item),
+      });
 
     const consoleCommands = useMemo(() => {
       return getEndpointConsoleCommands({
@@ -36,12 +54,57 @@ export const BulkResponseConsole = memo<BulkResponseConsoleProps>(
       });
     }, [authz]);
 
+    const ConsoleTitleComponent: React.ComponentType = useMemo(() => {
+      if (!policyDetailsResponse?.item) {
+        return () => null;
+      }
+
+      const TitleComponent = () => {
+        return (
+          <EuiFlexGroup responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                description={i18n.translate(
+                  'xpack.securitySolution.bulkResponseConsole.policyAgentTotal',
+                  { defaultMessage: 'Agent count' }
+                )}
+                title={policyAgentCounts?.active ?? 0}
+                isLoading={isAgentCountsLoading}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionList
+                listItems={[
+                  {
+                    title: i18n.translate('xpack.securitySolution.bulkResponseConsole.policyName', {
+                      defaultMessage: 'Policy',
+                    }),
+                    description: policyDetailsResponse?.item.name ?? '',
+                  },
+                ]}
+                textStyle="reverse"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      };
+      TitleComponent.displayName = 'TitleComponent';
+
+      return TitleComponent;
+    }, [isAgentCountsLoading, policyAgentCounts?.active, policyDetailsResponse?.item]);
+
+    if (isLoading) {
+      return <EuiSkeletonText lines={10} isLoading />;
+    }
+
+    // FIMXE:PT show message if policy has no agents
+
     return (
       <Console
         commands={consoleCommands}
         storagePrefix={RESPONSE_CONSOLE_STORAGE_KEY}
         data-test-subj={getTestId()}
-        TitleComponent={() => <>{'Policy: blah (300 agents)'}</>}
+        TitleComponent={ConsoleTitleComponent}
       />
     );
   }

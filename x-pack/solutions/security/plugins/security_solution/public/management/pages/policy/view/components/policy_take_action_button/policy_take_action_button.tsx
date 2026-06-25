@@ -7,6 +7,8 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { MaybeImmutable, PolicyData } from '../../../../../../../common/endpoint/types';
 import { BulkResponseConsoleModal } from './bulk_response_console';
 import {
   type ContextMenuItemNavByRouterProps,
@@ -17,11 +19,12 @@ import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 type TakeActionType = 'respond';
 
 export interface PolicyTakeActionButtonProps {
+  integrationPolicy: MaybeImmutable<PolicyData>;
   'data-test-subj'?: string;
 }
 
 export const PolicyTakeActionButton = memo<PolicyTakeActionButtonProps>(
-  ({ 'data-test-subj': dataTestSubj }) => {
+  ({ integrationPolicy, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [showActionType, setShowActionType] = useState<TakeActionType | undefined>();
 
@@ -31,7 +34,9 @@ export const PolicyTakeActionButton = memo<PolicyTakeActionButtonProps>(
           onClick: () => {
             setShowActionType('respond');
           },
-          children: 'Respond',
+          children: i18n.translate('xpack.securitySolution.endpointPolicyTakeAction.bulkRespond', {
+            defaultMessage: 'Bulk respond',
+          }),
           icon: 'console',
         },
       ];
@@ -44,11 +49,16 @@ export const PolicyTakeActionButton = memo<PolicyTakeActionButtonProps>(
     const userActionUi = useMemo(() => {
       switch (showActionType) {
         case 'respond':
-          return <BulkResponseConsoleModal onClose={handleUserActionUiOnCloseHandler} />;
+          return (
+            <BulkResponseConsoleModal
+              integrationPolicyId={integrationPolicy.id}
+              onClose={handleUserActionUiOnCloseHandler}
+            />
+          );
         default:
           return null;
       }
-    }, [handleUserActionUiOnCloseHandler, showActionType]);
+    }, [handleUserActionUiOnCloseHandler, integrationPolicy.id, showActionType]);
 
     return (
       <>

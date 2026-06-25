@@ -68,10 +68,17 @@ export const PolicyDetails = React.memo(() => {
           offline={policyAgentStatusSummary?.offline ?? 0}
           error={policyAgentStatusSummary?.error ?? 0}
         />
-        <EuiSpacer />
-        <div className="eui-textRight">
-          <PolicyTakeActionButton />
-        </div>
+        {policyItem && (
+          <>
+            <EuiSpacer />
+            <div className="eui-textRight">
+              <PolicyTakeActionButton
+                data-test-subj="policyDetailsTakeAction"
+                integrationPolicy={policyItem}
+              />
+            </div>
+          </>
+        )}
       </>
     );
   }, [
@@ -79,6 +86,7 @@ export const PolicyDetails = React.memo(() => {
     policyAgentStatusSummary?.error,
     policyAgentStatusSummary?.offline,
     policyAgentStatusSummary?.online,
+    policyItem,
   ]);
 
   const backToEndpointList = (
