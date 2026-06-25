@@ -91,7 +91,7 @@ export class SecurityRuleGenerationClient {
       });
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      this.log.error(`agent_builder/converse (routing) failed after retries: ${msg}`);
+      this.log.warning(`agent_builder/converse (routing) failed after retries: ${msg}`);
       throw error instanceof Error ? error : new Error(msg);
     }
   }

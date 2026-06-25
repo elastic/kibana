@@ -83,10 +83,7 @@ const FIND_RULES_TOOL_ID = 'security.find_rules';
 const DISCOVER_RULE_TAGS_TOOL_ID = 'security.discover_rule_tags';
 
 function isFindRulesRoutingMetadata(metadata?: RuleRoutingDatasetMetadata): boolean {
-  return (
-    metadata?.expectedOnlyToolId === FIND_RULES_TOOL_ID ||
-    metadata?.category === 'find-rules'
-  );
+  return metadata?.expectedOnlyToolId === FIND_RULES_TOOL_ID || metadata?.category === 'find-rules';
 }
 
 function allowedDomainToolIdsForExample(metadata?: RuleRoutingDatasetMetadata): string[] | null {
@@ -246,7 +243,9 @@ const createToolUsageOnlyEvaluator = (): Evaluator<RuleRoutingDatasetExample, Ta
       };
     }
 
-    const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
+    const usedToolIds = domainToolCalls
+      .map((t) => t.tool_id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0);
     const hasExpected = usedToolIds.includes(expectedOnlyToolId);
     const allAllowed = usedToolIds.every((id) => allowedToolIds.includes(id));
 

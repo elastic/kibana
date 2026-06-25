@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator, TaskOutput } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ruleRoutingExamples } from '../datasets/routing_examples';
-import { buildRuleRoutingEvaluators, toRoutingDatasetExample } from './evaluate_routing_dataset';
+import { buildRuleRoutingEvaluators, toRoutingDatasetExample, type RuleRoutingDatasetExample } from './evaluate_routing_dataset';
 
 const stubTraceEvaluator = (name: string): Evaluator => ({
   name,
@@ -93,7 +93,9 @@ describe('ruleRoutingExamples', () => {
   });
 
   it('uses discover-then-find trajectory goldens for find-rules routing', () => {
-    for (const example of ruleRoutingExamples.filter((ex) => ex.metadata.category === 'find-rules')) {
+    for (const example of ruleRoutingExamples.filter(
+      (ex) => ex.metadata.category === 'find-rules'
+    )) {
       expect(example.metadata.tool_sequence).toEqual([
         'security.discover_rule_tags',
         'security.find_rules',
@@ -120,7 +122,10 @@ describe('routing evaluator behavior', () => {
       examples: wrappedExamples,
     });
 
-  const findEvaluator = <T extends Evaluator>(stack: T[], name: string) => {
+  const findEvaluator = (
+    stack: Evaluator<RuleRoutingDatasetExample, TaskOutput>[],
+    name: string
+  ): Evaluator<RuleRoutingDatasetExample, TaskOutput> => {
     const evaluator = stack.find((e) => e.name === name);
     expect(evaluator).toBeDefined();
     return evaluator!;
