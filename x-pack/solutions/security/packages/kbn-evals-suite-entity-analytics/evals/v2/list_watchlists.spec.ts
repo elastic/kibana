@@ -7,30 +7,72 @@
 
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
+import {
+  assignEntitiesToWatchlist,
+  bulkIndexEntities,
+  createWatchlist,
+  deleteEntityEngines,
+  deleteWatchlistsByName,
+  installEntityStoreV2AndWait,
+} from '../../src/setup_helpers';
 
 /**
  * list_watchlists tool routing evals.
  *
  * These specs validate that the entity-analytics skill correctly routes:
- * - watchlist-discovery queries (e.g. "what watchlists do we have") to the
- *   `security.list_watchlists` tool;
+ * - watchlist-discovery queries
  * - "who is on watchlist X" queries to the `security.list_watchlists` →
- *   `security.search_entities` chain (resolve name to id, then search by
- *   watchlist membership);
+ *   `security.search_entities` chain
  * - "which watchlists is this entity on" queries to `security.get_entity`
- *   (NOT to `security.list_watchlists`) — the watchlists an entity belongs to
- *   are already on the entity profile as `entity.attributes.watchlists`.
- *
- * Tool routing assertions work without pre-seeded data; the tools may return
- * "no watchlists" / "entity not found" but the calls themselves must still be
- * made. For grounded criteria (verifying actual watchlist names, members, etc.)
- * seed the entity store and create watchlists using the
- * security-documents-generator populate script.
  */
+
+const SEEDED_USER_EUIDS = ['user:jsmith123', 'user:rjones456', 'user:alice', 'user:bob'];
+const SEEDED_HOST_EUIDS = ['host:server01'];
+const ALL_SEEDED_EUIDS = [...SEEDED_USER_EUIDS, ...SEEDED_HOST_EUIDS];
+
+const MANAGED_WATCHLIST_NAMES = ['Privileged Users'];
+
 evaluate.describe(
   'SIEM Entity Analytics V2 Skill - List Watchlists',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ log, esClient, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+
+      await bulkIndexEntities({
+        esClient,
+        entities: ALL_SEEDED_EUIDS.map((euid) => ({ euid })),
+      });
+
+      // delete any prior runs' managed watchlists, then create fresh.
+      await deleteWatchlistsByName({ supertest, names: MANAGED_WATCHLIST_NAMES });
+      const { id: privilegedUsersId } = await createWatchlist({
+        supertest,
+        watchlist: {
+          name: 'Privileged Users',
+          description: 'Sensitive accounts under continuous review',
+          riskModifier: 1.5,
+        },
+      });
+
+      await assignEntitiesToWatchlist({
+        supertest,
+        watchlistId: privilegedUsersId,
+        euids: ALL_SEEDED_EUIDS,
+      });
+    });
+
+    evaluate.afterAll(async ({ log, supertest, quickApiClient }) => {
+      // Best-effort cleanup. Failures here are non-fatal — the next beforeAll
+      // is idempotent and will clear leftover seeded watchlists by name.
+      try {
+        await deleteWatchlistsByName({ supertest, names: MANAGED_WATCHLIST_NAMES });
+      } catch (err) {
+        log.warning(`Watchlist cleanup failed during teardown: ${(err as Error).message}`);
+      }
+      await deleteEntityEngines({ quickApiClient, log });
+    });
+
     evaluate('list watchlists questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
@@ -92,8 +134,9 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  "Derive the host's watchlist memberships from its entity profile (entity.attributes.watchlists) using security.get_entity, or clearly state the entity was not found.",
-                  "Do NOT call security.list_watchlists for this question — the watchlists an entity belongs to are already on the entity profile; security.list_watchlists is for discovering which watchlists exist, not for finding a specific entity's memberships.",
+                  "Call security.get_entity FIRST — the entity's watchlist memberships are on the entity profile (entity.attributes.watchlists, an array of watchlist IDs). Or clearly state the entity was not found.",
+                  "Optionally call security.list_watchlists AFTERWARDS to translate the watchlist IDs into human-readable names for the response — that's helpful, not an anti-pattern. The criterion is only that get_entity comes first and is the source of truth.",
+                  "What's wrong is calling security.list_watchlists FIRST to iterate over all watchlists looking for this entity's memberships — that ignores the fact that the profile already has them.",
                   'Do not fabricate entity or watchlist data.',
                 ],
                 toolCalls: [
