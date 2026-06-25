@@ -1332,8 +1332,6 @@
       "@kbn/fec-alerts-test-plugin/*": ["x-pack/platform/test/functional_execution_context/plugins/alerts/*"],
       "@kbn/federated-data-plugin": ["x-pack/platform/plugins/private/federated_data"],
       "@kbn/federated-data-plugin/*": ["x-pack/platform/plugins/private/federated_data/*"],
-      "@kbn/feedback-components": ["src/platform/packages/shared/feedback-components"],
-      "@kbn/feedback-components/*": ["src/platform/packages/shared/feedback-components/*"],
       "@kbn/feedback-plugin": ["x-pack/platform/plugins/private/feedback"],
       "@kbn/feedback-plugin/*": ["x-pack/platform/plugins/private/feedback/*"],
       "@kbn/feedback-registry": ["x-pack/platform/packages/private/feedback-registry"],
