@@ -73,6 +73,7 @@ import type {
   SearchStepExecutionsParams,
 } from './workflows_management_api';
 
+import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
@@ -91,7 +92,6 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
-import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
