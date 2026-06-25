@@ -193,19 +193,23 @@ export const installRuleAssetsHandler: FleetRequestHandler<
   };
 
   // Ensure archive SO assets (including alerting_rule_template SOs) are present in this space
-  // before attempting rule creation. Without this, templates would not be found in secondary
-  // spaces that have not yet had assets installed via the "Install Kibana assets" flow.
-  await installKibanaAssetsAndReferences({
-    savedObjectsClient: spaceScopedClient,
-    logger,
-    pkgName,
-    pkgTitle: packageInfo.title,
-    installAsAdditionalSpace,
-    spaceId,
-    assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
-    installedPkg: installation,
-    packageInstallContext,
-  });
+  // before attempting rule creation. Only required for secondary spaces that have not yet had
+  // assets installed via the "Install Kibana assets" flow; the primary space already has them
+  // from the original install, and reinstalling unconditionally would wipe and recreate all
+  // Kibana assets (dashboards, visualizations, etc.) as an unintended side effect.
+  if (installAsAdditionalSpace) {
+    await installKibanaAssetsAndReferences({
+      savedObjectsClient: spaceScopedClient,
+      logger,
+      pkgName,
+      pkgTitle: packageInfo.title,
+      installAsAdditionalSpace,
+      spaceId,
+      assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
+      installedPkg: installation,
+      packageInstallContext,
+    });
+  }
 
   await stepCreateAlertingAssets({
     logger,
