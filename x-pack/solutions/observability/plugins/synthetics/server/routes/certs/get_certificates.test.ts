@@ -14,12 +14,8 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 
 const buildServer = (ccsEnabled: boolean) =>
   ({
-    isElasticsearchServerless: false,
-    config: {
-      experimental: {
-        ccs: { enabled: ccsEnabled },
-      },
-    },
+    // isCCSEnabled() derives CCS purely from !isElasticsearchServerless, so drive that.
+    isElasticsearchServerless: !ccsEnabled,
   } as any);
 
 describe('getSyntheticsCertsRoute', () => {
