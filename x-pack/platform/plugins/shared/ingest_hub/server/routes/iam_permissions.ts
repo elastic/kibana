@@ -138,7 +138,6 @@ export const registerIamPermissionsRoute = (
             `No manifest provider_permissions found for service '${id}' — using hardcoded matrix fallback`
           );
           const fallback = AWS_SERVICE_PROVIDER_PERMISSIONS[id];
-          const fallback = AWS_SERVICE_PROVIDER_PERMISSIONS[id];
           actions = fallback?.actions ?? [];
           if (fallback?.managedPolicyArns?.length) {
             managedPolicyArns = fallback.managedPolicyArns;
