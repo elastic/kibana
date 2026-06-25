@@ -9,6 +9,29 @@ import React, { useLayoutEffect, useMemo, useState } from 'react';
 import type { RefObject } from 'react';
 import { EuiComponentDefaultsProvider } from '@elastic/eui';
 
+export const AGENT_WORKSPACE_MOUNT_TEST_SUBJ = 'agentWorkspaceMount';
+
+/**
+ * Agent Builder mounts into the chrome agent column via a separate React root.
+ * Flyout defaults must be provided in that app tree — not only in the chrome tree.
+ */
+export const resolveAgentWorkspaceFlyoutContainer = (element: HTMLElement): HTMLElement => {
+  const mountRoot = element.closest(`[data-test-subj="${AGENT_WORKSPACE_MOUNT_TEST_SUBJ}"]`);
+  if (mountRoot instanceof HTMLElement) {
+    return mountRoot;
+  }
+  return element.parentElement ?? element;
+};
+
+export const createAgentWorkspaceFlyoutDefaults = (container: HTMLElement | null) =>
+  container
+    ? {
+        EuiFlyout: {
+          container,
+        },
+      }
+    : undefined;
+
 interface AgentWorkspaceFlyoutDefaultsProps {
   containerRef: RefObject<HTMLElement | null>;
   children: React.ReactNode;
@@ -16,7 +39,6 @@ interface AgentWorkspaceFlyoutDefaultsProps {
 
 /**
  * Scope AB flyouts to the agent workspace column instead of the application workspace.
- * Always renders the provider so the child DOM tree stays stable for ReactDOM.mount targets.
  */
 export const AgentWorkspaceFlyoutDefaults: React.FC<AgentWorkspaceFlyoutDefaultsProps> = ({
   containerRef,
@@ -29,14 +51,7 @@ export const AgentWorkspaceFlyoutDefaults: React.FC<AgentWorkspaceFlyoutDefaults
   }, [containerRef]);
 
   const componentDefaults = useMemo(
-    () =>
-      container
-        ? {
-            EuiFlyout: {
-              container,
-            },
-          }
-        : undefined,
+    () => createAgentWorkspaceFlyoutDefaults(container),
     [container]
   );
 

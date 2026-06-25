@@ -5,52 +5,42 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlyout, EuiFlyoutBody, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import { AGENT_WORKSPACE_MOUNT_TEST_SUBJ } from '../../../../../../agent_workspace/agent_workspace_flyout_defaults';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
-import {
-  shouldOfferSidebarConversation,
-  useIsAgentWorkspaceMount,
-} from '../../../../../hooks/use_navigation';
+import { shouldOfferSidebarConversation } from '../../../../../hooks/use_navigation';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
-import { CanvasPanelOverlay } from './canvas_panel_overlay';
 
-const DEFAULT_CANVAS_WIDTH = '50vw';
-const CANVAS_MIN_WIDTH = 300;
+const FADE_OUT_MS = 200;
 
-const FLYOUT_ARIA_LABEL = i18n.translate('xpack.agentBuilder.canvasFlyout.ariaLabel', {
-  defaultMessage: 'Attachment preview',
-});
-
-interface CanvasFlyoutProps {
+interface CanvasPanelOverlayProps {
   attachmentsService: AttachmentsService;
 }
 
 /**
- * Flyout component for displaying attachments in canvas mode (expanded view).
- * In agent workspace chrome, renders a full-column overlay instead of a flyout.
+ * Full-column attachment preview for the agent workspace chrome column (POC).
+ * Portals into agentWorkspaceMount — not a flyout, no scrim.
  */
-export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
+export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
   const agentId = useAgentId();
-  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
-  const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const offerSidebarConversation = shouldOfferSidebarConversation(
     canvasState?.isSidebar ?? false,
-    isAgentWorkspaceMount
+    true
   );
 
   const openSidebarConversation = useCallback(() => {
@@ -58,7 +48,6 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   }, [conversationId, openSidebarConversationInternal]);
 
   const prevConversationIdRef = useRef(conversationId);
-
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {
       closeCanvas();
@@ -94,9 +83,23 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     : null;
 
   const [dynamicButtons, setDynamicButtons] = useState<ActionButton[]>([]);
+  const [mountElement, setMountElement] = useState<HTMLElement | null>(null);
+  const [isEntering, setIsEntering] = useState(true);
+  const [isClosing, setIsClosing] = useState(false);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    const mountRoot = document.querySelector(`[data-test-subj="${AGENT_WORKSPACE_MOUNT_TEST_SUBJ}"]`);
+    setMountElement(mountRoot instanceof HTMLElement ? mountRoot : null);
+  }, []);
 
   useEffect(() => {
     setDynamicButtons([]);
+    setIsClosing(false);
+    setIsEntering(true);
+    requestAnimationFrame(() => {
+      setIsEntering(false);
+    });
   }, [canvasState?.attachment.id, canvasState?.attachment.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
@@ -127,14 +130,45 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     dynamicButtons,
   ]);
 
-  const useAgentWorkspacePanel =
-    isAgentWorkspaceMount && canvasState && !canvasState.isSidebar;
+  const finishClose = useCallback(() => {
+    setIsClosing(false);
+    closeCanvas();
+  }, [closeCanvas]);
 
-  if (useAgentWorkspacePanel) {
-    return <CanvasPanelOverlay attachmentsService={attachmentsService} />;
-  }
+  const handleClose = useCallback(() => {
+    if (isClosing) {
+      return;
+    }
+    setIsClosing(true);
+  }, [isClosing]);
 
-  if (!canvasState || !uiDefinition?.renderCanvasContent) {
+  useEffect(() => {
+    if (!isClosing) {
+      return;
+    }
+
+    const node = overlayRef.current;
+    const onTransitionEnd = (event: TransitionEvent) => {
+      if (event.propertyName === 'opacity') {
+        finishClose();
+      }
+    };
+
+    if (node) {
+      node.addEventListener('transitionend', onTransitionEnd);
+    }
+
+    const fallbackTimer = window.setTimeout(finishClose, FADE_OUT_MS);
+
+    return () => {
+      if (node) {
+        node.removeEventListener('transitionend', onTransitionEnd);
+      }
+      window.clearTimeout(fallbackTimer);
+    };
+  }, [isClosing, finishClose]);
+
+  if (!canvasState || !uiDefinition?.renderCanvasContent || !mountElement) {
     return null;
   }
 
@@ -142,35 +176,32 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
 
-  const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
-  const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
-  const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
+  const isVisible = !isEntering && !isClosing;
 
-  const flyoutBodyStyles = css`
-    padding-top: ${euiTheme.size.m};
-
-    > .euiFlyoutBody__overflow {
-      mask-image: none;
-    }
-
-    .euiFlyoutBody__overflowContent {
-      height: 100%;
-    }
+  const overlayStyles = css`
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    opacity: ${isVisible ? 1 : 0};
+    transition: opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
   `;
 
-  return (
-    <EuiFlyout
-      onClose={closeCanvas}
-      aria-label={FLYOUT_ARIA_LABEL}
-      ownFocus={false}
-      outsideClickCloses={true}
-      minWidth={CANVAS_MIN_WIDTH}
-      maxWidth={DEFAULT_CANVAS_WIDTH}
-      resizable={!isSidebar && !isNarrowViewport}
-      size={flyoutSize}
-      type={flyoutType}
-      hideCloseButton
-      paddingSize="none"
+  const bodyStyles = css`
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding-top: ${euiTheme.size.m};
+  `;
+
+  return createPortal(
+    <div
+      ref={overlayRef}
+      css={overlayStyles}
+      data-test-subj="agentWorkspaceCanvasOverlay"
     >
       <AttachmentHeader
         icon={header?.icon}
@@ -178,10 +209,10 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         subtitle={header?.subtitle}
         badges={header?.badges}
         actionButtons={canvasHeaderActionButtons}
-        onClose={closeCanvas}
+        onClose={handleClose}
         previewBadgeState="preview_available"
       />
-      <EuiFlyoutBody css={flyoutBodyStyles}>
+      <div css={bodyStyles}>
         <React.Fragment key={`${attachment.id}:${attachment.version ?? 'latest'}`}>
           {uiDefinition.renderCanvasContent(
             {
@@ -196,7 +227,8 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
             }
           )}
         </React.Fragment>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+      </div>
+    </div>,
+    mountElement
   );
 };

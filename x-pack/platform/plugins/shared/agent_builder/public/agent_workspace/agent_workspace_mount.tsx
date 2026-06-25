@@ -15,7 +15,7 @@ import React, { useEffect, useRef } from 'react';
 import { AGENTBUILDER_PATH } from '../../common/features';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
-import { AgentWorkspaceFlyoutDefaults } from './agent_workspace_flyout_defaults';
+import { AGENT_WORKSPACE_MOUNT_TEST_SUBJ } from './agent_workspace_flyout_defaults';
 import {
   clearAgentWorkspaceMountLeaveHandler,
   setAgentWorkspaceMountLeaveHandler,
@@ -136,21 +136,23 @@ export function AgentWorkspaceMount() {
   }, []);
 
   return (
-    <div css={mountRootStyles} data-test-subj="agentWorkspaceMount" ref={flyoutContainerRef}>
-      <AgentWorkspaceFlyoutDefaults containerRef={flyoutContainerRef}>
-        <div
-          ref={elementRef}
-          css={css`
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            min-height: 0;
-            min-width: 0;
-            height: 100%;
-            width: 100%;
-          `}
-        />
-      </AgentWorkspaceFlyoutDefaults>
+    <div
+      css={mountRootStyles}
+      data-test-subj={AGENT_WORKSPACE_MOUNT_TEST_SUBJ}
+      ref={flyoutContainerRef}
+    >
+      <div
+        ref={elementRef}
+        css={css`
+          display: flex;
+          flex-direction: column;
+          flex-grow: 1;
+          min-height: 0;
+          min-width: 0;
+          height: 100%;
+          width: 100%;
+        `}
+      />
     </div>
   );
 }
