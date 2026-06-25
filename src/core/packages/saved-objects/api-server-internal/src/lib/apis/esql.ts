@@ -17,6 +17,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsEsqlOptions,
   SavedObjectsEsqlResponse,
+  SavedObjectsEsqlUnmappedFields,
 } from '@kbn/core-saved-objects-api-server';
 import { esql, Walker, SOURCE_COMMANDS } from '@elastic/esql';
 import type { ApiExecutionContext } from './types';
@@ -33,12 +34,25 @@ const EMPTY_ESQL_RESPONSE: SavedObjectsEsqlResponse = {
   values: [],
 };
 
+const validUnmappedFieldsValues = new Set<SavedObjectsEsqlUnmappedFields>([
+  'default',
+  'nullify',
+  'load',
+]);
+
 export async function performEsql(
   { options, rawClient }: PerformEsqlParams,
   { registry, helpers, allowedTypes, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsEsqlResponse> {
   const { securityExtension, spacesExtension } = extensions;
-  const { namespaces: requestedNamespaces, type, pipeline, metadata, ...esqlOptions } = options;
+  const {
+    namespaces: requestedNamespaces,
+    type,
+    pipeline,
+    metadata,
+    querySettings,
+    ...esqlOptions
+  } = options;
 
   if (requestedNamespaces.length === 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -118,7 +132,8 @@ export async function performEsql(
 
   // toRequest() prints pipeline-only queries without a leading '|';
   // we supply the separator when joining with the FROM clause.
-  const query = `${fromClause} | ${req.query}`;
+  const querySettingsClause = buildQuerySettingsClause(querySettings?.unmappedFields);
+  const query = `${querySettingsClause}${fromClause} | ${req.query}`;
 
   // @elastic/esql types params as Record<string, unknown> for named entries;
   // the ES client expects Partial<Record<string, EsqlSingleOrMultiValue>>.
@@ -142,6 +157,23 @@ export async function performEsql(
   const { encryptionExtension } = extensions;
   const withDecryptedSource = await decryptSourceColumn(result, types, encryptionExtension);
   return stripEncryptedColumns(withDecryptedSource, types, encryptionExtension);
+}
+
+function buildQuerySettingsClause(unmappedFields: unknown): string {
+  if (unmappedFields === undefined) {
+    return '';
+  }
+
+  if (
+    typeof unmappedFields !== 'string' ||
+    !validUnmappedFieldsValues.has(unmappedFields as SavedObjectsEsqlUnmappedFields)
+  ) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'options.querySettings.unmappedFields must be one of "default", "nullify", or "load"'
+    );
+  }
+
+  return `SET unmapped_fields="${unmappedFields}"; `;
 }
 
 /**

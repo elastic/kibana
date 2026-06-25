@@ -90,4 +90,9 @@ export type {
   SavedObjectsChangeAccessModeOptions,
 } from './change_access_control';
 export type { SavedObjectsSearchOptions, SavedObjectsSearchResponse } from './search';
-export type { SavedObjectsEsqlOptions, SavedObjectsEsqlResponse } from './esql';
+export type {
+  SavedObjectsEsqlOptions,
+  SavedObjectsEsqlQuerySettings,
+  SavedObjectsEsqlResponse,
+  SavedObjectsEsqlUnmappedFields,
+} from './esql';

@@ -136,6 +136,30 @@ describe('esql', () => {
     expect(request.query).toMatch(/^FROM .+ METADATA _id, _source \| LIMIT 10$/);
   });
 
+  it('should include unmapped_fields query setting before the FROM clause', async () => {
+    await repository.esql({
+      ...options,
+      querySettings: { unmappedFields: 'load' },
+    });
+
+    expect(client.esql.query).toHaveBeenCalledTimes(1);
+    const [[request]] = client.esql.query.mock.calls;
+    expect(request.query).toMatch(/^SET unmapped_fields="load"; FROM .+ \| LIMIT 10$/);
+  });
+
+  it('should reject invalid unmappedFields values', async () => {
+    await expect(
+      repository.esql({
+        ...options,
+        querySettings: { unmappedFields: 'foo' as 'load' },
+      })
+    ).rejects.toThrowError(
+      'options.querySettings.unmappedFields must be one of "default", "nullify", or "load"'
+    );
+
+    expect(client.esql.query).not.toHaveBeenCalled();
+  });
+
   it('should throw if pipeline contains a source command', async () => {
     await expect(
       repository.esql({ ...options, pipeline: esql`FROM .kibana | LIMIT 10` })

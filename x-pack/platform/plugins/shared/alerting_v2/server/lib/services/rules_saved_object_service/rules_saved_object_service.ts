@@ -10,6 +10,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { esql } from '@elastic/esql';
 import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
@@ -25,12 +26,8 @@ import { RuleSavedObjectsClientToken } from './tokens';
  */
 const SCHEDULE_INTERVAL_AGG_SIZE = 1000;
 
-interface ScheduleEveryAggregationResult {
-  schedule_intervals: {
-    sum_other_doc_count: number;
-    buckets: Array<{ key: string; doc_count: number }>;
-  };
-}
+const colEnabled = esql.col(`${RULE_SAVED_OBJECT_TYPE}.enabled`);
+const colScheduleEvery = esql.col(`${RULE_SAVED_OBJECT_TYPE}.schedule.every`);
 
 export type RulesSavedObjectsBulkGetResultItem =
   | {
@@ -286,34 +283,25 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
 
   /**
    * Sums the scheduled rule runs per minute across all enabled rules in every
-   * space. Used to enforce the `maxScheduledPerMinute` guardrail. Uses a terms
-   * aggregation on the indexed `schedule.every` field, so its cost scales with
-   * the number of distinct intervals rather than the number of rules.
+   * space. Used to enforce the `maxScheduledPerMinute` guardrail. Uses ES|QL
+   * unmapped field loading so `schedule.every` does not need a dedicated SO
+   * mapping for this aggregate-only access pattern.
    */
   public async getTotalScheduledPerMinute(): Promise<number> {
-    const result = await this.client.find<
-      RuleSavedObjectAttributes,
-      ScheduleEveryAggregationResult
-    >({
+    const result = await this.client.esql({
       type: RULE_SAVED_OBJECT_TYPE,
-      perPage: 0,
       namespaces: ['*'],
-      filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
-      aggs: {
-        schedule_intervals: {
-          terms: {
-            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.schedule.every`,
-            size: SCHEDULE_INTERVAL_AGG_SIZE,
-          },
-        },
-      },
+      querySettings: { unmappedFields: 'load' },
+      pipeline: esql`
+        WHERE ${colEnabled} == true AND ${colScheduleEvery} IS NOT NULL
+        | STATS occurrences = COUNT(*) BY interval = ${colScheduleEvery}
+        | LIMIT ${SCHEDULE_INTERVAL_AGG_SIZE}
+      `,
     });
 
-    const buckets = result.aggregations?.schedule_intervals.buckets ?? [];
-
-    return buckets.reduce(
-      (total, { key, doc_count: occurrences }) =>
-        total + convertEveryToSchedulesPerMinute(key) * occurrences,
+    return getScheduleIntervalBuckets(result).reduce(
+      (total, { interval, occurrences }) =>
+        total + convertEveryToSchedulesPerMinute(interval) * occurrences,
       0
     );
   }
@@ -338,4 +326,26 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
 
     return aggs?.tags?.buckets.map((bucket) => bucket.key) ?? [];
   }
+}
+
+function getScheduleIntervalBuckets(
+  result: Awaited<ReturnType<SavedObjectsClientContract['esql']>>
+): Array<{ interval: string; occurrences: number }> {
+  const intervalColumnIndex = result.columns.findIndex((column) => column.name === 'interval');
+  const occurrencesColumnIndex = result.columns.findIndex(
+    (column) => column.name === 'occurrences'
+  );
+
+  if (intervalColumnIndex === -1 || occurrencesColumnIndex === -1) {
+    return [];
+  }
+
+  return result.values.flatMap((row) => {
+    const interval = row[intervalColumnIndex];
+    const occurrences = row[occurrencesColumnIndex];
+
+    return typeof interval === 'string' && typeof occurrences === 'number'
+      ? [{ interval, occurrences }]
+      : [];
+  });
 }

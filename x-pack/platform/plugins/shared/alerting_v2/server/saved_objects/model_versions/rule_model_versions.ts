@@ -16,24 +16,4 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       create: ruleSavedObjectAttributesSchemaV1,
     },
   },
-  '2': {
-    // Index the already-existing `schedule.every` attribute so the
-    // maxScheduledPerMinute guardrail can aggregate scheduled frequency.
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          schedule: {
-            properties: {
-              every: { type: 'keyword', ignore_above: 256 },
-            },
-          },
-        },
-      },
-    ],
-    schemas: {
-      forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
-      create: ruleSavedObjectAttributesSchemaV1,
-    },
-  },
 };

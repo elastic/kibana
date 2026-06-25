@@ -10,6 +10,20 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ComposerQuery } from '@elastic/esql';
 
+export type SavedObjectsEsqlUnmappedFields = 'default' | 'nullify' | 'load';
+
+export interface SavedObjectsEsqlQuerySettings {
+  /**
+   * Optional ES|QL unmapped-fields resolution.
+   *
+   * `load` asks Elasticsearch to load unmapped values from `_source` and treat
+   * fully unmapped fields as `keyword` columns. This is useful for simple
+   * schema-on-read predicates and aggregations, but is subject to Elasticsearch
+   * ES|QL `unmapped_fields` limitations.
+   */
+  unmappedFields?: SavedObjectsEsqlUnmappedFields;
+}
+
 /**
  * Options for the saved objects ES|QL query operation.
  *
@@ -71,6 +85,17 @@ export interface SavedObjectsEsqlOptions
    * ```
    */
   metadata?: string[];
+
+  /**
+   * Optional ES|QL query settings generated before the `FROM` clause.
+   *
+   * @example
+   * ```
+   * querySettings: { unmappedFields: 'load' }
+   * // generates: SET unmapped_fields="load"; FROM .kibana ...
+   * ```
+   */
+  querySettings?: SavedObjectsEsqlQuerySettings;
 }
 
 /**

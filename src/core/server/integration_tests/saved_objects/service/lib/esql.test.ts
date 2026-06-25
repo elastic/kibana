@@ -11,9 +11,7 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { URL } from 'url';
 import { esql } from '@elastic/esql';
-
-const colName = esql.col('esql-test-type.name');
-const colEmail = esql.col('esql-test-type.email');
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import type { Root } from '@kbn/core-root-server-internal';
@@ -23,19 +21,24 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 
+const colName = esql.col('esql-test-type.name');
+const colEmail = esql.col('esql-test-type.email');
+const colDepartment = esql.col('esql-test-type.department');
+
 export const logFilePath = Path.join(__dirname, 'esql.test.log');
 
 interface UserType {
   name: string;
   email: string;
+  department: string;
 }
 
 const users: UserType[] = [
-  { name: 'John Doe', email: 'john.doe@example.com' },
-  { name: 'Jane Doe', email: 'jane.doe@example.com' },
-  { name: 'Alice Smith', email: 'alice.smith@example.com' },
-  { name: 'Alice Johnson', email: 'alice.johnson@example.com' },
-  { name: 'Charlie Brown', email: 'charlie.brown@example.com' },
+  { name: 'John Doe', email: 'john.doe@example.com', department: 'engineering' },
+  { name: 'Jane Doe', email: 'jane.doe@example.com', department: 'engineering' },
+  { name: 'Alice Smith', email: 'alice.smith@example.com', department: 'sales' },
+  { name: 'Alice Johnson', email: 'alice.johnson@example.com', department: 'sales' },
+  { name: 'Charlie Brown', email: 'charlie.brown@example.com', department: 'support' },
 ];
 
 const registerTypes = (setup: InternalCoreSetup) => {
@@ -61,6 +64,8 @@ describe('SOR - esql API', () => {
   let root: Root;
   let esServer: TestElasticsearchUtils;
   let savedObjectsRepository: ISavedObjectsRepository;
+  let esClient: ElasticsearchClient;
+  let savedObjectsIndex: string;
 
   beforeAll(async () => {
     await fs.unlink(logFilePath).catch(() => {});
@@ -87,6 +92,8 @@ describe('SOR - esql API', () => {
 
     const start = await root.start();
     savedObjectsRepository = start.savedObjects.createInternalRepository();
+    esClient = start.elasticsearch.client.asInternalUser;
+    savedObjectsIndex = start.savedObjects.getIndexForType('esql-test-type');
 
     await savedObjectsRepository.bulkCreate(
       users
@@ -179,6 +186,40 @@ describe('SOR - esql API', () => {
     // Find the doc_count column index
     const countColIdx = result.columns.findIndex((c) => c.name === 'doc_count');
     expect(result.values[0][countColIdx]).toBe(5);
+  });
+
+  it('should load and aggregate unmapped fields from _source', async () => {
+    const mappings = await esClient.indices.getMapping({ index: savedObjectsIndex });
+    const [indexMapping] = Object.values(mappings).map((entry) => entry.mappings);
+    const typeProperties = indexMapping.properties?.['esql-test-type'];
+
+    expect(typeProperties).toEqual(
+      expect.objectContaining({
+        properties: expect.not.objectContaining({
+          department: expect.anything(),
+        }),
+      })
+    );
+
+    const result = await savedObjectsRepository.esql({
+      type: 'esql-test-type',
+      namespaces: ['default'],
+      querySettings: { unmappedFields: 'load' },
+      pipeline: esql`
+        STATS users = COUNT(*) BY department = ${colDepartment}
+        | SORT department
+      `,
+    });
+
+    expect(result.columns).toEqual([
+      expect.objectContaining({ name: 'users' }),
+      expect.objectContaining({ name: 'department', type: 'keyword' }),
+    ]);
+    expect(result.values).toEqual([
+      [2, 'engineering'],
+      [2, 'sales'],
+      [1, 'support'],
+    ]);
   });
 
   it('should include METADATA fields when specified', async () => {
