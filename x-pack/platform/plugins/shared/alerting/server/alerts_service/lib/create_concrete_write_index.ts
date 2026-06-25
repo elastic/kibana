@@ -37,7 +37,6 @@ interface UpdateIndexOpts {
   totalFieldsLimit: number;
   concreteIndexInfo: ConcreteIndexInfo;
   simulatedMapping: MappingTypeMapping;
-  attempt?: number;
 }
 
 interface UpdateTotalFieldLimitSettingOpts {
@@ -86,52 +85,51 @@ const updateUnderlyingMapping = async ({
   esClient,
   concreteIndexInfo,
   simulatedMapping,
-  attempt = 1,
 }: UpdateIndexOpts) => {
   const { index, alias } = concreteIndexInfo;
-  try {
-    await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
-      { logger }
-    );
 
-    return;
-  } catch (err) {
-    if (attempt <= MAX_FIELDS_LIMIT_INCREASE_ATTEMPTS) {
-      try {
-        const newLimit = await increaseFieldsLimit({
-          err,
-          esClient,
-          concreteIndexInfo,
+  // Looping (rather than recursing per retry) keeps a single stack frame, so only
+  // one ~MB putMapping body is live at a time instead of one per retry attempt.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await retryTransientEsErrors(
+        () => esClient.indices.putMapping({ index, ...simulatedMapping }),
+        {
           logger,
-          increment: attempt,
-        });
-        if (newLimit) {
-          logger.debug(
-            `Retrying PUT mapping for ${alias} with increased total_fields.limit of ${newLimit}. Attempt: ${attempt}`
-          );
-          await updateUnderlyingMapping({
-            logger,
+        }
+      );
+      return;
+    } catch (err) {
+      let newLimit: number | undefined;
+      if (attempt <= MAX_FIELDS_LIMIT_INCREASE_ATTEMPTS) {
+        try {
+          newLimit = await increaseFieldsLimit({
+            err,
             esClient,
             concreteIndexInfo,
-            simulatedMapping,
-            totalFieldsLimit: newLimit,
-            attempt: attempt + 1,
+            logger,
+            increment: attempt,
           });
-          return;
+        } catch (e) {
+          logger.error(
+            `An error occured while increasing total_fields.limit of ${alias} - ${e.message}`,
+            e
+          );
+          // Throw the original error
+          throw err;
         }
-      } catch (e) {
-        logger.error(
-          `An error occured while increasing total_fields.limit of ${alias} - ${e.message}`,
-          e
-        );
-        // Throw the original error
-        throw err;
       }
-    }
 
-    logger.error(`Failed to PUT mapping for ${alias}: ${err.message}`);
-    throw err;
+      if (newLimit) {
+        logger.debug(
+          `Retrying PUT mapping for ${alias} with increased total_fields.limit of ${newLimit}. Attempt: ${attempt}`
+        );
+        continue;
+      }
+
+      logger.error(`Failed to PUT mapping for ${alias}: ${err.message}`);
+      throw err;
+    }
   }
 };
 
