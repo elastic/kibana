@@ -11,11 +11,7 @@ import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
-/**
- * Proper nouns kept in exact casing that currently appear in nav. Unused brand
- * names are omitted; add one only when it lands in nav.
- * Everything else is sentence case; acronyms are auto-detected.
- */
+/** Proper nouns in nav with exact required casing; add only when a term lands in nav. */
 const CANONICAL_NAV_TERMS = [
   'AI Assistant',
   'AI Assistants',
@@ -64,10 +60,7 @@ function toSentenceCaseSuggestion(str: string): string {
     .join(' ');
 }
 
-/**
- * True for a label/title in a `*.registerApp(...)` object or a `deepLinks: [...]`
- * element. Bare `application.register(...)` is excluded (an app isn't nav).
- */
+/** True for a label/title inside registerApp(...) or a deepLinks:[...] element. */
 function isInNavRegistrationContext(prop: TSESTree.Property): boolean {
   const objExpr = prop.parent;
   if (!objExpr || objExpr.type !== AST_NODE_TYPES.ObjectExpression) return false;
@@ -104,11 +97,7 @@ function isInNavRegistrationContext(prop: TSESTree.Property): boolean {
 
 const SIDENAV_CONTEXTS = new Set(['classicSideNav', 'projectSideNav']);
 
-/**
- * True when the object's `visibleIn` array contains no sidenav context.
- * Skipped (returns false) if `visibleIn` is absent, non-literal, or a referenced const —
- * we only suppress checking when we can prove the item is not shown in the sidenav.
- */
+/** True when the item is provably absent from both sidenavs (visibleIn present but contains no sidenav context). */
 function isHiddenFromSideNav(prop: TSESTree.Property): boolean {
   const obj = prop.parent;
   if (!obj || obj.type !== AST_NODE_TYPES.ObjectExpression) return false;

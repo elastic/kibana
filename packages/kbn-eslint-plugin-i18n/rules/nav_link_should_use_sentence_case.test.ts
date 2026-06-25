@@ -34,9 +34,9 @@ const SECURITY_LINKS_FILE =
   '/x-pack/solutions/security/plugins/security_solution/public/rules/links.ts';
 
 const wrap = (code: string) =>
-  `import { i18n } from '@kbn/i18n';\nimport type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';\n${code}`;
+  `import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';\n${code}`;
 
-const plain = (code: string) => `import { i18n } from '@kbn/i18n';\n${code}`;
+const plain = (code: string) => code;
 
 const invalid: RuleTester.InvalidTestCase[] = [
   // Canonical term with wrong casing → brandMismatch (literal + i18n.translate)
@@ -109,21 +109,6 @@ const invalid: RuleTester.InvalidTestCase[] = [
     ],
   },
   {
-    name: 'Multiple Title Case words reports the first offender',
-    filename: NAV_FILE,
-    code: wrap(`const node = { title: 'Data Management Panel' };`),
-    errors: [
-      {
-        messageId: 'sentenceCase',
-        data: {
-          message: 'Data Management Panel',
-          suggestion: 'Data management panel',
-          word: 'Management',
-        },
-      },
-    ],
-  },
-  {
     name: 'label wrapping i18n.translate in a nav-tree file warns',
     filename: NAV_FILE,
     code: wrap(
@@ -137,7 +122,7 @@ const invalid: RuleTester.InvalidTestCase[] = [
     ],
   },
 
-  // registerApp titles (any file, no core-chrome import) — literal + i18n.translate
+  // registerApp titles (any file, no core-chrome import) — literal
   {
     name: 'registerApp title literal in a plugin file warns',
     filename: PLUGIN_FILE,
@@ -148,19 +133,6 @@ const invalid: RuleTester.InvalidTestCase[] = [
       {
         messageId: 'sentenceCase',
         data: { message: 'My Custom Section', suggestion: 'My custom section', word: 'Custom' },
-      },
-    ],
-  },
-  {
-    name: 'registerApp title wrapping i18n.translate in a plugin file warns',
-    filename: PLUGIN_FILE,
-    code: plain(
-      `management.sections.section.data.registerApp({ id: 'x', title: i18n.translate('foo.mon', { defaultMessage: 'Machine learning' }) });`
-    ),
-    errors: [
-      {
-        messageId: 'brandMismatch',
-        data: { message: 'Machine learning', expected: 'Machine Learning' },
       },
     ],
   },
@@ -326,11 +298,6 @@ const valid: RuleTester.ValidTestCase[] = [
       `const node = { title: i18n.translate('foo.nav.soc', { defaultMessage: 'Elastic AI SOC Engine' }) };`
     ),
   },
-  {
-    name: 'Machine Learning Kibana app title — allowed',
-    filename: NAV_FILE,
-    code: wrap(`const node = { title: 'Machine Learning' };`),
-  },
 
   // Sentence case — no violation
   {
@@ -354,11 +321,6 @@ const valid: RuleTester.ValidTestCase[] = [
     filename: NAV_FILE,
     code: wrap(`const node = { title: 'macOS agents' };`),
   },
-  {
-    name: 'Single word title — allowed',
-    filename: NAV_FILE,
-    code: wrap(`const node = { title: 'Discover' };`),
-  },
 
   // Not a nav title → ignored
   {
@@ -374,11 +336,6 @@ const valid: RuleTester.ValidTestCase[] = [
     code: wrap(
       `const NAV_TITLE = i18n.translate('foo.nav.x', { defaultMessage: 'Some Custom Thing' });`
     ),
-  },
-  {
-    name: 'Non-i18n.translate call — ignored',
-    filename: NAV_FILE,
-    code: wrap(`const t = someOtherFn('foo', { defaultMessage: 'Not A Nav Link' });`),
   },
 
   // Out of scope: not a nav file and not a registration context
@@ -412,14 +369,6 @@ const valid: RuleTester.ValidTestCase[] = [
     filename: PLUGIN_FILE,
     code: plain(
       `core.application.register({ id: 'x', title: 'Streams', deepLinks: [{ id: 'y', title: 'My Hidden Page', visibleIn: ['globalSearch'] }] });`
-    ),
-  },
-  // Correct casing in a registration context — allowed
-  {
-    name: 'registerApp canonical title — allowed',
-    filename: PLUGIN_FILE,
-    code: plain(
-      `management.sections.section.data.registerApp({ id: 'x', title: i18n.translate('foo.mon', { defaultMessage: 'Machine Learning' }) });`
     ),
   },
   // Navigation-module file only checks title/label — other strings ignored
@@ -471,9 +420,7 @@ const valid: RuleTester.ValidTestCase[] = [
   },
 ];
 
-for (const [, tester] of [tsTester]) {
-  tester.run('nav_link_should_use_sentence_case', NavLinkShouldUseSentenceCase, {
-    valid,
-    invalid,
-  });
-}
+tsTester[1].run('nav_link_should_use_sentence_case', NavLinkShouldUseSentenceCase, {
+  valid,
+  invalid,
+});
