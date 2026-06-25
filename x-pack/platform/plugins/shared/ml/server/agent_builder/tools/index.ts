@@ -6,10 +6,11 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { adGetJobInfoTool } from './ad_get_job_info';
-import { adCreateJobTool } from './ad_create_job';
-import { adManageJobStateTool } from './ad_manage_job_state';
-import { adUpdateJobConfigTool } from './ad_update_job_config';
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { createAdGetJobInfoTool } from './ad_get_job_info';
+import { createAdCreateJobTool } from './ad_create_job';
+import { createAdManageJobStateTool } from './ad_manage_job_state';
+import { createAdUpdateJobConfigTool } from './ad_update_job_config';
 
 export {
   AD_GET_JOB_INFO_TOOL_ID,
@@ -18,9 +19,12 @@ export {
   AD_UPDATE_JOB_CONFIG_TOOL_ID,
 } from './tool_ids';
 
-export const registerAnomalyDetectionTools = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.tools.register(adGetJobInfoTool);
-  agentBuilder.tools.register(adCreateJobTool);
-  agentBuilder.tools.register(adManageJobStateTool);
-  agentBuilder.tools.register(adUpdateJobConfigTool);
+export const registerAnomalyDetectionTools = (
+  agentBuilder: AgentBuilderPluginSetup,
+  resolveMlCapabilities: ResolveMlCapabilities
+): void => {
+  agentBuilder.tools.register(createAdGetJobInfoTool(resolveMlCapabilities));
+  agentBuilder.tools.register(createAdCreateJobTool(resolveMlCapabilities));
+  agentBuilder.tools.register(createAdManageJobStateTool(resolveMlCapabilities));
+  agentBuilder.tools.register(createAdUpdateJobConfigTool(resolveMlCapabilities));
 };

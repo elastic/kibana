@@ -320,7 +320,10 @@ export class MlServerPlugin
     }
 
     if (plugins.agentBuilder && this.anomalyDetectionSkillEnabled) {
-      registerAnomalyDetectionAgentBuilder({ agentBuilder: plugins.agentBuilder });
+      registerAnomalyDetectionAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        resolveMlCapabilities,
+      });
     }
 
     return { ...sharedServicesProviders };

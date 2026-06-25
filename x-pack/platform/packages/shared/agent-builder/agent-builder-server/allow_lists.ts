@@ -152,7 +152,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.service-map',
 
   // ML
-  'ml.anomaly-detection',
+  `${internalNamespaces.ml}.anomaly-detection`,
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

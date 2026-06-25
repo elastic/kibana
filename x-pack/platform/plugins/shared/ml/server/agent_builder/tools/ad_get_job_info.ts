@@ -10,7 +10,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { AD_GET_JOB_INFO_TOOL_ID } from './tool_ids';
 
 const getCalendarsAssociatedWithJob = async (
@@ -66,17 +68,22 @@ const schema = z.object({
     ),
 });
 
-export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
+export const createAdGetJobInfoTool = (
+  resolveMlCapabilities: ResolveMlCapabilities
+): BuiltinToolDefinition<typeof schema> => ({
   id: AD_GET_JOB_INFO_TOOL_ID,
   type: ToolType.builtin,
   tags: ['ml', 'anomaly-detection'],
   description:
     'Read ML job and datafeed state, config, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty.',
   schema,
-  handler: async ({ operation, job_id: jobId }, { esClient }) => {
+  handler: async ({ operation, job_id: jobId }, { esClient, request }) => {
+    const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, request);
     const ml = esClient.asCurrentUser.ml;
 
     try {
+      await hasMlCapabilities(['canGetJobs']);
+
       switch (operation) {
         case 'get_jobs': {
           const response = await ml.getJobs(jobId ? { job_id: jobId } : {});
@@ -179,4 +186,4 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
       };
     }
   },
-};
+});

@@ -10,6 +10,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { AD_MANAGE_JOB_STATE_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -36,7 +38,9 @@ const schema = z.object({
     .describe('End time for start_datafeed (ISO 8601). Omit for open-ended.'),
 });
 
-export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
+export const createAdManageJobStateTool = (
+  resolveMlCapabilities: ResolveMlCapabilities
+): BuiltinToolDefinition<typeof schema> => ({
   id: AD_MANAGE_JOB_STATE_TOOL_ID,
   type: ToolType.builtin,
   tags: ['ml', 'anomaly-detection'],
@@ -45,24 +49,28 @@ export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
   schema,
   handler: async (
     { operation, job_id: jobId, snapshot_id: snapshotId, start, end },
-    { esClient }
+    { esClient, request }
   ) => {
+    const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, request);
     const ml = esClient.asCurrentUser.ml;
     const datafeedId = `datafeed-${jobId}`;
 
     try {
       switch (operation) {
         case 'open_job': {
+          await hasMlCapabilities(['canOpenJob']);
           const response = await ml.openJob({ job_id: jobId });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'close_job': {
+          await hasMlCapabilities(['canCloseJob']);
           const response = await ml.closeJob({ job_id: jobId });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'start_datafeed': {
+          await hasMlCapabilities(['canStartStopDatafeed']);
           const body: Record<string, unknown> = {};
           if (start) body.start = start;
           if (end) body.end = end;
@@ -71,11 +79,13 @@ export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'stop_datafeed': {
+          await hasMlCapabilities(['canStartStopDatafeed']);
           const response = await ml.stopDatafeed({ datafeed_id: datafeedId });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'revert_model_snapshot': {
+          await hasMlCapabilities(['canUpdateJob']);
           if (!snapshotId) {
             return {
               results: [createErrorResult('snapshot_id is required for revert_model_snapshot')],
@@ -89,6 +99,7 @@ export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'preview_datafeed': {
+          await hasMlCapabilities(['canPreviewDatafeed']);
           const response = await ml.previewDatafeed({ datafeed_id: datafeedId });
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
@@ -105,4 +116,4 @@ export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
       };
     }
   },
-};
+});

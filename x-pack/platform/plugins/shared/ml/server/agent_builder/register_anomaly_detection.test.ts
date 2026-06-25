@@ -23,11 +23,16 @@ const createAgentBuilderMock = () => ({
   topSnippets: { numSnippets: 5, numWords: 100 },
 });
 
+const resolveMlCapabilities = jest.fn().mockResolvedValue(null);
+
 describe('registerAnomalyDetectionAgentBuilder', () => {
   it('registers all 4 ML API tools', () => {
     const agentBuilder = createAgentBuilderMock();
 
-    registerAnomalyDetectionAgentBuilder({ agentBuilder: agentBuilder as any });
+    registerAnomalyDetectionAgentBuilder({
+      agentBuilder: agentBuilder as any,
+      resolveMlCapabilities,
+    });
 
     const registeredIds = agentBuilder.tools.register.mock.calls.map((call) => call[0].id);
     expect(registeredIds).toContain(AD_GET_JOB_INFO_TOOL_ID);
@@ -40,7 +45,10 @@ describe('registerAnomalyDetectionAgentBuilder', () => {
   it('registers the anomaly detection skill', () => {
     const agentBuilder = createAgentBuilderMock();
 
-    registerAnomalyDetectionAgentBuilder({ agentBuilder: agentBuilder as any });
+    registerAnomalyDetectionAgentBuilder({
+      agentBuilder: agentBuilder as any,
+      resolveMlCapabilities,
+    });
 
     expect(agentBuilder.skills.register).toHaveBeenCalledTimes(1);
     const skillArg = agentBuilder.skills.register.mock.calls[0][0];
@@ -50,7 +58,10 @@ describe('registerAnomalyDetectionAgentBuilder', () => {
   it('each registered tool has a description and a schema', () => {
     const agentBuilder = createAgentBuilderMock();
 
-    registerAnomalyDetectionAgentBuilder({ agentBuilder: agentBuilder as any });
+    registerAnomalyDetectionAgentBuilder({
+      agentBuilder: agentBuilder as any,
+      resolveMlCapabilities,
+    });
 
     for (const [tool] of agentBuilder.tools.register.mock.calls) {
       expect(tool.description).toBeTruthy();

@@ -10,6 +10,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { AD_CREATE_JOB_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -25,7 +27,9 @@ const schema = z.object({
     .describe('Full datafeed configuration body for create_datafeed.'),
 });
 
-export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
+export const createAdCreateJobTool = (
+  resolveMlCapabilities: ResolveMlCapabilities
+): BuiltinToolDefinition<typeof schema> => ({
   id: AD_CREATE_JOB_TOOL_ID,
   type: ToolType.builtin,
   tags: ['ml', 'anomaly-detection'],
@@ -34,13 +38,15 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
   schema,
   handler: async (
     { operation, job_id: jobId, job_config: jobConfig, datafeed_config: datafeedConfig },
-    { esClient }
+    { esClient, request }
   ) => {
+    const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, request);
     const ml = esClient.asCurrentUser.ml;
 
     try {
       switch (operation) {
         case 'validate_spec': {
+          await hasMlCapabilities(['canGetJobs']);
           if (!jobConfig) {
             return {
               results: [createErrorResult('job_config is required for validate_spec')],
@@ -51,6 +57,7 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'estimate_memory': {
+          await hasMlCapabilities(['canGetJobs']);
           if (!jobConfig) {
             return {
               results: [createErrorResult('job_config is required for estimate_memory')],
@@ -61,6 +68,7 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'create_job': {
+          await hasMlCapabilities(['canCreateJob']);
           if (!jobId || !jobConfig) {
             return {
               results: [createErrorResult('job_id and job_config are required for create_job')],
@@ -75,6 +83,7 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'create_datafeed': {
+          await hasMlCapabilities(['canCreateDatafeed']);
           const datafeedId = jobId ? `datafeed-${jobId}` : undefined;
           if (!datafeedId || !datafeedConfig) {
             return {
@@ -102,4 +111,4 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
       };
     }
   },
-};
+});

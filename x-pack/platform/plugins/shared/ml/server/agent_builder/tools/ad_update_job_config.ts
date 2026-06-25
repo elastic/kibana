@@ -10,6 +10,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { AD_UPDATE_JOB_CONFIG_TOOL_ID } from './tool_ids';
 
 const calendarEventSchema = z.object({
@@ -51,7 +53,9 @@ const schema = z.object({
     ),
 });
 
-export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
+export const createAdUpdateJobConfigTool = (
+  resolveMlCapabilities: ResolveMlCapabilities
+): BuiltinToolDefinition<typeof schema> => ({
   id: AD_UPDATE_JOB_CONFIG_TOOL_ID,
   type: ToolType.builtin,
   tags: ['ml', 'anomaly-detection'],
@@ -68,14 +72,16 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
       calendar_event,
       calendar_id,
     },
-    { esClient }
+    { esClient, request }
   ) => {
+    const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, request);
     const ml = esClient.asCurrentUser.ml;
     const datafeedId = `datafeed-${jobId}`;
 
     try {
       switch (operation) {
         case 'update_memory_limit': {
+          await hasMlCapabilities(['canUpdateJob']);
           const response = await ml.updateJob({
             job_id: jobId,
             body: { analysis_limits: { model_memory_limit: memory_limit } } as any,
@@ -84,6 +90,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'update_query_delay': {
+          await hasMlCapabilities(['canUpdateDatafeed']);
           const response = await ml.updateDatafeed({
             datafeed_id: datafeedId,
             body: { query_delay } as any,
@@ -92,6 +99,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'update_delayed_data_check': {
+          await hasMlCapabilities(['canUpdateDatafeed']);
           const response = await ml.updateDatafeed({
             datafeed_id: datafeedId,
             body: { delayed_data_check_config: delayed_data_check } as any,
@@ -100,6 +108,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'create_calendar_event': {
+          await hasMlCapabilities(['canCreateCalendar']);
           if (!calendar_event) {
             return {
               results: [createErrorResult('calendar_event is required for create_calendar_event')],
@@ -125,4 +134,4 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
       };
     }
   },
-};
+});
