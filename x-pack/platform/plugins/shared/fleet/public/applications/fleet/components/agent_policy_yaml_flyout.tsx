@@ -30,7 +30,6 @@ import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from
 import { agentPolicyRouteService, getYamlFormatters } from '../services';
 import type { YamlFormatters } from '../../../services/yaml_formatters';
 import { API_VERSIONS } from '../../../../common/constants';
-// import { splitVersionSuffixFromPolicyId } from '../../../../common/services/version_specific_policies_utils';
 
 import { Loading } from '.';
 
@@ -46,7 +45,6 @@ export const AgentPolicyYamlFlyout = memo<{
   onClose: () => void;
 }>(({ policyId, revision, onClose }) => {
   const flyoutTitleId = useGeneratedHtmlId();
-  // const { version: agentVersion } = splitVersionSuffixFromPolicyId(policyId);
   const [formatters, setFormatters] = useState<YamlFormatters | null>(null);
 
   useEffect(() => {
