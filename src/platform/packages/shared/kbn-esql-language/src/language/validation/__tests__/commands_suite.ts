@@ -149,6 +149,9 @@ export const runCommandsValidationSuite = (setup: Setup) => {
     testErrorsAndWarnings('from a_index | where (unknownColumn > 0)', [
       'Unknown column "unknownColumn"',
     ]);
+    testErrorsAndWarnings('from a_index | where ROUND((unknownColumn)) > 0', [
+      'Unknown column "unknownColumn"',
+    ]);
   });
 
   describe('eval', () => {

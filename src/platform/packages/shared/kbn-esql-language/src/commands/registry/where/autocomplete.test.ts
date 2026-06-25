@@ -272,7 +272,7 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggests boolean and numeric operators after a numeric function result', async () => {
-      await whereExpectSuggestions('from a | where log10(doubleField) ', [
+      const expectedSuggestions = [
         ...getFunctionSignaturesByReturnType(
           Location.WHERE,
           'double',
@@ -285,7 +285,10 @@ describe('WHERE Autocomplete', () => {
           { operators: true, skipAssign: true },
           ['double']
         ),
-      ]);
+      ];
+
+      await whereExpectSuggestions('from a | where log10(doubleField) ', expectedSuggestions);
+      await whereExpectSuggestions('from a | where ROUND((doubleField)) ', expectedSuggestions);
     });
 
     test('suggestions after IS', async () => {

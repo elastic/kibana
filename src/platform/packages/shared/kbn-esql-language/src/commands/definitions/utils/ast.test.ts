@@ -209,6 +209,8 @@ describe('unwrapExpressionParens', () => {
     ['single field parens', 'FROM index | EVAL (field)'],
     ['nested field parens', 'FROM index | EVAL ((field))'],
     ['operator operand parens', 'FROM index | WHERE (a + b) > 0'],
+    ['function argument parens', 'FROM index | EVAL result = ROUND((field))'],
+    ['nested function argument parens', 'FROM index | WHERE LENGTH(TRIM((field))) > 0'],
     ['BY expression parens', 'FROM index | STATS COUNT(*) BY (field)'],
     ['IN list value parens', 'FROM index | WHERE foo IN (1, (2 + 3))'],
   ])('unwraps %s', (_, query) => {
