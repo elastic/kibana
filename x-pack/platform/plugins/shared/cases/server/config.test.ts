@@ -22,7 +22,7 @@ describe('config validation', () => {
           },
           "casesRedesign": Object {
             "details": false,
-            "list": false,
+            "list": true,
             "settings": false,
           },
           "enabled": true,
