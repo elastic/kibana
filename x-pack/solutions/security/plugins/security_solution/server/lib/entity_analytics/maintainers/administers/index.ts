@@ -9,25 +9,30 @@ import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 
 import { runRelationshipMaintainer } from '../engine/run_relationship_maintainer';
 import type { RelationshipMaintainerTelemetryCollector } from '../types';
-import { ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS } from './configs';
+import { buildAdministersConfigs } from './configs';
 
-export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
-  id: 'accesses_frequently_and_infrequently',
+export const administersMaintainer: RegisterEntityMaintainerConfig = {
+  id: 'administers',
   description:
-    'Computes accesses_frequently and accesses_infrequently relationships from authentication events',
+    'Resolves administers relationships from raw_identifiers on entity documents ' +
+    '(Active Directory: user → host and host → host via managedObjects)',
   interval: '1d',
+  timeout: '1h',
   initialState: {},
-  run: async ({
-    esClient,
-    cpsEsClient,
-    logger,
-    status,
-    crudClient,
-    abortController,
-    telemetry,
-  }) => {
+  run: async ({ esClient, logger, status, crudClient, abortController, telemetry }) => {
     const namespace = status.metadata.namespace;
-    logger.info('Starting accesses maintainer run');
+    const lastProcessedTimestamp =
+      typeof status.state.lastProcessedTimestamp === 'string'
+        ? status.state.lastProcessedTimestamp
+        : undefined;
+
+    if (lastProcessedTimestamp) {
+      logger.info(
+        `Starting administers maintainer run (incremental from ${lastProcessedTimestamp})`
+      );
+    } else {
+      logger.info('Starting administers maintainer run (full scan — first run)');
+    }
 
     const collector: RelationshipMaintainerTelemetryCollector = {
       sources: [],
@@ -36,11 +41,10 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
 
     const result = await runRelationshipMaintainer({
       esClient,
-      cpsEsClient,
       logger,
       namespace,
       crudClient,
-      integrations: ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
+      integrations: buildAdministersConfigs(lastProcessedTimestamp),
       abortController,
       telemetryCollector: collector,
     });
@@ -55,6 +59,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
         failed: result.totalWriteErrors,
+        // TODO: extend telemetry schema to include droppedTargets (phantom ID validation)
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
@@ -68,6 +73,17 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     logger.info(
       `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped`
     );
-    return result;
+
+    // Do not advance the watermark if the run was aborted — the next run should
+    // re-process the same window to avoid missing entities.
+    if (abortController.signal.aborted) {
+      logger.info('Run was aborted; watermark not advanced');
+      return status.state;
+    }
+
+    return {
+      ...result,
+      lastProcessedTimestamp: result.lastRunTimestamp,
+    };
   },
 };
