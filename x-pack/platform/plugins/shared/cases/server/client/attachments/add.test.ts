@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ATTACHMENTS_ADDED_EVENT_TYPE } from '@kbn/domain-events/events/cases';
+import {
+  ATTACHMENTS_ADDED_EVENT_TYPE,
+  COMMENTS_ADDED_EVENT_TYPE,
+} from '@kbn/domain-events/events/cases';
 import {
   MAX_COMMENT_LENGTH,
   MAX_USER_ACTIONS_PER_CASE,
@@ -155,6 +158,15 @@ describe('addComment', () => {
         caseId,
         attachmentIds: expect.any(Array),
         attachmentType: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
+      }),
+      request: clientArgs.request,
+    });
+    expect(clientArgs.domainEvents.publish).toHaveBeenCalledWith({
+      type: COMMENTS_ADDED_EVENT_TYPE,
+      payload: expect.objectContaining({
+        caseId,
+        commentIds: expect.any(Array),
         owner: SECURITY_SOLUTION_OWNER,
       }),
       request: clientArgs.request,

@@ -297,8 +297,7 @@ export class TriggerEventHandler {
       );
     }
 
-    // A single domain event can fan out to multiple triggers (e.g. cases.attachmentsAdded
-    // drives both the attachments and comments triggers). Dispatch each independently.
+    // A single domain event can fan out to multiple triggers. Dispatch each independently.
     for (const trigger of triggers) {
       await this.dispatchDomainEventToTrigger({ event, trigger, spaceId, eventChainContext });
     }

@@ -5577,6 +5577,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-domain-events-server-internal@link:src/core/packages/domain-events/server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-domain-events-server-mocks@link:src/core/packages/domain-events/server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-domain-events-server@link:src/core/packages/domain-events/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-elasticsearch-client-server-internal@link:src/core/packages/elasticsearch/client-server-internal":
   version "0.0.0"
   uid ""

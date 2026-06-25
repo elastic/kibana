@@ -19,11 +19,14 @@ import {
 import type { CaseStatusChangedDomainEventMap } from './case_status_changed';
 import { ATTACHMENTS_ADDED_EVENT_TYPE, attachmentsAddedPayloadSchema } from './attachments_added';
 import type { AttachmentsAddedDomainEventMap } from './attachments_added';
+import { COMMENTS_ADDED_EVENT_TYPE, commentsAddedPayloadSchema } from './comments_added';
+import type { CommentsAddedDomainEventMap } from './comments_added';
 
 export type CasesDomainEventMap = CaseCreatedDomainEventMap &
   CaseUpdatedDomainEventMap &
   CaseStatusChangedDomainEventMap &
-  AttachmentsAddedDomainEventMap;
+  AttachmentsAddedDomainEventMap &
+  CommentsAddedDomainEventMap;
 
 type CasesDomainEventMapSchemas = {
   [K in keyof CasesDomainEventMap]: z.ZodType<CasesDomainEventMap[K]>;
@@ -55,10 +58,17 @@ export {
   isAttachmentsAddedPayload,
 } from './attachments_added';
 export type { AttachmentsAddedPayload } from './attachments_added';
+export {
+  COMMENTS_ADDED_EVENT_TYPE,
+  commentsAddedPayloadSchema,
+  isCommentsAddedPayload,
+} from './comments_added';
+export type { CommentsAddedPayload } from './comments_added';
 
 export const casesEventPayloadSchemas = {
   [CASE_CREATED_EVENT_TYPE]: caseCreatedPayloadSchema,
   [CASE_UPDATED_EVENT_TYPE]: caseUpdatedPayloadSchema,
   [CASE_STATUS_CHANGED_EVENT_TYPE]: caseStatusChangedPayloadSchema,
   [ATTACHMENTS_ADDED_EVENT_TYPE]: attachmentsAddedPayloadSchema,
+  [COMMENTS_ADDED_EVENT_TYPE]: commentsAddedPayloadSchema,
 } as const satisfies CasesDomainEventMapSchemas;

@@ -499,16 +499,12 @@ describe('TriggerEventHandler', () => {
       mapEvent: (event: any) => event.payload,
     };
 
-    const commentsAddedTrigger = {
-      id: 'cases.commentsAdded',
+    const filteredAttachmentsTrigger = {
+      id: 'cases.filteredAttachments',
       domainEventType: 'cases.attachmentsAdded',
       eventSchema: okEventSchema,
       matchesDomainEvent: (event: any) => event.payload.attachmentType === 'comment',
-      mapEvent: (event: any) => ({
-        caseId: event.payload.caseId,
-        owner: event.payload.owner,
-        commentIds: event.payload.attachmentIds,
-      }),
+      mapEvent: (event: any) => event.payload,
     };
 
     const createDomainDeps = (triggers: any[], overrides: Partial<TriggerEventHandlerDeps> = {}) => {
@@ -523,9 +519,9 @@ describe('TriggerEventHandler', () => {
       });
     };
 
-    it('fans out one domain event to every matching trigger (comment matches both)', async () => {
+    it('fans out one domain event to every matching trigger', async () => {
       const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
-      const deps = createDomainDeps([attachmentsAddedTrigger, commentsAddedTrigger], {
+      const deps = createDomainDeps([attachmentsAddedTrigger, filteredAttachmentsTrigger], {
         scheduleWorkflow,
       });
       const handler = new TriggerEventHandler(deps);
@@ -544,13 +540,13 @@ describe('TriggerEventHandler', () => {
       expect(scheduleWorkflow).toHaveBeenCalledTimes(2);
       const scheduledTriggerIds = scheduleWorkflow.mock.calls.map((call) => call[1].triggeredBy);
       expect(scheduledTriggerIds).toEqual(
-        expect.arrayContaining(['cases.attachmentsAdded', 'cases.commentsAdded'])
+        expect.arrayContaining(['cases.attachmentsAdded', 'cases.filteredAttachments'])
       );
     });
 
     it('skips a trigger whose matchesDomainEvent returns false (non-comment attachment)', async () => {
       const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
-      const deps = createDomainDeps([attachmentsAddedTrigger, commentsAddedTrigger], {
+      const deps = createDomainDeps([attachmentsAddedTrigger, filteredAttachmentsTrigger], {
         scheduleWorkflow,
       });
       const handler = new TriggerEventHandler(deps);

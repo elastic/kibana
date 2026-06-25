@@ -10,6 +10,7 @@ import {
   CASE_CREATED_EVENT_TYPE,
   CASE_STATUS_CHANGED_EVENT_TYPE,
   CASE_UPDATED_EVENT_TYPE,
+  COMMENTS_ADDED_EVENT_TYPE,
 } from '@kbn/domain-events/events/cases';
 import { createServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
@@ -47,14 +48,5 @@ export const attachmentsAddedTriggerDefinition = createServerTriggerDefinition({
 
 export const commentsAddedTriggerDefinition = createServerTriggerDefinition({
   ...commentsAddedTriggerCommonDefinition,
-  domainEventType: ATTACHMENTS_ADDED_EVENT_TYPE,
-  matchesDomainEvent: (event) =>
-    normalizeAttachmentType(event.payload.attachmentType) === 'comment',
-  mapEvent: (event) => {
-    const { attachmentIds, attachmentType: _attachmentType, ...rest } = event.payload;
-    return {
-      ...rest,
-      commentIds: attachmentIds,
-    };
-  },
+  domainEventType: COMMENTS_ADDED_EVENT_TYPE,
 });

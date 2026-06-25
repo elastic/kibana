@@ -6,7 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { ATTACHMENTS_ADDED_EVENT_TYPE } from '@kbn/domain-events/events/cases';
+import {
+  ATTACHMENTS_ADDED_EVENT_TYPE,
+  COMMENTS_ADDED_EVENT_TYPE,
+} from '@kbn/domain-events/events/cases';
 import { attachmentsAddedTriggerDefinition, commentsAddedTriggerDefinition } from './triggers';
 
 const request = httpServerMock.createKibanaRequest();
@@ -56,63 +59,8 @@ describe('cases workflow server trigger definitions', () => {
   });
 
   describe('commentsAddedTriggerDefinition', () => {
-    const { mapEvent, matchesDomainEvent } = commentsAddedTriggerDefinition;
-    const eventType = ATTACHMENTS_ADDED_EVENT_TYPE;
-
-    it('matchesDomainEvent returns true for comment attachments', () => {
-      expect(
-        matchesDomainEvent!({
-          type: eventType,
-          payload: {
-            ...baseAttachmentsPayload,
-            attachmentType: 'comment',
-          },
-          request,
-        })
-      ).toBe(true);
-    });
-
-    it('matchesDomainEvent returns true for legacy user attachment type', () => {
-      expect(
-        matchesDomainEvent!({
-          type: eventType,
-          payload: {
-            ...baseAttachmentsPayload,
-            attachmentType: 'user',
-          },
-          request,
-        })
-      ).toBe(true);
-    });
-
-    it('matchesDomainEvent returns false for non-comment attachment types', () => {
-      expect(
-        matchesDomainEvent!({
-          type: eventType,
-          payload: {
-            ...baseAttachmentsPayload,
-            attachmentType: 'alert',
-          },
-          request,
-        })
-      ).toBe(false);
-    });
-
-    it('mapEvent maps comment attachments to commentIds', () => {
-      const result = mapEvent!({
-        type: eventType,
-        payload: {
-          ...baseAttachmentsPayload,
-          attachmentType: 'comment',
-        },
-        request,
-      });
-
-      expect(result).toEqual({
-        caseId: baseAttachmentsPayload.caseId,
-        owner: baseAttachmentsPayload.owner,
-        commentIds: baseAttachmentsPayload.attachmentIds,
-      });
+    it('uses cases.commentsAdded as its domain event type', () => {
+      expect(commentsAddedTriggerDefinition.domainEventType).toBe(COMMENTS_ADDED_EVENT_TYPE);
     });
   });
 });
