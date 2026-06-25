@@ -125,6 +125,7 @@ export const GenericEntityPanel = memo(function GenericEntityPanel(
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore({
     identifierType: EntityType.generic,
     identifier: genericInsightsValue || '',
+    entityId: genericInsightsValue || undefined,
     onSuccess: refetchRiskScore,
   });
 
