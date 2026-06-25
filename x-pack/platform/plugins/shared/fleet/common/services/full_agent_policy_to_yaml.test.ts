@@ -23,6 +23,7 @@ const mockYaml = {
     }
   },
   isScalar: () => true,
+  visit: () => {},
 };
 
 describe('fullAgentPolicyToYaml', () => {
