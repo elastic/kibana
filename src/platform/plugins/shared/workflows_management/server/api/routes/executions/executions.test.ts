@@ -9,12 +9,14 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import {
   WorkflowExecutionNotFoundError,
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
+import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
 import type { RouteDependencies } from '../types';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
@@ -68,6 +70,10 @@ describe('Execution Routes', () => {
     forbidden: jest.fn((params?: any) => ({ type: 'forbidden', ...params })),
     conflict: jest.fn((params?: any) => ({ type: 'conflict', ...params })),
   };
+  const defaultAuthzResult = {
+    [WorkflowsManagementApiActions.readExecution]: true,
+    [WorkflowsManagementApiActions.readManagedExecution]: true,
+  };
 
   const mockWorkflow = {
     id: 'wf-1',
@@ -98,12 +104,18 @@ describe('Execution Routes', () => {
       resumeWorkflowExecutionExternally: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
     };
+    mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: false });
 
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
         .fn()
         .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
-          routeHandlers[`${method}:${path}`] = { handler };
+          routeHandlers[`${method}:${path}`] = {
+            handler: async (context, request, response) => {
+              request.authzResult ??= defaultAuthzResult;
+              return handler(context, request, response);
+            },
+          };
           return { addVersion: jest.fn() };
         }),
     });
@@ -471,6 +483,27 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
+    });
+
+    it('should reject managed executions without managed execution read privilege', async () => {
+      mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: true });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+        authzResult: {
+          [WorkflowsManagementApiActions.readExecution]: true,
+        },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: {
+          message: new ManagedWorkflowExecutionReadForbiddenError().message,
+        },
+      });
+      expect(result).toMatchObject({ type: 'forbidden' });
     });
   });
 
