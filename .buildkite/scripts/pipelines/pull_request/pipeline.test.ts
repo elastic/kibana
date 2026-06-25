@@ -104,7 +104,7 @@ describe('pull_request pipeline generation', () => {
   });
 
   it('emits valid renovate-only pipeline and skips pre-build', async () => {
-    mockDoAllChangesMatch.mockResolvedValueOnce(true);
+    mockAreChangesSkippable.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
     const emitted = waitForEmission();
 
