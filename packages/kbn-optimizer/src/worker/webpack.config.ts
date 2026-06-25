@@ -83,6 +83,8 @@ export function getWebpackConfig(
 
     externals: {
       'node:crypto': 'commonjs crypto',
+      mysql2: 'commonjs mysql2',
+      'mysql2/promise': 'commonjs mysql2/promise',
       ...UiSharedDepsSrc.externals,
     },
 

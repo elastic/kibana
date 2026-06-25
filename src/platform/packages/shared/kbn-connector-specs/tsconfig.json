@@ -24,5 +24,6 @@
     "@kbn/actions-utils",
     "@kbn/i18n",
     "@kbn/mcp-client",
+    "@kbn/crypto-browser",
   ]
 }

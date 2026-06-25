@@ -41,6 +41,7 @@ lightningcss
 tar-fs
 browserslist
 react-day-picker
+mysql2
 jszip
 @rsdoctor/rspack-plugin
 @rspack/core
