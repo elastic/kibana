@@ -17,21 +17,27 @@ import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
  * Everything else is sentence case; acronyms are auto-detected.
  */
 const CANONICAL_NAV_TERMS = [
-  // Brand/feature names used in nav.
-  'Significant Events',
-  'Universal Profiling',
-  // Kibana UI names the brand guide capitalises.
-  'Machine Learning',
-  'Stack Monitoring',
-  'User Experience',
+  'AI Assistant',
+  'AI Assistants',
+  'Cloud Connect',
   'Elastic AI SOC Engine',
   'Elastic Inference',
+  'Machine Learning',
+  'Significant Events',
+  'Stack Monitoring',
+  'Universal Profiling',
 ] as const;
 
 const CANONICAL_NAV_TERMS_MAP = new Map(CANONICAL_NAV_TERMS.map((t) => [t.toLowerCase(), t]));
 
 /** Navigation-module files: check label/title only, for cases without the core-chrome import. */
 const NAV_PATH_SEGMENT = /[\\/]navigation[\\/]/;
+
+// security_solution nav titles live outside /navigation/: top-level consts in app/translations.ts
+// (consumed cross-file, unreachable at the usage site) and inline i18n.translate() calls in
+// public/*/links.ts. Hard-coded because this two-layer architecture is unique to this plugin.
+const SECURITY_NAV_TRANSLATIONS = /[\\/]security_solution[\\/]public[\\/]app[\\/]translations\.ts$/;
+const SECURITY_LINKS_FILE = /[\\/]security_solution[\\/]public[\\/][^/\\]+[\\/]links\.ts$/;
 
 /**
  * Excluded from sentence case: acronyms (API), mixed-case brand tokens (GenAI, macOS),
@@ -96,24 +102,46 @@ function isInNavRegistrationContext(prop: TSESTree.Property): boolean {
   return false;
 }
 
-/** True when the object has a literal `visibleIn: []` (hidden everywhere). A
- *  referenced const or spread is not resolved — only the empty-array literal. */
-function isHiddenFromNav(prop: TSESTree.Property): boolean {
+const SIDENAV_CONTEXTS = new Set(['classicSideNav', 'projectSideNav']);
+
+/**
+ * True when the object's `visibleIn` array contains no sidenav context.
+ * Skipped (returns false) if `visibleIn` is absent, non-literal, or a referenced const —
+ * we only suppress checking when we can prove the item is not shown in the sidenav.
+ */
+function isHiddenFromSideNav(prop: TSESTree.Property): boolean {
   const obj = prop.parent;
   if (!obj || obj.type !== AST_NODE_TYPES.ObjectExpression) return false;
-  return obj.properties.some(
-    (p) =>
+
+  const visibleInProp = obj.properties.find(
+    (p): p is TSESTree.Property =>
       p.type === AST_NODE_TYPES.Property &&
       p.key.type === AST_NODE_TYPES.Identifier &&
-      p.key.name === 'visibleIn' &&
-      p.value.type === AST_NODE_TYPES.ArrayExpression &&
-      p.value.elements.length === 0
+      p.key.name === 'visibleIn'
+  );
+
+  if (!visibleInProp) return false;
+  if (visibleInProp.value.type !== AST_NODE_TYPES.ArrayExpression) return false; // const ref — don't assume hidden
+
+  const elements = visibleInProp.value.elements;
+  // Empty array → hidden everywhere
+  if (elements.length === 0) return true;
+  // Non-empty → hidden from sidenav only if no sidenav context is listed
+  return !elements.some(
+    (el) =>
+      el !== null &&
+      el.type === AST_NODE_TYPES.Literal &&
+      typeof el.value === 'string' &&
+      SIDENAV_CONTEXTS.has(el.value)
   );
 }
 
-/** String value of a string literal, or null. */
+/** String value of a string literal or no-expression template literal, or null. */
 function getStaticString(node: TSESTree.Node): string | null {
-  return node.type === AST_NODE_TYPES.Literal && typeof node.value === 'string' ? node.value : null;
+  if (node.type === AST_NODE_TYPES.Literal && typeof node.value === 'string') return node.value;
+  if (node.type === AST_NODE_TYPES.TemplateLiteral && node.expressions.length === 0)
+    return node.quasis[0].value.cooked ?? null;
+  return null;
 }
 
 function getTranslateDefaultMessage(node: TSESTree.Node): string | null {
@@ -174,11 +202,13 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
   },
 
   create(context) {
-    // Where titles are checked:
-    //  - importNavFile: imports @kbn/core-chrome-browser — label/title + title consts.
-    //  - pathNavFile: inside a navigation module — label/title only.
-    //  - registration: *.registerApp / deepLinks titles in any file (not bare register).
+    // Scope triggers — each enables a different subset of checks (see visitors below):
+    //  - importNavFile: imports @kbn/core-chrome-browser
+    //  - pathNavFile: path contains /navigation/
+    //  - securityNavTranslations / securityLinksFile: security-specific hard-coded paths
     const pathNavFile = NAV_PATH_SEGMENT.test(context.filename);
+    const securityNavTranslations = SECURITY_NAV_TRANSLATIONS.test(context.filename);
+    const securityLinksFile = SECURITY_LINKS_FILE.test(context.filename);
     let importNavFile = false;
 
     function checkString(message: string, reportNode: Rule.Node) {
@@ -220,7 +250,18 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
       }
     }
 
-    // Property catches titles written inline (title:/label:); CallExpression catches titles defined as standalone i18n.translate consts.
+    // Resolves same-file `title: CONST` to its initializer. Cross-file refs are covered
+    // by the security-specific paths above.
+    function resolveSameFileConstInit(idNode: TSESTree.Identifier): TSESTree.Node | null {
+      const scope = context.sourceCode.getScope(idNode as unknown as Rule.Node);
+      const variable = scope.references.find((r) => r.identifier === idNode)?.resolved;
+      if (!variable) return null;
+      const def = variable.defs[0];
+      if (def?.type === 'Variable' && def.node.init)
+        return def.node.init as unknown as TSESTree.Node;
+      return null;
+    }
+
     return {
       ImportDeclaration(node) {
         const importNode = node as TSESTree.ImportDeclaration;
@@ -229,24 +270,15 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
         }
       },
 
-      // Title consts in nav-tree files: `const FOO_TITLE = i18n.translate(...)`.
-      // Restricted to const initializers so non-title values (description,
-      // tooltip, aria label) and inline title/label (owned by Property) are
-      // not also reported here.
+      // Every export in app/translations.ts is a nav title — check all i18n.translate() calls.
       CallExpression(node) {
-        if (!importNavFile) return;
-
+        if (!securityNavTranslations) return;
         const callNode = node as TSESTree.CallExpression;
-        if (callNode.parent?.type !== AST_NODE_TYPES.VariableDeclarator) return;
-
-        const defaultMessage = getTranslateDefaultMessage(callNode);
-        if (defaultMessage === null) return;
-
-        checkString(defaultMessage, callNode as unknown as Rule.Node);
+        const msg = getTranslateDefaultMessage(callNode);
+        if (msg !== null) checkString(msg, callNode as unknown as Rule.Node);
       },
 
-      // Checks `label`/`title` values (a string literal or an i18n.translate)
-      // in nav-tree files, navigation modules, and registerApp/deepLinks objects.
+      // Checks `label`/`title`: string literal, inline i18n.translate, or same-file const ref.
       Property(node) {
         const prop = node as TSESTree.Property;
 
@@ -258,21 +290,24 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
         }
 
         const inRegistrationContext = isInNavRegistrationContext(prop);
-        if (!importNavFile && !pathNavFile && !inRegistrationContext) return;
+        if (!importNavFile && !pathNavFile && !inRegistrationContext && !securityLinksFile) return;
 
-        if (isHiddenFromNav(prop)) return; // not rendered in nav (visibleIn: [])
+        if (isHiddenFromSideNav(prop)) return;
 
         const valueNode = prop.value;
 
-        const literal = getStaticString(valueNode);
-        if (literal !== null) {
-          checkString(literal, valueNode as unknown as Rule.Node);
+        // Direct string literal or inline i18n.translate.
+        const direct = getStaticString(valueNode) ?? getTranslateDefaultMessage(valueNode);
+        if (direct !== null) {
+          checkString(direct, valueNode as unknown as Rule.Node);
           return;
         }
 
-        const defaultMessage = getTranslateDefaultMessage(valueNode);
-        if (defaultMessage !== null) {
-          checkString(defaultMessage, valueNode as unknown as Rule.Node);
+        // `title: SOME_CONST` → resolve to its same-file const initializer.
+        if (valueNode.type === AST_NODE_TYPES.Identifier) {
+          const init = resolveSameFileConstInit(valueNode);
+          const resolved = init && (getStaticString(init) ?? getTranslateDefaultMessage(init));
+          if (resolved) checkString(resolved, init as unknown as Rule.Node);
         }
       },
     };
