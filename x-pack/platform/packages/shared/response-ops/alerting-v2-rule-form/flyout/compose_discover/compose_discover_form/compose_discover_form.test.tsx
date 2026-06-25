@@ -136,13 +136,63 @@ describe('step validation', () => {
       expect(await alertStep.validate!(methods, state)).toBe(true);
     });
 
-    it('returns false when queryCommitted but breach segment is empty', async () => {
+    it('returns false for a base-only alert persisted as a standalone query (no_where)', async () => {
       const state = createState({ queryCommitted: true });
       const methods = {
         getValues: (field?: keyof ComposeFormValues) => {
           if (field === 'kind') return 'alert';
           if (field === 'query') {
-            return { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } };
+            return { format: 'standalone', breach: { query: 'FROM logs-*' } };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<ComposeFormValues>;
+
+      // Per #621/#623 an alert without an alert condition cannot advance.
+      expect(await alertStep.validate!(methods, state)).toBe(false);
+    });
+
+    it('returns false for a composed alert with base but no breach segment in edit mode', async () => {
+      const state = createState({ queryCommitted: true, mode: 'edit' });
+      const methods = {
+        getValues: (field?: keyof ComposeFormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: '' },
+            };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<ComposeFormValues>;
+
+      expect(await alertStep.validate!(methods, state)).toBe(false);
+    });
+
+    it('returns true for a signal rule with a non-empty standalone query', async () => {
+      const state = createState({ queryCommitted: true });
+      const methods = {
+        getValues: (field?: keyof ComposeFormValues) => {
+          if (field === 'kind') return 'signal';
+          if (field === 'query') {
+            return { format: 'standalone', breach: { query: 'FROM logs-*' } };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<ComposeFormValues>;
+
+      expect(await alertStep.validate!(methods, state)).toBe(true);
+    });
+
+    it('returns false when the composed alert query has no base (empty query)', async () => {
+      const state = createState({ queryCommitted: true });
+      const methods = {
+        getValues: (field?: keyof ComposeFormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return { format: 'composed', base: '', breach: { segment: '' } };
           }
           return undefined;
         },

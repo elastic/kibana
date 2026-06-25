@@ -19,7 +19,11 @@ import type {
   CompositeBucket,
   EntityRelationshipRecord,
 } from './types';
-import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
+import {
+  buildActorDiscoveryQuery,
+  buildActorPageFilter,
+  buildLookbackFilter,
+} from './build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
@@ -115,10 +119,7 @@ async function fetchTargetsForActors(
 ): Promise<EsqlQueryResult | null> {
   const esqlFilter = {
     bool: {
-      filter: [
-        { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
-        buildActorPageFilter(config, buckets),
-      ],
+      filter: [...buildLookbackFilter(config), buildActorPageFilter(config, buckets)],
     },
   };
   try {
@@ -137,6 +138,7 @@ async function fetchTargetsForActors(
       );
       return null;
     }
+
     return { columns: typed.columns, values: typed.values };
   } catch (err) {
     if (abortController?.signal.aborted) {
@@ -261,7 +263,14 @@ async function runIntegration(
     // Stream per-integration: write latest entities first, then metadata.
     // Both writes are inside the try so any transport failure sets outcome:
     // 'error' and the outer loop continues to other integrations.
-    const write = await writeEntityIds(crudClient, logger, records);
+    const write = await writeEntityIds(
+      crudClient,
+      logger,
+      records,
+      esClient,
+      namespace,
+      config.validateTargetIds
+    );
     const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, records, {
       scanId: metadataContext.scanId,
       lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
@@ -285,7 +294,7 @@ async function runIntegration(
     return {
       buckets: totalBuckets,
       recordsCount: records.length,
-      write: { updated: 0, notFound: 0, errors: 0, relationshipTypeApplied: {} },
+      write: { updated: 0, notFound: 0, errors: 0, droppedTargets: 0, relationshipTypeApplied: {} },
       metadata: { docsAttempted: 0, docsApplied: 0 },
       outcome: 'error',
       iterations,
@@ -350,6 +359,8 @@ export const runRelationshipMaintainer = async ({
   totalWriteErrors: number;
   /** Count of relationship metadata docs successfully appended to the metadata datastream. */
   totalMetadataDocsApplied: number;
+  /** Count of target EUIDs pruned because they don't exist in the entity store. */
+  totalDroppedTargets: number;
   /** Total composite-agg pagination passes across all integrations. */
   totalIterations: number;
   /** True if any integration hit MAX_ITERATIONS and stopped early. */
@@ -360,6 +371,11 @@ export const runRelationshipMaintainer = async ({
   // callbacks plus the Azure override fn. One guard at the engine boundary
   // is cheaper and stronger than trusting all callers.
   assertValidNamespace(namespace);
+
+  // Capture run-start time as the watermark. Using end-of-run would exclude any
+  // entity whose last_seen advanced between query execution and run completion —
+  // a silent permanent gap on busy stores with long paginated runs.
+  const runStartTimestamp = new Date().toISOString();
 
   const readClient = cpsEsClient ?? esClient;
 
@@ -377,6 +393,7 @@ export const runRelationshipMaintainer = async ({
   let totalNotFound = 0;
   let totalWriteErrors = 0;
   let totalMetadataDocsApplied = 0;
+  let totalDroppedTargets = 0;
   let totalIterations = 0;
   let truncated = false;
 
@@ -417,6 +434,7 @@ export const runRelationshipMaintainer = async ({
       totalNotFound += write.notFound;
       totalWriteErrors += write.errors;
       totalMetadataDocsApplied += metadata.docsApplied;
+      totalDroppedTargets += write.droppedTargets;
     }
 
     if (telemetryCollector) {
@@ -440,8 +458,9 @@ export const runRelationshipMaintainer = async ({
     totalNotFound,
     totalWriteErrors,
     totalMetadataDocsApplied,
+    totalDroppedTargets,
     totalIterations,
     truncated,
-    lastRunTimestamp: new Date().toISOString(),
+    lastRunTimestamp: runStartTimestamp,
   };
 };

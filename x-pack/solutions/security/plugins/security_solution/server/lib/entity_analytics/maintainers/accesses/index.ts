@@ -70,6 +70,10 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
         })),
       }),
     });
+
+    logger.info(
+      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+    );
     return result;
   },
 };
