@@ -437,7 +437,6 @@ export function EpisodeDetailsPage() {
                       episodeId={episodeId}
                       services={detailsServices}
                     />
-                    <EuiSpacer size="l" />
                     <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
                   </EuiFlexGroup>
                 </EuiPanel>
