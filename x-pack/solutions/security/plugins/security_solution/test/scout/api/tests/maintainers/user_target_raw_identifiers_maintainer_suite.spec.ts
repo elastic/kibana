@@ -7,7 +7,6 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,
@@ -68,12 +67,10 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
       let defaultHeaders: Record<string, string>;
       let internalHeaders: Record<string, string>;
 
-      apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+      apiTest.beforeAll(async ({ apiClient, esClient, samlAuth }) => {
         const credentials = await samlAuth.asInteractiveUser('admin');
         defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
         internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
-
-        await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
 
         await esClient.indices.delete({
           index: [LATEST_INDEX, UPDATES_INDEX],

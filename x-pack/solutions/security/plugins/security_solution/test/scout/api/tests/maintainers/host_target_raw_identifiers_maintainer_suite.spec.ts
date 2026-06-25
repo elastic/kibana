@@ -7,7 +7,6 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,
@@ -106,15 +105,13 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
       let defaultHeaders: Record<string, string>;
       let internalHeaders: Record<string, string>;
 
-      apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+      apiTest.beforeAll(async ({ apiClient, esClient, samlAuth }) => {
         // `admin` is required: the install route enforces `securitySolution` +
         // `entity-analytics` Kibana privileges that lower roles (e.g. platform_engineer)
         // do not hold.
         const credentials = await samlAuth.asInteractiveUser('admin');
         defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
         internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
-
-        await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
 
         await esClient.indices.delete({
           index: [LATEST_INDEX, UPDATES_INDEX],
@@ -148,9 +145,7 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
         });
       });
 
-      apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
-        await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
-
+      apiTest.afterAll(async ({ apiClient, esClient }) => {
         const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
           headers: defaultHeaders,
           responseType: 'json',
