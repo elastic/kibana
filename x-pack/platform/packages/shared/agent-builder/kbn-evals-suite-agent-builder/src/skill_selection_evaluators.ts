@@ -47,7 +47,7 @@ export const getSkillsLoadedFromSteps = (output: TaskOutput): string[] => {
       }
     }
 
-    if (step.tool_id === 'filestore.read') {
+    if (step.tool_id === 'read_file' || step.tool_id === 'filestore.read') {
       const path = step.params?.path;
       if (typeof path === 'string') seen.push(path);
     }
