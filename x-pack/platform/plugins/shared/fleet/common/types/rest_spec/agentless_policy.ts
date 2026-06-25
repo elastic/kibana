@@ -9,6 +9,12 @@ import { type TypeOf, schema } from '@kbn/config-schema';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import type {
+  GetAgentlessPolicyRequestSchema,
+  ListAgentlessPoliciesRequestSchema,
+  AgentlessPolicyListResponseSchema,
+} from '../../../server/types';
+
 import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/package_policy_schema';
 import type { AgentlessPolicyResponseSchema } from '../models/agentless_policy_schema';
 
@@ -187,3 +193,15 @@ export type AgentlessPolicyThroughput = TypeOf<typeof AgentlessPolicyThroughputS
 export type GetBulkAgentlessPolicyThroughputResponse = TypeOf<
   typeof GetBulkAgentlessPolicyThroughputResponseSchema
 >;
+
+export interface GetAgentlessPolicyRequest {
+  params: TypeOf<typeof GetAgentlessPolicyRequestSchema.params>;
+}
+
+export type GetAgentlessPolicyResponse = TypeOf<typeof AgentlessPolicyResponseSchema>;
+
+export interface ListAgentlessPoliciesRequest {
+  query: TypeOf<typeof ListAgentlessPoliciesRequestSchema.query>;
+}
+
+export type ListAgentlessPoliciesResponse = TypeOf<typeof AgentlessPolicyListResponseSchema>;
