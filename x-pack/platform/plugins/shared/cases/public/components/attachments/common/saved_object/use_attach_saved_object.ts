@@ -15,8 +15,6 @@ import type { DashboardPayload } from '../../dashboard/build_dashboard_payload';
 import { buildDashboardPayload } from '../../dashboard/build_dashboard_payload';
 import type { MapPayload } from '../../map/build_map_payload';
 import { buildMapPayload } from '../../map/build_map_payload';
-import type { LensPayload } from '../../lens/build_lens_payload';
-import { buildLensPayload } from '../../lens/build_lens_payload';
 import type { DiscoverSessionPayload } from '../../discover_session/build_discover_session_payload';
 import { buildDiscoverSessionPayload } from '../../discover_session/build_discover_session_payload';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -50,9 +48,8 @@ export const useAttachSavedObject = ({
   onAttached,
 }: UseAttachSavedObjectArgs): UseAttachSavedObjectResult => {
   const {
-    services: { contentManagement, dashboard, data: dataService },
+    services: { contentManagement, dashboard },
   } = useKibana();
-  const { timefilter } = dataService.query.timefilter;
   const toasts = useToasts();
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const { mutateAsync: createAttachments, isLoading: isAttaching } = useCreateAttachments();
@@ -65,28 +62,21 @@ export const useAttachSavedObject = ({
       if (!attachmentType) {
         return;
       }
+      if (supportedType === LENS_SO_TYPE) {
+        // Lens attach is owned by `useOpenLensForAttach`
+        return;
+      }
 
       const title = object.meta.title ?? object.id;
       setAttachmentId(object.id);
       try {
-        let attachment: DashboardPayload | MapPayload | DiscoverSessionPayload | LensPayload;
+        let attachment: DashboardPayload | MapPayload | DiscoverSessionPayload;
         if (supportedType === MAP_SO_TYPE) {
           attachment = await buildMapPayload({ contentManagement, id: object.id, title });
         } else if (supportedType === DASHBOARD_SO_TYPE) {
           attachment = await buildDashboardPayload({ dashboard, id: object.id, title });
-        } else if (supportedType === LENS_SO_TYPE) {
-          // Lens does not persist a view time range on the SO by design — the
-          // surrounding context (here: the attach action) owns it. Mirrors the
-          // "Add to existing case" embeddable action, which snapshots the live
-          // `lensApi.timeRange$` at action time.
-          const timeRange = timefilter.getTime();
-          attachment = await buildLensPayload({
-            contentManagement,
-            id: object.id,
-            timeRange,
-            title,
-          });
         } else {
+          // Lens routes through `useOpenLensForAttach` -> Lens editor -> return
           attachment = buildDiscoverSessionPayload({ id: object.id, title });
         }
 
@@ -113,7 +103,6 @@ export const useAttachSavedObject = ({
       dashboard,
       onAttached,
       refreshCaseViewPage,
-      timefilter,
       toasts,
     ]
   );
