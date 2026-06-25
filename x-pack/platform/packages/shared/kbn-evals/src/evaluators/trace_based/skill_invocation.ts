@@ -41,7 +41,7 @@ export function createExampleScopedSkillInvocationEvaluator({
   log: ToolingLog;
   skillName: string;
   resolveContext: (args: {
-    metadata?: Record<string, unknown>;
+    metadata?: Record<string, unknown> | null;
     expected?: unknown;
   }) => ExampleScopedSkillInvocationContext;
 }): Evaluator {
