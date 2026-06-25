@@ -15,7 +15,8 @@ import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { getInstallableRulesForReview } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
 import { fetchInstalledRuleVersionsMap } from '../../../lib/detection_engine/prebuilt_rules/logic/fetch_installed_rule_versions_map';
-import type { MlAuthz } from '../../../lib/machine_learning/authz';
+import { buildMlAuthz } from '../../../lib/machine_learning/authz';
+import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { buildPrebuiltRulesToolFilter } from './find_prebuilt_rules_filter';
 
@@ -25,9 +26,6 @@ const MAX_STRING_LENGTH = 10_000;
 const MAX_TAG_LENGTH = 1000;
 const MAX_RULE_IDS = 50;
 
-// Structured filters that select which installable rules match. Different filters are ANDed;
-// array values are ORed within a single filter. Grouped under `filter` to keep the top-level
-// schema split between "what to match" (filter) and "how to return it" (fields, perPage, sort).
 const findPrebuiltRulesFilterSchema = z
   .object({
     keywords: z
@@ -71,19 +69,20 @@ const findPrebuiltRulesFilterSchema = z
       .array(
         z
           .string()
-          .regex(/^T\d{4}(\.\d{3})?$/i)
+          .regex(/^T\d{4}$/i)
           .max(MAX_STRING_LENGTH)
       )
       .optional()
-      .describe('MITRE technique IDs to include (OR), e.g. ["T1059", "T1059.001"].'),
+      .describe('MITRE technique IDs to include (OR), e.g. ["T1059", "T1078"].'),
     mitreTactic: z
-      .array(z.string().min(1).max(MAX_STRING_LENGTH))
+      .array(
+        z
+          .string()
+          .regex(/^TA\d{4}$/i)
+          .max(MAX_STRING_LENGTH)
+      )
       .optional()
-      .describe(
-        'MITRE tactics to include (OR), each either an ID (e.g. "TA0001") or display name ' +
-          '(e.g. "Initial Access"). Queries the structured threat field, so it finds rules whose ' +
-          'tactic is in rule metadata even when no "Tactic: X" tag is present. Prefer IDs.'
-      ),
+      .describe('MITRE tactic IDs to include (OR), e.g. ["TA0001", "TA0006"].'),
     relatedIntegrations: z
       .array(z.string().min(1).max(MAX_STRING_LENGTH))
       .optional()
@@ -146,12 +145,6 @@ export const findPrebuiltRulesSchema = z
   })
   .strict();
 
-// ---- Response shaping ----
-
-// Top-level `security-rule` attribute keys always fetched from ES — they form the default triage
-// shape and are also included on deep (`fields`) calls so every row is self-contained. Identity
-// fields (rule_id, name, type, version, ...) are intentionally absent here: getInstallableRulesForReview
-// always backfills them from the rule-asset baseline, so they come back regardless of this list.
 const DEFAULT_FIELDS_TO_FETCH = [
   'severity',
   'risk_score',
@@ -169,20 +162,16 @@ export const reduceMitreToTacticsOnly = (rule: RuleResponse) => ({
 
 // ---- Tool handler ----
 
-// Phase 1 assumption: all ML rule types are valid candidates. Replace with a
-// licensing-derived MlAuthz in a follow-up if needed.
-const permissiveMlAuthz: MlAuthz = {
-  validateRuleType: async () => ({ valid: true, message: undefined }),
-};
-
 interface FindPrebuiltRulesToolDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
   logger: Logger;
+  ml: EntityAnalyticsRoutesDeps['ml'];
 }
 
 export const createFindPrebuiltRulesInlineTool = ({
   getStartServices,
   logger,
+  ml,
 }: FindPrebuiltRulesToolDeps): BuiltinSkillBoundedTool<typeof findPrebuiltRulesSchema> => ({
   id: FIND_PREBUILT_RULES_INLINE_TOOL_ID,
   type: ToolType.builtin,
@@ -201,6 +190,9 @@ export const createFindPrebuiltRulesInlineTool = ({
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
       const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
+      const license = await startPlugins.licensing.getLicense();
+      const mlAuthz = buildMlAuthz({ license, ml, request, savedObjectsClient });
+
       const installedRuleVersionsMap = await fetchInstalledRuleVersionsMap(rulesClient);
 
       const additionalFieldsToFetch = input.fields ?? [];
@@ -209,7 +201,7 @@ export const createFindPrebuiltRulesInlineTool = ({
       const { rules: partialRules, total } = await getInstallableRulesForReview({
         ruleAssetsClient,
         logger,
-        mlAuthz: permissiveMlAuthz,
+        mlAuthz,
         installedRuleVersionsMap,
         filter: buildPrebuiltRulesToolFilter(input.filter),
         sort: input.sort ? [{ field: input.sort.field, order: input.sort.order }] : undefined,

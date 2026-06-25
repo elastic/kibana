@@ -26,19 +26,19 @@ describe('buildPrebuiltRulesToolFilter', () => {
 
   it('builds severity clause (single)', () => {
     expect(buildPrebuiltRulesToolFilter({ severity: ['critical'] })).toBe(
-      'security-rule.severity: (critical)'
+      'security-rule.severity: ("critical")'
     );
   });
 
   it('builds severity clause with OR for multiple values', () => {
     expect(buildPrebuiltRulesToolFilter({ severity: ['critical', 'high'] })).toBe(
-      'security-rule.severity: (critical OR high)'
+      'security-rule.severity: ("critical" OR "high")'
     );
   });
 
   it('builds ruleType clause with OR for multiple values', () => {
     expect(buildPrebuiltRulesToolFilter({ ruleType: ['esql', 'eql'] })).toBe(
-      'security-rule.type: (esql OR eql)'
+      'security-rule.type: ("esql" OR "eql")'
     );
   });
 
@@ -56,43 +56,25 @@ describe('buildPrebuiltRulesToolFilter', () => {
 
   it('routes a single mitreTechnique to the technique id field', () => {
     expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059'] })).toBe(
-      'security-rule.threat.technique.id: (T1059)'
+      'security-rule.threat.technique.id: ("T1059")'
     );
   });
 
-  it('routes a single sub-technique to the subtechnique id field', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059.001'] })).toBe(
-      'security-rule.threat.technique.subtechnique.id: (T1059.001)'
-    );
-  });
-
-  it('ORs techniques and sub-techniques across their respective fields', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059', 'T1071', 'T1059.001'] })).toBe(
-      '(security-rule.threat.technique.id: (T1059 OR T1071) OR security-rule.threat.technique.subtechnique.id: (T1059.001))'
+  it('ORs multiple techniques in one clause', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059', 'T1071'] })).toBe(
+      'security-rule.threat.technique.id: ("T1059" OR "T1071")'
     );
   });
 
   it('routes a single tactic ID to threat.tactic.id', () => {
     expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001'] })).toBe(
-      'security-rule.threat.tactic.id: (TA0001)'
-    );
-  });
-
-  it('routes a single tactic display name to threat.tactic.name', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['Initial Access'] })).toBe(
-      'security-rule.threat.tactic.name: ("Initial Access")'
+      'security-rule.threat.tactic.id: ("TA0001")'
     );
   });
 
   it('ORs multiple tactic IDs in one clause', () => {
     expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001', 'TA0006'] })).toBe(
-      'security-rule.threat.tactic.id: (TA0001 OR TA0006)'
-    );
-  });
-
-  it('ORs tactic IDs and names across their respective fields', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001', 'Credential Access'] })).toBe(
-      '(security-rule.threat.tactic.id: (TA0001) OR security-rule.threat.tactic.name: ("Credential Access"))'
+      'security-rule.threat.tactic.id: ("TA0001" OR "TA0006")'
     );
   });
 
@@ -110,7 +92,13 @@ describe('buildPrebuiltRulesToolFilter', () => {
 
   it('ANDs multiple parameters together', () => {
     const result = buildPrebuiltRulesToolFilter({ severity: ['critical'], ruleType: ['esql'] });
-    expect(result).toBe('security-rule.severity: (critical) AND security-rule.type: (esql)');
+    expect(result).toBe('security-rule.severity: ("critical") AND security-rule.type: ("esql")');
+  });
+
+  it('escapes embedded quotes and backslashes inside quoted values', () => {
+    expect(buildPrebuiltRulesToolFilter({ tags: ['weird"tag\\x'] })).toBe(
+      'security-rule.tags: ("weird\\"tag\\\\x")'
+    );
   });
 
   it('treats an empty array the same as an omitted parameter (no clause)', () => {
