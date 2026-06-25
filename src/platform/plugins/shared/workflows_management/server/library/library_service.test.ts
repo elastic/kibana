@@ -27,7 +27,8 @@ const baseRow: Template = {
   categories: ['utility'],
   definitionUrl: 'templates/placeholder/1.0.0.yaml',
   contentHash: `sha256:${'0'.repeat(64)}`,
-  fixedConnectors: [],
+  stepTypes: [],
+  triggerTypes: [],
 };
 
 const row = (overrides: Partial<Template>): Template => ({ ...baseRow, ...overrides });

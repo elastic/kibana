@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "kibanaVersion": "9.5",
+  "kibanaVersion": "9.5.0",
   "generatedAt": "2026-06-01T00:00:00Z",
   "templates": [
     {
@@ -11,10 +11,10 @@
       "description": "Assess the reputation of an IP address using AbuseIPDB.",
       "solutions": ["security"],
       "categories": ["enrichment", "threat-intel"],
-      "icon": "abuseipdb",
       "definitionUrl": "templates/ip-reputation-check/1.0.0.yaml",
       "contentHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
-      "fixedConnectors": [".abuseipdb"]
+      "stepTypes": ["abuseipdb.checkIp"],
+      "triggerTypes": ["manual"]
     }
   ]
 }

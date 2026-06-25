@@ -15,7 +15,7 @@ const TTL_MS = 60_000;
 
 const catalogA: TemplatesCatalog = {
   version: 'v1',
-  kibanaVersion: '9.5',
+  kibanaVersion: '9.5.0',
   generatedAt: '2026-06-01T00:00:00Z',
   templates: [
     {
@@ -27,7 +27,8 @@ const catalogA: TemplatesCatalog = {
       categories: ['utility'],
       definitionUrl: 'templates/demo/1.0.0.yaml',
       contentHash: `sha256:${'0'.repeat(64)}`,
-      fixedConnectors: [],
+      stepTypes: [],
+      triggerTypes: [],
     },
   ],
 };

@@ -18,8 +18,9 @@ export { TemplateMetadataSchema } from './template';
 
 export {
   KibanaVersionEntrySchema,
+  KibanaVersionsManifestConsumptionSchema,
   KibanaVersionsManifestSchema,
-  ManifestSchema,
   TemplateSchema,
+  TemplatesCatalogConsumptionSchema,
   TemplatesCatalogSchema,
 } from './catalog';

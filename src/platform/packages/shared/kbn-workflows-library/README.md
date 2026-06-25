@@ -11,7 +11,7 @@ dependency on `workflows_management`.
 ## Contents
 
 - `src/types/` — TypeScript interfaces for the catalog (`Template`,
-  `TemplatesCatalog`, `KibanaVersionsManifest`, `Manifest`, `TemplateBody`) and
+  `TemplatesCatalog`, `KibanaVersionsManifest`, `TemplateBody`) and
   the install form (`InstallFormField`, `InstallFormSchema`).
 - `src/schemas/` — Zod schemas mirroring the types, used both at runtime (server
   validates catalogs fetched from the CDN) and in CI (the `elastic/workflows`

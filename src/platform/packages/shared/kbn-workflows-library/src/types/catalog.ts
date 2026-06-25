@@ -11,7 +11,6 @@ import type { z } from '@kbn/zod/v4';
 import type {
   KibanaVersionEntrySchema,
   KibanaVersionsManifestSchema,
-  ManifestSchema,
   TemplateSchema,
   TemplatesCatalogSchema,
 } from '../schemas/catalog';
@@ -33,7 +32,7 @@ export type TemplateMetadata = z.infer<typeof TemplateMetadataSchema>;
  * `/v1/<kibana-version>/catalogs/templates.json`.
  *
  * Contains the authored `template-metadata` (sans `install` — which is in the
- * body) plus three CI-derived fields the browse UI needs to render cards
+ * body) plus the CI-derived fields the browse UI needs to render cards
  * without fetching each body.
  */
 export type Template = z.infer<typeof TemplateSchema>;
@@ -48,12 +47,6 @@ export type TemplatesCatalog = z.infer<typeof TemplatesCatalogSchema>;
 export type KibanaVersionsManifest = z.infer<typeof KibanaVersionsManifestSchema>;
 
 export type KibanaVersionEntry = z.infer<typeof KibanaVersionEntrySchema>;
-
-/**
- * `manifest.json` served alongside each per-Kibana-version catalog.
- * Carries hashes consumers can use to short-circuit refreshes.
- */
-export type Manifest = z.infer<typeof ManifestSchema>;
 
 /**
  * The shape `GET /internal/workflows/library/templates/:slug` returns:

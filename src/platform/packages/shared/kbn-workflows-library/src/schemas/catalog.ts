@@ -19,7 +19,11 @@ export const TemplateSchema = TemplateMetadataSchema.omit({ install: true })
   .extend({
     definitionUrl: z.string().min(1),
     contentHash: z.string().regex(/^sha256:[a-f0-9]{64}$/i, 'Must be `sha256:<hex>`.'),
-    fixedConnectors: z.array(z.string().min(1)),
+    // Full `type` strings for every step (recursively, including nested steps)
+    // and every trigger in the template, derived by the catalog generator. The
+    // Library UI maps these to icons. Either array may be empty.
+    stepTypes: z.array(z.string().min(1)),
+    triggerTypes: z.array(z.string().min(1)),
   })
   .strict();
 
@@ -47,10 +51,17 @@ export const KibanaVersionsManifestSchema = z
   })
   .strict();
 
-export const ManifestSchema = z
-  .object({
-    version: z.string().min(1),
-    generatedAt: z.string().min(1),
-    hashes: z.record(z.string().min(1), z.string().min(1)),
-  })
-  .strict();
+/**
+ * Consumption-side variants used by the Kibana runtime (`LibraryFetcher`) when
+ * it validates catalog JSON fetched from the CDN. They mirror the strict base
+ * schemas above but strip unknown-key handling — at the top level and on each row —
+ * so an older Kibana tolerates a newer catalog that adds fields
+ * Template Authoring / CI validation uses the strict base schemas.
+ */
+export const TemplatesCatalogConsumptionSchema = TemplatesCatalogSchema.extend({
+  templates: z.array(TemplateSchema.strip()),
+}).strip();
+
+export const KibanaVersionsManifestConsumptionSchema = KibanaVersionsManifestSchema.extend({
+  versions: z.array(KibanaVersionEntrySchema.strip()),
+}).strip();

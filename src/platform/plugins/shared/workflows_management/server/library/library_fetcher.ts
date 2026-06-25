@@ -19,10 +19,10 @@ import type {
   TemplatesCatalog,
 } from '@kbn/workflows-library';
 import {
-  KibanaVersionsManifestSchema,
+  KibanaVersionsManifestConsumptionSchema,
   parseTemplateYaml,
   TemplateParseError,
-  TemplatesCatalogSchema,
+  TemplatesCatalogConsumptionSchema,
 } from '@kbn/workflows-library';
 import { ZodError } from '@kbn/zod/v4';
 
@@ -188,12 +188,14 @@ export class LibraryFetcher {
 
   private async fetchKibanaVersionsManifest(): Promise<FetchResult<KibanaVersionsManifest>> {
     const url = this.buildUrl('kibana-versions.json');
-    return this.fetchJson(url, KibanaVersionsManifestSchema);
+    // Loosened consumption schema: tolerate unknown fields from a newer catalog.
+    return this.fetchJson<KibanaVersionsManifest>(url, KibanaVersionsManifestConsumptionSchema);
   }
 
   private async fetchTemplatesCatalog(versionId: string): Promise<FetchResult<TemplatesCatalog>> {
     const url = this.buildUrl(`${encodeURIComponent(versionId)}/catalogs/templates.json`);
-    return this.fetchJson(url, TemplatesCatalogSchema);
+    // Loosened consumption schema: tolerate unknown fields from a newer catalog.
+    return this.fetchJson<TemplatesCatalog>(url, TemplatesCatalogConsumptionSchema);
   }
 
   /**

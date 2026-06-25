@@ -18,7 +18,6 @@ template-metadata:
   description: "Assess the reputation of an IP address using AbuseIPDB."
   solutions: [security]
   categories: [enrichment, threat-intel]
-  icon: abuseipdb
   install:
     form:
       - name: abuseipdb-connector

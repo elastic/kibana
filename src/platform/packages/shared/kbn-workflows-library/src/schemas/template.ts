@@ -37,7 +37,6 @@ export const TemplateMetadataSchema = z
     solutions: z.array(z.string().min(1)).optional(),
     // Closed vocabulary is enforced by the catalog generator in the source repo.
     categories: z.array(z.string().min(1)).min(1, 'At least one category is required.'),
-    icon: z.string().min(1).optional(),
     install: InstallFormSchema.optional(),
   })
   .strict();

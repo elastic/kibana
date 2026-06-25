@@ -100,7 +100,8 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
       solutions: ['security'],
       categories: ['enrichment', 'threat-intel'],
       definitionUrl: 'templates/ip-reputation-check/1.0.0.yaml',
-      fixedConnectors: ['.abuseipdb'],
+      stepTypes: ['abuseipdb.checkIp'],
+      triggerTypes: ['manual'],
     });
   });
 

@@ -17,7 +17,6 @@ export type {
 export type {
   KibanaVersionEntry,
   KibanaVersionsManifest,
-  Manifest,
   Template,
   TemplateBody,
   TemplateMetadata,

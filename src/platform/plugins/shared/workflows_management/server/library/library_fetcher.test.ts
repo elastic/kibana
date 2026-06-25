@@ -58,7 +58,7 @@ const sampleManifest = {
 
 const sampleCatalog = (overrides: Partial<{ slug: string; version: string }> = {}) => ({
   version: 'v1',
-  kibanaVersion: '9.5',
+  kibanaVersion: '9.5.0',
   generatedAt: '2026-06-01T00:00:00Z',
   templates: [
     {
@@ -70,7 +70,8 @@ const sampleCatalog = (overrides: Partial<{ slug: string; version: string }> = {
       categories: ['utility'],
       definitionUrl: `templates/${overrides.slug ?? 'demo'}/${overrides.version ?? '1.0.0'}.yaml`,
       contentHash: `sha256:${'0'.repeat(64)}`,
-      fixedConnectors: [],
+      stepTypes: [],
+      triggerTypes: [],
     },
   ],
 });
@@ -319,6 +320,28 @@ describe('LibraryFetcher.listTemplates', () => {
     const fetcher = buildFetcher();
 
     await expect(fetcher.listTemplates()).rejects.toBeInstanceOf(LibraryFetchError);
+  });
+
+  it('tolerates unknown fields in the fetched manifest and catalog (forward-compat)', async () => {
+    // Simulate a catalog published by a newer Kibana that adds fields this
+    // (older) runtime does not know about — at the top level and per row.
+    const futureManifest = {
+      ...sampleManifest,
+      futureChannelMeta: { beta: true },
+      versions: sampleManifest.versions.map((v) => ({ ...v, note: 'from a newer publisher' })),
+    };
+    const base = sampleCatalog();
+    const futureCatalog = {
+      ...base,
+      futureTopLevelField: 'ignored-by-older-kibana',
+      templates: base.templates.map((t) => ({ ...t, snippetRoles: ['send-notification'] })),
+    };
+    queueRefresh(futureManifest, futureCatalog);
+    const fetcher = buildFetcher();
+
+    const result = await fetcher.listTemplates();
+
+    expect(result.map((t) => t.slug)).toEqual(['demo']);
   });
 
   it('translates a node-fetch system error into reason `connection`', async () => {
