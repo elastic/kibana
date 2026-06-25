@@ -268,4 +268,46 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       rule_source: { type: 'internal' },
     });
   });
+
+  it('returns no_change when the snapshot is identical to the current rule', async () => {
+    rulesClient.resolve.mockResolvedValue(liveAlertingRule);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(liveAlertingRule, CHANGE_ID));
+
+    const result = await detectionRulesClient.restoreRuleFromHistory({
+      ruleId: RULE_ID,
+      changeId: CHANGE_ID,
+    });
+
+    expect(result.no_change).toBe(true);
+    expect(rulesClient.update).not.toHaveBeenCalled();
+  });
+
+  it('detects an action-only diff and calls rulesClient.update', async () => {
+    const snapshotWithAction = getRuleMock(getQueryRuleParams(), {
+      actions: [
+        {
+          id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionTypeId: '.slack',
+          uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+          frequency: { summary: true, notifyWhen: 'onActiveAlert' as const, throttle: null },
+          group: 'default',
+        },
+      ],
+    });
+
+    rulesClient.resolve.mockResolvedValue(liveAlertingRule);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotWithAction, CHANGE_ID));
+    rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
+    const result = await detectionRulesClient.restoreRuleFromHistory({
+      ruleId: RULE_ID,
+      changeId: CHANGE_ID,
+    });
+
+    expect(result.no_change).toBeUndefined();
+    expect(rulesClient.update).toHaveBeenCalled();
+  });
 });
