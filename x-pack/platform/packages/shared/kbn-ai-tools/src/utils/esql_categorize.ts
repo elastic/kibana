@@ -57,9 +57,9 @@ export function buildCategorizeWithSampleQuery({
     query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
   }
 
-  return query.pipe`STATS count = COUNT(*), sample = TOP(${esql.col(
-    columnPath(field)
-  )}::keyword, 1, "desc") BY pattern = CATEGORIZE(${esql.col(columnPath(field))})`
+  const fieldCol = esql.col(columnPath(field));
+
+  return query.pipe`STATS count = COUNT(*), sample = TOP(${fieldCol}::keyword, 1, "desc") BY pattern = CATEGORIZE(${fieldCol})`
     .sort([['count'], 'DESC', ''])
     .limit(limit)
     .print('basic');
@@ -80,8 +80,6 @@ export function parseCategorizeWithSampleRows(
     const count = row[countIndex];
     const pattern = row[patternIndex];
     const rawSample = row[sampleIndex];
-    // TOP(..., 1) returns a scalar, but tolerate a single-item array across ES
-    // snapshots (same defensive handling as the two-pass categorize parser).
     const sample = Array.isArray(rawSample) ? rawSample[0] : rawSample;
 
     if (typeof count !== 'number' || typeof pattern !== 'string') {

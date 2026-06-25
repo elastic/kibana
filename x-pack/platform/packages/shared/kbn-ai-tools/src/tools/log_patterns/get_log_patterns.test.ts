@@ -76,7 +76,6 @@ describe('getSigEventsLogPatternsEsql', () => {
           'FROM logs-* | WHERE KQL("service.name:\\"checkout\\"") | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text) | SORT count DESC | LIMIT 1000',
       }),
     ]);
-    // The schema probe is the only query on the raw client; there is no pass-2 fetch.
     expect(rawEsqlQuery).toHaveBeenCalledTimes(1);
     expect(rawEsqlQuery.mock.calls[0]).toEqual([
       expect.objectContaining({

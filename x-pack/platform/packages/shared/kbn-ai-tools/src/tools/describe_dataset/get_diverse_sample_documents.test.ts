@@ -86,6 +86,23 @@ const viewFetchResponse = (
   values,
 });
 
+// Concrete index where the categorized field is an ES|QL alias/runtime field
+// (here `message` aliases `body.text`): the field is a queryable column but is
+// absent from `_source` (OTel logs). The join must use the column, not _source.
+const aliasFetchResponse = (
+  values: unknown[][] = [
+    ['error one', 'doc-1', { 'body.text': 'error one' }],
+    ['warn two', 'doc-2', { 'body.text': 'warn two' }],
+  ]
+) => ({
+  columns: [
+    { name: 'message', type: 'text' },
+    { name: '_id', type: 'keyword' },
+    { name: '_source', type: '_source' },
+  ],
+  values,
+});
+
 describe('getDiverseSampleDocuments', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -153,6 +170,32 @@ describe('getDiverseSampleDocuments', () => {
     expect(result.hits).toEqual([
       { _index: '', _id: objectHash(firstSource), _source: firstSource },
       { _index: '', _id: objectHash(secondSource), _source: secondSource },
+    ]);
+  });
+
+  it('joins on the field column when it is an alias absent from _source (OTel logs)', async () => {
+    const { esClient, query } = createEsClient();
+    query
+      .mockResolvedValueOnce(schemaResponse())
+      .mockResolvedValueOnce(countResponse(10))
+      .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(aliasFetchResponse());
+
+    const result = await getDiverseSampleDocuments({
+      esClient,
+      index: 'logs.otel.android',
+      start: 100,
+      end: 200,
+      size: 2,
+      offset: 0,
+      logger,
+    });
+
+    // `_source` has no `message` (it lives under `body.text`); reading the join
+    // value from the `message` column still resolves both representatives.
+    expect(result.hits).toEqual([
+      { _index: '', _id: 'doc-1', _source: { 'body.text': 'error one' } },
+      { _index: '', _id: 'doc-2', _source: { 'body.text': 'warn two' } },
     ]);
   });
 

@@ -285,6 +285,7 @@ export function StreamsTreeTable({
                 const treeMode = shouldComposeTree(sortField);
                 const hasChildren = !!item.children && item.children.length > 0;
                 const isCollapsed = collapsed.has(item.stream.name);
+                const isQueryStream = Streams.QueryStream.Definition.is(item.stream);
 
                 return (
                   <EuiFlexGroup
@@ -335,7 +336,7 @@ export function StreamsTreeTable({
                         <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                       </EuiFlexItem>
                     )}
-                    {Streams.QueryStream.Definition.is(item.stream) && (
+                    {isQueryStream && (
                       <EuiFlexItem grow={false}>
                         <QueryStreamBadge />
                       </EuiFlexItem>
@@ -350,7 +351,7 @@ export function StreamsTreeTable({
                         <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>
                       </EuiLink>
                     </EuiFlexItem>
-                    {Streams.QueryStream.Definition.is(item.stream) && (
+                    {isQueryStream && (
                       <EuiFlexItem grow={false}>
                         <TechnicalPreviewBadge />
                       </EuiFlexItem>

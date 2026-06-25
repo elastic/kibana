@@ -106,52 +106,21 @@ export async function getDiverseSampleDocuments({
     .sort((a, b) => b.count - a.count)
     .slice(offset, offset + size);
 
-  const sampleValues = [...new Set(window.map((row) => row.sample).filter((s) => s.length > 0))];
+  const sampleValues = Array.from(
+    new Set(window.map((row) => row.sample).filter((sample) => sample.length > 0))
+  );
 
   if (sampleValues.length === 0) {
     return { hits: [] };
   }
 
-  // Fetch pass: pull the full document for each representative value. Keeping
-  // `METADATA _id, _source` means concrete indices return the real nested
-  // `_source`, while views silently drop it and `parseEsqlSourceDocuments`
-  // reconstructs the source from the projected columns. The join key is the
-  // representative field value (not `_id`), so this is metadata-free too.
-  //
-  // A representative value is not a unique key, so a single `WHERE field IN
-  // (values) | LIMIT n` lets one high-frequency value crowd others out of the
-  // budget. To guarantee every value resolves, re-query only the still-missing
-  // values each round — their per-value budget grows as the set shrinks — until
-  // all are resolved or a round resolves nothing (the rest have no live
-  // document). `pending` strictly shrinks each iteration, so this terminates.
-  const valueToHit = new Map<string, SearchHit<Record<string, unknown>>>();
-  let pending = sampleValues;
-  while (pending.length > 0) {
-    const fetchResponse = (await esClient.esql.query({
-      query: buildSourceFetchQuery({
-        indices,
-        field: messageField,
-        values: pending,
-        limit: pending.length * SOURCE_FETCH_PER_VALUE,
-      }),
-      filter,
-      drop_null_columns: true,
-    })) as unknown as ESQLSearchResponse;
-
-    const resolvedBeforeRound = valueToHit.size;
-    for (const doc of parseEsqlSourceDocuments(fetchResponse)) {
-      const value = readFieldValue(doc.source, messageField);
-      if (value === undefined || valueToHit.has(value)) {
-        continue;
-      }
-      valueToHit.set(value, { _index: '', _id: getEsqlDocumentId(doc), _source: doc.source });
-    }
-
-    if (valueToHit.size === resolvedBeforeRound) {
-      break;
-    }
-    pending = pending.filter((value) => !valueToHit.has(value));
-  }
+  const valueToHit = await fetchRepresentativeDocuments({
+    esClient,
+    indices,
+    field: messageField,
+    sampleValues,
+    filter,
+  });
 
   // Emit one document per category, preserving the count-descending window order.
   const hits: Array<SearchHit<Record<string, unknown>>> = [];
@@ -174,17 +143,96 @@ export async function getDiverseSampleDocuments({
 }
 
 /**
- * Reads the categorized field value from a parsed document. View reconstruction
- * stores projected columns under their dotted key (`source['host.name']`), while
- * a concrete index `_source` is nested (`source.host.name`), so try the dotted
- * key first and fall back to a nested lookup.
+ * Fetches the full document for each representative value, returning a map from
+ * representative value to its hit.
+ *
+ * Keeping `METADATA _id, _source` means concrete indices return the real nested
+ * `_source`, while views silently drop it and `parseEsqlSourceDocuments`
+ * reconstructs the source from the projected columns. The join key is the
+ * representative field value (not `_id`), so this is metadata-free too.
+ *
+ * A representative value is not a unique key, so a single `WHERE field IN
+ * (values) | LIMIT n` lets one high-frequency value crowd others out of the
+ * budget. To guarantee every value resolves, re-query only the still-missing
+ * values each round — their per-value budget grows as the set shrinks — until
+ * all are resolved or a round resolves nothing (the rest have no live document).
+ * `pending` strictly shrinks each iteration, so this terminates.
  */
-function readFieldValue(source: Record<string, unknown>, field: string): string | undefined {
-  const raw = field in source ? source[field] : get(source, field);
-  if (raw == null) {
-    return undefined;
+async function fetchRepresentativeDocuments({
+  esClient,
+  indices,
+  field,
+  sampleValues,
+  filter,
+}: {
+  esClient: ElasticsearchClient;
+  indices: string[];
+  field: string;
+  sampleValues: string[];
+  filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
+}): Promise<Map<string, SearchHit<Record<string, unknown>>>> {
+  const valueToHit = new Map<string, SearchHit<Record<string, unknown>>>();
+  let pending = sampleValues;
+
+  while (pending.length > 0) {
+    const fetchResponse = (await esClient.esql.query({
+      query: buildSourceFetchQuery({
+        indices,
+        field,
+        values: pending,
+        limit: pending.length * SOURCE_FETCH_PER_VALUE,
+      }),
+      filter,
+      drop_null_columns: true,
+    })) as unknown as ESQLSearchResponse;
+
+    const docs = parseEsqlSourceDocuments(fetchResponse);
+    const joinValues = resolveFieldValues({ response: fetchResponse, docs, field });
+
+    const resolvedBeforeRound = valueToHit.size;
+    docs.forEach((doc, i) => {
+      const value = joinValues[i];
+      if (value === undefined || valueToHit.has(value)) {
+        return;
+      }
+      valueToHit.set(value, { _index: '', _id: getEsqlDocumentId(doc), _source: doc.source });
+    });
+
+    if (valueToHit.size === resolvedBeforeRound) {
+      break;
+    }
+    pending = pending.filter((value) => !valueToHit.has(value));
   }
-  return Array.isArray(raw) ? String(raw[0]) : String(raw);
+
+  return valueToHit;
+}
+
+/**
+ * Resolves the categorized field value for each parsed document.
+ */
+function resolveFieldValues({
+  response,
+  docs,
+  field,
+}: {
+  response: ESQLSearchResponse;
+  docs: Array<{ source: Record<string, unknown> }>;
+  field: string;
+}): Array<string | undefined> {
+  const normalize = (raw: unknown): string | undefined =>
+    raw == null ? undefined : String(Array.isArray(raw) ? raw[0] : raw);
+
+  // The column read is only safe when rows map 1:1 to the parsed documents.
+  const fieldIndex =
+    response.values.length === docs.length
+      ? response.columns.findIndex((column) => column.name === field)
+      : -1;
+
+  return docs.map((doc, i) => {
+    const fromColumn = fieldIndex === -1 ? undefined : normalize(response.values[i][fieldIndex]);
+    const fromSource = normalize(field in doc.source ? doc.source[field] : get(doc.source, field));
+    return fromColumn ?? fromSource;
+  });
 }
 
 function buildSourceFetchQuery({
