@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
 
 import { AGENTS_PREFIX } from '../../../../../../../../../common/constants';
 import { sendGetAgents } from '../../../../../../hooks';
@@ -13,16 +14,30 @@ import { createIntegrationsTestRendererMock } from '../../../../../../../../mock
 
 import { AgentlessPackagePoliciesTable } from './agentless_table';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
+
 jest.mock('../../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../../hooks'),
   useConfirmForceInstall: jest.fn(),
   sendGetAgents: jest.fn(),
 }));
 
+const mockUseLocation = useLocation as jest.MockedFunction<typeof useLocation>;
+
 describe('AgentlessPackagePoliciesTable', () => {
   const mockSendGetAgents = sendGetAgents as jest.MockedFunction<typeof sendGetAgents>;
 
   beforeEach(() => {
+    mockUseLocation.mockReturnValue({
+      pathname: '/',
+      search: '',
+      hash: '',
+      state: undefined,
+    });
+
     mockSendGetAgents.mockResolvedValue({
       data: {
         items: [
@@ -154,5 +169,34 @@ describe('AgentlessPackagePoliciesTable', () => {
       fireEvent.click(await result.findByText('Healthy'));
     });
     expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+  });
+
+  it('opens flyout when openEnrollmentFlyout query param matches a package policy id', async () => {
+    mockUseLocation.mockReturnValue({
+      pathname: '/',
+      search: '?openEnrollmentFlyout=packagePolicy1',
+      hash: '',
+      state: undefined,
+    });
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+    await waitFor(() => {
+      expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+    });
+  });
+
+  it('does not open flyout when openEnrollmentFlyout query param does not match any policy', async () => {
+    mockUseLocation.mockReturnValue({
+      pathname: '/',
+      search: '?openEnrollmentFlyout=nonexistent-id',
+      hash: '',
+      state: undefined,
+    });
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+    await waitFor(() => {
+      expect(mockSendGetAgents).toHaveBeenCalled();
+    });
+    expect(result.queryByText('Confirm agentless enrollment')).not.toBeInTheDocument();
   });
 });
