@@ -19,6 +19,10 @@ import type { FetchLike } from '@kbn/mcp-client';
  * @param axiosInstance - Axios instance with auth and any other config already applied
  * @returns A FetchLike suitable for passing to McpClient as the `fetch` option
  */
+// How long to wait for the GET SSE channel before proceeding anyway.
+// Bounds the sseReady gate against ordering races and servers that never open the channel.
+const SSE_READY_TIMEOUT_MS = 5_000;
+
 export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
   // The MCP SDK fires the GET SSE channel as a fire-and-forget side effect of the
   // initialized handshake. Some servers require that channel to be established before
@@ -82,7 +86,22 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     }
 
     if (sseReady !== null) {
-      await sseReady;
+      // Race sseReady against a timeout and the abort signal so a stuck or
+      // out-of-order GET can never cause tool-call POSTs to hang indefinitely.
+      // Whichever wins first, execution falls through to the POST below.
+      const races: Array<Promise<void>> = [
+        sseReady,
+        new Promise<void>((resolve) => setTimeout(resolve, SSE_READY_TIMEOUT_MS)),
+      ];
+      if (init?.signal) {
+        races.push(
+          new Promise<void>((resolve) => {
+            if (init.signal!.aborted) resolve();
+            else init.signal!.addEventListener('abort', () => resolve(), { once: true });
+          })
+        );
+      }
+      await Promise.race(races);
     }
 
     const res = await axiosInstance.request({
