@@ -409,6 +409,18 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
     });
   });
 
+  describe('real C2 gold corpus — unchanged by new filters', () => {
+    test('retains qaqkongtiao.com', () => {
+      const r = extractIocs({ text: 'C2 observed at qaqkongtiao.com' });
+      expect(domainValues(r)).toContain('qaqkongtiao.com');
+    });
+
+    test('retains sfrclak.com', () => {
+      const r = extractIocs({ text: 'beacon to sfrclak.com:8080' });
+      expect(domainValues(r)).toContain('sfrclak.com');
+    });
+  });
+
   describe('ioc_set_hash — computed from surviving IOCs only', () => {
     test('returns null when all tokens are noise', () => {
       // WScript.Shell excluded: .shell is a real branded IANA gTLD.
@@ -424,6 +436,63 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
       // 'wndlogon.hopto.org' is a real domain; 'update.zip' is a file extension
       expect(r.ioc_set_hash).not.toBeNull();
       expect(domainValues(r)).toContain('wndlogon.hopto.org');
+    });
+  });
+
+  describe('noise domain denylist additions (eval-2026-06-23)', () => {
+    test('rejects registry.npmjs.org', () => {
+      const r = extractIocs({ text: 'package fetched from registry.npmjs.org/lodash' });
+      expect(domainValues(r)).not.toContain('registry.npmjs.org');
+    });
+
+    test('rejects eset.com (vendor self-citation)', () => {
+      const r = extractIocs({ text: 'ESET researchers at eset.com published this analysis' });
+      expect(domainValues(r)).not.toContain('eset.com');
+    });
+  });
+
+  describe('redaction-adjacency drop (step a)', () => {
+    test('drops ie.com when immediately preceded by * (aad****ie.com pattern)', () => {
+      // The regex matches 'ie.com' as a separate token after the masking chars.
+      const r = extractIocs({ text: 'victim domain aad****ie.com redacted in table' });
+      expect(domainValues(r)).not.toContain('ie.com');
+    });
+
+    test('keeps ie.com when NOT preceded by a masking glyph', () => {
+      const r = extractIocs({ text: 'TLD ccTLD for Ireland is ie.com example' });
+      expect(domainValues(r)).toContain('ie.com');
+    });
+  });
+
+  describe('corroboration gate for ambiguous TLDs (step e)', () => {
+    test('drops ld.py — ambiguous TLD, uncorroborated', () => {
+      const r = extractIocs({ text: 'script calls ld.py to link objects' });
+      expect(domainValues(r)).not.toContain('ld.py');
+    });
+
+    test('drops subprocess.run — ambiguous TLD, uncorroborated', () => {
+      const r = extractIocs({ text: 'code calls subprocess.run(cmd, shell=True)' });
+      expect(domainValues(r)).not.toContain('subprocess.run');
+    });
+
+    test('drops WScript.Shell — ambiguous TLD, uncorroborated', () => {
+      const r = extractIocs({ text: 'macro creates WScript.Shell object' });
+      expect(domainValues(r)).not.toContain('wscript.shell');
+    });
+
+    test('keeps evil.py when defanged-in-source (defanged corroboration)', () => {
+      const r = extractIocs({ text: 'C2 beacon to evil[.]py' });
+      expect(domainValues(r)).toContain('evil.py');
+    });
+
+    test('keeps evil.py when it is the host of an extracted URL (url-host corroboration)', () => {
+      const r = extractIocs({ text: 'payload from https://evil.py/x' });
+      expect(domainValues(r)).toContain('evil.py');
+    });
+
+    test('normal domain evil.com passes gate unchanged (gate only touches AMBIGUOUS_TLDS)', () => {
+      const r = extractIocs({ text: 'C2 callback to evil.com' });
+      expect(domainValues(r)).toContain('evil.com');
     });
   });
 

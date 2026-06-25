@@ -169,6 +169,32 @@ export const IOC_NOISE_DOMAIN_LIST: readonly NoiseDomainEntry[] = [
     added: '2026-06-08',
     source: 'manual',
   },
+  // ── Package registries ────────────────────────────────────────────────────
+  {
+    domain: 'registry.npmjs.org',
+    rationale: 'npm package registry — cited as supply-chain reference, never adversary C2',
+    added: '2026-06-25',
+    source: 'eval-2026-06-23',
+  },
+  {
+    domain: 'packages.npm.org',
+    rationale: 'npm CDN/packages host — distribution infrastructure reference, never IOC',
+    added: '2026-06-25',
+    source: 'eval-2026-06-23',
+  },
+  {
+    domain: 'npmjs.org',
+    rationale: 'npm organization domain — package registry citation, not adversary infra',
+    added: '2026-06-25',
+    source: 'eval-2026-06-23',
+  },
+  // ── AV vendor self-citations ──────────────────────────────────────────────
+  {
+    domain: 'eset.com',
+    rationale: 'ESET AV vendor — appears in reports as vendor attribution, never C2',
+    added: '2026-06-25',
+    source: 'eval-2026-06-23',
+  },
 ];
 
 export const IOC_NOISE_DOMAINS: ReadonlySet<string> = new Set(

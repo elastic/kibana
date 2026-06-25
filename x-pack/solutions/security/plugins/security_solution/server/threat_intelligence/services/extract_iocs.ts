@@ -19,17 +19,23 @@ import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
  * `hunt_behavior` flow does the deeper pass.
  *
  * Domain filter pipeline (applied in order after regex match):
- *  1. File-extension check — drop if the rightmost label is a known file or
+ *  a. Redaction-adjacency drop — drop if the match is immediately preceded by a
+ *     masking glyph (* █ ● ＊). Catches victim-domain redaction fragments such as
+ *     aad****ie.com → the trailing 'ie.com' token is not a real indicator.
+ *  b. File-extension check — drop if the rightmost label is a known file or
  *     executable extension (.exe, .dll, .ps1, …). Done BEFORE IANA validation
  *     to handle .zip/.mov gTLD collisions. Binary names paired with a real TLD
  *     (powershell.ru, svchost.io) are NOT dropped here — those are valid domains
  *     and potential C2; only the extension suffix form (powershell.exe) is rejected.
- *  2. IANA TLD validation — drop if the rightmost label is not a real IANA TLD.
+ *  c. IANA TLD validation — drop if the rightmost label is not a real IANA TLD.
  *     Eliminates code symbols (.Sleep, .MaxValue), truncated tokens (.hopto),
- *     and any extensions not caught by step 1.
- *  3. Noise domain denylist — drop if the full domain is in the curated list of
+ *     and any extensions not caught by step b.
+ *  d. Noise domain denylist — drop if the full domain is in the curated list of
  *     security-tooling / vendor / reference domains (elastic.co, urlscan.io, …).
- *  4. Longest-match dedup — if both `a.b.tld` and `b.tld` survive, keep only
+ *  e. Corroboration gate — drop if the TLD is in AMBIGUOUS_TLDS (doubles as a code
+ *     or file token) unless the domain is corroborated by: (1) defanged-in-source
+ *     (absent from raw text, present after refang) or (2) host of an extracted URL.
+ *  f. Longest-match dedup — if both `a.b.tld` and `b.tld` survive, keep only
  *     `a.b.tld` (PSL-suffix dedup, handles hopto.org vs wndlogon.hopto.org).
  */
 
@@ -179,6 +185,18 @@ const FILE_EXTENSION_TLDS = new Set([
   'ipa',
 ]);
 
+/**
+ * TLDs that double as common code/file tokens (e.g. ld.py, subprocess.run,
+ * WScript.Shell). These require positive corroboration before being emitted
+ * as IOCs. Tunable/expandable as the corpus evolves.
+ *
+ * Corroboration contract: a domain whose TLD ∈ AMBIGUOUS_TLDS is KEPT only if:
+ *   (1) it was defanged-in-source (absent from raw text, present after refang), OR
+ *   (2) it is the host of a separately-extracted URL.
+ * Structured adapters (future enrichment sources) would be a third corroboration path.
+ */
+const AMBIGUOUS_TLDS = new Set(['py', 'sh', 'run', 'shell', 'name', 'pl', 'rb', 'lua', 'ps']);
+
 const isPrivateIp = (ip: string) => PRIVATE_IP_PREFIXES.some((p) => ip.startsWith(p));
 
 /**
@@ -192,20 +210,30 @@ const extractTld = (domain: string): string => {
 
 /**
  * Domain filter pipeline: returns true if the domain should be KEPT.
- * Applied in order: file-ext → IANA → noise denylist.
+ * Applied in order: file-ext → IANA → noise denylist → corroboration gate.
+ * Redaction-adjacency is checked upstream (requires match position from matchAll).
  */
-const isDomainKept = (domain: string): boolean => {
+const isDomainKept = (
+  domain: string,
+  defangedDomains: ReadonlySet<string>,
+  urlHosts: ReadonlySet<string>
+): boolean => {
   const lower = domain.toLowerCase();
   const tld = extractTld(lower);
 
-  // Step 1 — file extension (before IANA to handle .zip/.mov gTLD collisions)
+  // Step b — file extension (before IANA to handle .zip/.mov gTLD collisions)
   if (FILE_EXTENSION_TLDS.has(tld)) return false;
 
-  // Step 2 — IANA TLD validation
+  // Step c — IANA TLD validation
   if (!IANA_TLDS.has(tld)) return false;
 
-  // Step 3 — noise domain denylist (full hostname)
+  // Step d — noise domain denylist (full hostname)
   if (IOC_NOISE_DOMAINS.has(lower)) return false;
+
+  // Step e — corroboration gate for ambiguous/code-shaped TLDs
+  if (AMBIGUOUS_TLDS.has(tld)) {
+    if (!defangedDomains.has(lower) && !urlHosts.has(lower)) return false;
+  }
 
   return true;
 };
@@ -272,39 +300,79 @@ const refang = (text: string): string =>
       m.toLowerCase().startsWith('hxxps') ? 'https://' : 'http://'
     );
 
+/** Masking glyphs used in victim-domain redaction tables (e.g. aad****ie.com). */
+const REDACTION_GLYPHS = new Set(['*', '＊', '█', '●']);
+
 export const extractIocs = ({ text, defang = true }: ExtractIocsParams): ExtractIocsResult => {
   // Pre-pass: recover defanged IOCs before regex matching.
   const refangedText = refang(text);
   const seen = new Set<string>();
-  const rawDomains: string[] = [];
+  const rawUrls: string[] = [];
   const iocs: ExtractedIoc[] = [];
 
-  // Pass 1 — collect non-domain IOCs and candidate domain strings.
-  for (const type of IOC_TYPES) {
+  // ── Corroboration signal 1: defanged-in-source domains ───────────────────
+  // A domain present in refangedText but absent from the original text was
+  // created BY refang, meaning the vendor deliberately defanged it — strongest
+  // possible corroboration that it is a live indicator.
+  const originalLower = text.toLowerCase();
+  const refangedLower = refangedText.toLowerCase();
+  const rawDomainsInOriginal = new Set(
+    (originalLower.match(PATTERNS.domain) ?? []).map((d) => d.toLowerCase())
+  );
+  const rawDomainsInRefanged = (refangedLower.match(PATTERNS.domain) ?? []).map((d) =>
+    d.toLowerCase()
+  );
+  const defangedDomains: ReadonlySet<string> = new Set(
+    rawDomainsInRefanged.filter((d) => !rawDomainsInOriginal.has(d))
+  );
+
+  // Pass 1 — collect non-domain IOCs; accumulate raw URL strings for signal 2.
+  for (const type of IOC_TYPES.filter((t) => t !== 'domain')) {
     const matches = refangedText.match(PATTERNS[type]) ?? [];
     for (const raw of matches) {
-      if (type === 'domain') {
-        // Domains go through the full filter pipeline + longest-match dedup below.
-        rawDomains.push(raw);
-      } else {
-        // Normalize: lowercase hashes (hex) and urls (scheme+host are case-insensitive).
-        // IPs are digits-only; no case change needed.
-        const value = type === 'hash' || type === 'url' ? raw.toLowerCase() : raw;
-        const dedupKey = `${type}:${value.toLowerCase()}`;
-        const isPrivateIpHit = type === 'ip' && isPrivateIp(value);
-        if (!seen.has(dedupKey) && !isPrivateIpHit) {
-          seen.add(dedupKey);
-          iocs.push({ type, value, defanged: defangValue(type, value, defang) });
-        }
+      // Normalize: lowercase hashes (hex) and urls (scheme+host are case-insensitive).
+      // IPs are digits-only; no case change needed.
+      const value = type === 'hash' || type === 'url' ? raw.toLowerCase() : raw;
+      const dedupKey = `${type}:${value.toLowerCase()}`;
+      const isPrivateIpHit = type === 'ip' && isPrivateIp(value);
+      if (!seen.has(dedupKey) && !isPrivateIpHit) {
+        seen.add(dedupKey);
+        iocs.push({ type, value, defanged: defangValue(type, value, defang) });
+        if (type === 'url') rawUrls.push(value);
       }
     }
   }
 
-  // Pass 2 — domain filter pipeline: step 1-4 per domain, then longest-match dedup.
-  // Lowercase before filtering so isDomainKept and longestMatchDomainDedup work
-  // on normalized strings; stored `value` is the lowercase canonical form.
-  const lowercasedDomains = rawDomains.map((d) => d.toLowerCase());
-  const filteredDomains = longestMatchDomainDedup(lowercasedDomains.filter(isDomainKept));
+  // ── Corroboration signal 2: URL hosts ────────────────────────────────────
+  // A domain that is the host of a matched URL is corroborated — the URL pattern
+  // is a stricter match, so this is independent evidence.
+  const urlHosts: ReadonlySet<string> = new Set(
+    rawUrls.flatMap((url) => {
+      try {
+        return [new URL(url).hostname.toLowerCase()];
+      } catch {
+        return [];
+      }
+    })
+  );
+
+  // Pass 2 — domain filter pipeline: a–f per domain, then longest-match dedup.
+  // Use matchAll to get positions (needed for redaction-adjacency check, step a).
+  const domainPattern = new RegExp(PATTERNS.domain.source, PATTERNS.domain.flags);
+  const candidateDomains: string[] = Array.from(refangedText.matchAll(domainPattern))
+    .filter((match) => {
+      const raw = match[0].toLowerCase();
+      // Step a — redaction-adjacency: drop tokens immediately preceded by a masking glyph.
+      // Catches victim-domain redaction fragments (e.g. aad****ie.com → 'ie.com' token).
+      const redactionPreceded =
+        match.index > 0 && REDACTION_GLYPHS.has(refangedText[match.index - 1]);
+      // Steps b–e delegated to isDomainKept.
+      return !redactionPreceded && isDomainKept(raw, defangedDomains, urlHosts);
+    })
+    .map((match) => match[0].toLowerCase());
+
+  // Step f — longest-match PSL dedup.
+  const filteredDomains = longestMatchDomainDedup(candidateDomains);
   for (const domain of filteredDomains) {
     const dedupKey = `domain:${domain}`;
     if (!seen.has(dedupKey)) {
