@@ -199,7 +199,6 @@ export const SetupTechnologySelector = ({
                   <FormattedMessage
                     id="xpack.fleet.setupTechnology.radioCardAgentlessInputDescription"
                     defaultMessage="Best for simple setup and faster onboarding."
-                    values={{ integrationName: packageInfo.title }}
                   />
                 </p>
               </EuiText>
