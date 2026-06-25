@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { RegionPolicyBody, RegionPolicyResponse } from '../../common/types';
 
-const REGION_POLICY_PATH = '_inference/_region_policy';
+const REGION_POLICY_PATH = '/_inference/_region_policy';
 
 export const getRegionPolicy = async (
   client: ElasticsearchClient

@@ -63,7 +63,7 @@ describe('Region Policy Routes', () => {
 
       expect(mockEsClient.transport.request).toHaveBeenCalledWith({
         method: 'GET',
-        path: '_inference/_region_policy',
+        path: '/_inference/_region_policy',
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith(
         expect.objectContaining({ body: mockPolicy })
@@ -104,7 +104,7 @@ describe('Region Policy Routes', () => {
 
       expect(mockEsClient.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
-        path: '_inference/_region_policy',
+        path: '/_inference/_region_policy',
         body: requestBody,
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith(
@@ -163,7 +163,7 @@ describe('Region Policy Routes', () => {
 
       expect(mockEsClient.transport.request).toHaveBeenCalledWith({
         method: 'DELETE',
-        path: '_inference/_region_policy',
+        path: '/_inference/_region_policy',
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith(
         expect.objectContaining({ body: { acknowledged: true } })

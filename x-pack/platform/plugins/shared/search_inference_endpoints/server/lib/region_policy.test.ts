@@ -34,7 +34,7 @@ describe('region_policy lib', () => {
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
         method: 'GET',
-        path: '_inference/_region_policy',
+        path: '/_inference/_region_policy',
       });
       expect(result).toEqual(policy);
     });
@@ -60,7 +60,7 @@ describe('region_policy lib', () => {
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
-        path: '_inference/_region_policy',
+        path: '/_inference/_region_policy',
         body,
       });
       expect(result).toEqual(response);
@@ -84,7 +84,7 @@ describe('region_policy lib', () => {
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
         method: 'DELETE',
-        path: '_inference/_region_policy',
+        path: '/_inference/_region_policy',
       });
     });
 
