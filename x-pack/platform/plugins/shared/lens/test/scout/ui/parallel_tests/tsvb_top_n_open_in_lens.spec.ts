@@ -198,7 +198,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     const queryInput = page.testSubj.locator('queryInput');
-    await expect(queryInput).toHaveText('machine.os : ios');
+    await expect(queryInput).toHaveValue('machine.os : ios');
   });
 
   spaceTest(

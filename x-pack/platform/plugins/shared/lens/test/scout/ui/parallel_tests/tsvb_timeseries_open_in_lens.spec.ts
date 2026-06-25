@@ -96,7 +96,7 @@ spaceTest.describe('TSVB Timeseries - Open in Lens', { tag: tags.deploymentAgnos
     await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Timeseries - With query');
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
-    await expect(page.testSubj.locator('queryInput')).toHaveText('machine.os : ios');
+    await expect(page.testSubj.locator('queryInput')).toHaveValue('machine.os : ios');
   });
 
   spaceTest('should draw a reference line', async ({ page, pageObjects }) => {
