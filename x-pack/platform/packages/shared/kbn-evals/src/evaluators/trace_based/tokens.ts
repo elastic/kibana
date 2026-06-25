@@ -90,32 +90,3 @@ export function createCachedTokensEvaluator({
     },
   });
 }
-
-export function createCachedReadInputTokensEvaluator({
-  traceEsClient,
-  log,
-}: {
-  traceEsClient: EsClient;
-  log: ToolingLog;
-}): Evaluator {
-  return createTraceBasedEvaluator({
-    traceEsClient,
-    log,
-    config: {
-      name: 'Cached Tokens',
-      // Cached input tokens as recorded by the inference span: `gen_ai.usage.cache_read.input_tokens`
-      // (the OTel gen_ai semantic-convention name, always set — defaults to 0 on a cache miss).
-      buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
-        | STATS
-        cached_tokens = SUM(attributes.gen_ai.usage.cache_read.input_tokens)`,
-      extractResult: (response) => {
-        const { columns, values } = response;
-        const row = values[0];
-        const cachedTokensIdx = columns.findIndex((col) => col.name === 'cached_tokens');
-        return row[cachedTokensIdx];
-      },
-      isResultValid: (result) => result !== null,
-    },
-  });
-}
