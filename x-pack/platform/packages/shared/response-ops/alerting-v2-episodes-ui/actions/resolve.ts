@@ -25,13 +25,7 @@ export const createResolveAction = (deps: ResolveActionDeps): EpisodeAction => (
   iconType: 'check',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.length > 0 &&
-    episodes.some(
-      (ep) =>
-        ep.last_deactivate_action !== 'deactivate' &&
-        // last_deactivate_action is authoritative; episode.status may be stale after an unresolve
-        (ep.last_deactivate_action === 'activate' ||
-          ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE)
-    ),
+    episodes.some((ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const items = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,

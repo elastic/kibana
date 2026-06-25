@@ -77,23 +77,34 @@ describe('EpisodeStatusCell', () => {
       last_ack_action: 'ack',
       last_snooze_action: 'snooze',
       snooze_expiry: '2025-01-01T00:00:00Z',
-      last_deactivate_action: 'deactivate',
       last_tags: ['x'],
     });
     render(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
     const props = mockStatusBadges.mock.calls[0][0];
     expect(props.status).toBe('active');
     expect(props.episodeAction).toMatchObject({ episodeId: 'ep1', lastAckAction: 'ack' });
-    expect(props.groupAction).toMatchObject({
-      groupHash: 'gh1',
+    expect(props.groupAction).toEqual({
       lastSnoozeAction: 'snooze',
       snoozeExpiry: '2025-01-01T00:00:00Z',
-      lastDeactivateAction: 'deactivate',
-      tags: ['x'],
     });
   });
 
-  it('passes null action fields and empty tags when row fields are absent', () => {
+  it('does not surface the deactivate audit fields to the status badges', () => {
+    const row = makeRow({
+      'episode.status': 'active',
+      'episode.id': 'ep1',
+      'rule.id': 'r1',
+      group_hash: 'gh1',
+      last_deactivate_action: 'deactivate',
+      last_deactivate_actor: 'someone',
+    });
+    render(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+    const props = mockStatusBadges.mock.calls[0][0];
+    expect(props.groupAction).not.toHaveProperty('lastDeactivateAction');
+    expect(props.groupAction).not.toHaveProperty('lastDeactivateActor');
+  });
+
+  it('passes null action fields when row fields are absent', () => {
     const row = makeRow({
       'episode.status': 'active',
       'episode.id': 'ep1',
@@ -103,11 +114,9 @@ describe('EpisodeStatusCell', () => {
     render(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
     const props = mockStatusBadges.mock.calls[0][0];
     expect(props.episodeAction).toMatchObject({ lastAckAction: null });
-    expect(props.groupAction).toMatchObject({
+    expect(props.groupAction).toEqual({
       lastSnoozeAction: null,
-      lastDeactivateAction: null,
       snoozeExpiry: null,
-      tags: [],
     });
   });
 });

@@ -24,3 +24,8 @@ export interface AlertEpisodeGroupAction {
   lastSnoozeActor: string | null;
   lastDeactivateActor: string | null;
 }
+
+export interface EpisodeStatusGroupAction {
+  lastSnoozeAction: string | null;
+  snoozeExpiry: string | null;
+}
