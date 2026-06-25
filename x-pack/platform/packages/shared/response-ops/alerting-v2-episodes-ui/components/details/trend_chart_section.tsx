@@ -88,7 +88,10 @@ export const AlertEpisodeTrendChartSection = ({
     data: rows,
     isLoading,
     isError,
-  } = useFetchEpisodeTrendQuery({ episodeId, services: { data, spaces } });
+  } = useFetchEpisodeTrendQuery({
+    episodeId: metricGroups ? episodeId : undefined,
+    services: { data, spaces },
+  });
 
   // Default to the first group; if the user's selection is no longer valid, fall back.
   const effectiveSelected =
