@@ -55,6 +55,20 @@ export const useConversationScrollActions = ({
     const gen = ++scrollGenRef.current;
     const scrollTarget = scrollContainer.scrollHeight - scrollContainer.clientHeight;
 
+    const onComplete = () => {
+      smoothScrollingRef.current = false;
+      const reachedTarget =
+        Math.abs(scrollContainer.scrollTop - scrollTarget) <= AT_BOTTOM_THRESHOLD;
+      if (isAtBottom(scrollContainer) || reachedTarget) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        stuckToBottomRef.current = true;
+        setShowScrollButton(false);
+      } else {
+        stuckToBottomRef.current = false;
+        setShowScrollButton(true);
+      }
+    };
+
     scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
 
     scrollContainer.addEventListener(
@@ -65,27 +79,15 @@ export const useConversationScrollActions = ({
           clearTimeout(smoothScrollFallbackTimerRef.current);
           smoothScrollFallbackTimerRef.current = null;
         }
-        smoothScrollingRef.current = false;
-
-        const reachedTarget =
-          Math.abs(scrollContainer.scrollTop - scrollTarget) <= AT_BOTTOM_THRESHOLD;
-
-        if (isAtBottom(scrollContainer) || reachedTarget) {
-          scrollContainer.scrollTop = scrollContainer.scrollHeight;
-          stuckToBottomRef.current = true;
-          setShowScrollButton(false);
-        } else {
-          stuckToBottomRef.current = false;
-          setShowScrollButton(true);
-        }
+        onComplete();
       },
       { once: true }
     );
 
     smoothScrollFallbackTimerRef.current = setTimeout(() => {
       smoothScrollFallbackTimerRef.current = null;
-      if (gen !== scrollGenRef.current) return; // stale
-      smoothScrollingRef.current = false;
+      if (gen !== scrollGenRef.current) return;
+      onComplete();
     }, SMOOTH_SCROLL_TIMEOUT_MS);
   }, [scrollContainer]);
 
