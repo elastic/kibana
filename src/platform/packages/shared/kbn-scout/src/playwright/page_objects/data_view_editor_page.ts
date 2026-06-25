@@ -39,9 +39,8 @@ export class DataViewEditorPage {
   // Fills the title field and waits for async validation to settle.
   async setTitle(title: string): Promise<void> {
     await this.titleInput.fill(title);
-    await this.form
-      .and(this.page.locator('[data-validation-error="0"]'))
-      .waitFor({ state: 'visible' });
+    await expect(this.titleInput).toHaveAttribute('data-is-validating', '0');
+    await expect(this.titleInput).not.toHaveAttribute('aria-invalid', 'true');
   }
 
   // Returns the timestamp field combo box value after the field finishes loading.
