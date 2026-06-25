@@ -47,7 +47,12 @@ export type {
   ModelCallInfo,
   ModelSelectionPreferences,
 } from './model_provider';
-export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } from './result_store';
+export type {
+  ToolResultStore,
+  WritableToolResultStore,
+  ToolResultWithMeta,
+  ToolCallWithResults,
+} from './result_store';
 export type { AttachmentsService } from './attachments_service';
 export type { SkillsService, SkillRegistryListOptions } from './skills_service';
 export type { PluginsService } from './plugins_service';
