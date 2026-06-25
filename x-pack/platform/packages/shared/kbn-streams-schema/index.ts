@@ -235,6 +235,7 @@ export {
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
+  CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   INFERRED_FEATURE_TYPES,
   isFeature,
@@ -277,18 +278,15 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   SIG_EVENT_STATUS_OPTIONS,
-  SIG_EVENT_IMPACT_OPTIONS,
   detectionSchema,
   type Detection,
   discoverySchema,
   type Discovery,
   sigEventSchema,
   sigEventStatusSchema,
-  sigEventImpactSchema,
   type SigEvent,
   type KnowledgeIndicator,
   type SigEventStatus,
-  type SigEventImpact,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,
