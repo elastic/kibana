@@ -136,7 +136,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
   const [compareMode, setCompareMode] = useState<WorkflowChangeHistoryCompareMode>('unified');
   const compareModeRef = useRef(compareMode);
   compareModeRef.current = compareMode;
-  const [highlightValidationErrors, setHighlightValidationErrors] = useState(true);
+  const [highlightValidationErrors, setHighlightValidationErrors] = useState(false);
   const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 

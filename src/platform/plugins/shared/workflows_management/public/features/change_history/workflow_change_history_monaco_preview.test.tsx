@@ -220,7 +220,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
     expect(mockCreateDiffEditor.mock.calls.length).toBe(createCallsBeforeToggle);
   });
 
-  it('re-validates with highlight disabled when the setting is toggled off', async () => {
+  it('re-validates with highlight enabled when the setting is toggled on', async () => {
     jest.useFakeTimers();
     renderPreview({ yaml: 'name: current\n' });
 
@@ -234,7 +234,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
       expect(mockApplyValidation).toHaveBeenCalledWith(
         expect.anything(),
         'name: current\n',
-        true,
+        false,
         expect.anything(),
         expect.anything()
       );
@@ -255,7 +255,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
       expect(mockApplyValidation).toHaveBeenCalledWith(
         expect.anything(),
         'name: current\n',
-        false,
+        true,
         expect.anything(),
         expect.anything()
       );
