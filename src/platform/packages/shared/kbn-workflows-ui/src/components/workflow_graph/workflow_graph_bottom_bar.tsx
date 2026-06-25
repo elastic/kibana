@@ -400,89 +400,95 @@ export function WorkflowDetailBottomBar({
           onMouseEnter={handleExpandedMouseEnter}
           onMouseLeave={handleExpandedMouseLeave}
         >
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
-          {/* Left section — yaml actions slot, only shown in yaml view. */}
-          {yamlActionsSlot && editorView === 'yaml' ? (
-            <>
-              <EuiFlexItem grow={false}>{yamlActionsSlot}</EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
+            {/* Left section — yaml actions slot, only shown in yaml view. */}
+            {yamlActionsSlot && editorView === 'yaml' ? (
+              <>
+                <EuiFlexItem grow={false}>{yamlActionsSlot}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <VerticalDivider />
+                </EuiFlexItem>
+              </>
+            ) : null}
+
+            {compact ? (
               <EuiFlexItem grow={false}>
-                <VerticalDivider />
+                <CompactToolsMenu toolsMenuItems={toolsMenuItems} toolsSlot={toolsSlot} />
               </EuiFlexItem>
-            </>
-          ) : null}
+            ) : (
+              <EuiFlexItem grow={false}>{toolsSlot}</EuiFlexItem>
+            )}
 
-          {compact ? (
-            <EuiFlexItem grow={false}>
-              <CompactToolsMenu toolsMenuItems={toolsMenuItems} toolsSlot={toolsSlot} />
-            </EuiFlexItem>
-          ) : (
-            <EuiFlexItem grow={false}>{toolsSlot}</EuiFlexItem>
-          )}
+            {showViewToggle ? (
+              <>
+                <EuiFlexItem grow={false}>
+                  <VerticalDivider />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ViewToggle editorView={editorView} onEditorViewChange={onEditorViewChange} />
+                </EuiFlexItem>
+              </>
+            ) : null}
 
-          {showViewToggle ? (
-            <>
+            {testWorkflowButton ? (
+              <EuiFlexItem
+                grow={false}
+                css={{ alignSelf: 'stretch', display: 'flex', alignItems: 'stretch' }}
+              >
+                <VerticalDivider fullBar />
+              </EuiFlexItem>
+            ) : null}
+
+            {testWorkflowButton ? (
               <EuiFlexItem grow={false}>
-                <VerticalDivider />
+                {compact ? testWorkflowButtonCompact ?? testWorkflowButton : testWorkflowButton}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ViewToggle editorView={editorView} onEditorViewChange={onEditorViewChange} />
-              </EuiFlexItem>
-            </>
-          ) : null}
-
-          {testWorkflowButton ? (
-            <EuiFlexItem
-              grow={false}
-              css={{ alignSelf: 'stretch', display: 'flex', alignItems: 'stretch' }}
-            >
-              <VerticalDivider fullBar />
-            </EuiFlexItem>
-          ) : null}
-
-          {testWorkflowButton ? (
-            <EuiFlexItem grow={false}>
-              {compact ? testWorkflowButtonCompact ?? testWorkflowButton : testWorkflowButton}
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+            ) : null}
+          </EuiFlexGroup>
         </div>
 
-      {/* Collapsed pill — hover to expand */}
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label={pillLabel}
-        css={{
-          position: 'absolute',
-          left: '50%',
-          bottom: 0,
-          transform: 'translateX(-50%)',
-          pointerEvents: isExpanded ? 'none' : 'auto',
-          opacity: isExpanded ? 0 : 1,
-          transition: 'opacity 200ms ease',
-          width: 64,
-          height: 24,
-          background: euiTheme.colors.primary,
-          borderRadius: 30,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: BAR_SHADOW,
-          cursor: 'pointer',
-        }}
-        onMouseEnter={handlePillMouseEnter}
-        onFocus={handlePillMouseEnter}
-        onBlur={handleExpandedMouseLeave}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handlePillMouseEnter();
-          }
-        }}
-      >
-        <EuiIcon type="boxesVertical" size="s" color={euiTheme.colors.emptyShade} css={{ transform: 'rotate(90deg)' }} aria-hidden />
+        {/* Collapsed pill — hover to expand */}
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label={pillLabel}
+          css={{
+            position: 'absolute',
+            left: '50%',
+            bottom: 0,
+            transform: 'translateX(-50%)',
+            pointerEvents: isExpanded ? 'none' : 'auto',
+            opacity: isExpanded ? 0 : 1,
+            transition: 'opacity 200ms ease',
+            width: 64,
+            height: 24,
+            background: euiTheme.colors.primary,
+            borderRadius: 30,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: BAR_SHADOW,
+            cursor: 'pointer',
+          }}
+          onMouseEnter={handlePillMouseEnter}
+          onFocus={handlePillMouseEnter}
+          onBlur={handleExpandedMouseLeave}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handlePillMouseEnter();
+            }
+          }}
+        >
+          <EuiIcon
+            type="boxesVertical"
+            size="s"
+            color={euiTheme.colors.emptyShade}
+            css={{ transform: 'rotate(90deg)' }}
+            aria-hidden
+          />
+        </div>
       </div>
-    </div>
     </WorkflowBottomBarContext.Provider>
   );
 }

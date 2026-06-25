@@ -41,10 +41,7 @@ const runLayout = (yaml: WorkflowYaml, direction: 'TB' | 'LR' = 'TB') => {
   };
 };
 
-const findNode = (
-  nodes: ReturnType<typeof computeWorkflowLayout>['nodes'],
-  id: string
-) => {
+const findNode = (nodes: ReturnType<typeof computeWorkflowLayout>['nodes'], id: string) => {
   const n = nodes.find((x) => x.id === id);
   if (!n) throw new Error(`Expected positioned node "${id}"`);
   return n;

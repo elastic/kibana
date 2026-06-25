@@ -57,8 +57,7 @@ const workflowComputationMiddleware: Middleware =
       if (!computed) {
         // On initial load pass the server-parsed definition so the graph renders
         // even when the client-side YAML parser can't handle the workflow's syntax.
-        const loadedDefinition =
-          store.getState().detail.workflow?.definition ?? undefined;
+        const loadedDefinition = store.getState().detail.workflow?.definition ?? undefined;
         compute(yamlString, store, loadedDefinition);
       } else {
         debouncedCompute(yamlString, store);

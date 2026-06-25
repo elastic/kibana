@@ -15,10 +15,7 @@ import { isStep } from './types';
  * `branches[].steps`). Centralises the branching logic so visitors don't
  * each duplicate it.
  */
-export const visitStepChildren = (
-  step: Step,
-  callback: (children: Step[]) => void
-): void => {
+export const visitStepChildren = (step: Step, callback: (children: Step[]) => void): void => {
   const record = step as Record<string, unknown>;
 
   if ('steps' in record && Array.isArray(record.steps)) {

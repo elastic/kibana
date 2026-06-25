@@ -8,11 +8,7 @@
  */
 
 import { Position } from '@xyflow/react';
-import {
-  buildForkBusPath,
-  buildMergeBusPath,
-  computeEdgePath,
-} from './compute_edge_path';
+import { buildForkBusPath, buildMergeBusPath, computeEdgePath } from './compute_edge_path';
 
 const TRUNK = 20;
 
