@@ -72,6 +72,14 @@ const executionsTabReadExecutionDisabledTooltip = i18n.translate(
   }
 );
 
+const executionsTabReadManagedExecutionDisabledTooltip = i18n.translate(
+  'workflows.workflowDetailHeader.executionsTabReadManagedExecutionDisabledTooltip',
+  {
+    defaultMessage:
+      'You need the Workflows "Read workflow executions" and "Read managed workflow executions" privileges to view managed workflow executions.',
+  }
+);
+
 export const SkipUnsavedRunConfirmationStorageKey = 'workflows:skipUnsavedRunConfirmation';
 
 const Translations = {
@@ -150,27 +158,37 @@ export const WorkflowDetailHeader = React.memo(
     const { application } = useKibana().services;
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
-    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
-      useWorkflowsCapabilities();
-
-    const workflowDetailTabButtonOptions = useMemo(
-      () =>
-        ButtonGroupOptions.map((option) =>
-          option.id === 'executions' && !canReadWorkflowExecution
-            ? {
-                ...option,
-                isDisabled: true,
-                title: '',
-                toolTipContent: executionsTabReadExecutionDisabledTooltip,
-              }
-            : option
-        ),
-      [canReadWorkflowExecution]
-    );
+    const {
+      canCreateWorkflow,
+      canUpdateWorkflow,
+      canExecuteWorkflow,
+      canReadWorkflowExecution,
+      canReadManagedWorkflowExecution,
+    } = useWorkflowsCapabilities();
 
     const { activeTab, setActiveTab } = useWorkflowUrlState();
 
     const workflow = useSelector(selectWorkflow);
+    const isManagedWorkflow = workflow?.managed === true;
+    const canReadVisibleWorkflowExecution =
+      canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
+    const executionsTabDisabledTooltip = isManagedWorkflow
+      ? executionsTabReadManagedExecutionDisabledTooltip
+      : executionsTabReadExecutionDisabledTooltip;
+    const workflowDetailTabButtonOptions = useMemo(
+      () =>
+        ButtonGroupOptions.map((option) =>
+          option.id === 'executions' && !canReadVisibleWorkflowExecution
+            ? {
+                ...option,
+                isDisabled: true,
+                title: '',
+                toolTipContent: executionsTabDisabledTooltip,
+              }
+            : option
+        ),
+      [canReadVisibleWorkflowExecution, executionsTabDisabledTooltip]
+    );
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
     const hasYamlSchemaValidationErrors = useSelector(selectHasYamlSchemaValidationErrors);
     const hasUnsavedChanges = useSelector(selectHasChanges);
@@ -185,7 +203,6 @@ export const WorkflowDetailHeader = React.memo(
       }),
       [workflow]
     );
-    const isManagedWorkflow = workflow?.managed === true;
 
     const saveYaml = useSaveYaml();
     const isSaving = useSelector(selectIsSavingYaml);
@@ -350,7 +367,7 @@ export const WorkflowDetailHeader = React.memo(
                       idSelected={activeTab}
                       legend="Switch between workflow and executions"
                       type="single"
-                      hasAriaDisabled={!canReadWorkflowExecution}
+                      hasAriaDisabled={!canReadVisibleWorkflowExecution}
                       onChange={(id) => setActiveTab(id as WorkflowUrlStateTabType)}
                     />
                   </EuiFlexItem>
