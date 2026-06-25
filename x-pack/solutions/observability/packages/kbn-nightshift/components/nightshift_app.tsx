@@ -12,11 +12,7 @@ import { NightshiftIllustration } from './nightshift_illustration';
 
 export function NightshiftApp() {
   return (
-    <EuiFlexGroup
-      justifyContent="center"
-      alignItems="center"
-      style={{ minHeight: '60vh' }}
-    >
+    <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
       <EuiFlexItem grow={false}>
         <EuiEmptyPrompt
           data-test-subj="nightshiftEmptyState"
