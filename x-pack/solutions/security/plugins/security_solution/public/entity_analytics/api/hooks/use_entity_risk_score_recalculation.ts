@@ -6,12 +6,14 @@
  */
 
 import { useCallback } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../common/types';
 import { useEntityRiskScores, type EntityRiskScoresState } from './use_entity_risk_scores';
 import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
 import { useRefetchQueryById } from './use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
+import { RESOLUTION_GROUP_QUERY_KEY } from '../../components/entity_resolution/hooks/use_resolution_group';
 
 interface UseEntityRiskScoreRecalculationParams<T extends EntityType> {
   entityType: T;
@@ -51,6 +53,7 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
 }: UseEntityRiskScoreRecalculationParams<T>): UseEntityRiskScoreRecalculationResult<T> => {
   const entityRiskScores = useEntityRiskScores(entityType, entityId);
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
+  const queryClient = useQueryClient();
 
   const onRiskScoreUpdated = useCallback(() => {
     if (entityStoreV2Enabled) {
@@ -60,6 +63,7 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
     }
     entityRiskScores.refetch();
     (refetchRiskInputsTab as Refetch | null)?.();
+    queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
     onRecalculation?.();
   }, [
     entityStoreV2Enabled,
@@ -67,6 +71,7 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
     riskScoreState,
     entityRiskScores,
     refetchRiskInputsTab,
+    queryClient,
     onRecalculation,
   ]);
 
