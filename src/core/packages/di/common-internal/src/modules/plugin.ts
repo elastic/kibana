@@ -18,6 +18,11 @@ import {
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
+// Cross-plugin marker symbols. The `Symbol.for(...)` string key is a stable,
+// well-known protocol: other packages (e.g. `@kbn/plugin-di`) re-create the same
+// key via the global symbol registry rather than importing these bindings, so
+// they participate without a hard dependency on `@kbn/core-di` internals. Keep
+// the keys stable.
 export const ProvidedService = Symbol.for(
   'ProvidedService'
 ) as ServiceIdentifier<ServiceIdentifier>;
