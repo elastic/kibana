@@ -226,9 +226,7 @@ export const triggerMaintainerRun = async (
   { maxRetries = 5, retryDelayMs = 2000, sync = false } = {}
 ) => {
   // Use `sync: true` in tests that need a settled watermark before proceeding.
-  const runUrl = sync
-    ? `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId)}?sync=true`
-    : ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId);
+  const runUrl = `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId)}?sync=${sync}`
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const response = await apiClient.post(runUrl, {
