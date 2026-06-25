@@ -57,9 +57,11 @@ export const registerSkills = async ({
   );
 
   agentBuilder.skills.register(getDetectionRuleEditSkill());
-  await agentBuilder.skills.register(
-    createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
-  );
+  if (experimentalFeatures.dexAiSkillOnboardPrebuiltRules) {
+    await agentBuilder.skills.register(
+      createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
+    );
+  }
 
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
