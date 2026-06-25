@@ -24,9 +24,7 @@ export const WAIT_FOR_APPROVAL_RESPONSE_SCHEMA = {
   required: ['approved'],
 } as const satisfies JsonModelSchemaType;
 
-export const WAIT_FOR_APPROVAL_STEP_TYPES = ['waitForInput', 'waitForApproval'] as const;
-
-export type HitlWaitStepType = (typeof WAIT_FOR_APPROVAL_STEP_TYPES)[number];
+export type HitlWaitStepType = 'waitForInput' | 'waitForApproval';
 
 /** Maps `with.channels` keys to Kibana connector action types for connector-id autocomplete/validation. */
 export const WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES = {

@@ -33,10 +33,9 @@ export class ExternalResumeApiKeyMetadataError extends Error {
 }
 
 export function getAuthenticatedExternalResumeApiKeyId(
-  authentication: ApiKeyAuthenticateResponse,
-  encodedApiKey: string
+  authentication: ApiKeyAuthenticateResponse
 ): string | undefined {
-  return authentication.api_key?.id ?? decodeApiKeyId(encodedApiKey);
+  return authentication.api_key?.id;
 }
 
 export function parseExternalResumeApiKeyMetadata(metadata: unknown): ExternalResumeApiKeyMetadata {
@@ -86,14 +85,4 @@ export async function loadExternalResumeApiKeyMetadata(
   }
 
   return parseExternalResumeApiKeyMetadata(apiKey.metadata);
-}
-
-function decodeApiKeyId(encodedApiKey: string): string | undefined {
-  try {
-    const decoded = Buffer.from(encodedApiKey, 'base64').toString('utf8');
-    const [id] = decoded.split(':');
-    return id || undefined;
-  } catch {
-    return undefined;
-  }
 }

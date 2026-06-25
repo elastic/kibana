@@ -48,7 +48,7 @@ export async function resumeWorkflowExecutionExternally(
     throw new ExternalResumeError('Invalid external resume API key', 401);
   }
 
-  const authenticatedApiKeyId = getAuthenticatedExternalResumeApiKeyId(authentication, apiKey);
+  const authenticatedApiKeyId = getAuthenticatedExternalResumeApiKeyId(authentication);
   if (!authenticatedApiKeyId) {
     throw new ExternalResumeError('Invalid external resume API key', 401);
   }
