@@ -57,7 +57,7 @@ describe('Telemetry Schema Checks', () => {
      * setting description instead. When you remove an entry from the list below, decrement
      * `EXPECTED_COUNT`. The goal is for both this count and the list to reach zero.
      */
-    const EXPECTED_COUNT = 150;
+    const EXPECTED_COUNT = 151;
 
     expect(keysWithNonDefaultDescriptions).toHaveLength(EXPECTED_COUNT);
     expect(keysWithNonDefaultDescriptions).toEqual([
@@ -144,6 +144,7 @@ describe('Telemetry Schema Checks', () => {
       'observability:aiAssistantSimulatedFunctionCalling',
       'observability:apmAWSLambdaPriceFactor',
       'observability:apmAWSLambdaRequestCostPerMillion',
+      'observability:apmEnableRollupFallback',
       'observability:apmEnableServiceInventoryTableSearchBar',
       'observability:apmEnableTableSearchBar',
       'observability:apmEnableTransactionProfiling',
