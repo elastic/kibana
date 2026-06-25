@@ -16,7 +16,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
-  readonly stepType: 'foreach';
+  /** The original step type (e.g. `'foreach'`, `'while'`). */
+  readonly stepType: string;
   /** Optional execution status threaded through from the canvas. */
   readonly stepExecution?: WorkflowStepExecutionDto;
 }

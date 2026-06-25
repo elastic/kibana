@@ -296,6 +296,94 @@ describe('dagLayout — compact mode', () => {
   });
 });
 
+// ─── align_cross_axis — uncovered branches ─────────────────────────────────────
+
+describe('dagLayout — handleMultipleChildren with siblingsWithSharedChildren.length > 1', () => {
+  // Topology (TB):
+  //         root
+  //        /    \
+  //       a      b
+  //      / \    / \
+  //     c1  c2 c1  c2  ← a and b are siblings that BOTH fan into c1 and c2
+  //
+  // When the barycenter pass processes 'a', it has multiple children [c1, c2] AND
+  // sibling 'b' shares those same children. This triggers the spacing formula in
+  // handleMultipleChildren (siblingsWithSharedChildren.length > 1).
+  // After layout, 'a' and 'b' must be horizontally separated and neither should
+  // overlap 'c1' or 'c2'.
+  it('sibling nodes that share multiple children do not overlap each other or their children', () => {
+    const nodes = [node('root'), node('a'), node('b'), node('c1'), node('c2')];
+    const edges = [
+      edge('r-a', 'root', 'a'),
+      edge('r-b', 'root', 'b'),
+      edge('a-c1', 'a', 'c1'),
+      edge('a-c2', 'a', 'c2'),
+      edge('b-c1', 'b', 'c1'),
+      edge('b-c2', 'b', 'c2'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edges, [], { direction: 'TB' });
+
+    // All pairs must be non-overlapping.
+    for (let i = 0; i < laid.length; i++) {
+      for (let j = i + 1; j < laid.length; j++) {
+        const na = laid[i];
+        const nb = laid[j];
+        const overlapX = na.x < nb.x + nb.width && na.x + na.width > nb.x;
+        const overlapY = na.y < nb.y + nb.height && na.y + na.height > nb.y;
+        expect(overlapX && overlapY).toBe(false);
+      }
+    }
+
+    // Siblings 'a' and 'b' must be horizontally separated (they are on the same rank).
+    const aNode = findNode(laid, 'a');
+    const bNode = findNode(laid, 'b');
+    expect(Math.abs(centerX(aNode) - centerX(bNode))).toBeGreaterThan(NODE_W / 2);
+  });
+});
+
+describe('dagLayout — compound inner-node overlap invariant', () => {
+  // The existing overlap tests run with compoundGroups = []. This test verifies
+  // inner nodes inside a group container also remain non-overlapping after the
+  // absolute-position translation (getGroupAbsolutePosition).
+  it('inner nodes of a compound group do not overlap each other', () => {
+    const outerNodes = [node('trigger'), node('group'), node('end')];
+    const outerEdges = [edge('t-g', 'trigger', 'group'), edge('g-e', 'group', 'end')];
+    // Diamond topology inside the group to exercise the barycenter pass on inner nodes.
+    const innerNodes = [node('fork'), node('branch-a'), node('branch-b'), node('join')];
+    const innerEdges = [
+      edge('f-a', 'fork', 'branch-a'),
+      edge('f-b', 'fork', 'branch-b'),
+      edge('a-j', 'branch-a', 'join'),
+      edge('b-j', 'branch-b', 'join'),
+    ];
+    const groups: DagCompoundGroup[] = [{ id: 'group', innerNodes, innerEdges }];
+    const { nodes: laid } = dagLayout(outerNodes, outerEdges, groups, {
+      compoundPadding: { top: 70, right: 32, bottom: 32, left: 32 },
+    });
+
+    const innerLaid = laid.filter((n) => ['fork', 'branch-a', 'branch-b', 'join'].includes(n.id));
+    expect(innerLaid).toHaveLength(4);
+
+    // No two inner nodes should overlap.
+    for (let i = 0; i < innerLaid.length; i++) {
+      for (let j = i + 1; j < innerLaid.length; j++) {
+        const na = innerLaid[i];
+        const nb = innerLaid[j];
+        const overlapX = na.x < nb.x + nb.width && na.x + na.width > nb.x;
+        const overlapY = na.y < nb.y + nb.height && na.y + na.height > nb.y;
+        expect(overlapX && overlapY).toBe(false);
+      }
+    }
+
+    // The join node should be horizontally centered between branch-a and branch-b.
+    const branchA = findNode(laid, 'branch-a');
+    const branchB = findNode(laid, 'branch-b');
+    const join = findNode(laid, 'join');
+    const expectedCenter = (centerX(branchA) + centerX(branchB)) / 2;
+    expect(Math.abs(centerX(join) - expectedCenter)).toBeLessThanOrEqual(CENTER_TOLERANCE);
+  });
+});
+
 // ─── Cycle detection ──────────────────────────────────────────────────────────
 
 describe('dagLayout — cycle detection', () => {

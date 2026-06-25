@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiSwitch,
   EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -33,12 +34,6 @@ interface EditorSettingsPopoverProps {
   hideControlsMenu?: boolean;
   onHideControlsMenuChange?: (next: boolean) => void;
 }
-
-// Figma node 11146:20897.
-const TITLE_COLOR = '#111c2c';
-const DIVIDER_COLOR = '#e3e8f2';
-const SECTION_TITLE_COLOR = '#000000';
-const SWITCH_LABEL_COLOR = '#1d2a3e';
 
 const directionOptions: EuiButtonGroupOptionProps[] = [
   {
@@ -67,6 +62,7 @@ export function EditorSettingsPopover({
   hideControlsMenu = true,
   onHideControlsMenuChange,
 }: EditorSettingsPopoverProps) {
+  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showIndentGuides, setShowIndentGuides] = useState(true);
   const [showWhitespace, setShowWhitespace] = useState(false);
@@ -149,8 +145,8 @@ export function EditorSettingsPopover({
           fontSize: 14,
           fontWeight: 600,
           lineHeight: '20px',
-          color: TITLE_COLOR,
-          borderBottom: `1px solid ${DIVIDER_COLOR}`,
+          color: euiTheme.colors.title,
+          borderBottom: `1px solid ${euiTheme.colors.lightShade}`,
         }}
       >
         {label}
@@ -167,7 +163,7 @@ export function EditorSettingsPopover({
           label={i18n.translate('workflows.yamlEditor.editorSettings.showIndentGuides', {
             defaultMessage: 'Show indent guides',
           })}
-          labelProps={{ style: { color: SWITCH_LABEL_COLOR, fontSize: 14, fontWeight: 400 } }}
+          labelProps={{ style: { color: euiTheme.colors.text, fontSize: 14, fontWeight: 400 } }}
           checked={showIndentGuides}
           onChange={handleIndentGuidesChange}
         />
@@ -176,7 +172,7 @@ export function EditorSettingsPopover({
           label={i18n.translate('workflows.yamlEditor.editorSettings.showWhitespace', {
             defaultMessage: 'Show whitespace characters',
           })}
-          labelProps={{ style: { color: SWITCH_LABEL_COLOR, fontSize: 14, fontWeight: 400 } }}
+          labelProps={{ style: { color: euiTheme.colors.text, fontSize: 14, fontWeight: 400 } }}
           checked={showWhitespace}
           onChange={handleWhitespaceChange}
         />
@@ -214,7 +210,7 @@ export function EditorSettingsPopover({
             label={i18n.translate('workflows.yamlEditor.editorSettings.hideControlsMenu', {
               defaultMessage: 'Hide controls menu',
             })}
-            labelProps={{ style: { color: SWITCH_LABEL_COLOR, fontSize: 14, fontWeight: 400 } }}
+            labelProps={{ style: { color: euiTheme.colors.text, fontSize: 14, fontWeight: 400 } }}
             checked={hideControlsMenu}
             onChange={(e) => onHideControlsMenuChange(e.target.checked)}
             data-test-subj="workflowHideControlsMenuSwitch"
@@ -234,6 +230,7 @@ function Section({
   topBorder?: boolean;
   children: React.ReactNode;
 }) {
+  const { euiTheme } = useEuiTheme();
   return (
     <div
       css={{
@@ -241,7 +238,7 @@ function Section({
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
-        borderTop: topBorder ? `1px solid ${DIVIDER_COLOR}` : undefined,
+        borderTop: topBorder ? `1px solid ${euiTheme.colors.lightShade}` : undefined,
       }}
     >
       <div
@@ -249,7 +246,7 @@ function Section({
           fontSize: 12,
           fontWeight: 600,
           lineHeight: '16px',
-          color: SECTION_TITLE_COLOR,
+          color: euiTheme.colors.title,
         }}
       >
         {title}

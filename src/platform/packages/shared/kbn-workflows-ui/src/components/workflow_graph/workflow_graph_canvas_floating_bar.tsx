@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useReactFlow, useStore } from '@xyflow/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -32,8 +39,7 @@ export function WorkflowGraphCanvasFloatingBar({
 }: WorkflowGraphCanvasFloatingBarProps) {
   const { euiTheme } = useEuiTheme();
   const { zoomIn, zoomOut, getViewport, setViewport } = useReactFlow();
-  const zoom = useStore((s) => s.transform[2]);
-  const isZoomed = Math.abs(zoom - 1) > ZOOM_RESET_EPS;
+  const isZoomed = useStore((s) => Math.abs(s.transform[2] - 1) > ZOOM_RESET_EPS);
 
   const [isExpanded, setIsExpanded] = useState(true);
   const isInitialPhaseRef = useRef(true);
@@ -227,7 +233,13 @@ export function WorkflowGraphCanvasFloatingBar({
           }
         }}
       >
-        <EuiIcon type="boxesVertical" size="s" color={euiTheme.colors.emptyShade} css={{ transform: 'rotate(90deg)' }} aria-hidden />
+        <EuiIcon
+          type="boxesVertical"
+          size="s"
+          color={euiTheme.colors.emptyShade}
+          css={{ transform: 'rotate(90deg)' }}
+          aria-hidden
+        />
       </div>
     </>
   );

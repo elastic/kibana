@@ -23,6 +23,7 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
@@ -178,6 +179,8 @@ describe('WorkflowDetailEditor', () => {
       if (key === 'workflows:ui:executionGraph:enabled') return [false];
       return [defaultValue];
     });
+    // Reset to the default (disabled) after each test that may have overridden it.
+    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
 
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
@@ -298,11 +301,10 @@ describe('WorkflowDetailEditor', () => {
     it('highlights trigger sentinel when cursor is inside triggers block', async () => {
       const store = mockStore();
 
-      mockUseUiSetting$.mockImplementation((key: string, defaultValue: boolean) => {
-        if (key === 'workflows:ui:visualEditor:enabled') return [true];
-        if (key === 'workflows:ui:executionGraph:enabled') return [false];
-        return [defaultValue];
-      });
+      // Enable the visual editor so handleEditorViewChange runs the graph-focus logic.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+        (settingId: string) => settingId === 'workflows:ui:visualEditor:enabled'
+      );
 
       const wrapper = ({ children }: { children: React.ReactNode }) => {
         return <TestWrapper store={store}>{children}</TestWrapper>;

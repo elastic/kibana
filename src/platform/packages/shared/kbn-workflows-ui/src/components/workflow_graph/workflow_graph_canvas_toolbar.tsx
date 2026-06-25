@@ -33,8 +33,7 @@ export function WorkflowGraphCanvasToolbar({
 }: WorkflowGraphCanvasToolbarProps) {
   const { euiTheme } = useEuiTheme();
   const { zoomIn, zoomOut, getViewport, setViewport } = useReactFlow();
-  const zoom = useStore((s) => s.transform[2]);
-  const isZoomed = Math.abs(zoom - 1) > ZOOM_RESET_EPS;
+  const isZoomed = useStore((s) => Math.abs(s.transform[2] - 1) > ZOOM_RESET_EPS);
 
   const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
   const handleZoomOut = useCallback(() => zoomOut({ duration: 200 }), [zoomOut]);

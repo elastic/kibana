@@ -196,6 +196,12 @@ export interface WorkflowYAMLEditorProps {
    * and graph views from the keyboard-driven palette.
    */
   onToggleEditorMode?: () => void;
+  /**
+   * When true, suppresses the extra-actions toolbar in the validation accordion
+   * (keyboard shortcuts, settings, docs, actions menu). Use when an external
+   * control bar (e.g. WorkflowDetailBottomBar) already owns those buttons.
+   */
+  hideEditorTools?: boolean;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -206,8 +212,12 @@ export const WorkflowYAMLEditor = ({
   bodyOverride,
   openActionsRef,
   onToggleEditorMode,
+  hideEditorTools = false,
 }: WorkflowYAMLEditorProps) => {
-  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID, false);
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+    false
+  );
   const { notifications, http } = useKibana().services;
   const euiThemeContext = useEuiTheme();
 
@@ -615,23 +625,34 @@ export const WorkflowYAMLEditor = ({
     return () => disposable?.dispose();
   }, [isEditorMounted, dispatch]);
 
-  // Scroll editor to highlighted step when selected from execution flyout.
-  // workflowLookup is a dependency because the line numbers may shift, but in
-  // practice this only fires in execution mode where the editor is read-only,
-  // so re-scrolling on lookup changes is harmless.
+  // Scroll the editor to the highlighted step whenever:
+  //   • highlightedStepId changes (new step selected from the graph flyout), OR
+  //   • hideEditorBody transitions true→false (YAML view becomes visible, e.g.
+  //     "Open in YAML editor" clicked for the same step that was already
+  //     highlighted — Redux deduplicates the dispatch, so only the hideEditorBody
+  //     change triggers the re-run in that case).
+  // workflowLookup is intentionally read via ref to avoid re-running on every
+  // keystroke while a step is highlighted.
   useEffect(() => {
-    if (!isEditorMounted || !highlightedStepId || !workflowLookup) {
+    if (!highlightedStepId || !isEditorMounted || hideEditorBody) {
+      return;
+    }
+    const currentWorkflowLookup = workflowLookupRef.current;
+    if (!currentWorkflowLookup) {
       return;
     }
     const lineStart =
       highlightedStepId === HIGHLIGHTED_STEP_TRIGGER
-        ? workflowLookup.triggersLineStart
-        : workflowLookup.steps[highlightedStepId]?.lineStart;
+        ? currentWorkflowLookup.triggersLineStart
+        : currentWorkflowLookup.steps[highlightedStepId]?.lineStart;
     if (lineStart != null) {
       editorRef.current?.revealLineInCenter(lineStart);
-      editorRef.current?.setPosition({ lineNumber: lineStart, column: 1 });
+      // Update focusedStepId so the decoration (bordered highlight box) renders
+      // on the target step. We dispatch directly rather than calling Monaco's
+      // setPosition to avoid the cursor-hijack issue (M7).
+      dispatch(setCursorPosition({ lineNumber: lineStart, column: 1 }));
     }
-  }, [isEditorMounted, highlightedStepId, workflowLookup]);
+  }, [dispatch, isEditorMounted, highlightedStepId, hideEditorBody]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
@@ -850,7 +871,6 @@ export const WorkflowYAMLEditor = ({
     [extraActions, isReadOnlyYaml]
   );
 
-
   const actionsMenuPanelProps = useMemo(() => {
     return {
       Button: <EuiButton iconType="plusCircle" css={styles.hiddenButtonCss} />,
@@ -974,7 +994,7 @@ export const WorkflowYAMLEditor = ({
             error={errorValidating}
             validationErrors={validationErrors}
             onErrorClick={handleErrorClick}
-            extraAction={extraActionElement}
+            extraAction={hideEditorTools ? undefined : extraActionElement}
           />
         </div>
       )}

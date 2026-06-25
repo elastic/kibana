@@ -19,15 +19,9 @@ import type {
   PreLayoutTriggerNode,
   Step,
 } from './types';
-import { DEFAULT_NODE_STYLE } from './types';
-import type {
-  ForEachStep,
-  IfStep,
-  MergeStep,
-  ParallelStep,
-  SwitchStep,
-  WorkflowYaml,
-} from '../spec/schema';
+import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE } from './types';
+import { visitStepChildren } from './walk_step_tree';
+import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
 
 const TRIGGER_LABEL: Record<string, string> = {
   manual: 'Manual',
@@ -152,25 +146,32 @@ function transformInternal(
     // foreachGroup container IS that step, just rendered differently.
     nodeRefs[id] = { kind: 'step', stepName: step.name };
 
-    // Every foreach with a `steps` body renders as a group container, at any
-    // nesting depth. The container is a self-contained "folder": one edge in
-    // (from the previous outer step), one edge out (to the next outer step),
-    // and inner steps only connect to each other.
-    const isForeachGroup = step.type === 'foreach';
+    // Container step types (foreach, while) render as a group container node,
+    // at any nesting depth. The container is a self-contained "folder": one
+    // edge in (from the previous outer step), one edge out (to the next outer
+    // step), and inner steps only connect to each other.
+    // CONTAINER_STEP_TYPES is the single source of truth for this set — kept
+    // in sync with visitStepChildren so the topology fingerprint and the
+    // transform always agree on which steps have inner children.
+    const isContainerGroup = CONTAINER_STEP_TYPES.has(step.type);
 
-    if (isForeachGroup) {
-      const foreachStep = step as ForEachStep;
+    if (isContainerGroup) {
       // Render the container as a `foreachGroup` node (full-width header +
       // body). The regular step node would overlap with the inner children.
       const groupNode: PreLayoutForeachGroupNode = {
         id,
         type: 'foreachGroup',
-        data: { label: step.name, stepType: 'foreach', step },
+        data: { label: step.name, stepType: step.type, step },
         style: { ...DEFAULT_NODE_STYLE },
       };
       nodes.push(groupNode);
 
-      const childSteps = (foreachStep.steps as Step[]) ?? [];
+      // Use visitStepChildren (the same enumerator as the topology fingerprint)
+      // to extract the inner steps — keeps both traversals in sync.
+      let childSteps: Step[] = [];
+      visitStepChildren(step, (children) => {
+        childSteps = children;
+      });
       const inner = transformInternal([], childSteps, ids);
       Object.assign(nodeRefs, inner.nodeRefs);
       bypassLaneNodes.push(...inner.bypassLaneNodes);
@@ -182,7 +183,7 @@ function transformInternal(
       });
       foreachGroups.push(...inner.foreachGroups);
 
-      // The foreach group is a self-contained "folder": one edge in (from the
+      // The group is a self-contained "folder": one edge in (from the
       // previous sibling to the group itself), one edge out (the next sibling
       // joins from the group's id via `exitIds = [id]` below), and the inner
       // steps only connect to each other. Deliberately NOT adding an edge

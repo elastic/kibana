@@ -93,6 +93,59 @@ describe('transformWorkflowToGraph', () => {
     expect(r.foreachGroups[0].innerNodes[0].data.label).toBe('inner');
   });
 
+  it('promotes a while step to a group container like foreach', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'poll',
+            type: 'while',
+            condition: '{{ count < 10 }}',
+            steps: [{ name: 'inner-check', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    // The while group should appear in foreachGroups (shared container path).
+    expect(r.foreachGroups).toHaveLength(1);
+    expect(r.foreachGroups[0].id).toBe('poll');
+    // Inner step lives inside the group, not in the top-level nodes.
+    expect(r.foreachGroups[0].innerNodes).toHaveLength(1);
+    expect(r.foreachGroups[0].innerNodes[0].data.label).toBe('inner-check');
+    // No outer edge from the group to its inner step.
+    expect(r.edges.filter((e) => e.source === 'poll')).toHaveLength(0);
+    // The group node carries the real stepType so the UI can pick the right icon.
+    const groupNode = r.nodes.find((n) => n.id === 'poll');
+    expect(groupNode?.data.stepType).toBe('while');
+  });
+
+  it('topology fingerprint changes when a while inner step is added', () => {
+    const base = minimal({
+      steps: [
+        {
+          name: 'poll',
+          type: 'while',
+          condition: '{{ count < 10 }}',
+          steps: [{ name: 'inner-check', type: 'http' }],
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    const withExtra = minimal({
+      steps: [
+        {
+          name: 'poll',
+          type: 'while',
+          condition: '{{ count < 10 }}',
+          steps: [
+            { name: 'inner-check', type: 'http' },
+            { name: 'inner-log', type: 'console' },
+          ],
+        },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    expect(computeTopologyFingerprint(base)).not.toBe(computeTopologyFingerprint(withExtra));
+  });
+
   it('connects branch leaves to the step that follows an if', () => {
     const r = transformWorkflowToGraph(
       minimal({

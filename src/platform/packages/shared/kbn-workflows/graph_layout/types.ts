@@ -18,8 +18,20 @@ export const FLOW_CONTROL_STEP_TYPES: ReadonlySet<string> = new Set([
   'merge',
   'parallel',
   'foreach',
+  'while',
   'atomic',
 ]);
+
+/**
+ * Step types that render as a group container node (one-in/one-out "folder"
+ * with inner steps rendered inside). This is the single source of truth
+ * consumed by both the transform and any code that needs to enumerate
+ * child-bearing container types — keeps it in sync with `visitStepChildren`.
+ *
+ * `atomic` is intentionally excluded: it is an internal implementation detail
+ * never exposed in user-authored workflows.
+ */
+export const CONTAINER_STEP_TYPES: ReadonlySet<string> = new Set(['foreach', 'while']);
 
 export const TRIGGER_STEP_TYPES: ReadonlySet<string> = new Set([
   'manual',
@@ -57,7 +69,8 @@ export interface TriggerNodeData extends Record<string, unknown> {
 
 export interface ForeachGroupNodeData extends Record<string, unknown> {
   label: string;
-  stepType: 'foreach';
+  /** The original step type (e.g. `'foreach'`, `'while'`). */
+  stepType: string;
   step: Step;
 }
 
@@ -73,7 +86,6 @@ export interface PreLayoutForeachGroupNode extends PreLayoutNodeBase {
   type: 'foreachGroup';
   data: ForeachGroupNodeData;
 }
-
 
 export type PreLayoutNode = PreLayoutStepNode | PreLayoutTriggerNode | PreLayoutForeachGroupNode;
 

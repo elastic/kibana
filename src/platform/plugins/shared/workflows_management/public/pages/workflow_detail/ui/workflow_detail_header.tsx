@@ -30,7 +30,9 @@ import { useParams } from 'react-router-dom';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { PLUGIN_ID } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -49,6 +51,7 @@ import {
   useWorkflowUrlState,
   type WorkflowUrlStateTabType,
 } from '../../../hooks/use_workflow_url_state';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import {
   getSaveWorkflowTooltipContent,
   getTestRunTooltipContent,
@@ -63,8 +66,6 @@ const executionsTabReadExecutionDisabledTooltip = i18n.translate(
       'You need the Workflows "Read Workflow Execution" privilege to view workflow executions.',
   }
 );
-
-export const SkipUnsavedRunConfirmationStorageKey = 'workflows:skipUnsavedRunConfirmation';
 
 const Translations = {
   runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
@@ -239,9 +240,13 @@ export const WorkflowDetailHeader = React.memo(
       hasUnsavedChanges,
     });
 
-    const handleRunClick = useCallback(() => {
-      openTestModal();
-    }, [openTestModal]);
+    const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+      WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID
+    );
+
+    const runDisabled = isExecutionsTab || !canExecuteWorkflow || !isSyntaxValid || isSaving;
+
+    const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
 
     return (
       <>
@@ -361,6 +366,20 @@ export const WorkflowDetailHeader = React.memo(
                   />
                 </EuiToolTip>
                 <EuiFlexItem grow={false} css={styles.separator} />
+                {!isVisualEditorEnabled && (
+                  <EuiToolTip content={runWorkflowTooltipContent}>
+                    <EuiButton
+                      color="success"
+                      iconType="play"
+                      size="s"
+                      onClick={handleRunClick}
+                      isDisabled={runDisabled}
+                      data-test-subj="runWorkflowHeaderButton"
+                    >
+                      {Translations.runWorkflow}
+                    </EuiButton>
+                  </EuiToolTip>
+                )}
                 <EuiToolTip content={saveWorkflowTooltipContent}>
                   <EuiButton
                     fill
@@ -382,6 +401,7 @@ export const WorkflowDetailHeader = React.memo(
             </EuiPageHeaderSection>
           </EuiPageTemplate.Header>
         </EuiPageTemplate>
+        {runConfirmationModal}
       </>
     );
   }

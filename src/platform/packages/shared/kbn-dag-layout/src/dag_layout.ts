@@ -126,11 +126,14 @@ export function dagLayout(
     { layoutedInnerNodes: DagPositionedNode[]; innerEdges: DagPositionedEdge[] }
   >();
 
+  // Index input nodes by id for O(1) lookups in the group-layout loop.
+  const inputNodeById = new Map(nodes.map((n) => [n.id, n]));
+
   for (const group of sortedGroups) {
     if (compact) {
       // In compact mode use the caller-provided dimensions as-is and skip
       // inner layout. Inner nodes are not included in the output.
-      const containerNode = nodes.find((n) => n.id === group.id);
+      const containerNode = inputNodeById.get(group.id);
       if (containerNode) {
         groupSizing.set(group.id, { width: containerNode.width, height: containerNode.height });
       }
@@ -181,19 +184,30 @@ export function dagLayout(
 
   const outerLayout = applyDagre(outerNodes, edges, direction, nodeSep, rankSep);
 
+  // Index outer nodes by id once so lookups below are O(1) instead of O(n).
+  const outerNodeById = new Map(outerLayout.nodes.map((n) => [n.id, n]));
+
+  // Memoize absolute positions to avoid O(M²) re-computation for nested groups.
+  const absPositionCache = new Map<string, { x: number; y: number }>();
   const getGroupAbsolutePosition = (groupId: string): { x: number; y: number } => {
-    const outerNode = outerLayout.nodes.find((n) => n.id === groupId);
+    const cached = absPositionCache.get(groupId);
+    if (cached) return cached;
+    const outerNode = outerNodeById.get(groupId);
     if (outerNode) {
-      return { x: outerNode.x, y: outerNode.y };
+      const pos = { x: outerNode.x, y: outerNode.y };
+      absPositionCache.set(groupId, pos);
+      return pos;
     }
     for (const [parentGroupId, inner] of groupInnerById) {
       const childInParent = inner.layoutedInnerNodes.find((n) => n.id === groupId);
       if (childInParent) {
         const parentAbs = getGroupAbsolutePosition(parentGroupId);
-        return {
+        const pos = {
           x: parentAbs.x + childInParent.x,
           y: parentAbs.y + childInParent.y,
         };
+        absPositionCache.set(groupId, pos);
+        return pos;
       }
     }
     return { x: 0, y: 0 };

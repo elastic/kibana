@@ -87,8 +87,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
-  const { selectedStepId, setSelectedStep, setEditorView, setGraphDirection } =
-    useWorkflowUrlState();
+  const { selectedStepId, setSelectedStep, setEditorView } = useWorkflowUrlState();
   const dispatch = useDispatch();
   const flyoutPanelRef = useRef<HTMLDivElement | null>(null);
 

@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
@@ -19,13 +20,6 @@ import { isMac } from '@kbn/shared-ux-utility';
 import { useWorkflowBottomBarState } from '@kbn/workflows-ui';
 
 const COMMAND_KEY = isMac ? '⌘' : 'Ctrl';
-
-// Figma key-cell + popover styling (node 11146:20897).
-const KEY_CELL_BORDER = '#cad3e2';
-const KEY_CELL_TEXT = '#798eaf';
-const TITLE_COLOR = '#111c2c';
-const DIVIDER_COLOR = '#e3e8f2';
-const ROW_LABEL_COLOR = '#000000';
 
 const shortcuts: Array<{ label: string; keys: string[] }> = [
   {
@@ -70,6 +64,7 @@ const PANEL_CLASS = 'workflowKeyboardShortcutsPopoverPanel';
 const BUTTON_TEST_SUBJ = 'workflowYamlEditorKeyboardShortcutsButton';
 
 export function KeyboardShortcutsPopover() {
+  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
 
@@ -133,8 +128,8 @@ export function KeyboardShortcutsPopover() {
           fontSize: 14,
           fontWeight: 600,
           lineHeight: '20px',
-          color: TITLE_COLOR,
-          borderBottom: `1px solid ${DIVIDER_COLOR}`,
+          color: euiTheme.colors.title,
+          borderBottom: `1px solid ${euiTheme.colors.lightShade}`,
         }}
       >
         {label}
@@ -157,7 +152,7 @@ export function KeyboardShortcutsPopover() {
                 fontSize: 12,
                 fontWeight: 400,
                 lineHeight: '24px',
-                color: ROW_LABEL_COLOR,
+                color: euiTheme.colors.text,
               }}
             >
               {shortcutLabel}
@@ -174,14 +169,14 @@ export function KeyboardShortcutsPopover() {
                     height: 16,
                     paddingInline: 6,
                     paddingBlock: 3,
-                    background: '#ffffff',
-                    border: `1px solid ${KEY_CELL_BORDER}`,
+                    background: euiTheme.colors.emptyShade,
+                    border: `1px solid ${euiTheme.colors.mediumShade}`,
                     borderRadius: 3,
                     fontFamily: 'inherit',
                     fontSize: 10,
                     fontWeight: 500,
                     lineHeight: 1,
-                    color: KEY_CELL_TEXT,
+                    color: euiTheme.colors.subduedText,
                   }}
                 >
                   {key}

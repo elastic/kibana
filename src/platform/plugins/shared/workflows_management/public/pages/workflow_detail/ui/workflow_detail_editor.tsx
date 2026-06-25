@@ -11,8 +11,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCheckbox,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -24,7 +22,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
 import {
@@ -37,13 +34,12 @@ import {
   WorkflowDetailBottomBar,
 } from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
+import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
-import { SkipUnsavedRunConfirmationStorageKey } from './workflow_detail_header';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import {
   selectEditorWorkflowLookup,
-  selectHasChanges,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSyntaxValid,
@@ -59,10 +55,10 @@ import {
 import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { getTestRunTooltipContent } from '../../../shared/ui';
 import { EditorSettingsPopover } from '../../../widgets/workflow_yaml_editor/ui/editor_settings_popover';
 import { KeyboardShortcutsPopover } from '../../../widgets/workflow_yaml_editor/ui/keyboard_shortcuts_popover';
-import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -117,7 +113,6 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowId = useSelector(selectWorkflowId);
-  const hasUnsavedChanges = useSelector(selectHasChanges);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
   const isSaving = useSelector(selectIsSavingYaml);
@@ -186,7 +181,6 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID
   );
 
-
   const { editorView, setEditorView, graphDirection, setGraphDirection } = useWorkflowUrlState();
   const showGraph = isVisualEditorEnabled && editorView === 'graph';
 
@@ -237,32 +231,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     dispatch(setIsTestModalOpen(true));
   }, [dispatch]);
 
-  const [showRunConfirmation, setShowRunConfirmation] = useState(false);
-  const [dontAskAgain, setDontAskAgain] = useState(false);
-
-  const handleRunClickWithUnsavedCheck = useCallback(() => {
-    const shouldSkipUnsavedRunConfirmation =
-      localStorage.getItem(SkipUnsavedRunConfirmationStorageKey) === 'true';
-    if (hasUnsavedChanges && !shouldSkipUnsavedRunConfirmation) {
-      setDontAskAgain(false);
-      setShowRunConfirmation(true);
-    } else {
-      openTestModal();
-    }
-  }, [hasUnsavedChanges, openTestModal]);
-
-  const handleConfirmRun = useCallback(() => {
-    if (dontAskAgain) {
-      localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
-    }
-    setShowRunConfirmation(false);
-    openTestModal();
-  }, [dontAskAgain, openTestModal]);
-
-  const handleCancelRun = useCallback(() => {
-    setDontAskAgain(false);
-    setShowRunConfirmation(false);
-  }, []);
+  const { handleRunClick: handleRunClickWithUnsavedCheck, runConfirmationModal } =
+    useRunWorkflowWithConfirmation(openTestModal);
 
   const runWorkflowTooltipContent = useMemo(
     () =>
@@ -287,7 +257,9 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         isDisabled={runDisabled}
         data-test-subj="workflowBottomBarRunButton"
       >
-        {i18n.translate('workflows.workflowDetailEditor.runWorkflow', { defaultMessage: 'Run workflow' })}
+        {i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
+          defaultMessage: 'Run workflow',
+        })}
       </EuiButton>
     </EuiToolTip>
   );
@@ -394,6 +366,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               onStepRun={handleStepRun}
               editorRef={editorRef}
               hideEditorBody={showGraph}
+              hideEditorTools={isVisualEditorEnabled}
               openActionsRef={openActionsRef}
               onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
               bodyOverride={
@@ -410,16 +383,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               }
             />
           </React.Suspense>
-          <WorkflowDetailBottomBar
-            editorView={editorView}
-            onEditorViewChange={handleEditorViewChange}
-            yamlActionsSlot={yamlActionsSlot}
-            toolsSlot={toolsSlot}
-            testWorkflowButton={testWorkflowButton}
-            testWorkflowButtonCompact={testWorkflowButtonCompact}
-            disableAutoCollapse={!hideControlsMenu}
-            showViewToggle={isVisualEditorEnabled}
-          />
+          {isVisualEditorEnabled && (
+            <WorkflowDetailBottomBar
+              editorView={editorView}
+              onEditorViewChange={handleEditorViewChange}
+              yamlActionsSlot={yamlActionsSlot}
+              toolsSlot={toolsSlot}
+              testWorkflowButton={testWorkflowButton}
+              testWorkflowButtonCompact={testWorkflowButtonCompact}
+              disableAutoCollapse={!hideControlsMenu}
+            />
+          )}
         </EuiFlexItem>
         {isExecutionGraphEnabled && (
           <EuiFlexItem css={styles.visualEditor}>
@@ -431,43 +405,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       </EuiFlexGroup>
 
       <WorkflowDetailConnectorFlyout editorRef={editorRef} />
-      {showRunConfirmation && (
-        <EuiConfirmModal
-          data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
-          aria-label={i18n.translate('workflows.workflowDetailEditor.runWithUnsavedChangesLabel', {
-            defaultMessage: 'Run workflow with unsaved changes confirmation',
-          })}
-          title={i18n.translate('workflows.workflowDetailEditor.runWithUnsavedChangesQuestion', {
-            defaultMessage: 'Run workflow with unsaved changes?',
-          })}
-          onCancel={handleCancelRun}
-          onConfirm={handleConfirmRun}
-          cancelButtonText={i18n.translate('workflows.workflowDetailEditor.runWorkflowCancel', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
-            defaultMessage: 'Run workflow',
-          })}
-          buttonColor="success"
-          defaultFocusedButton="confirm"
-        >
-          <p>
-            <FormattedMessage
-              id="workflows.workflowDetailEditor.runWithUnsavedChanges.message"
-              defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
-            />
-          </p>
-          <EuiCheckbox
-            id="workflowsRunWithUnsavedChangesDontAskAgain"
-            data-test-subj="runWorkflowWithUnsavedChangesDontAskAgain"
-            label={i18n.translate('workflows.workflowDetailEditor.dontAskAgain', {
-              defaultMessage: "Don't ask again",
-            })}
-            checked={dontAskAgain}
-            onChange={(event) => setDontAskAgain(event.target.checked)}
-          />
-        </EuiConfirmModal>
-      )}
+      {runConfirmationModal}
     </ReactFlowProvider>
   );
 });
