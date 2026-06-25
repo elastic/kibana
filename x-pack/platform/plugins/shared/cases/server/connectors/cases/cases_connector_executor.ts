@@ -751,6 +751,7 @@ export class CasesConnectorExecutor {
         this.casesClient,
         params.templateId,
         params.templateVersion,
+        params.owner,
         this.logger
       );
     } else {
@@ -1167,6 +1168,7 @@ export class CasesConnectorExecutor {
         this.casesClient,
         params.templateId,
         params.templateVersion,
+        params.owner,
         this.logger
       );
     } else {

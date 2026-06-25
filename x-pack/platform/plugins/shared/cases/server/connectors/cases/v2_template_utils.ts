@@ -30,32 +30,15 @@ export const parseTemplateDefinition = (
 };
 
 /**
- * Merge parent and child template definitions (single-level inheritance).
- * Child scalar metadata (name, description, tags, severity, category) takes precedence.
- * fields[] is NOT merged — the connector does not apply extended fields at case-creation time.
- */
-export const mergeV2TemplateDefinitions = (
-  parent: ParsedTemplateDefinition,
-  child: ParsedTemplateDefinition
-): ParsedTemplateDefinition => ({
-  name: child.name,
-  description: child.description ?? parent.description,
-  tags: child.tags ?? parent.tags,
-  severity: child.severity ?? parent.severity,
-  category: child.category ?? parent.category,
-  extends: child.extends,
-  fields: child.fields,
-});
-
-/**
- * Fetch a v2 template by id + version, parse its definition, and resolve a single-level
- * `extends` parent if present. Returns the merged ParsedTemplateDefinition, or null when
- * the template cannot be found or parsed (logs a warning in that case).
+ * Fetch a v2 template by id + version, validate owner, and parse its definition.
+ * Returns the ParsedTemplateDefinition, or null when the template cannot be found,
+ * belongs to a different owner, or has an invalid definition (logs a warning in each case).
  */
 export const resolveV2Template = async (
   casesClient: CasesClient,
   templateId: string,
   templateVersion: string,
+  owner: string,
   logger: Logger
 ): Promise<ParsedTemplateDefinition | null> => {
   const so = await casesClient.templates.getTemplate(templateId, templateVersion, {
@@ -70,8 +53,16 @@ export const resolveV2Template = async (
     return null;
   }
 
-  const childDefinition = parseTemplateDefinition(so.attributes.definition);
-  if (!childDefinition) {
+  if (so.attributes.owner !== owner) {
+    logger.warn(
+      `[CasesConnector][resolveV2Template] Template "${templateId}" belongs to owner "${so.attributes.owner}" but the connector is running for owner "${owner}". Falling back to default case fields.`,
+      { tags: ['case-connector:resolveV2Template'] }
+    );
+    return null;
+  }
+
+  const definition = parseTemplateDefinition(so.attributes.definition);
+  if (!definition) {
     logger.warn(
       `[CasesConnector][resolveV2Template] Template "${templateId}" has an invalid definition. Falling back to default case fields.`,
       { tags: ['case-connector:resolveV2Template'] }
@@ -79,31 +70,5 @@ export const resolveV2Template = async (
     return null;
   }
 
-  if (!childDefinition.extends) {
-    return childDefinition;
-  }
-
-  // Resolve single-level parent
-  const parentSo = await casesClient.templates.getTemplate(childDefinition.extends, undefined, {
-    includeDeleted: false,
-  });
-
-  if (!parentSo) {
-    logger.warn(
-      `[CasesConnector][resolveV2Template] Parent template "${childDefinition.extends}" referenced by "${templateId}" not found. Using child definition only.`,
-      { tags: ['case-connector:resolveV2Template'] }
-    );
-    return childDefinition;
-  }
-
-  const parentDefinition = parseTemplateDefinition(parentSo.attributes.definition);
-  if (!parentDefinition) {
-    logger.warn(
-      `[CasesConnector][resolveV2Template] Parent template "${childDefinition.extends}" has an invalid definition. Using child definition only.`,
-      { tags: ['case-connector:resolveV2Template'] }
-    );
-    return childDefinition;
-  }
-
-  return mergeV2TemplateDefinitions(parentDefinition, childDefinition);
+  return definition;
 };
