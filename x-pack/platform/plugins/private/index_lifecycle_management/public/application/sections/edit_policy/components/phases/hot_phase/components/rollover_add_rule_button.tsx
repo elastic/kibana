@@ -86,18 +86,16 @@ export const RolloverAddRuleButton = <T extends RolloverField>({
               data-test-subj={`rolloverAddField-${field}`}
             >
               <EuiFlexGroup>
-                <EuiFlexItem grow={true}>
-                  {config.menuLabel}
-                </EuiFlexItem>
+                <EuiFlexItem grow={true}>{config.menuLabel}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                {config.deprecationMessage && (
-                  <EuiIconTip
-                    type="warning"
-                    aria-label={config.deprecationMessage}
-                    content={config.deprecationMessage}
-                    disableScreenReaderOutput
-                  />
-                )}
+                  {config.deprecationMessage && (
+                    <EuiIconTip
+                      type="warning"
+                      aria-label={config.deprecationMessage}
+                      content={config.deprecationMessage}
+                      disableScreenReaderOutput
+                    />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiContextMenuItem>
