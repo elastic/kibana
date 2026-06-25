@@ -118,6 +118,20 @@ describe('buildEpisodesQuery', () => {
     });
   });
 
+  it('should sort by severity using numeric severity order', () => {
+    const query = buildEpisodesQuery(SPACE_ID, {
+      sortField: 'severity',
+      sortDirection: 'desc',
+    });
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('EVAL _severity_sort = CASE(');
+    expect(queryString).toContain('severity == "critical", 4');
+    expect(queryString).toContain('severity == "info", 0');
+    expect(queryString).toContain(', -1)');
+    expect(queryString).toContain('SORT _severity_sort DESC');
+  });
+
   it('should filter on effective_status when status filter is set', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,

@@ -16,6 +16,8 @@ import {
   HISTOGRAM_EPISODE_LIMIT,
 } from '../constants';
 import {
+  EPISODE_SEVERITIES,
+  EPISODE_SEVERITY_CHART_VALUE,
   EPISODE_SEVERITY_FILTER_NONE,
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
@@ -108,8 +110,28 @@ const ALLOWLISTED_SORT_FIELDS = new Set([
   'duration',
 ]);
 
+const SEVERITY_SORT_FIELD = '_severity_sort';
+const EPISODE_WITHOUT_SEVERITY_SORT_VALUE = -1;
+
 const sanitizeSortField = (field: string) => {
   return ALLOWLISTED_SORT_FIELDS.has(field) ? field : '@timestamp';
+};
+
+const buildSeveritySortEval = (): string => {
+  const cases = EPISODE_SEVERITIES.map(
+    (severity) => `severity == "${severity}", ${EPISODE_SEVERITY_CHART_VALUE[severity]}`
+  ).join(', ');
+
+  return `EVAL ${SEVERITY_SORT_FIELD} = CASE(${cases}, ${EPISODE_WITHOUT_SEVERITY_SORT_VALUE})`;
+};
+
+const resolveSortField = (query: ComposerQuery, sortField: string): string => {
+  if (sortField === 'severity') {
+    query.pipe(buildSeveritySortEval());
+    return SEVERITY_SORT_FIELD;
+  }
+
+  return sanitizeSortField(sortField);
 };
 
 export const addEpisodeAggregation = (query: ComposerQuery) => {
@@ -249,7 +271,6 @@ export const buildEpisodesQuery = (
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
   filterState?: EpisodesFilterState
 ): ComposerQuery => {
-  const sortField = sanitizeSortField(sortState.sortField);
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
@@ -258,6 +279,8 @@ export const buildEpisodesQuery = (
   if (filterState) {
     applyFilterState(query, filterState);
   }
+
+  const sortField = resolveSortField(query, sortState.sortField);
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS
