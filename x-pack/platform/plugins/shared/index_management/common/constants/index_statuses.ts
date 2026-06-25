@@ -6,6 +6,8 @@
  */
 
 export const INDEX_CLOSED = 'close';
+// The display label used in the UI — the selector maps INDEX_CLOSED → this string.
+export const INDEX_CLOSED_LABEL = 'closed';
 export const INDEX_OPEN = 'open';
 export const INDEX_CLOSING = 'closing';
 export const INDEX_OPENING = 'opening';

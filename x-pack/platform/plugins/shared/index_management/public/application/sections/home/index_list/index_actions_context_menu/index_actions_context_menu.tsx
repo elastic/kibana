@@ -26,6 +26,8 @@ import { EMPTY } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import {
+  INDEX_CLOSED,
+  INDEX_CLOSED_LABEL,
   INDEX_OPEN,
   IndexDetailsSection,
   MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX,
@@ -36,6 +38,9 @@ import { useAppContext } from '../../../../app_context';
 import type { Index } from '../../../../../../common';
 import { type DocCountApi, RequestResultType } from '../index_table/get_doc_count';
 import { ModalHost, type ModalHostHandles } from './modal_host/modal_host';
+
+const isClosedIndexStatus = (indexStatus?: Index['status']) =>
+  indexStatus === INDEX_CLOSED || indexStatus === INDEX_CLOSED_LABEL;
 
 export interface IndexActionsContextMenuProps {
   // either an array of indices selected in the list view or an array of 1 index name on the details panel/page
@@ -149,7 +154,11 @@ export const IndexActionsContextMenu = ({
     if (!isPopoverOpen && indexNames.length === 1 && docCountApi) {
       const indexName = indexNames[0];
       const selectedIndex = indices.find((index) => index.name === indexName);
-      if (selectedIndex?.documents === undefined && !docCountMap?.[indexName]) {
+      if (
+        selectedIndex?.documents === undefined &&
+        !docCountMap?.[indexName] &&
+        !isClosedIndexStatus(indexStatusByName[indexName] ?? selectedIndex?.status)
+      ) {
         docCountApi.getByName(indexName);
       }
     }
