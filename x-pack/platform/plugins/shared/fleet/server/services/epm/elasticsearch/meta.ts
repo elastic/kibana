@@ -9,8 +9,6 @@ import { parse } from 'yaml';
 
 import type { ESAssetMetadata } from '../../../../common/types';
 
-import { PackagePolicyValidationError } from '../../../../common/errors';
-
 import { toYaml } from './yaml_utils';
 
 const MANAGED_BY_DEFAULT = 'fleet';
