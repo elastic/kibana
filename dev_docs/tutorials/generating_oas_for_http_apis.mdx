@@ -70,6 +70,56 @@ Use this section as a practical checklist when authoring public APIs.
 | `schema.oneOf()` for object variants (especially nested `oneOf`) | Unions without a clear discriminator are harder for humans/tools to understand. Nested forms like `schema.oneOf([schema.oneOf([a, b]), schema.oneOf([c, d])])` are especially hard to read and lead to poor validation errors. | Prefer `schema.discriminatedUnion('type', [...])` with a stable discriminator and flat variants. |
 | `schema.conditional()`, `schema.contextRef()`, `schema.siblingRef()` | Behavior depends on runtime context, which is difficult to encode as a stable, portable OAS contract. | Prefer explicit route versions or explicit discriminator/object shapes so behavior is statically visible in the contract. |
 
+#### IDs avoid repeated inline schemas
+
+If the same request or response schema appears in multiple routes, versions, or status codes, give it an **ID**. In this context, the ID is the OpenAPI component name for that schema. Once a schema has one, the generator can emit a `$ref` to `#/components/schemas/<id>` instead of inlining the full schema every time it is used.
+
+Use `meta.id` with `@kbn/config-schema`:
+
+```typescript
+import { schema } from '@kbn/config-schema';
+
+export const addressSchema = schema.object(
+  {
+    street: schema.string(),
+    city: schema.string(),
+  },
+  {
+    meta: {
+      id: 'Address',
+      description: 'Mailing address for a foo resource.',
+    },
+  }
+);
+```
+
+Use `.meta({ id })` with `@kbn/zod/v4`:
+
+```typescript
+import { z } from '@kbn/zod/v4';
+
+export const addressSchema = z
+  .object({
+    street: z.string(),
+    city: z.string(),
+  })
+  .meta({
+    id: 'Address',
+    description: 'Mailing address for a foo resource.',
+  });
+```
+
+With either library, an ID lets repeated uses of `addressSchema` point to the shared component:
+
+```yaml
+schema:
+  $ref: '#/components/schemas/Address'
+```
+
+For Zod v4, attach the ID at definition time. `.meta()` is immutable and returns a new schema, so calling it later does not update the schema that your route already references.
+
+If your API uses tagged unions, prefer `schema.discriminatedUnion('type', [...])` or `z.discriminatedUnion('type', [...])` over a plain union. For Zod v4, when each variant also has its own `.meta({ id })`, Kibana can generate an OpenAPI discriminator mapping automatically.
+
 #### 1. Runtime schema definitions
 
 ```typescript
