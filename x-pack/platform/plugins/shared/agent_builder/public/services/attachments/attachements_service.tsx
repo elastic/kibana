@@ -80,9 +80,7 @@ export class AttachmentsService {
     origin: string
   ): Promise<UpdateOriginResponse> {
     return await this.http.put<UpdateOriginResponse>(
-      `${publicApiPath}/conversations/${encodeURIComponent(
-        conversationId
-      )}/attachments/${encodeURIComponent(attachmentId)}/origin`,
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/origin`,
       {
         body: JSON.stringify({ origin }),
       }
@@ -94,7 +92,7 @@ export class AttachmentsService {
    */
   async checkStale(conversationId: string): Promise<CheckStaleAttachmentsResponse> {
     return await this.http.get<CheckStaleAttachmentsResponse>(
-      `${publicApiPath}/conversations/${encodeURIComponent(conversationId)}/attachments/stale`
+      `${publicApiPath}/conversations/${conversationId}/attachments/stale`
     );
   }
 }
