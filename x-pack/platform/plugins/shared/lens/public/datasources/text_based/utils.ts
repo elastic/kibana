@@ -6,7 +6,6 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
 import type {
   ValueFormatConfig,
   IndexPatternRef,
@@ -71,15 +70,6 @@ export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
   column?.meta?.type === 'number';
 
 export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
-
-export function isDateHistogram(meta?: DatatableColumn['meta']): boolean {
-  const sourceParams = meta?.sourceParams;
-  if (!sourceParams || !isSourceParamsESQL(sourceParams)) {
-    return false;
-  }
-
-  return Boolean(sourceParams.bucket?.unit && sourceParams.appliedTimeRange);
-}
 
 export function canColumnBeDroppedInMetricDimension(
   columns: TextBasedLayerColumn[] | DatatableColumn[],

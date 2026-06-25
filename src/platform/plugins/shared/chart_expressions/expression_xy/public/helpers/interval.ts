@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { type DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { XYChartProps } from '../../common';
 import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
-import { getDataLayers, isDataLayer } from './visualization';
+import { isDataLayer, getDataLayers } from './visualization';
 
 export function calculateMinInterval(
   datatableUtilities: DatatableUtilitiesService,
@@ -22,14 +22,12 @@ export function calculateMinInterval(
   const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
   const isTimeViz = isTimeChart(getDataLayers(filteredLayers));
-
   const xColumn =
     isDataLayer(filteredLayers[0]) &&
     filteredLayers[0].xAccessor &&
     getColumnByAccessor(filteredLayers[0].xAccessor, filteredLayers[0].table.columns);
 
   if (!xColumn) return;
-
   if (minTimeBarInterval) {
     return search.aggs.parseInterval(minTimeBarInterval)?.as('milliseconds');
   }

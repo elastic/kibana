@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSpacer, useEuiTheme, EuiText, EuiSwitch } from '@elastic/eui';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { isSourceParamsESQL, type ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import type {
@@ -18,7 +18,6 @@ import type {
   DataType,
 } from '@kbn/lens-common';
 import {
-  isDateHistogram,
   mergeLayer,
   updateColumnDropPartials,
   updateColumnFormat,
@@ -144,7 +143,16 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     activeColumnMeta != null
       ? activeColumnMeta?.type === 'number'
       : selectedField?.meta?.type === 'number';
-  const isDateHistogramColumn = isDateHistogram(activeColumnMeta ?? selectedField?.meta);
+  const sourceParams = activeColumnMeta?.sourceParams;
+
+  // Check if the column is a date histogram column, is there a better way to do this?
+  const isDateHistogramColumn =
+    sourceParams &&
+    isSourceParamsESQL(sourceParams) &&
+    typeof sourceParams.params === 'object' &&
+    sourceParams.params !== null &&
+    'used_interval' in sourceParams.params &&
+    typeof sourceParams.params.used_interval === 'string';
 
   return (
     <>

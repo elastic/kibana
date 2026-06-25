@@ -17,6 +17,7 @@ import type {
 import type { OriginalColumn } from '../../../common/types';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { operationDefinitionMap } from './operations';
+import { getTimeZoneAndInterval } from './date_histogram_esql';
 
 export interface CreateEsAggsIdMapEntryParams {
   col: GenericIndexPatternColumn;
@@ -63,16 +64,22 @@ export function createEsAggsIdMapEntry({
     isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col) &&
     interval !== undefined
   ) {
+    const sourceField = col.sourceField ? col.sourceField : indexPattern.timeFieldName ?? '';
+    const { usedField } = getTimeZoneAndInterval({ ...col, sourceField }, indexPattern);
+
+    const dropPartials = Boolean(
+      col.params?.dropPartials &&
+        (indexPattern.timeFieldName === usedField?.name || !col.params?.ignoreTimeRange)
+    );
+
     return [
       {
         id: colId,
         label,
         operationType: 'date_histogram',
-        sourceField: col.sourceField,
+        sourceField: col.sourceField!,
         interval,
-        ...(col.params?.dropPartials !== undefined
-          ? { dropPartials: col.params.dropPartials }
-          : {}),
+        dropPartials,
         ...(format !== undefined ? { format } : {}),
         ...(col.dataType ? { dataType: col.dataType } : {}),
         ...(col.customLabel ? { customLabel: col.customLabel } : {}),

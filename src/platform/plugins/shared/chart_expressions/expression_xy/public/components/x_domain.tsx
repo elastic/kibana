@@ -31,10 +31,7 @@ const getDateHistogramMeta = (
     .map(({ xAccessor, table }) => {
       const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
       const meta = xColumn && datatableUtilitites.getDateHistogramMeta(xColumn);
-      return {
-        meta,
-        field: xColumn?.meta.field,
-      };
+      return meta ? { meta, field: xColumn?.meta.field } : undefined;
     })
     .find(Boolean);
 };
@@ -67,8 +64,8 @@ const getBucketBounds = (
   if (valid.length === 0) return undefined;
 
   return {
-    min: Math.min(...valid),
-    max: Math.max(...valid),
+    min: valid[0],
+    max: valid[valid.length - 1],
   };
 };
 

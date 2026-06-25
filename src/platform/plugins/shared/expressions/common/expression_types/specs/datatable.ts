@@ -11,7 +11,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-import type { ESQLBucketMetadata } from '@kbn/es-types/src/search';
 import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import type { PointSeries, PointSeriesColumn } from './pointseries';
 import type { ExpressionValueRender } from './render';
@@ -111,7 +110,6 @@ interface SourceParamsESQL extends Record<string, unknown> {
   sourceField: string;
   operationType: string;
   interval?: number;
-  bucket?: ESQLBucketMetadata;
   dropPartials?: boolean;
   appliedTimeRange?: {
     from?: string;
@@ -121,15 +119,15 @@ interface SourceParamsESQL extends Record<string, unknown> {
 
 export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceParamsESQL {
   return (
-    obj &&
-    typeof obj.indexPattern === 'string' &&
-    typeof obj.sourceField === 'string' &&
-    (typeof obj.interval === 'number' || !obj.interval) &&
-    ((typeof obj.bucket === 'object' &&
-      obj.bucket !== null &&
-      'interval' in obj.bucket &&
-      'unit' in obj.bucket) ||
-      !obj.bucket)
+    (obj &&
+      typeof obj.indexPattern === 'string' &&
+      typeof obj.sourceField === 'string' &&
+      (typeof obj.interval === 'number' || !obj.interval) &&
+      (typeof obj.dropPartials === 'boolean' || !obj.dropPartials) &&
+      typeof obj.appliedTimeRange === 'object' &&
+      obj.appliedTimeRange !== null &&
+      ('from' in obj.appliedTimeRange || 'to' in obj.appliedTimeRange)) ||
+    !obj.appliedTimeRange
   );
 }
 

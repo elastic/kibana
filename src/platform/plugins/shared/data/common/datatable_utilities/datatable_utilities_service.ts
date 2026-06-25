@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewsContract, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { FieldFormatsStartCommon, FieldFormat } from '@kbn/field-formats-plugin/common';
-import { isSourceParamsESQL } from '@kbn/expressions-plugin/common';
-import type { Unit } from '@kbn/datemath';
+import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import {
-  type AggsCommonStart,
   type AggConfig,
-  type AggParamsDateHistogram,
-  type AggParamsHistogram,
+  type AggsCommonStart,
   type CreateAggConfigParams,
   type IAggType,
 } from '../search';
@@ -30,20 +26,19 @@ interface DateHistogramMeta {
   dropPartials?: boolean;
 }
 
-const ESQL_UNITS = ['millisecond', 'second', 'minute', 'hour', 'day', 'week', 'month', 'year'];
-type ESQLUnit = (typeof ESQL_UNITS)[number];
-const isESQLUnit = (s: string): s is ESQLUnit => (ESQL_UNITS as readonly string[]).includes(s);
+interface HistogramParams {
+  used_interval: string | number;
+  used_time_zone?: string;
+  drop_partials?: boolean;
+}
 
-const ESQL_UNIT_TO_DATEMATH: Record<string, Unit> = {
-  millisecond: 'ms',
-  second: 's',
-  minute: 'm',
-  hour: 'h',
-  day: 'd',
-  week: 'w',
-  month: 'M',
-  year: 'y',
-  // quarter: not supported by datemath / parseInterval
+const isHistogramParams = (params: unknown): params is HistogramParams => {
+  return (
+    typeof params === 'object' &&
+    params !== null &&
+    'used_interval' in params &&
+    (typeof params.used_interval === 'string' || typeof params.used_interval === 'number')
+  );
 };
 
 export class DatatableUtilitiesService {
@@ -93,34 +88,19 @@ export class DatatableUtilitiesService {
       timeZone: string;
     }> = {}
   ): DateHistogramMeta | undefined {
-    if (!column.meta.sourceParams) {
+    const params = column.meta.sourceParams?.params;
+    const appliedTimeRange = column.meta.sourceParams?.appliedTimeRange;
+
+    if (!params || !isHistogramParams(params) || typeof params.used_interval !== 'string') {
       return;
     }
 
-    if (isSourceParamsESQL(column.meta.sourceParams)) {
-      const bucket = column.meta.sourceParams.bucket;
-      if (bucket) {
-        if (!bucket.unit || !isESQLUnit(bucket.unit)) {
-          return;
-        }
-        return {
-          interval: `${bucket.interval}${ESQL_UNIT_TO_DATEMATH[bucket.unit]}`,
-          timeZone: defaults.timeZone,
-          timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
-          dropPartials: column.meta.sourceParams.dropPartials,
-        };
-      }
-    } else if (column.meta.sourceParams.params) {
-      const params = column.meta.sourceParams.params as AggParamsDateHistogram;
-      if (params.used_interval && params.used_interval !== 'auto') {
-        return {
-          interval: params.used_interval,
-          timeZone: params.used_time_zone || defaults.timeZone,
-          timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
-          dropPartials: params.drop_partials,
-        };
-      }
-    }
+    return {
+      interval: params.used_interval,
+      timeZone: params.used_time_zone || defaults.timeZone,
+      timeRange: appliedTimeRange as TimeRange | undefined,
+      dropPartials: params.drop_partials,
+    };
   }
 
   async getDataView(column: DatatableColumn): Promise<DataView | undefined> {
@@ -161,21 +141,17 @@ export class DatatableUtilitiesService {
    * this function will return undefined.
    */
   getNumberHistogramInterval(column: DatatableColumn): number | undefined {
-    if (column.meta.sourceParams && isSourceParamsESQL(column.meta.sourceParams)) {
-      const bucket = column.meta.sourceParams.bucket;
-      if (bucket) {
-        return bucket.interval;
-      }
-    }
-
-    if (column.meta.source !== 'esaggs') {
-      return;
-    }
-    if (column.meta.sourceParams?.type !== BUCKET_TYPES.HISTOGRAM) {
+    const params = column.meta.sourceParams?.params;
+    if (!params || !isHistogramParams(params)) {
       return;
     }
 
-    const params = column.meta.sourceParams.params as unknown as AggParamsHistogram;
+    if (
+      column.meta.source === 'esaggs' &&
+      column.meta.sourceParams?.type !== BUCKET_TYPES.HISTOGRAM
+    ) {
+      return;
+    }
 
     if (!params.used_interval || typeof params.used_interval === 'string') {
       return;

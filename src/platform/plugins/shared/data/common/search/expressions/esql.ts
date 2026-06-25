@@ -30,6 +30,7 @@ import {
 import { zipObject } from 'lodash';
 import { buildEsQuery, type Filter, getTimeZoneFromSettings } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse, ESQLColumn } from '@kbn/es-types';
+import type { Unit } from '@kbn/datemath';
 import DateMath from '@kbn/datemath';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
@@ -86,8 +87,26 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
   }
   return {};
 }
+const ESQL_UNIT_TO_DATEMATH = {
+  millisecond: 'ms',
+  second: 's',
+  minute: 'm',
+  hour: 'h',
+  day: 'd',
+  week: 'w',
+  month: 'M',
+  year: 'y',
+} as const satisfies Record<string, Unit>;
 
-function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: Input): Datatable {
+type ESQLUnit = keyof typeof ESQL_UNIT_TO_DATEMATH;
+const isESQLUnit = (s: string): s is ESQLUnit => s in ESQL_UNIT_TO_DATEMATH;
+
+function mapResponseToDatatable(
+  body: ESQLSearchResponse,
+  input: Input,
+  request: ESQLSearchParams
+): Datatable {
+  const { query, time_zone } = request;
   // all_columns in the response means that there is a separation between
   // columns with data and empty columns
   // columns contain only columns with data while all_columns everything
@@ -123,16 +142,18 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
         from: DateMath.parse(input.timeRange.from)?.toISOString(),
         to: DateMath.parse(input.timeRange.to, { roundUp: true })?.toISOString(),
       };
-      sourceParams.params = {};
     }
 
     if (_meta?.bucket) {
-      sourceParams.bucket = {
-        interval: _meta.bucket.interval,
-        unit: _meta.bucket.unit,
+      const unit = _meta.bucket?.unit;
+      const unitDateMath = unit && isESQLUnit(unit) ? ESQL_UNIT_TO_DATEMATH[unit] : undefined;
+      sourceParams.params = {
+        used_interval: unitDateMath
+          ? `${_meta.bucket?.interval}${unitDateMath}`
+          : _meta.bucket?.interval,
+        used_time_zone: time_zone,
       };
     }
-
     return sourceParams;
   };
 
@@ -412,7 +433,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
-        return mapResponseToDatatable(rawResponse as any, query, input);
+        return mapResponseToDatatable(rawResponse as any, input, params);
       } catch (error) {
         // Inspector logging on error
         logInspectorRequest()
