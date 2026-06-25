@@ -126,7 +126,7 @@ const getColumnConfigs = ({
           return (
             <DocCountCell
               indexName={index.name}
-              docCountApi={docCountApiInstance}
+              docCountApi={docCountApi}
               metadataCount={index.documents}
               status={index.status}
             />
