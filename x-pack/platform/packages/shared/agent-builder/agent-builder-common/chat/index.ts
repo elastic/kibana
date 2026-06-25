@@ -6,6 +6,11 @@
  */
 
 export {
+  ConversationAccessControlMode,
+  getDefaultConversationAccessControl,
+  type ConversationAccessControl,
+} from './access_control';
+export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
   type ConversationAction,
