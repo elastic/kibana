@@ -950,17 +950,20 @@ export class WorkflowCrudService {
     shouldUpdateScheduler: boolean;
   }): Promise<void> {
     const { id, spaceId, request, finalData, shouldUpdateScheduler } = params;
-    const taskScheduler = this.deps.getTaskScheduler();
-    if (!taskScheduler) {
-      return;
-    }
-
     const shouldRefreshScheduledTaskCredentials =
       Boolean(finalData.definition) &&
       finalData.valid &&
       finalData.enabled &&
       hasScheduledTriggers(finalData.definition?.triggers ?? []);
     if (!shouldUpdateScheduler && !shouldRefreshScheduledTaskCredentials) {
+      return;
+    }
+
+    const taskScheduler = this.deps.getTaskScheduler();
+    if (!taskScheduler) {
+      this.deps.logger.warn(
+        `Skipping scheduler sync for workflow ${id} in space ${spaceId}: task scheduler is unavailable`
+      );
       return;
     }
 

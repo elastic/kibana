@@ -1345,6 +1345,42 @@ describe('WorkflowCrudService', () => {
       expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     });
 
+    it('warns when an enabled scheduled workflow needs scheduler sync but the scheduler is unavailable', async () => {
+      const { deps, client } = makeDeps();
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      } as any;
+      const existingSource = makeSource({
+        enabled: true,
+        valid: true,
+        triggerTypes: ['scheduled'],
+        definition: scheduledDefinition,
+      });
+
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: existingSource,
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+
+      expect(deps.logger.warn).toHaveBeenCalledWith(
+        'Skipping scheduler sync for workflow wf-1 in space default: task scheduler is unavailable'
+      );
+    });
+
     it('retries after a version conflict and merges against a fresh read', async () => {
       const { deps, client } = makeDeps();
       client.search
