@@ -113,8 +113,8 @@ export function ServiceHeaderBadges({
     return null;
   }
 
-  const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
-    defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
+  const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
+    defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}.',
     values: { count: alertsCount },
   });
 
