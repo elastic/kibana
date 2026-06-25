@@ -30,10 +30,13 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [persisted, setPersisted] = useSessionStorage<PersistedState>(SERVICE_SETTINGS_SESSION_KEY, {
-    globalRegion: '',
-    serviceVars: {},
-  });
+  const [persisted, setPersisted] = useSessionStorage<PersistedState>(
+    SERVICE_SETTINGS_SESSION_KEY,
+    {
+      globalRegion: '',
+      serviceVars: {},
+    }
+  );
 
   const globalRegion = persisted?.globalRegion ?? '';
 

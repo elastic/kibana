@@ -121,7 +121,10 @@ function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<st
 
 function buildAgentlessPolicyName(services: AwsServiceMatrixEntry[]): string {
   // truncating serviceIds in policy name to limit the length, the suffix of timestamp should ensure uniqueness
-  const serviceIdsTruncated = services.map((s) => s.id).join('_').slice(0, 100);
+  const serviceIdsTruncated = services
+    .map((s) => s.id)
+    .join('_')
+    .slice(0, 100);
   return `${serviceIdsTruncated}-${Date.now()}`;
 }
 
@@ -263,7 +266,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         .map((id) => AWS_SERVICES_MAP.get(id))
         .filter(
           (s): s is AwsServiceMatrixEntry =>
-            s !== undefined && s.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)
+            s !== undefined &&
+            s.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)
         ),
     [selectedServiceIds]
   );
