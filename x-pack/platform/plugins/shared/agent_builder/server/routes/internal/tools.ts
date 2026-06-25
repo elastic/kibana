@@ -13,12 +13,7 @@ import {
   type ActionTypeExecutorResult,
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import {
-  ToolType,
-  editableToolTypes,
-  isMcpTool,
-  type McpToolDefinition,
-} from '@kbn/agent-builder-common/tools';
+import { ToolType, isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
