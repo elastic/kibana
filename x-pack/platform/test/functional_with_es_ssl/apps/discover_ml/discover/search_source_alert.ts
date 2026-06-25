@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover_ml_uptime/discover/search_source_alert.ts
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { openDiscoverSearchThresholdRuleFlyout } from '../../../../functional/apps/discover/open_search_threshold_rule_flyout';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -199,9 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openDiscoverAlertFlyout = async () => {
-    await testSubjects.click('app-menu-overflow-button');
-    await testSubjects.click('discoverAlertsButton');
-    await testSubjects.click('discoverCreateAlertButton');
+    await openDiscoverSearchThresholdRuleFlyout({ testSubjects, retry });
   };
 
   const openManagementAlertFlyout = async () => {
@@ -460,7 +460,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 
@@ -691,7 +691,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 

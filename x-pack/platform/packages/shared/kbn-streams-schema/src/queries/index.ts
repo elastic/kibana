@@ -54,6 +54,7 @@ export interface StreamQuery extends StreamQueryBase {
   severity_score?: number;
   evidence?: string[];
   features?: QueryFeature[];
+  expires_at?: string;
 }
 
 const streamQueryBaseSchema = z.object({
@@ -73,6 +74,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.ex
   evidence: z.array(z.string()).optional(),
   features: z.array(queryFeatureSchema).optional(),
   esql: esqlQuerySchema,
+  expires_at: z.iso.datetime().optional(),
 });
 
 export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
@@ -93,6 +95,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
   description: z.string().default(''),
+  expires_at: z.iso.datetime().optional(),
 });
 
 /**
@@ -117,9 +120,6 @@ export interface QueriesOccurrencesGetResponse {
 }
 
 export interface QueryLink {
-  'asset.uuid': string;
-  'asset.type': 'query';
-  'asset.id': string;
   query: StreamQuery;
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */

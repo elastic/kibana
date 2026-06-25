@@ -52,6 +52,7 @@ import { licenseService } from './license';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { getPackageInfo } from './epm/packages';
@@ -137,6 +138,7 @@ jest.mock('./audit_logging');
 jest.mock('./agent_policies/full_agent_policy');
 jest.mock('./agent_policies/outputs_helpers');
 jest.mock('./agent_policies/deploy_agent_policies_task');
+jest.mock('./agent_policies/bump_agent_policies_by_id_task');
 jest.mock('./agent_policy_create');
 jest.mock('./epm/packages/install');
 jest.mock('./epm/packages');
@@ -972,8 +974,9 @@ describe('Agent policy', () => {
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
           query: {
-            term: {
-              policy_id: 'mocked',
+            bool: {
+              should: [{ term: { policy_id: 'mocked' } }, { prefix: { policy_id: 'mocked#' } }],
+              minimum_should_match: 1,
             },
           },
         })
@@ -1326,6 +1329,92 @@ describe('Agent policy', () => {
           }),
         ])
       );
+    });
+
+    it('should offload the bump to a background task when above the async threshold', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // 101 policies, just above BUMP_AGENT_POLICIES_ASYNC_THRESHOLD (100)
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: Array.from({ length: 101 }, (_, i) => ({
+          id: `policy-${i}`,
+          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+          attributes: { revision: 1 },
+          score: 1,
+          references: [],
+        })),
+        total: 101,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
+
+      // The bulk Saved Objects update must not run on the request thread...
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(scheduleDeployAgentPoliciesTask).not.toHaveBeenCalled();
+      // ...it is offloaded to the background task instead.
+      expect(scheduleBumpAgentPoliciesByIdTask).toHaveBeenCalledTimes(1);
+      const scheduledPolicies = jest.mocked(scheduleBumpAgentPoliciesByIdTask).mock.calls[0][1];
+      expect(scheduledPolicies).toHaveLength(101);
+      expect(scheduledPolicies).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: 'policy-0' })])
+      );
+    });
+
+    it('should bump inline when at or below the async threshold', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: { revision: 1 },
+            score: 1,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+      expect(scheduleBumpAgentPoliciesByIdTask).not.toHaveBeenCalled();
     });
   });
 
@@ -2564,6 +2653,9 @@ describe('Agent policy', () => {
           total: 1,
           hits: [{ _source: { policy_id: 'policy123', revision_idx: 1 } }],
         },
+        aggregations: {
+          policies: { buckets: [{ key: 'policy123', latest_revision: { value: 1 } }] },
+        },
       } as any);
 
       await agentPolicyService.deployPolicy(soClient, 'policy123');
@@ -2607,6 +2699,9 @@ describe('Agent policy', () => {
         hits: {
           total: 1,
           hits: [{ _source: { policy_id: 'policy123', revision_idx: 2 } }],
+        },
+        aggregations: {
+          policies: { buckets: [{ key: 'policy123', latest_revision: { value: 2 } }] },
         },
       } as any);
 
@@ -3662,6 +3757,52 @@ describe('Agent policy', () => {
       expect(vars.namespace).toBeUndefined();
       expect(vars.cloud_connector_id).toBeUndefined();
       expect(vars.cloud_connector_name).toBeUndefined();
+    });
+  });
+
+  describe('getLatestFleetPolicyRevisions', () => {
+    it('returns an empty map without querying when no policy ids are provided', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+
+      const result = await agentPolicyService.getLatestFleetPolicyRevisions(esClient, []);
+
+      expect(result).toEqual(new Map());
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('maps each policy id to its latest deployed revision, omitting policies with none', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          policies: {
+            buckets: [
+              { key: 'policy1', latest_revision: { value: 3 } },
+              { key: 'policy2', latest_revision: { value: 1 } },
+              { key: 'policy3', latest_revision: { value: null } },
+            ],
+          },
+        },
+      } as any);
+
+      const result = await agentPolicyService.getLatestFleetPolicyRevisions(esClient, [
+        'policy1',
+        'policy2',
+        'policy3',
+      ]);
+
+      expect(result).toEqual(
+        new Map([
+          ['policy1', 3],
+          ['policy2', 1],
+        ])
+      );
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENT_POLICY_INDEX,
+          size: 0,
+          query: { terms: { policy_id: ['policy1', 'policy2', 'policy3'] } },
+        })
+      );
     });
   });
 });
