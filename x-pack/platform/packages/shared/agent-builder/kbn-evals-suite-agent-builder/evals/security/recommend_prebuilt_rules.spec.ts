@@ -125,6 +125,43 @@ const tagsFromFilter = (step: ToolCallStep): string[] => {
     : [];
 };
 
+// The 14 canonical MITRE ATT&CK Enterprise tactics the skill routes to (its prompt table).
+// Unlike tags, tactics are NOT discovered from a tool — they are a fixed set — so the grounding
+// source of truth is this constant, and the schema accepts any string, so this guard is real.
+const CANONICAL_TACTICS: ReadonlyArray<{ id: string; name: string }> = [
+  { id: 'TA0001', name: 'Initial Access' },
+  { id: 'TA0002', name: 'Execution' },
+  { id: 'TA0003', name: 'Persistence' },
+  { id: 'TA0004', name: 'Privilege Escalation' },
+  { id: 'TA0005', name: 'Defense Evasion' },
+  { id: 'TA0006', name: 'Credential Access' },
+  { id: 'TA0007', name: 'Discovery' },
+  { id: 'TA0008', name: 'Lateral Movement' },
+  { id: 'TA0009', name: 'Collection' },
+  { id: 'TA0010', name: 'Exfiltration' },
+  { id: 'TA0011', name: 'Command and Control' },
+  { id: 'TA0040', name: 'Impact' },
+  { id: 'TA0042', name: 'Resource Development' },
+  { id: 'TA0043', name: 'Reconnaissance' },
+];
+
+const CANONICAL_TACTIC_IDS = new Set(CANONICAL_TACTICS.map((tactic) => tactic.id));
+const CANONICAL_TACTIC_NAMES = new Set(
+  CANONICAL_TACTICS.map((tactic) => tactic.name.toLowerCase())
+);
+
+// A `mitreTactic` value is grounded if it is a canonical TA-ID or a canonical tactic name.
+const isCanonicalTactic = (value: string): boolean =>
+  CANONICAL_TACTIC_IDS.has(value) || CANONICAL_TACTIC_NAMES.has(value.toLowerCase());
+
+// Tactic values the agent passed to a `find_prebuilt_rules` `mitreTactic` filter.
+const tacticsFromFilter = (step: ToolCallStep): string[] => {
+  const mitreTactic = step?.params?.filter?.mitreTactic;
+  return Array.isArray(mitreTactic)
+    ? mitreTactic.filter((value): value is string => typeof value === 'string')
+    : [];
+};
+
 evaluate.describe(
   'Security Skills - Recommend Prebuilt Rules',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
@@ -211,6 +248,33 @@ evaluate.describe(
         // Anti-hallucination: every tag used must come from the overview result.
         const ungroundedTags = usedTags.filter((tag) => !catalogTags.has(tag));
         expect(ungroundedTags).toEqual([]);
+      }
+    );
+
+    evaluate(
+      'mitreTactic filters use only canonical MITRE tactics (no hallucinated tactics)',
+      async ({ chatClient }) => {
+        // Two tactics named in prose force the name->ID mapping and the OR-array path.
+        const response = await chatClient.converse({
+          messages: [
+            {
+              message:
+                'Which installable prebuilt rules can I add to cover the Credential Access and Persistence tactics?',
+            },
+          ],
+        });
+
+        expect(response.errors).toEqual([]);
+
+        const steps = (response.steps ?? []) as ToolCallStep[];
+        const usedTactics = getFindPrebuiltRulesCalls(steps).flatMap(tacticsFromFilter);
+
+        // Guard against a vacuous pass: the query must have exercised the mitreTactic path.
+        expect(usedTactics.length).toBeGreaterThan(0);
+
+        // Anti-hallucination: every tactic used must be one of the canonical MITRE tactics.
+        const nonCanonical = usedTactics.filter((tactic) => !isCanonicalTactic(tactic));
+        expect(nonCanonical).toEqual([]);
       }
     );
   }
