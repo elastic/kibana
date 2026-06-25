@@ -33,12 +33,9 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
-      ...uiamConfig.kbnTestServer.serverArgs.filter(
-        (arg) => !arg.includes('security_functional/plugins/test_endpoints')
-      ),
+      ...uiamConfig.kbnTestServer.serverArgs,
       '--cps.cpsEnabled=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
-      '--xpack.alerting_v2.enabled=true',
     ],
   },
 };
