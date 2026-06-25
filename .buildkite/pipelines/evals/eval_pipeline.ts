@@ -209,14 +209,16 @@ function buildEvalsYaml({
   const prBuildId = process.env.BUILDKITE_BUILD_ID ?? '';
   const prNumber = process.env.BUILDKITE_PULL_REQUEST ?? '';
 
+  // Block + trigger steps live OUTSIDE the eval group so the group itself
+  // completes cleanly and doesn't cause a "blocked" state on the GitHub check.
   const refreshBlockStep = isPrBuild
     ? [
-        `      - block: 'LLM Evals: Refresh Baseline'`,
-        `        key: kbn-evals-refresh-block`,
-        `        blocked_state: passed`,
-        `        depends_on:`,
-        `          - kbn-evals-post-comparison`,
-        `        allow_dependency_failure: true`,
+        `  - block: 'LLM Evals: Refresh Baseline'`,
+        `    key: kbn-evals-refresh-block`,
+        `    blocked_state: passed`,
+        `    depends_on:`,
+        `      - kbn-evals-post-comparison`,
+        `    allow_dependency_failure: true`,
       ].join('\n')
     : null;
 
@@ -227,33 +229,33 @@ function buildEvalsYaml({
         const includeEisModels =
           hasEisJudge || suiteModelGroups.some((group) => group.startsWith('eis/'));
         const triggerEnvLines: string[] = [
-          `            EVAL_SUITE_ID: '${suite.id}'`,
-          `            EVAL_SUITE_IDS: '${suite.id}'`,
-          `            FRESH_BASELINE_PR_EXPERIMENT_ID: 'bk-${prBuildId}'`,
-          `            GITHUB_PR_NUMBER: '${prNumber}'`,
+          `        EVAL_SUITE_ID: '${suite.id}'`,
+          `        EVAL_SUITE_IDS: '${suite.id}'`,
+          `        FRESH_BASELINE_PR_EXPERIMENT_ID: 'bk-${prBuildId}'`,
+          `        GITHUB_PR_NUMBER: '${prNumber}'`,
         ];
         if (evaluationConnectorId) {
-          triggerEnvLines.push(`            EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`);
+          triggerEnvLines.push(`        EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`);
         }
         if (includeEisModels) {
-          triggerEnvLines.push(`            EVAL_INCLUDE_EIS_MODELS: '1'`);
+          triggerEnvLines.push(`        EVAL_INCLUDE_EIS_MODELS: '1'`);
         }
         if (suiteModelGroups.length > 0) {
-          triggerEnvLines.push(`            EVAL_MODEL_GROUPS: '${suiteModelGroups.join(',')}'`);
+          triggerEnvLines.push(`        EVAL_MODEL_GROUPS: '${suiteModelGroups.join(',')}'`);
         }
         if (suite.serverConfigSet) {
-          triggerEnvLines.push(`            EVAL_SERVER_CONFIG_SET: '${suite.serverConfigSet}'`);
+          triggerEnvLines.push(`        EVAL_SERVER_CONFIG_SET: '${suite.serverConfigSet}'`);
         }
         return [
-          `      - trigger: kibana-evals-on-demand`,
-          `        label: 'LLM Evals: Refresh ${suite.name || suite.id}'`,
-          `        key: ${triggerKey}`,
-          `        depends_on:`,
-          `          - kbn-evals-refresh-block`,
-          `        build:`,
-          `          branch: main`,
-          `          message: 'Fresh baseline for PR #${prNumber}: ${suite.id}'`,
-          `          env:`,
+          `  - trigger: kibana-evals-on-demand`,
+          `    label: 'LLM Evals: Refresh ${suite.name || suite.id}'`,
+          `    key: ${triggerKey}`,
+          `    depends_on:`,
+          `      - kbn-evals-refresh-block`,
+          `    build:`,
+          `      branch: main`,
+          `      message: 'Fresh baseline for PR #${prNumber}: ${suite.id}'`,
+          `      env:`,
           ...triggerEnvLines,
         ].join('\n');
       })
@@ -269,6 +271,8 @@ function buildEvalsYaml({
     `    steps:`,
     suiteSteps,
     ...(postCompareStep ? [postCompareStep] : []),
+    // Block + trigger steps are top-level (outside the group) so the group
+    // completes independently and reports a clean status to GitHub.
     ...(refreshBlockStep ? [refreshBlockStep] : []),
     ...refreshTriggerSteps,
   ].join('\n');
