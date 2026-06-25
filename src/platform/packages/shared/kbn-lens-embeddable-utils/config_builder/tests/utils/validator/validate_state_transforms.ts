@@ -22,6 +22,8 @@ const strictChartTypes = new Set([
   'treemap',
   'waffle',
   'tag_cloud',
+  'region_map',
+  'metric',
 ]);
 
 /**

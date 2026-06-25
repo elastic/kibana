@@ -12,6 +12,7 @@ import {
   RuleExecutionMiddlewaresToken,
 } from '../lib/rule_executor/tokens';
 import {
+  CheckEngineEnabledStep,
   WaitForResourcesStep,
   FetchRuleStep,
   ValidateRuleStep,
@@ -48,6 +49,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
    * Rule execution steps via multi-injection.
    * Binding order defines execution order.
    */
+  bind(RuleExecutionStepsToken).to(CheckEngineEnabledStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
