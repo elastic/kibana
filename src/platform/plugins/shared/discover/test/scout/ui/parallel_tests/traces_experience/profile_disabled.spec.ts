@@ -82,7 +82,7 @@ spaceTest.describe(
           await pageObjects.discover.goto({ queryMode: 'classic' });
 
           await spaceTest.step('open first document in flyout', async () => {
-            await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
+            await pageObjects.tracesExperience.openDocumentFlyout();
           });
 
           await spaceTest.step('verify Overview tab is not present', async () => {

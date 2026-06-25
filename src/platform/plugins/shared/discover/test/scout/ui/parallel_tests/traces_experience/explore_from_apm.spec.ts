@@ -111,7 +111,7 @@ spaceTest.describe(
             timeout: CHART_LINK_CLICK_TIMEOUT,
           });
           await expectTracesExperienceEnabled(pageObjects);
-          await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
+          await pageObjects.tracesExperience.openDocumentFlyout();
           await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
           await page.goBack();
         });
@@ -243,7 +243,7 @@ spaceTest.describe(
         await spaceTest.step('"Open in Discover" button opens traces experience', async () => {
           await clickAndWaitForDiscover(page, 'apmWaterfallOpenInDiscoverButton');
           await expectTracesExperienceEnabled(pageObjects);
-          await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
+          await pageObjects.tracesExperience.openDocumentFlyout();
           await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
           await page.goBack();
         });
