@@ -1368,6 +1368,8 @@
       "@kbn/fleet-plugin-cypress/*": ["x-pack/platform/plugins/shared/fleet/cypress/*"],
       "@kbn/flot-charts": ["src/platform/packages/shared/kbn-flot-charts"],
       "@kbn/flot-charts/*": ["src/platform/packages/shared/kbn-flot-charts/*"],
+      "@kbn/flyout-history": ["src/platform/packages/shared/kbn-flyout-history"],
+      "@kbn/flyout-history/*": ["src/platform/packages/shared/kbn-flyout-history/*"],
       "@kbn/flyout-system-example-plugin": ["examples/flyout_system"],
       "@kbn/flyout-system-example-plugin/*": ["examples/flyout_system/*"],
       "@kbn/foo-plugin": ["x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin"],
