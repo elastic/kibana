@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { useAppContext } from '../../../../../app_context';
-import { serializeAsESLifecycle } from '../../../../../../../common/lib';
 import {
   formatDlmLifecycleSummary,
   resolveLifecycleForSummary,
@@ -83,11 +82,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     linkedIngestPipeline
   );
 
-  const lifecycle = resolveLifecycleForSummary(
-    templateDetails.template?.lifecycle ??
-      (templateDetails.lifecycle ? serializeAsESLifecycle(templateDetails.lifecycle) : undefined),
-    { hasDataStream: hasDatastream }
-  );
+  const lifecycle = resolveLifecycleForSummary(templateDetails.template?.lifecycle, {
+    hasDataStream: hasDatastream,
+  });
 
   return (
     <>

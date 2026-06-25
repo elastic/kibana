@@ -139,23 +139,7 @@ const StatefulDlmPhasesSelector = ({ defaultValue, onChange }: DlmPhasesSelector
 };
 
 const ServerlessDlmPhasesSelector = ({ defaultValue, onChange }: DlmPhasesSelectorFieldProps) => {
-  const { isAtLeastEnterprise } = useLicense();
-  const { manageRepositoriesUrl, createDefaultRepositoryUrl } = useDlmRepositoryUrls();
-  const enterprise = useDlmEnterpriseConfig();
-
-  return (
-    <DlmPhasesSelector
-      defaultValue={defaultValue}
-      serverless
-      hasEnterpriseLicense={isAtLeastEnterprise()}
-      hasDefaultSnapshotRepository={false}
-      canCreateDefaultSnapshotRepository={false}
-      manageRepositoriesUrl={manageRepositoriesUrl}
-      createDefaultRepositoryUrl={createDefaultRepositoryUrl}
-      enterprise={enterprise}
-      onChange={onChange}
-    />
-  );
+  return <DlmPhasesSelector defaultValue={defaultValue} serverless onChange={onChange} />;
 };
 
 // Create or Form components with partial props that are common to all instances

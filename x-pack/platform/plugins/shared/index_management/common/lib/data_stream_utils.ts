@@ -65,6 +65,9 @@ export const serializeAsESLifecycle = (lifecycle?: DataRetention): DataStream['l
       ? { frozen_after: `${frozen.value}${frozen.unit}` }
       : {};
 
+  // No delete phase: either frozen-only (!lifecycle.enabled, guaranteed
+  // by the early return above) or infinite retention. Omit `data_retention` and
+  // keep only the optional frozen phase.
   if (!lifecycle.enabled || infiniteDataRetention) {
     return {
       enabled: true,

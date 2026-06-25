@@ -30,14 +30,14 @@ export type {
 
 export const DlmPhasesSelector = ({
   defaultValue,
-  hasEnterpriseLicense,
-  hasDefaultSnapshotRepository,
+  hasEnterpriseLicense = false,
+  hasDefaultSnapshotRepository = false,
   isDisabled = false,
   defaultSnapshotRepository,
   serverless = false,
   manageRepositoriesUrl,
   createDefaultRepositoryUrl,
-  canCreateDefaultSnapshotRepository,
+  canCreateDefaultSnapshotRepository = false,
   enterprise,
   onRefreshDefaultSnapshotRepository,
   onChange,
@@ -100,7 +100,7 @@ export const DlmPhasesSelector = ({
         </EuiFlexItem>
       )}
 
-      {shouldShowFrozenPhase && (
+      {shouldShowFrozenPhase && enterprise && createDefaultRepositoryUrl && (
         <EuiFlexItem grow={false}>
           <FrozenPhaseCard
             id={frozenCheckboxId}
