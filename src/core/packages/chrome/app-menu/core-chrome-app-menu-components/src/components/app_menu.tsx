@@ -67,7 +67,7 @@ export const AppMenuComponent = ({
 
   const headerLinksProps = {
     'data-test-subj': 'app-menu',
-    gutterSize: 'xs' as const,
+    gutterSize: 'xxs' as const,
     popoverBreakpoints: 'none' as const,
     className: 'kbnTopNavMenu__wrapper',
   };
