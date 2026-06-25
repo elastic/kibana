@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { NonEmptyString } from '@kbn/zod-helpers/v4';
+import { DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
 import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 export interface IngestStreamLifecycleDSL {
@@ -86,28 +86,28 @@ const errorLifecycleSchema = z.object({
   }),
 });
 
-export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z
-  .union([dslLifecycleSchema, ilmLifecycleSchema, inheritLifecycleSchema])
-  .meta({ id: 'IngestStreamLifecycle' });
+export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = DeepStrict(
+  z.union([dslLifecycleSchema, ilmLifecycleSchema, inheritLifecycleSchema])
+).meta({ id: 'IngestStreamLifecycle' });
 
 export const classicIngestStreamEffectiveLifecycleSchema: z.Schema<ClassicIngestStreamEffectiveLifecycle> =
-  z
-    .union([
+  DeepStrict(
+    z.union([
       dslLifecycleSchema,
       ilmLifecycleSchema,
       inheritLifecycleSchema,
       disabledLifecycleSchema,
       errorLifecycleSchema,
     ])
-    .meta({ id: 'ClassicIngestStreamEffectiveLifecycle' });
+  ).meta({ id: 'ClassicIngestStreamEffectiveLifecycle' });
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
-  z
-    .union([
+  DeepStrict(
+    z.union([
       dslLifecycleSchema.extend({ from: NonEmptyString }),
       ilmLifecycleSchema.extend({ from: NonEmptyString }),
     ])
-    .meta({ id: 'WiredIngestStreamEffectiveLifecycle' });
+  ).meta({ id: 'WiredIngestStreamEffectiveLifecycle' });
 
 export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
   z.union([classicIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);

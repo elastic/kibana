@@ -8,25 +8,25 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_RULE_NAME_LENGTH } from './constants';
 
-export const dependencyEdgeSchema = z.object({
+export const dependencyEdgeSchema = z.strictObject({
   source: z.string(),
   target: z.string(),
   protocol: z.string().optional(),
   exposure: z.string().optional(),
 });
 
-export const infraComponentSchema = z.object({
+export const infraComponentSchema = z.strictObject({
   title: z.string().optional(),
   workloads: z.array(z.string()).optional(),
   exposure: z.string().optional(),
 });
 
-export const causeKiSchema = z.object({
+export const causeKiSchema = z.strictObject({
   name: z.string().optional(),
   stream_name: z.string().optional(),
 });
 
-export const evidenceSchema = z.object({
+export const evidenceSchema = z.strictObject({
   rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
   result: z.string().optional(),
   description: z.string().optional(),

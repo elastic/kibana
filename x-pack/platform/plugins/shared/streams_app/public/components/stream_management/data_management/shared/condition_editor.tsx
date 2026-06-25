@@ -24,7 +24,7 @@ import {
   getFilterOperator,
   getFilterValue,
   isArrayOperator,
-  isConditionStrict,
+  isCondition,
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
@@ -68,7 +68,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
   } = props;
   const { core } = useKibana();
 
-  const isInvalidCondition = !isConditionStrict(props.condition);
+  const isInvalidCondition = !isCondition(props.condition);
 
   const condition = alwaysToEmptyEquals(props.condition);
 
@@ -194,7 +194,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
     }
     try {
       const parsed = yaml.parse(currentValue);
-      if (!isConditionStrict(parsed)) {
+      if (!isCondition(parsed)) {
         return;
       }
       debouncedEmitConditionChange.cancel();
@@ -246,8 +246,20 @@ export function ConditionEditor(props: ConditionEditorProps) {
             id="xpack.streams.conditionEditor.arrayOperatorHelpText"
             defaultMessage="Use {includes} for array/multivalue fields. For partial matches, use {contains}."
             values={{
-              includes: <strong>includes</strong>,
-              contains: <strong>contains</strong>,
+              includes: (
+                <strong>
+                  {i18n.translate('xpack.streams.conditionEditor.strong.includesLabel', {
+                    defaultMessage: 'includes',
+                  })}
+                </strong>
+              ),
+              contains: (
+                <strong>
+                  {i18n.translate('xpack.streams.conditionEditor.strong.containsLabel', {
+                    defaultMessage: 'contains',
+                  })}
+                </strong>
+              ),
             }}
           />
         ) : undefined
@@ -280,7 +292,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
             setSyntaxEditorValue(value);
             try {
               const parsed = yaml.parse(value);
-              if (!isConditionStrict(parsed)) {
+              if (!isCondition(parsed)) {
                 reportValidityChange(false);
                 debouncedEmitConditionChange.cancel();
                 return;

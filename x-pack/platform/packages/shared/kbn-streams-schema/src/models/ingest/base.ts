@@ -45,7 +45,7 @@ interface IngestStreamPrivileges {
   create_snapshot_repository: boolean;
 }
 
-const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
+const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.strictObject({
   manage: z.boolean(),
   monitor: z.boolean(),
   view_index_metadata: z.boolean(),
@@ -74,13 +74,13 @@ export const ingestBaseSchemaFields = {
 export const ingestBaseUpsertSchemaFields = {
   ...ingestBaseSchemaFields,
   processing: ingestStreamProcessingSchema.merge(
-    z.object({ updated_at: z.undefined().optional() })
+    z.strictObject({ updated_at: z.undefined().optional() })
   ),
 };
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
-  z.object(ingestBaseSchemaFields)
+  z.strictObject(ingestBaseSchemaFields)
 );
 
 type OmitIngestBaseUpsertProps<
@@ -95,7 +95,7 @@ export type IngestBaseUpsertRequest = OmitIngestBaseUpsertProps<IngestBase>;
 
 export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertRequest> = validation(
   z.unknown(),
-  z.object(ingestBaseUpsertSchemaFields)
+  z.strictObject(ingestBaseUpsertSchemaFields)
 );
 
 export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';

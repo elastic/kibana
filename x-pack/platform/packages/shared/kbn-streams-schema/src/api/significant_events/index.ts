@@ -56,7 +56,7 @@ interface SignificantEventsGetResponse {
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
-export const generatedSignificantEventQuerySchema = z.object({
+export const generatedSignificantEventQuerySchema = z.strictObject({
   type: queryTypeSchema,
   title: z.string(),
   esql: esqlQuerySchema,

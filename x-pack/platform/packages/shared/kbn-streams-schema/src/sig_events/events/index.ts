@@ -25,7 +25,7 @@ export const SIG_EVENT_STATUS_OPTIONS = [
 export const sigEventStatusSchema = z.enum(SIG_EVENT_STATUS_OPTIONS);
 export type SigEventStatus = z.infer<typeof sigEventStatusSchema>;
 
-export const sigEventSchema = z.object({
+export const sigEventSchema = z.strictObject({
   '@timestamp': z.iso.datetime({ offset: true }),
   created_at: z.iso.datetime({ offset: true }),
   event_id: z.string().max(MAX_ID_LENGTH),

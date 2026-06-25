@@ -34,7 +34,8 @@ export function validateStepsRecursively(
     if (isConditionBlock(step)) {
       // Validate condition field names
       if (step.condition) {
-        const conditionFields = extractFieldNamesFromCondition(step.condition as Condition);
+        const { steps: _steps, else: _else, ...condition } = step.condition;
+        const conditionFields = extractFieldNamesFromCondition(condition as Condition);
         for (const field of conditionFields) {
           if (hasInvalidFieldNameChars(field)) {
             errors.push({

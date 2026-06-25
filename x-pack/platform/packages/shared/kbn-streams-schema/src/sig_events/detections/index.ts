@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '../constants';
 
-const detectionEvidenceSchema = z.object({
+const detectionEvidenceSchema = z.strictObject({
   change_point_type: z.string().optional(),
   p_value: z.number().optional(),
 });
 
-export const detectionSchema = z.object({
+export const detectionSchema = z.strictObject({
   '@timestamp': z.iso.datetime(),
   kind: z.enum(['detection', 'quiet', 'handled']),
   processed: z.boolean(),

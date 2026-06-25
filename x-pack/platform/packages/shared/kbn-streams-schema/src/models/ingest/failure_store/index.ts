@@ -7,7 +7,7 @@
 
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
-import { NonEmptyString } from '@kbn/zod-helpers/v4';
+import { DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
 import { isSchema } from '../../../shared/type_guards';
 
 export interface FailureStoreStatsResponse {
@@ -70,49 +70,49 @@ const enabledWithoutLifecycleFailureStoreSchema = z.object({
   lifecycle: z.object({ disabled: z.strictObject({}) }),
 });
 
-const effectiveWithLifecycleFailureStoreSchema: z.Schema<EffectiveFailureStoreEnabledWithLifecycle> =
-  z.object({
-    lifecycle: z.object({
-      enabled: z.object({
-        data_retention: NonEmptyString.optional(),
-        is_default_retention: z.boolean(),
-      }),
+const effectiveWithLifecycleFailureStoreSchema = z.object({
+  lifecycle: z.object({
+    enabled: z.object({
+      data_retention: NonEmptyString.optional(),
+      is_default_retention: z.boolean(),
     }),
-  });
+  }),
+});
 
-export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z
-  .union([
+export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = DeepStrict(
+  z.union([
     effectiveWithLifecycleFailureStoreSchema,
     enabledWithoutLifecycleFailureStoreSchema,
     disabledFailureStoreSchema,
   ])
-  .meta({ id: 'EffectiveFailureStore' });
+).meta({ id: 'EffectiveFailureStore' });
 
-export const enabledFailureStoreSchema: z.Schema<FailureStoreEnabled> = z.union([
-  enabledWithLifecycleFailureStoreSchema,
-  enabledWithoutLifecycleFailureStoreSchema,
-]);
+export const enabledFailureStoreSchema: z.Schema<FailureStoreEnabled> = DeepStrict(
+  z.union([enabledWithLifecycleFailureStoreSchema, enabledWithoutLifecycleFailureStoreSchema])
+);
 
-export const failureStoreSchema: z.Schema<FailureStore> = z
-  .union([
+export const failureStoreSchema: z.Schema<FailureStore> = DeepStrict(
+  z.union([
     inheritFailureStoreSchema,
     disabledFailureStoreSchema,
     enabledWithLifecycleFailureStoreSchema,
     enabledWithoutLifecycleFailureStoreSchema,
   ])
-  .meta({ id: 'FailureStore' });
+).meta({ id: 'FailureStore' });
 
-export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.object({
+export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.strictObject({
   size: z.number().min(0).optional(),
   count: z.number().min(0).optional(),
   creationDate: z.number().min(0).optional(),
 });
 
 export const wiredIngestStreamEffectiveFailureStoreSchema: z.Schema<WiredIngestStreamEffectiveFailureStore> =
-  effectiveFailureStoreSchema.and(
-    z.object({
-      from: NonEmptyString,
-    })
+  DeepStrict(
+    z.union([
+      effectiveWithLifecycleFailureStoreSchema.extend({ from: NonEmptyString }),
+      enabledWithoutLifecycleFailureStoreSchema.extend({ from: NonEmptyString }),
+      disabledFailureStoreSchema.extend({ from: NonEmptyString }),
+    ])
   );
 
 export const isEnabledLifecycleFailureStore = (

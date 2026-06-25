@@ -35,7 +35,7 @@ export const INFERRED_FEATURE_TYPES = [
 ] as const;
 
 // TODO: it would be nice to rename id->slug and uuid->id for consistency with queries
-export const baseFeatureSchema = z.object({
+export const baseFeatureSchema = z.strictObject({
   id: z.string(),
   stream_name: z.string(),
   type: z.string(),
@@ -57,7 +57,7 @@ export type BaseFeature = z.infer<typeof baseFeatureSchema>;
 export const identifiedFeatureSchema = baseFeatureSchema
   .omit({ subtype: true, title: true, evidence: true, tags: true })
   .and(
-    z.object({
+    z.strictObject({
       subtype: z.string(),
       title: z.string(),
       evidence: z.array(z.string()),
@@ -67,7 +67,7 @@ export const identifiedFeatureSchema = baseFeatureSchema
 
 export type IdentifiedFeature = z.infer<typeof identifiedFeatureSchema>;
 
-export const ignoredFeatureSchema = z.object({
+export const ignoredFeatureSchema = z.strictObject({
   feature_id: z.string(),
   feature_title: z.string(),
   excluded_feature_id: z.string(),
@@ -80,7 +80,7 @@ export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 // storage boundary (see `computeFeatureUuid` / `toStoredFeature`), so it is not
 // part of the input — callers never supply it.
 export const featureUpsertSchema = baseFeatureSchema.and(
-  z.object({
+  z.strictObject({
     run_id: z.string().optional(),
     excluded: z.boolean().optional(),
     updated_at: z.iso.datetime().optional(),
@@ -93,7 +93,7 @@ export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
 // Canonical persisted feature. Once a feature has been stored and read back it
 // always carries its derived `uuid`.
 export const featureSchema = featureUpsertSchema.and(
-  z.object({
+  z.strictObject({
     uuid: z.string().max(MAX_ID_LENGTH),
   })
 );

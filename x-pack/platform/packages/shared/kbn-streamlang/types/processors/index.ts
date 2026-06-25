@@ -35,7 +35,7 @@ export interface ProcessorBase {
 }
 
 const processorBaseSchema = z
-  .object({
+  .strictObject({
     customIdentifier: z
       .optional(NonEmptyString)
       .describe('Custom identifier to correlate this processor across outputs'),
@@ -640,7 +640,7 @@ export interface JsonExtraction {
 }
 
 const jsonExtractionSchema = z
-  .object({
+  .strictObject({
     selector: NonEmptyString.describe(
       'JSONPath-like selector to extract value (e.g., "user.id", "$.metadata.client.ip", "items[0].name")'
     ),
@@ -685,7 +685,7 @@ interface ConcatFromField {
   value: string;
 }
 
-const concatFromFieldSchema = z.object({
+const concatFromFieldSchema = z.strictObject({
   type: z.literal('field'),
   value: StreamlangSourceField,
 }) satisfies z.Schema<ConcatFromField>;
@@ -695,7 +695,7 @@ interface ConcatFromLiteral {
   value: string;
 }
 
-const concatFromLiteralSchema = z.object({
+const concatFromLiteralSchema = z.strictObject({
   type: z.literal('literal'),
   value: z.string(),
 }) satisfies z.Schema<ConcatFromLiteral>;
@@ -729,17 +729,9 @@ export interface NetworkDirectionWithInternalNetworks {
   internal_networks: string[];
 }
 
-const networkDirectionWithInternalNetworksSchema = z.object({
-  internal_networks: z.array(z.string()),
-}) satisfies z.Schema<NetworkDirectionWithInternalNetworks>;
-
 export interface NetworkDirectionWithInternalNetworksField {
   internal_networks_field: string;
 }
-
-const networkDirectionWithInternalNetworksFieldSchema = z.object({
-  internal_networks_field: StreamlangSourceField,
-}) satisfies z.Schema<NetworkDirectionWithInternalNetworksField>;
 
 export interface NetworkDirectionCommonFields extends ProcessorBaseWithWhere {
   action: 'network_direction';
@@ -760,13 +752,14 @@ const networkDirectionCommonFieldsSchema = processorBaseWithWhereSchema.extend({
 export type NetworkDirectionProcessor = NetworkDirectionCommonFields &
   (NetworkDirectionWithInternalNetworks | NetworkDirectionWithInternalNetworksField);
 
-export const networkDirectionProcessorSchema = z.intersection(
-  networkDirectionCommonFieldsSchema,
-  z.union([
-    networkDirectionWithInternalNetworksSchema,
-    networkDirectionWithInternalNetworksFieldSchema,
-  ])
-) satisfies z.Schema<NetworkDirectionProcessor>;
+export const networkDirectionProcessorSchema = z.union([
+  networkDirectionCommonFieldsSchema.extend({
+    internal_networks: z.array(z.string().max(100)),
+  }),
+  networkDirectionCommonFieldsSchema.extend({
+    internal_networks_field: StreamlangSourceField,
+  }),
+]) satisfies z.Schema<NetworkDirectionProcessor>;
 
 /**
  * Enrich processor

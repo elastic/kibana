@@ -130,6 +130,31 @@ describe('zod', () => {
         required: ['name'],
       });
     });
+
+    test('convert handles DeepStrict-wrapped schema nested inside another schema', () => {
+      const wrapped = DeepStrict(
+        z.object({
+          name: z.string(),
+          age: z.number().optional(),
+        })
+      );
+      const outer = z.object({ field: wrapped });
+
+      const result = convert(outer as any);
+      expect(result.schema).toMatchObject({
+        type: 'object',
+        properties: {
+          field: {
+            type: 'object',
+            properties: {
+              age: { type: 'number' },
+              name: { type: 'string' },
+            },
+            required: ['name'],
+          },
+        },
+      });
+    });
   });
 
   describe('convertPathParameters', () => {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { createIsNarrowSchema, DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
+import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
 
 export const stringOrNumberOrBoolean = z
   .union([z.string(), z.number(), z.boolean()])
@@ -78,7 +78,7 @@ export const operatorToHumanReadableNameMap = {
 };
 
 export const rangeConditionSchema = z
-  .object({
+  .strictObject({
     gt: stringOrNumberOrBoolean.optional(),
     gte: stringOrNumberOrBoolean.optional(),
     lt: stringOrNumberOrBoolean.optional(),
@@ -87,7 +87,7 @@ export const rangeConditionSchema = z
   .describe('A condition specifying a range of values.');
 // Shorthand binary: field + one of the operator keys
 export const shorthandBinaryFilterConditionSchema = z
-  .object({
+  .strictObject({
     field: NonEmptyString.describe('The document field to filter on.'),
     eq: stringOrNumberOrBoolean.optional().describe('Equality comparison value.'),
     neq: stringOrNumberOrBoolean.optional().describe('Inequality comparison value.'),
@@ -118,7 +118,7 @@ export interface ShorthandUnaryFilterCondition {
 
 // Shorthand unary
 export const shorthandUnaryFilterConditionSchema = z
-  .object({
+  .strictObject({
     field: NonEmptyString.describe('The document field to check.'),
     exists: z.boolean().optional().describe('Indicates whether the field exists or not.'),
   })
@@ -176,7 +176,7 @@ export const conditionSchema: z.Schema<Condition> = z
   .meta({ id: 'Condition' });
 
 export const andConditionSchema = z
-  .object({
+  .strictObject({
     and: z
       .array(conditionSchema)
       .describe(
@@ -185,7 +185,7 @@ export const andConditionSchema = z
   })
   .describe('A logical AND that groups multiple conditions.');
 export const orConditionSchema = z
-  .object({
+  .strictObject({
     or: z
       .array(conditionSchema)
       .describe(
@@ -194,19 +194,19 @@ export const orConditionSchema = z
   })
   .describe('A logical OR that groups multiple conditions.');
 export const neverConditionSchema = z
-  .object({
+  .strictObject({
     never: z.strictObject({}).describe('An empty object. This condition never matches.'),
   })
   .describe('A condition that always evaluates to false.');
 export const alwaysConditionSchema = z
-  .object({
+  .strictObject({
     always: z.strictObject({}).describe('An empty object. This condition always matches.'),
   })
   .describe(
     'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
   );
 export const notConditionSchema = z
-  .object({
+  .strictObject({
     not: z.lazy(() => conditionSchema).describe('A condition that negates another condition.'),
   })
   .describe('A logical NOT that negates a condition.');
@@ -228,13 +228,6 @@ export const isAlwaysCondition = createIsNarrowSchema(conditionSchema, alwaysCon
 export const isNotCondition = createIsNarrowSchema(conditionSchema, notConditionSchema);
 
 export const isCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
-
-/**
- * Strict version of conditionSchema that rejects excess/unknown keys.
- * Pre-constructed for performance as DeepStrict creates proxy wrappers.
- */
-export const conditionSchemaStrict = DeepStrict(conditionSchema);
-export const isConditionStrict = createIsNarrowSchema(z.unknown(), conditionSchemaStrict);
 
 export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
 

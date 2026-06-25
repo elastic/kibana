@@ -10,7 +10,7 @@ import type {
   StreamlangDSLWithUpdatedAt,
   StreamlangStep,
 } from '../../types/streamlang';
-import { isConditionBlock, streamlangDSLSchemaStrict } from '../../types/streamlang';
+import { isConditionBlock, streamlangDSLSchema } from '../../types/streamlang';
 import {
   addDeterministicCustomIdentifiers,
   addDeterministicCustomIdentifiersFromIngestProcessing,
@@ -81,7 +81,7 @@ describe('addDeterministicCustomIdentifiers', () => {
     const result = addDeterministicCustomIdentifiersFromIngestProcessing(processingFromApi);
 
     expect(result).not.toHaveProperty('updated_at');
-    expect(streamlangDSLSchemaStrict.safeParse(result).success).toBe(true);
+    expect(streamlangDSLSchema.safeParse(result).success).toBe(true);
   });
 });
 
