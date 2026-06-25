@@ -5,28 +5,38 @@
  * 2.0.
  */
 
-import type { InvestigatorEvaluator, InvestigatorOutput } from '../types';
+import type { Discovery } from '@kbn/streams-schema';
+import type { InvestigatorEvaluator } from '../../types';
 
-const VALID_KINDS = new Set(['discovery', 'clearance', 'handled']);
+const VALID_KINDS = new Set<Discovery['kind']>(['discovery', 'clearance', 'handled']);
 
-const REQUIRED_FIELDS = [
+const REQUIRED_FIELDS: Array<keyof Discovery> = [
   'kind',
   'title',
   'summary',
-  'discovery_id',
-  'discovery_slug',
+  'criticality',
+  'confidence',
   'detections',
-] as const;
+  'cause_kis',
+  'discovery_slug',
+  'dependency_edges',
+  'infra_components',
+  'evidences',
+];
+
+function isCriticalityValid(value: unknown): boolean {
+  return value == null || (typeof value === 'number' && value >= 0 && value <= 100);
+}
 
 /**
- * CODE evaluator: validates that each discovery has all required fields and
- * a valid `kind`. Score = valid_docs / total_docs.
+ * CODE evaluator: validates that each discovery has all required fields, a valid `kind`, and a
+ * `criticality` (when present) that is a number in 0–100. Score = valid_docs / total_docs.
  */
 export const schemaValidityInvestigatorEvaluator: InvestigatorEvaluator = {
   name: 'schema_validity',
   kind: 'CODE',
   evaluate: ({ output }) => {
-    const discoveries = (output as InvestigatorOutput)?.discoveries ?? [];
+    const discoveries = output.discoveries ?? [];
 
     if (discoveries.length === 0) {
       return Promise.resolve({ score: 0, explanation: 'No discoveries returned' });
@@ -36,14 +46,17 @@ export const schemaValidityInvestigatorEvaluator: InvestigatorEvaluator = {
     const issues: string[] = [];
 
     for (const [i, discovery] of discoveries.entries()) {
-      const doc = discovery as Record<string, unknown>;
-      const missing = REQUIRED_FIELDS.filter((f) => doc[f] == null);
+      const missing = REQUIRED_FIELDS.filter((f) => discovery[f] == null);
       if (missing.length > 0) {
         issues.push(`[${i}] missing fields: ${missing.join(', ')}`);
         continue;
       }
-      if (!VALID_KINDS.has(doc.kind as string)) {
-        issues.push(`[${i}] invalid kind: ${doc.kind}`);
+      if (!VALID_KINDS.has(discovery.kind)) {
+        issues.push(`[${i}] invalid kind: ${discovery.kind}`);
+        continue;
+      }
+      if (!isCriticalityValid(discovery.criticality)) {
+        issues.push(`[${i}] invalid criticality: ${discovery.criticality}`);
         continue;
       }
       validCount++;

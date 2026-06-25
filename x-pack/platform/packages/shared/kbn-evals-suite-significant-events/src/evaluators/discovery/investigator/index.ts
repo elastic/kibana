@@ -15,10 +15,17 @@ import type {
   InvestigatorOutput,
   ScenarioCriteriaConfig,
 } from '../types';
-import { schemaValidityInvestigatorEvaluator } from './schema_validity';
-import { toolUsageSequenceEvaluator } from './tool_usage_sequence';
-import { executeEsqlCoverageEvaluator } from './execute_esql_coverage';
-import { createKindCorrectnessEvaluator } from './kind_correctness';
+import {
+  createToolTrajectoryEvaluator,
+  createExecuteEsqlGroundingEvaluator,
+} from '../common/tool_usage/tool_usage_validation';
+import {
+  createCriticalityCalibrationEvaluator,
+  createConfidenceCalibrationEvaluator,
+} from '../calibration';
+import { schemaValidityInvestigatorEvaluator } from './schema/schema_validity';
+import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
+import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 
 export type { ScenarioCriteriaConfig } from '../types';
 
@@ -31,8 +38,10 @@ export const createInvestigatorEvaluators = (
 ): Array<Evaluator<InvestigatorEvaluationExample, InvestigatorOutput>> => {
   const codeEvaluators: InvestigatorEvaluator[] = [
     schemaValidityInvestigatorEvaluator,
-    toolUsageSequenceEvaluator,
-    executeEsqlCoverageEvaluator,
+    groupingCorrectnessEvaluator,
+    evidenceCollectionEvaluator,
+    createToolTrajectoryEvaluator() as InvestigatorEvaluator,
+    createExecuteEsqlGroundingEvaluator() as InvestigatorEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);
@@ -42,14 +51,27 @@ export const createInvestigatorEvaluators = (
   }
 
   const { criteriaFn, criteria } = scenarioCriteria;
+  const toCriteria = (c: Parameters<typeof criteriaFn>[0]) =>
+    criteriaFn(c) as Evaluator<InvestigatorEvaluationExample, InvestigatorOutput>;
+  // Drop the bulky `steps` before the calibration judge sees the output.
+  const withoutSteps = (output: InvestigatorOutput): InvestigatorOutput => ({
+    ...output,
+    steps: [],
+  });
 
   return [
     ...base,
-    createKindCorrectnessEvaluator(criteriaFn),
     createScenarioCriteriaLlmEvaluator<InvestigatorEvaluationExample, InvestigatorOutput>({
-      criteriaFn: (c) =>
-        criteriaFn(c) as Evaluator<InvestigatorEvaluationExample, InvestigatorOutput>,
+      criteriaFn: toCriteria,
       criteria,
+    }),
+    createCriticalityCalibrationEvaluator<InvestigatorEvaluationExample, InvestigatorOutput>({
+      criteriaFn,
+      transformOutput: withoutSteps,
+    }),
+    createConfidenceCalibrationEvaluator<InvestigatorEvaluationExample, InvestigatorOutput>({
+      criteriaFn,
+      transformOutput: withoutSteps,
     }),
   ];
 };

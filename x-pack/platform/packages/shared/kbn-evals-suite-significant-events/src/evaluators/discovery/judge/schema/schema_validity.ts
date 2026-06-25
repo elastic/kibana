@@ -5,28 +5,38 @@
  * 2.0.
  */
 
-import type { JudgeEvaluator, JudgeOutput } from '../types';
+import type { SigEvent } from '@kbn/streams-schema';
+import type { JudgeEvaluator } from '../../types';
 
-const VALID_STATUSES = new Set(['promoted', 'acknowledged', 'demoted', 'resolved']);
-const VALID_IMPACTS = new Set(['critical', 'high', 'medium', 'low']);
-const REQUIRED_FIELDS = [
-  'event_id',
+const VALID_STATUSES = new Set<SigEvent['status']>([
+  'promoted',
+  'acknowledged',
+  'demoted',
+  'resolved',
+]);
+const REQUIRED_FIELDS: Array<keyof SigEvent> = [
   'discovery_id',
   'discovery_slug',
   'status',
-  'stream_names',
-] as const;
+  'criticality',
+  'confidence',
+  'assessment_note',
+  'evidences',
+];
+
+function isCriticalityValid(value: unknown): boolean {
+  return value == null || (typeof value === 'number' && value >= 0 && value <= 100);
+}
 
 /**
- * CODE evaluator: validates required `SigEvent` fields and that
- * `status` and `impact` values are within allowed sets.
- * Score = valid_docs / total_docs.
+ * CODE evaluator: validates required `SigEvent` fields, that `status` is in the allowed set, and
+ * that `criticality` (when present) is a number in 0–100. Score = valid_docs / total_docs.
  */
 export const schemaValidityJudgeEvaluator: JudgeEvaluator = {
   name: 'schema_validity',
   kind: 'CODE',
   evaluate: ({ output }) => {
-    const events = (output as JudgeOutput)?.significantEvents ?? [];
+    const events = output.significantEvents ?? [];
 
     if (events.length === 0) {
       return Promise.resolve({ score: 0, explanation: 'No significant events returned' });
@@ -36,18 +46,17 @@ export const schemaValidityJudgeEvaluator: JudgeEvaluator = {
     const issues: string[] = [];
 
     for (const [i, event] of events.entries()) {
-      const doc = event as Record<string, unknown>;
-      const missing = REQUIRED_FIELDS.filter((f) => doc[f] == null);
+      const missing = REQUIRED_FIELDS.filter((f) => event[f] == null);
       if (missing.length > 0) {
         issues.push(`[${i}] missing fields: ${missing.join(', ')}`);
         continue;
       }
-      if (!VALID_STATUSES.has(doc.status as string)) {
-        issues.push(`[${i}] invalid status: ${doc.status}`);
+      if (!VALID_STATUSES.has(event.status)) {
+        issues.push(`[${i}] invalid status: ${event.status}`);
         continue;
       }
-      if (doc.impact != null && !VALID_IMPACTS.has(doc.impact as string)) {
-        issues.push(`[${i}] invalid impact: ${doc.impact}`);
+      if (!isCriticalityValid(event.criticality)) {
+        issues.push(`[${i}] invalid criticality: ${event.criticality}`);
         continue;
       }
       validCount++;

@@ -151,7 +151,6 @@ describe('createEvaluateExternalDataset', () => {
         latency: createTraceEvaluator('Latency'),
         toolCalls: createTraceEvaluator('ToolCalls'),
         cachedTokens: createTraceEvaluator('CachedTokens'),
-        cachedReadInputTokens: createTraceEvaluator('CachedReadInputTokens'),
       },
     };
   }

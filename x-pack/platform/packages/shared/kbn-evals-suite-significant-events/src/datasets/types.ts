@@ -19,7 +19,6 @@ interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
   failure_domain: string;
   failure_mode?: string;
-  adversarial?: boolean;
 }
 
 export interface SnapshotSourceOverride {
@@ -95,12 +94,19 @@ export interface DiscoveryInvestigatorScenario {
     scenario_id: string;
     stream_name: string;
     detections: Array<Partial<Detection>>;
-    continuation_candidates?: Array<Partial<Discovery>>;
+    continuation_candidates?: Array<Discovery>;
   };
   output: {
     criteria: SamplingCriterion[];
     expected_kind: 'discovery' | 'clearance' | 'handled' | 'any';
     expected_min_evidence_count?: number;
+    /**
+     * The discoveries the investigator is expected to produce — same shape as the judge's
+     * `input.discoveries` (detections + evidences + cause_kis). This is the canonical ground
+     * truth: the grouping check derives its expected groups from these `detections[].rule_name`s,
+     * and the same discoveries feed the judge scenario's input so the two stages stay consistent.
+     */
+    expected_discoveries: Array<Partial<Discovery>>;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
