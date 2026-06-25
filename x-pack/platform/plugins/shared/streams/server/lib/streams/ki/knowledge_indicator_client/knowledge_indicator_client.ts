@@ -25,6 +25,7 @@ import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
 import { QueryRuleOrchestrator } from './query_rule_orchestrator';
+import { computeExpiresAt } from './serializers';
 
 export type {
   KIBulkOperation,
@@ -38,6 +39,7 @@ export class KnowledgeIndicatorClient {
   private readonly reader: IndicatorReader;
   private readonly searcher: IndicatorSearcher;
   private readonly orchestrator: QueryRuleOrchestrator;
+  private readonly ttlDays: number;
 
   constructor(
     deps: KnowledgeIndicatorClientDeps,
@@ -48,6 +50,7 @@ export class KnowledgeIndicatorClient {
     > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
   ) {
     const revisionReader = new RevisionReader(deps.esClient, deps.logger);
+    this.ttlDays = config.feature_ttl_days;
     this.writer = new IndicatorWriter(
       deps.dataStreamClient,
       deps.logger,
@@ -67,6 +70,10 @@ export class KnowledgeIndicatorClient {
 
   bulk(stream: string, operations: KIBulkOperation[]) {
     return this.writer.bulk(stream, operations);
+  }
+
+  getDefaultExpiresAt(): string {
+    return computeExpiresAt(new Date().toISOString(), this.ttlDays);
   }
 
   deleteIndicators(stream: string) {
