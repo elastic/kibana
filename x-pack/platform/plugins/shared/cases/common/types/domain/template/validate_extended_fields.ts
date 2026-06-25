@@ -118,7 +118,7 @@ const validateField = (field: InlineField, value: string, errors: string[]): voi
 export const validateExtendedFields = (
   extendedFields: Record<string, string>,
   fields: Array<RefField | InlineField>,
-  { partial = false }: { partial?: boolean } = {}
+  { partial = false, onClose = false }: { partial?: boolean; onClose?: boolean } = {}
 ): string[] => {
   const errors: string[] = [];
   const inlineFields = fields.filter(isInlineField);
@@ -160,7 +160,8 @@ export const validateExtendedFields = (
         field.validation?.required === true ||
         (field.validation?.required_when
           ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
-          : false);
+          : false) ||
+        (onClose && field.validation?.required_on_close === true);
 
       if (isRequired && isEmpty) {
         errors.push(`Field "${field.label ?? field.name}" is required`);
