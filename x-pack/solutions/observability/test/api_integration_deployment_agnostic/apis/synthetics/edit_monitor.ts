@@ -156,9 +156,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...savedMonitor,
         [ConfigKey.LABELS]: { team: 'obs' },
         [ConfigKey.REQUEST_HEADERS_CHECK]: { sampleHeader: 'sampleHeaderValue' },
-      };
+      } as any;
 
-      await editMonitor(toUpdate as MonitorFields, monitorId);
+      await editMonitor(toUpdate, monitorId);
 
       const updatedResponse = await monitorTestService.getMonitor(monitorId, {
         internal: true,
