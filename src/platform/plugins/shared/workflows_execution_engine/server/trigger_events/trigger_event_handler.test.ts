@@ -495,7 +495,7 @@ describe('TriggerEventHandler', () => {
       id: 'cases.attachmentsAdded',
       domainEventType: 'cases.attachmentsAdded',
       eventSchema: okEventSchema,
-      // No matchesDomainEvent: should match every cases.attachmentsAdded event.
+      // No shouldHandleDomainEvent: should handle every cases.attachmentsAdded event.
       mapEvent: (event: any) => event.payload,
     };
 
@@ -503,7 +503,7 @@ describe('TriggerEventHandler', () => {
       id: 'cases.filteredAttachments',
       domainEventType: 'cases.attachmentsAdded',
       eventSchema: okEventSchema,
-      matchesDomainEvent: (event: any) => event.payload.attachmentType === 'comment',
+      shouldHandleDomainEvent: (event: any) => event.payload.attachmentType === 'comment',
       mapEvent: (event: any) => event.payload,
     };
 
@@ -544,7 +544,7 @@ describe('TriggerEventHandler', () => {
       );
     });
 
-    it('skips a trigger whose matchesDomainEvent returns false (non-comment attachment)', async () => {
+    it('skips a trigger whose shouldHandleDomainEvent returns false', async () => {
       const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
       const deps = createDomainDeps([attachmentsAddedTrigger, filteredAttachmentsTrigger], {
         scheduleWorkflow,
@@ -566,7 +566,7 @@ describe('TriggerEventHandler', () => {
       expect(scheduleWorkflow.mock.calls[0][1].triggeredBy).toBe('cases.attachmentsAdded');
     });
 
-    it('matches a trigger without matchesDomainEvent (omitted filter = match-all)', async () => {
+    it('handles a trigger without shouldHandleDomainEvent', async () => {
       const caseCreatedTrigger = {
         id: 'cases.caseCreated',
         domainEventType: 'cases.caseCreated',

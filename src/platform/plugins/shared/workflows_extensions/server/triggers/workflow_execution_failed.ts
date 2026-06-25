@@ -21,7 +21,7 @@ export type { WorkflowExecutionFailedEvent } from '../../common/triggers/workflo
 export const workflowExecutionFailedTriggerDefinition = createServerTriggerDefinition({
   ...commonWorkflowExecutionFailedTriggerDefinition,
   domainEventType: WORKFLOW_TERMINATED_EVENT_TYPE,
-  matchesDomainEvent: (event) => event.payload.status === 'failed',
+  shouldHandleDomainEvent: (event) => event.payload.status === 'failed',
   mapEvent: (event) => ({
     workflow: event.payload.workflow,
     execution: event.payload.execution,

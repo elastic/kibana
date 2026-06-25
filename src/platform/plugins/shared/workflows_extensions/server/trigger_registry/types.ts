@@ -19,7 +19,7 @@ export interface ServerTriggerDefinition<
   /** Bus event type this trigger listens to. Omit for emitEvent-only triggers. */
   domainEventType?: TDomainEventType;
   /** When omitted, all events of {@link domainEventType} are candidates. */
-  matchesDomainEvent?: (event: DomainEvent) => boolean;
+  shouldHandleDomainEvent?: (event: DomainEvent) => boolean;
   /** When omitted, trigger payload defaults to event.payload. */
   mapEvent?: (event: DomainEvent) => z.infer<EventSchema>;
 }
@@ -36,7 +36,7 @@ export function createServerTriggerDefinition<
 >(
   definition: CommonTriggerDefinition<EventSchema> & {
     domainEventType: TDomainEventType;
-    matchesDomainEvent?: (event: DomainEvent<TDomainEventType>) => boolean;
+    shouldHandleDomainEvent?: (event: DomainEvent<TDomainEventType>) => boolean;
     mapEvent?: (event: DomainEvent<TDomainEventType>) => z.infer<EventSchema>;
   }
 ): ServerTriggerDefinition<EventSchema, TDomainEventType> {

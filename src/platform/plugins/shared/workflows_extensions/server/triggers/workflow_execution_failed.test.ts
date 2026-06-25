@@ -32,12 +32,12 @@ const baseTerminatedPayload = {
 };
 
 describe('workflowExecutionFailedTriggerDefinition', () => {
-  const { mapEvent, matchesDomainEvent } = workflowExecutionFailedTriggerDefinition;
+  const { mapEvent, shouldHandleDomainEvent } = workflowExecutionFailedTriggerDefinition;
   const eventType = WORKFLOW_TERMINATED_EVENT_TYPE;
 
-  it('matchesDomainEvent returns true only for failed terminal status', () => {
+  it('shouldHandleDomainEvent returns true only for failed terminal status', () => {
     expect(
-      matchesDomainEvent!({
+      shouldHandleDomainEvent!({
         type: eventType,
         payload: { ...baseTerminatedPayload, status: 'failed' },
         request,
@@ -46,7 +46,7 @@ describe('workflowExecutionFailedTriggerDefinition', () => {
 
     for (const status of ['completed', 'cancelled', 'timed_out', 'skipped'] as const) {
       expect(
-        matchesDomainEvent!({
+        shouldHandleDomainEvent!({
           type: eventType,
           payload: { ...baseTerminatedPayload, status },
           request,

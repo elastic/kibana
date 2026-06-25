@@ -406,8 +406,8 @@ export class TriggerEventHandler {
     const triggers: ServerTriggerDefinition[] = [];
     for (const triggerId of triggerIds) {
       const trigger = this.workflowsExtensions.getTriggerDefinition(triggerId);
-      // A trigger without `matchesDomainEvent` matches every event of its `domainEventType`.
-      if (trigger && (!trigger.matchesDomainEvent || trigger.matchesDomainEvent(event))) {
+      // A trigger without `shouldHandleDomainEvent` handles every event of its `domainEventType`.
+      if (trigger && (!trigger.shouldHandleDomainEvent || trigger.shouldHandleDomainEvent(event))) {
         triggers.push(trigger);
       }
     }
