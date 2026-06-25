@@ -125,6 +125,10 @@ describe('WHERE Autocomplete', () => {
       ]);
     });
 
+    test('at the start of a parenthesized expression', async () => {
+      await whereExpectSuggestions('from a | where (', EMPTY_WHERE_SUGGESTIONS);
+    });
+
     test('suggests dates after a comparison with a date', async () => {
       const expectedFields = getFieldNamesByType(['date', 'date_nanos']);
       mockFieldsWithTypes(mockCallbacks, expectedFields);
