@@ -53,26 +53,25 @@ const SCENARIOS: RoleScenario[] = [
  */
 test.describe('Management pages — required privileges', { tag: '@local-stateful-classic' }, () => {
   for (const { name, role, allowed } of SCENARIOS) {
+    const denied = ALL_APPS.filter((app) => !allowed.includes(app));
+
     test(`${name}`, async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(role);
 
-      for (const app of ALL_APPS) {
-        const isAllowed = allowed.includes(app);
-        const stepName = isAllowed
-          ? `${app} is accessible`
-          : `${app} shows the privileges interstitial`;
-
-        await test.step(stepName, async () => {
+      for (const app of allowed) {
+        await test.step(`${app} is accessible`, async () => {
           await pageObjects.alertingV2Access.goto(app);
+          await expect(pageObjects.alertingV2Access.pageHeading(app)).toBeVisible();
+          await expect(pageObjects.alertingV2Access.requiredPrivilegesPrompt).toBeHidden();
+        });
+      }
 
-          if (isAllowed) {
-            await expect(pageObjects.alertingV2Access.pageHeading(app)).toBeVisible();
-            await expect(pageObjects.alertingV2Access.requiredPrivilegesPrompt).toBeHidden();
-          } else {
-            await expect(pageObjects.alertingV2Access.requiredPrivilegesPrompt).toBeVisible();
-            await expect(pageObjects.alertingV2Access.requiredPrivilegeItem(app)).toBeVisible();
-            await expect(pageObjects.alertingV2Access.pageHeading(app)).toBeHidden();
-          }
+      for (const app of denied) {
+        await test.step(`${app} shows the privileges interstitial`, async () => {
+          await pageObjects.alertingV2Access.goto(app);
+          await expect(pageObjects.alertingV2Access.requiredPrivilegesPrompt).toBeVisible();
+          await expect(pageObjects.alertingV2Access.requiredPrivilegeItem(app)).toBeVisible();
+          await expect(pageObjects.alertingV2Access.pageHeading(app)).toBeHidden();
         });
       }
     });
