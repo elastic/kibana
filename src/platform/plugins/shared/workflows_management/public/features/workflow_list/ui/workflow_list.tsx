@@ -29,11 +29,13 @@ import { useEventDrivenExecutionStatus } from './use_event_driven_execution_stat
 import { useExportWithReferences } from './use_export_with_references';
 import { WorkflowListTable } from './workflow_list_table';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
+import { PLUGIN_ID } from '../../../../common';
 import { WorkflowsEmptyState } from '../../../components';
 import { WorkflowsEmptyStateReadOnly } from '../../../components/workflows_empty_state/workflows_empty_state';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
+import { getWorkflowDetailRouteState } from '../../../shared/utils/workflow_navigation';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
@@ -92,6 +94,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+  const workflowDetailRouteState = useMemo(
+    () => getWorkflowDetailRouteState(location.search),
+    [location.search]
+  );
 
   const allWorkflowsMap = useMemo(
     () => new Map((workflows?.results ?? []).map((w) => [w.id, w])),
@@ -164,11 +170,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             notifications?.toasts.addSuccess('Workflow run started', {
               toastLifeTimeMs: 3000,
             });
-            application.navigateToUrl(
-              application.getUrlForApp('workflows', {
-                path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
-              })
-            );
+            void application.navigateToApp(PLUGIN_ID, {
+              path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
+              state: workflowDetailRouteState,
+            });
           },
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
@@ -179,7 +184,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         }
       );
     },
-    [application, notifications, runWorkflow]
+    [application, notifications, runWorkflow, workflowDetailRouteState]
   );
 
   const handleCloseExecuteModal = useCallback(() => {
@@ -262,12 +267,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     [notifications?.toasts, updateWorkflow]
   );
 
-  const getEditHref = useCallback(
-    (item: WorkflowListItemDto) =>
-      application.getUrlForApp('workflows', {
+  const handleEditWorkflow = useCallback(
+    (item: WorkflowListItemDto) => {
+      void application.navigateToApp(PLUGIN_ID, {
         path: `/${item.id}`,
-      }),
-    [application]
+        state: workflowDetailRouteState,
+      });
+    },
+    [application, workflowDetailRouteState]
   );
 
   const showStart = useMemo(() => (page - 1) * size + 1, [page, size]);
@@ -378,7 +385,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onCloneWorkflow={handleCloneWorkflow}
         onExportWorkflow={handleExportWorkflow}
         onRequestRun={setExecuteWorkflow}
-        getEditHref={getEditHref}
+        onEditWorkflow={handleEditWorkflow}
         workflowsListSearch={location.search}
         canCreateWorkflow={!!canCreateWorkflow}
         canReadWorkflow={!!canReadWorkflow}

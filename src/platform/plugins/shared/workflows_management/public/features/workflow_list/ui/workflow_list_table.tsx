@@ -54,7 +54,7 @@ export interface WorkflowListTableProps {
   onCloneWorkflow: (item: WorkflowListItemDto) => void;
   onExportWorkflow: (item: WorkflowListItemDto) => void;
   onRequestRun: (item: WorkflowListItemDto) => void;
-  getEditHref: (item: WorkflowListItemDto) => string;
+  onEditWorkflow: (item: WorkflowListItemDto) => void;
   canCreateWorkflow: boolean;
   canReadWorkflow: boolean;
   canReadWorkflowExecution: boolean;
@@ -80,7 +80,7 @@ export const WorkflowListTable = ({
   onCloneWorkflow,
   onExportWorkflow,
   onRequestRun,
-  getEditHref,
+  onEditWorkflow,
   canCreateWorkflow,
   canReadWorkflow,
   canReadWorkflowExecution,
@@ -316,7 +316,7 @@ export const WorkflowListTable = ({
             description: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit workflow',
             }),
-            href: (item: WorkflowListItemDto) => getEditHref(item),
+            onClick: (item: WorkflowListItemDto) => onEditWorkflow(item),
           },
           {
             enabled: () => canCreateWorkflow && canReadWorkflow,
@@ -369,7 +369,7 @@ export const WorkflowListTable = ({
       canExecuteWorkflow,
       canCreateWorkflow,
       canDeleteWorkflow,
-      getEditHref,
+      onEditWorkflow,
       workflowsListSearch,
       onToggleWorkflow,
       onCloneWorkflow,
