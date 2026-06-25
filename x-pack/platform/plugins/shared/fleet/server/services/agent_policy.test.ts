@@ -2757,21 +2757,16 @@ describe('Agent policy', () => {
   });
 
   describe('getInactivityTimeouts', () => {
-    const createPolicySO = (id: string, inactivityTimeout: number) => ({
-      id,
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-      attributes: { inactivity_timeout: inactivityTimeout },
-      references: [],
-      score: 1,
-    });
-
-    const createMockSoClientThatReturns = (policies: Array<ReturnType<typeof createPolicySO>>) => {
+    const createMockSoClientThatReturns = (
+      values: Array<[number, string | string[]]>
+    ): ReturnType<typeof createSavedObjectClientMock> => {
       const mockSoClient = createSavedObjectClientMock();
-      mockSoClient.find.mockResolvedValue({
-        saved_objects: policies,
-        page: 1,
-        per_page: 10,
-        total: policies.length,
+      mockSoClient.esql.mockResolvedValue({
+        columns: [
+          { name: 'inactivityTimeout', type: 'integer' },
+          { name: 'policyIds', type: 'keyword' },
+        ],
+        values,
       });
       return mockSoClient;
     };
@@ -2784,18 +2779,34 @@ describe('Agent policy', () => {
       expect(await agentPolicyService.getInactivityTimeouts()).toEqual([]);
     });
     it('should return single inactivity timeout', async () => {
-      const mockSoClient = createMockSoClientThatReturns([createPolicySO('policy1', 1000)]);
+      const mockSoClient = createMockSoClientThatReturns([
+        [1000, `${AGENT_POLICY_SAVED_OBJECT_TYPE}:policy1`],
+      ]);
       mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
         mockSoClient
       );
       expect(await agentPolicyService.getInactivityTimeouts()).toEqual([
         { inactivityTimeout: 1000, policyIds: ['policy1'] },
       ]);
+      expect(mockSoClient.esql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          namespaces: ['*'],
+          metadata: ['_id'],
+          querySettings: { unmappedFields: 'load' },
+          pipeline: expect.any(Object),
+        })
+      );
     });
     it('should return group policies with same inactivity timeout', async () => {
       const mockSoClient = createMockSoClientThatReturns([
-        createPolicySO('policy1', 1000),
-        createPolicySO('policy2', 1000),
+        [
+          1000,
+          [
+            `${AGENT_POLICY_SAVED_OBJECT_TYPE}:policy1`,
+            `${AGENT_POLICY_SAVED_OBJECT_TYPE}:policy2`,
+          ],
+        ],
       ]);
       mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
         mockSoClient
@@ -2807,9 +2818,14 @@ describe('Agent policy', () => {
     });
     it('should return handle single and grouped policies', async () => {
       const mockSoClient = createMockSoClientThatReturns([
-        createPolicySO('policy1', 1000),
-        createPolicySO('policy2', 1000),
-        createPolicySO('policy3', 2000),
+        [
+          1000,
+          [
+            `${AGENT_POLICY_SAVED_OBJECT_TYPE}:policy1`,
+            `${AGENT_POLICY_SAVED_OBJECT_TYPE}:policy2`,
+          ],
+        ],
+        [2000, `${AGENT_POLICY_SAVED_OBJECT_TYPE}:policy3`],
       ]);
       mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
         mockSoClient

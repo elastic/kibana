@@ -51,11 +51,13 @@ New evidence can reopen this alignment.
 - `SavedObjectsEsqlOptions.querySettings.unmappedFields` generates `SET unmapped_fields="..."` before the Core-owned `FROM` clause.
 - A Core integration test verifies an unmapped Saved Object attribute can be aggregated from `_source` with `unmappedFields: 'load'`.
 - Alerting v2 `getTotalScheduledPerMinute()` now uses `savedObjectsClient.esql()` and no longer needs the `schedule.every` mapping/model-version addition.
+- Fleet `getInactivityTimeouts()` now uses `savedObjectsClient.esql()` with `inactivity_timeout::integer`, proving numeric casting over an unmapped Saved Object field loaded from `_source`.
 
 ## Validation
 
 - `node scripts/jest --config=src/core/packages/saved-objects/api-server-internal/jest.config.js src/core/packages/saved-objects/api-server-internal/src/lib/apis/esql.test.ts`
 - `node scripts/jest --config=x-pack/platform/plugins/shared/alerting_v2/jest.config.js x-pack/platform/plugins/shared/alerting_v2/server/lib/services/rules_saved_object_service/rules_saved_object_service.test.ts`
+- `node scripts/jest --config=x-pack/platform/plugins/shared/fleet/server/jest.config.js x-pack/platform/plugins/shared/fleet/server/services/agent_policy.test.ts --testNamePattern=getInactivityTimeouts`
 - `node scripts/jest_integration src/core/server/integration_tests/saved_objects/service/lib/esql.test.ts`
 - `node scripts/type_check --project src/core/packages/saved-objects/api-server/tsconfig.json`
 - `node scripts/type_check --project src/core/packages/saved-objects/api-server-internal/tsconfig.json`

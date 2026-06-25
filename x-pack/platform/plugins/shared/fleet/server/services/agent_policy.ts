@@ -11,6 +11,7 @@ import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import pMap from 'p-map';
 import { lt, minVersion, gt } from 'semver';
+import { esql } from '@elastic/esql';
 import type {
   AuthenticatedUser,
   ElasticsearchClient,
@@ -2396,23 +2397,25 @@ class AgentPolicyService {
     Array<{ policyIds: string[]; inactivityTimeout: number }>
   > {
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const colInactivityTimeout = esql.col(`${savedObjectType}.inactivity_timeout`);
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const findRes = await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
+
+    const result = await internalSoClientWithoutSpaceExtension.esql({
       type: savedObjectType,
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      filter: `${savedObjectType}.attributes.inactivity_timeout > 0`,
-      fields: [`inactivity_timeout`],
       namespaces: ['*'],
+      metadata: ['_id'],
+      querySettings: { unmappedFields: 'load' },
+      pipeline: esql`
+        EVAL inactivityTimeout = ${colInactivityTimeout}::integer
+        | WHERE inactivityTimeout > 0
+        | LIMIT ${SO_SEARCH_LIMIT}
+        | STATS policyIds = VALUES(_id) BY inactivityTimeout
+        | SORT inactivityTimeout
+      `,
     });
 
-    const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);
-
-    return Object.entries(groupedResults).map(([inactivityTimeout, policies]) => ({
-      inactivityTimeout: parseInt(inactivityTimeout, 10),
-      policyIds: policies.map((policy) => policy.id),
-    }));
+    return getInactivityTimeoutBuckets(result, savedObjectType);
   }
 
   public async turnOffAgentTamperProtections(soClient: SavedObjectsClientContract): Promise<{
@@ -2891,6 +2894,52 @@ class AgentPolicyService {
       );
     }
   }
+}
+
+function getInactivityTimeoutBuckets(
+  result: Awaited<ReturnType<SavedObjectsClientContract['esql']>>,
+  savedObjectType: string
+): Array<{ policyIds: string[]; inactivityTimeout: number }> {
+  const inactivityTimeoutColumnIndex = result.columns.findIndex(
+    (column) => column.name === 'inactivityTimeout'
+  );
+  const policyIdsColumnIndex = result.columns.findIndex((column) => column.name === 'policyIds');
+
+  if (inactivityTimeoutColumnIndex === -1 || policyIdsColumnIndex === -1) {
+    return [];
+  }
+
+  return result.values.flatMap((row) => {
+    const inactivityTimeout = row[inactivityTimeoutColumnIndex];
+    const policyIds = row[policyIdsColumnIndex];
+
+    if (typeof inactivityTimeout !== 'number') {
+      return [];
+    }
+
+    const parsedPolicyIds = getPolicyIdsFromEsqlValue(policyIds, savedObjectType);
+    if (parsedPolicyIds.length === 0) {
+      return [];
+    }
+
+    return [{ inactivityTimeout, policyIds: parsedPolicyIds }];
+  });
+}
+
+function getPolicyIdsFromEsqlValue(
+  value: estypes.FieldValue | estypes.FieldValue[],
+  savedObjectType: string
+): string[] {
+  const values = Array.isArray(value) ? value : [value];
+  const savedObjectIdPrefix = `${savedObjectType}:`;
+
+  return values.flatMap((rawId) => {
+    if (typeof rawId !== 'string') {
+      return [];
+    }
+
+    return rawId.startsWith(savedObjectIdPrefix) ? rawId.slice(savedObjectIdPrefix.length) : rawId;
+  });
 }
 
 export const agentPolicyService = new AgentPolicyService();
