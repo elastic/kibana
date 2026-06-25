@@ -12,7 +12,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
+import type { FeedbackRegistryEntry } from '@kbn/ui-feedback';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
@@ -39,13 +39,13 @@ interface FeedbackDeps {
 }
 
 const LazyFeedbackTriggerButton = lazy(() =>
-  import('@kbn/feedback-components').then(({ FeedbackTriggerButton }) => ({
+  import('@kbn/ui-feedback').then(({ FeedbackTriggerButton }) => ({
     default: FeedbackTriggerButton,
   }))
 );
 
 const LazyFeedbackContainer = lazy(() =>
-  import('@kbn/feedback-components').then(({ FeedbackContainer }) => ({
+  import('@kbn/ui-feedback').then(({ FeedbackContainer }) => ({
     default: FeedbackContainer,
   }))
 );
