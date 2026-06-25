@@ -19,6 +19,7 @@ import {
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _clearComputedData,
+  setActiveTab,
   setHasYamlSchemaValidationErrors,
   setWorkflow,
   setYamlString,
@@ -61,6 +62,9 @@ jest.mock('../../../entities/workflows/model/use_update_workflow', () => ({
 }));
 jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
   useMemoCss: (styles: any) => mockUseMemoCss(styles),
+}));
+jest.mock('./workflow_detail_actions_menu', () => ({
+  WorkflowDetailActionsMenu: () => <div data-test-subj="workflowChangeHistoryEmbed" />,
 }));
 
 describe('WorkflowDetailHeader', () => {
@@ -471,5 +475,29 @@ describe('WorkflowDetailHeader', () => {
       });
       expect(result.getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
     });
+  });
+
+  it('renders change history embed on workflow tab when workflow id is present', () => {
+    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+    expect(getByTestId('workflowChangeHistoryEmbed')).toBeInTheDocument();
+  });
+
+  it('does not render change history embed on executions tab', () => {
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      setActiveTab: jest.fn(),
+    });
+
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    store.dispatch(setYamlString(mockWorkflow.yaml));
+    store.dispatch(setActiveTab('executions'));
+
+    const { queryByTestId } = render(<WorkflowDetailHeader {...defaultProps} />, {
+      wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
+    });
+
+    expect(queryByTestId('workflowChangeHistoryEmbed')).not.toBeInTheDocument();
   });
 });
