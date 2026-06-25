@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { OnboardingFlowForm } from './onboarding_flow_form';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
-import { MemoryRouter } from 'react-router-dom-v5-compat';
+import { MemoryRouter, useLocation } from 'react-router-dom-v5-compat';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../..';
@@ -69,6 +69,11 @@ const renderWithProviders = (children: React.ReactNode, initialEntries: string[]
       <I18nProvider>{children}</I18nProvider>
     </MemoryRouter>
   );
+};
+
+const LocationDisplay = () => {
+  const location = useLocation();
+  return <div data-test-subj="location-display">{`${location.pathname}${location.search}`}</div>;
 };
 
 describe('OnboardingFlowForm', () => {
@@ -138,6 +143,21 @@ describe('OnboardingFlowForm', () => {
       renderWithProviders(<OnboardingFlowForm />, ['/?category=kubernetes']);
 
       expect(screen.getByTestId('package-item-otel-kubernetes')).toBeInTheDocument();
+    });
+
+    it('navigates directly to the Kubernetes OTel flow when the Kubernetes tile is clicked, preserving query params', () => {
+      renderWithProviders(
+        <>
+          <OnboardingFlowForm />
+          <LocationDisplay />
+        </>,
+        ['/?foo=bar']
+      );
+
+      const kubernetesTile = screen.getByTestId('observabilityOnboardingUseCaseCard-kubernetes');
+      fireEvent.click(within(kubernetesTile).getByRole('radio'));
+
+      expect(screen.getByTestId('location-display')).toHaveTextContent('/kubernetes?foo=bar');
     });
 
     it('leads with the AWS quickstart in the provider grid and shows the AWS collection as a fallback below', () => {

@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
@@ -145,6 +145,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const { onPageReady } = usePerformanceContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const suggestedPackagesRef = useRef<HTMLDivElement | null>(null);
   const searchResultsRef = useRef<HTMLDivElement | null>(null);
@@ -301,7 +303,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                */
               onKeyDown={() => (isSelectingCategoryWithKeyboard = true)}
               onKeyUp={() => (isSelectingCategoryWithKeyboard = false)}
+              // onChange (not onClick) navigates the Kubernetes tile: it fires on
+              // selection in every browser (Chromium fires a spurious click on
+              // arrow-select that an onClick handler would catch) and avoids the
+              // label+radio bubble double-fire. Matches CollectionMethodSelector.
+              // Deep-links to ?category=kubernetes still render the category page.
               onChange={() => {
+                if (option.id === 'kubernetes') {
+                  navigate(`/kubernetes${location.search}`);
+                  return;
+                }
                 setIntegrationSearch('');
                 setSearchParams({ category: option.id }, { replace: true });
               }}

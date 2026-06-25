@@ -45,23 +45,21 @@ test.describe('Onboarding UI Validation', () => {
         await pageObjects.onboarding.selectHostUseCase();
         expect(page.url()).toContain('category=host');
 
-        await pageObjects.onboarding.selectKubernetesUseCase();
-        expect(page.url()).toContain('category=kubernetes');
-
         await pageObjects.onboarding.selectCloudUseCase();
         expect(page.url()).toContain('category=cloud');
 
         await pageObjects.onboarding.selectApplicationUseCase();
         expect(page.url()).toContain('category=application');
+
+        await pageObjects.onboarding.selectKubernetesUseCase();
+        expect(page.url()).toMatch(/\/kubernetes(\?|$|#)/);
       });
 
       await test.step('shows correct quickstart flows for each use case', async () => {
+        await pageObjects.onboarding.goto();
         await pageObjects.onboarding.selectHostUseCase();
         await expect(pageObjects.onboarding.autoDetectLogsCard).toBeVisible();
         await expect(pageObjects.onboarding.otelLogsCard).toBeVisible();
-
-        await pageObjects.onboarding.selectKubernetesUseCase();
-        await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
 
         await pageObjects.onboarding.selectCloudUseCase();
         await expect(pageObjects.onboarding.awsLogsVirtualCard).toBeVisible();
@@ -72,6 +70,9 @@ test.describe('Onboarding UI Validation', () => {
         await expect(pageObjects.onboarding.apmVirtualCard).toBeVisible();
         await expect(pageObjects.onboarding.otelVirtualCard).toBeVisible();
         await expect(pageObjects.onboarding.syntheticsVirtualCard).toBeVisible();
+
+        await pageObjects.onboarding.selectKubernetesUseCase();
+        await expect(pageObjects.kubernetes.layout('otel')).toBeVisible();
       });
 
       await test.step('supports deep-linking to onboarding use cases', async () => {
@@ -127,9 +128,8 @@ test.describe('Onboarding UI Validation', () => {
       ],
     },
     async ({ page, pageObjects }) => {
-      await test.step('navigates correctly when Kubernetes OpenTelemetry card is clicked', async () => {
+      await test.step('navigates directly when Kubernetes use case is selected', async () => {
         await pageObjects.onboarding.selectKubernetesUseCase();
-        await pageObjects.onboarding.clickIntegrationCard('integration-card:otel-kubernetes');
         expect(page.url()).toContain('/kubernetes');
       });
     }
@@ -145,23 +145,15 @@ test.describe('Onboarding UI Validation', () => {
       ],
     },
     async ({ page, pageObjects }) => {
-      await test.step('selects Kubernetes use case and shows integration cards', async () => {
-        // tab to first item onboarding case card (radio group)
+      await test.step('navigates to /kubernetes when the Kubernetes tile is selected via keyboard', async () => {
+        // tab to the first use case card (radio group)
         await page.keyTo('[data-test-subj="observabilityOnboardingUseCaseCard-host"] input', 'Tab');
 
-        // press arrow key until the kubernetes use case is selected (radio group)
-        await page.keyTo(
-          '[data-test-subj="observabilityOnboardingUseCaseCard-kubernetes"] input',
-          'ArrowRight'
-        );
+        // ArrowRight selects the adjacent Kubernetes tile, which navigates directly
+        // to the OTel flow (selection, not a separate activation step, triggers nav)
+        await page.keyboard.press('ArrowRight');
 
-        await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
-      });
-
-      await test.step('navigates correctly when Kubernetes OpenTelemetry card is tabbed to and enter is pressed', async () => {
-        await page.keyTo('[data-test-subj="integration-card:otel-kubernetes"] button', 'Tab');
-        await page.keyboard.press('Enter');
-        expect(page.url()).toContain('/kubernetes');
+        await expect(page).toHaveURL(/\/kubernetes(\?|$|#)/);
       });
 
       await test.step('supports deep-linking to kubernetes category', async () => {
