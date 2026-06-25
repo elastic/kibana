@@ -8,7 +8,10 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  calculateNextRunAtFromSchedule,
+  type TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
@@ -134,8 +137,26 @@ export class WorkflowTaskScheduler {
         // are not returned in either `tasks` or `errors`. Recreate the deterministic workflow task
         // so it picks up the latest schedule interval and refreshed execution credentials.
         if (!result.tasks.some((task) => task.id === taskId)) {
+          const existingTask = await this.taskManager.get(taskId).catch((error) => {
+            if ((error as { statusCode?: number }).statusCode === NOT_FOUND_STATUS) {
+              return undefined;
+            }
+            throw error;
+          });
+          const recreatedTaskInstance = existingTask
+            ? {
+                ...taskInstance,
+                scheduledAt: existingTask.scheduledAt,
+                runAt: new Date(
+                  calculateNextRunAtFromSchedule({
+                    schedule,
+                    startDate: existingTask.scheduledAt,
+                  })
+                ),
+              }
+            : taskInstance;
           await this.taskManager.removeIfExists(taskId);
-          const scheduledTask = await this.taskManager.schedule(taskInstance, { request });
+          const scheduledTask = await this.taskManager.schedule(recreatedTaskInstance, { request });
           this.logger.debug(
             `Recreated scheduled task for workflow ${workflowId} after in-place update was skipped`
           );
