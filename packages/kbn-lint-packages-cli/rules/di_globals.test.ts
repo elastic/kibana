@@ -154,9 +154,9 @@ describe('extractArgIdentifiers', () => {
   });
 
   it('tolerates generic type arguments before the call', () => {
-    expect(extractArgIdentifiers(`getService<MyType>(container, MyToken);`, 'getService', 1)).toEqual(
-      ['MyToken']
-    );
+    expect(
+      extractArgIdentifiers(`getService<MyType>(container, MyToken);`, 'getService', 1)
+    ).toEqual(['MyToken']);
   });
 
   it('tolerates a member expression in a non-target argument position', () => {
@@ -187,7 +187,9 @@ describe('extractArgIdentifiers', () => {
 
   it('does not capture a non-identifier (call/member) in the target position', () => {
     expect(extractArgIdentifiers(`useService(makeToken());`, 'useService')).toEqual([]);
-    expect(extractArgIdentifiers(`getService(container, this.token);`, 'getService', 1)).toEqual([]);
+    expect(extractArgIdentifiers(`getService(container, this.token);`, 'getService', 1)).toEqual(
+      []
+    );
   });
 
   it('does not capture string-literal arguments as identifiers', () => {
