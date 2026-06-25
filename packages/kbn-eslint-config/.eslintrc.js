@@ -81,6 +81,7 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]scripts[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]server[\/\\]assistant[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]security[\/\\]test[\/\\]security_solution_cypress[\/\\]cypress[\/\\]support[\/\\]/,
+  /^x-pack[\/\\]solutions[\/\\]security[\/\\]test[\/\\]security_solution_playwright[\/\\]api_utils[\/\\]/,
 ];
 
 module.exports = {
