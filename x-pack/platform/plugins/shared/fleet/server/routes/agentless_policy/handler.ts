@@ -9,14 +9,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import pMap from 'p-map';
 
 import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
-import type { FleetRequestHandler } from '../../types';
 import { appContextService, packagePolicyService } from '../../services';
 import type {
   FleetRequestHandler,
   GetAgentlessPolicyRequestSchema,
   ListAgentlessPoliciesRequestSchema,
 } from '../../types';
-import { appContextService } from '../../services';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 import type {
   DeleteAgentlessPolicyRequestSchema,

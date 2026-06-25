@@ -9,14 +9,11 @@ import { type TypeOf, schema } from '@kbn/config-schema';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import type {
-  GetAgentlessPolicyRequestSchema,
-  ListAgentlessPoliciesRequestSchema,
-  AgentlessPolicyListResponseSchema,
-} from '../../../server/types';
-
 import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/package_policy_schema';
 import type { AgentlessPolicyResponseSchema } from '../models/agentless_policy_schema';
+import type { AgentlessPolicy } from '../models/agentless_policy';
+
+import type { ListResult, ListWithKuery } from './common';
 
 export const CreateAgentlessPolicyRequestSchema = {
   body: SimplifiedCreatePackagePolicyRequestBodySchema.extends(
@@ -194,14 +191,33 @@ export type GetBulkAgentlessPolicyThroughputResponse = TypeOf<
   typeof GetBulkAgentlessPolicyThroughputResponseSchema
 >;
 
+/**
+ * Params for the GET-by-id endpoint.
+ *
+ * Inline interface following the Fleet convention (see `GetOneAgentPolicyRequest`):
+ * request/response types live in `common/` while the runtime validation schema
+ * lives in `server/types/rest_spec/agentless_policy.ts`, so `common/` carries no
+ * dependency on `server/`. The two are kept in sync by the API integration tests.
+ */
 export interface GetAgentlessPolicyRequest {
-  params: TypeOf<typeof GetAgentlessPolicyRequestSchema.params>;
+  params: {
+    policyId: string;
+  };
 }
 
 export type GetAgentlessPolicyResponse = TypeOf<typeof AgentlessPolicyResponseSchema>;
 
+/**
+ * Query contract for the LIST endpoint.
+ *
+ * Derived from the shared {@link ListWithKuery} contract (the same source the
+ * service's `ListAgentlessPoliciesOptions` is built from) rather than the
+ * server-side validation schema, so `common/` carries no dependency on
+ * `server/`. The runtime schema in `server/types/rest_spec/agentless_policy.ts`
+ * only adds the server-only `kuery` validator on top of this exact shape.
+ */
 export interface ListAgentlessPoliciesRequest {
-  query: TypeOf<typeof ListAgentlessPoliciesRequestSchema.query>;
+  query: Pick<ListWithKuery, 'page' | 'perPage' | 'sortField' | 'sortOrder' | 'kuery'>;
 }
 
-export type ListAgentlessPoliciesResponse = TypeOf<typeof AgentlessPolicyListResponseSchema>;
+export type ListAgentlessPoliciesResponse = ListResult<AgentlessPolicy>;
