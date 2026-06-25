@@ -59,4 +59,4 @@ export const CaseViewSimilarCases = ({ caseData, searchTerm }: CaseViewSimilarCa
   );
 };
 
-CaseViewSimilarCases.displayName = 'CaseViewObservables';
+CaseViewSimilarCases.displayName = 'CaseViewSimilarCases';
