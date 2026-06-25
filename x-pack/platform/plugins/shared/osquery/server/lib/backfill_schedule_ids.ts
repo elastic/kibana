@@ -171,8 +171,9 @@ export const reconcileScheduleIdsToWire = async ({
       const error = err as Error & { statusCode?: number };
       if (error.statusCode === 409) {
         logger.debug(
-          `reconcileScheduleIdsToWire: version conflict for pack ${packSO.id}, skipping`
+          `reconcileScheduleIdsToWire: version conflict for pack ${packSO.id}, will retry`
         );
+        hadFailures = true;
       } else {
         logger.warn(
           `reconcileScheduleIdsToWire: failed to reconcile pack ${packSO.id}: ${error.message}`

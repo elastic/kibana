@@ -245,7 +245,7 @@ describe('reconcileScheduleIdsToWire', () => {
     );
   });
 
-  test('continues on version conflict (409)', async () => {
+  test('flags hadFailures on version conflict (409) so the one-shot task re-arms', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest
       .fn()
@@ -265,8 +265,10 @@ describe('reconcileScheduleIdsToWire', () => {
       logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
     });
 
-    // A 409 is benign churn, not a failure that should force a retry.
-    expect(result).toEqual({ hadFailures: false });
+    // A 409 means the pack's wire was NOT written this pass. Because the task
+    // is single-run, only `hadFailures: true` makes it re-arm and retry — a
+    // swallowed 409 would silently abandon the pack on a stale wire.
+    expect(result).toEqual({ hadFailures: true });
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('version conflict for pack pack-1')
     );

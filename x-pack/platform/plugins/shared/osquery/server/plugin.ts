@@ -49,25 +49,13 @@ import { registerFeatures } from './utils/register_features';
 import { osqueryUnifiedAttachment } from './cases/attachments';
 import { createActionService } from './handlers/action/create_action_service';
 import { reconcileScheduleIdsToWire } from './lib/backfill_schedule_ids';
+import {
+  RECONCILE_TASK_TYPE,
+  buildReconcileTaskSchedule,
+  buildReconcileRunResult,
+} from './lib/reconcile_schedule_ids_task';
 import { checkResponseActionAuthz } from './lib/check_response_action_authz';
 import { SchemaService } from './lib/schema_service';
-
-const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
-
-/**
- * Build the Task Manager `ensureScheduled` params for the schedule-id wire
- * reconciler. Exported (and exercised by `plugin.test.ts`) so the one-shot
- * contract is pinned at the registration level: `runAt` is set (run promptly,
- * once) and there is NO recurring `schedule`.
- */
-export const buildReconcileTaskSchedule = (runAt: Date) => ({
-  id: BACKFILL_TASK_TYPE,
-  taskType: BACKFILL_TASK_TYPE,
-  scope: ['osquery'],
-  runAt,
-  params: {},
-  state: {},
-});
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -133,7 +121,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     plugins.taskManager?.registerTaskDefinitions({
-      [BACKFILL_TASK_TYPE]: {
+      [RECONCILE_TASK_TYPE]: {
         title: 'Reconcile osquery pack schedule IDs onto the Fleet wire',
         timeout: '5m',
         maxAttempts: 3,
@@ -157,7 +145,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
               isRruleFeatureEnabled: this.rruleSchedulingEnabled,
             });
 
-            return { state: { completed: !hadFailures } };
+            return buildReconcileRunResult(hadFailures, new Date());
           },
         }),
       },

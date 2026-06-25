@@ -205,6 +205,31 @@ describe('Pack saved object model version 4 — schedule_id backfill (security-t
     expect(queries[0].schedule_id).not.toBe(queries[1].schedule_id);
   });
 
+  it('pre-9.4 legacy shape — queries with no `id` still each gain a schedule_id', () => {
+    // The oldest packs predate BOTH the per-query `id` and `schedule_id`
+    // fields. The mint keys off neither, so it must
+    // still assign a distinct schedule_id to every query and leave the rest
+    // untouched.
+    const result = runBackfill({
+      queries: [
+        { query: 'SELECT 1', interval: 60 },
+        { query: 'SELECT 2', interval: 120 },
+      ],
+    });
+
+    const queries = (result as { attributes: { queries: Array<Record<string, unknown>> } })
+      .attributes.queries;
+    expect(queries).toHaveLength(2);
+    queries.forEach((q) => {
+      expect(typeof q.schedule_id).toBe('string');
+      expect((q.schedule_id as string).length).toBeGreaterThan(0);
+    });
+    expect(queries[0].schedule_id).not.toBe(queries[1].schedule_id);
+    // Original fields preserved; no `id` is invented.
+    expect(queries[0].query).toBe('SELECT 1');
+    expect(queries[0]).not.toHaveProperty('id');
+  });
+
   it('(b) idempotency — a query with an existing schedule_id is unchanged', () => {
     const result = runBackfill({
       queries: [
