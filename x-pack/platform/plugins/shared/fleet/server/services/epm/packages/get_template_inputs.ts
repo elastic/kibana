@@ -217,6 +217,13 @@ export async function getTemplateInputs(
       sortMapEntries: _sortYamlKeys as (a: Pair, b: Pair) => number,
       strict: false,
     });
+    yaml.visit(doc, {
+      Scalar(_key, node) {
+        if (typeof node.value === 'string' && node.value.includes('\n')) {
+          node.type = 'BLOCK_LITERAL';
+        }
+      },
+    });
     const yamlStr = doc.toString({ singleQuote: true });
     return addCommentsToYaml(yamlStr, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }

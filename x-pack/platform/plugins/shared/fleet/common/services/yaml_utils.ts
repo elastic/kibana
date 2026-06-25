@@ -11,8 +11,9 @@
  * common code does not statically import 'yaml' and pull it into the browser bundle.
  */
 export interface YamlModule {
-  Document: new (data: unknown, options?: any) => { toString(): string };
+  Document: new (data: unknown, options?: any) => { toString(opts?: any): string };
   isScalar: (node: unknown) => boolean;
+  visit: (doc: any, visitor: { Scalar: (key: any, node: any) => void }) => void;
 }
 
 /**
@@ -61,5 +62,12 @@ export function createYamlKeysSorter(
  */
 export function toYaml(data: unknown, options: unknown, yaml: YamlModule): string {
   const doc = new yaml.Document(data, options);
+  yaml.visit(doc, {
+    Scalar(_key: any, node: any) {
+      if (typeof node.value === 'string' && node.value.includes('\n')) {
+        node.type = 'BLOCK_LITERAL';
+      }
+    },
+  });
   return doc.toString();
 }
