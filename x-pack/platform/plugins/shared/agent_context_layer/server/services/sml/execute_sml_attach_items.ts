@@ -88,11 +88,23 @@ export const resolveSmlAttachItems = async ({
 
       const typeDefinition = sml.getTypeDefinition(smlDoc.type);
       if (!typeDefinition) {
+        // Generic fallback for chunks indexed under an unregistered type
+        // (e.g. workflow-authored ad-hoc namespaces — see
+        // `SmlIndexer.indexManualChunks`). Surface the stored content as
+        // a plain `text` attachment so the agent can still reason about
+        // it; specialized rendering (inline previews, click-throughs)
+        // only kicks in when a registered type's `toAttachment` is
+        // available. This keeps the SML index usable without a code
+        // change every time a new namespace is introduced.
         return {
-          success: false,
+          success: true,
           chunk_id: chunkId,
-          attachment_type: smlDoc.type,
-          message: `SML type '${smlDoc.type}' does not support conversion to attachment`,
+          attachment: {
+            type: 'text',
+            data: { title: smlDoc.title, content: smlDoc.content },
+            origin: smlDoc.origin.uri,
+            description: `${smlDoc.type}/${smlDoc.title}`,
+          },
         };
       }
 

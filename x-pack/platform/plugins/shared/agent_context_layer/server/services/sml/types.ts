@@ -396,9 +396,10 @@ export interface SmlDocumentInput {
   // permissions: intentionally absent. The indexer derives them from
   // the SML type registered as `type` (via its `getPermissions` hook),
   // so callers cannot stamp arbitrary access-control on a document.
-  // An unregistered `type` is rejected as
-  // {@link SmlUnregisteredTypeError}, surfaced as HTTP 400 by the
-  // upsert route.
+  // An unregistered `type` is accepted by content-mode writes: the
+  // indexer stamps empty `SmlPermissions` (space-readable) and emits a
+  // once-per-process warn naming the namespace. Use a registered SML
+  // type when the data needs to be permission-gated.
 }
 
 /**

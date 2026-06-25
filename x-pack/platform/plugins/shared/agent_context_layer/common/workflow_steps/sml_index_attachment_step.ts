@@ -105,10 +105,17 @@ const ChunkSchema = z
  * rejects an extraneous `permissions` field so authors do not assume they
  * can override that gate. To use the visualization/dashboard/connector/etc.
  * gate, set `attachmentType` to the matching SML type id. To write a chunk
- * that should be readable by anyone in the space, set `attachmentType` to a
- * type with no `getPermissions` hook (or an unregistered one — chunks are
- * then stamped with empty permissions and are publicly readable within the
- * space).
+ * that should be readable by anyone in the space, set `attachmentType` to
+ * a type with no `getPermissions` hook, or to a name that isn't registered
+ * at all — in both cases the indexer stamps empty permissions. The
+ * unregistered path additionally emits a once-per-process server-side
+ * warn naming the namespace, so workflow authors can confirm their type
+ * id is recognized when they expect it to be.
+ *
+ * `attachmentType` must be a lowercase identifier (`[a-z][a-z0-9_]*`).
+ * This is a syntactic guard against junk values leaking in as durable
+ * chunk namespaces — semantic validation (does the registry know this
+ * type?) is intentionally absent so ad-hoc namespaces are allowed.
  *
  * - `upsert` requires `chunks` and always performs a full replace: every
  *   prior chunk for the `origin_id` is removed and the supplied chunks are
@@ -122,6 +129,18 @@ const ChunkSchema = z
  *   this origin" semantic and is the opposite of the crawler's default
  *   delete (which preserves curated manual entries).
  */
+const AttachmentTypeSchema = z
+  .string()
+  .min(1)
+  .max(MAX_SML_IDENTIFIER_LENGTH)
+  .regex(
+    /^[a-z][a-z0-9_]*$/,
+    'attachmentType must be a lowercase identifier starting with a letter (e.g. "visualization", "my_notes")'
+  )
+  .describe(
+    "Context Engine entry type id (chunk namespace). When the value matches a registered SmlTypeDefinition the chunk inherits that type's permissions; when it does not, the indexer stamps empty permissions and the chunk is readable to anyone in the caller's space."
+  );
+
 export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
   z.object({
     originId: z
@@ -129,17 +148,13 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
       .min(1)
       .max(MAX_SML_IDENTIFIER_LENGTH)
       .describe('Stable identifier for the source object (e.g., saved object id).'),
-    attachmentType: z
-      .string()
-      .min(1)
-      .max(MAX_SML_IDENTIFIER_LENGTH)
-      .describe('Context Engine entry type id (chunk namespace).'),
+    attachmentType: AttachmentTypeSchema,
     action: z.literal('upsert'),
     chunks: z.array(ChunkSchema).min(1).max(100),
   }),
   z.object({
     originId: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
-    attachmentType: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
+    attachmentType: AttachmentTypeSchema,
     action: z.literal('delete'),
   }),
 ]);

@@ -12,7 +12,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { SmlIndexAttachmentInputSchema } from '../../common/workflow_steps/sml_index_attachment_step';
 import { apiPrivileges } from '../../common/features';
 import type { AgentContextLayerPluginStart } from '../types';
-import { SmlUnregisteredTypeError } from '../services/sml/sml_errors';
 import { createContextEngineAddEntryStepDefinition } from './sml_index_attachment_step';
 
 const buildStartContract = (): jest.Mocked<AgentContextLayerPluginStart> => ({
@@ -310,18 +309,15 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     expect(result.output?.action).toBe('delete');
   });
 
-  it('returns an error result when upsert targets an unregistered attachment type', async () => {
+  it('upserts under an unregistered attachment type by handing the call to the indexer', async () => {
+    // Content-mode writes accept any `attachmentType` — the indexer
+    // stamps empty permissions and emits a once-per-process warn when
+    // the type isn't registered. The workflow step's job is to forward
+    // the call, not to pre-validate the type, so the only assertion
+    // here is that the call reaches `indexAttachment` with the
+    // unregistered identifier intact and a success result is returned.
     const startContract = buildStartContract();
-    // The workflow step no longer pre-checks the registry. It just hands
-    // the call to `indexAttachment`, which is the single place that
-    // enforces type registration (so every write path — crawler,
-    // event-driven, workflow step, HTTP — gets the same gate). We
-    // simulate the indexer's typed throw here.
-    startContract.indexAttachment.mockRejectedValueOnce(
-      new SmlUnregisteredTypeError(
-        "type definition 'unknown' is not registered — cannot index origin 'doc-1' in content mode"
-      )
-    );
+    startContract.indexAttachment.mockResolvedValueOnce(undefined);
     const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
@@ -331,19 +327,27 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
     const context = buildHandlerContext({
       originId: 'doc-1',
-      attachmentType: 'unknown',
+      attachmentType: 'my_notes',
       action: 'upsert',
-      chunks: [{ type: 'unknown', title: 't', content: 'c' }],
+      chunks: [{ type: 'my_notes', title: 't', content: 'c' }],
     });
 
     const result = await definition.handler(context as any);
-    expect(result.output).toBeUndefined();
-    expect(result.error).toBeInstanceOf(Error);
-    expect((result.error as Error).message).toBe("Unknown Context Engine entry type: 'unknown'");
+
+    expect(startContract.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        originId: 'doc-1',
+        attachmentType: 'my_notes',
+        action: 'create',
+      })
+    );
     // The redundant `getTypeDefinition` guard was removed from the
-    // workflow step — registration is checked exactly once, inside
-    // the indexer.
+    // workflow step — registration handling lives entirely inside the
+    // indexer (registered → stamp `getPermissions`, unregistered →
+    // stamp empty + warn).
     expect(startContract.getTypeDefinition).not.toHaveBeenCalled();
+    expect(result.error).toBeUndefined();
+    expect(result.output?.action).toBe('upsert');
   });
 
   it('returns an error result and logs when indexAttachment throws', async () => {

@@ -11,7 +11,6 @@ import type { SmlUpsertHttpResponse } from '../../common/http_api/sml';
 import { smlByOriginIdPath } from '../../common/constants';
 import type { SmlChunk, SmlService } from '../services/sml/types';
 import { isVisibleInSpace } from '../services/sml/sml_service';
-import { SmlUnregisteredTypeError } from '../services/sml/sml_errors';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 
@@ -20,9 +19,16 @@ import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
  *
  * Writes a single manual chunk under the origin via
  * {@link SmlService.indexAttachment} content-mode — the same code path
- * the workflow step's `sml.index` action uses. Permissions are stamped
- * by the registered type's `getPermissions` hook; the request body
- * cannot influence them.
+ * the workflow step's `sml.index` action uses.
+ *
+ * Permissions are stamped by the indexer:
+ * - When `body.type` matches a registered SML type, its `getPermissions`
+ *   hook supplies them.
+ * - When it doesn't (ad-hoc namespace), the indexer stamps empty
+ *   `SmlPermissions` and the chunk becomes readable to anyone in the
+ *   caller's space. The indexer logs a once-per-process warn so this
+ *   doesn't happen invisibly. Callers cannot influence permissions from
+ *   the body — that surface was removed to close a spoofing vector.
  *
  * The indexer's content-mode write wipes every existing chunk for the
  * origin (regardless of `ingestion_method`), so this route is the
@@ -65,7 +71,21 @@ export const registerUpsertRoute = ({
         // - `origin_id` is the URL path parameter; duplicating it in the
         //   body invites caller/path mismatch with no consistency check.
         body: schema.object({
-          type: schema.string({ minLength: 1 }),
+          // Syntactic guard on the type identifier. The indexer no longer
+          // rejects unregistered types (see SmlIndexer.indexManualChunks),
+          // so this regex is the last line of defense against junk values
+          // — empty strings, slashes, whitespace — leaking in as durable
+          // namespace identifiers. The shape matches the convention used
+          // by every built-in SML type id (`visualization`, `dashboard`,
+          // `connector`, `workflow`, `corpus_entry`, …).
+          type: schema.string({
+            minLength: 1,
+            maxLength: 256,
+            validate: (v) =>
+              /^[a-z][a-z0-9_]*$/.test(v)
+                ? undefined
+                : 'must be a lowercase identifier starting with a letter, e.g. "visualization", "my_notes"',
+          }),
           title: schema.string({ minLength: 1 }),
           content: schema.string(),
           tags: schema.maybe(
@@ -157,9 +177,6 @@ export const registerUpsertRoute = ({
         };
         return response.ok({ body: responseBody });
       } catch (error) {
-        if (error instanceof SmlUnregisteredTypeError) {
-          return response.badRequest({ body: { message: (error as Error).message } });
-        }
         logger.error(`SML upsert route error: ${(error as Error).message}`);
         throw error;
       }

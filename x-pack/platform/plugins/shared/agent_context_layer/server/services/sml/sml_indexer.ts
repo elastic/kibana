@@ -47,14 +47,22 @@ export interface SmlIndexer {
    * provided chunks are written directly, tagged `ingestion_method: 'manual'`.
    * The write always overwrites any existing chunks for the `origin_id`.
    *
-   * **Unregistered types are rejected.** For `action: 'create'` / `'update'`
-   * (origin OR content mode), the indexer throws if `attachmentType` is not
-   * registered. This is the single place that enforces the rule, so every
-   * write path (crawler, event-driven, workflow step, HTTP upsert) inherits
-   * the same gate. Callers that wrap the indexer with a UX-friendly error
-   * should still let the throw bubble up rather than re-checking against
-   * the registry — that prevents drift between the wrapper's gate and the
-   * indexer's gate.
+   * **Unregistered types are handled by mode:**
+   *
+   * - Origin mode (`action: 'create' | 'update'` without `content`) throws
+   *   {@link SmlUnregisteredTypeError} — there is no `getSmlData` to call
+   *   and no sensible fallback. The crawler and event-driven origin-mode
+   *   callers only ever target registered types, so this is never hit in
+   *   normal operation; the throw exists to surface programmer error.
+   * - Content mode (`action: 'create' | 'update'` with `content`) accepts
+   *   any `attachmentType`. When the type is registered, the chunk is
+   *   stamped with the result of `getPermissions`; when it is not, the
+   *   indexer stamps empty `SmlPermissions` (no privileges required,
+   *   space-scoped read) and emits a once-per-process warn for that
+   *   `attachmentType` so operators see the implicit "public" stamping.
+   *   Use this when a workflow needs to write ad-hoc content that has no
+   *   dedicated SML type; register a real `SmlTypeDefinition` if the
+   *   content should be gated.
    *
    * For `action: 'delete'`, only chunks with `ingestion_method: 'crawled'` are
    * removed — manual entries for the same `origin_id` are preserved. This keeps
@@ -105,6 +113,14 @@ export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndex
 class SmlIndexerImpl implements SmlIndexer {
   private readonly registry: SmlTypeRegistry;
   private readonly logger: Logger;
+  /**
+   * `attachmentType` values we've already emitted the "writing chunks under
+   * an unregistered type" warn for in this process. Bounded by the number
+   * of distinct caller-supplied types, which is small in practice; we
+   * deliberately do not cap or evict because doing so would just re-emit
+   * the warn on the next write of an already-known type and add noise.
+   */
+  private readonly warnedUnregisteredTypes = new Set<string>();
 
   constructor({ registry, logger }: SmlIndexerDeps) {
     this.registry = registry;
@@ -259,17 +275,27 @@ class SmlIndexerImpl implements SmlIndexer {
    * directly with bare-UUID IDs and `ingestion_method: 'manual'`. Always
    * overwrites.
    *
-   * Permissions are computed from the registered `SmlTypeDefinition`'s
-   * `getPermissions` hook (same as origin mode) so the workflow step's
-   * content-mode write inherits the same gating as the crawler. Types
-   * without a `getPermissions` hook stamp empty `SmlPermissions` — publicly
-   * readable within the space.
+   * Permissions resolution:
    *
-   * Throws {@link SmlUnregisteredTypeError} when `attachmentType` is not
-   * registered. The empty-chunks fast path (no write actually happens) is
-   * exempt — it acts as a delete-via-content-mode and proceeds even for
-   * unregistered types, mirroring the cleanup-must-still-work semantics
-   * of the `action: 'delete'` path.
+   * - **Registered type with `getPermissions`** — the hook's result is
+   *   stamped onto every chunk, identical to origin-mode behaviour so a
+   *   content-mode write inherits the same gating as a crawler-driven
+   *   write for the same type.
+   * - **Registered type without `getPermissions`** — empty
+   *   `SmlPermissions` is stamped (no privileges required); the chunk is
+   *   readable to anyone with access to the space.
+   * - **Unregistered type** — empty `SmlPermissions` is stamped and a
+   *   warn is logged once per process per `attachmentType` so operators
+   *   can spot ad-hoc namespaces being created without permissions
+   *   metadata. Content mode is intentionally permissive about
+   *   registration so workflow authors can write ad-hoc content without a
+   *   code change; the trade-off is that those chunks become publicly
+   *   readable in their space.
+   *
+   * The empty-chunks fast path (no write actually happens) is treated as
+   * a delete-via-content-mode and proceeds even for unregistered types,
+   * mirroring the cleanup-must-still-work semantics of the
+   * `action: 'delete'` path.
    */
   private async indexManualChunks({
     originId,
@@ -301,20 +327,19 @@ class SmlIndexerImpl implements SmlIndexer {
       `SML indexer: content mode for origin '${originId}' of type '${attachmentType}' — writing ${chunks.length} chunk(s) as 'manual'`
     );
 
+    // Content mode accepts any `attachmentType` — workflow authors and
+    // HTTP callers can write chunks under an unregistered namespace
+    // (e.g. ad-hoc knowledge entries) without first registering a real
+    // SmlTypeDefinition. The trade-off is that without `getPermissions`,
+    // the chunk has no permission gate and is readable to anyone in the
+    // space. We surface that trade-off with a one-time warn per
+    // (process, type) so operators notice when a new namespace starts
+    // being written with empty permissions.
     const definition = this.registry.get(attachmentType);
-    if (!definition) {
-      // Content mode used to log debug and continue (stamping empty
-      // permissions). That was a silent footgun for workflow authors: a
-      // typo in `attachmentType` would happily write publicly-readable
-      // chunks. Now both modes reject unregistered types so no caller can
-      // produce ungated chunks by accident. Note: we throw BEFORE the
-      // delete-then-write — a failed write must not also wipe existing
-      // chunks for the origin.
-      throw new SmlUnregisteredTypeError(
-        `SML indexer: type definition '${attachmentType}' is not registered — cannot index origin '${originId}' in content mode. Registered types: [${this.registry
-          .list()
-          .map((t) => t.id)
-          .join(', ')}]`
+    if (!definition && !this.warnedUnregisteredTypes.has(attachmentType)) {
+      this.warnedUnregisteredTypes.add(attachmentType);
+      this.logger.warn(
+        `SML indexer: writing chunks under unregistered type '${attachmentType}' (origin '${originId}', and likely more) with empty permissions — these chunks will be publicly readable within their space. Register an SmlTypeDefinition for '${attachmentType}' if you need a permission gate.`
       );
     }
 
@@ -356,23 +381,25 @@ class SmlIndexerImpl implements SmlIndexer {
   /**
    * Resolve the {@link SmlPermissions} to stamp on a chunk.
    *
-   * Calls the registered type's `getPermissions` hook when defined and
-   * falls back to empty `SmlPermissions` (`kibana.privileges: []`,
-   * `elasticsearch.indices: []`) otherwise. Empty privileges are treated
-   * by the read-path filter as "no privileges required" — appropriate
-   * only for types that intentionally make their data publicly readable
-   * within the space, so SML types backing sensitive resources MUST
-   * implement the hook.
+   * - Registered type with `getPermissions` → the hook's result is used
+   *   (with arrays defensively defaulted to `[]` so the stored document
+   *   always has fully-shaped inner arrays).
+   * - Registered type without `getPermissions` → empty `SmlPermissions`.
+   * - Unregistered type (`definition === undefined`) → empty
+   *   `SmlPermissions`. Only reachable via content-mode writes; origin-mode
+   *   rejects unregistered types upstream via
+   *   {@link SmlUnregisteredTypeError}. The warn line announcing the
+   *   namespace is emitted by `indexManualChunks` once per process per
+   *   type so this helper can stay quiet on the hot path.
    *
-   * Callers must pass a registered `definition` — both write paths in
-   * this file reject unregistered types upstream via
-   * {@link SmlUnregisteredTypeError}, so reaching this helper with an
-   * undefined definition would be a programming error.
+   * Empty privileges are treated by the read-path filter as "no
+   * privileges required" — appropriate only for types that intentionally
+   * make their data publicly readable within the space. SML types
+   * backing sensitive resources MUST implement the hook.
    *
    * A `getPermissions` throw is treated as a hard failure-closed: the
-   * indexer logs a warning and stamps empty permissions, which the
-   * read-path filter treats as "no privileges required". The alternative —
-   * using caller-supplied permissions — is the spoofing surface this
+   * indexer logs a warning and stamps empty permissions. The alternative
+   * — using caller-supplied permissions — is the spoofing surface this
    * design removes, so we intentionally fail closed instead.
    */
   private async resolvePermissionsForChunk({
@@ -380,11 +407,11 @@ class SmlIndexerImpl implements SmlIndexer {
     originId,
     context,
   }: {
-    definition: SmlTypeDefinition;
+    definition: SmlTypeDefinition | undefined;
     originId: string;
     context: SmlContext;
   }): Promise<SmlPermissions> {
-    if (!definition.getPermissions) {
+    if (!definition || !definition.getPermissions) {
       return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
     }
     try {

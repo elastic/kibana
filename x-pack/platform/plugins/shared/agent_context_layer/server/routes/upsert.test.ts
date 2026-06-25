@@ -16,7 +16,6 @@ import {
   sampleDocument,
 } from './test_helpers';
 import { registerUpsertRoute } from './upsert';
-import { SmlUnregisteredTypeError } from '../services/sml/sml_errors';
 
 const validBody = {
   type: 'visualization',
@@ -132,17 +131,49 @@ describe('registerUpsertRoute', () => {
     expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
   });
 
-  it('returns 400 when the SML type is not registered', async () => {
+  it('accepts an unregistered type and writes it through the indexer (which stamps empty permissions)', async () => {
+    // Content-mode writes now accept any `type` — the indexer is the
+    // single point of decision on what permissions to stamp. The route
+    // no longer pre-checks the registry, so any value matching the
+    // identifier regex (`/^[a-z][a-z0-9_]*$/`) passes the body schema
+    // and the indexer handles permissioning. Verifying the call here
+    // is enough; the indexer's own tests cover the empty-permission
+    // stamping + warn-once behaviour.
     mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
-    mockSmlService.indexAttachment.mockRejectedValue(
-      new SmlUnregisteredTypeError("type 'wat' not registered")
-    );
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
 
-    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
-
-    expect(response.badRequest).toHaveBeenCalledWith({
-      body: { message: "type 'wat' not registered" },
+    const response = await callHandler({
+      params: { originId: 'note-1' },
+      body: { ...validBody, type: 'my_notes' },
     });
+
+    expect(response.ok).toHaveBeenCalled();
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ attachmentType: 'my_notes' })
+    );
+    expect(response.badRequest).not.toHaveBeenCalled();
+  });
+
+  it('exposes the type identifier regex on the route schema', () => {
+    // Syntactic guard at the route layer — the indexer is permissive
+    // about *whether* a type is registered, but the body schema still
+    // refuses junk values (slashes, uppercase, leading digits) from
+    // leaking in as durable chunk namespaces. The httpServerMock test
+    // setup bypasses schema validation entirely, so we extract and
+    // exercise the schema directly here.
+    const [routeConfig] = router.put.mock.calls[0];
+    const bodySchema = (routeConfig as any).validate.body;
+    expect(() => bodySchema.validate({ type: 'BadType/slash', title: 't', content: 'c' })).toThrow(
+      /lowercase identifier/
+    );
+    expect(() =>
+      bodySchema.validate({ type: '1startswithdigit', title: 't', content: 'c' })
+    ).toThrow(/lowercase identifier/);
+    expect(() => bodySchema.validate({ type: 'my_notes', title: 't', content: 'c' })).not.toThrow();
+    expect(() =>
+      bodySchema.validate({ type: 'visualization', title: 't', content: 'c' })
+    ).not.toThrow();
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {

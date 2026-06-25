@@ -45,18 +45,27 @@ export class SmlAuthzEnumerationIncompleteError extends SmlError {}
 export class SmlCorpusTooLargeError extends SmlError {}
 
 /**
- * Thrown when a write call (`indexAttachment` for `action: 'create'` /
- * `'update'`, in either origin or content mode) targets an
+ * Thrown when an **origin-mode** write (`indexAttachment` for
+ * `action: 'create' | 'update'` without `content`) targets an
  * `attachmentType` that has no entry in the SML type registry.
  *
- * Centralised here so every write path produces the same error class
- * regardless of which surface the call arrived through — the HTTP PUT
- * route translates it to 400, the workflow step handler surfaces it as
- * a step `error` result, and direct internal callers see a typed throw
- * rather than a no-op silently dropping their write.
+ * Only origin-mode writes raise this — they need `getSmlData` on the
+ * registered type to produce chunks, and there is no sensible fallback.
+ * **Content-mode writes** (the caller supplies `chunks`) are intentionally
+ * permissive about registration: an unregistered `attachmentType` stamps
+ * empty `SmlPermissions` and emits a once-per-process warn, so workflow
+ * authors can write ad-hoc content without first registering an SML type.
  *
- * `delete` paths intentionally do **not** raise this — cleanup must keep
- * working even when the plugin that originally registered the type is
- * disabled, or stale chunks become unreachable from every write path.
+ * **Delete paths** also intentionally do not raise this — cleanup must
+ * keep working even when the plugin that originally registered the type
+ * is disabled, or stale chunks become unreachable from every write path.
+ *
+ * No HTTP-route or workflow-step surface currently translates this
+ * error: the routes only invoke content mode, and the only origin-mode
+ * callers are the crawler / event-driven CRUD pipelines, which by
+ * construction only enumerate already-registered types. The class is
+ * kept as a typed signal so a future code path that does call origin
+ * mode externally still has a structured error to catch instead of a
+ * generic `Error`.
  */
 export class SmlUnregisteredTypeError extends SmlError {}

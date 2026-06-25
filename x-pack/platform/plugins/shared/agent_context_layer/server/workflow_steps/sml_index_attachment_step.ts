@@ -11,7 +11,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { contextEngineAddEntryStepCommonDefinition } from '../../common/workflow_steps/sml_index_attachment_step';
 import { apiPrivileges } from '../../common/features';
-import { SmlUnregisteredTypeError } from '../services/sml/sml_errors';
 import type { SmlChunk } from '../services/sml/types';
 import type { AgentContextLayerPluginStart } from '../types';
 
@@ -51,14 +50,18 @@ import type { AgentContextLayerPluginStart } from '../types';
  *    dev/test with security disabled) we follow the standard "no security
  *    plugin → open access" convention used by the SML read path.
  *
- * Unregistered-type rejection lives in the indexer, not here. The handler
- * lets the indexer throw {@link SmlUnregisteredTypeError} for `upsert`
- * (whose write would be nonsensical without a `getPermissions` hook) and
- * translates that into a step `error` result. `delete` calls
- * `deleteAttachment` directly — the indexer's delete path is permissive
- * about registration so cleanup keeps working even after the plugin that
- * registered the type is disabled, otherwise stale chunks become
- * unreachable from the workflow surface.
+ * Unregistered-type handling lives in the indexer, not here. Content-mode
+ * writes (the only mode this step uses for `upsert`) accept any
+ * `attachmentType`: when the type is registered, `getPermissions` is
+ * stamped; when it is not, empty `SmlPermissions` is stamped and the
+ * indexer emits a once-per-process warn naming the namespace. This lets
+ * workflow authors write ad-hoc content without first registering an SML
+ * type, at the cost of those chunks being space-readable rather than
+ * gated by a privilege. `delete` calls `deleteAttachment` directly — the
+ * indexer's delete path is permissive about registration so cleanup
+ * keeps working even after the plugin that registered the type is
+ * disabled, otherwise stale chunks become unreachable from the workflow
+ * surface.
  *
  * The handler defers resolving the AGL start contract until execution
  * time so the step can be registered during plugin `setup()` and still
@@ -137,18 +140,14 @@ export const createContextEngineAddEntryStepDefinition = ({
             ingestionMethod: 'all',
           });
         } else {
-          // Unregistered-type rejection happens inside the indexer (it
-          // throws SmlUnregisteredTypeError). We map the typed throw to a
-          // step error result below — that single place keeps the rule
-          // consistent across every write surface (HTTP upsert, workflow
-          // step, event-driven, crawler) instead of each surface
-          // re-checking the registry and drifting.
-
           // Permissions are intentionally *not* passed through here. The
           // indexer derives them from the registered type's `getPermissions`
           // hook, which makes workflow-driven writes inherit the same gating
           // as a crawler-driven write (and cannot be spoofed by a workflow
-          // author).
+          // author). If `attachmentType` is unregistered, the indexer
+          // stamps empty `SmlPermissions` (space-readable) and emits a
+          // once-per-process warn naming the namespace — see
+          // `SmlIndexer.indexManualChunks`.
           const chunks: SmlChunk[] = input.chunks.map((chunk) => ({
             type: chunk.type,
             title: chunk.title,
@@ -192,16 +191,6 @@ export const createContextEngineAddEntryStepDefinition = ({
           },
         };
       } catch (error) {
-        // Surface the unregistered-type case with the workflow-author-
-        // friendly message we used to produce from the inline guard, so
-        // existing dashboards / step output schemas keep working.
-        if (error instanceof SmlUnregisteredTypeError) {
-          return {
-            error: new Error(
-              `Unknown Context Engine entry type: '${context.input.attachmentType}'`
-            ),
-          };
-        }
         context.logger.error(
           'contextEngine.addEntry workflow step failed',
           error instanceof Error ? error : new Error(String(error))

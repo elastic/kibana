@@ -780,8 +780,8 @@ describe('createSmlIndexer', () => {
         });
       });
 
-      it('content mode for an unregistered type throws SmlUnregisteredTypeError without touching ES', async () => {
-        const bulkMock = jest.fn();
+      it('content mode for an unregistered type writes chunks with empty permissions and warns once per type', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
@@ -792,28 +792,73 @@ describe('createSmlIndexer', () => {
         const contextLogger = createMockLogger();
         const indexer = createSmlIndexer({ registry, logger });
 
-        // The old behaviour silently stamped empty permissions for
-        // unknown types, which let a typo in `attachmentType` write
-        // publicly-readable chunks. The new behaviour rejects loudly
-        // so callers cannot produce ungated chunks by accident.
-        await expect(
-          indexer.indexAttachment(
-            createContentIndexerParams({
-              originId: 'att-no-type',
-              attachmentType: 'unregistered',
-              action: 'create',
-              esClient,
-              logger: contextLogger,
-              content: [{ type: 'unregistered', title: 'T', content: 'c' }],
-            })
-          )
-        ).rejects.toBeInstanceOf(SmlUnregisteredTypeError);
+        // Content mode now accepts any `attachmentType` so workflow
+        // authors can write ad-hoc content without first registering a
+        // SmlTypeDefinition. The trade-off is intentionally surfaced:
+        // (a) the chunk has no permission gate (empty SmlPermissions),
+        // (b) the indexer logs a once-per-process warn naming the
+        // namespace so operators see when a new unregistered namespace
+        // starts being written.
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-no-type',
+            attachmentType: 'my_notes',
+            action: 'create',
+            esClient,
+            logger: contextLogger,
+            content: [{ type: 'my_notes', title: 'T', content: 'c' }],
+          })
+        );
 
-        // The throw happens before deleteChunks fires, so existing
-        // chunks for the origin remain — a failed write must not
-        // double as a destructive operation.
-        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
-        expect(bulkMock).not.toHaveBeenCalled();
+        // First write of this namespace → warn fired with the type id.
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`unregistered type 'my_notes'`)
+        );
+        const firstWarnCount = (logger.warn as jest.Mock).mock.calls.length;
+
+        // Existing chunks for the origin were wiped, then the new chunk
+        // was written with empty permissions.
+        expect(esClient.deleteByQuery).toHaveBeenCalled();
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+        const ops = bulkMock.mock.calls[0][0].operations;
+        expect(ops[0].index.document.permissions).toEqual({
+          kibana: { privileges: [] },
+          elasticsearch: { indices: [] },
+        });
+        // Document type is preserved on the stored chunk so reads can
+        // still filter by it via the existing `type` term query.
+        expect(ops[0].index.document.type).toBe('my_notes');
+        expect(ops[0].index.document.ingestion_method).toBe('manual');
+
+        // Second write of the *same* namespace → no additional warn
+        // (the once-per-process Set has the type recorded).
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-no-type-2',
+            attachmentType: 'my_notes',
+            action: 'create',
+            esClient,
+            logger: contextLogger,
+            content: [{ type: 'my_notes', title: 'T2', content: 'c2' }],
+          })
+        );
+        expect((logger.warn as jest.Mock).mock.calls.length).toBe(firstWarnCount);
+
+        // A *different* unregistered namespace fires a fresh warn —
+        // the dedup is per-type, not global.
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-other',
+            attachmentType: 'other_notes',
+            action: 'create',
+            esClient,
+            logger: contextLogger,
+            content: [{ type: 'other_notes', title: 'T3', content: 'c3' }],
+          })
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`unregistered type 'other_notes'`)
+        );
       });
 
       it('content mode with empty chunks deletes existing and writes nothing', async () => {
