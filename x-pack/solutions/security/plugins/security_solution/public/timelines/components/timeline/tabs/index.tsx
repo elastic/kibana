@@ -28,6 +28,7 @@ import * as i18n from './translations';
 import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 import { fetchNotesBySavedObjectIds, makeSelectNotesBySavedObjectId } from '../../../../notes';
+import { makeSelectNotesBySavedObjectIds } from '../../../../notes/store/notes.slice';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { LazyTimelineTabRenderer, TimelineTabFallback } from './lazy_timeline_tab_renderer';
 
@@ -245,13 +246,25 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [fetchNotes, isTimelineSaved]);
 
   const selectNotesBySavedObjectId = useMemo(() => makeSelectNotesBySavedObjectId(), []);
+  const selectNotesBySavedObjectIds = useMemo(() => makeSelectNotesBySavedObjectIds(), []);
+
+  const superTimelineSourceIds = useMemo(
+    () => timeline?.superTimelineSourceIds ?? [],
+    [timeline?.superTimelineSourceIds]
+  );
 
   const notesNewSystem = useSelector((state: State) =>
     selectNotesBySavedObjectId(state, timelineSavedObjectId)
   );
+  const superTimelineNotes = useSelector((state: State) =>
+    selectNotesBySavedObjectIds(state, superTimelineSourceIds)
+  );
   const numberOfNotesNewSystem = useMemo(
-    () => notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
-    [notesNewSystem, timelineDescription]
+    () =>
+      isSuperTimeline
+        ? superTimelineNotes.length
+        : notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
+    [isSuperTimeline, superTimelineNotes, notesNewSystem, timelineDescription]
   );
 
   const setActiveTab = useCallback(
