@@ -10,7 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { SmlSearchFilterType } from '@kbn/agent-context-layer-plugin/server';
 import type { SmlToolsOptions } from './types';
 
@@ -82,12 +82,12 @@ export const createSmlSearchTool = ({
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      const enabled = await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
       return enabled
         ? { status: 'available' }
         : {
             status: 'unavailable',
-            reason: 'SML features require experimental features to be enabled',
+            reason: 'SML features require the Context Engine to be enabled',
           };
     },
   },

@@ -71,10 +71,10 @@ export const createContextEngineAddEntryStepDefinition = ({
   getSpaces: () => SpacesPluginStart | undefined;
   getSecurity: () => SecurityPluginStart | undefined;
   /**
-   * Resolves whether the AGL/SML experimental UI setting is enabled for
-   * the calling request's space. Mirrors the gate applied to every HTTP
-   * route via `withSmlFeatureFlag` and to the SML crawler task. The check
-   * is request-scoped so per-space overrides of the setting are honored.
+   * Resolves whether the Context Engine UI setting is enabled for the
+   * calling request's space. Mirrors the gate applied to every HTTP route
+   * via `withSmlFeatureFlag` and to the SML crawler task. The check is
+   * request-scoped so per-space overrides of the setting are honored.
    */
   isFeatureEnabled: (request: KibanaRequest) => Promise<boolean>;
 }) =>
@@ -90,7 +90,7 @@ export const createContextEngineAddEntryStepDefinition = ({
         if (!featureEnabled) {
           return {
             error: new Error(
-              `Agent Context Layer experimental features are disabled — cannot ${action} Context Engine entry '${originId}'.`
+              `Context Engine is disabled — cannot ${action} Context Engine entry '${originId}'.`
             ),
           };
         }

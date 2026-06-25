@@ -7,12 +7,12 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
-const createMockUiSettingsClient = (experimentalFeaturesEnabled = true) => ({
+const createMockUiSettingsClient = (contextEngineEnabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalFeaturesEnabled;
+    if (key === CONTEXT_ENGINE_ENABLED_SETTING_ID) return contextEngineEnabled;
     return undefined;
   }),
 });
@@ -75,7 +75,7 @@ describe('createConnectorLifecycleHandler', () => {
       expect(agentContextLayer.indexAttachment).not.toHaveBeenCalled();
     });
 
-    it('skips when experimental features are disabled', async () => {
+    it('skips when the Context Engine is disabled', async () => {
       const uiSettingsClient = createMockUiSettingsClient(false);
       const agentContextLayer = createMockAgentContextLayer();
       const handler = createConnectorLifecycleHandler({

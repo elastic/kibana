@@ -68,6 +68,9 @@ export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWork
 export const AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID =
   'agentBuilder:uiamOAuthClientManagement';
 
+// Context engine settings
+export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
+
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
 export const AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID = 'autocomplete:valueSuggestionMethod';

@@ -56,6 +56,7 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'contextEngine:enabled': boolean;
   'agentBuilder:uiamOAuthClientManagement': boolean;
   'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;

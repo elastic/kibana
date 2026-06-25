@@ -26,18 +26,18 @@ jest.mock('../../../../../../../hooks/use_agent_builder_service', () => ({
   }),
 }));
 
-let mockExperimentalEnabled = true;
-jest.mock('../../../../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => mockExperimentalEnabled,
+let mockContextEngineEnabled = true;
+jest.mock('../../../../../../../hooks/use_context_engine_enabled', () => ({
+  useContextEngineEnabled: () => mockContextEngineEnabled,
 }));
 
 describe('usePrefetchSml', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockExperimentalEnabled = true;
+    mockContextEngineEnabled = true;
   });
 
-  it('prefetches wildcard SML autocomplete when experimental features are enabled', () => {
+  it('prefetches wildcard SML autocomplete when the Context Engine is enabled', () => {
     const { result } = renderHook(() => usePrefetchSml());
 
     act(() => {
@@ -58,8 +58,8 @@ describe('usePrefetchSml', () => {
     });
   });
 
-  it('does not prefetch when experimental features are disabled', () => {
-    mockExperimentalEnabled = false;
+  it('does not prefetch when the Context Engine is disabled', () => {
+    mockContextEngineEnabled = false;
     const { result } = renderHook(() => usePrefetchSml());
 
     act(() => {

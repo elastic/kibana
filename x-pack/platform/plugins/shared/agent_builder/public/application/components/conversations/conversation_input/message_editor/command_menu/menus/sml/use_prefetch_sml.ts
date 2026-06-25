@@ -14,15 +14,15 @@ import type {
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { useAgentBuilderServices } from '../../../../../../../hooks/use_agent_builder_service';
-import { useExperimentalFeatures } from '../../../../../../../hooks/use_experimental_features';
+import { useContextEngineEnabled } from '../../../../../../../hooks/use_context_engine_enabled';
 
 export const usePrefetchSml = (constraints?: SmlSearchConstraints, filters?: SmlSearchFilters) => {
   const queryClient = useQueryClient();
   const { smlService } = useAgentBuilderServices();
-  const experimentalFeaturesEnabled = useExperimentalFeatures();
+  const contextEngineEnabled = useContextEngineEnabled();
 
   return useCallback(() => {
-    if (!experimentalFeaturesEnabled) {
+    if (!contextEngineEnabled) {
       return;
     }
     queryClient.prefetchQuery({
@@ -35,5 +35,5 @@ export const usePrefetchSml = (constraints?: SmlSearchConstraints, filters?: Sml
           filters,
         }),
     });
-  }, [experimentalFeaturesEnabled, queryClient, smlService, constraints, filters]);
+  }, [contextEngineEnabled, queryClient, smlService, constraints, filters]);
 };
