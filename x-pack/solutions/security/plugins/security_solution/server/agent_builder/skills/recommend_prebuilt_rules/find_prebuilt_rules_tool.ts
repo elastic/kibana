@@ -174,18 +174,35 @@ export const createFindPrebuiltRulesInlineTool = ({
   id: FIND_PREBUILT_RULES_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Search the catalog of installable (not-yet-installed) Elastic prebuilt detection rules using ' +
-    'the structured `filter` object. Returns a compact triage shape per rule by default — rule_id, ' +
-    'name, severity, risk_score, tags, MITRE tactics, and related_integrations — plus the ' +
-    'total match count. Opt into deeper per-rule detail via `fields`, and deep-fetch specific rules ' +
-    'via `filter.ruleIds`. This tool only sees not-yet-installed rules. Read-only: it never ' +
-    'installs, edits, or enables rules.',
+    'Search the catalog of installable (not-yet-installed, non-deprecated) Elastic prebuilt ' +
+    'detection rules using structured filters. Returns a compact triage shape per rule by ' +
+    'default — rule_id, name, severity, risk_score, tags, MITRE tactics, and ' +
+    "related_integrations.package — plus the total match count. A rule's related_integrations are the " +
+    'Fleet packages it is built to query (they supply its source events); compare them against the ' +
+    'cached user inventory to reason about which rules likely have data to run on — a related ' +
+    'integration being installed is a signal, not a guarantee that the right data is flowing. ' +
+    'The response also includes `space_url_prefix`: prepend it to ' +
+    '`/app/security/rules/add_rules/<rule_id>` to build a deep link that opens a rule install flyout. ' +
+    'Opt into deeper detail (description, query, full MITRE, etc.) via `fields`, and deep-fetch ' +
+    'specific rules via `ruleIds`. ' +
+    'Before any call that uses a `tags` filter, call `security.get_installable_catalog_overview` ' +
+    'in the same turn to enumerate valid tag values and avoid tag hallucination. ' +
+    'For currently-installed rules use the `find-security-rules` skill instead — this tool only ' +
+    'sees rules that are not yet installed. Read-only: it never installs, edits, or enables rules.',
   schema: findPrebuiltRulesSchema,
   handler: async (input, { request }) => {
     try {
       const [coreStart, startPlugins] = await getStartServices();
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+
+      // Resolve the active Kibana space so the LLM can build install-flyout links that land
+      // users in the correct space. The default space (id "default") uses no URL prefix;
+      // custom spaces use /s/<id>. Empty string when the spaces plugin is unavailable.
+      const activeSpace = await startPlugins.spaces?.spacesService.getActiveSpace(request);
+      const spaceUrlPrefix =
+        activeSpace && activeSpace.id !== 'default' ? `/s/${activeSpace.id}` : '';
+
       const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
       const license = await startPlugins.licensing.getLicense();
@@ -223,6 +240,7 @@ export const createFindPrebuiltRulesInlineTool = ({
           {
             type: ToolResultType.other,
             data: {
+              space_url_prefix: spaceUrlPrefix,
               total,
               rules,
             },

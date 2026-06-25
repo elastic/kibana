@@ -84,4 +84,12 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     ];
     tacticIds.forEach((id) => expect(skill.content).toContain(id));
   });
+
+  it('content instructs the model to build install-flyout links', () => {
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
+    expect(skill.content).toContain('## Rule Links');
+    expect(skill.content).toContain('/app/security/rules/add_rules/<rule_id>');
+    expect(skill.content).toContain('space_url_prefix');
+  });
 });

@@ -72,7 +72,7 @@ const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
     ...overrides,
   } as RuleResponse);
 
-const createMockDeps = () => {
+const createMockDeps = ({ activeSpaceId }: { activeSpaceId?: string } = {}) => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
 
@@ -88,6 +88,15 @@ const createMockDeps = () => {
     alerting: alertingPlugin,
     licensing: licensingPlugin,
   };
+  // Only wire the spaces plugin when a space id is requested; otherwise leave it absent to
+  // exercise the optional-chaining path (empty prefix when spaces is unavailable).
+  if (activeSpaceId !== undefined) {
+    startPlugins.spaces = {
+      spacesService: {
+        getActiveSpace: jest.fn().mockResolvedValue({ id: activeSpaceId }),
+      },
+    };
+  }
   mockCore.getStartServices.mockResolvedValue([mockCoreStart, startPlugins, {}] as never);
 
   mockCreatePrebuiltRuleAssetsClient.mockReturnValue({
@@ -230,9 +239,10 @@ describe('createFindPrebuiltRulesInlineTool', () => {
   describe('handler', () => {
     const runHandler = async (
       input: Record<string, unknown>,
-      result: { rules: RuleResponse[]; total: number }
+      result: { rules: RuleResponse[]; total: number },
+      opts: { activeSpaceId?: string } = {}
     ) => {
-      const { getStartServices, mockLogger, mockEsClient, mockRequest, ml } = createMockDeps();
+      const { getStartServices, mockLogger, mockEsClient, mockRequest, ml } = createMockDeps(opts);
       mockGetInstallableRulesForReview.mockResolvedValue(result);
       const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger, ml });
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
@@ -327,6 +337,44 @@ describe('createFindPrebuiltRulesInlineTool', () => {
         ]);
         // Deep fields are not pulled in unless requested.
         expect(data.rules[0]).not.toHaveProperty('description');
+      }
+    });
+
+    it('returns an empty space_url_prefix when the spaces plugin is unavailable', async () => {
+      const { toolResult } = await runHandler({}, { rules: [makeRule()], total: 1 });
+      if ('results' in toolResult) {
+        const { space_url_prefix: spaceUrlPrefix } = toolResult.results[0].data as {
+          space_url_prefix: string;
+        };
+        expect(spaceUrlPrefix).toBe('');
+      }
+    });
+
+    it('returns an empty space_url_prefix in the default space', async () => {
+      const { toolResult } = await runHandler(
+        {},
+        { rules: [makeRule()], total: 1 },
+        { activeSpaceId: 'default' }
+      );
+      if ('results' in toolResult) {
+        const { space_url_prefix: spaceUrlPrefix } = toolResult.results[0].data as {
+          space_url_prefix: string;
+        };
+        expect(spaceUrlPrefix).toBe('');
+      }
+    });
+
+    it('prefixes space_url_prefix with /s/<id> in a custom space', async () => {
+      const { toolResult } = await runHandler(
+        {},
+        { rules: [makeRule()], total: 1 },
+        { activeSpaceId: 'my-space' }
+      );
+      if ('results' in toolResult) {
+        const { space_url_prefix: spaceUrlPrefix } = toolResult.results[0].data as {
+          space_url_prefix: string;
+        };
+        expect(spaceUrlPrefix).toBe('/s/my-space');
       }
     });
 
