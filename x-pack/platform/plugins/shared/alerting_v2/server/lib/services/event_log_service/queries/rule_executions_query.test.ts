@@ -22,6 +22,9 @@ const filtersOf = (body: ReturnType<typeof buildRuleExecutionsQuery>): QueryDslQ
 const hasTermsOn = (field: string) => (filter: QueryDslQueryContainer | undefined) =>
   Boolean(filter?.terms && field in (filter.terms as object));
 
+const hasPrefixOn = (field: string) => (filter: QueryDslQueryContainer | undefined) =>
+  Boolean(filter?.prefix && field in (filter.prefix as object));
+
 describe('buildRuleExecutionsQuery', () => {
   it('always filters on provider, task type and action', () => {
     const body = buildRuleExecutionsQuery(baseQuery);
@@ -34,6 +37,46 @@ describe('buildRuleExecutionsQuery', () => {
         { term: { 'event.action': 'task-run' } },
       ])
     );
+  });
+
+  describe('space scoping', () => {
+    it('always pushes a kibana.task.id prefix filter for the request space, even when ruleIds is omitted', () => {
+      const filters = filtersOf(buildRuleExecutionsQuery({ ...baseQuery, spaceId: 'space-A' }));
+
+      expect(filters).toEqual(
+        expect.arrayContaining([
+          { prefix: { 'kibana.task.id': 'alerting_v2:rule_executor:space-A:' } },
+        ])
+      );
+    });
+
+    it('still emits the space prefix when ruleIds is provided (terms narrows further within it)', () => {
+      const filters = filtersOf(
+        buildRuleExecutionsQuery({ ...baseQuery, spaceId: 'space-A', ruleIds: ['rule-x'] })
+      );
+
+      expect(filters.find(hasPrefixOn('kibana.task.id'))).toEqual({
+        prefix: { 'kibana.task.id': 'alerting_v2:rule_executor:space-A:' },
+      });
+      expect(filters.find(hasTermsOn('kibana.task.id'))).toEqual({
+        terms: { 'kibana.task.id': ['alerting_v2:rule_executor:space-A:rule-x'] },
+      });
+    });
+
+    it('cross-space regression: a no-ruleIds query in space A cannot match task ids from space B', () => {
+      const filters = filtersOf(buildRuleExecutionsQuery({ ...baseQuery, spaceId: 'space-A' }));
+      const prefixFilter = filters.find(hasPrefixOn('kibana.task.id'));
+
+      expect(prefixFilter).toBeDefined();
+      const prefixValue = (prefixFilter?.prefix as Record<string, string>)['kibana.task.id'];
+
+      // The space prefix is the only thing carrying the request space when
+      // ruleIds is absent — Task Manager's task-run events have no
+      // kibana.space_ids. Concretely: space-B task ids must NOT start with
+      // the space-A prefix, and vice versa.
+      expect('alerting_v2:rule_executor:space-B:rule-1'.startsWith(prefixValue)).toBe(false);
+      expect('alerting_v2:rule_executor:space-A:rule-1'.startsWith(prefixValue)).toBe(true);
+    });
   });
 
   it('does not include a kibana.task.id terms filter when ruleIds is omitted', () => {

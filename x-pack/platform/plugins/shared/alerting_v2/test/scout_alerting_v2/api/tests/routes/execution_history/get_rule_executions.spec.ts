@@ -18,25 +18,33 @@ import {
   testData,
 } from '../../../fixtures';
 
+const OTHER_SPACE_ID = 'cross-space-execution-history';
+
 apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
   let allCredentials: RoleApiCredentials;
   let allHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     readerCredentials = await requestAuth.getApiKeyForCustomRole(
       ALERTING_V2_EXECUTION_HISTORY_READ_ROLE
     );
-    readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
 
-    // We need rules.write to create the rule used in the happy-path test.
+    readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
     allCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
     allHeaders = { ...testData.COMMON_HEADERS, ...allCredentials.apiKeyHeader };
+
+    await apiServices.spaces.delete(OTHER_SPACE_ID);
+    await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
+  });
+
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.spaces.delete(OTHER_SPACE_ID);
   });
 
   apiTest(
@@ -48,7 +56,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
 
       await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: rule.id, runs: 1 });
 
-      const response = await apiClient.get(getRuleExecutionsUrl({ ruleIds: [rule.id] }), {
+      const response = await apiClient.get(getRuleExecutionsUrl({ ruleId: [rule.id] }), {
         headers: allHeaders,
       });
       expect(response).toHaveStatusCode(200);
@@ -69,6 +77,54 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       );
 
       expect(successful).toBeDefined();
+    }
+  );
+
+  apiTest(
+    'space scoping: does not return executions from another space',
+    async ({ apiServices, apiClient }) => {
+      const ruleInDefaultSpace = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'cross-space-default' } })
+      );
+
+      const ruleInOtherSpace = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'cross-space-other' } }),
+        { spaceId: OTHER_SPACE_ID }
+      );
+
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+        ruleId: ruleInDefaultSpace.id,
+        runs: 1,
+      });
+
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+        ruleId: ruleInOtherSpace.id,
+        runs: 1,
+        spaceId: OTHER_SPACE_ID,
+      });
+
+      const response = await apiClient.get(getRuleExecutionsUrl({ perPage: 100 }), {
+        headers: allHeaders,
+      });
+
+      expect(response).toHaveStatusCode(200);
+
+      const items = response.body.items as Array<{
+        rule: { id: string };
+        spaceId: string;
+      }>;
+
+      const sawDefaultSpaceRule = items.some(
+        (item) => item.rule.id === ruleInDefaultSpace.id && item.spaceId === 'default'
+      );
+
+      expect(sawDefaultSpaceRule).toBe(true);
+
+      const leaked = items
+        .filter((item) => item.spaceId === OTHER_SPACE_ID || item.rule.id === ruleInOtherSpace.id)
+        .map((item) => `${item.spaceId}/${item.rule.id}`);
+
+      expect(leaked).toHaveLength(0);
     }
   );
 

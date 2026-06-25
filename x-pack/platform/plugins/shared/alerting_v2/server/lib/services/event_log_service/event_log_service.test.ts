@@ -362,11 +362,26 @@ describe('EventLogService', () => {
           { term: { 'event.provider': 'taskManager' } },
           { term: { 'kibana.task.type': 'alerting_v2:rule_executor' } },
           { term: { 'event.action': 'task-run' } },
+          { prefix: { 'kibana.task.id': 'alerting_v2:rule_executor:default:' } },
           { terms: { 'kibana.task.id': ['alerting_v2:rule_executor:default:rule-a'] } },
           { terms: { 'event.outcome': ['failure'] } },
         ])
       );
       expect(args).not.toHaveProperty('track_total_hits');
+    });
+
+    it('always sends the space-prefix filter to ES, even with no ruleIds (cross-space leak guard)', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
+
+      await eventLogService.findRuleExecutions({ ...baseQuery, spaceId: 'space-A' });
+
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      expect(args.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { prefix: { 'kibana.task.id': 'alerting_v2:rule_executor:space-A:' } },
+        ])
+      );
     });
 
     it('normalizes hits and drops malformed rows without throwing', async () => {

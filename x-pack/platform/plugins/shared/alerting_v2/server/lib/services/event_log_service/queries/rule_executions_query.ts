@@ -27,9 +27,12 @@ const SORT_FIELD_TO_ES: Record<RuleExecutionSortField, string> = {
  * Builds the Elasticsearch search request body for
  * `EventLogService.findRuleExecutions`.
  *
- * Space scoping is *implicit*: `kibana.task.id` encodes
- * `{taskType}:{spaceId}:{ruleId}`, so the `terms` filter on computed task
- * ids enforces the space without a separate field.
+ * Space scoping is enforced **unconditionally** by a `prefix` filter on
+ * `kibana.task.id` (`{taskType}:{spaceId}:`). Task Manager's `task-run`
+ * events carry no `kibana.space_ids` field, so this is the only available
+ * carrier for the request space — and gating it on `ruleIds` would let
+ * a no-filter call read across spaces. When `ruleIds` is also provided
+ * the `terms` filter narrows further within the same prefix.
  *
  * `track_total_hits` is intentionally not set. ES defaults to capping
  * `total` at 10000 with `relation: 'gte'`.
@@ -51,6 +54,7 @@ export const buildRuleExecutionsQuery = (query: FindRuleExecutionsQuery): Search
     { term: { 'event.provider': EVENT_LOG_PROVIDER } },
     { term: { 'kibana.task.type': ALERTING_RULE_EXECUTOR_TASK_TYPE } },
     { term: { 'event.action': EVENT_LOG_ACTIONS.taskRun } },
+    { prefix: { 'kibana.task.id': `${ALERTING_RULE_EXECUTOR_TASK_TYPE}:${spaceId}:` } },
   ];
 
   if (ruleIds && ruleIds.length > 0) {
