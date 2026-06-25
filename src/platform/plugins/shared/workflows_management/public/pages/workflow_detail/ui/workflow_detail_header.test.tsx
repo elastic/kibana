@@ -16,9 +16,11 @@ import {
   WorkflowDetailHeader,
   type WorkflowDetailHeaderProps,
 } from './workflow_detail_header';
+import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _clearComputedData,
+  setActiveTab,
   setHasYamlSchemaValidationErrors,
   setWorkflow,
   setYamlString,
@@ -32,6 +34,7 @@ const mockUseWorkflowUrlState = jest.fn();
 const mockUseSaveYaml = jest.fn();
 const mockUseUpdateWorkflow = jest.fn();
 const mockUseMemoCss = jest.fn();
+let mockNavigateToApp: jest.Mock;
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => mockUseKibana(),
@@ -61,6 +64,9 @@ jest.mock('../../../entities/workflows/model/use_update_workflow', () => ({
 }));
 jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
   useMemoCss: (styles: any) => mockUseMemoCss(styles),
+}));
+jest.mock('./workflow_detail_actions_menu', () => ({
+  WorkflowDetailActionsMenu: () => <div data-test-subj="workflowChangeHistoryEmbed" />,
 }));
 
 describe('WorkflowDetailHeader', () => {
@@ -92,6 +98,7 @@ describe('WorkflowDetailHeader', () => {
       serverValid = true,
       isSaving = false,
       isManaged = false,
+      routerHistory,
     }: {
       isValid?: boolean;
       hasChanges?: boolean;
@@ -99,6 +106,7 @@ describe('WorkflowDetailHeader', () => {
       serverValid?: boolean;
       isSaving?: boolean;
       isManaged?: boolean;
+      routerHistory?: React.ComponentProps<typeof TestWrapper>['routerHistory'];
     } = {}
   ) => {
     const store = createMockStore();
@@ -122,7 +130,11 @@ describe('WorkflowDetailHeader', () => {
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
-      return <TestWrapper store={store}>{children}</TestWrapper>;
+      return (
+        <TestWrapper store={store} routerHistory={routerHistory}>
+          {children}
+        </TestWrapper>
+      );
     };
 
     return { ...render(component, { wrapper }), store };
@@ -131,10 +143,11 @@ describe('WorkflowDetailHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    mockNavigateToApp = jest.fn();
     mockUseKibana.mockReturnValue({
       services: {
         application: {
-          navigateToApp: jest.fn(),
+          navigateToApp: mockNavigateToApp,
         },
         settings: {
           client: {
@@ -164,6 +177,23 @@ describe('WorkflowDetailHeader', () => {
   it('should render', () => {
     const { getByText } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     expect(getByText('Test Workflow')).toBeInTheDocument();
+  });
+
+  it('navigates back to the workflows list with the stored list search params', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      routerHistory: [
+        {
+          pathname: '/test-123',
+          state: { workflowsListSearch: '?tags=prod&enabled=true' },
+        },
+      ],
+    });
+
+    fireEvent.click(result.getByRole('button', { name: 'Back to Workflows' }));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+      path: '?tags=prod&enabled=true',
+    });
   });
 
   it('shows saved status when no changes', () => {
@@ -307,6 +337,30 @@ describe('WorkflowDetailHeader', () => {
     expect(executionsTab).toHaveAttribute('aria-disabled', 'true');
   });
 
+  it('disables executions tab for managed workflows when user cannot read managed workflow executions', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...defaultWorkflowsCapabilities,
+      canReadWorkflowExecution: true,
+      canReadManagedWorkflowExecution: false,
+    });
+    const { getByRole } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isManaged: true,
+    });
+    const executionsTab = getByRole('button', { name: 'Executions' });
+    expect(executionsTab).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('keeps executions tab enabled for custom workflows when only managed workflow execution read is missing', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...defaultWorkflowsCapabilities,
+      canReadWorkflowExecution: true,
+      canReadManagedWorkflowExecution: false,
+    });
+    const { getByRole } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    const executionsTab = getByRole('button', { name: 'Executions' });
+    expect(executionsTab).not.toHaveAttribute('aria-disabled', 'true');
+  });
+
   describe('Authorization matrix', () => {
     interface MatrixRow {
       roleLabel: string;
@@ -447,5 +501,29 @@ describe('WorkflowDetailHeader', () => {
       });
       expect(result.getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
     });
+  });
+
+  it('renders change history embed on workflow tab when workflow id is present', () => {
+    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+    expect(getByTestId('workflowChangeHistoryEmbed')).toBeInTheDocument();
+  });
+
+  it('does not render change history embed on executions tab', () => {
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      setActiveTab: jest.fn(),
+    });
+
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    store.dispatch(setYamlString(mockWorkflow.yaml));
+    store.dispatch(setActiveTab('executions'));
+
+    const { queryByTestId } = render(<WorkflowDetailHeader {...defaultProps} />, {
+      wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
+    });
+
+    expect(queryByTestId('workflowChangeHistoryEmbed')).not.toBeInTheDocument();
   });
 });
