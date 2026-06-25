@@ -877,11 +877,12 @@ export function ComposeDiscoverFlyout({
 
   /*
    * Help text shown above the single unified editor in the create-mode alert flow.
-   * Absent in edit mode (where the sandbox shows base/alert tabs instead) and in
-   * builder/read-only mode (where the sandbox has no Apply button).
+   * Absent in edit mode (where the sandbox shows base/alert tabs instead), in
+   * builder/read-only mode (where the sandbox has no Apply button), and in YAML
+   * mode (where shouldRunHeuristicSplit is false and the split does not run).
    */
   const sandboxHelpText =
-    isAlert && !sandboxTabs?.length && !isBuilderMode ? (
+    isAlert && !sandboxTabs?.length && !isBuilderMode && !uiState.yamlMode ? (
       <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
         <FormattedMessage
           id="xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText"
