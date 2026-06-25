@@ -241,7 +241,7 @@ export function WorkflowsPage() {
               <EuiFlexItem>
                 <WorkflowSearchField
                   initialValue={search.query || ''}
-                  onSearch={(query) => setSearch({ ...search, query })}
+                  onSearch={(query) => setSearch({ ...search, query, page: 1 })}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
