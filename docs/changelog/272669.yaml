@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/272669
+issues:
+- https://github.com/elastic/kibana/issues/269421
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-25
+areas:
+- Discover and ES|QL
+title: editor new line mechanism

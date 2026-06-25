@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/272604
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-25
+areas:
+- Search and data
+title: Optimize enrollment key and revision reconciliation during Fleet setup
+description: Improve Fleet setup performance at scale by reconciling agent policy enrollment keys and revisions with bulk aggregations instead of per-policy Elasticsearch queries.

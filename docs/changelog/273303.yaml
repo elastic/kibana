@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/273303
+issues:
+- https://github.com/elastic/kibana/issues/273146
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-25
+areas:
+- Discover and ES|QL
+title: Adds support for object fields in the Index editor

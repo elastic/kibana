@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/274002
+issues:
+- https://github.com/elastic/kibana/issues/273690
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-25
+areas:
+- Dashboards and visualizations
+title: fix Save and return doesn't work for Maps through Visualize library

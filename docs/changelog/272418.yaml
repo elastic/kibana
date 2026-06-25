@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/272418
+issues:
+- https://github.com/elastic/kibana/issues/272275
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-25
+title: 'fix: add kibana version to export to csv call via alerts table'

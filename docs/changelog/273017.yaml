@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/273017
+issues:
+- https://github.com/elastic/kibana/issues/273014
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-25
+title: Fix attachment state leaking between conversations and improve add-to-chat UX
+description: '> Fixes a bug where attachments from one AI assistant conversation leaked into the next.'

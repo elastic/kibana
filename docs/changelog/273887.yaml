@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/273887
+issues:
+- https://github.com/elastic/kibana/issues/273798
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-25
+areas:
+- AI and machine Learning
+title: Removes unnecessary polling for ML capabilities on Kibana pages
