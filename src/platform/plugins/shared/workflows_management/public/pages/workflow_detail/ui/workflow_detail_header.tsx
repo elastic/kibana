@@ -39,7 +39,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { PLUGIN_ID } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
@@ -63,7 +62,7 @@ import {
   ManagedWorkflowBadge,
 } from '../../../shared/ui';
 import {
-  getWorkflowsListPathFromDetailRouteState,
+  navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
@@ -174,10 +173,6 @@ export const WorkflowDetailHeader = React.memo(
     );
 
     const { activeTab, setActiveTab } = useWorkflowUrlState();
-    const workflowsListPath = useMemo(
-      () => getWorkflowsListPathFromDetailRouteState(location.state),
-      [location.state]
-    );
 
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
@@ -299,11 +294,7 @@ export const WorkflowDetailHeader = React.memo(
                 size="xs"
                 flush="left"
                 onClick={() => {
-                  if (workflowsListPath) {
-                    application.navigateToApp(PLUGIN_ID, { path: workflowsListPath });
-                    return;
-                  }
-                  application.navigateToApp(PLUGIN_ID);
+                  void navigateToWorkflowsList(application, location.state);
                 }}
                 aria-label={Translations.backLink}
               >

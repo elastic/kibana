@@ -24,7 +24,6 @@ import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
-import { PLUGIN_ID } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
@@ -43,7 +42,7 @@ import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import {
-  getWorkflowsListPathFromDetailRouteState,
+  navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
 
@@ -141,14 +140,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [setSelectedExecution]);
 
   const onBackToWorkflows = useCallback(() => {
-    const workflowsListPath = getWorkflowsListPathFromDetailRouteState(location.state);
-
-    if (workflowsListPath) {
-      application.navigateToApp(PLUGIN_ID, { path: workflowsListPath });
-      return;
-    }
-
-    application.navigateToApp(PLUGIN_ID);
+    void navigateToWorkflowsList(application, location.state);
   }, [application, location.state]);
 
   if (error) {

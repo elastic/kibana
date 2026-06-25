@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ApplicationStart } from '@kbn/core/public';
+import { PLUGIN_ID } from '../../../common';
+
 export interface WorkflowDetailRouteState {
   workflowsListSearch?: string;
 }
@@ -27,4 +30,16 @@ export const getWorkflowsListPathFromDetailRouteState = (
   }
 
   return workflowsListSearch.startsWith('?') ? workflowsListSearch : `?${workflowsListSearch}`;
+};
+
+export const navigateToWorkflowsList = (
+  application: ApplicationStart,
+  state: WorkflowDetailRouteState | undefined
+): Promise<void> => {
+  const workflowsListPath = getWorkflowsListPathFromDetailRouteState(state);
+
+  return application.navigateToApp(
+    PLUGIN_ID,
+    workflowsListPath ? { path: workflowsListPath } : undefined
+  );
 };
