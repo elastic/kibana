@@ -19,7 +19,15 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
   interval: '1d',
   timeout: '1h',
   initialState: {},
-  run: async ({ esClient, logger, status, crudClient, entityMetadataClient, abortController, telemetry }) => {
+  run: async ({
+    esClient,
+    logger,
+    status,
+    crudClient,
+    entityMetadataClient,
+    abortController,
+    telemetry,
+  }) => {
     const namespace = status.metadata.namespace;
     const lastProcessedTimestamp =
       typeof status.state.lastProcessedTimestamp === 'string'
