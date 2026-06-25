@@ -321,6 +321,13 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Enables the transient read-only Super Timeline that aggregates multiple
+   * source timelines into the active timeline slot. Disabled by default until GA.
+   * Epic: elastic/security-team#14357
+   */
+  superTimeline: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
