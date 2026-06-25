@@ -10,12 +10,12 @@ import { schema } from '@kbn/config-schema';
 
 import {
   CreateAgentlessPolicyRequestSchema,
-  CreateAgentlessPolicyResponseSchema,
   DeleteAgentlessPolicyRequestSchema,
   DeleteAgentlessPolicyResponseSchema,
   GetBulkAgentlessPolicyThroughputRequestSchema,
   GetBulkAgentlessPolicyThroughputResponseSchema,
 } from '../../../common/types/rest_spec/agentless_policy';
+import { AgentlessPolicyResponseSchema } from '../../../common/types/models/agentless_policy_schema';
 import { AGENTLESS_POLICIES_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -109,7 +109,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               description: 'OK: A successful request.',
-              body: () => CreateAgentlessPolicyResponseSchema,
+              body: () => AgentlessPolicyResponseSchema,
             },
             400: {
               description: 'A bad request.',
