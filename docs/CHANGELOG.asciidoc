@@ -144,7 +144,7 @@ Multipage Canvas visualizations stop advancing after one page when in autoplay m
 Manually advance to the next page or upgrade to 8.19.18, 9.3.7.
 
 *Resolved* + 
-This issue is resolved in 8.19.18, 9.3.7.
+This issue is resolved in 8.19.18 and 9.3.7.
 ====
 // end::known-issue-268398[]
 
