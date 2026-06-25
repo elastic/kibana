@@ -20,6 +20,10 @@ import { useConversationActions } from './use_conversation_actions';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
+import {
+  clearWorkspaceAttachmentCallbacks,
+  registerWorkspaceAttachmentCallbacks,
+} from '../../../agent_workspace/workspace_attachment_callbacks';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -116,6 +120,18 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       return removeAttachmentFromList(prev, attachmentIndex);
     });
   }, []);
+
+  useEffect(() => {
+    registerWorkspaceAttachmentCallbacks({
+      addAttachment: (attachment) => {
+        upsertAttachments([attachment]);
+      },
+    });
+
+    return () => {
+      clearWorkspaceAttachmentCallbacks();
+    };
+  }, [upsertAttachments]);
 
   const contextValue = useMemo(
     () => ({

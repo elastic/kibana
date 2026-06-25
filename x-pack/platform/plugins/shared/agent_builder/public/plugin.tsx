@@ -77,6 +77,7 @@ import {
   registerAgentWorkspaceSlot,
   unregisterAgentWorkspaceSlot,
 } from './agent_workspace/register_agent_workspace';
+import { getWorkspaceAttachmentCallbacks } from './agent_workspace/workspace_attachment_callbacks';
 
 export class AgentBuilderPlugin
   implements
@@ -353,6 +354,11 @@ export class AgentBuilderPlugin
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
       addAttachment: (attachment: AttachmentInput) => {
+        if (isAgentFirstChrome) {
+          getWorkspaceAttachmentCallbacks()?.addAttachment(attachment);
+          return;
+        }
+
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
         }
