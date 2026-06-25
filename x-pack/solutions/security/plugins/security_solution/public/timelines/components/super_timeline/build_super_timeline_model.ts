@@ -11,6 +11,7 @@ import type { EsQueryConfig } from '@kbn/es-query';
 import { buildCombinedFilter, BooleanRelation, FilterStateStore } from '@kbn/es-query';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineDefaults } from '../../store/defaults';
 import { combineQueries } from '../../../common/lib/kuery';
@@ -115,19 +116,18 @@ export const buildSuperTimelineModel = (
     const title = timeline.title || timeline.savedObjectId || 'Untitled Timeline';
     const id = timeline.savedObjectId ?? '';
 
-    // Detect EQL/ESQL-only timelines (their query lives outside KQL/dataProviders/filters)
-    const hasEqlQuery = !!timeline.eqlOptions?.query;
-    const hasEsqlQuery = !!timeline.savedSearchId;
-    const hasKqlQuery =
-      (timeline.dataProviders && timeline.dataProviders.length > 0) ||
-      timeline.kqlQuery?.filterQuery?.kuery?.expression ||
-      (timeline.filters && timeline.filters.length > 0);
+    // Key off the saved activeTab to identify the primary query mode.
+    // savedSearchId definitively identifies ESQL. activeTab === 'eql' identifies EQL.
+    // This avoids false-positives from stale filters/dataProviders that remain on the
+    // model when the user visited the Query tab before switching to EQL mode.
+    const isEsqlTimeline = !!timeline.savedSearchId;
+    const isEqlTimeline = !isEsqlTimeline && timeline.activeTab === TimelineTabs.eql;
 
-    if (!hasKqlQuery && (hasEqlQuery || hasEsqlQuery)) {
+    if (isEqlTimeline || isEsqlTimeline) {
       skippedQueryTimelines.push({
         id,
         title,
-        reason: hasEsqlQuery ? 'esql' : 'eql',
+        reason: isEsqlTimeline ? 'esql' : 'eql',
       });
     } else {
       const kqlQuery = {

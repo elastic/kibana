@@ -9,6 +9,7 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 import { isCombinedFilter, BooleanRelation } from '@kbn/es-query';
 import type { CombinedFilter } from '@kbn/es-query';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../common/types/timeline';
 import type { DataProvider } from '../../../../common/types';
 import type { TimelineModel } from '../../store/model';
 import { timelineDefaults } from '../../store/defaults';
@@ -328,6 +329,7 @@ describe('buildSuperTimelineModel', () => {
       const eqlTimeline = makeTimeline({
         savedObjectId: 'eql-timeline',
         title: 'EQL Investigation',
+        activeTab: TimelineTabs.eql,
         eqlOptions: {
           eventCategoryField: 'event.category',
           timestampField: '@timestamp',
@@ -408,6 +410,7 @@ describe('buildSuperTimelineModel', () => {
       const eqlTimeline = makeTimeline({
         savedObjectId: 'eql-tl',
         title: 'EQL Timeline',
+        activeTab: TimelineTabs.eql,
         eqlOptions: {
           eventCategoryField: 'event.category',
           timestampField: '@timestamp',
@@ -431,6 +434,36 @@ describe('buildSuperTimelineModel', () => {
       // EQL timeline is skipped
       expect(skippedQueryTimelines).toHaveLength(1);
       expect(skippedQueryTimelines[0].title).toBe('EQL Timeline');
+    });
+
+    it('skips an EQL timeline that has stale KQL filters from a prior query-tab visit', () => {
+      // A timeline saved in EQL mode may still carry filters from when the user
+      // previously visited the Query tab. The old !hasKqlQuery guard would have
+      // treated this as a KQL timeline and silently merged the stale filters.
+      const eqlWithStaleFilters = makeTimeline({
+        savedObjectId: 'eql-stale',
+        title: 'EQL with stale filters',
+        activeTab: TimelineTabs.eql,
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          timestampField: '@timestamp',
+          query: 'process where process.name == "cmd.exe"',
+          size: 100,
+        },
+        filters: [
+          {
+            meta: { alias: null, negate: false, disabled: false, type: 'phrase', key: 'host.name' },
+            query: { match_phrase: { 'host.name': 'stale-host' } },
+          },
+        ],
+      });
+
+      const { model, skippedQueryTimelines } = buildSuperTimelineModel([eqlWithStaleFilters], deps);
+
+      // Must be reported as skipped — stale filters must not be merged
+      expect(skippedQueryTimelines).toHaveLength(1);
+      expect(skippedQueryTimelines[0].reason).toBe('eql');
+      expect(model.filters).toHaveLength(0);
     });
   });
 });
