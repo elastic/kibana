@@ -59,9 +59,7 @@ export const buildMitreCoverageFromRules = (
     const ruleTactics = new Set<string>();
     const ruleTechniques = new Set<string>();
 
-    const mitreThreats = threat.filter(
-      (threatItem) => threatItem.framework === 'MITRE ATT&CK'
-    );
+    const mitreThreats = threat.filter((threatItem) => threatItem.framework === 'MITRE ATT&CK');
     for (const threatItem of mitreThreats) {
       const tacticId = threatItem.tactic?.id;
       if (tacticId) {
