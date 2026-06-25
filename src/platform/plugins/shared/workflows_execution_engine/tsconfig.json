@@ -37,7 +37,8 @@
     "@kbn/es-errors",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
-    "@kbn/domain-events"
+    "@kbn/domain-events",
+    "@kbn/i18n"
   ],
   "exclude": ["target/**/*"]
 }
