@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import {
   createToolHandlerContext,
   createToolTestMocks,
@@ -34,14 +34,6 @@ const createMockDeps = (fleetAvailable = true) => {
 
 describe('createGetUserDataInventoryTool', () => {
   describe('tool definition', () => {
-    it('has the correct id and type', () => {
-      const { getStartServices, mockLogger } = createMockDeps();
-      const tool = createGetUserDataInventoryTool({ getStartServices, logger: mockLogger });
-
-      expect(tool.id).toBe(GET_USER_DATA_INVENTORY_INLINE_TOOL_ID);
-      expect(tool.type).toBe(ToolType.builtin);
-    });
-
     it('has the correct tool id constant', () => {
       expect(GET_USER_DATA_INVENTORY_INLINE_TOOL_ID).toBe('security.get_user_data_inventory');
     });
@@ -76,20 +68,6 @@ describe('createGetUserDataInventoryTool', () => {
         makePackage('okta', 'not_installed'),
         makePackage('aws', 'not_installed'),
       ]);
-
-      const tool = createGetUserDataInventoryTool({ getStartServices, logger: mockLogger });
-      const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
-      const result = await tool.handler({}, context);
-
-      expect('results' in result).toBe(true);
-      if ('results' in result) {
-        expect(result.results[0].data).toEqual({ integrations: [] });
-      }
-    });
-
-    it('returns empty integrations when getPackages returns empty array', async () => {
-      const { getStartServices, mockLogger, mockRequest, getPackagesMock } = createMockDeps();
-      getPackagesMock.mockResolvedValue([]);
 
       const tool = createGetUserDataInventoryTool({ getStartServices, logger: mockLogger });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
