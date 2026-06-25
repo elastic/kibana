@@ -13,8 +13,8 @@ import {
   CreateAgentlessPolicyResponseSchema,
   DeleteAgentlessPolicyRequestSchema,
   DeleteAgentlessPolicyResponseSchema,
-  GetAgentlessPolicyThroughputRequestSchema,
-  GetAgentlessPolicyThroughputResponseSchema,
+  GetBulkAgentlessPolicyThroughputRequestSchema,
+  GetBulkAgentlessPolicyThroughputResponseSchema,
 } from '../../../common/types/rest_spec/agentless_policy';
 import { AGENTLESS_POLICIES_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
@@ -26,7 +26,7 @@ import {
   createAgentlessPolicyHandler,
   deleteAgentlessPolicyHandler,
   syncAgentlessPoliciesHandler,
-  getAgentlessPolicyThroughputHandler,
+  getBulkAgentlessPolicyThroughputHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -170,13 +170,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       deleteAgentlessPolicyHandler
     );
 
-  // Throughput
+  // Bulk throughput
   router.versioned
-    .get({
-      path: AGENTLESS_POLICIES_ROUTES.THROUGHPUT_PATTERN,
+    .post({
+      path: AGENTLESS_POLICIES_ROUTES.BULK_THROUGHPUT_PATTERN,
       access: 'internal',
-      summary: 'Get throughput for an agentless policy',
-      description: 'Get 24h throughput data for an agentless integration policy.',
+      summary: 'Get throughput for multiple agentless policies',
+      description: 'Get 24h throughput data for a batch of agentless integration policies.',
       security: {
         authz: {
           requiredPrivileges: [
@@ -194,23 +194,19 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: GetAgentlessPolicyThroughputRequestSchema,
+          request: GetBulkAgentlessPolicyThroughputRequestSchema,
           response: {
             200: {
               description: 'OK: A successful request.',
-              body: () => GetAgentlessPolicyThroughputResponseSchema,
+              body: () => GetBulkAgentlessPolicyThroughputResponseSchema,
             },
             400: {
               description: 'A bad request.',
               body: genericErrorResponse,
             },
-            404: {
-              description: 'Not found.',
-              body: genericErrorResponse,
-            },
           },
         },
       },
-      getAgentlessPolicyThroughputHandler
+      getBulkAgentlessPolicyThroughputHandler
     );
 };

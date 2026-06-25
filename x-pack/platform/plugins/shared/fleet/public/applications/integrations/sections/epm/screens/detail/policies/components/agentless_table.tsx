@@ -4,19 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingChart,
-  EuiText,
-} from '@elastic/eui';
-import { Axis, Chart, Position, Settings, AreaSeries, ScaleType } from '@elastic/charts';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -28,15 +18,19 @@ import type {
   InMemoryPackagePolicy,
   PackagePolicy,
 } from '../../../../../../types';
-import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../../../../../../../common/constants';
-import { FLEET_CONNECTORS_PACKAGE } from '../../../../../../constants';
+import type { AgentlessPolicyThroughput } from '../../../../../../../../../common/types/rest_spec/agentless_policy';
+import {
+  AGENTS_PREFIX,
+  FLEET_CONNECTORS_PACKAGE,
+  SO_SEARCH_LIMIT,
+} from '../../../../../../../../../common/constants';
 import type { usePagination } from '../../../../../../hooks';
 import {
   useLink,
   sendGetAgents,
   useAuthz,
   useStartServices,
-  useGetAgentlessPolicyThroughput,
+  useBulkGetAgentlessPolicyThroughput,
 } from '../../../../../../hooks';
 import {
   Loading,
@@ -48,81 +42,12 @@ import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
+import { ThroughputCell, ThroughputNotApplicable } from './throughput_cell';
 
 const REFRESH_INTERVAL_MS = 30000;
 
-const formatRate = (value: number): string =>
-  value >= 1000 ? `${(value / 1000).toFixed(2)}k/s` : `${value.toFixed(2)}/s`;
-
-const ThroughputDash: React.FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': testSubj }) => (
-  <EuiText size="s" color="subdued" data-test-subj={testSubj}>
-    {i18n.translate('xpack.fleet.epm.packageDetails.integrationList.throughputNoData', {
-      defaultMessage: '—',
-    })}
-  </EuiText>
-);
-
-const ThroughputCell: React.FC<{ packagePolicyId: string }> = ({ packagePolicyId }) => {
-  const chartBaseTheme = useElasticChartsTheme();
-  const { data, isLoading } = useGetAgentlessPolicyThroughput(packagePolicyId);
-  const locale = useMemo(() => i18n.getLocale(), []);
-  const formatTimestamp = useCallback(
-    (ms: number) =>
-      new Date(ms).toLocaleString(locale, {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    [locale]
-  );
-
-  if (isLoading) {
-    return <EuiLoadingChart size="m" data-test-subj="agentlessThroughputLoading" />;
-  }
-
-  if (!data || data.series.length === 0) {
-    return <ThroughputDash data-test-subj="agentlessThroughputNoData" />;
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" className="eui-textNoWrap" data-test-subj="agentlessThroughputValue">
-          {formatRate(data.averagePerSecond)}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Chart size={{ height: 30, width: 100 }} data-test-subj="agentlessThroughputSparkline">
-          <Settings showLegend={false} baseTheme={chartBaseTheme} locale={locale} />
-          <Axis
-            id="x"
-            position={Position.Bottom}
-            hide={true}
-            gridLine={{ visible: false }}
-            tickFormat={formatTimestamp}
-          />
-          <Axis
-            id="y"
-            gridLine={{ visible: false }}
-            position={Position.Left}
-            hide={true}
-            tickFormat={formatRate}
-          />
-
-          <AreaSeries
-            id="throughput"
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={data.series}
-          />
-        </Chart>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const isConnectorPolicy = (packagePolicy: InMemoryPackagePolicy) =>
+  packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE;
 
 export const AgentlessPackagePoliciesTable = ({
   isLoading,
@@ -150,6 +75,28 @@ export const AgentlessPackagePoliciesTable = ({
   const [isAgentsLoading, setIsAgentsLoading] = useState<boolean>(false);
   const [agentsByPolicyId, setAgentsByPolicyId] = useState<Record<string, Agent>>({});
   const canReadAgents = authz.fleet.readAgents;
+
+  // Collect ids for non-connector policies only; connectors don't ingest via agents
+  const throughputPolicyIds = useMemo(
+    () =>
+      packagePolicies
+        .filter(({ packagePolicy }) => !isConnectorPolicy(packagePolicy))
+        .map(({ packagePolicy }) => packagePolicy.id),
+    [packagePolicies]
+  );
+  const { data: throughputData, isLoading: isThroughputLoading } =
+    useBulkGetAgentlessPolicyThroughput(throughputPolicyIds);
+  const throughputByPolicyId = useMemo(
+    () =>
+      (throughputData?.items ?? []).reduce<Record<string, AgentlessPolicyThroughput>>(
+        (acc, item) => {
+          acc[item.policyId] = item;
+          return acc;
+        },
+        {}
+      ),
+    [throughputData]
+  );
 
   // Kuery for all agents enrolled into the agent policies associated with the package policies
   // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies
@@ -315,10 +262,15 @@ export const AgentlessPackagePoliciesTable = ({
             }),
             align: 'left' as HorizontalAlignment,
             render({ packagePolicy }: { packagePolicy: InMemoryPackagePolicy }) {
-              if (packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE) {
-                return <ThroughputDash data-test-subj="agentlessThroughputNotApplicable" />;
+              if (isConnectorPolicy(packagePolicy)) {
+                return <ThroughputNotApplicable />;
               }
-              return <ThroughputCell packagePolicyId={packagePolicy.id} />;
+              return (
+                <ThroughputCell
+                  data={throughputByPolicyId[packagePolicy.id]}
+                  isLoading={isThroughputLoading}
+                />
+              );
             },
           },
           ...(canReadAgents

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useQuery } from '@kbn/react-query';
+
 import { API_VERSIONS } from '../../../common';
 
 import { agentlessPolicyRouteService } from '../../../common/services';
@@ -13,10 +15,10 @@ import type {
   CreateAgentlessPolicyResponse,
   DeleteAgentlessPolicyRequest,
   DeleteAgentlessPolicyResponse,
-  GetAgentlessPolicyThroughputResponse,
+  GetBulkAgentlessPolicyThroughputResponse,
 } from '../../../common/types/rest_spec/agentless_policy';
 
-import { sendRequestForRq, useRequest } from './use_request';
+import { sendRequestForRq } from './use_request';
 
 export const sendCreateAgentlessPolicy = (
   body: CreateAgentlessPolicyRequest['body'],
@@ -43,10 +45,18 @@ export const sendDeleteAgentlessPolicy = (
   });
 };
 
-export const useGetAgentlessPolicyThroughput = (policyId: string) => {
-  return useRequest<GetAgentlessPolicyThroughputResponse>({
-    path: agentlessPolicyRouteService.getThroughputPath(policyId),
-    method: 'get',
-    version: API_VERSIONS.internal.v1,
-  });
+export const useBulkGetAgentlessPolicyThroughput = (policyIds: string[]) => {
+  return useQuery<GetBulkAgentlessPolicyThroughputResponse>(
+    ['agentlessPolicyThroughput', policyIds],
+    () =>
+      sendRequestForRq<GetBulkAgentlessPolicyThroughputResponse>({
+        path: agentlessPolicyRouteService.getBulkThroughputPath(),
+        method: 'post',
+        version: API_VERSIONS.internal.v1,
+        body: JSON.stringify({ policyIds }),
+      }),
+    {
+      enabled: policyIds.length > 0,
+    }
+  );
 };

@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import pMap from 'p-map';
 
 import { inputsFormat } from '../../../common/constants';
 import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
@@ -15,15 +16,15 @@ import { appContextService, packagePolicyService } from '../../services';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 import type {
   DeleteAgentlessPolicyRequestSchema,
-  GetAgentlessPolicyThroughputRequestSchema,
-  GetAgentlessPolicyThroughputResponse,
+  GetBulkAgentlessPolicyThroughputRequestSchema,
 } from '../../../common/types/rest_spec/agentless_policy';
 import { syncAgentlessDeployments } from '../../services/agentless/deployment_sync';
 import { agentlessAgentService } from '../../services/agents/agentless_agent';
-import { dataStreamService } from '../../services/data_streams';
-import { retryTransientEsErrors } from '../../services/epm/elasticsearch/retry';
+import { getPolicyThroughput } from '../../services/agentless/throughput';
 
-const PEAK_WINDOW_SECONDS = 10;
+// Each per-policy search runs a nested date_histogram aggregation; cap it
+// to avoid overwhelming the cluster when a page has many agentless policies.
+const BULK_THROUGHPUT_CONCURRENCY = 10;
 
 export const syncAgentlessPoliciesHandler: FleetRequestHandler<
   undefined,
@@ -116,105 +117,32 @@ export const deleteAgentlessPolicyHandler: FleetRequestHandler<
   });
 };
 
-export const getAgentlessPolicyThroughputHandler: FleetRequestHandler<
-  TypeOf<typeof GetAgentlessPolicyThroughputRequestSchema.params>
+export const getBulkAgentlessPolicyThroughputHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetBulkAgentlessPolicyThroughputRequestSchema.body>
 > = async (context, request, response) => {
-  const { policyId } = request.params;
+  const { policyIds } = request.body;
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-  const packagePolicy = await packagePolicyService.get(soClient, policyId);
-  if (!packagePolicy) {
-    return response.notFound({ body: { message: `Package policy '${policyId}' not found` } });
-  }
-
-  // Derive unique index patterns from the package policy's data streams
-  const indexPatterns = [
-    ...new Set(
-      packagePolicy.inputs.flatMap((input) =>
-        input.streams
-          .filter((stream) => stream.enabled)
-          .map((stream) =>
-            dataStreamService.streamPartsToIndexPattern({
-              type: stream.data_stream.type ?? 'logs',
-              dataset: stream.data_stream.dataset,
-            })
-          )
-      )
-    ),
-  ];
-
-  const emptyResult: GetAgentlessPolicyThroughputResponse = { averagePerSecond: 0, series: [] };
-
-  if (indexPatterns.length === 0) {
-    return response.ok({ body: emptyResult });
-  }
-
-  let searchResult;
-  try {
-    searchResult = await retryTransientEsErrors(() =>
-      esClient.search({
-        index: indexPatterns.join(','),
-        size: 0,
-        allow_no_indices: true,
-        ignore_unavailable: true,
-        query: {
-          bool: {
-            filter: [
-              { range: { 'event.ingested': { gte: 'now-24h', lte: 'now' } } },
-              { wildcard: { 'agent.name': { value: `*${policyId}*` } } },
-            ],
-          },
-        },
-        aggs: {
-          throughput: {
-            date_histogram: {
-              field: 'event.ingested',
-              fixed_interval: '30m',
-              min_doc_count: 0,
-              extended_bounds: { min: 'now-24h', max: 'now' },
-            },
-            aggs: {
-              per_window: {
-                date_histogram: {
-                  field: 'event.ingested',
-                  fixed_interval: '10s',
-                  min_doc_count: 1, // omit empty windows to keep inner bucket count low
-                },
-              },
-              peak_per_window: {
-                max_bucket: { buckets_path: 'per_window>_count' },
-              },
-            },
-          },
-        },
-      })
-    );
-  } catch (err) {
-    if (err?.statusCode === 404) {
-      return response.ok({ body: emptyResult });
-    }
-    throw err;
-  }
-
-  interface ThroughputBucket {
-    key: number;
-    doc_count: number;
-    peak_per_window?: { value: number | null };
-  }
-  const throughputAgg = searchResult.aggregations?.throughput as
-    | { buckets: ThroughputBucket[] }
-    | undefined;
-  const buckets = throughputAgg?.buckets ?? [];
-
-  let totalDocs = 0;
-  const series = buckets.map(({ key, doc_count: docCount, peak_per_window: peak }) => {
-    totalDocs += docCount;
-    // peak docs in any 10s window within this hour, normalized to events/s
-    return { x: key, y: (peak?.value ?? 0) / PEAK_WINDOW_SECONDS };
+  const packagePolicies = await packagePolicyService.getByIDs(soClient, policyIds, {
+    ignoreMissing: true,
   });
-  const averagePerSecond = totalDocs / (24 * 3600);
 
-  return response.ok({ body: { averagePerSecond, series } });
+  const items = await pMap(
+    packagePolicies,
+    async (packagePolicy) => {
+      try {
+        const throughput = await getPolicyThroughput(esClient, packagePolicy);
+        return { policyId: packagePolicy.id, ...throughput };
+      } catch {
+        return { policyId: packagePolicy.id, averagePerSecond: 0, series: [] };
+      }
+    },
+    { concurrency: BULK_THROUGHPUT_CONCURRENCY }
+  );
+
+  return response.ok({ body: { items } });
 };

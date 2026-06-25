@@ -7,6 +7,8 @@
 
 import { type TypeOf, schema } from '@kbn/config-schema';
 
+import { SO_SEARCH_LIMIT } from '../../constants';
+
 import {
   PackagePolicyResponseSchema,
   SimplifiedCreatePackagePolicyRequestBodySchema,
@@ -158,27 +160,38 @@ export interface DeleteAgentlessPolicyRequest {
   query: TypeOf<typeof DeleteAgentlessPolicyRequestSchema.query>;
 }
 
-export const GetAgentlessPolicyThroughputRequestSchema = {
-  params: schema.object({
-    policyId: schema.string({
-      meta: { description: 'The ID of the agentless package policy.' },
-    }),
-  }),
-};
-
-export const GetAgentlessPolicyThroughputResponseSchema = schema.object({
+export const AgentlessPolicyThroughputSchema = schema.object({
+  policyId: schema.string({ meta: { description: 'The ID of the agentless package policy.' } }),
   averagePerSecond: schema.number({
-    meta: { description: 'Average ingest rate over the last 24h in events per second.' },
+    meta: { description: 'Average ingest rate over the observed span in events per second.' },
   }),
   series: schema.arrayOf(
     schema.object({
       x: schema.number({ meta: { description: 'Bucket start timestamp in epoch milliseconds.' } }),
-      y: schema.number({ meta: { description: 'Events per second in this bucket.' } }),
+      y: schema.number({
+        meta: { description: 'Peak events per second in this 30-minute bucket.' },
+      }),
     }),
     { meta: { description: '30-minute throughput buckets over the last 24h.' } }
   ),
 });
 
-export type GetAgentlessPolicyThroughputResponse = TypeOf<
-  typeof GetAgentlessPolicyThroughputResponseSchema
+export const GetBulkAgentlessPolicyThroughputRequestSchema = {
+  body: schema.object({
+    policyIds: schema.arrayOf(schema.string(), {
+      maxSize: SO_SEARCH_LIMIT,
+      meta: { description: 'IDs of the agentless package policies to query.' },
+    }),
+  }),
+};
+
+export const GetBulkAgentlessPolicyThroughputResponseSchema = schema.object({
+  items: schema.arrayOf(AgentlessPolicyThroughputSchema, {
+    meta: { description: 'Throughput data for each requested policy.' },
+  }),
+});
+
+export type AgentlessPolicyThroughput = TypeOf<typeof AgentlessPolicyThroughputSchema>;
+export type GetBulkAgentlessPolicyThroughputResponse = TypeOf<
+  typeof GetBulkAgentlessPolicyThroughputResponseSchema
 >;
