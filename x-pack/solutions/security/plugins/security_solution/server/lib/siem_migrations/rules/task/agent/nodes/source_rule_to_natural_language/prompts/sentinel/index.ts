@@ -53,7 +53,7 @@ Microsoft Sentinel watchlists are reference lists used in KQL queries via the \`
 
 #### Elastic Ecosystem Data Source Mapping
 
-The customer is migrating FROM Microsoft Sentinel TO the Elastic ecosystem. When    69 - "Data source: Microsoft Defender endpoint events"the rule references security products that have direct Elastic equivalents, REPLACE them entirely with the Elastic equivalent in your output. Do NOT mention the original vendor name in the Data Sources section.
+The customer is migrating FROM Microsoft Sentinel TO the Elastic ecosystem. When the rule references security products that have direct Elastic equivalents, REPLACE them entirely with the Elastic equivalent in your output. Do NOT mention the original vendor name in the Data Sources section.
 
 Replacements:
 - **SentinelOne** (tables like \`SentinelOne_CL\`, SentinelOne activity/threat/agent logs) -> Output as: **Elastic Defend endpoint telemetry** (process, file, network, threat detection, agent lifecycle)
