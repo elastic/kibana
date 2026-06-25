@@ -149,7 +149,10 @@ export interface DeleteAgentlessPolicyRequest {
 }
 
 export const AgentlessPolicyThroughputSchema = schema.object({
-  policyId: schema.string({ meta: { description: 'The ID of the agentless package policy.' } }),
+  policyId: schema.string({
+    maxLength: 256,
+    meta: { description: 'The ID of the agentless package policy.' },
+  }),
   averagePerSecond: schema.number({
     meta: { description: 'Average ingest rate over the observed span in events per second.' },
   }),
@@ -160,13 +163,13 @@ export const AgentlessPolicyThroughputSchema = schema.object({
         meta: { description: 'Peak events per second in this 30-minute bucket.' },
       }),
     }),
-    { meta: { description: '30-minute throughput buckets over the last 24h.' } }
+    { maxSize: 256, meta: { description: '30-minute throughput buckets over the last 24h.' } }
   ),
 });
 
 export const GetBulkAgentlessPolicyThroughputRequestSchema = {
   body: schema.object({
-    policyIds: schema.arrayOf(schema.string(), {
+    policyIds: schema.arrayOf(schema.string({ maxLength: 500 }), {
       maxSize: SO_SEARCH_LIMIT,
       meta: { description: 'IDs of the agentless package policies to query.' },
     }),
@@ -175,6 +178,7 @@ export const GetBulkAgentlessPolicyThroughputRequestSchema = {
 
 export const GetBulkAgentlessPolicyThroughputResponseSchema = schema.object({
   items: schema.arrayOf(AgentlessPolicyThroughputSchema, {
+    maxSize: SO_SEARCH_LIMIT,
     meta: { description: 'Throughput data for each requested policy.' },
   }),
 });
