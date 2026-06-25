@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useFetchProjects } from '@kbn/cps-utils';
-import { MlProjectPickerPanel } from '@kbn/ml-cps';
+import { MlProjectPickerPanel, showUpdateConfirmationModal } from '@kbn/ml-cps';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
 import { useMlKibana, useNotifications } from '../../../../application/contexts/kibana';
 import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
@@ -47,7 +47,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   allowScopeSelection,
 }) => {
   const { services } = useMlKibana();
-  const { cps } = services;
+  const { cps, overlays, ...startServices } = services;
   const { toasts } = useNotifications();
   const jobsApi = useJobsApiService();
   const cpsManager = cps?.cpsManager;
@@ -128,6 +128,15 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     if (jobIds.length === 0) {
       return;
     }
+    try {
+      await showUpdateConfirmationModal({
+        overlays,
+        startServices,
+        jobCount: jobIds.length,
+      });
+    } catch {
+      return;
+    }
     setUpdating(true);
     try {
       const response = await jobsApi.bulkUpdateProjectRouting({
@@ -150,6 +159,9 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
             values: { count: successCount },
           })
         );
+        if (onClose) {
+          onClose();
+        }
       } else if (successCount === 0) {
         toasts.addDanger(
           i18n.translate('xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updateAllFailed', {
@@ -177,7 +189,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     } finally {
       setUpdating(false);
     }
-  }, [jobIds, jobsApi, selectedProjectRouting, toasts]);
+  }, [jobIds, jobsApi, selectedProjectRouting, toasts, onClose, overlays, startServices]);
 
   const allUpdatesSucceeded = useMemo(
     () =>

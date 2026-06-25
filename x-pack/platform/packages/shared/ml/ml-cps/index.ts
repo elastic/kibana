@@ -7,3 +7,4 @@
 
 export { CpsProjectRoutingCallout } from './cps_project_routing_callout';
 export { MlProjectPickerPanel, type MlProjectPickerPanelProps } from './project_picker';
+export { showUpdateConfirmationModal } from './utils/project_routing_change_confirm';

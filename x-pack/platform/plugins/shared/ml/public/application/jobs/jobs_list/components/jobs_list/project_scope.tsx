@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useId, useState } from 'react';
 import type { FC } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../contexts/kibana';
 
 interface Props {
@@ -23,6 +24,8 @@ function getProjectCountFromRouting(projectRouting: string, totalProjectCount: n
 }
 
 export const ProjectScope: FC<Props> = ({ projectRouting }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useId();
   const {
     services: { cps },
   } = useMlKibana();
@@ -35,9 +38,32 @@ export const ProjectScope: FC<Props> = ({ projectRouting }) => {
   const totalProjectCount = cpsManager.getTotalProjectCount();
   const projectCount = getProjectCountFromRouting(projectRouting, totalProjectCount);
 
-  return (
-    <EuiButtonEmpty size="s" data-test-subj="mlJobListProjectScopeButton">
+  const button = (
+    <EuiButtonEmpty
+      size="s"
+      data-test-subj="mlJobListProjectScopeButton"
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+    >
       {`${projectCount}/${totalProjectCount}`}
     </EuiButtonEmpty>
+  );
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      anchorPosition="downLeft"
+      aria-labelledby={popoverTitleId}
+    >
+      <EuiPopoverTitle id={popoverTitleId}>
+        {i18n.translate('xpack.ml.jobsList.projectScopeLabel', {
+          defaultMessage: 'Project scope',
+        })}
+      </EuiPopoverTitle>
+      <EuiText size="s" data-test-subj="mlJobListProjectScopeValue">
+        {projectRouting}
+      </EuiText>
+    </EuiPopover>
   );
 };

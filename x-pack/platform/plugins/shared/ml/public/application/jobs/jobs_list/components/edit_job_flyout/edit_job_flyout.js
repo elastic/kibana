@@ -42,6 +42,7 @@ import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warnin
 import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
+import { showUpdateConfirmationModal } from '@kbn/ml-cps';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -286,7 +287,7 @@ export class EditJobFlyoutUI extends Component {
     });
   };
 
-  save = () => {
+  save = async () => {
     const newJobData = {
       description: this.state.jobDescription,
       groups: this.state.jobGroups,
@@ -301,6 +302,19 @@ export class EditJobFlyoutUI extends Component {
       datafeedProjectRouting: this.state.datafeedProjectRouting,
       customUrls: this.state.jobCustomUrls,
     };
+
+    if (newJobData.datafeedProjectRouting !== this._initialJobFormState.datafeedProjectRouting) {
+      const { overlays, ...startServices } = this.props.kibana.services;
+      try {
+        await showUpdateConfirmationModal({
+          overlays,
+          startServices,
+          jobCount: 1,
+        });
+      } catch {
+        return;
+      }
+    }
 
     const mlApi = this.props.kibana.services.mlServices.mlApi;
     const { toasts } = this.props.kibana.services.notifications;
