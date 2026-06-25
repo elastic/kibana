@@ -38,6 +38,7 @@ import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespac
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { DomainEventsServiceStart } from '@kbn/core-domain-events-server';
 import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -63,7 +64,6 @@ import { EmailNotificationService } from '../services/notifications/email_notifi
 import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
-import type { DomainEventsServiceStart } from '@kbn/core-domain-events-server';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;

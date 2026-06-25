@@ -150,7 +150,6 @@ describe('DomainEventBusImpl', () => {
       expect(barHandler).toHaveBeenCalledTimes(1);
       expect(barHandler).toHaveBeenCalledWith(bar);
     });
-
   });
 
   describe('error isolation', () => {
