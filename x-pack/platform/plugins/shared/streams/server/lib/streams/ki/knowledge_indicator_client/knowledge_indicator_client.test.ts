@@ -11,6 +11,8 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
+import type { SignificantEventsAlertingContext } from '../../../sig_events/alerting/significant_events_alerting_context';
+import { V1_ALERTS_READER } from '../../../sig_events/alerting/alerts_reader';
 import { computeFeatureUuid } from '@kbn/streams-schema';
 import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from '../data_stream';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
@@ -77,6 +79,16 @@ function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   });
 }
 
+function createAlertingContext(
+  rulesManagementClient: SignificantEventsAlertingContext['rulesClient']
+): SignificantEventsAlertingContext {
+  return {
+    alertingV2Active: false,
+    alertsReader: V1_ALERTS_READER,
+    rulesClient: rulesManagementClient,
+  };
+}
+
 function makeClient(): {
   client: KnowledgeIndicatorClient;
   create: jest.Mock;
@@ -91,15 +103,19 @@ function makeClient(): {
   const deps: KnowledgeIndicatorClientDeps = {
     dataStreamClient,
     esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
-    rulesManagementClient: {
-      createRule: jest.fn().mockResolvedValue(undefined),
-      updateRule: jest.fn().mockResolvedValue(undefined),
-      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-    },
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
   };
-  const client = new KnowledgeIndicatorClient(deps);
+  const rulesManagementClient = {
+    createRule: jest.fn().mockResolvedValue(undefined),
+    updateRule: jest.fn().mockResolvedValue(undefined),
+    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+  };
+  const client = new KnowledgeIndicatorClient(
+    deps,
+    true,
+    createAlertingContext(rulesManagementClient)
+  );
   return { client, create, runEsql: executeAndDecodeSource as jest.Mock, logger };
 }
 
@@ -278,6 +294,36 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
   });
 });
 
+describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () => {
+  it('returns distinct sorted stream names from active feature and query revisions', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({
+      hits: [
+        createFeatureDoc({ 'stream.name': 'logs.nginx' }),
+        createFeatureDoc({ slug: 'feat-2', 'stream.name': 'logs.apache' }),
+        {
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          id: 'query-1',
+          type: KI_TYPE_QUERY,
+          'stream.name': 'logs.nginx',
+          title: 'High error rate',
+          query: {
+            esql: 'FROM logs | STATS c = COUNT(*)',
+            query_type: 'match',
+            severity_score: 80,
+            rule_backed: false,
+          },
+        },
+      ],
+    });
+
+    await expect(client.getStreamNamesWithKnowledgeIndicators()).resolves.toEqual([
+      'logs.apache',
+      'logs.nginx',
+    ]);
+  });
+});
+
 describe('KnowledgeIndicatorClient.getFeatures', () => {
   const printedQueryFor = (runEsql: jest.Mock): string => {
     const query = runEsql.mock.calls[0][1] as { print: () => string };
@@ -436,15 +482,19 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     const deps: KnowledgeIndicatorClientDeps = {
       dataStreamClient,
       esClient: { search } as unknown as KnowledgeIndicatorClientDeps['esClient'],
-      rulesManagementClient: {
-        createRule: jest.fn().mockResolvedValue(undefined),
-        updateRule: jest.fn().mockResolvedValue(undefined),
-        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-      },
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
     };
-    const client = new KnowledgeIndicatorClient(deps);
+    const rulesManagementClient = {
+      createRule: jest.fn().mockResolvedValue(undefined),
+      updateRule: jest.fn().mockResolvedValue(undefined),
+      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    };
+    const client = new KnowledgeIndicatorClient(
+      deps,
+      true,
+      createAlertingContext(rulesManagementClient)
+    );
     return { client, runEsql: executeAndDecodeSource as jest.Mock, search };
   }
 

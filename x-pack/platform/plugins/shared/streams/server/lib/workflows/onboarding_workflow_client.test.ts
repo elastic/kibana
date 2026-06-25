@@ -463,7 +463,7 @@ describe('StreamsKIsOnboardingClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      await client.cancelAllRunning({ request });
+      await expect(client.cancelAllRunning({ request })).resolves.toBe(2);
 
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(2);
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
@@ -479,12 +479,10 @@ describe('StreamsKIsOnboardingClient', () => {
     });
 
     it('does nothing when no running executions exist', async () => {
-      const { client, managementApi } = createClient();
+      const { client } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
-      await client.cancelAllRunning({ request });
-
-      expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+      await expect(client.cancelAllRunning({ request })).resolves.toBe(0);
     });
   });
 

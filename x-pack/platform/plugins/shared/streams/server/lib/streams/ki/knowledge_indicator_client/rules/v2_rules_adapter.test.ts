@@ -108,6 +108,22 @@ describe('V2RulesAdapter', () => {
       expect(data.grouping).toEqual({ fields: ['_id'] });
     });
 
+    it('rejects STATS queries until rule-on-rule provisioning', async () => {
+      const mock = makeRulesClientMock();
+      const adapter = makeAdapter(mock);
+      const statsQuery =
+        'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | WHERE count > 0';
+
+      await expect(
+        adapter.createRule('rule-stats', {
+          ...createBody,
+          params: { ...createBody.params, query: statsQuery },
+        })
+      ).rejects.toThrow('STATS queries cannot be installed as v2 signal rules');
+
+      expect(mock.createRule).not.toHaveBeenCalled();
+    });
+
     it('maps updateRule body to v2 partial shape (no kind)', async () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);

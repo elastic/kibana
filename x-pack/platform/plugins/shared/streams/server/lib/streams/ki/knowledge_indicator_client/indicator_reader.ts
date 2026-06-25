@@ -202,6 +202,18 @@ export class IndicatorReader {
     return this.getQueryLinks([stream], { queryIds: ids, ruleUnbacked: 'include' });
   }
 
+  async getRuleBackedQueryLinks(): Promise<QueryLink[]> {
+    const where = inPredicate(TYPE, [KI_TYPE_QUERY]);
+
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      esql.exp`${esql.col(QUERY_RULE_BACKED)} == true`
+    );
+
+    const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
+    return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
+  }
+
   /**
    * Returns all unbacked, non-STATS queries across streams. Filtering by
    * `query.query_type != stats` happens via the post-grouping WHERE so the
@@ -236,5 +248,21 @@ export class IndicatorReader {
       id: doc.id,
       stream_name: doc['stream.name'],
     }));
+  }
+
+  /**
+   * Returns distinct stream names that have at least one active (non-deleted) KI revision.
+   */
+  async getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    const where = inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]);
+    const docs = await this.revisionReader.fetchLatestRevisions(where, IS_NOT_DELETED);
+    const streamNames = new Set<string>();
+    for (const doc of docs) {
+      const streamName = doc['stream.name'];
+      if (streamName) {
+        streamNames.add(streamName);
+      }
+    }
+    return [...streamNames].sort();
   }
 }
