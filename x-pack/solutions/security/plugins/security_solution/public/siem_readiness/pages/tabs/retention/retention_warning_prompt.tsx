@@ -22,6 +22,7 @@ export const RetentionWarningPrompt: React.FC = () => {
           'Some data streams or indices have shorter retention periods than recommended.',
       })}
       color="warning"
+      data-test-subj="retentionWarningPrompt"
       iconType="warning"
       size="s"
     >
