@@ -89,9 +89,12 @@ export async function identifyComputedFeatures({
   });
 
   if (reconciledComputedFeatures.length > 0) {
+    const expiresAt = kiClient.getDefaultExpiresAt();
     await kiClient.bulk(
       streamName,
-      reconciledComputedFeatures.map((feature) => ({ index: { feature } }))
+      reconciledComputedFeatures.map((feature) => ({
+        index: { feature: { ...feature, expires_at: expiresAt } },
+      }))
     );
   }
 
