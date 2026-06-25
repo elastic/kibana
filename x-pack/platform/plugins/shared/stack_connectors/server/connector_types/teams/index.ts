@@ -28,6 +28,7 @@ import {
 } from '@kbn/actions-plugin/common';
 import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { httpResponseUserErrorCodes } from '@kbn/actions-plugin/server/lib/create_and_throw_user_error';
 import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -175,7 +176,15 @@ async function teamsExecutor(
         return retryResult(actionId, serviceMessage);
       }
 
-      return errorResultInvalid(actionId, serviceMessage, getErrorSource(error));
+      const errorResult = errorResultInvalid(actionId, serviceMessage, getErrorSource(error));
+
+      // 4xx codes caused by user/configuration mistakes (e.g. a retired webhook
+      // URL) are attributed to the user rather than the framework.
+      if (httpResponseUserErrorCodes.includes(status)) {
+        errorResult.errorSource = TaskErrorSource.USER;
+      }
+
+      return errorResult;
     }
 
     logger.debug(`error on ${actionId} Microsoft Teams action: unexpected error`);

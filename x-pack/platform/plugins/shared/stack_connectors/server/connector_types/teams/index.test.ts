@@ -18,6 +18,7 @@ import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/teams';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -342,5 +343,55 @@ describe('execute()', () => {
         "status": "ok",
       }
     `);
+  });
+
+  const executeWithResponseStatus = async (status: number) => {
+    requestMock.mockRejectedValueOnce({
+      tag: 'err',
+      isAxiosError: true,
+      response: {
+        status,
+        statusText: 'Forbidden',
+      },
+    });
+
+    return connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'a message' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+  };
+
+  describe('error handling', () => {
+    test.each([401, 402, 403, 404, 407, 409, 412, 413, 417, 422, 423, 429, 451])(
+      'flags %s responses as a user error',
+      async (status) => {
+        const result = await executeWithResponseStatus(status);
+
+        expect(result.status).toBe('error');
+        expect(result.errorSource).toBe(TaskErrorSource.USER);
+        expect(result.serviceMessage).toBe(`[${status}] Forbidden`);
+      }
+    );
+
+    test('retries 5xx responses without a user error source', async () => {
+      const result = await executeWithResponseStatus(503);
+
+      expect(result.status).toBe('error');
+      expect(result.retry).toBe(true);
+      expect(result.errorSource).toBeUndefined();
+    });
+
+    test('does not flag other 4xx responses as a user error', async () => {
+      const result = await executeWithResponseStatus(400);
+
+      expect(result.status).toBe('error');
+      expect(result.errorSource).toBeUndefined();
+    });
   });
 });
