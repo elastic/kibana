@@ -98,6 +98,13 @@ export const HEADER_LOADING_TITLE = i18n.translate(
   }
 );
 
+export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.header.episodeTitleFallback',
+  {
+    defaultMessage: 'Alert episode',
+  }
+);
+
 /** --- Lifecycle heatmap --- */
 export const LIFECYCLE_HEATMAP_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmap.title',
@@ -160,6 +167,64 @@ export const LIFECYCLE_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmapSection.loadError',
   {
     defaultMessage: 'Could not load episode lifecycle.',
+  }
+);
+
+/** --- Severity heatmap --- */
+export const SEVERITY_HEATMAP_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.title',
+  {
+    defaultMessage: 'Severity Timeline',
+  }
+);
+
+export const SEVERITY_HEATMAP_TOOLTIP_FIELD_COLUMN = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.tooltipFieldColumn',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const SEVERITY_HEATMAP_TOOLTIP_VALUE_COLUMN = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.tooltipValueColumn',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const SEVERITY_HEATMAP_EVENT_DATA_TABLE_CAPTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.eventDataTableCaption',
+  {
+    defaultMessage: 'Alert evaluation data fields and values',
+  }
+);
+
+export const SEVERITY_HEATMAP_CLICK_TO_SEE_DATA = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.clickToSeeData',
+  {
+    defaultMessage: 'Click to see data',
+  }
+);
+
+export const SEVERITY_HEATMAP_DETAIL_PANEL_CLOSE_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.detailPanelCloseAriaLabel',
+  {
+    defaultMessage: 'Close severity event data panel',
+  }
+);
+
+export const SEVERITY_HEATMAP_DETAIL_PANEL_EMPTY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmap.detailPanelEmpty',
+  {
+    defaultMessage: 'No evaluation data is available for this event.',
+  }
+);
+
+/** --- Severity heatmap section --- */
+export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.severityHeatmapSection.loadError',
+  {
+    defaultMessage: 'Could not load episode severity.',
   }
 );
 
@@ -283,7 +348,14 @@ export const RULE_OVERVIEW_KIND_SIGNAL = i18n.translate(
 export const RULE_OVERVIEW_KIND_ALERTING = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.alerting',
   {
-    defaultMessage: 'Alerting',
+    defaultMessage: 'Alert',
+  }
+);
+
+export const RULE_OVERVIEW_KIND_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.tooltip',
+  {
+    defaultMessage: 'Mode can be changed in the rule edit form',
   }
 );
 

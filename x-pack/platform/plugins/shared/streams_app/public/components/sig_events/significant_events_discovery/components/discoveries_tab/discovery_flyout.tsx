@@ -17,10 +17,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
-  EuiListGroup,
   EuiLoadingSpinner,
   EuiTimeline,
   EuiTimelineItem,
+  EuiListGroup,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,36 @@ import type { Discovery } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS, DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
+
+const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
+  const criticality = entry.criticality ?? '-';
+  switch (entry.kind) {
+    case 'discovery':
+      if (prev?.kind === 'clearance') {
+        return i18n.translate('xpack.streams.discoveryFlyout.transition.reopened', {
+          defaultMessage: 'Re-opened — Criticality {criticality}',
+          values: { criticality },
+        });
+      }
+      if (prev?.kind === 'discovery') {
+        return i18n.translate('xpack.streams.discoveryFlyout.transition.updated', {
+          defaultMessage: 'Updated — Criticality {criticality}',
+          values: { criticality },
+        });
+      }
+      return i18n.translate('xpack.streams.discoveryFlyout.transition.found', {
+        defaultMessage: 'Found — Criticality {criticality}',
+        values: { criticality },
+      });
+    case 'clearance':
+      return i18n.translate('xpack.streams.discoveryFlyout.transition.cleared', {
+        defaultMessage: 'Cleared — Criticality {criticality}',
+        values: { criticality },
+      });
+    default:
+      return entry.kind;
+  }
+};
 
 interface DiscoveryFlyoutProps {
   discovery: Discovery;
@@ -77,23 +107,17 @@ export const DiscoveryFlyout = ({
     [discovery, streams]
   );
 
-  const isCleared = discovery.kind === 'clearance';
-
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby={titleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
-          {isCleared && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="success">
-                {i18n.translate('xpack.streams.discoveryFlyout.cleared', {
-                  defaultMessage: 'Cleared',
-                })}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={DISCOVERY_KIND_COLORS[discovery.kind] ?? 'default'}>
+              {DISCOVERY_KIND_LABELS[discovery.kind] ?? discovery.kind}
+            </EuiBadge>
+          </EuiFlexItem>
         </EuiFlexGroup>
-        {isCleared && <EuiSpacer size="s" />}
+        <EuiSpacer size="s" />
         <EuiTitle size="m">
           <h2 id={titleId}>{discovery.title}</h2>
         </EuiTitle>
@@ -164,7 +188,6 @@ export const DiscoveryFlyout = ({
                 </EuiText>
                 <EuiText size="xs" color="subdued">
                   {[
-                    det.detected_at ? formatTimestamp(det.detected_at) : null,
                     det.stream_name,
                     det.alert_count != null
                       ? i18n.translate('xpack.streams.discoveryFlyout.alertCount', {
@@ -194,6 +217,12 @@ export const DiscoveryFlyout = ({
 
         {isHistoryLoading ? (
           <EuiLoadingSpinner size="m" />
+        ) : history.length === 0 ? (
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.streams.discoveryFlyout.noHistory', {
+              defaultMessage: 'No history available.',
+            })}
+          </EuiText>
         ) : (
           <EuiTimeline
             aria-label={i18n.translate('xpack.streams.discoveryFlyout.timeline.title', {
@@ -201,50 +230,30 @@ export const DiscoveryFlyout = ({
             })}
             gutterSize="m"
           >
-            {history.map((entry, idx) => {
-              const prevEntry = history[idx - 1];
-              const isReopened = entry.kind === 'finding' && prevEntry?.kind === 'clearance';
-              const label =
-                entry.kind === 'finding'
-                  ? isReopened
-                    ? i18n.translate('xpack.streams.discoveryFlyout.timeline.reopened', {
-                        defaultMessage: 'Re-opened — Criticality {criticality}',
-                        values: { criticality: entry.criticality ?? '-' },
-                      })
-                    : i18n.translate('xpack.streams.discoveryFlyout.timeline.found', {
-                        defaultMessage: 'Found — Criticality {criticality}',
-                        values: { criticality: entry.criticality ?? '-' },
-                      })
-                  : i18n.translate('xpack.streams.discoveryFlyout.timeline.cleared', {
-                      defaultMessage: 'Cleared — Criticality {criticality}',
-                      values: { criticality: entry.criticality ?? '-' },
-                    });
-
-              return (
-                <EuiTimelineItem
-                  key={`${entry.discovery_id}-${idx}`}
-                  icon="dot"
-                  iconAriaLabel={entry.kind}
-                  verticalAlign="top"
-                >
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color={DISCOVERY_KIND_COLORS[entry.kind]}>
-                        {DISCOVERY_KIND_LABELS[entry.kind]}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {formatTimestamp(entry['@timestamp'])}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiText size="s">
-                    <p>{label}</p>
-                  </EuiText>
-                </EuiTimelineItem>
-              );
-            })}
+            {history.map((entry, idx) => (
+              <EuiTimelineItem
+                key={`${entry['@timestamp']}-${idx}`}
+                icon="dot"
+                iconAriaLabel={DISCOVERY_KIND_LABELS[entry.kind] ?? entry.kind}
+                verticalAlign="top"
+              >
+                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={DISCOVERY_KIND_COLORS[entry.kind] ?? 'hollow'}>
+                      {DISCOVERY_KIND_LABELS[entry.kind] ?? entry.kind}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {formatTimestamp(entry['@timestamp'])}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiText size="s">
+                  <p>{timelineLabel(entry, history[idx - 1])}</p>
+                </EuiText>
+              </EuiTimelineItem>
+            ))}
           </EuiTimeline>
         )}
       </EuiFlyoutBody>

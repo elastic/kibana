@@ -60,7 +60,7 @@ describe('registerListRoute', () => {
       body: {
         page: 1,
         per_page: 20,
-        items: [sampleDocument],
+        items: [expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin })],
       },
     });
   });
@@ -80,7 +80,7 @@ describe('registerListRoute', () => {
     const response = await callHandler({ page: 1, per_page: 20 });
     expect(response.ok).toHaveBeenCalledWith({
       body: expect.objectContaining({
-        items: [sampleDocument],
+        items: [expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin })],
       }),
     });
   });
@@ -91,7 +91,7 @@ describe('registerListRoute', () => {
       page: 2,
       per_page: 5,
       type: 'dashboard',
-      origin_id: 'dash-1',
+      origin_uri: 'dashboard://dash-1',
     });
     expect(mockSmlService.listDocuments).toHaveBeenCalledWith({
       spaceId: 'test-space',
@@ -99,8 +99,24 @@ describe('registerListRoute', () => {
       page: 2,
       perPage: 5,
       type: 'dashboard',
-      originId: 'dash-1',
+      originUri: 'dashboard://dash-1',
     });
+  });
+
+  it('passes tags filter to sml.listDocuments when provided (comma-delimited)', async () => {
+    mockSmlService.listDocuments.mockResolvedValue({ total: 0, results: [] });
+    await callHandler({ page: 1, per_page: 20, tags: 'otel,claude-code' });
+    expect(mockSmlService.listDocuments).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ['otel', 'claude-code'] })
+    );
+  });
+
+  it('omits tags from sml.listDocuments when not provided', async () => {
+    mockSmlService.listDocuments.mockResolvedValue({ total: 0, results: [] });
+    await callHandler({ page: 1, per_page: 20 });
+    expect(mockSmlService.listDocuments).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: undefined })
+    );
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {

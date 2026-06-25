@@ -307,6 +307,30 @@ describe('WorkflowDetailHeader', () => {
     expect(executionsTab).toHaveAttribute('aria-disabled', 'true');
   });
 
+  it('disables executions tab for managed workflows when user cannot read managed workflow executions', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...defaultWorkflowsCapabilities,
+      canReadWorkflowExecution: true,
+      canReadManagedWorkflowExecution: false,
+    });
+    const { getByRole } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isManaged: true,
+    });
+    const executionsTab = getByRole('button', { name: 'Executions' });
+    expect(executionsTab).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('keeps executions tab enabled for custom workflows when only managed workflow execution read is missing', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...defaultWorkflowsCapabilities,
+      canReadWorkflowExecution: true,
+      canReadManagedWorkflowExecution: false,
+    });
+    const { getByRole } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    const executionsTab = getByRole('button', { name: 'Executions' });
+    expect(executionsTab).not.toHaveAttribute('aria-disabled', 'true');
+  });
+
   describe('Authorization matrix', () => {
     interface MatrixRow {
       roleLabel: string;

@@ -8,7 +8,6 @@
  */
 import type { ESQLAstPromqlCommand, ESQLMapEntry } from '@elastic/esql/types';
 import { isIdentifier, isList, isSource } from '@elastic/esql';
-import { EDITOR_MARKER } from '../constants';
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { promqlOperatorDefinitions } from '../generated/promql_operators';
 import {
@@ -140,12 +139,12 @@ export function getIndexFromPromQLParams({
       }
     }
 
-    if ((isIdentifier(value) || isSource(value)) && !value.name.includes(EDITOR_MARKER)) {
+    if (isIdentifier(value) || isSource(value)) {
       return value.name;
     }
   }
 
   const indexValue = query?.text?.match(INDEX_PARAM_REGEX)?.[1];
 
-  return indexValue?.includes(EDITOR_MARKER) ? undefined : indexValue;
+  return indexValue;
 }

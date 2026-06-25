@@ -10,7 +10,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
 const WORKFLOW_POPOVER_WIDTH = 215;
@@ -20,6 +26,7 @@ interface WorkflowFilterPopoverProps {
   title: string;
   selectedValues: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   values: EuiSelectableOption[];
+  singleSelection?: boolean;
   onSelectedValuesChanged: (newValues: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
@@ -28,9 +35,11 @@ const WorkflowsFilterPopoverComponent = ({
   title,
   values,
   selectedValues,
+  singleSelection = false,
   onSelectedValuesChanged,
 }: WorkflowFilterPopoverProps) => {
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>(() => {
     const selectedValuesSet = new Set(selectedValues);
 
@@ -84,6 +93,7 @@ const WorkflowsFilterPopoverComponent = ({
   return (
     <EuiPopover
       ownFocus
+      aria-labelledby={popoverTitleId}
       button={triggerButton}
       isOpen={isFilterPopoverOpen}
       closePopover={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
@@ -100,12 +110,13 @@ const WorkflowsFilterPopoverComponent = ({
         aria-label="Search"
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
+        singleSelection={singleSelection}
         emptyMessage="No items available"
         noMatchesMessage="No items available"
       >
         {(list, search) => (
           <div css={{ width: WORKFLOW_POPOVER_WIDTH }}>
-            <EuiPopoverTitle>{search}</EuiPopoverTitle>
+            <EuiPopoverTitle id={popoverTitleId}>{search}</EuiPopoverTitle>
             {list}
           </div>
         )}

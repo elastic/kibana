@@ -37,6 +37,29 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 
+export const promptResponseEntrySchema = schema.oneOf([
+  schema.object({ allow: schema.boolean() }),
+  schema.object({ authorized: schema.boolean() }),
+  schema.object(
+    {
+      answers: schema.arrayOf(
+        schema.object({
+          choice: schema.maybe(schema.arrayOf(schema.number(), { maxSize: 100 })),
+          custom: schema.maybe(schema.string({ minLength: 1, maxLength: 20_000 })),
+          skipped: schema.maybe(schema.boolean()),
+        }),
+        { maxSize: 100 }
+      ),
+    },
+    {
+      meta: {
+        description:
+          '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.',
+      },
+    }
+  ),
+]);
+
 export function registerChatRoutes({
   router,
   getInternalServices,
@@ -80,14 +103,26 @@ export function registerChatRoutes({
         },
       })
     ),
+    execution_id: schema.maybe(
+      schema.string({
+        validate: (v) => (uuidValidate(v) ? undefined : 'execution_id must be a valid UUID'),
+        meta: {
+          description:
+            'Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.',
+        },
+      })
+    ),
     input: schema.maybe(
       schema.string({
         meta: { description: 'The user input message to send to the agent.' },
       })
     ),
     prompts: schema.maybe(
-      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
-        meta: { description: 'Can be used to respond to a confirmation prompt.' },
+      schema.recordOf(schema.string({ minLength: 1, maxLength: 512 }), promptResponseEntrySchema, {
+        meta: {
+          description:
+            'Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.',
+        },
       })
     ),
     attachments: schema.maybe(
@@ -283,17 +318,16 @@ export function registerChatRoutes({
   const executeAgent = async ({
     payload,
     request,
-    abortSignal,
     executionService,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
-    abortSignal: AbortSignal;
     executionService: AgentExecutionService;
   }) => {
     const {
       agent_id: agentId,
       conversation_id: conversationId,
+      execution_id: executionId,
       input,
       prompts,
       attachments,
@@ -312,7 +346,7 @@ export function registerChatRoutes({
     const { events$ } = await executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
-      abortSignal,
+      executionId,
       useTaskManager,
       params: {
         agentId,
@@ -371,15 +405,9 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
-        });
-
         const chatEvents$ = await executeAgent({
           payload,
           request,
-          abortSignal: abortController.signal,
           executionService,
         });
 
@@ -452,7 +480,6 @@ export function registerChatRoutes({
         const chatEvents$ = await executeAgent({
           payload,
           request,
-          abortSignal: abortController.signal,
           executionService,
         });
 
