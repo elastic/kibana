@@ -145,13 +145,15 @@ export function unwrapExpressionParens(root: ESQLAstQueryExpression) {
   }) as ESQLParens[];
 
   for (const node of parensNodes) {
-    let child: ESQLAstExpression = node.child;
+    let child: ESQLAstExpression | undefined = node.child;
 
     while (isParens(child) && !isSubQuery(child)) {
       child = child.child;
     }
 
-    replaceProperties(node, child);
+    if (child) {
+      replaceProperties(node, child);
+    }
   }
 
   return root;
