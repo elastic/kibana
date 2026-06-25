@@ -201,6 +201,43 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.rule.id).toBe(rule.id);
     });
 
+    it('handles concurrent restores of an existing rule gracefully (200 or 409, never 500)', async () => {
+      const { body: rule } = await detectionsApi
+        .createRule({ body: getCustomQueryRuleParams({ name: 'original name' }) })
+        .expect(200);
+
+      await detectionsApi
+        .updateRule({
+          body: getCustomQueryRuleParams({ rule_id: rule.rule_id, name: 'updated name' }),
+        })
+        .expect(200);
+
+      await refreshHistory();
+
+      const { body: historyBody } = await detectionsApi
+        .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
+        .expect(200);
+
+      const createEntry = historyBody.items.find(
+        (item: { action: string }) => item.action === 'rule_create'
+      );
+      const changeId = createEntry.id;
+
+      // Both requests race to update the same existing rule via rulesClient.update.
+      // One of two outcomes is valid:
+      //   [200, 200] — requests executed serially; both updates succeeded
+      //   [200, 409] — true race; both read the same saved-object version, second write conflicted
+      const [res1, res2] = await Promise.all([
+        detectionsApi.restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } }),
+        detectionsApi.restoreRuleFromHistory({ params: { ruleId: rule.id, changeId } }),
+      ]);
+
+      const statuses = [res1.status, res2.status];
+
+      expect(statuses).toContain(200);
+      expect(statuses.every((s: number) => s === 200 || s === 409)).toBe(true);
+    });
+
     it('returns 404 when the changeId does not exist for a valid rule', async () => {
       const { body: rule } = await detectionsApi
         .createRule({ body: getCustomQueryRuleParams() })

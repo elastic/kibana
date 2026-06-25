@@ -324,6 +324,7 @@ describe('getHistory()', () => {
 
     const makeSnapshotItem = (attrs: Partial<RawRule> = {}) => {
       const ruleSO = getRuleSavedObject();
+      const mergedAttrs = { ...ruleSO.attributes, ...attrs };
       return generateChangeHistoryDocument({
         object: {
           id: ruleSO.id,
@@ -331,8 +332,21 @@ describe('getHistory()', () => {
           hash: '',
           fields: { hashed: [] },
           snapshot: {
-            attributes: { ...ruleSO.attributes, ...attrs },
-            references: ruleSO.references,
+            id: ruleSO.id,
+            alertTypeId: mergedAttrs.alertTypeId,
+            consumer: mergedAttrs.consumer,
+            name: mergedAttrs.name,
+            enabled: mergedAttrs.enabled,
+            tags: mergedAttrs.tags,
+            schedule: mergedAttrs.schedule,
+            actions: mergedAttrs.actions,
+            params: mergedAttrs.params,
+            createdBy: mergedAttrs.createdBy,
+            updatedBy: mergedAttrs.updatedBy,
+            createdAt: mergedAttrs.createdAt,
+            updatedAt: mergedAttrs.updatedAt,
+            revision: mergedAttrs.revision,
+            muteAll: mergedAttrs.muteAll,
           },
         },
       });

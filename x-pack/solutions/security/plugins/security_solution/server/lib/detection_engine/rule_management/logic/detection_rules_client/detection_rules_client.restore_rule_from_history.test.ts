@@ -282,6 +282,35 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     expect(rulesClient.update).not.toHaveBeenCalled();
   });
 
+  it('propagates a 409 conflict from rulesClient.update when the rule is concurrently modified', async () => {
+    const conflictError = Object.assign(new Error('Rule was modified concurrently'), {
+      output: { statusCode: 409 },
+    });
+
+    rulesClient.resolve.mockResolvedValue(liveAlertingRule);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+    rulesClient.update.mockRejectedValue(conflictError);
+
+    await expect(
+      detectionRulesClient.restoreRuleFromHistory({ ruleId: RULE_ID, changeId: CHANGE_ID })
+    ).rejects.toMatchObject({ output: { statusCode: 409 } });
+  });
+
+  it('propagates a 409 conflict from rulesClient.create when the rule is concurrently recreated', async () => {
+    const conflictError = Object.assign(new Error(`Rule with id "${RULE_ID}" already exists`), {
+      output: { statusCode: 409 },
+    });
+
+    const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+    rulesClient.resolve.mockRejectedValue(notFoundError);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+    rulesClient.create.mockRejectedValue(conflictError);
+
+    await expect(
+      detectionRulesClient.restoreRuleFromHistory({ ruleId: RULE_ID, changeId: CHANGE_ID })
+    ).rejects.toMatchObject({ output: { statusCode: 409 } });
+  });
+
   it('detects an action-only diff and calls rulesClient.update', async () => {
     const snapshotWithAction = getRuleMock(getQueryRuleParams(), {
       actions: [

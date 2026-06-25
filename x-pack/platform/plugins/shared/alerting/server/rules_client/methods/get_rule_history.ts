@@ -106,10 +106,12 @@ export async function getRuleHistory(
       return { total: 0, items: [] };
     }
 
-    const rawAttributes = latestHistory.items[0].object.snapshot?.attributes as RawRule | undefined;
-    ruleTypeId = rawAttributes?.alertTypeId;
-    consumer = rawAttributes?.consumer;
-    ruleName = rawAttributes?.name;
+    const snapshot = latestHistory.items[0].object.snapshot as
+      | RuleChangeHistorySnapshot
+      | undefined;
+    ruleTypeId = snapshot?.alertTypeId;
+    consumer = snapshot?.consumer;
+    ruleName = snapshot?.name;
   }
 
   if (!ruleTypeId || !consumer) {

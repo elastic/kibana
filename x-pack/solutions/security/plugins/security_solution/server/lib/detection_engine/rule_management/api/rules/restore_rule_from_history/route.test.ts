@@ -12,6 +12,7 @@ import type {
 } from '../../../../routes/__mocks__/request_context';
 import { RULE_RESTORE_FROM_HISTORY_URL } from '../../../../../../../common/api/detection_engine/rule_management';
 import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import { ClientError } from '../../../logic/detection_rules_client/utils';
 import { restoreRuleFromHistoryRoute } from './route';
 
 const buildRestoreRequest = ({ params = {} }: { params: Record<string, string> }) =>
@@ -90,5 +91,24 @@ describe('Restore rule from history route', () => {
 
     expect(response.status).toEqual(500);
     expect(response.body).toEqual({ message: 'boom', status_code: 500 });
+  });
+
+  test('returns 409 when the detection rules client throws a conflict error', async () => {
+    clients.detectionRulesClient.restoreRuleFromHistory.mockImplementationOnce(async () => {
+      throw new ClientError('Rule was modified concurrently', 409);
+    });
+
+    const response = await server.inject(
+      buildRestoreRequest({
+        params: {
+          ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd',
+          changeId: '7b3e4f52-1a2b-4c5d-8e9f-0a1b2c3d4e5f',
+        },
+      }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(409);
+    expect(response.body).toEqual({ message: 'Rule was modified concurrently', status_code: 409 });
   });
 });
