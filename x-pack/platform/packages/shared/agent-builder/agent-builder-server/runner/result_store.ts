@@ -23,10 +23,6 @@ export interface ToolResultStore extends FileEntryAccessor {
 
 /**
  * Writable version of ToolResultStore, used internally by the runner/agent.
- *
- * `add` takes a whole tool call (`ToolCallWithResult`) so the store can write the call's
- * `meta.json` plus its result file(s) in a single pass; it only reads `tool_call_id`,
- * `tool_id`, `params` and `results`.
  */
 export interface WritableToolResultStore extends ToolResultStore {
   add(toolCall: ToolCallWithResult): void;
