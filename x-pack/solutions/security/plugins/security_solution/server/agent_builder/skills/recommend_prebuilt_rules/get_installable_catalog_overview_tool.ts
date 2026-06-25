@@ -15,7 +15,8 @@ import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/pr
 import { getInstallableRuleVersions } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
 import { fetchInstalledRuleVersionsMap } from '../../../lib/detection_engine/prebuilt_rules/logic/fetch_installed_rule_versions_map';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_type';
-import type { MlAuthz } from '../../../lib/machine_learning/authz';
+import { buildMlAuthz } from '../../../lib/machine_learning/authz';
+import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 export const GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID =
@@ -26,20 +27,16 @@ export const getInstallableCatalogOverviewSchema = z.object({}).strict();
 const TAGS_AGG_SIZE = 200;
 const TAGS_AGG_KEY = 'facet_tags';
 
-// Phase 1 assumption: all ML rule types are valid candidates. Replace with a
-// licensing-derived MlAuthz in a follow-up if needed.
-const permissiveMlAuthz: MlAuthz = {
-  validateRuleType: async () => ({ valid: true, message: undefined }),
-};
-
 interface GetInstallableCatalogOverviewToolDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
   logger: Logger;
+  ml: EntityAnalyticsRoutesDeps['ml'];
 }
 
 export const createGetInstallableCatalogOverviewTool = ({
   getStartServices,
   logger,
+  ml,
 }: GetInstallableCatalogOverviewToolDeps): BuiltinSkillBoundedTool<
   typeof getInstallableCatalogOverviewSchema
 > => ({
@@ -61,13 +58,16 @@ export const createGetInstallableCatalogOverviewTool = ({
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
+      const license = await startPlugins.licensing.getLicense();
+      const mlAuthz = buildMlAuthz({ license, ml, request, savedObjectsClient });
+
       const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
       const installedRuleVersionsMap = await fetchInstalledRuleVersionsMap(rulesClient);
 
       const installableVersions = await getInstallableRuleVersions(
         ruleAssetsClient,
         logger,
-        permissiveMlAuthz,
+        mlAuthz,
         installedRuleVersionsMap
       );
 

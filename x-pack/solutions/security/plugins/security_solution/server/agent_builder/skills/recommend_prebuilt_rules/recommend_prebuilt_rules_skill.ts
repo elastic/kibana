@@ -9,6 +9,7 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { createFindPrebuiltRulesInlineTool } from './find_prebuilt_rules_tool';
 import { createGetUserDataInventoryTool } from './get_user_data_inventory_tool';
@@ -18,6 +19,7 @@ import { createGetInstalledRulesMitreCoverageTool } from './get_installed_rules_
 interface RecommendPrebuiltRulesSkillDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
   logger: Logger;
+  ml: EntityAnalyticsRoutesDeps['ml'];
 }
 
 const RECOMMEND_PREBUILT_RULES_CONTENT = `# Recommend Prebuilt Rules
@@ -87,7 +89,7 @@ The goal is to surface rules that are **worth installing here.** Four factors ma
 | \`security.find_prebuilt_rules\` | The workhorse — search installable rules by structured filters | Triage rows (rule_id, name, severity, risk_score, tags, MITRE tactics, related_integrations) + total |
 | \`security.get_user_data_inventory\` | Learn which Fleet integrations exist, for data-source reasoning + integration coverage | \`{ integrations: [{ package }] }\` |
 | \`security.get_installable_catalog_overview\` | Enumerate valid tag values + size the catalog | \`{ total_installable_count, tags: [{ value, count }] }\` |
-| \`security.get_installed_rules_mitre_coverage\` | What MITRE tactics/techniques the installed rules already cover | \`total_installed_rules\`, \`total_with_mitre_mapping\`, and per-tactic + per-technique (with nested subtechniques) counts |
+| \`security.get_installed_rules_mitre_coverage\` | What MITRE tactics/techniques the installed rules already cover | \`total_installed_rules\`, \`total_with_mitre_mapping\`, and per-tactic + per-technique counts |
 
 \`security.get_user_data_inventory\`, \`security.get_installable_catalog_overview\`, and \`security.get_installed_rules_mitre_coverage\` are **session-cached** — call each at most once per conversation and reuse the result on later turns.
 
@@ -127,8 +129,8 @@ Every tag value, rule name, \`rule_id\`, count, total, and MITRE tactic/techniqu
 **Coverage intent** ("which MITRE tactics am I missing?"):
 1. Call \`security.get_installed_rules_mitre_coverage\`. Frame the answer with \`total_with_mitre_mapping\` out of \`total_installed_rules\` (e.g. "of your 320 installed rules, 290 carry MITRE mappings") so the user knows how much of their estate the coverage reflects.
 2. Diff its \`tactics\` against the canonical 14 below — any tactic not present has zero installed coverage.
-3. Subtechniques are nested under their parent technique. A technique's \`count\` can be **larger** than the sum of its listed subtechnique counts — the difference is rules that map the technique generically without naming a variant. Don't report that as missing, inconsistent, or a data error.
-4. To recommend rules that fill the gaps, call \`security.find_prebuilt_rules\` with \`mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...]\` for the missing tactics in one call — or one call per tactic when you want balanced coverage of each.
+3. Use the per-\`technique\` counts to judge depth **within** a covered tactic: a high tactic count can still be lopsided (many rules on a few techniques, none on others). The result lists only techniques with coverage, so a technique you'd expect from your own ATT&CK knowledge but don't see has zero installed coverage — call those out as thin spots even when the parent tactic looks covered.
+4. To recommend rules that fill the gaps, call \`security.find_prebuilt_rules\` with \`mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...]\` for the missing tactics in one call (or one call per tactic when you want balanced coverage of each). For a thin technique inside an otherwise-covered tactic, target it directly with \`mitreTechnique: ["<T-ID>"]\`.
 
 ## Precision: Narrow, Then Deepen
 
@@ -166,9 +168,9 @@ These are illustrative. Reason about unfamiliar packages by analogy: a host/EDR 
 Route MITRE intent through the structured params **\`mitreTactic\`** and **\`mitreTechnique\`**, never through \`tags\`. The structured threat fields are populated on rule metadata even when no \`Tactic: X\` / \`Technique: Y\` tag exists, so they are strictly more reliable. Do not put a \`Tactic: ...\` or \`Technique: ...\` value into the \`tags\` filter, even if it appears in a catalog-overview result.
 
 Priority:
-1. **Technique IDs** (\`T1059\`, or sub-technique \`T1059.001\`) -> \`{ filter: { mitreTechnique: ["T1059"] } }\`. Syntax per value: \`T\` + 4 digits, optionally \`.\` + 3 digits.
+1. **Technique IDs** (\`T1059\`) -> \`{ filter: { mitreTechnique: ["T1059"] } }\`. Syntax per value: \`T\` + 4 digits.
 2. **Tactic IDs** (\`TA0001\`) -> \`{ filter: { mitreTactic: ["TA0001"] } }\`.
-3. **Tactic names** in the table below -> convert to IDs: \`{ filter: { mitreTactic: ["<TA-ID>"] } }\`. Prefer IDs; they are stable across MITRE versions.
+3. **Tactic names** in the table below -> convert to the ID first: \`{ filter: { mitreTactic: ["<TA-ID>"] } }\`.
 4. **Anything uncertain** — a typo, a technique *name* like "Phishing", informal phrasing, or an ID you are unsure of -> \`{ filter: { keywords: "<phrase>" } }\`. Never guess an ID.
 
 \`mitreTactic\` and \`mitreTechnique\` are **arrays (OR-ed)**. Pass several at once — e.g. \`{ filter: { mitreTactic: ["TA0001", "TA0006"] } }\` — to gather candidates across tactics in a single call instead of one call per tactic. Use separate single-tactic calls only when you need balanced coverage of each tactic (a few rules from every gap) or a count per tactic.
@@ -228,7 +230,7 @@ Each maps a user request to the tool call(s). These are patterns for you, not sc
 - "What Windows rules can I install?" -> \`security.get_installable_catalog_overview\` (find the Windows tag), then \`security.find_prebuilt_rules { filter: { tags: ["OS: Windows"] } }\`.
 - "Installable rules for Credential Access" -> \`security.find_prebuilt_rules { filter: { mitreTactic: ["TA0006"] } }\` (no overview needed — not a tag filter).
 - "Rules for Initial Access or Credential Access" -> \`security.find_prebuilt_rules { filter: { mitreTactic: ["TA0001", "TA0006"] } }\` (one call, not two).
-- "Any rules for T1059.001?" -> \`security.find_prebuilt_rules { filter: { mitreTechnique: ["T1059.001"] } }\`.
+- "Any rules for T1059?" -> \`security.find_prebuilt_rules { filter: { mitreTechnique: ["T1059"] } }\`.
 - "Do you have a rule that mentions mimikatz?" -> \`security.find_prebuilt_rules { filter: { keywords: "mimikatz" } }\` (searches description too).
 - "Show me critical ES|QL rules to install" -> \`security.find_prebuilt_rules { filter: { severity: ["critical"], ruleType: ["esql"] } }\`.
 - "How many LLM rules can I install?" -> \`security.get_installable_catalog_overview\` (read the \`Domain: LLM\` tag count); confirm with \`security.find_prebuilt_rules { filter: { tags: ["Domain: LLM"] }, perPage: 1 }\` and answer from \`total\`.
@@ -244,6 +246,7 @@ Do not invent other install commands, API endpoints, or CLI flows.`;
 export const createRecommendPrebuiltRulesSkill = ({
   getStartServices,
   logger,
+  ml,
 }: RecommendPrebuiltRulesSkillDeps): SkillDefinition<
   'recommend-prebuilt-rules',
   'skills/security/rules'
@@ -258,9 +261,9 @@ export const createRecommendPrebuiltRulesSkill = ({
       'catalog (by tag, MITRE, rule type, integration, or keyword). Read-only.',
     content: RECOMMEND_PREBUILT_RULES_CONTENT,
     getInlineTools: () => [
-      createFindPrebuiltRulesInlineTool({ getStartServices, logger }),
+      createFindPrebuiltRulesInlineTool({ getStartServices, logger, ml }),
       createGetUserDataInventoryTool({ getStartServices, logger }),
-      createGetInstallableCatalogOverviewTool({ getStartServices, logger }),
+      createGetInstallableCatalogOverviewTool({ getStartServices, logger, ml }),
       createGetInstalledRulesMitreCoverageTool({ getStartServices, logger }),
     ],
   });

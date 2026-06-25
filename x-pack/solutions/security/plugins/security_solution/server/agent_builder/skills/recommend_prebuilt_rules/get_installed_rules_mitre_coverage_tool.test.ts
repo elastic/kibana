@@ -72,9 +72,9 @@ const createMockDeps = () => {
 };
 
 describe('buildMitreCoverageFromRules', () => {
-  it('keeps each technique paired with its own name and its own subtechnique (regression: the flattened-agg bug)', () => {
-    // One rule mapping to two techniques, each with one subtechnique. The old aggregation-based
-    // implementation cross-contaminated names and duplicated subtechniques across both parents.
+  it('keeps each technique paired with its own name (regression: the flattened-agg bug)', () => {
+    // One rule mapping to two techniques. The old aggregation-based implementation
+    // cross-contaminated names across techniques; reading the structured object keeps them paired.
     const result = buildMitreCoverageFromRules(
       rules(
         rule([
@@ -92,18 +92,8 @@ describe('buildMitreCoverageFromRules', () => {
       total_with_mitre_mapping: 1,
       tactics: [{ id: 'TA0040', name: 'Impact', count: 1 }],
       techniques: [
-        {
-          id: 'T1491',
-          name: 'Defacement',
-          count: 1,
-          subtechniques: [{ id: 'T1491.002', name: 'External Defacement', count: 1 }],
-        },
-        {
-          id: 'T1565',
-          name: 'Data Manipulation',
-          count: 1,
-          subtechniques: [{ id: 'T1565.001', name: 'Stored Data Manipulation', count: 1 }],
-        },
+        { id: 'T1491', name: 'Defacement', count: 1 },
+        { id: 'T1565', name: 'Data Manipulation', count: 1 },
       ],
     });
   });
@@ -134,15 +124,7 @@ describe('buildMitreCoverageFromRules', () => {
       { id: 'TA0002', name: 'Execution', count: 1 },
     ]);
     expect(result.techniques).toEqual([
-      {
-        id: 'T1059',
-        name: 'Command and Scripting Interpreter',
-        count: 3,
-        subtechniques: [
-          { id: 'T1059.001', name: 'PowerShell', count: 1 },
-          { id: 'T1059.003', name: 'Windows Command Shell', count: 1 },
-        ],
-      },
+      { id: 'T1059', name: 'Command and Scripting Interpreter', count: 3 },
     ]);
   });
 
@@ -167,13 +149,23 @@ describe('buildMitreCoverageFromRules', () => {
     ]);
   });
 
-  it('omits the subtechniques field when a technique has none covered', () => {
+  it('reports techniques flat — subtechniques in the threat data are not tallied', () => {
     const result = buildMitreCoverageFromRules(
-      rules(rule([mitre('TA0005', 'Defense Evasion', [tech('T1055', 'Process Injection')])])),
+      rules(
+        rule([
+          mitre('TA0005', 'Defense Evasion', [
+            tech('T1055', 'Process Injection', [
+              sub('T1055.001', 'Dynamic-link Library Injection'),
+              sub('T1055.002', 'Portable Executable Injection'),
+            ]),
+          ]),
+        ])
+      ),
       1
     );
 
-    expect(result.techniques).toHaveLength(1);
+    // The technique is counted once; its subtechniques are not surfaced as a field.
+    expect(result.techniques).toEqual([{ id: 'T1055', name: 'Process Injection', count: 1 }]);
     expect('subtechniques' in result.techniques[0]).toBe(false);
   });
 
@@ -280,17 +272,8 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
           total_with_mitre_mapping: 2,
           tactics: [{ id: 'TA0001', name: 'Initial Access', count: 2 }],
           techniques: [
-            {
-              id: 'T1190',
-              name: 'Exploit Public-Facing Application',
-              count: 1,
-            },
-            {
-              id: 'T1566',
-              name: 'Phishing',
-              count: 1,
-              subtechniques: [{ id: 'T1566.001', name: 'Spearphishing Attachment', count: 1 }],
-            },
+            { id: 'T1190', name: 'Exploit Public-Facing Application', count: 1 },
+            { id: 'T1566', name: 'Phishing', count: 1 },
           ],
         });
       }
