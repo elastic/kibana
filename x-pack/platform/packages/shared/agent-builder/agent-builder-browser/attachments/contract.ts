@@ -85,9 +85,6 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
 }
 
-/** Re-export so consumers don't need a direct @elastic/eui import for button colors. */
-export type ActionButtonColor = ButtonColor;
-
 /**
  * Action button definition for inline-rendered attachments.
  */
@@ -99,7 +96,7 @@ export interface ActionButton {
   /** Whether this is the primary action button */
   type: ActionButtonType;
   /** Optional EUI button color override (defaults to 'text') */
-  color?: ActionButtonColor;
+  color?: ButtonColor;
   /** Whether the action is currently unavailable */
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */
