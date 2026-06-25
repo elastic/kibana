@@ -19,12 +19,11 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MainCategories, PipelineStats } from '@kbn/siem-readiness';
+import type { MainCategories, PipelineDataFlowHealth, PipelineStats } from '@kbn/siem-readiness';
 import {
   CATEGORY_ORDER,
   filterPipelinesByCategories,
-  VOLUME_DROP_WARNING_PCT,
-  VOLUME_DROP_CRITICAL_PCT,
+  getContinuityDataFlowHealth,
 } from '@kbn/siem-readiness';
 import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
@@ -49,32 +48,14 @@ import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
 
-type ContinuityDataFlowHealth =
-  | 'silent'
-  | 'volume_drop_critical'
-  | 'volume_drop_warning'
-  | 'healthy';
-
 export interface PipelineInfoWithStatus extends PipelineStats, Record<string, unknown> {
   failureRate: string;
   status: 'healthy' | 'critical';
-  continuityDataFlowHealth: ContinuityDataFlowHealth;
+  continuityDataFlowHealth: PipelineDataFlowHealth;
 }
 
 const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
   return isCriticalFailureRateFromString(failureRate) ? 'critical' : 'healthy';
-};
-
-// Silence takes precedence over volume drop, mirroring how get_continuity merges them into one finding.
-const getContinuityDataFlowHealth = (p: PipelineStats): ContinuityDataFlowHealth => {
-  if (p.isSilent) return 'silent';
-  if (p.volumeDropPct != null && p.volumeDropPct >= VOLUME_DROP_CRITICAL_PCT) {
-    return 'volume_drop_critical';
-  }
-  if (p.volumeDropPct != null && p.volumeDropPct >= VOLUME_DROP_WARNING_PCT) {
-    return 'volume_drop_warning';
-  }
-  return 'healthy';
 };
 
 export const getIngestPipelineUrl = (basePath: string, pipelineName: string): string => {
@@ -254,7 +235,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               }),
               sortable: true,
               render: (
-                continuityDataFlowHealth: ContinuityDataFlowHealth,
+                continuityDataFlowHealth: PipelineDataFlowHealth,
                 item: PipelineInfoWithStatus
               ) => {
                 if (continuityDataFlowHealth === 'silent') {
