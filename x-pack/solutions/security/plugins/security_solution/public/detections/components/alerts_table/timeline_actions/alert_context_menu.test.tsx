@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import { AlertContextMenu } from './alert_context_menu';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
@@ -84,7 +83,6 @@ const mockUseKibanaReturnValue = {
           manageTemplates: true,
         }),
         getRuleIdFromEvent: jest.fn(),
-        getObservablesFromEcs: jest.fn().mockReturnValue([]),
       },
     },
   },
@@ -167,49 +165,43 @@ jest.mock(
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
-    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', async () => {
+    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
       const wrapper = render(
         <TestProviders>
           <AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      await waitFor(() => {
-        expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-        expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
-      });
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
 
-    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', async () => {
+    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
       const wrapper = render(
         <TestProviders>
           <AlertContextMenu {...props} scopeId={TableId.alertsOnRuleDetailsPage} />
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      await waitFor(() => {
-        expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-        expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
-      });
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
 
-    test('it render AddToCase context menu item if timelineId === TimelineId.active', async () => {
+    test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
       const wrapper = render(
         <TestProviders>
           <AlertContextMenu {...props} scopeId={TimelineId.active} />
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      await waitFor(() => {
-        expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-        expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
-      });
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
   });
 
@@ -221,7 +213,7 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       expect(wrapper.queryByTestId(markAsOpenButton)).toBeNull();
       expect(wrapper.getByTestId(markAsAcknowledgedButton)).toBeInTheDocument();
@@ -259,7 +251,7 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       expect(wrapper.queryByTestId(runWorkflowActionButton)).not.toBeInTheDocument();
     });
@@ -276,18 +268,12 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       expect(wrapper.getByTestId(runWorkflowActionButton)).toBeInTheDocument();
     });
 
     test('it shows the workflow panel when run workflow action is clicked', async () => {
-      // EuiPopover applies `pointer-events: none` on the panel until its mount
-      // transition completes. user-event v14 throws synchronously when it
-      // encounters that style, which made this click flaky. Disabling the
-      // pointer-events check here mirrors the sibling Document workflow test
-      // below and is the same fix the user-event docs recommend for popovers.
-      const user = userEvent.setup({ pointerEventsCheck: 0 });
       mockUseRunAlertWorkflowPanel.mockReturnValue({
         runWorkflowMenuItem: mockRunWorkflowMenuItem,
         runAlertWorkflowPanel: mockRunAlertWorkflowPanel,
@@ -299,8 +285,8 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await user.click(wrapper.getByTestId(actionMenuButton));
-      await user.click(wrapper.getByTestId(runWorkflowActionButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(runWorkflowActionButton));
 
       await waitFor(() => {
         expect(wrapper.getByTestId(alertWorkflowPanelContent)).toBeInTheDocument();
@@ -361,7 +347,7 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       expect(wrapper.queryByTestId(runDocumentWorkflowActionButton)).not.toBeInTheDocument();
     });
@@ -378,13 +364,12 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       expect(wrapper.getByTestId(runDocumentWorkflowActionButton)).toBeInTheDocument();
     });
 
     test('it shows the document workflow panel when run workflow action is clicked', async () => {
-      const user = userEvent.setup({ pointerEventsCheck: 0 });
       mockUseRunDocumentWorkflowPanel.mockReturnValue({
         runWorkflowMenuItem: mockDocumentWorkflowMenuItem,
         runDocumentWorkflowPanel: mockDocumentWorkflowPanel,
@@ -396,8 +381,8 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await user.click(wrapper.getByTestId(actionMenuButton));
-      await user.click(wrapper.getByTestId(runDocumentWorkflowActionButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(runDocumentWorkflowActionButton));
 
       await waitFor(() => {
         expect(wrapper.getByTestId(documentWorkflowPanelContent)).toBeInTheDocument();
@@ -434,7 +419,7 @@ describe('Alert table context menu', () => {
             </TestProviders>
           );
 
-          await userEvent.click(wrapper.getByTestId(actionMenuButton));
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
@@ -449,7 +434,7 @@ describe('Alert table context menu', () => {
             </TestProviders>
           );
 
-          await userEvent.click(wrapper.getByTestId(actionMenuButton));
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
@@ -468,7 +453,7 @@ describe('Alert table context menu', () => {
             </TestProviders>
           );
 
-          await userEvent.click(wrapper.getByTestId(actionMenuButton));
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
@@ -483,7 +468,7 @@ describe('Alert table context menu', () => {
             </TestProviders>
           );
 
-          await userEvent.click(wrapper.getByTestId(actionMenuButton));
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
@@ -502,7 +487,7 @@ describe('Alert table context menu', () => {
             </TestProviders>
           );
 
-          await userEvent.click(wrapper.getByTestId(actionMenuButton));
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
@@ -520,7 +505,7 @@ describe('Alert table context menu', () => {
           </TestProviders>
         );
 
-        await userEvent.click(wrapper.getByTestId(actionMenuButton));
+        fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
         await waitFor(() => {
           expect(wrapper.getByTestId(applyAlertTagsButton)).toBeTruthy();
@@ -536,7 +521,7 @@ describe('Alert table context menu', () => {
           </TestProviders>
         );
 
-        await userEvent.click(wrapper.getByTestId(actionMenuButton));
+        fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
         await waitFor(() => {
           expect(wrapper.getByTestId(applyAlertAssigneesButton)).toBeTruthy();
@@ -565,7 +550,7 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       await waitFor(() => {
         expect(wrapper.getByTestId(addToChatButton)).toBeInTheDocument();
@@ -581,7 +566,7 @@ describe('Alert table context menu', () => {
         </TestProviders>
       );
 
-      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
       expect(wrapper.queryByTestId(addToChatButton)).not.toBeInTheDocument();
     });

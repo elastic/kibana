@@ -1,5 +1,5 @@
 {
-  "sha1": "070c10d70ff47e763c24dcb61f2ad3a16fcbf95f",
+  "sha1": "115bf47edbb568febae0b7f96023658db84dc10c",
   "tests": [
     {
       "id": "fbc74590a1185af-3e73699777c3b59",
@@ -146,8 +146,8 @@
       }
     },
     {
-      "id": "ac68e3762339a89-12ae1a235b2c6f4",
-      "title": "Kubernetes Onboarding Kubernetes tile navigates to the OTel Kubernetes flow",
+      "id": "ac68e3762339a89-73532f99c291a58",
+      "title": "Kubernetes Onboarding Kubernetes card navigates to the OTel Kubernetes flow",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -223,7 +223,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 87,
+        "line": 86,
         "column": 7
       }
     },
@@ -241,7 +241,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 103,
+        "line": 102,
         "column": 7
       }
     },
@@ -259,7 +259,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 121,
+        "line": 120,
         "column": 7
       }
     },
@@ -277,7 +277,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 139,
+        "line": 138,
         "column": 7
       }
     },
@@ -291,7 +291,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 175,
+        "line": 173,
         "column": 7
       }
     },
