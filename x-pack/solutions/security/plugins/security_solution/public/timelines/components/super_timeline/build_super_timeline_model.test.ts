@@ -175,6 +175,29 @@ describe('buildSuperTimelineModel', () => {
       expect(model.dateRange.start).toBe('2024-01-01T00:00:00.000Z');
       expect(model.dateRange.end).toBe('2024-01-07T00:00:00.000Z');
     });
+
+    it('correctly unions relative date strings (now-7d is earlier than now-24h)', () => {
+      // Lexicographic comparison gets this wrong: '7' > '2', so 'now-7d' < 'now-24h' is
+      // false by char code, but now-7d is actually an earlier point in time than now-24h.
+      const t1 = makeTimeline({ dateRange: { start: 'now-24h', end: 'now' } });
+      const t2 = makeTimeline({ dateRange: { start: 'now-7d', end: 'now' } });
+      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      // now-7d is earlier, so it should win as the start
+      expect(model.dateRange.start).toBe('now-7d');
+      expect(model.dateRange.end).toBe('now');
+    });
+
+    it('unions mixed ISO and relative date strings correctly', () => {
+      // ISO 2020-01-01 is always earlier than now-7d; ISO end 2021-01-01 is always earlier
+      // than now. Verifies that ISO and relative strings can be compared across types.
+      const t1 = makeTimeline({
+        dateRange: { start: '2020-01-01T00:00:00.000Z', end: '2021-01-01T00:00:00.000Z' },
+      });
+      const t2 = makeTimeline({ dateRange: { start: 'now-7d', end: 'now' } });
+      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      expect(model.dateRange.start).toBe('2020-01-01T00:00:00.000Z');
+      expect(model.dateRange.end).toBe('now');
+    });
   });
 
   describe('column union', () => {
