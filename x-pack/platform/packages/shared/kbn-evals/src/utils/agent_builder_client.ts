@@ -97,17 +97,20 @@ export function createAgentBuilderClient({
     };
 
     return pRetry(call, {
-       retries: RETRIES,
-       minTimeout: MIN_TIMEOUT_MS,
-       onFailedAttempt: (error) => {
-            if (error.retriesLeft === 0) {
-                 log.error(`[AgentBuilderClient] converse(${agentId}) failed after ${error.attemptNumber} attempts: ${error.message}`);
-       } else {
-            log.warning(`[AgentBuilderClient] converse(${agentId}) failed on attempt ${error.attemptNumber}; retrying... (${error.message})`
-            );
+      retries: RETRIES,
+      minTimeout: MIN_TIMEOUT_MS,
+      onFailedAttempt: (error) => {
+        if (error.retriesLeft === 0) {
+          log.error(
+            `[AgentBuilderClient] converse(${agentId}) failed after ${error.attemptNumber} attempts: ${error.message}`
+          );
+        } else {
+          log.warning(
+            `[AgentBuilderClient] converse(${agentId}) failed on attempt ${error.attemptNumber}; retrying... (${error.message})`
+          );
         }
-    },
-});
+      },
+    });
   };
 
   return { converse };
