@@ -305,7 +305,6 @@ export const HelpPopover: React.FC<{
               color="text"
               onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
               data-test-subj="esql-help-popover-button"
-              size="xs"
               iconType="question"
               aria-label={helpLabel}
             />

@@ -209,17 +209,22 @@ const unifiedControlGroupEmptyPseudoSelectors = [
   `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonEmpty::before`,
   `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonEmpty:hover::before`,
   `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonEmpty:focus-visible::before`,
+  `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonIcon::before`,
+  `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonIcon:hover::before`,
+  `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonIcon:focus-visible::before`,
 ].join(', ');
 
 const buttonGroupHoverSelectors = [
   '.euiButtonGroupButton:not(:disabled):hover',
   '.euiButtonGroupButton:not(:disabled):focus-visible',
+].join(', ');
+
+/** Toolbar control groups: native EUI hover only — no stacked backgroundTextHover fill */
+const toolbarControlGroupHoverSelectors = [
   `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonIcon:not(:disabled):hover`,
   `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonIcon:not(:disabled):focus-visible`,
-  `.${DATA_TABLE_TOOLBAR_ICON_BUTTON_CLASS}:not(:disabled):hover`,
-  `.${DATA_TABLE_TOOLBAR_ICON_BUTTON_CLASS}:not(:disabled):focus-visible`,
-  `.${FILTER_BUTTON_GROUP_CLASS} .euiButtonIcon:not(:disabled):hover`,
-  `.${FILTER_BUTTON_GROUP_CLASS} .euiButtonIcon:not(:disabled):focus-visible`,
+  `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiDataGridToolbarControl:not(:disabled):hover`,
+  `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiDataGridToolbarControl:not(:disabled):focus-visible`,
 ].join(', ');
 
 /** Excludes filled / accent-colored EuiButton variants from subdued text-control styling. */
@@ -409,6 +414,7 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-radius: ${controlRadius} !important;
       background-color: ${colors.backgroundBaseHighlighted} !important;
+      padding: 0 !important;
       overflow: hidden;
     }
 
@@ -464,6 +470,10 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
     ${scopedInPanels(buttonGroupHoverSelectors)} {
       color: ${colors.text} !important;
       background-color: ${components.buttons.backgroundTextHover} !important;
+    }
+
+    ${scopedInPanels(toolbarControlGroupHoverSelectors)} {
+      color: ${colors.text} !important;
     }
 
     ${scope} ${panelSelectors} {
