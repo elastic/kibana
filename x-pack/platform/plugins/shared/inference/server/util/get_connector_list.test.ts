@@ -211,4 +211,56 @@ describe('getConnectorList', () => {
     const endpoint = result.find((c) => c.isInferenceEndpoint);
     expect(endpoint?.name).toBe('Display Name Takes Priority');
   });
+
+  it('populates capabilities.contextWindowSize for inference endpoints with a known model', async () => {
+    getInferenceEndpointsMock.mockResolvedValue([
+      {
+        inferenceId: 'my-endpoint',
+        taskType: 'chat_completion',
+        service: 'openai',
+        serviceSettings: { model_id: 'gpt-4o' },
+        metadata: {},
+      },
+    ]);
+
+    const result = await getConnectorList({ actions, request, esClient, logger });
+
+    const endpoint = result.find((c) => c.isInferenceEndpoint);
+    expect(endpoint?.capabilities.contextWindowSize).toBe(128000);
+  });
+
+  it('resolves contextWindowSize for EIS endpoints via the elastic model dictionary', async () => {
+    getInferenceEndpointsMock.mockResolvedValue([
+      {
+        inferenceId: 'eis-endpoint',
+        taskType: 'chat_completion',
+        service: 'elastic',
+        serviceSettings: { model_id: 'rainbow-sprinkles' },
+        metadata: { display: { name: 'Elastic Managed LLM' } },
+      },
+    ]);
+
+    const result = await getConnectorList({ actions, request, esClient, logger });
+
+    const endpoint = result.find((c) => c.isInferenceEndpoint);
+    expect(endpoint).toMatchObject({ isInferenceEndpoint: true, isEis: true });
+    expect(endpoint?.capabilities.contextWindowSize).toBe(200000);
+  });
+
+  it('leaves contextWindowSize undefined for inference endpoints with an unknown model', async () => {
+    getInferenceEndpointsMock.mockResolvedValue([
+      {
+        inferenceId: 'my-endpoint',
+        taskType: 'chat_completion',
+        service: 'openai',
+        serviceSettings: { model_id: 'totally-unknown-model' },
+        metadata: {},
+      },
+    ]);
+
+    const result = await getConnectorList({ actions, request, esClient, logger });
+
+    const endpoint = result.find((c) => c.isInferenceEndpoint);
+    expect(endpoint?.capabilities.contextWindowSize).toBeUndefined();
+  });
 });
