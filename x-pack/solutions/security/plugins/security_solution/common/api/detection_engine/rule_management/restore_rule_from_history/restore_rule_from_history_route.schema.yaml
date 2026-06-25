@@ -49,4 +49,4 @@ paths:
         '404':
           description: Rule or history entry not found.
         '409':
-          description: Unable to restore the rule due to a concurrency conflict.
+          description: Unable to restore the rule due to a conflict.
