@@ -8,5 +8,5 @@ products:
   target: 2026-06-25
 areas:
 - Search and data
-title: Avoid decrypting all outputs during Fleet setup
-description: Improved `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call.
+title: "Fix slow Fleet setup when many outputs are configured"
+description: "`POST /api/fleet/setup` no longer decrypts every output on each call, so setup stays responsive on deployments with many configured outputs."

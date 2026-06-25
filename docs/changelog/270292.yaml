@@ -4,4 +4,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-25
-title: Scope watchlist index sync
+title: "Fix Entity Analytics watchlist sync to use the watchlist creator's credentials"
+description: "Watchlist index sync operations now run with the watchlist creator's read privileges instead of the Entity Store installer's credentials."

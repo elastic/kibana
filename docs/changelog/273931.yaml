@@ -6,4 +6,4 @@ products:
   target: 2026-06-25
 areas:
 - Discover and ES|QL
-title: Fixes KQL suggestions in autocomplete
+title: "Fix KQL suggestions in autocomplete"

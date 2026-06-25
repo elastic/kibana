@@ -8,4 +8,4 @@ products:
   target: 2026-06-25
 areas:
 - Discover and ES|QL
-title: Recommendations for remote sources
+title: "Add recommended ES|QL queries for remote cluster sources"

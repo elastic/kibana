@@ -4,4 +4,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-25
-title: Update LogEntryExampleMessageTable to use minHeight instead of height
+title: "Fix unreadable wrapped log messages in Logs Anomalies example table"

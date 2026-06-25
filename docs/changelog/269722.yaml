@@ -8,4 +8,5 @@ products:
   target: 2026-06-25
 areas:
 - Dashboards and visualizations
-title: 'Filters and drill downs on xy, heatmap and partition charts: provide feedback when cannot apply filter or drill downs when the value is computed'
+title: "Add feedback when filters and drilldowns cannot apply to computed values on ES|QL charts"
+description: "XY, heatmap, and partition charts now explain when legend actions, filters, or drilldowns are unavailable because the underlying value is computed rather than stored."

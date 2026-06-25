@@ -4,4 +4,5 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-06-25
-title: New Kubernetes flow
+title: "Add OpenTelemetry-first Kubernetes onboarding flow"
+description: "The Kubernetes tile and add-data card now open a single OpenTelemetry onboarding flow at `/kubernetes`. The Elastic Agent Kubernetes flow remains available at `/kubernetes/elastic-agent`."

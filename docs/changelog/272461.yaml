@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/272461
-issues:
-- https://github.com/elastic/kibana/issues/270074
-type: enhancement
-products:
-- product: cloud-serverless
-  target: 2026-06-25
-title: Pre-compute applicable dimensions per metric in `MetricsGrid`
