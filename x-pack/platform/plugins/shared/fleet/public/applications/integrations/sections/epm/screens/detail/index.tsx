@@ -399,6 +399,11 @@ export function Detail() {
     [packageInfo]
   );
 
+  // Space-aware deferred count for the Alerting tab badge. Unlike getDeferredInstallationsCnt
+  // (which is space-agnostic and covers the primary installation only), this reads from
+  // additional_spaces_installed_kibana when the current space is not the primary installation
+  // space. If a future space-scoped deferred asset type is added, extend this memo rather than
+  // getDeferredInstallationsCnt.
   const numOfDeferredAlerts = useMemo(() => {
     const installedSpaceId = pkgInstallationInfo?.installed_kibana_space_id;
     const kibanaAssets =

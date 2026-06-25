@@ -182,16 +182,35 @@ export const installRuleAssetsHandler: FleetRequestHandler<
   const installAsAdditionalSpace =
     (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId;
 
+  const spaceScopedClient = installAsAdditionalSpace
+    ? appContextService.getInternalUserSOClientForSpaceId(spaceId)
+    : savedObjectsClient;
+
+  const packageInstallContext = {
+    packageInfo,
+    paths: installedPkgWithAssets.paths,
+    archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
+  };
+
+  // Ensure archive SO assets (including alerting_rule_template SOs) are present in this space
+  // before attempting rule creation. Without this, templates would not be found in secondary
+  // spaces that have not yet had assets installed via the "Install Kibana assets" flow.
+  await installKibanaAssetsAndReferences({
+    savedObjectsClient: spaceScopedClient,
+    logger,
+    pkgName,
+    pkgTitle: packageInfo.title,
+    installAsAdditionalSpace,
+    spaceId,
+    assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
+    installedPkg: installation,
+    packageInstallContext,
+  });
+
   await stepCreateAlertingAssets({
     logger,
-    savedObjectsClient: installAsAdditionalSpace
-      ? appContextService.getInternalUserSOClientForSpaceId(spaceId)
-      : savedObjectsClient,
-    packageInstallContext: {
-      packageInfo,
-      paths: installedPkgWithAssets.paths,
-      archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
-    },
+    savedObjectsClient: spaceScopedClient,
+    packageInstallContext,
     spaceId,
     request,
     installAsAdditionalSpace,
