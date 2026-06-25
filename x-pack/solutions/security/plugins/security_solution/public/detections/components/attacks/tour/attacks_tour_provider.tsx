@@ -11,15 +11,18 @@ import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import type { AttacksTourState } from './constants';
 import {
   ATTACKS_TOUR_CALLOUT_STORAGE_KEY,
-  ATTACKS_TOUR_STEP_COUNT,
   ATTACKS_TOUR_STORAGE_KEY,
   DEFAULT_ATTACKS_TOUR_STATE,
 } from './constants';
+import type { AttacksTourStep } from './tour_steps_config';
+import { getAttacksTourSteps } from './tour_steps_config';
 
 export interface AttacksTourContextValue {
   /** Persisted tour state. */
   tourState: AttacksTourState;
-  /** Total number of steps in the current variant (3 if attacks exist, otherwise 2). */
+  /** The steps for the current variant (3 if attacks exist, otherwise 2). */
+  steps: AttacksTourStep[];
+  /** Total number of steps in the current variant. */
   stepsTotal: number;
   /** `undefined` while the attacks query is loading, otherwise the resolved value. */
   hasAttacks: boolean | undefined;
@@ -75,10 +78,8 @@ const AttacksTourProviderComponent: React.FC<AttacksTourProviderProps> = ({
 
   // Use the optimistic 3-step variant while loading (`hasAttacks === undefined`)
   // so we never under-report the step count before the query resolves.
-  const stepsTotal =
-    hasAttacks !== false
-      ? ATTACKS_TOUR_STEP_COUNT.withAttacks
-      : ATTACKS_TOUR_STEP_COUNT.withoutAttacks;
+  const steps = useMemo(() => getAttacksTourSteps(hasAttacks !== false), [hasAttacks]);
+  const stepsTotal = steps.length;
 
   const reportCalloutAction = useCallback(
     (action: 'view' | 'start_tour' | 'view_docs' | 'dismiss') => {
@@ -142,9 +143,7 @@ const AttacksTourProviderComponent: React.FC<AttacksTourProviderProps> = ({
     if (hasAttacks === undefined || !tourState.isTourActive) {
       return;
     }
-    const total = hasAttacks
-      ? ATTACKS_TOUR_STEP_COUNT.withAttacks
-      : ATTACKS_TOUR_STEP_COUNT.withoutAttacks;
+    const total = hasAttacks ? 3 : 2;
     if (tourState.currentTourStep > total) {
       completeTour();
     }
@@ -153,6 +152,7 @@ const AttacksTourProviderComponent: React.FC<AttacksTourProviderProps> = ({
   const value = useMemo<AttacksTourContextValue>(
     () => ({
       tourState,
+      steps,
       stepsTotal,
       hasAttacks,
       isTourEnabled,
@@ -167,6 +167,7 @@ const AttacksTourProviderComponent: React.FC<AttacksTourProviderProps> = ({
     }),
     [
       tourState,
+      steps,
       stepsTotal,
       hasAttacks,
       isTourEnabled,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -51,21 +51,7 @@ import { ConnectorFilter } from '../../../attack_discovery/pages/results/history
 import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
 import { KPIsSection } from './kpis/kpis_section';
-import { AttacksTourProvider } from './tour/attacks_tour_provider';
-
-// Lazy-load the tour views so their (inlined) illustration SVGs land in an async
-// chunk instead of the page-load bundle. The provider is kept eager: it carries
-// no images and provides the context the lazy views consume.
-const WelcomeTourCallout = React.lazy(() =>
-  import(/* webpackChunkName: "attacks_tour_callout" */ './tour/welcome_tour_callout').then(
-    ({ WelcomeTourCallout: Component }) => ({ default: Component })
-  )
-);
-const AttacksTour = React.lazy(() =>
-  import(/* webpackChunkName: "attacks_tour" */ './tour/attacks_tour').then(
-    ({ AttacksTour: Component }) => ({ default: Component })
-  )
-);
+import { AttacksTour, AttacksTourProvider, WelcomeTourCallout } from './tour';
 
 import type { SettingsOverrideOptions } from '../../../attack_discovery/pages/results/history/types';
 
@@ -268,10 +254,10 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
             {isTourFlagEnabled && (
-              <Suspense fallback={null}>
+              <>
                 <WelcomeTourCallout />
                 <AttacksTour />
-              </Suspense>
+              </>
             )}
             <EuiFlexGroup direction="row" responsive={false} wrap={true}>
               <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>

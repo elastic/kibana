@@ -52,17 +52,6 @@ export const ATTACKS_TOUR_CALLOUT_DISMISS_TEST_ID = 'attacks-page-tour-callout-d
 export const ATTACKS_TOUR_STEP_TEST_ID = 'attacks-page-tour-step';
 
 /**
- * Step counts for the two tour variants, mirroring `getAttacksTourSteps`. Kept
- * here (instead of derived from the step configs) so the provider can know the
- * count without importing `tour_steps_config`, which pulls in the step
- * illustration SVGs — those should stay in the lazy-loaded tour chunk.
- */
-export const ATTACKS_TOUR_STEP_COUNT = {
-  withAttacks: 3,
-  withoutAttacks: 2,
-} as const;
-
-/**
  * Persisted tour state. A single counter drives a single tour; the
  * attack-details-flyout step is an optional 3rd step shown only when attacks
  * exist (see the reconciliation logic in `attacks_tour_provider.tsx`).
