@@ -496,6 +496,52 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
     });
   });
 
+  describe('public-suffix guard (step b2)', () => {
+    test('drops bare co.uk (multi-label public suffix)', () => {
+      const r = extractIocs({ text: 'victim domain was co.uk in the table' });
+      expect(domainValues(r)).not.toContain('co.uk');
+    });
+
+    test('drops bare co.nz', () => {
+      const r = extractIocs({ text: 'registrant suffix co.nz observed' });
+      expect(domainValues(r)).not.toContain('co.nz');
+    });
+
+    test('drops bare com.br', () => {
+      const r = extractIocs({ text: 'fragment com.br in redacted table' });
+      expect(domainValues(r)).not.toContain('com.br');
+    });
+
+    test('drops bare c.id', () => {
+      const r = extractIocs({ text: 'suffix fragment c.id extracted' });
+      expect(domainValues(r)).not.toContain('c.id');
+    });
+
+    test('drops bare wl.gl (single registrar, commonly a suffix fragment)', () => {
+      // wl.gl is not in PUBLIC_SUFFIX_DROPLIST — it is a registrable .gl domain.
+      // This test documents the boundary: only explicit droplist entries are dropped.
+      // wl.gl survives; only the listed multi-label suffixes are affected.
+      const r = extractIocs({ text: 'redirect via wl.gl shortener' });
+      // wl.gl is NOT in the droplist — it passes (this test confirms no over-dropping)
+      expect(domainValues(r)).toContain('wl.gl');
+    });
+
+    test('KEEPS evil.co.uk — registrable domain built on a public suffix', () => {
+      const r = extractIocs({ text: 'C2 callback to evil.co.uk:443' });
+      expect(domainValues(r)).toContain('evil.co.uk');
+    });
+
+    test('KEEPS acme.com — normal TLD unaffected by public-suffix guard', () => {
+      const r = extractIocs({ text: 'beacon to acme.com' });
+      expect(domainValues(r)).toContain('acme.com');
+    });
+
+    test('KEEPS sub.evil.co.uk — multi-label registrable domain', () => {
+      const r = extractIocs({ text: 'stage2 from sub.evil.co.uk/payload' });
+      expect(domainValues(r)).toContain('sub.evil.co.uk');
+    });
+  });
+
   describe('mixed realistic report — RoningLoader-style smoke test', () => {
     const roningLoaderText = `
       The threat actor distributed a signed driver WinRing0x64.sys

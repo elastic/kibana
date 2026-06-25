@@ -197,6 +197,75 @@ const FILE_EXTENSION_TLDS = new Set([
  */
 const AMBIGUOUS_TLDS = new Set(['py', 'sh', 'run', 'shell', 'name', 'pl', 'rb', 'lua', 'ps']);
 
+/**
+ * Multi-label public suffixes that are registry boundaries, not registrable domains.
+ * A token that exactly matches one of these (e.g. `co.uk`, `com.br`) carries no
+ * registrant identity and should never be emitted as an IOC. Only the BARE suffix
+ * is dropped — a domain with a registrable label in front (e.g. `evil.co.uk`) passes.
+ *
+ * Curated from corpus FPs; expandable as new suffix patterns appear.
+ * We intentionally do NOT pull in the full ICANN PSL to avoid a heavy dependency.
+ */
+const PUBLIC_SUFFIX_DROPLIST = new Set([
+  // UK second-level registry suffixes
+  'co.uk',
+  'org.uk',
+  'me.uk',
+  'net.uk',
+  'ltd.uk',
+  'plc.uk',
+  // Australia
+  'com.au',
+  'net.au',
+  'org.au',
+  'id.au',
+  // Brazil
+  'com.br',
+  'net.br',
+  'org.br',
+  // New Zealand
+  'co.nz',
+  'net.nz',
+  'org.nz',
+  // Israel
+  'co.il',
+  'org.il',
+  'net.il',
+  // South Korea
+  'co.kr',
+  'or.kr',
+  'ne.kr',
+  // Saudi Arabia
+  'com.sa',
+  'net.sa',
+  'org.sa',
+  // Indonesia (c.id and co.id are both registry suffixes)
+  'co.id',
+  'c.id',
+  'net.id',
+  'or.id',
+  // Argentina
+  'com.ar',
+  'net.ar',
+  'org.ar',
+  // Japan
+  'co.jp',
+  'ne.jp',
+  'or.jp',
+  // China
+  'com.cn',
+  'net.cn',
+  'org.cn',
+  // India
+  'co.in',
+  'net.in',
+  'org.in',
+  // South Africa
+  'co.za',
+  'net.za',
+  'org.za',
+]);
+
 const isPrivateIp = (ip: string) => PRIVATE_IP_PREFIXES.some((p) => ip.startsWith(p));
 
 /**
@@ -210,7 +279,7 @@ const extractTld = (domain: string): string => {
 
 /**
  * Domain filter pipeline: returns true if the domain should be KEPT.
- * Applied in order: file-ext → IANA → noise denylist → corroboration gate.
+ * Applied in order: file-ext → public-suffix → IANA → noise denylist → corroboration gate.
  * Redaction-adjacency is checked upstream (requires match position from matchAll).
  */
 const isDomainKept = (
@@ -223,6 +292,13 @@ const isDomainKept = (
 
   // Step b — file extension (before IANA to handle .zip/.mov gTLD collisions)
   if (FILE_EXTENSION_TLDS.has(tld)) return false;
+
+  // Step b2 — bare public-suffix guard: drop tokens that ARE a registry suffix
+  // (co.uk, com.br, c.id …) with no registrable label in front. These appear
+  // as corpus FPs from partially-redacted victim-domain tables. A domain that
+  // extends beyond the suffix (evil.co.uk) is NOT in PUBLIC_SUFFIX_DROPLIST
+  // and passes through.
+  if (PUBLIC_SUFFIX_DROPLIST.has(lower)) return false;
 
   // Step c — IANA TLD validation
   if (!IANA_TLDS.has(tld)) return false;
