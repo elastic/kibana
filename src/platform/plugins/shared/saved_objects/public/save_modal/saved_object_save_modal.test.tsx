@@ -38,24 +38,6 @@ const mockHasLibraryItemWithTitle = jest.fn().mockResolvedValue(false);
 const mockClose = jest.fn();
 
 describe('SavedObjectSaveModal', () => {
-  it('renders the form with noValidate to suppress native browser validation', () => {
-    const { container } = render(
-      <I18nProvider>
-        <SavedObjectSaveModal
-          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
-          onSave={mockSave}
-          onClose={mockClose}
-          lastSavedTitle={''}
-          title={'Saved Object title'}
-          showCopyOnSave={false}
-          objectType="visualization"
-          showDescription={true}
-        />
-      </I18nProvider>
-    );
-    expect(document.querySelector('form')).toHaveAttribute('novalidate');
-  });
-
   it('should render', async () => {
     const { findByTestId, getByText } = render(
       <I18nProvider>
@@ -185,6 +167,24 @@ describe('SavedObjectSaveModal', () => {
       expect(onSave).toHaveBeenCalled();
       expect(onSave.mock.calls[0][0].newCopyOnSave).toBe(true);
     });
+  });
+
+  it('renders the form with noValidate to suppress native browser validation', () => {
+    const { container } = render(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
+          onSave={mockSave}
+          onClose={mockClose}
+          lastSavedTitle={''}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+        />
+      </I18nProvider>
+    );
+    expect(document.querySelector('form')).toHaveAttribute('novalidate');
   });
 
   describe('handle title duplication logic', () => {
