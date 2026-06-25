@@ -151,6 +151,11 @@ export const AgentSkills: React.FC = () => {
     );
   }, [activeSkills, searchQuery]);
 
+  const selectedActiveSkill = useMemo(
+    () => activeSkills.find((s) => s.id === selectedSkillId),
+    [activeSkills, selectedSkillId]
+  );
+
   const handleSelectSkill = (skillId: string) => {
     setSelectedSkillId(skillId);
   };
@@ -374,8 +379,11 @@ export const AgentSkills: React.FC = () => {
                   onEdit={() => setEditingSkillId(selectedSkillId)}
                   onRemove={handleRemoveSelectedSkill}
                   isAutoIncluded={
-                    enableElasticCapabilities &&
-                    (activeSkills.find((s) => s.id === selectedSkillId)?.readonly ?? false)
+                    selectedActiveSkill !== undefined &&
+                    isBuiltinSkillAutoIncludedForElasticCapabilities(
+                      selectedActiveSkill,
+                      enableElasticCapabilities
+                    )
                   }
                   canEditAgent={canEditAgent}
                 />
