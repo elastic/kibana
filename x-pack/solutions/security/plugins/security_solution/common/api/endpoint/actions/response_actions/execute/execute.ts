@@ -15,6 +15,7 @@ export const ExecuteActionRequestSchema = {
     parameters: schema.object({
       command: schema.string({
         minLength: 1,
+        maxLength: 8192,
         validate: (value) => {
           if (!value.trim().length) {
             return 'command cannot be an empty string';
