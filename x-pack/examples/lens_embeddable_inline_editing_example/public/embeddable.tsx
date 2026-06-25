@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiButtonIcon,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
 import type { StartDependencies } from './plugin';
@@ -108,6 +109,10 @@ export const LensChart = (props: {
   }, [embeddableInput, lensLoadEvent, props]);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
 
+  const editChartLabel = i18n.translate('lensChart.editButton.ariaLabel', {
+    defaultMessage: 'Edit chart',
+  });
+
   return (
     <EuiPanel
       hasBorder={!props.container}
@@ -137,22 +142,22 @@ export const LensChart = (props: {
             align-self: flex-end;
           `}
         >
-          <EuiButtonIcon
-            size="xs"
-            iconType="pencil"
-            aria-label={i18n.translate('lensChart.editButton.ariaLabel', {
-              defaultMessage: 'Edit chart',
-            })}
-            onClick={() => {
-              props?.setPanelActive?.(props.isESQL ? 1 : 2);
-              if (triggerOptions) {
-                props.plugins.uiActions
-                  .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
-                  .exec(triggerOptions);
-                props?.setIsinlineEditingVisible?.(true);
-              }
-            }}
-          />
+          <EuiToolTip content={editChartLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              size="xs"
+              iconType="pencil"
+              aria-label={editChartLabel}
+              onClick={() => {
+                props?.setPanelActive?.(props.isESQL ? 1 : 2);
+                if (triggerOptions) {
+                  props.plugins.uiActions
+                    .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
+                    .exec(triggerOptions);
+                  props?.setIsinlineEditingVisible?.(true);
+                }
+              }}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
           {embeddableInput && (
