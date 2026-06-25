@@ -257,6 +257,11 @@ export async function executor(
       },
     });
   }
+
+logger.info('-> 30s wait after running rule to play with the schedule: starting');
+await new Promise((resolve) => setTimeout(resolve, 30000));
+logger.info('<- 30s wait after running rule to play with the schedule: finished');
+
   return { state: { latestTimestamp } };
 }
 
