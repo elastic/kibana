@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Conversation, ToolResult } from '@kbn/agent-builder-common';
+import type { Conversation, ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import type {
   ToolResultStore,
   WritableToolResultStore,
   ToolResultWithMeta,
-  ToolCallWithResults,
 } from '@kbn/agent-builder-server/runner';
 import { MemoryVolume } from '../../memory_volume';
 import { extractConversationToolResults, buildToolCallEntries } from './utils';
@@ -26,12 +25,12 @@ export class ToolResultStoreImpl implements WritableToolResultStore {
   private readonly resultPaths: Map<string, string> = new Map();
   private readonly volume: MemoryVolume;
 
-  constructor({ toolCalls = [] }: { toolCalls?: ToolCallWithResults[] }) {
+  constructor({ toolCalls = [] }: { toolCalls?: ToolCallWithResult[] }) {
     this.volume = new MemoryVolume();
     toolCalls.forEach((toolCall) => this.add(toolCall));
   }
 
-  add(toolCall: ToolCallWithResults): void {
+  add(toolCall: ToolCallWithResult): void {
     const { metaEntry, resultEntries } = buildToolCallEntries(toolCall);
     this.volume.add(metaEntry);
     for (const { entry, result, relativePath } of resultEntries) {

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound, ToolResult } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationRound,
+  ToolCallWithResult,
+  ToolResult,
+} from '@kbn/agent-builder-common';
 import { ToolResultType, ConversationRoundStepType } from '@kbn/agent-builder-common';
-import type { ToolCallWithResults } from '@kbn/agent-builder-server/runner';
 import type { FsEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { ToolResultStoreImpl, createResultStore } from './tool_result_store';
@@ -20,7 +24,7 @@ describe('ToolResultStoreImpl', () => {
     data,
   });
 
-  const makeToolCall = (overrides: Partial<ToolCallWithResults> = {}): ToolCallWithResults => ({
+  const makeToolCall = (overrides: Partial<ToolCallWithResult> = {}): ToolCallWithResult => ({
     tool_call_id: 'call-1',
     tool_id: 'platform.core.list_indices',
     params: { pattern: 'logs-*' },

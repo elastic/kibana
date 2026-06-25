@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ConversationRound, ToolResult } from '@kbn/agent-builder-common';
+import type { ConversationRound, ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
-import type { ToolCallWithResults } from '@kbn/agent-builder-server/runner';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
@@ -75,7 +74,7 @@ export interface BuiltToolCallEntries {
  * order follows the `results` array, which is the same on the live and reconstruct
  * paths — guaranteeing a call yields identical files either way.
  */
-export const buildToolCallEntries = (toolCall: ToolCallWithResults): BuiltToolCallEntries => {
+export const buildToolCallEntries = (toolCall: ToolCallWithResult): BuiltToolCallEntries => {
   const { tool_id: toolId, tool_call_id: toolCallId, params, results } = toolCall;
   const dir = getToolCallDirPath({ toolId, toolCallId });
 
@@ -132,23 +131,18 @@ export const buildToolCallEntries = (toolCall: ToolCallWithResults): BuiltToolCa
 };
 
 /**
- * Flattens a conversation's persisted rounds into per-call records (with params) to
- * seed the store on run start. Excludes tools opted out of the filestore.
+ * Flattens a conversation's persisted rounds into per-call records to seed the store on
+ * run start. Tool-call steps already are `ToolCallWithResult`. Excludes tools opted out
+ * of the filestore.
  */
 export const extractConversationToolResults = (
   conversation: ConversationRound[]
-): ToolCallWithResults[] => {
-  const toolCalls: ToolCallWithResults[] = [];
+): ToolCallWithResult[] => {
+  const toolCalls: ToolCallWithResult[] = [];
   for (const round of conversation) {
     const calls = round.steps
       .filter(isToolCallStep)
-      .filter((step) => !isExcludedFromFilestore(step.tool_id))
-      .map<ToolCallWithResults>((step) => ({
-        tool_call_id: step.tool_call_id,
-        tool_id: step.tool_id,
-        params: step.params,
-        results: step.results,
-      }));
+      .filter((step) => !isExcludedFromFilestore(step.tool_id));
     toolCalls.push(...calls);
   }
   return toolCalls;

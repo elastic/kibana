@@ -6,6 +6,7 @@
  */
 
 import type { ToolResult } from '@kbn/agent-builder-common/tools';
+import type { ToolCallWithResult } from '@kbn/agent-builder-common';
 import type { FileEntry } from './filestore';
 import type { FileEntryAccessor } from './file_entry_accessor';
 
@@ -17,33 +18,19 @@ import type { FileEntryAccessor } from './file_entry_accessor';
 export interface ToolResultStore extends FileEntryAccessor {
   has(resultId: string): boolean;
   get(resultId: string): ToolResult;
-  /**
-   * Look up the VFS entry for a given tool result id. The returned entry's `path`
-   * is mount-relative (relative to the `/tool_calls` mount); prefix
-   * `MOUNT_POINTS.toolCalls` to obtain the agent-visible path.
-   */
   getEntryByResultId(toolResultId: string): Promise<FileEntry | undefined>;
 }
 
 /**
- * Writable version of ToolResultStore, used internally by the runner/agent
+ * Writable version of ToolResultStore, used internally by the runner/agent.
+ *
+ * `add` takes a whole tool call (`ToolCallWithResult`) so the store can write the call's
+ * `meta.json` plus its result file(s) in a single pass; it only reads `tool_call_id`,
+ * `tool_id`, `params` and `results`.
  */
 export interface WritableToolResultStore extends ToolResultStore {
-  add(toolCall: ToolCallWithResults): void;
+  add(toolCall: ToolCallWithResult): void;
   asReadonly(): ToolResultStore;
-}
-
-/**
- * Per-tool-call input for {@link WritableToolResultStore.add}. The store writes the
- * call's `meta.json` plus its result file(s) in a single pass, so it needs the whole
- * call at once. Same field set as `ToolCallWithResult` from `@kbn/agent-builder-common`,
- * declared independently so the store interface owns its own contract.
- */
-export interface ToolCallWithResults {
-  tool_call_id: string;
-  tool_id: string;
-  params: Record<string, unknown>;
-  results: ToolResult[];
 }
 
 export interface ToolResultWithMeta {
