@@ -195,6 +195,8 @@ export class WaitForApprovalStepImpl implements NodeImplementation {
       return;
     }
 
+    await this.invalidateExternalResumeApiKeyIfPresent();
+
     resumeHitlWaitStep({
       stepExecutionRuntime: this.stepExecutionRuntime,
       workflowRuntime: this.workflowRuntime,

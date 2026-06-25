@@ -184,6 +184,43 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
   });
 
+  it('invalidates the external resume API key on in-app resume', async () => {
+    const invalidateAsInternalUser = jest.fn().mockResolvedValue(undefined);
+    dependencies = {
+      spaceId: 'default',
+      coreStart: {
+        security: {
+          authc: {
+            apiKeys: { invalidateAsInternalUser },
+          },
+        },
+      },
+    } as unknown as ContextDependencies;
+
+    mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
+    (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+      input: { externalResumeApiKeyId: 'api-key-id' },
+    };
+    mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+      id: 'exec-abc',
+      context: { resumeInput: { approved: true }, resumedBy: 'user-1' },
+    } as unknown as ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>);
+
+    underTest = new WaitForApprovalStepImpl(
+      node,
+      mockStepExecutionRuntime,
+      mockWorkflowRuntime,
+      workflowLogger,
+      connectorExecutor,
+      dependencies
+    );
+
+    await underTest.run();
+
+    expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
+    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalled();
+  });
+
   it('records external api key responder on resume', async () => {
     mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
     mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
