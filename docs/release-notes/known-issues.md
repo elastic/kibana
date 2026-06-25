@@ -8,21 +8,21 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
-::::{dropdown} Canvas Autoplay stops advancing after one page.
+::::{dropdown} Canvas autoplay stops advancing after one page
 
 Applies to: {{stack}} 9.3.6
 
 **Details**
 
-Multipage Canvas visualizations stop advancing after one page when in autoplay mode
+Multipage Canvas visualizations stop advancing after one page when in autoplay mode.
 
 **Workaround**
 
-Manually advance to the next page or upgrade to 9.3.7 or later.
+Manually advance to the next page.
 
 **Resolved**
 
-This issue is resolved in 9.3.7. 
+This issue is resolved in 9.3.7.
 
 ::::
 
