@@ -7,12 +7,14 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { AlertingV2AccessPage } from './alerting_v2_access_page';
 import { ComposeDiscoverPage } from './compose_discover_page';
 import { DiscoverAppMenu } from './discover_app_menu';
 import { ExecutionHistoryPage } from './execution_history_page';
 import { RuleFormPage } from './rule_form_page';
 import { RulesListPage } from './rules_list_page';
 
+export { AlertingV2AccessPage } from './alerting_v2_access_page';
 export { ComposeDiscoverPage } from './compose_discover_page';
 export { DiscoverAppMenu } from './discover_app_menu';
 export { ExecutionHistoryPage } from './execution_history_page';
@@ -20,6 +22,7 @@ export { RuleFormPage } from './rule_form_page';
 export { RulesListPage } from './rules_list_page';
 
 export type AlertingPageObjects = PageObjects & {
+  alertingV2Access: AlertingV2AccessPage;
   composeDiscover: ComposeDiscoverPage;
   discoverAppMenu: DiscoverAppMenu;
   executionHistory: ExecutionHistoryPage;
@@ -35,6 +38,7 @@ export const extendPageObjects = (
 
   return {
     ...pageObjects,
+    alertingV2Access: createLazyPageObject(AlertingV2AccessPage, page),
     composeDiscover: createLazyPageObject(ComposeDiscoverPage, page),
     discoverAppMenu,
     executionHistory: createLazyPageObject(ExecutionHistoryPage, page),
