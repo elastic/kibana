@@ -39,15 +39,19 @@ export const applyExcludedDataTiersToParams = <TParams extends estypes.SearchReq
     return params;
   }
 
-  const { query } = params;
-  // The spread only replaces `query` with a valid `QueryDslQueryContainer`, so
-  // the result is still a `TParams`; TS cannot infer that through a generic spread.
-  return {
-    ...params,
-    query: {
-      bool: {
-        filter: [...(query ? [query] : []), ...excludeTiersQuery(excludedDataTiers)],
-      },
+  // 8.19 callers issue the legacy request-body shape (`{ index, body: { query } }`),
+  // while a few pass a flat `{ index, query }`. Wrap whichever query is present so the
+  // `_tier` exclusion is combined with the real query instead of being appended next to it.
+  const { body } = params as { body?: { query?: estypes.QueryDslQueryContainer } };
+  const originalQuery = body?.query ?? params.query;
+
+  const query: estypes.QueryDslQueryContainer = {
+    bool: {
+      filter: [...(originalQuery ? [originalQuery] : []), ...excludeTiersQuery(excludedDataTiers)],
     },
-  } as TParams;
+  };
+
+  // The spread only replaces `query` with a valid `QueryDslQueryContainer`, so the
+  // result is still a `TParams`; TS cannot infer that through a generic spread.
+  return (body ? { ...params, body: { ...body, query } } : { ...params, query }) as TParams;
 };

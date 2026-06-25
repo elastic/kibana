@@ -84,6 +84,43 @@ describe('excluded data tiers (client)', () => {
       });
     });
 
+    it('wraps body.query for the 8.19 request-body shape used by the hooks', () => {
+      setExcludedTiers(['data_frozen']);
+
+      expect(
+        applyExcludedDataTiersToParams({
+          index: 'synthetics-*',
+          body: { size: 1, query: matchAll },
+        })
+      ).toEqual({
+        index: 'synthetics-*',
+        body: {
+          size: 1,
+          query: {
+            bool: {
+              filter: [matchAll, { bool: { must_not: [{ terms: { _tier: ['data_frozen'] } }] } }],
+            },
+          },
+        },
+      });
+    });
+
+    it('builds a filter-only body.query when body has no original query', () => {
+      setExcludedTiers(['data_frozen']);
+
+      expect(applyExcludedDataTiersToParams({ index: 'synthetics-*', body: { size: 0 } })).toEqual({
+        index: 'synthetics-*',
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [{ bool: { must_not: [{ terms: { _tier: ['data_frozen'] } }] } }],
+            },
+          },
+        },
+      });
+    });
+
     it('preserves other params (size, aggs) while wrapping the query', () => {
       setExcludedTiers(['data_frozen']);
       const aggs = { total: { cardinality: { field: 'monitor.id' } } };
