@@ -74,7 +74,14 @@ describe('discoverPerTypeSourceIndices', () => {
       expect.objectContaining({ name: `logs-*,${ALERTS_INDEX}` })
     );
     expect(esClient.fieldCaps).toHaveBeenCalledWith(
-      expect.objectContaining({ index: ['logs-*', ALERTS_INDEX], types: ['keyword'] })
+      expect.objectContaining({
+        index: ['logs-*', ALERTS_INDEX],
+        types: ['keyword'],
+        // Required for per-index presence: without it ES omits `indices` for
+        // fields that are keyword wherever they exist, and discovery over-
+        // qualifies every source for every entity type.
+        include_unmapped: true,
+      })
     );
   });
 
@@ -162,6 +169,57 @@ describe('discoverPerTypeSourceIndices', () => {
     expect(sources.user).toEqual([dataStream]);
     expect(sources.host).toEqual([dataStream]);
     expect(sources.service).toEqual([]);
+  });
+
+  it('qualifies disjoint sources per entity type so engines do not all scan the same indices', async () => {
+    // Regression for the `include_unmapped: false` bug: when each identity field is
+    // keyword in only a subset of the scope, `field_caps` (with `include_unmapped:
+    // true`) reports per-field `indices`, so each engine must qualify only the
+    // sources that actually carry its identity fields — not every source.
+    const userStream = 'logs-okta.system-default';
+    const userBacking = '.ds-logs-okta.system-default-2024.01.01-000001';
+    const genericStream = 'logs-entityanalytics_okta.entity-default';
+    const genericBacking = '.ds-logs-entityanalytics_okta.entity-default-2024.01.01-000001';
+    const serviceStream = 'logs-apm.service-default';
+    const serviceBacking = '.ds-logs-apm.service-default-2024.01.01-000001';
+    const endpointStream = 'logs-endpoint.events-default';
+    const endpointBacking = '.ds-logs-endpoint.events-default-2024.01.01-000001';
+
+    const esClient = buildEsClient(
+      {
+        data_streams: [
+          { name: userStream, backing_indices: [userBacking] },
+          { name: genericStream, backing_indices: [genericBacking] },
+          { name: serviceStream, backing_indices: [serviceBacking] },
+          { name: endpointStream, backing_indices: [endpointBacking] },
+        ],
+      },
+      {
+        indices: [userBacking, genericBacking, serviceBacking, endpointBacking],
+        fields: {
+          'user.name': { keyword: { type: 'keyword', indices: [userBacking, endpointBacking] } },
+          'host.name': { keyword: { type: 'keyword', indices: [endpointBacking] } },
+          'service.name': { keyword: { type: 'keyword', indices: [serviceBacking] } },
+          'entity.id': { keyword: { type: 'keyword', indices: [genericBacking] } },
+        },
+      }
+    );
+
+    const { sources } = await discoverPerTypeSourceIndices({
+      esClient,
+      namespace: NAMESPACE,
+      logger,
+    });
+
+    expect(sources.user).toEqual([userStream, endpointStream]);
+    expect(sources.host).toEqual([endpointStream]);
+    expect(sources.service).toEqual([serviceStream]);
+    expect(sources.generic).toEqual([genericStream]);
+
+    // The bug symptom was all four engines resolving to the identical full set.
+    expect(sources.generic).not.toEqual(sources.service);
+    expect(sources.generic).not.toEqual(sources.user);
+    expect(sources.host).not.toEqual(sources.user);
   });
 
   it('returns empty sources (and logs a warning) when Elasticsearch fails', async () => {

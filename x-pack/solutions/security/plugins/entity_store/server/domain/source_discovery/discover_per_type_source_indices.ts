@@ -44,8 +44,11 @@ interface DiscoverParams {
  * Two Elasticsearch calls, no LLM and no Streams plugin:
  *  1. `resolveIndex` over the scope → reverse map from the concrete indices
  *     `field_caps` reports back to clean source names.
- *  2. `field_caps` (type-gated to `keyword`) over the same scope → which
- *     concrete indices carry each identity field.
+ *  2. `field_caps` (type-gated to `keyword`, `include_unmapped: true`) over the
+ *     same scope → which concrete indices carry each identity field. The
+ *     `include_unmapped` flag is what makes presence per-index: it forces ES to
+ *     report the exact indices where a field is keyword instead of collapsing to
+ *     "present everywhere" (which would qualify every source for every type).
  *
  * A source qualifies for an entity type when it carries at least one of that
  * type's identity fields. Rollover drift is tolerated: a source qualifies if
@@ -83,7 +86,15 @@ export const discoverPerTypeSourceIndices = async ({
         index: scope,
         fields: [...ALL_IDENTITY_FIELDS],
         types: [...SAFE_IDENTITY_FIELD_TYPES],
-        include_unmapped: false,
+        // Must stay `true`. `field_caps` only fills a type's `indices` array when
+        // the field spans more than one type-family across the scope. With this
+        // `false`, "absent from an index" is not a family, so a field that is
+        // `keyword` wherever it exists looks single-family and ES OMITS `indices`
+        // — indistinguishable from "present everywhere". Discovery then over-
+        // qualifies every source for every type (see the `indices`-omitted
+        // fallback below). `true` adds an `unmapped` family for indices lacking
+        // the field, forcing ES to report exactly the indices where it is keyword.
+        include_unmapped: true,
         ignore_unavailable: true,
         allow_no_indices: true,
         expand_wildcards: 'open',
@@ -114,8 +125,10 @@ export const discoverPerTypeSourceIndices = async ({
       if (!keywordCap) {
         continue;
       }
-      // `indices` is omitted when the field has uniform caps across every matched
-      // index — i.e. it is keyword everywhere, so fall back to all matched indices.
+      // With `include_unmapped: true`, `keyword.indices` is populated whenever the
+      // field is keyword in only a subset of the scope (the rest form the `unmapped`
+      // family). An omitted `indices` therefore genuinely means "keyword in every
+      // in-scope index" — only then is the fall back to all matched indices correct.
       const concreteIndices =
         keywordCap.indices !== undefined ? castArray(keywordCap.indices) : topLevelConcrete;
       for (const concreteIndex of concreteIndices) {
