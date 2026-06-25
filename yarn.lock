@@ -6417,6 +6417,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-federation-plugin@link:x-pack/platform/plugins/private/data_federation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""
@@ -7142,10 +7146,6 @@
   uid ""
 
 "@kbn/fec-alerts-test-plugin@link:x-pack/platform/test/functional_execution_context/plugins/alerts":
-  version "0.0.0"
-  uid ""
-
-"@kbn/data-federation-plugin@link:x-pack/platform/plugins/private/data_federation":
   version "0.0.0"
   uid ""
 
