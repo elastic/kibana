@@ -212,7 +212,12 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
   test('should call update with a Painless script (not a doc) and retry_on_conflict', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
-    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1', 'alert-2']);
+    const expiredInstances = [
+      { instanceId: 'alert-1', snoozedAt: '2024-01-01T00:00:00.000Z' },
+      { instanceId: 'alert-2', snoozedAt: '2024-01-02T00:00:00.000Z' },
+    ];
+
+    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, expiredInstances);
 
     expect(esClient.update).toHaveBeenCalledTimes(1);
     expect(esClient.update).toHaveBeenCalledWith(
@@ -222,7 +227,7 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
         retry_on_conflict: 3,
         script: expect.objectContaining({
           lang: 'painless',
-          params: { expiredInstanceIds: ['alert-1', 'alert-2'] },
+          params: { expired: expiredInstances },
         }),
       })
     );
@@ -236,9 +241,12 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
   test('should pass ignore: [404] when ignore404 option is set', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
-    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1'], {
-      ignore404: true,
-    });
+    await atomicRemoveSnoozedInstancesWithEs(
+      esClient,
+      MockRuleId,
+      [{ instanceId: 'alert-1', snoozedAt: '2024-01-01T00:00:00.000Z' }],
+      { ignore404: true }
+    );
 
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({ retry_on_conflict: 3 }),
@@ -249,9 +257,12 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
   test('should include the refresh option when set', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
-    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1'], {
-      refresh: 'wait_for',
-    });
+    await atomicRemoveSnoozedInstancesWithEs(
+      esClient,
+      MockRuleId,
+      [{ instanceId: 'alert-1', snoozedAt: '2024-01-01T00:00:00.000Z' }],
+      { refresh: 'wait_for' }
+    );
 
     expect(esClient.update).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }));
   });
@@ -259,13 +270,15 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
   test('should not include refresh when the option is not set', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
-    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1']);
+    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, [
+      { instanceId: 'alert-1', snoozedAt: '2024-01-01T00:00:00.000Z' },
+    ]);
 
     const [callArgs] = esClient.update.mock.calls[0];
     expect(callArgs).not.toHaveProperty('refresh');
   });
 
-  test('should work with an empty expiredInstanceIds array (idempotent noop)', async () => {
+  test('should work with an empty expired array (idempotent noop)', async () => {
     esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
 
     await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, []);
@@ -274,7 +287,7 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         script: expect.objectContaining({
-          params: { expiredInstanceIds: [] },
+          params: { expired: [] },
         }),
       })
     );
@@ -284,8 +297,43 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
     esClient.update.mockRejectedValueOnce(new Error('es error'));
 
     await expect(
-      atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1'])
+      atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, [
+        { instanceId: 'alert-1', snoozedAt: '2024-01-01T00:00:00.000Z' },
+      ])
     ).rejects.toThrowError('es error');
+  });
+
+  test('script params only include the original snoozedAt — re-created snooze with a newer snoozedAt is not targeted', async () => {
+    // Simulate the race: runner decided to expire alert-1 at OLD_SNOOZED_AT,
+    // but between the SO read and this write the user re-snoozed alert-1
+    // (NEW_SNOOZED_AT). The expired array must only reference the original entry.
+    const OLD_SNOOZED_AT = '2024-01-01T00:00:00.000Z';
+    const NEW_SNOOZED_AT = '2024-06-01T00:00:00.000Z';
+
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, [
+      { instanceId: 'alert-1', snoozedAt: OLD_SNOOZED_AT },
+    ]);
+
+    // The script receives only the original (instanceId, snoozedAt) pair.
+    // A concurrent re-snooze entry with NEW_SNOOZED_AT will not match the
+    // Painless anyMatch predicate and will survive the removeIf.
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          params: {
+            expired: [{ instanceId: 'alert-1', snoozedAt: OLD_SNOOZED_AT }],
+          },
+        }),
+      })
+    );
+    // Verify NEW_SNOOZED_AT is not present in the params that drive removal
+    const [callArgs] = esClient.update.mock.calls[0];
+    const expired = (
+      callArgs as unknown as { script: { params: { expired: Array<{ snoozedAt: string }> } } }
+    ).script.params.expired;
+    expect(expired.some((e) => e.snoozedAt === NEW_SNOOZED_AT)).toBe(false);
   });
 });
 

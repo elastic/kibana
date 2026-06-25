@@ -227,10 +227,10 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
-      snoozedInstanceIdsToRemove?: string[];
+      snoozedInstancesToRemove?: Array<{ instanceId: string; snoozedAt: string }>;
     }
   ): Promise<boolean> {
-    const { snoozedInstanceIdsToRemove, ...docAttributes } = attributes;
+    const { snoozedInstancesToRemove, ...docAttributes } = attributes;
     const client = this.context.elasticsearch.client.asInternalUser;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
@@ -251,9 +251,9 @@ export class TaskRunner<
           refresh: false,
         }
       );
-      if (snoozedInstanceIdsToRemove?.length) {
+      if (snoozedInstancesToRemove?.length) {
         // Per-alert snooze expiry is applied via an atomic Painless script.
-        await atomicRemoveSnoozedInstancesWithEs(client, ruleId, snoozedInstanceIdsToRemove, {
+        await atomicRemoveSnoozedInstancesWithEs(client, ruleId, snoozedInstancesToRemove, {
           ignore404: true,
           refresh: false,
         });
@@ -567,11 +567,17 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
-      expiredSnoozedInstanceIds:
+      expiredSnoozedInstances:
         expiredInstances.length > 0 || conditionExpiredInstances.length > 0
           ? [
-              ...expiredInstances.map((i) => i.instanceId),
-              ...conditionExpiredInstances.map((i) => i.instanceId),
+              ...expiredInstances.map((i) => ({
+                instanceId: i.instanceId,
+                snoozedAt: i.snoozedAt,
+              })),
+              ...conditionExpiredInstances.map((i) => ({
+                instanceId: i.instanceId,
+                snoozedAt: i.snoozedAt,
+              })),
             ]
           : undefined,
       ...(expiredInstances.length > 0 || conditionExpiredInstances.length > 0
@@ -793,8 +799,8 @@ export class TaskRunner<
         });
       }
 
-      const expiredSnoozedInstanceIds = isOk(runRuleResult)
-        ? runRuleResult.value.expiredSnoozedInstanceIds
+      const expiredSnoozedInstances = isOk(runRuleResult)
+        ? runRuleResult.value.expiredSnoozedInstances
         : undefined;
       const autoUnsnoozeAudit = isOk(runRuleResult)
         ? runRuleResult.value.autoUnsnoozeAudit
@@ -818,8 +824,8 @@ export class TaskRunner<
           nextRun,
           lastRun: lastRunToRaw(lastRun),
           monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-          ...(expiredSnoozedInstanceIds !== undefined
-            ? { snoozedInstanceIdsToRemove: expiredSnoozedInstanceIds }
+          ...(expiredSnoozedInstances !== undefined
+            ? { snoozedInstancesToRemove: expiredSnoozedInstances }
             : {}),
         });
 

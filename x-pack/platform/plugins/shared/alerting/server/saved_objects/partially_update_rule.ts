@@ -75,22 +75,32 @@ const RuleAttributesAllowedForPartialUpdate = [
   'snoozedInstances',
 ];
 
-// Painless script that atomically removes snoozed instance entries by ID.
-// Using removeIf avoids a full-array replacement
+export interface ExpiredSnoozedInstance {
+  instanceId: string;
+  snoozedAt: string;
+}
+
+// Painless script that atomically removes snoozed instance entries matching
+// both instanceId AND snoozedAt. Matching on snoozedAt prevents a race where
+// the user re-snoozes an alert between the SO read and this post-run write —
+// the new entry has a different snoozedAt and survives the removeIf.
 const REMOVE_SNOOZED_INSTANCES_SCRIPT = `
   if (ctx._source.alert.snoozedInstances != null) {
-    ctx._source.alert.snoozedInstances.removeIf(
-      instance -> params.expiredInstanceIds.contains(instance.instanceId)
+    ctx._source.alert.snoozedInstances.removeIf(instance ->
+      params.expired.stream().anyMatch(e ->
+        e.instanceId == instance.instanceId && e.snoozedAt == instance.snoozedAt
+      )
     );
   }
 `;
 
-// Atomically removes per-alert snooze entries whose IDs are in expiredInstanceIds.
-// Uses retry_on_conflict - removing an already-absent entry is a no-op, retrying on a version conflict is safe.
+// Atomically removes per-alert snooze entries matching the given (instanceId, snoozedAt) pairs.
+// Matching on both fields prevents a concurrent re-snooze from being silently deleted:
+// a freshly created entry has a different snoozedAt and will not be removed.
 export async function atomicRemoveSnoozedInstancesWithEs(
   esClient: ElasticsearchClient,
   id: string,
-  expiredInstanceIds: string[],
+  expiredInstances: ExpiredSnoozedInstance[],
   options: Pick<PartiallyUpdateRuleSavedObjectOptions, 'ignore404' | 'refresh'> = {}
 ): Promise<void> {
   const updateParams = {
@@ -100,7 +110,7 @@ export async function atomicRemoveSnoozedInstancesWithEs(
     script: {
       lang: 'painless' as const,
       source: REMOVE_SNOOZED_INSTANCES_SCRIPT,
-      params: { expiredInstanceIds },
+      params: { expired: expiredInstances },
     },
     ...(options.refresh ? { refresh: options.refresh } : {}),
   };

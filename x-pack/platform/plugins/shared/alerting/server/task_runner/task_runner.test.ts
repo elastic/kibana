@@ -3654,7 +3654,9 @@ describe('Task Runner', () => {
       expect.objectContaining({
         script: expect.objectContaining({
           lang: 'painless',
-          params: { expiredInstanceIds: ['alert-1'] },
+          params: {
+            expired: [{ instanceId: 'alert-1', snoozedAt: '1969-12-01T00:00:00.000Z' }],
+          },
         }),
       }),
       expect.anything()
@@ -3772,7 +3774,9 @@ describe('Task Runner', () => {
       expect.objectContaining({
         script: expect.objectContaining({
           lang: 'painless',
-          params: { expiredInstanceIds: ['alert-1'] },
+          params: {
+            expired: [{ instanceId: 'alert-1', snoozedAt: '1969-12-01T00:00:00.000Z' }],
+          },
         }),
       }),
       expect.anything()
@@ -4041,9 +4045,9 @@ describe('Task Runner', () => {
         script: expect.objectContaining({
           lang: 'painless',
           params: {
-            expiredInstanceIds: expect.arrayContaining([
-              'alert-expired-time',
-              'alert-condition-change',
+            expired: expect.arrayContaining([
+              { instanceId: 'alert-expired-time', snoozedAt: '1969-12-01T00:00:00.000Z' },
+              { instanceId: 'alert-condition-change', snoozedAt: '1969-12-01T00:00:00.000Z' },
             ]),
           },
         }),
@@ -4162,7 +4166,9 @@ describe('Task Runner', () => {
       expect.objectContaining({
         script: expect.objectContaining({
           lang: 'painless',
-          params: { expiredInstanceIds: ['alert-expired'] },
+          params: {
+            expired: [{ instanceId: 'alert-expired', snoozedAt: '1969-12-01T00:00:00.000Z' }],
+          },
         }),
       }),
       expect.anything()

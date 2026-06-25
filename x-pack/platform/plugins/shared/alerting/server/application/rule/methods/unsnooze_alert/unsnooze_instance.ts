@@ -84,6 +84,9 @@ async function unsnoozeInstanceWithOCC(
     return;
   }
 
+  // Only the rule saved object is updated here. The `kibana.alert.snoozed` field
+  // in alert-as-data documents is eventually consistent and will reflect the
+  // unsnooze only after the next rule execution.
   await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },

@@ -160,6 +160,12 @@ async function snoozeAlertInstanceWithOCC(
     snoozeSnapshot,
   });
 
+  // Only the rule saved object is updated here. The `kibana.alert.snoozed` field
+  // in alert-as-data documents is eventually consistent: it is written by the task
+  // runner on each execution using the rule SO as its source of truth, so it will
+  // reflect the new snooze state only after the next rule run. Consumers querying
+  // .alerts-* indexes directly may observe stale `kibana.alert.snoozed` values until
+  // the next execution.
   await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },

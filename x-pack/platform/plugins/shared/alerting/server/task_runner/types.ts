@@ -79,9 +79,10 @@ export interface RunRuleResult {
   metrics: RuleRunMetrics;
   state: RuleTaskState;
   /**
-   * Instance IDs of per-alert snooze entries that expired (TTL or condition met) during this run.
+   * Per-alert snooze entries that expired (TTL or condition met) during this run,
+   * as (instanceId, snoozedAt) pairs for identity-aware atomic removal.
    */
-  expiredSnoozedInstanceIds?: string[];
+  expiredSnoozedInstances?: Array<{ instanceId: string; snoozedAt: string }>;
   /**
    * Audit context for `alert_auto_unsnooze`
    */

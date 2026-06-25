@@ -32,6 +32,7 @@ export {
   atomicRemoveSnoozedInstancesWithEs,
   partiallyUpdateRule,
   partiallyUpdateRuleWithEs,
+  type ExpiredSnoozedInstance,
 } from './partially_update_rule';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import {
