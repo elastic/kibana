@@ -247,17 +247,125 @@ const tryReadFile = (absPath: string): string | undefined => {
 
 const escapeForRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const extractArgIdentifiers = (source: string, fnName: string, argIndex = 0): string[] => {
-  const identifier = '([A-Za-z_$][A-Za-z0-9_$]*)';
-  const args = Array.from({ length: argIndex + 1 }, (_, index) =>
-    index === argIndex ? identifier : '[A-Za-z_$][A-Za-z0-9_$]*'
-  );
-  const re = new RegExp(`\\b${fnName}\\s*\\(\\s*${args.join('\\s*,\\s*')}\\s*[,)]`, 'g');
-  const results: string[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(source)) !== null) {
-    results.push(m[1]);
+const IDENTIFIER_RE = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
+const skipWhitespace = (source: string, start: number): number => {
+  let index = start;
+  while (/\s/.test(source[index] ?? '')) {
+    index += 1;
   }
+  return index;
+};
+
+/** Skips a balanced `<...>` type-argument list when present; otherwise a no-op. */
+const skipTypeArguments = (source: string, start: number): number => {
+  if (source[start] !== '<') {
+    return start;
+  }
+
+  let index = start;
+  let depth = 0;
+  while (index < source.length) {
+    const char = source[index];
+    index += 1;
+    if (char === '<') {
+      depth += 1;
+    } else if (char === '>') {
+      depth -= 1;
+      if (depth === 0) {
+        break;
+      }
+    }
+  }
+  return index;
+};
+
+/** Advances past a string/template literal, returning the index of its closing quote. */
+const skipStringLiteral = (source: string, start: number): number => {
+  const quote = source[start];
+  let index = start + 1;
+  while (index < source.length) {
+    const char = source[index];
+    if (char === '\\') {
+      index += 2;
+      continue;
+    }
+    if (char === quote) {
+      return index;
+    }
+    index += 1;
+  }
+  return index;
+};
+
+/** Returns the trimmed `argIndex`-th argument of the call whose `(` is at `parenIndex`. */
+const readCallArgument = (
+  source: string,
+  parenIndex: number,
+  argIndex: number
+): string | undefined => {
+  let depth = 0;
+  let current = 0;
+  let argStart = parenIndex + 1;
+
+  for (let index = parenIndex + 1; index < source.length; index += 1) {
+    const char = source[index];
+
+    if (char === "'" || char === '"' || char === '`') {
+      index = skipStringLiteral(source, index);
+      continue;
+    }
+
+    if (char === '(' || char === '[' || char === '{') {
+      depth += 1;
+    } else if (char === ')' || char === ']' || char === '}') {
+      if (char === ')' && depth === 0) {
+        return current === argIndex ? source.slice(argStart, index).trim() : undefined;
+      }
+      depth -= 1;
+    } else if (char === ',' && depth === 0) {
+      if (current === argIndex) {
+        return source.slice(argStart, index).trim();
+      }
+      current += 1;
+      argStart = index + 1;
+    }
+  }
+
+  return undefined;
+};
+
+/**
+ * Collects the identifiers passed at `argIndex` to every bare `fnName(...)` call.
+ *
+ * Tolerates generic type arguments (`fnName<T>(...)`) and arbitrary other
+ * arguments (member expressions, nested calls, strings), but only captures the
+ * target argument when it is a bare identifier — so `fnName(this.container, Token)`
+ * yields `Token`, while `fnName(make(), x)` at index 0 yields nothing. Member
+ * calls (`obj.fnName(...)`) are intentionally excluded; these helpers are imported
+ * and invoked bare. Token resolution downstream discards anything not bound to a
+ * `@kbn/...` import, so over-capture is harmless; under-capture would silently
+ * drop a contract, which the unit tests pin against.
+ */
+export const extractArgIdentifiers = (source: string, fnName: string, argIndex = 0): string[] => {
+  const nameRe = new RegExp(`(?<![\\w$.])${escapeForRegExp(fnName)}\\b`, 'g');
+  const results: string[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = nameRe.exec(source)) !== null) {
+    let index = skipWhitespace(source, match.index + fnName.length);
+    index = skipTypeArguments(source, index);
+    index = skipWhitespace(source, index);
+    if (source[index] !== '(') {
+      continue;
+    }
+
+    const arg = readCallArgument(source, index, argIndex);
+    if (arg !== undefined && IDENTIFIER_RE.test(arg)) {
+      results.push(arg);
+    }
+  }
+
   return results;
 };
 
@@ -431,41 +539,11 @@ export const diGlobalsRule = PackageRule.create('diGlobals', {
       extensionPoints: { hosts: [], contributes: [] },
     };
 
-    for (const entryRel of ['server/index.ts', 'public/index.ts']) {
-      const entrySource = tryReadFile(Path.join(pkg.directory, entryRel));
-      if (!entrySource) continue;
-
-      for (const name of resolveTokenNames(
-        extractArgIdentifiers(entrySource, 'provide'),
-        entrySource,
-        'service'
-      )) {
-        if (name.split('.')[0] === pluginId) {
-          nextValues.services.provides.push(name);
-        }
-      }
-
-      for (const name of resolveTokenNames(
-        extractArgIdentifiers(entrySource, 'host'),
-        entrySource,
-        'extensionPoint'
-      )) {
-        if (name.split('.')[0] === pluginId) {
-          nextValues.extensionPoints.hosts.push(name);
-        }
-      }
-
-      for (const name of resolveTokenNames(
-        extractArgIdentifiers(entrySource, 'contribute'),
-        entrySource,
-        'extensionPoint'
-      )) {
-        if (name.split('.')[0] !== pluginId) {
-          nextValues.extensionPoints.contributes.push(name);
-        }
-      }
-    }
-
+    // `provide`/`host`/`contribute` are scanned across every file — not just the
+    // `server/index.ts`/`public/index.ts` entries — because the `declare(...)` body
+    // is encouraged to live in a separate cheap-to-import module that the entry
+    // re-exports as `services`. Scanning all files keeps this symmetric with the
+    // `consumes` scan and avoids silently empty `provides`/`hosts`/`contributes`.
     for (const file of this.getAllFiles()) {
       if (!file.isJsTsCode()) continue;
       if (
@@ -478,6 +556,36 @@ export const diGlobalsRule = PackageRule.create('diGlobals', {
 
       const source = tryReadFile(file.abs);
       if (!source) continue;
+
+      for (const name of resolveTokenNames(
+        extractArgIdentifiers(source, 'provide'),
+        source,
+        'service'
+      )) {
+        if (name.split('.')[0] === pluginId) {
+          nextValues.services.provides.push(name);
+        }
+      }
+
+      for (const name of resolveTokenNames(
+        extractArgIdentifiers(source, 'host'),
+        source,
+        'extensionPoint'
+      )) {
+        if (name.split('.')[0] === pluginId) {
+          nextValues.extensionPoints.hosts.push(name);
+        }
+      }
+
+      for (const name of resolveTokenNames(
+        extractArgIdentifiers(source, 'contribute'),
+        source,
+        'extensionPoint'
+      )) {
+        if (name.split('.')[0] !== pluginId) {
+          nextValues.extensionPoints.contributes.push(name);
+        }
+      }
 
       const serviceUsage = [
         ...extractArgIdentifiers(source, 'getService', 1),

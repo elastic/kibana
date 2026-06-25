@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractTokenMetadataFromSource, mergeGlobals } from './di_globals';
+import { extractArgIdentifiers, extractTokenMetadataFromSource, mergeGlobals } from './di_globals';
 
 describe('extractTokenMetadataFromSource', () => {
   it('extracts tokens from direct imports bound to a local factory variable', () => {
@@ -139,5 +139,58 @@ describe('mergeGlobals', () => {
       provides: ['me.A', 'me.B'],
       consumes: ['other.Shared'],
     });
+  });
+});
+
+describe('extractArgIdentifiers', () => {
+  it('captures a bare identifier at the default (first) argument position', () => {
+    expect(extractArgIdentifiers(`provide(MyToken, factory);`, 'provide')).toEqual(['MyToken']);
+  });
+
+  it('captures the requested argument index', () => {
+    expect(extractArgIdentifiers(`getService(container, MyToken);`, 'getService', 1)).toEqual([
+      'MyToken',
+    ]);
+  });
+
+  it('tolerates generic type arguments before the call', () => {
+    expect(extractArgIdentifiers(`getService<MyType>(container, MyToken);`, 'getService', 1)).toEqual(
+      ['MyToken']
+    );
+  });
+
+  it('tolerates a member expression in a non-target argument position', () => {
+    expect(extractArgIdentifiers(`getService(this.container, MyToken);`, 'getService', 1)).toEqual([
+      'MyToken',
+    ]);
+  });
+
+  it('tolerates a nested call in a non-target argument position', () => {
+    expect(extractArgIdentifiers(`getService(wrap(this.c), MyToken);`, 'getService', 1)).toEqual([
+      'MyToken',
+    ]);
+  });
+
+  it('collects every matching call', () => {
+    const source = `provide(TokenA, a); provide(TokenB, b);`;
+    expect(extractArgIdentifiers(source, 'provide')).toEqual(['TokenA', 'TokenB']);
+  });
+
+  it('matches a call even when the helper is also destructured', () => {
+    const source = `const { provide, host } = api; provide(MyToken, factory);`;
+    expect(extractArgIdentifiers(source, 'provide')).toEqual(['MyToken']);
+  });
+
+  it('ignores member calls (obj.fn(...)) — these helpers are invoked bare', () => {
+    expect(extractArgIdentifiers(`registry.provide(MyToken);`, 'provide')).toEqual([]);
+  });
+
+  it('does not capture a non-identifier (call/member) in the target position', () => {
+    expect(extractArgIdentifiers(`useService(makeToken());`, 'useService')).toEqual([]);
+    expect(extractArgIdentifiers(`getService(container, this.token);`, 'getService', 1)).toEqual([]);
+  });
+
+  it('does not capture string-literal arguments as identifiers', () => {
+    expect(extractArgIdentifiers(`useService('literal');`, 'useService')).toEqual([]);
   });
 });
