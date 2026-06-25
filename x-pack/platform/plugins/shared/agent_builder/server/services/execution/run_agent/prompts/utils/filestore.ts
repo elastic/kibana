@@ -28,6 +28,11 @@ export const getFileSystemInstructions = ({
   ## FILESYSTEM (VFS)
 
   You have access to a virtual filesystem with the following root folders:
+  - /workspace
+  - /tool_calls
+  - /skills
+  - /tmp
+  - /home/user
 
   #### /workspace
 
@@ -47,7 +52,7 @@ export const getFileSystemInstructions = ({
 
   #### /tmp and /home/user
 
-  ephemeral folders — not persisted between rounds.
+  Ephemeral folders — not persisted between rounds.
 
   ### VFS tools
 
