@@ -23,7 +23,7 @@ import type {
   AskUserQuestionAnswer,
 } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
-import type { ConversationAccessControl } from './access_control';
+import type { ConversationAccessControl } from './access_control/types';
 import type { RoundState } from './round_state';
 
 /**
