@@ -618,17 +618,33 @@ class SmlIndexerImpl implements SmlIndexer {
       return (response.count ?? 0) > 0;
     } catch (error) {
       if (isNotFoundError(error)) {
+        // "Index doesn't exist yet" is unambiguous: there *cannot* be a
+        // manual entry yet, so first-write crawls aren't blocked by this
+        // path. Distinct from the generic catch below.
         return false;
       }
-      // On unexpected errors, fail-open (treat as no manual entry) and log: the safety
-      // net is best-effort. Real protection lives at the document level via the
-      // HTTP upsert route. Errors here should not prevent the crawl from progressing.
+      // On unexpected ES errors, fail-CLOSED (assume a manual entry
+      // exists, so the crawler does NOT overwrite). The previous
+      // fail-OPEN behaviour returned `false` here, which meant a
+      // transient blip during the manual-entry probe let the crawler
+      // proceed to `deleteChunks` + bulk write and silently destroy an
+      // admin-curated `'manual'` entry. Admins use manual entries to
+      // pin curated context (or to suppress a sensitive resource from
+      // surfacing into LLM context), so an invisible failure mode that
+      // destroys that intent is unacceptable.
+      //
+      // The trade-off: a transient ES error now causes the crawler to
+      // *skip* this origin for one cycle. That's the correct default —
+      // a skipped crawl is recoverable on the next cycle, a deleted
+      // manual entry is not. Callers that genuinely need to clobber a
+      // manual entry (e.g. operator-driven force re-crawl) can pass
+      // `force: true` to `indexAttachment`, which bypasses this probe.
       this.logger.warn(
-        `SML indexer: hasManualEntry check failed for origin '${originUri}': ${
+        `SML indexer: hasManualEntry check failed for origin '${originUri}'; treating as manual-entry-present (fail-closed) to avoid clobbering curated content. Pass force=true to override on the next cycle: ${
           (error as Error).message
         }`
       );
-      return false;
+      return true;
     }
   }
 

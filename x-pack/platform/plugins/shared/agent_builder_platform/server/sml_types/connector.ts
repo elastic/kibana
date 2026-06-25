@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-context-layer-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -85,17 +86,24 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
     },
 
     /**
-     * Connector chunks are gated by the cluster-level `action:execute` Kibana
-     * privilege rather than a saved-object `get` privilege — agents need
-     * permission to *execute* a connector for it to be useful context. This
-     * is the same gate the connectors API checks before invoking the
-     * connector, so chunks surface only to users who could actually use the
-     * referenced connector.
+     * Connector chunks are gated by `saved_object:action/get` — the same
+     * privilege the actions plugin's feature config exposes as
+     * `savedObject.read: [ACTION_SAVED_OBJECT_TYPE]` and that the
+     * connector-execution route requires before invoking a connector
+     * (see `x-pack/platform/plugins/shared/actions/server/feature.ts`).
+     *
+     * Earlier iterations used the bare string `'action:execute'`, which
+     * is **not** a registered Kibana privilege. The actions plugin
+     * doesn't expose a cluster-level "execute" privilege — execution
+     * authority is derived from saved-object read access on the action
+     * saved object plus saved-object write access on `action_task_params`.
+     * Stamping `'action:execute'` made the chunk un-resolvable by
+     * `checkPrivilegesDynamicallyWithRequest` for every user, so
+     * connector chunks were silently invisible to everyone, including
+     * superusers. Using `kibanaSavedObjectPermissions` aligns the gate
+     * with what the actions plugin actually validates.
      */
-    getPermissions: () => ({
-      kibana: { privileges: [{ name: 'action:execute' }] },
-      elasticsearch: { indices: [] },
-    }),
+    getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
 
     toAttachment: async (item, context) => {
       try {

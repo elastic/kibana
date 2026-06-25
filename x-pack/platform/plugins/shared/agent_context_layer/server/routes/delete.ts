@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlDeleteHttpResponse } from '../../common/http_api/sml';
-import { smlByOriginIdPath } from '../../common/constants';
+import { smlByOriginIdPath, MAX_SML_ORIGIN_ID_LENGTH } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import { isVisibleInSpace } from '../services/sml/sml_service';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
@@ -47,7 +47,7 @@ export const registerDeleteRoute = ({
       path: smlByOriginIdPath,
       validate: {
         params: schema.object({
-          originId: schema.string({ minLength: 1 }),
+          originId: schema.string({ minLength: 1, maxLength: MAX_SML_ORIGIN_ID_LENGTH }),
         }),
       },
       options: { access: 'internal' },
@@ -98,18 +98,27 @@ export const registerDeleteRoute = ({
         // could in theory reuse the same id under two types — dispatch
         // a delete per distinct type so cleanup is exhaustive instead
         // of leaving the second type's chunks dangling.
+        //
+        // The deletes are independent (each is scoped by `(origin_id,
+        // attachmentType)`) so `Promise.all` is safe and meaningfully
+        // faster than a serial loop on every origin reuse case — the
+        // typical pathological example is a corpus_entry id reused as
+        // a notes type during migration, which currently doubles
+        // route latency for no reason.
         const types = new Set(existing.map((d) => d.type));
-        for (const attachmentType of types) {
-          await sml.deleteAttachment({
-            originId,
-            attachmentType,
-            spaces: [spaceId],
-            esClient: esClient.asInternalUser,
-            savedObjectsClient,
-            logger,
-            ingestionMethod: 'all',
-          });
-        }
+        await Promise.all(
+          Array.from(types, (attachmentType) =>
+            sml.deleteAttachment({
+              originId,
+              attachmentType,
+              spaces: [spaceId],
+              esClient: esClient.asInternalUser,
+              savedObjectsClient,
+              logger,
+              ingestionMethod: 'all',
+            })
+          )
+        );
 
         const body: SmlDeleteHttpResponse = { origin_id: originId, deleted: true };
         return response.ok({ body });

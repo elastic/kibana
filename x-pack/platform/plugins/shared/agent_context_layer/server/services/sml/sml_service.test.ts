@@ -2272,6 +2272,43 @@ describe('SmlService', () => {
         expect.stringContaining('SML findByOriginId failed')
       );
     });
+
+    it('logs a warning when total chunks exceed MAX_CHUNKS_PER_ORIGIN', async () => {
+      // `track_total_hits: true` makes ES report the real count even
+      // when it exceeds the `size` window. The helper exposes that
+      // signal via a log line so operators can spot a producer that
+      // has gone off the rails (or a typo collapsing many distinct
+      // origins into one). The returned chunks are still useful — the
+      // per-space lookup is informational, not security-critical (see
+      // findByOriginIdAcrossSpaces for the guard-side case).
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 1500, relation: 'eq' },
+          hits: [],
+        },
+      } as any);
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      await smlService.findByOriginId({
+        originId: 'overfull',
+        spaceId: 'default',
+        esClient: scopedClient,
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("origin 'overfull' has 1500 chunks")
+      );
+
+      // The query also opts into `track_total_hits` and uses the
+      // shared `size` constant — pin both so a future change can't
+      // quietly drop the overflow detection.
+      const passed = esClient.search.mock.calls[0][0] as any;
+      expect(passed.track_total_hits).toBe(true);
+      expect(passed.size).toBe(1000);
+    });
   });
 
   describe('findByOriginIdAcrossSpaces', () => {
@@ -2361,6 +2398,65 @@ describe('SmlService', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('SML findByOriginIdAcrossSpaces failed')
       );
+    });
+
+    it('only fetches the guard-relevant fields via _source filter', async () => {
+      // The cross-space guard runs on every PUT and DELETE. The route
+      // only ever reads `id`, `type`, and `spaces` from the result, so
+      // pulling back the full `_source` (which can include a 50 KB
+      // `content` per chunk × up to 1000 chunks) would push tens of
+      // MB across the wire per call for nothing. Pinning the
+      // `_source` selector here so we notice if a future change tries
+      // to remove it (and re-introduces the bandwidth regression).
+      esClient.search.mockResolvedValue({
+        hits: { total: { value: 1, relation: 'eq' }, hits: [] },
+      } as any);
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      await smlService.findByOriginIdAcrossSpaces({
+        originId: 'ref-1',
+        esClient: scopedClient,
+      });
+
+      const passed = esClient.search.mock.calls[0][0] as any;
+      expect(passed._source).toEqual(['id', 'type', 'spaces', 'origin']);
+    });
+
+    it('logs a warning when total chunks exceed MAX_CHUNKS_PER_ORIGIN', async () => {
+      // Security-critical: if more than MAX_CHUNKS_PER_ORIGIN chunks
+      // exist across spaces, the cross-space guard might miss chunks
+      // in another space (they fall outside the returned window).
+      // We log explicitly so an operator can investigate the producer
+      // before the guard silently passes.
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 2000, relation: 'eq' },
+          hits: [],
+        },
+      } as any);
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      await smlService.findByOriginIdAcrossSpaces({
+        originId: 'overfull',
+        esClient: scopedClient,
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("origin 'overfull' has 2000 chunks")
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('cross-space overwrite guard may miss chunks')
+      );
+
+      const passed = esClient.search.mock.calls[0][0] as any;
+      expect(passed.track_total_hits).toBe(true);
+      expect(passed.size).toBe(1000);
     });
   });
 });

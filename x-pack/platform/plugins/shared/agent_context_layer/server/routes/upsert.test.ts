@@ -124,6 +124,37 @@ describe('registerUpsertRoute', () => {
     );
   });
 
+  it('clears existing tags when the PUT body omits tags (full-document replace semantic)', async () => {
+    // `PUT` is a full-document replace, not a patch — omitting `tags`
+    // in the body MUST clear any previously stored tags rather than
+    // preserving them. This is the documented REST `PUT` contract and
+    // also what the indexer's content-mode write does: it wipes every
+    // chunk for the origin and re-writes from the body. A previous
+    // refactor accidentally preserved tags via a merge, masking the
+    // intent; pin the behaviour here so any reintroduction of merge
+    // semantics fails loudly.
+    //
+    // The assertion looks at the `content` payload handed to the
+    // indexer rather than the post-write read because the indexer is
+    // the single source of truth for what lands on disk.
+    const taggedDoc = { ...sampleDocument, tags: ['stale-tag-1', 'stale-tag-2'] };
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([taggedDoc]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+
+    // Body explicitly does NOT include `tags`.
+    await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+
+    const [callArgs] = mockSmlService.indexAttachment.mock.calls;
+    const passedContent = callArgs[0].content as Array<{ tags?: unknown }>;
+    // The single chunk we passed must not carry a `tags` field at all
+    // — the indexer reads "absent" as "clear", consistent with the
+    // workflow step's content-mode schema.
+    expect(passedContent).toHaveLength(1);
+    expect(passedContent[0]).not.toHaveProperty('tags');
+  });
+
   it('returns 404 when origin is owned by another space', async () => {
     const otherSpaceDoc = { ...sampleDocument, spaces: ['other-space'] };
     mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
@@ -221,6 +252,37 @@ describe('registerUpsertRoute', () => {
     expect(() =>
       bodySchema.validate({ type: 'visualization', title: 't', content: 'c' })
     ).not.toThrow();
+  });
+
+  it('rejects body payloads that overflow the per-field maxLength caps', () => {
+    // Defense-in-depth against unbounded HTTP payloads — a missing
+    // `maxLength` once let a single PUT push arbitrary content into
+    // the SML index. Pin each cap so a future refactor can't silently
+    // drop them. The actual values (`MAX_SML_*`) are exercised
+    // indirectly via the schema; testing each at length+1 keeps the
+    // assertions agnostic of the literal value.
+    const [routeConfig] = router.put.mock.calls[0];
+    const bodySchema = (routeConfig as any).validate.body;
+    const paramsSchema = (routeConfig as any).validate.params;
+
+    // title cap: > MAX_SML_TITLE_LENGTH (1024) chars
+    expect(() =>
+      bodySchema.validate({ type: 'lens', title: 'x'.repeat(1025), content: 'c' })
+    ).toThrow(/title/);
+
+    // content cap: > MAX_SML_CONTENT_LENGTH (50_000) chars
+    expect(() =>
+      bodySchema.validate({ type: 'lens', title: 't', content: 'x'.repeat(50_001) })
+    ).toThrow(/content/);
+
+    // type cap: > MAX_SML_TYPE_LENGTH (256) chars — even when the
+    // regex matches, the length envelope must bite.
+    expect(() => bodySchema.validate({ type: 'a'.repeat(257), title: 't', content: 'c' })).toThrow(
+      /type/
+    );
+
+    // originId URL param cap: > MAX_SML_ORIGIN_ID_LENGTH (512) chars.
+    expect(() => paramsSchema.validate({ originId: 'x'.repeat(513) })).toThrow(/originId/);
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {

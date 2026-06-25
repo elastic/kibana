@@ -8,7 +8,15 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlUpsertHttpResponse } from '../../common/http_api/sml';
-import { smlByOriginIdPath } from '../../common/constants';
+import {
+  smlByOriginIdPath,
+  MAX_SML_ORIGIN_ID_LENGTH,
+  MAX_SML_TYPE_LENGTH,
+  MAX_SML_TITLE_LENGTH,
+  MAX_SML_CONTENT_LENGTH,
+  MAX_SML_TAG_LENGTH,
+  MAX_SML_TAGS_PER_DOCUMENT,
+} from '../../common/constants';
 import type { SmlChunk, SmlService } from '../services/sml/types';
 import { isVisibleInSpace } from '../services/sml/sml_service';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
@@ -52,6 +60,14 @@ import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
  * (and returning 404 rather than 403) keeps the surface symmetric and
  * avoids disclosing the existence of gated chunks the caller cannot
  * see.
+ *
+ * `tags` semantics: the route writes the new chunk wholesale via the
+ * indexer's content-mode write — there is no merge/patch step. A PUT
+ * that omits `tags` therefore CLEARS any previously stored tags. This
+ * is the intended REST `PUT` semantic (the body is the complete new
+ * representation), but callers used to JSON-merge semantics should
+ * pin the current tag list explicitly. The behaviour is locked in by
+ * a route-level test.
  */
 export const registerUpsertRoute = ({
   router,
@@ -69,11 +85,8 @@ export const registerUpsertRoute = ({
       path: smlByOriginIdPath,
       validate: {
         params: schema.object({
-          originId: schema.string({ minLength: 1 }),
+          originId: schema.string({ minLength: 1, maxLength: MAX_SML_ORIGIN_ID_LENGTH }),
         }),
-        // TODO: Add maxLength bounds to string fields (type, title, content) to
-        // prevent abuse with excessively long values.
-        //
         // Neither `permissions` nor `origin_id` appear in this body:
         // - `permissions` are derived by the indexer from the registered SML
         //   type's `getPermissions` hook (same source of truth as the
@@ -83,6 +96,14 @@ export const registerUpsertRoute = ({
         //   the type it was stamping.
         // - `origin_id` is the URL path parameter; duplicating it in the
         //   body invites caller/path mismatch with no consistency check.
+        //
+        // Every string field carries a `maxLength` to keep the request
+        // envelope predictable (a single PUT cannot exceed
+        // ~MAX_SML_CONTENT_LENGTH + a few KB of overhead). The
+        // workflow step's content-mode applies the same caps via
+        // `AttachmentChunkSchema` so HTTP and workflow producers share
+        // a single envelope — `tags` reuses both the per-tag length
+        // cap and the per-document tag-count cap.
         body: schema.object({
           // Syntactic guard on the type identifier. The indexer no longer
           // rejects unregistered types (see SmlIndexer.indexManualChunks),
@@ -93,18 +114,18 @@ export const registerUpsertRoute = ({
           // `connector`, `workflow`, `corpus_entry`, …).
           type: schema.string({
             minLength: 1,
-            maxLength: 256,
+            maxLength: MAX_SML_TYPE_LENGTH,
             validate: (v) =>
               /^[a-z][a-z0-9_]*$/.test(v)
                 ? undefined
                 : 'must be a lowercase identifier starting with a letter, e.g. "visualization", "my_notes"',
           }),
-          title: schema.string({ minLength: 1 }),
-          content: schema.string(),
+          title: schema.string({ minLength: 1, maxLength: MAX_SML_TITLE_LENGTH }),
+          content: schema.string({ maxLength: MAX_SML_CONTENT_LENGTH }),
           tags: schema.maybe(
             schema.arrayOf(
               schema.string({
-                maxLength: 100,
+                maxLength: MAX_SML_TAG_LENGTH,
                 validate: (v) =>
                   /^[a-z0-9][a-z0-9_-]*$/.test(v)
                     ? undefined
@@ -115,7 +136,7 @@ export const registerUpsertRoute = ({
                 },
               }),
               {
-                maxSize: 100,
+                maxSize: MAX_SML_TAGS_PER_DOCUMENT,
                 meta: {
                   description:
                     'Optional tags for grouping and retrieval. Tags are matched with OR semantics on the list endpoint — a document is returned if it has any of the requested tags. Maximum 100 tags per document; each tag is at most 100 characters.',

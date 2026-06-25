@@ -13,6 +13,13 @@ import { SmlIndexAttachmentInputSchema } from '../../common/workflow_steps/sml_i
 import { apiPrivileges } from '../../common/features';
 import type { AgentContextLayerPluginStart } from '../types';
 import { createContextEngineAddEntryStepDefinition } from './sml_index_attachment_step';
+import { createSmlIndexer } from '../services/sml/sml_indexer';
+import { createSmlTypeRegistry } from '../services/sml/sml_type_registry';
+import { kibanaSavedObjectPermissions } from '../services/sml/permissions/kibana_saved_object';
+// Imported as a namespace so we can spy on `createSmlStorage` without
+// adding a `__mock__` shim. `jest.spyOn(target, method)` needs a
+// concrete object reference, which is what the `* as` form gives us.
+import * as smlStorage from '../services/sml/sml_storage';
 
 const buildStartContract = (): jest.Mocked<AgentContextLayerPluginStart> => ({
   search: jest.fn(),
@@ -633,15 +640,6 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     // — proving the workflow author cannot bypass type-level gating in
     // content mode even though they no longer have any chunk field with
     // which to attempt it.
-
-    /* eslint-disable @typescript-eslint/no-var-requires */
-    const { createSmlIndexer } = require('../services/sml/sml_indexer');
-    const { createSmlTypeRegistry } = require('../services/sml/sml_type_registry');
-    const {
-      kibanaSavedObjectPermissions,
-    } = require('../services/sml/permissions/kibana_saved_object');
-    const smlStorage = require('../services/sml/sml_storage');
-    /* eslint-enable @typescript-eslint/no-var-requires */
 
     it('stamps `saved_object:lens/get` on content-mode chunks for a visualization-like type', async () => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });

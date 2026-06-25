@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -32,6 +32,7 @@ import {
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
 } from './sml_errors';
+import { MAX_CHUNKS_PER_ORIGIN } from '../../../common/constants';
 
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
@@ -1366,6 +1367,18 @@ const getDocumentsByIds = async ({
 };
 
 /**
+ * Extract the total-hit count from an ES search response in a way that
+ * tolerates both the legacy numeric shape (older clients) and the
+ * `{ value, relation }` object shape returned when `track_total_hits`
+ * is set. Falls back to `0` when the field is absent.
+ */
+const extractTotalHits = (total: SearchTotalHits | number | undefined): number => {
+  if (total === undefined) return 0;
+  if (typeof total === 'number') return total;
+  return total.value;
+};
+
+/**
  * Fetch every chunk written under `originId` that is visible in `spaceId`.
  *
  * Multiple chunks per origin are expected: the workflow step's content
@@ -1376,6 +1389,13 @@ const getDocumentsByIds = async ({
  * because callers carry the bare id, not the typed URI, and we treat
  * `origin_id` as globally unique by convention (the HTTP routes
  * deliberately omit `type` from the URL).
+ *
+ * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow is
+ * logged with `track_total_hits` so operators can spot a producer that
+ * has gone off the rails (or a typo collapsing many distinct origins
+ * into one). The first `MAX_CHUNKS_PER_ORIGIN` chunks are still
+ * returned — the per-space response is a degraded view rather than an
+ * error.
  */
 const findByOriginId = async ({
   originId,
@@ -1391,7 +1411,8 @@ const findByOriginId = async ({
   try {
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
-      size: 1000,
+      size: MAX_CHUNKS_PER_ORIGIN,
+      track_total_hits: true,
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
@@ -1409,6 +1430,13 @@ const findByOriginId = async ({
       },
     });
 
+    const total = extractTotalHits(response.hits.total);
+    if (total > MAX_CHUNKS_PER_ORIGIN) {
+      logger.warn(
+        `SML findByOriginId: origin '${originId}' has ${total} chunks in space '${spaceId}' but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned. Producer is likely misbehaving — investigate before the cross-space guard becomes unreliable.`
+      );
+    }
+
     return response.hits.hits
       .filter((hit) => hit._source != null)
       .map((hit) => hydrateDocument(hit._source!));
@@ -1422,15 +1450,55 @@ const findByOriginId = async ({
 };
 
 /**
+ * `_source` fields fetched by `findByOriginIdAcrossSpaces`.
+ *
+ * The cross-space guard only reads `id`, `type`, `spaces` (and uses
+ * `origin.uri` indirectly via `hydrateDocument`'s `origin_id` fallback
+ * — kept for resilience against documents written before the dedicated
+ * `origin_id` field is in place). Everything else — `content`, `title`,
+ * `description`, `tags`, `permissions`, … — is pulled back on the
+ * per-space path (`findByOriginId`) which is the one that surfaces to
+ * users. The guard runs on every PUT and DELETE, so trimming the
+ * payload here matters: with `size: 1000` and a 50 KB `content` field
+ * per chunk, the un-filtered version could pull up to 50 MB per guard
+ * call and immediately discard 99% of it.
+ *
+ * Listed as a typed constant rather than inline so a future field
+ * addition has a single place to consider whether the guard needs to
+ * see it.
+ */
+const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof SmlDocument> = [
+  'id',
+  'type',
+  'spaces',
+  'origin',
+];
+
+/**
  * Fetch every chunk written under `originId` regardless of space.
  *
- * Used by the HTTP routes' cross-space-overwrite guard — never for
- * read paths that surface data to users. The route compares the result
- * against the caller's space to decide between proceeding, 404, and
- * (later) 409 semantics.
+ * Used by the HTTP routes' cross-space-overwrite guard and the
+ * `checkItemsAccess` privilege gate — never for read paths that
+ * surface data to users. The route compares the result against the
+ * caller's space to decide between proceeding, 404, and (later) 409
+ * semantics.
  *
  * Returns an empty array on `index_not_found` rather than throwing —
  * "no SML index yet" is a normal first-write state.
+ *
+ * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow has a
+ * security implication: if more than the limit exists, chunks in
+ * another space might fall outside the returned window and the
+ * cross-space guard would silently pass. We log a warning when
+ * overflow is detected so operators have an audit trail; the limit
+ * itself is generous enough that producers should never legitimately
+ * hit it (the workflow step caps batches at 100, and the crawler's
+ * built-in types produce 1 chunk per origin).
+ *
+ * Returned `SmlDocument`s carry only the fields in
+ * {@link FIND_ACROSS_SPACES_SOURCE_FIELDS}; everything else is
+ * defaulted to empty by `hydrateDocument`. Callers must treat the
+ * result as guard-only and not surface it to users.
  */
 const findByOriginIdAcrossSpaces = async ({
   originId,
@@ -1444,7 +1512,9 @@ const findByOriginIdAcrossSpaces = async ({
   try {
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
-      size: 1000,
+      size: MAX_CHUNKS_PER_ORIGIN,
+      track_total_hits: true,
+      _source: FIND_ACROSS_SPACES_SOURCE_FIELDS as unknown as string[],
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
@@ -1453,6 +1523,13 @@ const findByOriginIdAcrossSpaces = async ({
         },
       },
     });
+
+    const total = extractTotalHits(response.hits.total);
+    if (total > MAX_CHUNKS_PER_ORIGIN) {
+      logger.warn(
+        `SML findByOriginIdAcrossSpaces: origin '${originId}' has ${total} chunks but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned — the cross-space overwrite guard may miss chunks beyond that limit. Investigate the producer immediately.`
+      );
+    }
 
     return response.hits.hits
       .filter((hit) => hit._source != null)

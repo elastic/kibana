@@ -639,15 +639,21 @@ describe('createSmlIndexer', () => {
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       });
 
-      it('hasManualEntry treats lookup errors as no manual entry', async () => {
+      it('hasManualEntry treats unexpected ES errors as manual-entry-present (fail-closed)', async () => {
+        // Previous behaviour was fail-OPEN — a transient ES blip during
+        // the manual-entry probe let the crawler proceed straight to
+        // `deleteChunks` and silently destroyed admin-curated manual
+        // entries. We now fail-CLOSED: on an unexpected error we assume
+        // a manual entry exists and skip this cycle. The trade-off (a
+        // skipped crawl tick vs. silently wiping curated content) lands
+        // on the side of not destroying admin intent — the next cycle
+        // recovers automatically once ES is healthy. Force re-crawl
+        // remains available via `force: true`.
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
-        const smlData = {
-          chunks: [{ type: 'lens', title: 'T', content: 'c' }],
-        };
-        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const getSmlData = jest.fn();
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlData })
         );
@@ -671,7 +677,50 @@ describe('createSmlIndexer', () => {
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining('hasManualEntry check failed')
         );
-        // Should proceed (fail-open) and call getSmlData + bulk
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fail-closed'));
+        // The whole point — no destructive operations against the
+        // origin while the probe is uncertain.
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('hasManualEntry index_not_found still treats origin as fresh (no fail-closed)', async () => {
+        // Index-not-found is unambiguous: "no SML index yet" means
+        // there cannot be a manual entry. We MUST NOT fail-closed in
+        // this case or first-write crawls would never make progress on
+        // a brand-new cluster.
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [{ type: 'lens', title: 'T', content: 'c' }],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        (esClient.count as jest.Mock).mockRejectedValue(
+          Object.assign(new Error('index_not_found_exception'), {
+            statusCode: 404,
+            body: { error: { type: 'index_not_found_exception' } },
+          })
+        );
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-fresh',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        );
+
         expect(getSmlData).toHaveBeenCalledTimes(1);
         expect(bulkMock).toHaveBeenCalledTimes(1);
       });

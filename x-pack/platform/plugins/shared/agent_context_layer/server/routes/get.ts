@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlGetHttpResponse } from '../../common/http_api/sml';
-import { smlByOriginIdPath } from '../../common/constants';
+import { smlByOriginIdPath, MAX_SML_ORIGIN_ID_LENGTH } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { READ_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
@@ -43,7 +43,7 @@ export const registerGetRoute = ({
       path: smlByOriginIdPath,
       validate: {
         params: schema.object({
-          originId: schema.string({ minLength: 1 }),
+          originId: schema.string({ minLength: 1, maxLength: MAX_SML_ORIGIN_ID_LENGTH }),
         }),
       },
       options: { access: 'internal' },

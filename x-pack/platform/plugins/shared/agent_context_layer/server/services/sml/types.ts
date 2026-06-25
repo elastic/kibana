@@ -370,39 +370,6 @@ export interface SmlCrawler {
 }
 
 /**
- * Input fields for upserting an SML origin via the HTTP PUT route.
- *
- * `origin_id` is the URL path parameter (the route uses it as the
- * `originId` passed to `indexAttachment` content-mode). `spaces` is
- * derived from the caller's request space; `created_at` / `updated_at`
- * are managed by the indexer.
- *
- * The HTTP route hands this to {@link SmlService.indexAttachment} as a
- * single-chunk content-mode write — same code path the workflow step
- * uses — so permissions, type-registration enforcement, and storage
- * shape stay consistent across every write path.
- */
-export interface SmlDocumentInput {
-  type: string;
-  title: string;
-  content: string;
-  /**
-   * Free-form labels for filtering and retrieval. Forwarded as the
-   * chunk's `tags`; empty array when omitted (the indexer wipes-then-
-   * writes, so there is no existing-tags preservation step like the
-   * old _id-based upsert had).
-   */
-  tags?: string[];
-  // permissions: intentionally absent. The indexer derives them from
-  // the SML type registered as `type` (via its `getPermissions` hook),
-  // so callers cannot stamp arbitrary access-control on a document.
-  // An unregistered `type` is accepted by content-mode writes: the
-  // indexer stamps empty `SmlPermissions` (space-readable) and emits a
-  // once-per-process warn naming the namespace. Use a registered SML
-  // type when the data needs to be permission-gated.
-}
-
-/**
  * Filter parameters for SML search.
  * Re-exported from the shared HTTP API types so server and client use a single definition.
  */
@@ -485,10 +452,32 @@ export type SmlIndexerParams = SmlIndexerOriginParams | SmlIndexerContentParams;
  * `SmlService.deleteAttachment`. Shape mirrors `SmlIndexerBaseParams` minus
  * `action` (the method itself implies delete) and adds the `ingestionMethod`
  * scope selector that lets callers wipe more than just crawled chunks.
+ *
+ * @remarks
+ * `spaces` is informational only: the delete operates on the global
+ * `(origin_id, attachmentType[, ingestion_method])` selector and never
+ * filters by space. The field is forwarded to the structured log line
+ * emitted at the start of `deleteAttachment` so operators can correlate
+ * the request with the caller's space, but it has no effect on which
+ * documents are removed. The cross-space-overwrite/visibility guard
+ * has to live at the route layer (see `delete.ts`) — the indexer can't
+ * gate on space without breaking the crawler's tombstoning path, which
+ * legitimately runs without a calling space context.
+ *
+ * Keeping the field shape-symmetric with `SmlIndexerBaseParams` rather
+ * than dropping it costs nothing and lets every call site stay
+ * uniform; refactoring it out would be a sweeping change for no
+ * functional gain.
  */
 export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
+  /**
+   * Log-only. See type-level `@remarks` — the indexer does NOT use this
+   * to filter the underlying `deleteByQuery`; selection is global by
+   * `(origin_id, attachmentType[, ingestion_method])`. Space-scope
+   * enforcement is a route-layer concern.
+   */
   spaces: string[];
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
