@@ -213,7 +213,7 @@ const ObservedDataSectionContent = memo(
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}
-        linkRenderer={renderFlyoutLink}
+        entityLink={renderFlyoutLink}
       />
     );
   }

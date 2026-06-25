@@ -17,9 +17,9 @@ import {
 import { useKibana } from '../../../../../common/lib/kibana';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
-import { MisconfigurationPanel } from '../../../../csp_details/misconfiguration_panel';
+import { Misconfiguration } from '../../../../csp/misconfiguration';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
-import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/flyout_v2/csp_details/misconfiguration_findings_details_table';
+import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.host.misconfigurationInsights.title',
@@ -31,8 +31,6 @@ export interface MisconfigurationInsightsProps {
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
-  /** Scope id passed to downstream containers. */
-  scopeId: string;
   /** Opens the originating host flyout as a child. */
   onOpenHost?: () => void;
 }
@@ -41,7 +39,7 @@ export interface MisconfigurationInsightsProps {
  * Tool flyout displaying CSP misconfiguration findings for a host entity.
  */
 export const MisconfigurationInsights = memo(
-  ({ value, entityId, scopeId, onOpenHost }: MisconfigurationInsightsProps) => {
+  ({ value, entityId, onOpenHost }: MisconfigurationInsightsProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -55,7 +53,7 @@ export const MisconfigurationInsights = memo(
             services,
             store,
             history,
-            children: <MisconfigurationPanel resourceId={resourceId} ruleId={ruleId} />,
+            children: <Misconfiguration resourceId={resourceId} ruleId={ruleId} />,
           }),
           { ...defaultDocumentFlyoutProperties, title: value, session: 'inherit' }
         );
@@ -76,7 +74,6 @@ export const MisconfigurationInsights = memo(
         <MisconfigurationFindingsDetailsTable
           field={EntityIdentifierFields.hostName}
           value={value}
-          scopeId={scopeId}
           entityId={entityId}
           entityType={EntityType.host}
           onShowFinding={onShowFinding}

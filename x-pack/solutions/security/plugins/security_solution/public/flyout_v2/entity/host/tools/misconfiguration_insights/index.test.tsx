@@ -35,19 +35,17 @@ jest.mock('../../../../shared/components/tools_flyout_header', () => ({
 }));
 
 jest.mock(
-  '../../../../../cloud_security_posture/components/flyout_v2/csp_details/misconfiguration_findings_details_table',
+  '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table',
   () => ({
     MisconfigurationFindingsDetailsTable: ({
       field,
       value,
-      scopeId,
       entityId,
       entityType,
       onShowFinding,
     }: {
       field: string;
       value: string;
-      scopeId: string;
       entityId?: string;
       entityType?: string;
       onShowFinding?: (resourceId: string, ruleId: string) => void;
@@ -57,7 +55,6 @@ jest.mock(
         data-test-subj="mockMisconfigurationFindingsDetailsTable"
         data-field={field}
         data-value={value}
-        data-scope-id={scopeId}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
         onClick={() => onShowFinding?.('resource-1', 'rule-1')}
@@ -68,8 +65,8 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../csp_details/misconfiguration_panel', () => ({
-  MisconfigurationPanel: () => <div data-test-subj="mockMisconfigurationPanel" />,
+jest.mock('../../../../csp/misconfiguration', () => ({
+  Misconfiguration: () => <div data-test-subj="mockMisconfigurationPanel" />,
 }));
 
 jest.mock('../../../../shared/components/flyout_provider', () => ({
@@ -104,21 +101,20 @@ describe('<MisconfigurationInsights />', () => {
   });
 
   it('renders the header with the title, host label and entity icon', () => {
-    const { getByTestId } = render(<MisconfigurationInsights value="my-host" scopeId="scope" />);
+    const { getByTestId } = render(<MisconfigurationInsights value="my-host" />);
     const header = getByTestId('mockToolsFlyoutHeader');
     expect(header).toHaveAttribute('data-title', 'Misconfigurations');
     expect(header).toHaveAttribute('data-label', 'my-host');
     expect(header).toHaveAttribute('data-icon-type', 'storage');
   });
 
-  it('forwards the host name, scope and entity id to the findings table', () => {
+  it('forwards the host name and entity id to the findings table', () => {
     const { getByTestId } = render(
-      <MisconfigurationInsights value="my-host" scopeId="my-scope" entityId="euid-123" />
+      <MisconfigurationInsights value="my-host" entityId="euid-123" />
     );
     const table = getByTestId('mockMisconfigurationFindingsDetailsTable');
     expect(table).toHaveAttribute('data-field', 'host.name');
     expect(table).toHaveAttribute('data-value', 'my-host');
-    expect(table).toHaveAttribute('data-scope-id', 'my-scope');
     expect(table).toHaveAttribute('data-entity-id', 'euid-123');
     expect(table).toHaveAttribute('data-entity-type', 'host');
   });
@@ -126,14 +122,14 @@ describe('<MisconfigurationInsights />', () => {
   it('forwards onOpenHost to the header click handler', () => {
     const onOpenHost = jest.fn();
     const { getByTestId } = render(
-      <MisconfigurationInsights value="my-host" scopeId="scope" onOpenHost={onOpenHost} />
+      <MisconfigurationInsights value="my-host" onOpenHost={onOpenHost} />
     );
     getByTestId('mockToolsFlyoutHeader').click();
     expect(onOpenHost).toHaveBeenCalledTimes(1);
   });
 
   it('opens a child system flyout when a finding row is expanded', () => {
-    const { getByTestId } = render(<MisconfigurationInsights value="my-host" scopeId="scope" />);
+    const { getByTestId } = render(<MisconfigurationInsights value="my-host" />);
     getByTestId('mockMisconfigurationFindingsDetailsTable').click();
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
