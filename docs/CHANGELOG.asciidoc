@@ -138,7 +138,6 @@ The 8.19.17 release includes the following known issues and fixes.
 [%collapsible]
 ====
 *Details* +
-
 Multipage Canvas visualizations stop advancing after one page when in autoplay mode
 
 *Workaround* +
