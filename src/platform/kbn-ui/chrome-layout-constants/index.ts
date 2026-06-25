@@ -21,7 +21,7 @@ export { layoutLevels } from './src/levels';
 export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 
 /** Default width of the agent workspace column in agent-first chrome (POC). */
-export const DEFAULT_AGENT_WIDTH = 480;
+export const DEFAULT_AGENT_WIDTH = 800;
 
 /** Minimum width of the agent workspace column when agent-first (matches sidebar min). */
 export const MIN_AGENT_WIDTH = 320;
@@ -29,14 +29,19 @@ export const MIN_AGENT_WIDTH = 320;
 /** Minimum width reserved for the application workspace when agent-first (matches sidebar min). */
 export const MIN_APPLICATION_WORKSPACE_WIDTH = 320;
 
+/** Maximum agent workspace width as a fraction of the viewport width (50vw). */
+export const MAX_AGENT_VIEWPORT_WIDTH_RATIO = 0.5;
+
 export const getMaxAgentWorkspaceWidth = (
   navigationWidth: number,
   sidebarWidth: number
-): number =>
-  Math.max(
-    MIN_AGENT_WIDTH,
-    window.innerWidth - navigationWidth - MIN_APPLICATION_WORKSPACE_WIDTH - sidebarWidth
-  );
+): number => {
+  const maxByViewport = Math.floor(window.innerWidth * MAX_AGENT_VIEWPORT_WIDTH_RATIO);
+  const maxByRemainingSpace =
+    window.innerWidth - navigationWidth - MIN_APPLICATION_WORKSPACE_WIDTH - sidebarWidth;
+
+  return Math.max(MIN_AGENT_WIDTH, Math.min(maxByViewport, maxByRemainingSpace));
+};
 
 export const clampAgentWorkspaceWidth = (
   width: number,
