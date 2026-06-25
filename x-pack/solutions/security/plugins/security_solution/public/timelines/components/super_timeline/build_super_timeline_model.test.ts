@@ -9,7 +9,6 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 import { isCombinedFilter, BooleanRelation } from '@kbn/es-query';
 import type { CombinedFilter } from '@kbn/es-query';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../common/types/timeline';
 import type { DataProvider } from '../../../../common/types';
 import type { TimelineModel } from '../../store/model';
 import { timelineDefaults } from '../../store/defaults';
@@ -329,7 +328,6 @@ describe('buildSuperTimelineModel', () => {
       const eqlTimeline = makeTimeline({
         savedObjectId: 'eql-timeline',
         title: 'EQL Investigation',
-        activeTab: TimelineTabs.eql,
         eqlOptions: {
           eventCategoryField: 'event.category',
           timestampField: '@timestamp',
@@ -410,7 +408,6 @@ describe('buildSuperTimelineModel', () => {
       const eqlTimeline = makeTimeline({
         savedObjectId: 'eql-tl',
         title: 'EQL Timeline',
-        activeTab: TimelineTabs.eql,
         eqlOptions: {
           eventCategoryField: 'event.category',
           timestampField: '@timestamp',
@@ -437,13 +434,12 @@ describe('buildSuperTimelineModel', () => {
     });
 
     it('skips an EQL timeline that has stale KQL filters from a prior query-tab visit', () => {
-      // A timeline saved in EQL mode may still carry filters from when the user
-      // previously visited the Query tab. The old !hasKqlQuery guard would have
-      // treated this as a KQL timeline and silently merged the stale filters.
+      // Detection keys off eqlOptions.query (persisted), not activeTab (runtime-only).
+      // A timeline saved in EQL mode may still carry KQL filters from when the user
+      // previously visited the Query tab. Stale filters must not be merged.
       const eqlWithStaleFilters = makeTimeline({
         savedObjectId: 'eql-stale',
         title: 'EQL with stale filters',
-        activeTab: TimelineTabs.eql,
         eqlOptions: {
           eventCategoryField: 'event.category',
           timestampField: '@timestamp',
@@ -464,6 +460,31 @@ describe('buildSuperTimelineModel', () => {
       expect(skippedQueryTimelines).toHaveLength(1);
       expect(skippedQueryTimelines[0].reason).toBe('eql');
       expect(model.filters).toHaveLength(0);
+    });
+
+    it('does NOT skip a timeline that has activeTab=eql but an empty eqlOptions.query', () => {
+      // activeTab is runtime-only and resets to TimelineTabs.query after formatTimelineResponseToModel.
+      // A timeline that was opened in EQL mode but has no saved eqlOptions.query should be treated
+      // as a KQL timeline (fall through to the query merge path).
+      const kqlTimeline = makeTimeline({
+        savedObjectId: 'kql-was-eql-tab',
+        title: 'KQL (no EQL query saved)',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
+        filters: [
+          {
+            meta: { alias: null, negate: false, disabled: false, type: 'phrase', key: 'host.name' },
+            query: { match_phrase: { 'host.name': 'some-host' } },
+          },
+        ],
+      });
+
+      const { skippedQueryTimelines } = buildSuperTimelineModel([kqlTimeline], deps);
+      expect(skippedQueryTimelines).toHaveLength(0);
     });
   });
 });
