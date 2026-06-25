@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, tags, type ScoutPage } from '@kbn/scout';
-import { SavedObjectsTracker, installLogsSampleData, removeLogsSampleData } from '../../helpers';
+import { test, tags } from '@kbn/scout';
+import { SavedObjectsTracker } from '../../helpers';
 
 // Inlined ES|QL + Monaco editor + doc-viewer helpers.
 //
@@ -193,10 +193,6 @@ const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 const tracker = new SavedObjectsTracker();
 
 test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
@@ -207,10 +203,6 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
   test.afterEach(async ({ kbnClient }) => {
     await tracker.cleanup(kbnClient);
-  });
-
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
   });
 
   test('should switch the query bar to ES|QL and display the default sample query', async ({
