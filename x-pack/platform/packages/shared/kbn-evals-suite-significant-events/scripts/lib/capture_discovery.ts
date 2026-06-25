@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import type { ConnectionConfig } from './get_connection_config';
-import { DISCOVERY_TIMEOUT_MS } from './constants';
+import { DISCOVERY_TIMEOUT_MS, DEFAULT_LOGS_INDEX } from './constants';
 import {
   configureModelSelectionSettings,
   persistSigEventsDetectionsForSnapshot,
@@ -31,6 +31,7 @@ export async function captureDiscoveryForScenario({
   log,
   connectorId,
   scenarioId,
+  streamName = DEFAULT_LOGS_INDEX,
   timeoutMs = DISCOVERY_TIMEOUT_MS,
 }: {
   config: ConnectionConfig;
@@ -38,6 +39,7 @@ export async function captureDiscoveryForScenario({
   log: ToolingLog;
   connectorId: string;
   scenarioId: string;
+  streamName?: string;
   timeoutMs?: number;
 }): Promise<CaptureDiscoveryResult> {
   // Idempotent — ensures the discovery feature resolves to the requested connector
@@ -50,7 +52,7 @@ export async function captureDiscoveryForScenario({
   const { index: discoveriesIndex, count: discoveriesCount } =
     await persistSigEventsDiscoveriesForSnapshot(config, esClient, log, scenarioId);
   const { index: detectionsIndex, count: detectionsCount } =
-    await persistSigEventsDetectionsForSnapshot(config, esClient, log, scenarioId);
+    await persistSigEventsDetectionsForSnapshot(config, esClient, log, scenarioId, streamName);
 
   return { discoveriesIndex, discoveriesCount, detectionsIndex, detectionsCount };
 }

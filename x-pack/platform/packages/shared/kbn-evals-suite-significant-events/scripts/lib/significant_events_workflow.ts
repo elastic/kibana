@@ -246,24 +246,23 @@ export async function persistSigEventsFeaturesForSnapshot(
 }
 
 /**
- * Captures detections by reading the raw `.significant_events-detections` data stream (superuser).
+ * Captures a stream's detections from the raw `.significant_events-detections` data stream.
  *
- * Why raw, not an API: the detections read API resolves the latest revision and drops
- * `kind:handled`, but the eval consumers need *every* revision — the investigator wants the
- * active (`detection`/`quiet`) revision, the judge the post-triage (`handled`) one. A `match_all`
- * raw read preserves them all; consumers filter by `kind` at load time.
+ * Raw (not the read API) so *every* revision is kept: the investigator needs the active
+ * (`detection`/`quiet`) doc, the judge the post-triage (`handled`) one. Consumers filter by `kind`.
  */
 export async function persistSigEventsDetectionsForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
-  snapshotName: string
+  snapshotName: string,
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<{ index: string; count: number }> {
   const detectionDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
     readRawDataStreamDocs(
       sysClient,
       SIGEVENTS_DETECTIONS_DATA_STREAM,
-      { match_all: {} },
+      { term: { stream_name: streamName } },
       'detection(s)'
     )
   );

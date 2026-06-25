@@ -6,6 +6,11 @@
  */
 import type { IndicesUpdateAliasesAddAction } from '@elastic/elasticsearch/lib/api/types';
 import type { Scenario } from './types';
+import {
+  SIGEVENTS_DISCOVERIES_DATA_STREAM,
+  SIGEVENTS_DETECTIONS_DATA_STREAM,
+  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+} from '../../src/data_generators/sigevents_snapshot_indices';
 
 export {
   DEFAULT_LOGS_INDEX,
@@ -15,11 +20,6 @@ export {
   OTEL_DEMO_GCS_BASE_PATH_PREFIX,
 } from '../../src/constants';
 
-import {
-  SIGEVENTS_DISCOVERIES_DATA_STREAM,
-  SIGEVENTS_DETECTIONS_DATA_STREAM,
-  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
-} from '../../src/data_generators/sigevents_snapshot_indices';
 export const DEFAULT_ENV_SNAPSHOT_LOGS_INDEX = 'logs.otel';
 
 // Wait times

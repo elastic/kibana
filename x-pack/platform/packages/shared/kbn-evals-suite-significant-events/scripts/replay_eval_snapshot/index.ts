@@ -169,7 +169,11 @@ run(
     let features = await loadKIFeaturesFromSnapshot(esClient, log, scenario, gcs, streamName);
     if (features.length === 0) {
       features = knowledgeIndicators
-        .filter((ki) => (ki as { type?: string }).type === 'feature')
+        .filter(
+          (ki) =>
+            (ki as { type?: string }).type === 'feature' &&
+            (ki as StoredKiFeature).feature?.type != null
+        )
         .map((ki) => toFeature(ki as StoredKiFeature));
     }
     const discoveries = await loadDiscoveriesFromSnapshot(esClient, log, scenario, gcs);

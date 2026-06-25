@@ -106,8 +106,20 @@ async function loadDocsFromSnapshot<T>({
     const searchResult = await esClient.search<Record<string, unknown>>({
       index: tempIndex,
       size: SEARCH_LIMIT,
+      track_total_hits: true,
       ...(query ? { query } : {}),
     });
+
+    const total =
+      typeof searchResult.hits.total === 'number'
+        ? searchResult.hits.total
+        : searchResult.hits.total?.value ?? 0;
+    if (total > SEARCH_LIMIT) {
+      throw new Error(
+        `${label}: ${total} docs in snapshot "${snapshotName}" exceed the load limit of ${SEARCH_LIMIT}; ` +
+          `the result would be truncated. Add pagination before loading.`
+      );
+    }
 
     const docs = searchResult.hits.hits.map((hit) => hit._source as T).filter(Boolean) as T[];
 

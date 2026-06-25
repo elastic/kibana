@@ -362,20 +362,21 @@ async function processScenario(
       // Let data accumulate after feature extraction so the discovery workflow's detection
       // step has signal to analyze before we trigger it.
       if (discoveryWaitMs > 0) {
-        log.info('[6/8] Waiting for data to accumulate before discovery...');
+        log.info('[6a/8] Waiting for data to accumulate before discovery...');
         await sleep(discoveryWaitMs, log, 'pre-discovery data');
       }
 
-      log.info('[6/8] Running discovery workflow...');
+      log.info('[6b/8] Running discovery workflow...');
       const discoveryResult = await captureDiscoveryForScenario({
         config,
         esClient,
         log,
         connectorId,
         scenarioId: scenario.id,
+        streamName: logsIndex,
       });
       log.info(
-        `[6/8] Captured ${discoveryResult.discoveriesCount} discovery(s), ` +
+        `[6b/8] Captured ${discoveryResult.discoveriesCount} discovery(s), ` +
           `${discoveryResult.detectionsCount} detection(s)`
       );
       snapshotIndices.push(discoveryResult.discoveriesIndex, discoveryResult.detectionsIndex);
