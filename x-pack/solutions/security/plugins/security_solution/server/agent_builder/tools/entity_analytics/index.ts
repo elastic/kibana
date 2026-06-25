@@ -7,4 +7,5 @@
 
 export { entityRiskScoreTool, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from './entity_risk_score_tool';
 export { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
+export { listWatchlistsTool, SECURITY_LIST_WATCHLISTS_TOOL_ID } from './list_watchlists_tool';
 export { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
