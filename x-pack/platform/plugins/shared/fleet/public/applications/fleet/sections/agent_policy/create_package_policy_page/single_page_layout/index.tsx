@@ -653,7 +653,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       packagePolicy,
       updatePackagePolicy,
       validationResults,
-      formState,
+      submitAttempted,
       extensionView,
       createBottomExtensionView,
       integrationToEnable,
