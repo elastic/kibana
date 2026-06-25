@@ -485,16 +485,16 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString(logger, '{{a}}', { a: 1, 'a.b': 2 }, 'none')).toEqual('{"b":2}');
     });
 
-    it('merges dotted and plain keys regardless of their order in the input', () => {
-      // dotted key first, plain object key second – prior behaviour dropped 'b'
+    it('combines a dotted key with a nested-object sibling regardless of input order', () => {
+      // A dotted key and a plain nested object sharing a prefix each contribute
+      // their own distinct leaves to the same object, in either order.
       expect(
         renderMustacheString(logger, '{{a.b}} {{a.x}}', { 'a.b': 2, a: { x: 1 } }, 'none')
       ).toEqual('2 1');
-      // plain object key first, dotted key second – already worked before the fix
       expect(
         renderMustacheString(logger, '{{a.b}} {{a.x}}', { a: { x: 1 }, 'a.b': 2 }, 'none')
       ).toEqual('2 1');
-      // deeply nested: 'a.b.c' then a: { b: { d: 2 } }
+      // deeply nested prefixes combine the same way
       expect(
         renderMustacheString(
           logger,
@@ -565,10 +565,8 @@ describe('mustache_renderer', () => {
     });
 
     it('does not allow prototype pollution via dotted __proto__ keys', () => {
-      // JSON.parse produces an object whose own-enumerable key is literally
-      // '__proto__.polluted' — Object.entries() surfaces it, and a naive segment
-      // walk would resolve current['__proto__'] to Object.prototype and write
-      // attacker-controlled data onto it process-wide.
+      // Dotted keys whose segments include '__proto__' (produced by JSON.parse)
+      // must be dropped, not expanded into a write onto Object.prototype.
       const maliciousVars = JSON.parse('{"__proto__.polluted":"PWNED","a.__proto__.p":"C"}');
       renderMustacheString(logger, '{{a}}', maliciousVars, 'none');
 
@@ -576,6 +574,35 @@ describe('mustache_renderer', () => {
       expect(({} as any).polluted).toBeUndefined();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect(({} as any).p).toBeUndefined();
+    });
+
+    it('does not allow prototype pollution via __proto__ keys nested inside a value', () => {
+      // An object value whose own-enumerable keys are literally '__proto__' /
+      // 'constructor' (produced by JSON.parse) must not leak onto Object.prototype
+      // while the tree is expanded.
+      const maliciousVars = JSON.parse(
+        '{"a.b":1,"a":{"__proto__":{"polluted":"PWNED"},"constructor":{"prototype":{"p":"C"}}}}'
+      );
+      renderMustacheString(logger, '{{a.b}}', maliciousVars, 'none');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(({} as any).polluted).toBeUndefined();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(({} as any).p).toBeUndefined();
+    });
+
+    it('overwrites (does not deep-merge) when a dotted key and a nested object target the same path', () => {
+      // When a nested object and a dotted key resolve to the same path, the last
+      // write wins rather than unioning their sub-keys. Alerting payloads never
+      // produce this collision, so the simpler overwrite is safe.
+      expect(
+        renderMustacheString(
+          logger,
+          '{{a.b.x}}|{{a.b.y}}',
+          { a: { b: { y: 2 } }, 'a.b': { x: 1 } },
+          'none'
+        )
+      ).toEqual('1|');
     });
   });
 });
