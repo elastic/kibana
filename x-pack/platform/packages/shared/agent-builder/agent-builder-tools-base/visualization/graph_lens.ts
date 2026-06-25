@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -38,6 +38,24 @@ const validateConfigForChartType = (
   config: unknown
 ): VisualizationConfig => chartTypeRegistry[chartType].schema.validate(config);
 
+interface EsqlDataSourceCarrier {
+  data_source?: { type?: string; query?: string };
+}
+
+/**
+ * Returns the objects that carry a `data_source` for this config shape:
+ * XY-ESQL configs keep one `data_source` per layer; every other ESQL chart
+ * (metric, gauge, tagcloud, ...) carries it on the config itself. Used both to
+ * read existing queries (edits) and to inject the validated query (generation).
+ */
+const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrier[] => {
+  if (!config || typeof config !== 'object') return [];
+  const { layers } = config as { layers?: unknown };
+  return Array.isArray(layers)
+    ? (layers as EsqlDataSourceCarrier[])
+    : [config as EsqlDataSourceCarrier];
+};
+
 /**
  * Helper to extract ESQL queries from a visualization config.
  * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
@@ -47,25 +65,10 @@ function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
   if (!config) return [];
 
   const queries: string[] = [];
-
-  // For XY charts, check all layers' datasets
-  if ('layers' in config && Array.isArray(config.layers)) {
-    for (const layer of config.layers) {
-      if (layer && 'dataset' in layer && layer.dataset) {
-        const dataset = layer.dataset as { type?: string; query?: string };
-        if (dataset.type === 'esql' && dataset.query && !queries.includes(dataset.query)) {
-          queries.push(dataset.query);
-        }
-      }
-    }
-    return queries;
-  }
-
-  // For single-dataset configs (metric, gauge, tagcloud)
-  if ('dataset' in config && config.dataset) {
-    const dataset = config.dataset as { type?: string; query?: string };
-    if (dataset.type === 'esql' && dataset.query) {
-      queries.push(dataset.query);
+  for (const carrier of getEsqlDataSourceCarriers(config)) {
+    const dataSource = carrier.data_source;
+    if (dataSource?.type === 'esql' && dataSource.query && !queries.includes(dataSource.query)) {
+      queries.push(dataSource.query);
     }
   }
 
@@ -95,14 +98,16 @@ const VisualizationStateAnnotation = Annotation.Root({
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
 
-export const createVisualizationGraph = (
-  model: ScopedModel,
+export const createVisualizationGraph = async (
+  modelProvider: ModelProvider,
   logger: Logger,
   events: ToolEventEmitter,
   esClient: IScopedClusterClient,
   includeTimeRange = true,
   additionalChartConfigInstructions?: string
 ) => {
+  const defaultModel = await modelProvider.getDefaultModel();
+
   // Node: Generate ES|QL query
   const generateESQLNode = async (state: VisualizationState) => {
     logger.debug('Generating ES|QL query for visualization');
@@ -124,7 +129,7 @@ export const createVisualizationGraph = (
       const generateEsqlResponse = await generateEsql({
         nlQuery: nlQueryWithContext,
         index: state.index,
-        model,
+        modelProvider,
         events,
         logger,
         esClient: esClient.asCurrentUser,
@@ -210,7 +215,7 @@ export const createVisualizationGraph = (
     let action: GenerateConfigAction;
     try {
       // Invoke model without schema validation
-      const response = await model.chatModel.invoke(prompt);
+      const response = await defaultModel.chatModel.invoke(prompt);
       const responseText = extractTextFromMessage(response);
 
       // Try to extract JSON from markdown code blocks
@@ -227,6 +232,14 @@ export const createVisualizationGraph = (
       // Verify it's a valid object
       if (!configResponse || typeof configResponse !== 'object') {
         throw new Error('Response is not a valid JSON object');
+      }
+
+      // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
+      // config generation only binds columns from it.
+      if (esqlQuery) {
+        for (const carrier of getEsqlDataSourceCarriers(configResponse)) {
+          carrier.data_source = { type: 'esql', query: esqlQuery };
+        }
       }
 
       action = {
@@ -329,7 +342,7 @@ export const createVisualizationGraph = (
 
     let action: GenerateTimeRangeAction;
     try {
-      const timeRangeModel = model.chatModel.withStructuredOutput(
+      const timeRangeModel = defaultModel.chatModel.withStructuredOutput(
         z.object({
           from: z
             .string()
