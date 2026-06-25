@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { unset } from 'lodash';
+import { get, isEqual, unset } from 'lodash';
 import { produce } from 'immer';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -71,8 +71,8 @@ export const reconcileScheduleIdsToWire = async ({
 
   // Only enabled packs reach the Fleet wire. A pack whose SO carries
   // `schedule_id` values (guaranteed post-V4 for every query) is a reconcile
-  // candidate; the per-policy comparison below decides whether a write is
-  // actually needed.
+  // candidate; the per-policy wire-vs-SO diff gate below decides whether a
+  // write is actually needed, so an already-in-sync pack is skipped.
   const packsToReconcile = allPacks.saved_objects.filter(
     (pack) => pack.attributes.enabled && pack.attributes.queries?.length
   );
@@ -131,6 +131,33 @@ export const reconcileScheduleIdsToWire = async ({
             packSO.attributes.name,
             spaceId
           )}`;
+
+          const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
+            packSO.attributes.queries ?? [],
+            {
+              spaceId,
+              packSchedule: {
+                schedule_type: packSO.attributes.schedule_type,
+                interval: packSO.attributes.interval,
+                rrule_schedule: packSO.attributes.rrule_schedule,
+              },
+              isRruleFeatureEnabled,
+            }
+          );
+
+          const intendedPackBlock = {
+            pack_id: packSO.id,
+            ...packDefaults,
+            queries: builtQueries,
+          };
+
+          if (isEqual(get(pp, packPath), intendedPackBlock)) {
+            logger.debug(
+              `reconcileScheduleIdsToWire: pack ${packSO.id} already in sync on policy ${pp.id}, skipping write`
+            );
+            continue;
+          }
+
           await packagePolicyService.update(
             spaceClient,
             esClient,
@@ -138,21 +165,6 @@ export const reconcileScheduleIdsToWire = async ({
             produce<PackagePolicy>(pp, (draft) => {
               unset(draft, 'id');
               removePackFromPolicy(draft, packSO.attributes.name, spaceId);
-              // Read the SO's now-guaranteed `schedule_id` values straight onto
-              // the wire — no minting. `convertSOQueriesToPackConfig` emits
-              // `schedule_id` explicitly regardless of the RRULE flag.
-              const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
-                packSO.attributes.queries ?? [],
-                {
-                  spaceId,
-                  packSchedule: {
-                    schedule_type: packSO.attributes.schedule_type,
-                    interval: packSO.attributes.interval,
-                    rrule_schedule: packSO.attributes.rrule_schedule,
-                  },
-                  isRruleFeatureEnabled,
-                }
-              );
               set(draft, `${packPath}.pack_id`, packSO.id);
               for (const [k, v] of Object.entries(packDefaults)) {
                 set(draft, `${packPath}.${k}`, v);

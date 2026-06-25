@@ -162,6 +162,39 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packBlock.pack_id).toBe('pack-1');
   });
 
+  test('skips the package-policy write when the wire already matches the SO (no revision churn)', async () => {
+    const firstUpdate = jest.fn().mockResolvedValue({});
+    const firstList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
+
+    const seed = createMockCoreStart(buildEnabledPackFindResult(), createMockScopedClient());
+    await reconcileScheduleIdsToWire({
+      coreStart: seed.core,
+      osqueryContext: createMockOsqueryContext({ list: firstList, update: firstUpdate }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    const reconciledPolicy = { ...firstUpdate.mock.calls[0][3], id: 'pp-1' };
+
+    const secondUpdate = jest.fn().mockResolvedValue({});
+    const secondList = jest.fn().mockResolvedValue({ items: [reconciledPolicy] });
+    const logger = createMockLogger();
+
+    const { core } = createMockCoreStart(buildEnabledPackFindResult(), createMockScopedClient());
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({ list: secondList, update: secondUpdate }),
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: false });
+    expect(secondUpdate).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('already in sync on policy pp-1, skipping write')
+    );
+  });
+
   test('is idempotent — a second run changes no schedule_id', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});
