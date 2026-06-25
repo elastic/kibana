@@ -228,21 +228,6 @@ export interface AgentBuilderPluginStart {
     origin: string
   ) => Promise<UpdateOriginResponse>;
   /**
-   * Shallow-merges new data or description into an existing attachment.
-   * Use this to write fields (e.g. a saved rule id) into an attachment after
-   * a save, instead of calling the agent_builder REST API directly.
-   *
-   * @param conversationId - The conversation containing the attachment
-   * @param attachmentId - The ID of the attachment to update
-   * @param input - Fields to merge: `data` (shallow-merged into existing data) and/or `description`
-   * @returns Promise that resolves when the update completes
-   */
-  updateAttachment: (
-    conversationId: string,
-    attachmentId: string,
-    input: { data?: unknown; description?: string }
-  ) => Promise<void>;
-  /**
    * Inline-embeddable conversation component, pre-bound to the plugin's
    * internal services. Render this anywhere in the app to host a fully
    * functional agent_builder chat without the sidebar chrome.

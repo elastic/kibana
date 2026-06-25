@@ -90,24 +90,6 @@ export class AttachmentsService {
   }
 
   /**
-   * Shallow-merges new data/description into an existing attachment.
-   * Use when you need to write fields (e.g. ruleId, intent) into the attachment
-   * from outside the plugin without going through a raw HTTP call.
-   */
-  async updateAttachment(
-    conversationId: string,
-    attachmentId: string,
-    input: { data?: unknown; description?: string }
-  ): Promise<void> {
-    await this.http.put(
-      `${publicApiPath}/conversations/${encodeURIComponent(
-        conversationId
-      )}/attachments/${encodeURIComponent(attachmentId)}`,
-      { body: JSON.stringify(input) }
-    );
-  }
-
-  /**
    * Checks all conversation attachments for staleness against their origin snapshots.
    */
   async checkStale(conversationId: string): Promise<CheckStaleAttachmentsResponse> {

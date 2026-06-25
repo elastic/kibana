@@ -353,13 +353,6 @@ export class AgentBuilderPlugin
       updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
-      updateAttachment: (
-        conversationId: string,
-        attachmentId: string,
-        input: { data?: unknown; description?: string }
-      ) => {
-        return attachmentsService.updateAttachment(conversationId, attachmentId, input);
-      },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
     };
