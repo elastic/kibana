@@ -340,6 +340,7 @@ export const convertSOQueriesToPackConfig = (
         schedule_type: querySchedType,
         rrule_schedule: queryRrule,
         start_date: legacyStartDate,
+        schedule_id: scheduleId,
         ...rest
       }: SOPackQuery,
       key: number
@@ -400,6 +401,7 @@ export const convertSOQueriesToPackConfig = (
       queriesOut[index] = omitBy(
         {
           ...rest,
+          schedule_id: scheduleId,
           ...startDateField,
           ...scheduleFields,
           query: removeMultilines(query),

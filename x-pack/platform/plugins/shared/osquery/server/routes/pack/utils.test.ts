@@ -44,7 +44,19 @@ const getTestQueries = (additionalFields?: Record<string, unknown>, packName = '
 const getOneLiner = (additionParams: Record<string, unknown>) => ({
   default: {
     interval: 3600,
-    query: `select u.username, p.pid, p.name, pos.local_address, pos.local_port, p.path, p.cmdline, pos.remote_address, pos.remote_port from processes as p join users as u on u.uid=p.uid join process_open_sockets as pos on pos.pid=p.pid where pos.remote_port !='0' limit 1000;`,
+    query: `select u.username,
+                   p.pid,
+                   p.name,
+                   pos.local_address,
+                   pos.local_port,
+                   p.path,
+                   p.cmdline,
+                   pos.remote_address,
+                   pos.remote_port
+            from processes as p
+                   join users as u on u.uid = p.uid
+                   join process_open_sockets as pos on pos.pid = p.pid
+            where pos.remote_port !='0' limit 1000;`,
     ...additionParams,
   },
 });
@@ -479,6 +491,62 @@ describe('Pack utils', () => {
         'start_date',
         'timeout',
       ]);
+    });
+  });
+
+  describe('convertSOQueriesToPackConfig — schedule_id reaches the wire explicitly', () => {
+    test('emits schedule_id with the RRULE flag OFF (backport-critical path)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' }],
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(out.queries.q1.schedule_id).toBe('sched-1');
+    });
+
+    test('emits schedule_id with the RRULE flag ON', () => {
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' }],
+        { isRruleFeatureEnabled: true }
+      );
+
+      expect(out.queries.q1.schedule_id).toBe('sched-1');
+    });
+
+    test('emits schedule_id for every query (multi-query, flag off)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' },
+          { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 120, schedule_id: 'sched-2' },
+        ],
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(out.queries.q1.schedule_id).toBe('sched-1');
+      expect(out.queries.q2.schedule_id).toBe('sched-2');
+    });
+
+    test('omits schedule_id when the stored query has none (no empty key leaked)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(out.queries.q1).not.toHaveProperty('schedule_id');
+    });
+
+    test('does not regress other field shapes when schedule_id is present (flag off)', () => {
+      const out = convertSOQueriesToPackConfig(
+        [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sched-1' }],
+        { isRruleFeatureEnabled: false }
+      );
+
+      expect(out.queries.q1).toEqual({
+        name: 'q1',
+        query: 'SELECT 1',
+        interval: 60,
+        schedule_id: 'sched-1',
+      });
     });
   });
 
