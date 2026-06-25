@@ -117,7 +117,6 @@ export const renderSecondaryMenuSection = ({
 export interface RenderNestedSecondaryMenuSectionParams {
   section: SecondaryMenuSection;
   primaryItem: MenuItem;
-  solutionId?: string;
   activeItemId?: string;
   visuallyActiveSubpageId?: string;
   getIsNewSecondary: (itemId: string) => boolean;
@@ -133,7 +132,6 @@ export interface RenderNestedSecondaryMenuSectionParams {
 export const renderNestedSecondaryMenuSection = ({
   section,
   primaryItem,
-  solutionId,
   activeItemId,
   visuallyActiveSubpageId,
   getIsNewSecondary,
@@ -142,7 +140,7 @@ export const renderNestedSecondaryMenuSection = ({
   renderExtensionPoint,
 }: RenderNestedSecondaryMenuSectionParams) => {
   if (section.slotId && section.extensionId) {
-    if (!renderExtensionPoint || !solutionId) {
+    if (!renderExtensionPoint) {
       return null;
     }
 
