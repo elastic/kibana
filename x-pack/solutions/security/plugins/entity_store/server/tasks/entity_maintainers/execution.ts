@@ -142,7 +142,7 @@ export async function executeMaintainerRun({
   });
   const entityMetadataClient = new EntityMetadataClient({
     logger,
-    esClient,
+    esClient: coreStart.elasticsearch.client.asInternalUser,
     namespace: maintainerStatus.metadata.namespace,
   });
   const taskLogger = logger.get(taskId);

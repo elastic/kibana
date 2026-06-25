@@ -372,7 +372,7 @@ export class EntityMaintainersClient {
     });
     const entityMetadataClient = new EntityMetadataClient({
       logger: this.logger,
-      esClient,
+      esClient: this.coreStart.elasticsearch.client.asInternalUser,
       namespace: status.metadata.namespace,
     });
     const abortController = new AbortController();

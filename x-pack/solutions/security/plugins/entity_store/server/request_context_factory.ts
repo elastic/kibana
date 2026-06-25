@@ -76,7 +76,7 @@ export async function createRequestHandlerContext({
   });
   const entityMetadataClient = new EntityMetadataClient({
     logger,
-    esClient,
+    esClient: core.elasticsearch.client.asInternalUser,
     namespace,
   });
   const { client: remoteLogsExtractionClient, stateClient: remoteLogExtractionStateClient } =
