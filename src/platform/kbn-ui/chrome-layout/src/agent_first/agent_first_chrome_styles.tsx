@@ -214,6 +214,29 @@ const unifiedControlGroupEmptyPseudoSelectors = [
 const buttonGroupHoverSelectors = [
   '.euiButtonGroupButton:not(:disabled):hover',
   '.euiButtonGroupButton:not(:disabled):focus-visible',
+  `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonIcon:not(:disabled):hover`,
+  `.${DATA_TABLE_TOOLBAR_CONTROL_GROUP_CLASS} .euiButtonIcon:not(:disabled):focus-visible`,
+  `.${DATA_TABLE_TOOLBAR_ICON_BUTTON_CLASS}:not(:disabled):hover`,
+  `.${DATA_TABLE_TOOLBAR_ICON_BUTTON_CLASS}:not(:disabled):focus-visible`,
+  `.${FILTER_BUTTON_GROUP_CLASS} .euiButtonIcon:not(:disabled):hover`,
+  `.${FILTER_BUTTON_GROUP_CLASS} .euiButtonIcon:not(:disabled):focus-visible`,
+].join(', ');
+
+/** Excludes filled / accent-colored EuiButton variants from subdued text-control styling. */
+const nonEmphaticButtonExclude =
+  ':not(.euiButtonFill):not(.euiButtonColorPrimary):not(.euiButtonColorSuccess):not(.euiButtonColorDanger):not(.euiButtonColorWarning):not(.euiButton-isSelected)';
+
+/**
+ * Standalone text-colored EuiButton (not EuiButtonEmpty / EuiButtonIcon, not inside unified groups).
+ * Unified group wrappers + parts below handle EuiButtonIcon inside groups.
+ */
+const textColoredButtonSelectors = [
+  `.euiButton${nonEmphaticButtonExclude}:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(.euiButtonGroupButton)`,
+].join(', ');
+
+const textColoredButtonHoverSelectors = [
+  `.euiButton${nonEmphaticButtonExclude}:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(.euiButtonGroupButton):not(:disabled):hover`,
+  `.euiButton${nonEmphaticButtonExclude}:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(.euiButtonGroupButton):not(:disabled):focus-visible`,
 ].join(', ');
 
 const subduedTextSelectors = [
@@ -365,6 +388,20 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
     ${scope} ${panelSelectors} .euiSplitButton .euiSplitButtonActionSecondary {
       border-start-end-radius: ${controlRadius} !important;
       border-end-end-radius: ${controlRadius} !important;
+    }
+
+    /* Standalone text-colored EuiButton: highlighted tray like control groups */
+    ${scopedInPanels(textColoredButtonSelectors)} {
+      border: none !important;
+      border-radius: ${controlRadius} !important;
+      background-color: ${colors.backgroundBaseHighlighted} !important;
+      box-shadow: none !important;
+      color: ${colors.textParagraph} !important;
+    }
+
+    ${scopedInPanels(textColoredButtonHoverSelectors)} {
+      color: ${colors.text} !important;
+      background-color: ${components.buttons.backgroundTextHover} !important;
     }
 
     /* Unified control groups: EuiButtonGroup + data grid toolbar control group */
