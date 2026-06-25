@@ -9,7 +9,13 @@ import type {
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
+  ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
+import { getConnectorProvider } from '@kbn/inference-common';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
@@ -19,6 +25,7 @@ import {
   createAttachmentsService,
   createToolProvider,
   createSkillsService,
+  createFilesystemServices,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
@@ -46,17 +53,41 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     logger,
     promptManager,
     stateManager,
-    filestore,
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
     analyticsService,
     trackingService,
-    experimentalFeatures,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
+
+  const uiSettingsClient = manager.deps.uiSettings.asScopedToClient(
+    manager.deps.savedObjects.getScopedClient(request)
+  );
+  const [isExperimentalEnabled, isBashEnabled] = await Promise.all([
+    uiSettingsClient
+      .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .catch(() => false),
+    uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+  ]);
+
+  const experimentalFeatures: ExperimentalFeatures = {
+    skills: true,
+    subagents: isExperimentalEnabled,
+    todos: isExperimentalEnabled,
+    datasets: isExperimentalEnabled,
+    askUserQuestion: false,
+    bash: isBashEnabled,
+  };
+
+  const { filesystemService, bashService } = await createFilesystemServices({
+    manager,
+    experimentalFeatures,
+    workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
+    spaceId,
+  });
 
   return {
     request,
@@ -77,7 +108,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skillsStore,
     attachmentStateManager,
     todoStateManager,
-    filestore,
     stateManager,
     promptManager,
     attachments: createAttachmentsService({
@@ -103,6 +133,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     subAgentExecutor: manager.deps.subAgentExecutor,
     analyticsService,
     trackingService,
+    filesystemService,
+    bashService,
   };
 };
 
@@ -135,18 +167,27 @@ export const runAgent = async ({
   };
   manager.deps.agentConfiguration = effectiveConfiguration;
 
-  const agentResult = await withAgentSpan({ agent }, async () => {
-    const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
-    const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
-    return await agentHandler(
-      {
-        runId: manager.context.runId,
-        agentParams,
-        abortSignal: manager.deps.abortSignal,
-      },
-      agentHandlerContext
-    );
-  });
+  const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;
+  const providerName = getConnectorProvider(chatModel.getConnector());
+
+  const agentResult = await withAgentSpan(
+    { agent, conversationId: agentParams.conversation?.id, providerName },
+    async () => {
+      const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
+      const agentHandlerContext = await createAgentHandlerContext({
+        agentExecutionParams,
+        manager,
+      });
+      return await agentHandler(
+        {
+          runId: manager.context.runId,
+          agentParams,
+          abortSignal: manager.deps.abortSignal,
+        },
+        agentHandlerContext
+      );
+    }
+  );
 
   return {
     result: agentResult.result,

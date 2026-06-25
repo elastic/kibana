@@ -6,7 +6,16 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiCallOut, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useFormContext } from 'react-hook-form';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,13 +46,58 @@ export interface YamlRuleFormProps {
   /** Setter for the lifted YAML buffer. */
   setYamlText: (yaml: string) => void;
   /**
-   * Synchronous commit for blur events. In the compose-discover flyout the RHF
-   * form uses `ComposeFormValues`, so a raw `reset(FormValues)` would corrupt it.
-   * The flyout passes a callback that routes through `formValuesFromYamlToCompose`.
-   * When absent (standalone context), blur falls back to `useFormContext().reset()`.
+   * Synchronous commit for blur events. The compose-discover flyout passes a
+   * callback that also syncs the sandbox state after resetting the RHF form.
+   * When absent, blur falls back to `useFormContext().reset()`.
    */
   onBlurSync?: (values: FormValues) => void;
+  /** When true, fill the available flyout height below the field label. */
+  fullHeight?: boolean;
+  /** Forwarded to the editor; fires with `true` when the YAML buffer has
+   *  schema/syntax markers, `false` when clean. */
+  onValidate?: (hasErrors: boolean) => void;
 }
+
+const yamlRuleFormLabel = (
+  <FormattedMessage id="xpack.alertingV2.yamlRuleForm.label" defaultMessage="Rule definition" />
+);
+
+const yamlRuleFormHelpText = (
+  <FormattedMessage
+    id="xpack.alertingV2.yamlRuleForm.helpText"
+    defaultMessage="Edit the rule as YAML. ES|QL autocomplete is available within the query field."
+  />
+);
+
+const yamlRuleFormLabelWithHelp = (
+  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} component="span">
+    <EuiFlexItem grow={false}>{yamlRuleFormLabel}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiIconTip
+        content={yamlRuleFormHelpText}
+        position="right"
+        type="info"
+        data-test-subj="yamlRuleFormHelpText"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const fullHeightFlexColumnCss = css`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+`;
+
+const fullHeightFormRowCss = css`
+  height: 100%;
+
+  .euiFormRow__fieldWrapper {
+    height: 100%;
+  }
+`;
 
 /**
  * YAML-based rule form editor.
@@ -68,6 +122,8 @@ export const YamlRuleForm = ({
   yamlText,
   setYamlText,
   onBlurSync,
+  fullHeight = false,
+  onValidate,
 }: YamlRuleFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const { reset } = useFormContext<FormValues>();
@@ -115,8 +171,22 @@ export const YamlRuleForm = ({
   );
 
   const isReadOnly = isDisabled || isSubmitting;
+  const editorHeight = fullHeight ? '100%' : undefined;
 
-  return (
+  const editor = (
+    <YamlRuleEditor
+      value={yamlText}
+      onChange={handleYamlChange}
+      onBlur={handleBlur}
+      onValidate={onValidate}
+      esqlCallbacks={esqlCallbacks}
+      isReadOnly={isReadOnly}
+      height={editorHeight}
+      dataTestSubj="ruleV2FormYamlEditor"
+    />
+  );
+
+  const content = (
     <>
       {error && (
         <>
@@ -135,32 +205,38 @@ export const YamlRuleForm = ({
         </>
       )}
 
-      <EuiForm id={RULE_FORM_ID} component="form" onSubmit={handleSubmit}>
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.alertingV2.yamlRuleForm.label"
-              defaultMessage="Rule definition (YAML)"
-            />
-          }
-          fullWidth
-          helpText={
-            <FormattedMessage
-              id="xpack.alertingV2.yamlRuleForm.helpText"
-              defaultMessage="Edit the rule as YAML. ES|QL autocomplete is available within the query field."
-            />
-          }
+      <EuiForm
+        id={RULE_FORM_ID}
+        component="form"
+        onSubmit={handleSubmit}
+        css={fullHeight ? fullHeightFlexColumnCss : undefined}
+      >
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={fullHeight ? fullHeightFlexColumnCss : undefined}
         >
-          <YamlRuleEditor
-            value={yamlText}
-            onChange={handleYamlChange}
-            onBlur={handleBlur}
-            esqlCallbacks={esqlCallbacks}
-            isReadOnly={isReadOnly}
-            dataTestSubj="ruleV2FormYamlEditor"
-          />
-        </EuiFormRow>
+          <EuiFlexItem grow>
+            <EuiFormRow
+              label={yamlRuleFormLabelWithHelp}
+              fullWidth
+              css={fullHeight ? fullHeightFormRowCss : undefined}
+            >
+              {editor}
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiForm>
     </>
   );
+
+  if (fullHeight) {
+    return (
+      <div data-test-subj="yamlRuleFormFullHeight" css={fullHeightFlexColumnCss}>
+        {content}
+      </div>
+    );
+  }
+
+  return content;
 };

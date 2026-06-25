@@ -166,7 +166,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
   const toolReturn = await withExecuteToolSpan(
     tool.id,
-    { tool: { input: toolParams } },
+    { tool: { input: toolParams, toolCallId, description: tool.description } },
     async (): Promise<ToolHandlerReturn> => {
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);
@@ -275,11 +275,11 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     modelProvider,
     toolsService,
     resultStore,
+    skillsStore,
     attachmentStateManager,
     logger,
     promptManager,
     stateManager,
-    filestore,
     skillServiceStart,
     toolManager,
     experimentalFeatures,
@@ -314,6 +314,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       toolParams: toolParams as Record<string, unknown>,
     }),
     resultStore: resultStore.asReadonly(),
+    skillsStore: skillsStore.asReadonly(),
     attachments: attachmentStateManager,
     skills: await createSkillsService({
       skillServiceStart,
@@ -323,7 +324,6 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       runner: manager.getRunner(),
     }),
     toolManager,
-    filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
     runContext: manager.context,
     executionMode: manager.deps.executionMode,
