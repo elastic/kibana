@@ -41,14 +41,8 @@ export class DashboardMarkdownPlugin
 {
   public setup(
     core: CoreSetup<MarkdownStartDeps>,
-    { contentManagement, embeddable, expressions, visualizations }: MarkdownSetupDeps
+    { embeddable, expressions, visualizations }: MarkdownSetupDeps
   ) {
-    contentManagement.registry.register({
-      id: MARKDOWN_SAVED_OBJECT_TYPE,
-      name: 'Markdown',
-      version: { latest: 1 },
-    });
-
     embeddable.registerAddFromLibraryType({
       onAdd: async (container, savedObject) => {
         container.addNewPanel<MarkdownEmbeddableState>(
