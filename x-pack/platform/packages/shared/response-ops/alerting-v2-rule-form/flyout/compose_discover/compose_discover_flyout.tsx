@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
@@ -16,8 +17,10 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  euiFullHeight,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebounceFn } from '@kbn/react-hooks';
@@ -70,6 +73,13 @@ const YAML_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.editMod
 const YAML_MODE_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
   defaultMessage: 'YAML MODE',
 });
+
+const QUERY_SANDBOX_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.yamlMode.querySandbox',
+  {
+    defaultMessage: 'Query sandbox',
+  }
+);
 
 const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
   defaultMessage: 'Edit mode selection',
@@ -141,6 +151,22 @@ export interface ComposeDiscoverFlyoutProps {
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
 const YAML_PARSE_DEBOUNCE_OPTIONS = { wait: 300 } as const;
+
+const composeDiscoverYamlFlyoutBodyCss = css`
+  ${euiFullHeight()}
+  .euiFlyoutBody__overflow {
+    ${euiFullHeight()}
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+`;
 
 const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
   if (stepIndex < currentStep) return 'complete';
@@ -839,49 +865,76 @@ export function ComposeDiscoverFlyout({
                 )}
                 {!isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiToolTip content={forceYamlMode ? YAML_ONLY_TOOLTIP : undefined}>
-                      <EuiButtonGroup
-                        legend={EDIT_MODE_LEGEND}
-                        options={EDIT_MODE_OPTIONS}
-                        idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                        onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                        isIconOnly
-                        isDisabled={forceYamlMode}
-                        buttonSize="compressed"
-                        data-test-subj="composeDiscoverEditModeToggle"
-                      />
-                    </EuiToolTip>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      {uiState.yamlMode && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            color="text"
+                            iconType="chevronLimitLeft"
+                            isDisabled={uiState.childOpen}
+                            onClick={() => dispatch({ type: 'OPEN_CHILD', isAlert })}
+                            data-test-subj="composeDiscoverYamlQuerySandbox"
+                          >
+                            {QUERY_SANDBOX_LABEL}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      )}
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={forceYamlMode ? YAML_ONLY_TOOLTIP : undefined}>
+                          <EuiButtonGroup
+                            legend={EDIT_MODE_LEGEND}
+                            options={EDIT_MODE_OPTIONS}
+                            idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                            onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                            isIconOnly
+                            isDisabled={forceYamlMode}
+                            buttonSize="compressed"
+                            data-test-subj="composeDiscoverEditModeToggle"
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
             </EuiFlyoutHeader>
 
-            <EuiFlyoutBody>
-              {validationCallout}
+            <EuiFlyoutBody css={uiState.yamlMode ? composeDiscoverYamlFlyoutBodyCss : undefined}>
               {uiState.yamlMode ? (
-                <React.Suspense fallback={null}>
-                  <LazyYamlRuleForm
-                    services={baseServices}
-                    yamlText={yamlText}
-                    setYamlText={handleSetYamlText}
-                    onBlurSync={handleBlurSync}
-                    onValidate={setYamlHasErrors}
-                    isSubmitting={isSaving}
-                  />
-                </React.Suspense>
+                <>
+                  {validationCallout}
+                  <React.Suspense fallback={null}>
+                    <LazyYamlRuleForm
+                      services={baseServices}
+                      yamlText={yamlText}
+                      setYamlText={handleSetYamlText}
+                      onBlurSync={handleBlurSync}
+                      onValidate={setYamlHasErrors}
+                      isSubmitting={isSaving}
+                      fullHeight
+                    />
+                  </React.Suspense>
+                </>
               ) : (
-                <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
-                  <ComposeDiscoverForm
-                    state={uiState}
-                    dispatch={dispatch}
-                    services={baseServices}
-                    onRecoveryTypeChange={handleRecoveryTypeChange}
-                    onKindChange={handleKindChange}
-                    isEditing={isEditing}
-                    ruleId={ruleId}
-                    builderType={builderType}
-                  />
-                </BuilderStateProvider>
+                <>
+                  {validationCallout}
+                  <BuilderStateProvider
+                    builderState={builderState}
+                    setBuilderState={setBuilderState}
+                  >
+                    <ComposeDiscoverForm
+                      state={uiState}
+                      dispatch={dispatch}
+                      services={baseServices}
+                      onRecoveryTypeChange={handleRecoveryTypeChange}
+                      onKindChange={handleKindChange}
+                      isEditing={isEditing}
+                      ruleId={ruleId}
+                      builderType={builderType}
+                    />
+                  </BuilderStateProvider>
+                </>
               )}
             </EuiFlyoutBody>
 
