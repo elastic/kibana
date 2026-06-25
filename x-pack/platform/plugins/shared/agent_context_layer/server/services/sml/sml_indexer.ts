@@ -18,11 +18,13 @@ import type {
   SmlIngestionMethod,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
+  SmlPermissions,
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 import type { SmlResolverRegistry } from './resolvers/types';
 import { parseOriginId } from './resolvers/origin_id';
+import { classifyPermission } from './resolvers/permissions_dsl';
 
 export interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
@@ -188,20 +190,27 @@ class SmlIndexerImpl implements SmlIndexer {
 
     await this.deleteChunks({ originUri, esClient });
 
-    const bulkOps = smlData.chunks.map((chunk) =>
-      // Use a bare UUID for `_id` (and the document's `id` field) so the chunk
-      // identifier is bounded at 36 bytes regardless of `attachmentType` /
-      // `originId` length. ES `_id` is capped at 512 bytes and `originId`
-      // can be caller-supplied (e.g. via the workflow step's `with: originId`),
-      // so an embed-the-inputs scheme was unbounded by construction. Lookups
-      // happen via the `origin_id` and `type` document fields, not by parsing
-      // `_id`, so dropping the prefix is purely an internal change.
-      this.buildIndexOp({
-        chunkId: uuidv4(),
-        chunk,
-        originId,
-        spaces,
-        ingestionMethod: 'crawled',
+    const bulkOps = await Promise.all(
+      smlData.chunks.map(async (chunk) => {
+        // Use a bare UUID for `_id` (and the document's `id` field) so the chunk
+        // identifier is bounded at 36 bytes regardless of `attachmentType` /
+        // `originId` length. ES `_id` is capped at 512 bytes and `originId`
+        // can be caller-supplied (e.g. via the workflow step's `with: originId`),
+        // so an embed-the-inputs scheme was unbounded by construction. Lookups
+        // happen via the `origin_id` and `type` document fields, not by parsing
+        // `_id`, so dropping the prefix is purely an internal change.
+        const resolvedPermissions = await this.resolvePermissionsForChunk({
+          originId,
+          chunk,
+        });
+        return this.buildIndexOp({
+          chunkId: uuidv4(),
+          chunk,
+          originId,
+          spaces,
+          ingestionMethod: 'crawled',
+          resolvedPermissions,
+        });
       })
     );
 
@@ -260,23 +269,105 @@ class SmlIndexerImpl implements SmlIndexer {
 
     await this.deleteChunks({ originUri, esClient });
 
-    const bulkOps = chunks.map((chunk) =>
-      // Use a bare UUID for `_id`. The previous `${attachmentType}:${originId}:manual:${index}`
-      // scheme was unbounded (the inputs can be caller-controlled) and the
-      // determinism it advertised was redundant — `deleteChunks` above already
-      // wipes every chunk for the `origin_id`, so re-runs cannot accumulate
-      // stale rows. The `manual` literal was decoration; the document carries
-      // `ingestion_method: 'manual'` for that semantic.
-      this.buildIndexOp({
-        chunkId: uuidv4(),
-        chunk,
-        originId,
-        spaces,
-        ingestionMethod: 'manual',
+    const bulkOps = await Promise.all(
+      chunks.map(async (chunk) => {
+        // Use a bare UUID for `_id`. The previous `${attachmentType}:${originId}:manual:${index}`
+        // scheme was unbounded (the inputs can be caller-controlled) and the
+        // determinism it advertised was redundant — `deleteChunks` above already
+        // wipes every chunk for the `origin_id`, so re-runs cannot accumulate
+        // stale rows. The `manual` literal was decoration; the document carries
+        // `ingestion_method: 'manual'` for that semantic.
+        //
+        // Resolver-derived permissions apply in content mode too — when a
+        // workflow author writes against a resolver-prefixed `originId`
+        // (e.g. `kibana://lens/<id>`), the resolver is authoritative and any
+        // caller-supplied chunk permissions are logged + ignored. Mirrors
+        // the origin-mode behaviour and keeps the workflow step in lockstep
+        // with the crawler for registered SO-backed types.
+        const resolvedPermissions = await this.resolvePermissionsForChunk({
+          originId,
+          chunk,
+        });
+        return this.buildIndexOp({
+          chunkId: uuidv4(),
+          chunk,
+          originId,
+          spaces,
+          ingestionMethod: 'manual',
+          resolvedPermissions,
+        });
       })
     );
 
     await this.executeBulk({ bulkOps, esClient, originId, chunkCount: chunks.length });
+  }
+
+  /**
+   * Compute the permissions to stamp on an SML document for a given chunk.
+   *
+   * When `originId` carries a registered URI scheme (`<scheme>://<path>`), the
+   * matching resolver is authoritative: its `getPermissions(path)` output is
+   * classified through the SML permissions DSL and folded into the nested
+   * {@link SmlPermissions} shape. Any caller-supplied `chunk.permissions` is
+   * logged as a misconfiguration and dropped — the resolver is the single
+   * source of truth so the crawler, event-driven indexAttachment calls and
+   * the workflow step's content-mode writes all agree on what privileges
+   * gate a chunk.
+   *
+   * When `originId` has no scheme, the scheme is unregistered, or the
+   * resolver throws, we fall back to caller-supplied `chunk.permissions`
+   * (normalised to an empty `SmlPermissions` when absent). This preserves
+   * the historical behaviour for SML types that compute their own
+   * permissions in `getSmlData` (e.g. `connector`, `workflow`).
+   */
+  private async resolvePermissionsForChunk({
+    originId,
+    chunk,
+  }: {
+    originId: string;
+    chunk: SmlChunk;
+  }): Promise<SmlPermissions> {
+    const chunkPermissions: SmlPermissions = {
+      kibana: { privileges: chunk.permissions?.kibana?.privileges ?? [] },
+      elasticsearch: { indices: chunk.permissions?.elasticsearch?.indices ?? [] },
+    };
+
+    const { scheme, path } = parseOriginId(originId);
+    if (!scheme) {
+      return chunkPermissions;
+    }
+    const resolver = this.resolverRegistry.get(scheme);
+    if (!resolver) {
+      return chunkPermissions;
+    }
+
+    let rawPermissions: string[];
+    try {
+      rawPermissions = await resolver.getPermissions(path);
+    } catch (error) {
+      this.logger.warn(
+        `SML indexer: resolver '${scheme}' failed to compute permissions for origin '${originId}': ${
+          (error as Error).message
+        }`
+      );
+      return chunkPermissions;
+    }
+
+    if (
+      chunkPermissions.kibana.privileges.length > 0 ||
+      chunkPermissions.elasticsearch.indices.length > 0
+    ) {
+      this.logger.warn(
+        `SML indexer: '${scheme}' resolver is authoritative for origin '${originId}'; ignoring caller-supplied chunk permissions`
+      );
+    }
+
+    return foldDslToSmlPermissions({
+      rawPermissions,
+      scheme,
+      originId,
+      logger: this.logger,
+    });
   }
 
   private buildIndexOp({
@@ -285,12 +376,14 @@ class SmlIndexerImpl implements SmlIndexer {
     originId,
     spaces,
     ingestionMethod,
+    resolvedPermissions,
   }: {
     chunkId: string;
     chunk: SmlChunk;
     originId: string;
     spaces: string[];
     ingestionMethod: SmlIngestionMethod;
+    resolvedPermissions: SmlPermissions;
   }) {
     const now = new Date().toISOString();
     const document: SmlDocument = {
@@ -302,10 +395,7 @@ class SmlIndexerImpl implements SmlIndexer {
       created_at: now,
       updated_at: now,
       spaces,
-      permissions: {
-        kibana: { privileges: chunk.permissions?.kibana?.privileges ?? [] },
-        elasticsearch: { indices: chunk.permissions?.elasticsearch?.indices ?? [] },
-      },
+      permissions: resolvedPermissions,
       ingestion_method: ingestionMethod,
     };
     if (chunk.description !== undefined) {
@@ -483,3 +573,67 @@ class SmlIndexerImpl implements SmlIndexer {
     }
   }
 }
+
+/**
+ * Translate a flat list of DSL-encoded permission strings (as produced by an
+ * SML resolver) into the nested {@link SmlPermissions} shape the on-disk
+ * mapping expects.
+ *
+ * Supported DSL prefixes (see `permissions_dsl.ts`):
+ *   - `kibana:<priv>` or bare `<priv>` → `permissions.kibana.privileges`
+ *   - `es-index:<idx>:read` / `:view_index_metadata` → `permissions.elasticsearch.indices`
+ *
+ * Dropped (with a warning):
+ *   - `es-cluster:<priv>` — the nested storage has no slot for cluster
+ *     privileges. Built-in resolvers do not emit these today; treated as a
+ *     known latent gap rather than a regression.
+ *   - `es-index:<idx>:<other>` — the search-time `_has_privileges` call is
+ *     hard-coded to `'read'`, so other index-level privileges would not
+ *     survive the round-trip. Storing the index name without preserving the
+ *     requested privilege would silently change the access contract.
+ *
+ * Duplicate kibana privileges and duplicate index names are collapsed via set
+ * semantics so test snapshots stay stable across reorderings.
+ */
+const foldDslToSmlPermissions = ({
+  rawPermissions,
+  scheme,
+  originId,
+  logger,
+}: {
+  rawPermissions: string[];
+  scheme: string;
+  originId: string;
+  logger: Logger;
+}): SmlPermissions => {
+  const kibanaPrivs = new Set<string>();
+  const esIndices = new Set<string>();
+
+  for (const raw of rawPermissions) {
+    const classified = classifyPermission(raw);
+    if (classified.kind === 'kibana') {
+      kibanaPrivs.add(classified.value);
+    } else if (classified.kind === 'es-index') {
+      if (classified.value === 'read' || classified.value === 'view_index_metadata') {
+        esIndices.add(classified.index);
+      } else {
+        logger.warn(
+          `SML indexer: resolver '${scheme}' emitted unsupported es-index privilege '${classified.value}' on index '${classified.index}' for origin '${originId}'; dropping`
+        );
+      }
+    } else {
+      logger.warn(
+        `SML indexer: resolver '${scheme}' emitted es-cluster privilege '${classified.value}' for origin '${originId}'; cluster privileges are not yet representable in the SML storage shape and will be dropped`
+      );
+    }
+  }
+
+  return {
+    kibana: {
+      privileges: Array.from(kibanaPrivs, (name) => ({ name })),
+    },
+    elasticsearch: {
+      indices: Array.from(esIndices, (name) => ({ name })),
+    },
+  };
+};

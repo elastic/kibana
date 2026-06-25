@@ -99,8 +99,21 @@ export interface SmlChunk {
   user_id?: string;
   /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
   references?: Array<{ uri: string }>;
-  /** Permissions required to access the underlying element. */
-  permissions: SmlPermissions;
+  /**
+   * Permissions required to access the underlying element.
+   *
+   * Optional because SML types that opt into the resolver registry (by
+   * yielding `<scheme>://<path>` origin ids) intentionally delegate
+   * permission computation to the resolver and omit this field. The indexer
+   * stamps the resolver-derived permissions on the document and logs a
+   * warning if a resolver-backed chunk also carries `permissions` here —
+   * the resolver is authoritative in that case. See
+   * {@link SmlTypeDefinition} for the opt-in contract.
+   *
+   * Types that need permission shapes outside the built-in resolvers (e.g.
+   * feature-API privileges) must still set this field explicitly.
+   */
+  permissions?: SmlPermissions;
 }
 
 /**

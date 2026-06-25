@@ -73,7 +73,9 @@ const ChunkSchema = z.object({
     .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
     .max(MAX_SML_PERMISSIONS)
     .optional()
-    .describe('Optional Kibana privilege strings required to view the chunk later.'),
+    .describe(
+      "Optional Kibana privilege strings required to view the chunk later. Ignored when `originId` carries a resolver scheme registered on the SML resolver registry (e.g. `kibana://lens/<id>`) \u2014 the resolver is authoritative in that case and these values are logged + dropped by the indexer. Use this field only for origin schemes the SML layer cannot resolve."
+    ),
   tags: z
     .array(
       z
@@ -109,6 +111,16 @@ const ChunkSchema = z.object({
  *   (both crawled and manual entries). This matches the "workflow owns
  *   this origin" semantic and is the opposite of the crawler's default
  *   delete (which preserves curated manual entries).
+ *
+ * Permissions: when `originId` uses a resolver-prefixed form
+ * (`<scheme>://<path>`, e.g. `kibana://lens/<id>`), the matching SML
+ * resolver computes the required privileges at index time and the
+ * caller-supplied `chunks[].permissions` is logged and dropped. This keeps
+ * the workflow step in lockstep with the crawler — a workflow author
+ * cannot bypass the visualization's `saved_object:lens/get` requirement by
+ * writing a chunk under `attachmentType: 'visualization'`. For SML types
+ * not yet on the resolver registry (e.g. `connector`, `workflow`), the
+ * caller-supplied `chunks[].permissions` is honoured as before.
  */
 export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
   z.object({
@@ -175,7 +187,7 @@ export const contextEngineAddEntryStepCommonDefinition: CommonStepDefinition<
       'xpack.agentContextLayer.workflowSteps.contextEngineAddEntry.documentation.details',
       {
         defaultMessage:
-          "Writes chunks directly (the registered type\u2019s `getSmlData` hook is not invoked). `upsert` writes the supplied `chunks` tagged `ingestion_method: 'manual'`, replacing any prior chunks for the `origin_id` (idempotent — no fail-if-exists / fail-if-not-found distinction). `delete` wipes every chunk for the `origin_id` regardless of how it was produced.",
+          "Writes chunks directly (the registered type\u2019s `getSmlData` hook is not invoked). `upsert` writes the supplied `chunks` tagged `ingestion_method: 'manual'`, replacing any prior chunks for the `origin_id` (idempotent \u2014 no fail-if-exists / fail-if-not-found distinction). `delete` wipes every chunk for the `origin_id` regardless of how it was produced. When `originId` uses a resolver-prefixed form (e.g. `kibana://lens/<id>`), the matching SML resolver is authoritative for permissions \u2014 any caller-supplied `chunks[].permissions` is logged and dropped, so the workflow step enforces the same access controls as the crawler.",
       }
     ),
     examples: [
@@ -192,6 +204,24 @@ export const contextEngineAddEntryStepCommonDefinition: CommonStepDefinition<
         title: "Quarterly summary"
         content: "Revenue grew 12% across all regions ..."
         description: "Auto-generated quarterly summary"
+\`\`\``,
+
+      `## Add a resolver-backed entry (visualization)
+\`\`\`yaml
+- name: add_visualization_entry
+  type: ${ContextEngineAddEntryStepTypeId}
+  with:
+    # Prefixed origin id opts into the built-in 'kibana' resolver, which
+    # stamps 'saved_object:lens/get' on the chunk at index time. Workflow
+    # authors do not (and should not) supply 'permissions' here — the
+    # resolver is the single source of truth.
+    originId: "kibana://lens/abc-123"
+    attachmentType: "visualization"
+    action: "upsert"
+    chunks:
+      - type: "visualization"
+        title: "Custom title for an existing Lens viz"
+        content: "Quarterly revenue trend across all regions"
 \`\`\``,
 
       `## Remove a previously added entry

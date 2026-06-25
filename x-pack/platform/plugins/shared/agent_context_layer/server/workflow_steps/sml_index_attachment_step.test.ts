@@ -6,13 +6,33 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SmlIndexAttachmentInputSchema } from '../../common/workflow_steps/sml_index_attachment_step';
 import { apiPrivileges } from '../../common/features';
 import type { AgentContextLayerPluginStart } from '../types';
+import { createSmlIndexer } from '../services/sml/sml_indexer';
+import { createKibanaResolver } from '../services/sml/resolvers';
+import { createSmlResolverRegistry } from '../services/sml/resolvers/resolver_registry';
 import { createContextEngineAddEntryStepDefinition } from './sml_index_attachment_step';
+
+// Mock the storage and the only `sml_service` symbol the indexer pulls in.
+// The pre-existing describe blocks stub `startContract.indexAttachment`
+// entirely, so these mocks are no-ops for them; the end-to-end describe
+// block at the bottom of this file wires up a real `SmlIndexer` and
+// consumes both.
+jest.mock('../services/sml/sml_storage', () => ({
+  smlIndexName: '.test-sml-data',
+  createSmlStorage: jest.fn(),
+}));
+
+jest.mock('../services/sml/sml_service', () => ({
+  isNotFoundError: (error: unknown) => (error as { statusCode?: number })?.statusCode === 404,
+}));
+
+import { createSmlStorage } from '../services/sml/sml_storage';
 
 const buildStartContract = (): jest.Mocked<AgentContextLayerPluginStart> => ({
   search: jest.fn(),
@@ -609,6 +629,218 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       expect((result.error as Error).message).toContain('delete');
       expect(startContract.deleteAttachment).not.toHaveBeenCalled();
       expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * End-to-end coverage for the resolver wiring: build a *real* SML indexer
+   * with the built-in `kibana` resolver registered, route the workflow
+   * step's `startContract.indexAttachment` call through it, and confirm the
+   * stamped Elasticsearch document carries the resolver-derived permission
+   * regardless of what the workflow author wrote in `chunks[].permissions`.
+   *
+   * The pre-existing describe blocks above stub `indexAttachment` entirely,
+   * so they cannot catch a regression where the step bypasses the indexer's
+   * permission computation. This block closes that gap.
+   */
+  describe('resolver-backed permissions (end-to-end against a real indexer)', () => {
+    type BulkOperationDocument = {
+      index: {
+        _id: string;
+        document: {
+          permissions: { kibana: { privileges: Array<{ name: string }> }; elasticsearch: unknown };
+          ingestion_method: string;
+          [key: string]: unknown;
+        };
+      };
+    };
+
+    interface BulkBody {
+      operations: BulkOperationDocument[];
+    }
+
+    const buildIndexerScaffold = () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      (createSmlStorage as jest.Mock).mockReturnValue({
+        getClient: jest.fn().mockReturnValue({ bulk: bulkMock }),
+      });
+
+      const resolverRegistry = createSmlResolverRegistry();
+      resolverRegistry.register(createKibanaResolver());
+
+      const indexerLogger = loggerMock.create();
+      indexerLogger.get = jest.fn().mockReturnValue(indexerLogger);
+
+      // Minimal type registry — the visualization type is "registered" via a
+      // plain object so the step's `getTypeDefinition` guard passes; the
+      // indexer never invokes `getSmlData` in content mode, so the omitted
+      // fields are immaterial here.
+      const registry = {
+        get: jest.fn().mockReturnValue({ id: 'visualization' }),
+        list: jest.fn().mockReturnValue([{ id: 'visualization' }]),
+        register: jest.fn(),
+        has: jest.fn().mockReturnValue(true),
+      };
+
+      const indexer = createSmlIndexer({
+        registry: registry as any,
+        resolverRegistry,
+        logger: indexerLogger,
+      });
+
+      const esClient = {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+        count: jest.fn().mockResolvedValue({ count: 0 }),
+      };
+      const savedObjectsClient = {};
+
+      const buildStartContractAgainstRealIndexer = (): jest.Mocked<AgentContextLayerPluginStart> => {
+        const start = buildStartContract();
+        start.indexAttachment.mockImplementation(async (params: any) => {
+          const base = {
+            originId: params.originId,
+            attachmentType: params.attachmentType,
+            action: params.action,
+            spaces: [params.spaceId ?? 'default'],
+            esClient: esClient as any,
+            savedObjectsClient: savedObjectsClient as any,
+            logger: indexerLogger,
+          };
+          if (params.content !== undefined) {
+            return indexer.indexAttachment({ ...base, content: params.content });
+          }
+          return indexer.indexAttachment({ ...base, force: params.force });
+        });
+        return start;
+      };
+
+      return {
+        bulkMock,
+        indexerLogger,
+        buildStartContractAgainstRealIndexer,
+      };
+    };
+
+    it('stamps saved_object:lens/get on the document even when caller-supplied permissions are empty', async () => {
+      const { bulkMock, buildStartContractAgainstRealIndexer } = buildIndexerScaffold();
+      const startContract = buildStartContractAgainstRealIndexer();
+
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
+      });
+
+      const context = buildHandlerContext({
+        // Resolver-prefixed origin id — opts into the kibana resolver.
+        originId: 'kibana://lens/abc-123',
+        attachmentType: 'visualization',
+        action: 'upsert',
+        chunks: [
+          {
+            type: 'visualization',
+            title: 'Custom viz title',
+            content: 'Quarterly revenue trend',
+            // Intentionally no `permissions` — the kibana resolver should
+            // stamp `saved_object:lens/get` on the document.
+          },
+        ],
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.error).toBeUndefined();
+      expect(bulkMock).toHaveBeenCalledTimes(1);
+      const bulkBody = bulkMock.mock.calls[0][0] as BulkBody;
+      expect(bulkBody.operations[0].index.document.permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        elasticsearch: { indices: [] },
+      });
+      // Workflow writes are always 'manual' — confirms the test wired up the
+      // content-mode path, not origin mode.
+      expect(bulkBody.operations[0].index.document.ingestion_method).toBe('manual');
+    });
+
+    it('ignores caller-supplied permissions and logs a warning when a resolver scheme matches', async () => {
+      const {
+        bulkMock,
+        indexerLogger,
+        buildStartContractAgainstRealIndexer,
+      } = buildIndexerScaffold();
+      const startContract = buildStartContractAgainstRealIndexer();
+
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'kibana://lens/abc-123',
+        attachmentType: 'visualization',
+        action: 'upsert',
+        chunks: [
+          {
+            type: 'visualization',
+            title: 'Custom viz title',
+            content: 'Quarterly revenue trend',
+            // Stale / mismatched caller-supplied perm — must be dropped by
+            // the indexer because the kibana resolver is authoritative.
+            permissions: ['some:other:privilege'],
+          },
+        ],
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.error).toBeUndefined();
+      const bulkBody = bulkMock.mock.calls[0][0] as BulkBody;
+      expect(bulkBody.operations[0].index.document.permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        elasticsearch: { indices: [] },
+      });
+      expect(indexerLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("'kibana' resolver is authoritative")
+      );
+    });
+
+    it('honours caller-supplied permissions when the attachment type has no resolver-prefixed origin id', async () => {
+      const { bulkMock, buildStartContractAgainstRealIndexer } = buildIndexerScaffold();
+      const startContract = buildStartContractAgainstRealIndexer();
+
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
+      });
+
+      const context = buildHandlerContext({
+        // No `kibana://` prefix — falls through to caller-supplied perms,
+        // preserving the historical behaviour for legacy SML types.
+        originId: 'workflow-author-defined-id',
+        attachmentType: 'visualization',
+        action: 'upsert',
+        chunks: [
+          {
+            type: 'visualization',
+            title: 'Custom viz title',
+            content: 'c',
+            permissions: ['custom:read'],
+          },
+        ],
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.error).toBeUndefined();
+      const bulkBody = bulkMock.mock.calls[0][0] as BulkBody;
+      expect(bulkBody.operations[0].index.document.permissions).toEqual({
+        kibana: { privileges: [{ name: 'custom:read' }] },
+        elasticsearch: { indices: [] },
+      });
     });
   });
 });

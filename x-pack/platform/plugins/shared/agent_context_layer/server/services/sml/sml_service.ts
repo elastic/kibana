@@ -43,10 +43,7 @@ import {
 } from './resolvers';
 import type { SmlResolver, SmlResolverItem, SmlResolverRegistry } from './resolvers/types';
 import { parseOriginId } from './resolvers/origin_id';
-import {
-  buildCheckPrivilegesPayload,
-  collectAuthorizedRawPermissions,
-} from './resolvers/permissions_dsl';
+import { buildCheckPrivilegesPayload } from './resolvers/permissions_dsl';
 
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
@@ -339,10 +336,10 @@ const getAuthorizedPrivileges = async ({
     return { authorizedPerms: new Set(), authorizedIndices: new Set() };
   }
 
-  const { payload, classified } = buildCheckPrivilegesPayload(permissions);
+  const { payload } = buildCheckPrivilegesPayload(permissions);
   if (!payload.kibana && !payload.elasticsearch) {
     // No recognised privileges at all; nothing to check, nothing authorized.
-    return new Set();
+    return { authorizedPerms: new Set(), authorizedIndices: new Set() };
   }
 
   try {

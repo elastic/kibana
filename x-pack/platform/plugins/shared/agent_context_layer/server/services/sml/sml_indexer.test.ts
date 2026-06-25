@@ -287,7 +287,7 @@ describe('createSmlIndexer', () => {
       );
       const logger = createMockLogger();
       const esClient = createMockEsClient();
-      const indexer = createSmlIndexer({ registry, logger });
+      const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
       await indexer.indexAttachment(
         createIndexerParams({
@@ -628,7 +628,7 @@ describe('createSmlIndexer', () => {
         const esClient = createMockEsClient();
         // hasManualEntry returns true
         (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
-        const indexer = createSmlIndexer({ registry, logger });
+        const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
         await indexer.indexAttachment(
           createIndexerParams({
@@ -675,7 +675,7 @@ describe('createSmlIndexer', () => {
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
-        const indexer = createSmlIndexer({ registry, logger });
+        const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
         await indexer.indexAttachment({
           ...createIndexerParams({
@@ -704,7 +704,7 @@ describe('createSmlIndexer', () => {
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
-        const indexer = createSmlIndexer({ registry, logger });
+        const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
         await indexer.indexAttachment(
           createIndexerParams({
@@ -737,7 +737,7 @@ describe('createSmlIndexer', () => {
         (esClient.count as jest.Mock).mockRejectedValue(
           Object.assign(new Error('boom'), { statusCode: 500 })
         );
-        const indexer = createSmlIndexer({ registry, logger });
+        const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
         await indexer.indexAttachment(
           createIndexerParams({
@@ -770,7 +770,7 @@ describe('createSmlIndexer', () => {
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        const indexer = createSmlIndexer({ registry, logger });
+        const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
         await indexer.indexAttachment(
           createContentIndexerParams({
@@ -845,7 +845,7 @@ describe('createSmlIndexer', () => {
         registry.list.mockReturnValue([]);
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        const indexer = createSmlIndexer({ registry, logger });
+        const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
         await indexer.indexAttachment(
           createContentIndexerParams({
@@ -877,7 +877,7 @@ describe('createSmlIndexer', () => {
         const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        const indexer = createSmlIndexer({ registry, logger });
+        const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
         await indexer.indexAttachment(
           createContentIndexerParams({
@@ -901,7 +901,7 @@ describe('createSmlIndexer', () => {
         const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        const indexer = createSmlIndexer({ registry, logger });
+        const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
         await indexer.indexAttachment(
           createContentIndexerParams({
@@ -958,7 +958,7 @@ describe('createSmlIndexer', () => {
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
-      const indexer = createSmlIndexer({ registry, logger });
+      const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
       await indexer.deleteAttachment(
         createDeleteParams({ originId: 'att-wipe-all', ingestionMethod: 'all', esClient })
@@ -977,7 +977,7 @@ describe('createSmlIndexer', () => {
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
-      const indexer = createSmlIndexer({ registry, logger });
+      const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
       await indexer.deleteAttachment(
         createDeleteParams({ originId: 'att-wipe-manual', ingestionMethod: 'manual', esClient })
@@ -995,7 +995,7 @@ describe('createSmlIndexer', () => {
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
-      const indexer = createSmlIndexer({ registry, logger });
+      const indexer = createSmlIndexer({ registry, resolverRegistry: createResolverRegistry(), logger });
 
       // No `ingestionMethod` passed — should behave exactly like the historical
       // `action: 'delete'` call on `indexAttachment` (preserve manual entries,
@@ -1013,15 +1013,16 @@ describe('createSmlIndexer', () => {
     });
   });
 
-  describe('resolver integration', () => {
+  describe('resolver integration (origin mode)', () => {
     /**
      * Resolver that computes deterministic permissions from the origin path
      * and tracks every invocation so the test can assert against the
-     * resolver call sequence.
+     * resolver call sequence. Returns bare (unprefixed) strings, which the
+     * SML permissions DSL classifies as Kibana privileges by default.
      */
     const buildPermissionResolver = (
       type: string,
-      getPermissions: jest.Mock = jest.fn((path: string) => [`kibana:resolved:${path}`])
+      getPermissions: jest.Mock = jest.fn((path: string) => [`resolved:${path}`])
     ) => ({
       resolver: {
         type,
@@ -1029,6 +1030,11 @@ describe('createSmlIndexer', () => {
         getItem: jest.fn().mockResolvedValue(undefined),
       } as SmlResolver,
       getPermissions,
+    });
+
+    const nestedChunkPermissions = (privileges: string[]): SmlChunk['permissions'] => ({
+      kibana: { privileges: privileges.map((name) => ({ name })) },
+      elasticsearch: { indices: [] },
     });
 
     it('uses the resolver to compute permissions when origin_id has a registered scheme', async () => {
@@ -1041,7 +1047,12 @@ describe('createSmlIndexer', () => {
         // Chunk-level `permissions` is intentionally provided so the test
         // verifies it's IGNORED in favour of the resolver output.
         chunks: [
-          { type: 'lens', title: 'A', content: 'c', permissions: ['stale-perm'] },
+          {
+            type: 'lens',
+            title: 'A',
+            content: 'c',
+            permissions: nestedChunkPermissions(['stale-perm']),
+          },
           { type: 'lens', title: 'B', content: 'c2' },
         ],
       };
@@ -1065,18 +1076,114 @@ describe('createSmlIndexer', () => {
         })
       );
 
-      expect(getPermissions).toHaveBeenCalledTimes(1);
+      // Resolver is invoked once per chunk so per-chunk resolver state can
+      // diverge (e.g. when a future resolver hashes the chunk into its
+      // permission output).
+      expect(getPermissions).toHaveBeenCalledTimes(2);
       expect(getPermissions).toHaveBeenCalledWith('lens/abc-123');
       const bulkCall = bulkMock.mock.calls[0][0];
-      expect(bulkCall.operations[0].index.document.permissions).toEqual([
-        'kibana:resolved:lens/abc-123',
-      ]);
-      expect(bulkCall.operations[1].index.document.permissions).toEqual([
-        'kibana:resolved:lens/abc-123',
-      ]);
+      expect(bulkCall.operations[0].index.document.permissions).toEqual({
+        kibana: { privileges: [{ name: 'resolved:lens/abc-123' }] },
+        elasticsearch: { indices: [] },
+      });
+      expect(bulkCall.operations[1].index.document.permissions).toEqual({
+        kibana: { privileges: [{ name: 'resolved:lens/abc-123' }] },
+        elasticsearch: { indices: [] },
+      });
       // Misconfiguration warning was logged because chunk[0] had stale perms.
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("'kibana' resolver is authoritative")
+      );
+    });
+
+    it('folds DSL-prefixed resolver output into nested SmlPermissions', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const { resolver } = buildPermissionResolver(
+        'mixed',
+        jest.fn().mockReturnValue([
+          'kibana:saved_object:lens/get',
+          'bare-priv',
+          'es-index:logs-2024:read',
+          'es-index:logs-2024:read', // duplicate — collapsed
+          'es-index:metrics:view_index_metadata',
+          'es-index:writeable:write', // unsupported, dropped
+          'es-cluster:monitor', // unsupported, dropped
+        ])
+      );
+      const smlData = { chunks: [{ type: 'lens', title: 'A', content: 'c' }] };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
+      const logger = createMockLogger();
+      const indexer = createSmlIndexer({
+        registry,
+        resolverRegistry: createResolverRegistry([resolver]),
+        logger,
+      });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'mixed://anything',
+          attachmentType: 'lens',
+          action: 'create',
+          logger,
+        })
+      );
+
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document.permissions).toEqual({
+        kibana: {
+          privileges: [{ name: 'saved_object:lens/get' }, { name: 'bare-priv' }],
+        },
+        elasticsearch: {
+          indices: [{ name: 'logs-2024' }, { name: 'metrics' }],
+        },
+      });
+      // Both unsupported variants are logged + dropped.
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("emitted unsupported es-index privilege 'write'")
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("emitted es-cluster privilege 'monitor'")
+      );
+    });
+
+    it('falls back to chunk-level permissions when origin_id has no scheme (bare id)', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const smlData = {
+        chunks: [
+          {
+            type: 'lens',
+            title: 'A',
+            content: 'c',
+            permissions: nestedChunkPermissions(['chunk-priv']),
+          },
+        ],
+      };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
+      const indexer = createSmlIndexer({
+        registry,
+        resolverRegistry: createResolverRegistry(),
+        logger: createMockLogger(),
+      });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'plain-id',
+          attachmentType: 'lens',
+          action: 'create',
+        })
+      );
+
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document.permissions).toEqual(
+        nestedChunkPermissions(['chunk-priv'])
       );
     });
 
@@ -1086,7 +1193,14 @@ describe('createSmlIndexer', () => {
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
       const smlData = {
-        chunks: [{ type: 'lens', title: 'A', content: 'c', permissions: ['chunk-priv'] }],
+        chunks: [
+          {
+            type: 'lens',
+            title: 'A',
+            content: 'c',
+            permissions: nestedChunkPermissions(['chunk-priv']),
+          },
+        ],
       };
       const getSmlData = jest.fn().mockResolvedValue(smlData);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
@@ -1106,7 +1220,9 @@ describe('createSmlIndexer', () => {
       );
 
       const bulkCall = bulkMock.mock.calls[0][0];
-      expect(bulkCall.operations[0].index.document.permissions).toEqual(['chunk-priv']);
+      expect(bulkCall.operations[0].index.document.permissions).toEqual(
+        nestedChunkPermissions(['chunk-priv'])
+      );
     });
 
     it('falls back to chunk-level permissions when the resolver throws', async () => {
@@ -1121,7 +1237,14 @@ describe('createSmlIndexer', () => {
         })
       );
       const smlData = {
-        chunks: [{ type: 'lens', title: 'A', content: 'c', permissions: ['fallback-priv'] }],
+        chunks: [
+          {
+            type: 'lens',
+            title: 'A',
+            content: 'c',
+            permissions: nestedChunkPermissions(['fallback-priv']),
+          },
+        ],
       };
       const getSmlData = jest.fn().mockResolvedValue(smlData);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
@@ -1143,10 +1266,249 @@ describe('createSmlIndexer', () => {
 
       expect(getPermissions).toHaveBeenCalled();
       const bulkCall = bulkMock.mock.calls[0][0];
-      expect(bulkCall.operations[0].index.document.permissions).toEqual(['fallback-priv']);
+      expect(bulkCall.operations[0].index.document.permissions).toEqual(
+        nestedChunkPermissions(['fallback-priv'])
+      );
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("resolver 'kibana' failed to compute permissions")
       );
+    });
+
+    it('does not log an "authoritative" warning when the chunk omits permissions', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const { resolver } = buildPermissionResolver('kibana');
+      const smlData = { chunks: [{ type: 'lens', title: 'A', content: 'c' }] };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
+      const logger = createMockLogger();
+      const indexer = createSmlIndexer({
+        registry,
+        resolverRegistry: createResolverRegistry([resolver]),
+        logger,
+      });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'kibana://lens/abc-123',
+          attachmentType: 'lens',
+          action: 'create',
+          logger,
+        })
+      );
+
+      const warnCalls = (logger.warn as jest.Mock).mock.calls.map((c) => c[0]);
+      expect(warnCalls.every((msg) => !String(msg).includes('authoritative'))).toBe(true);
+    });
+  });
+
+  describe('resolver integration (content mode)', () => {
+    /**
+     * Same resolver helper as the origin-mode block. Content mode goes
+     * through `indexManualChunks`, so this duplicates the matrix to make
+     * sure both code paths honour the resolver registry identically.
+     */
+    const buildPermissionResolver = (
+      type: string,
+      getPermissions: jest.Mock = jest.fn((path: string) => [`saved_object:${path}`])
+    ) => ({
+      resolver: {
+        type,
+        getPermissions,
+        getItem: jest.fn().mockResolvedValue(undefined),
+      } as SmlResolver,
+      getPermissions,
+    });
+
+    const nestedChunkPermissions = (privileges: string[]): SmlChunk['permissions'] => ({
+      kibana: { privileges: privileges.map((name) => ({ name })) },
+      elasticsearch: { indices: [] },
+    });
+
+    it('uses the resolver to compute permissions when content-mode origin_id has a registered scheme', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const { resolver, getPermissions } = buildPermissionResolver('kibana');
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const indexer = createSmlIndexer({
+        registry,
+        resolverRegistry: createResolverRegistry([resolver]),
+        logger,
+      });
+
+      await indexer.indexAttachment(
+        createContentIndexerParams({
+          originId: 'kibana://lens/abc-123',
+          attachmentType: 'lens',
+          action: 'create',
+          content: [
+            // No `permissions` — the kibana resolver is authoritative.
+            { type: 'lens', title: 'A', content: 'c' },
+          ],
+          logger,
+        })
+      );
+
+      expect(getPermissions).toHaveBeenCalledWith('lens/abc-123');
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document.permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:lens/abc-123' }] },
+        elasticsearch: { indices: [] },
+      });
+      expect(bulkCall.operations[0].index.document.ingestion_method).toBe('manual');
+    });
+
+    it('ignores caller-supplied chunk permissions when a resolver matches (resolver wins)', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const { resolver } = buildPermissionResolver('kibana');
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const indexer = createSmlIndexer({
+        registry,
+        resolverRegistry: createResolverRegistry([resolver]),
+        logger,
+      });
+
+      await indexer.indexAttachment(
+        createContentIndexerParams({
+          originId: 'kibana://lens/abc-123',
+          attachmentType: 'lens',
+          action: 'create',
+          content: [
+            {
+              type: 'lens',
+              title: 'A',
+              content: 'c',
+              permissions: nestedChunkPermissions(['caller-supplied-priv']),
+            },
+          ],
+          logger,
+        })
+      );
+
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document.permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:lens/abc-123' }] },
+        elasticsearch: { indices: [] },
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("'kibana' resolver is authoritative")
+      );
+    });
+
+    it('falls back to chunk-level permissions when content-mode origin_id has an UNREGISTERED scheme', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const indexer = createSmlIndexer({
+        registry,
+        resolverRegistry: createResolverRegistry(),
+        logger: createMockLogger(),
+      });
+
+      await indexer.indexAttachment(
+        createContentIndexerParams({
+          originId: 'kibana://lens/abc-123',
+          attachmentType: 'lens',
+          action: 'create',
+          content: [
+            {
+              type: 'lens',
+              title: 'A',
+              content: 'c',
+              permissions: nestedChunkPermissions(['chunk-priv']),
+            },
+          ],
+        })
+      );
+
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document.permissions).toEqual(
+        nestedChunkPermissions(['chunk-priv'])
+      );
+    });
+
+    it('falls back to chunk-level permissions when the resolver throws in content mode', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const { resolver } = buildPermissionResolver(
+        'kibana',
+        jest.fn().mockImplementation(() => {
+          throw new Error('boom');
+        })
+      );
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const indexer = createSmlIndexer({
+        registry,
+        resolverRegistry: createResolverRegistry([resolver]),
+        logger,
+      });
+
+      await indexer.indexAttachment(
+        createContentIndexerParams({
+          originId: 'kibana://lens/explodes',
+          attachmentType: 'lens',
+          action: 'create',
+          content: [
+            {
+              type: 'lens',
+              title: 'A',
+              content: 'c',
+              permissions: nestedChunkPermissions(['fallback-priv']),
+            },
+          ],
+          logger,
+        })
+      );
+
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document.permissions).toEqual(
+        nestedChunkPermissions(['fallback-priv'])
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("resolver 'kibana' failed to compute permissions")
+      );
+    });
+
+    it('does not invoke the resolver when content-mode chunks is empty (no chunks to stamp)', async () => {
+      const { resolver, getPermissions } = buildPermissionResolver('kibana');
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({
+        registry,
+        resolverRegistry: createResolverRegistry([resolver]),
+        logger,
+      });
+
+      await indexer.indexAttachment(
+        createContentIndexerParams({
+          originId: 'kibana://lens/abc-123',
+          attachmentType: 'lens',
+          action: 'create',
+          content: [],
+          esClient,
+          logger,
+        })
+      );
+
+      expect(getPermissions).not.toHaveBeenCalled();
+      // Existing chunks for the origin are still wiped (consistent with the
+      // existing content-mode delete behaviour).
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
     });
   });
 });

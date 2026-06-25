@@ -177,9 +177,9 @@ const createMockSecurityAuthzPartial = (
   authorized: string[],
   _unauthorized: string[]
 ): AuthorizationServiceSetup => {
-  // `unauthorized` is retained as a documentation aid for the test author —
+  // `_unauthorized` is retained as a documentation aid for the test author —
   // the mock simply treats any privilege not in `authorized` as denied.
-  void unauthorized;
+  void _unauthorized;
   const checkPrivileges = buildCheckPrivilegesMock(new Set(authorized), new Set());
   return {
     checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
