@@ -41,13 +41,16 @@ import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/work
 
 export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
-  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy', 'tags']);
   const { euiTheme } = useEuiTheme();
   const location = useLocation();
 
   const search = useMemo(() => {
     return parseWorkflowsUrlSearchParams(location.search);
   }, [location.search]);
+  const { data: filtersData } = useWorkflowFiltersOptions(
+    ['enabled', 'createdBy', 'tags'],
+    search.managed
+  );
 
   const setSearch = useCallback(
     (newSearch: WorkflowsSearchParams) => {
@@ -147,7 +150,7 @@ export function WorkflowsPage() {
               <EuiFlexItem>
                 <WorkflowSearchField
                   initialValue={search.query || ''}
-                  onSearch={(query) => setSearch({ ...search, query })}
+                  onSearch={(query) => setSearch({ ...search, page: 1, query })}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -164,6 +167,7 @@ export function WorkflowsPage() {
 
                       setSearch({
                         ...search,
+                        page: 1,
                         enabled,
                       });
                     }}
@@ -178,7 +182,7 @@ export function WorkflowsPage() {
                     values={filtersData?.createdBy || []}
                     selectedValues={search.createdBy || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch({ ...search, createdBy: newValues.map(String) });
+                      setSearch({ ...search, page: 1, createdBy: newValues.map(String) });
                     }}
                   />
                 </EuiFilterGroup>
@@ -191,7 +195,7 @@ export function WorkflowsPage() {
                     values={filtersData?.tags || []}
                     selectedValues={search.tags || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch({ ...search, tags: newValues.map(String) });
+                      setSearch({ ...search, page: 1, tags: newValues.map(String) });
                     }}
                   />
                 </EuiFilterGroup>
