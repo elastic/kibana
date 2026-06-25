@@ -393,3 +393,18 @@ export const RUNBOOK_SECTION_LOAD_ERROR = i18n.translate(
     defaultMessage: 'Could not load the runbook for this episode.',
   }
 );
+
+/** --- Trend chart section --- */
+export const TREND_CHART_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.trendChart.title',
+  {
+    defaultMessage: 'Trend',
+  }
+);
+
+export const TREND_CHART_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.trendChart.loadError',
+  {
+    defaultMessage: 'Unable to load the trend chart.',
+  }
+);
