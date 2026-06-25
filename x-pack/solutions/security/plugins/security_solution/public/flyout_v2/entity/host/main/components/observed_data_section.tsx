@@ -38,6 +38,21 @@ type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
 };
 
+interface ObservedDataSectionProps {
+  /** Identity fields (e.g. host name) used to scope ML anomalies and queries */
+  identityFields: IdentityFields;
+  /** Entity Store record for the host, if available */
+  entityRecord?: EntityStoreRecord | null;
+  /** Observed host data, including loading state and field values */
+  observedHost: ObservedHostData;
+  /** Unique identifier for the flyout context, used to namespace cell actions */
+  contextID: string;
+  /** Identifier of the timeline/page scope the flyout is rendered in */
+  scopeId: string;
+  /** Identifier used to inspect the underlying request for this section */
+  queryId: string;
+}
+
 export const ObservedDataSection = memo(
   ({
     identityFields,
@@ -46,14 +61,7 @@ export const ObservedDataSection = memo(
     contextID,
     scopeId,
     queryId,
-  }: {
-    identityFields: IdentityFields;
-    entityRecord?: EntityStoreRecord | null;
-    observedHost: ObservedHostData;
-    contextID: string;
-    scopeId: string;
-    queryId: string;
-  }) => {
+  }: ObservedDataSectionProps) => {
     const { euiTheme } = useEuiTheme();
     const xsFontSize = useEuiFontSize('xxs').fontSize;
 
@@ -138,7 +146,6 @@ export const ObservedDataSection = memo(
               observedHost={observedHost}
               contextID={contextID}
               scopeId={scopeId}
-              queryId={queryId}
             />
           )}
         </EuiAccordion>
@@ -155,15 +162,7 @@ const ObservedDataSectionContent = memo(
     observedHost,
     contextID,
     scopeId,
-    queryId,
-  }: {
-    identityFields: IdentityFields;
-    entityRecord?: EntityStoreRecord | null;
-    observedHost: ObservedHostData;
-    contextID: string;
-    scopeId: string;
-    queryId: string;
-  }) => {
+  }: Omit<ObservedDataSectionProps, 'queryId'>) => {
     const { to, from, isInitializing } = useGlobalTime();
 
     const { jobNameById } = useInstalledSecurityJobNameById();
