@@ -94,7 +94,7 @@ steps:
       queriesTokensUsed: {}
       featuresConnectorUsed: ""
       queriesConnectorUsed: ""
-      cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%SZ" }}'
+      cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
 
   # -----------------------------------------------------------------------
   # Step 1: Recency check — auto-skip features if recently identified.
