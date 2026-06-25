@@ -183,6 +183,21 @@ describe('useFetcher', () => {
 
       expect(reportFetchErrorSpy).not.toHaveBeenCalled();
     });
+
+    it('does not capture the error when the request is aborted before it fails', async () => {
+      const hook = renderHook(() => useFetcher(failingFn, [], { operationId: 'my-op' }), {
+        wrapper,
+      });
+
+      // Unmount triggers cleanup → controller.abort() → signal.aborted = true
+      hook.unmount();
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(reportFetchErrorSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('when a hook already has data', () => {
