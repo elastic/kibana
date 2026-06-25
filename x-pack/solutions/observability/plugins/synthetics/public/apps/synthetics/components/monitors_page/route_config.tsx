@@ -19,6 +19,12 @@ import { CreateMonitorButton } from './create_monitor_button';
 import { MonitorManagementPage } from './monitors_page';
 import type { RouteProps } from '../../routes';
 import { ERRORS_ROUTE, MONITORS_ROUTE, OVERVIEW_ROUTE } from '../../../../../common/constants';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
+
+const OVERVIEW_DEFAULT_DATE_RANGE = {
+  from: CLIENT_DEFAULTS_SYNTHETICS.OVERVIEW_DATE_RANGE_START,
+  to: CLIENT_DEFAULTS_SYNTHETICS.DATE_RANGE_END,
+};
 
 export const getMonitorsRoute = (
   history: ReturnType<typeof useHistory>,
@@ -46,7 +52,10 @@ export const getMonitorsRoute = (
         // refresh replaces the shared <RefreshButton />, which we drop here to
         // avoid two refresh controls. `rightSideItems` render right-to-left, so
         // the picker (last) sits to the left of Create Monitor.
-        rightSideItems: [<CreateMonitorButton />, <SyntheticsDatePicker />],
+        rightSideItems: [
+          <CreateMonitorButton />,
+          <SyntheticsDatePicker defaultDateRange={OVERVIEW_DEFAULT_DATE_RANGE} />,
+        ],
         tabs: getMonitorsTabs(syntheticsPath, 'overview', location),
       },
     },

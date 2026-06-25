@@ -33,8 +33,9 @@ const initialState: MonitorOverviewState = {
     showFromAllSpaces: getInitialShowFromAllSpaces(),
     // Seed the date-range window so the very first overview fetch is already
     // scoped to the picker's default; `useSyncOverviewDateRange` keeps it in
-    // step with the URL afterwards.
-    dateRangeStart: CLIENT_DEFAULTS_SYNTHETICS.DATE_RANGE_START,
+    // step with the URL afterwards. The overview uses its own (narrower) default
+    // window rather than the app-wide one.
+    dateRangeStart: CLIENT_DEFAULTS_SYNTHETICS.OVERVIEW_DATE_RANGE_START,
     dateRangeEnd: CLIENT_DEFAULTS_SYNTHETICS.DATE_RANGE_END,
   },
   trendStats: {},

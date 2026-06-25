@@ -53,11 +53,11 @@ describe('useSyncOverviewDateRange', () => {
     );
   });
 
-  it('falls back to the default range when the URL has none', () => {
+  it('falls back to the overview default range when the URL has none', () => {
     renderForUrl('/');
 
     expect(dispatch).toHaveBeenCalledWith(
-      setOverviewPageStateAction({ dateRangeStart: 'now-24h', dateRangeEnd: 'now' })
+      setOverviewPageStateAction({ dateRangeStart: 'now-12h', dateRangeEnd: 'now' })
     );
   });
 

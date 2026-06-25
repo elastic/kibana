@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setOverviewPageStateAction } from '../../../state';
-import { useUrlParams } from '../../../hooks';
+import { useOverviewDateRange } from './use_overview_date_range';
 
 /**
  * Mirror the page-level date picker (URL params) into `MonitorOverviewState`.
@@ -26,8 +26,7 @@ import { useUrlParams } from '../../../hooks';
  */
 export function useSyncOverviewDateRange() {
   const dispatch = useDispatch();
-  const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useOverviewDateRange();
 
   useEffect(() => {
     dispatch(setOverviewPageStateAction({ dateRangeStart, dateRangeEnd }));
