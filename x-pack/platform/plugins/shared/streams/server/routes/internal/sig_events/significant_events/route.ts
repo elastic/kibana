@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
-import {
-  TaskStatus,
-  deriveQueryType,
-  type SignificantEventsQueriesGenerationResult,
-  type SignificantEventsQueriesGenerationTaskResult,
+import type {
+  SignificantEventsGetResponse,
+  SigEventsWorkflowStatusResult,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
+import { TaskStatus, deriveQueryType } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
 import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
@@ -54,6 +55,7 @@ const sanitizeTaskResult = (
   return result;
 };
 
+/** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead. Will be removed in a follow-up. */
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',
   params: z.object({
@@ -93,6 +95,7 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   },
 });
 
+/** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead. Will be removed in a follow-up. */
 const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/significant_events/_task',
   params: z.object({
@@ -195,7 +198,7 @@ const readAllSignificantEventsRoute = createServerRoute({
     server,
   }): Promise<SignificantEventsGetResponse> => {
     const {
-      getQueryClient,
+      getKnowledgeIndicatorClient,
       getAlertingV2RulesClient,
       scopedClusterClient,
       licensing,
@@ -211,7 +214,7 @@ const readAllSignificantEventsRoute = createServerRoute({
       uiSettingsClient,
       alertingV2RulesClient: await getAlertingV2RulesClient(),
     });
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     return readSignificantEventsFromAlertsIndices(
       {
         from,
@@ -222,8 +225,103 @@ const readAllSignificantEventsRoute = createServerRoute({
         searchMode,
         alertsSource,
       },
-      { queryClient, scopedClusterClient }
+      { kiClient, scopedClusterClient }
     );
+  },
+});
+
+const significantEventsDiscoveryExecuteRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
+  params: z.object({
+    body: z.discriminatedUnion('action', [
+      z.object({ action: z.literal('trigger') }),
+      z.object({ action: z.literal('cancel') }),
+    ]),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Manually trigger the Significant Events pipeline',
+    description:
+      'Executes the Significant Events orchestrator workflow for the current space. Runs detection, discovery, and triage in sequence.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    workflowClients,
+    getSpaceId,
+    server,
+    telemetry,
+  }): Promise<{ executionId: string | null }> => {
+    const { significantEventsDiscoveryClient } = workflowClients;
+    if (!significantEventsDiscoveryClient) {
+      throw new FeatureNotEnabledError(
+        'Significant events discovery requires the workflows feature to be enabled'
+      );
+    }
+
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const spaceId = await getSpaceId(request);
+    const { body } = params;
+
+    if (body.action === 'trigger') {
+      const { executionId, isNew } = await significantEventsDiscoveryClient.run({
+        request,
+        spaceId,
+      });
+      if (isNew) {
+        telemetry.trackSignificantEventsDiscoveryTriggered({
+          execution_id: executionId,
+          space_id: spaceId,
+        });
+      }
+      return { executionId };
+    }
+
+    const executionId = await significantEventsDiscoveryClient.cancel({ request, spaceId });
+    return { executionId };
+  },
+});
+
+const significantEventsDiscoveryStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/significant_events/discovery/_status',
+  params: z.object({}),
+  options: {
+    access: 'internal',
+    summary: 'Get the status of the Significant Events discovery pipeline',
+    description:
+      'Returns the status of the most recent Significant Events orchestrator workflow execution for the current space.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    request,
+    getScopedClients,
+    workflowClients,
+    getSpaceId,
+    server,
+  }): Promise<SigEventsWorkflowStatusResult> => {
+    const { significantEventsDiscoveryClient } = workflowClients;
+    if (!significantEventsDiscoveryClient) {
+      throw new FeatureNotEnabledError('Significant events discovery is not available');
+    }
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const spaceId = await getSpaceId(request);
+    return significantEventsDiscoveryClient.getStatus({ spaceId });
   },
 });
 
@@ -231,4 +329,6 @@ export const internalSignificantEventsRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
   ...readAllSignificantEventsRoute,
+  ...significantEventsDiscoveryExecuteRoute,
+  ...significantEventsDiscoveryStatusRoute,
 };

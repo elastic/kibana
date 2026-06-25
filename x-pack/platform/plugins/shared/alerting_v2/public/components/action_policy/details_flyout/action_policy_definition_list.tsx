@@ -11,15 +11,12 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
   type EuiDescriptionListProps,
 } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { paths } from '../../../constants';
 import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
 import { BadgeList } from './badge_list';
 import { DestinationRow } from './destination_row';
@@ -31,23 +28,7 @@ export interface ActionPolicyDefinitionListProps {
 }
 
 export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionListProps) => {
-  const {
-    description,
-    type: policyType,
-    ruleId,
-    tags,
-    matcher,
-    groupingMode,
-    groupBy,
-    throttle,
-    destinations = [],
-  } = policy;
-  const { basePath } = useService(CoreStart('http'));
-
-  const ruleDetailsHref =
-    policyType === 'single_rule' && ruleId
-      ? basePath.prepend(paths.ruleDetails(ruleId))
-      : undefined;
+  const { description, tags, matcher, groupingMode, groupBy, throttle, destinations = [] } = policy;
 
   const items: EuiDescriptionListProps['listItems'] = [
     {
@@ -57,29 +38,6 @@ export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionLis
       description: description || EMPTY_VALUE,
     },
   ];
-
-  if (policyType) {
-    items.push({
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.scope', {
-        defaultMessage: 'Scope',
-      }),
-      description:
-        policyType === 'single_rule' && ruleId ? (
-          <EuiLink href={ruleDetailsHref} data-test-subj="actionPolicyDefinitionLinkedRuleLink">
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicyDefinition.scope.linkedRule"
-              defaultMessage="Linked to rule {ruleId}"
-              values={{ ruleId: <EuiCode>{ruleId}</EuiCode> }}
-            />
-          </EuiLink>
-        ) : (
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicyDefinition.scope.global"
-            defaultMessage="Global. Matches alerts from any rule in this space"
-          />
-        ),
-    });
-  }
 
   items.push(
     {

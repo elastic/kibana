@@ -109,6 +109,8 @@ export const getCommandContext = async (
       const promqlTimeseriesSources = await callbacks?.getTimeseriesIndices?.();
       context = {
         timeSeriesSources: promqlTimeseriesSources?.indices || [],
+        supportsControls: callbacks?.canSuggestVariables?.() ?? false,
+        variables: callbacks?.getVariables?.(),
       };
       break;
     default:

@@ -6,8 +6,8 @@
  */
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
+import { useSyntheticsEsSearch } from './use_synthetics_es_search';
+import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices';
 import type { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
@@ -15,7 +15,7 @@ export const useMonitorDetail = (
   location: string,
   remoteName?: string
 ): { data?: Ping; loading?: boolean } => {
-  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN;
+  const index = getSyntheticsCcsIndex(remoteName);
 
   const params = {
     index,
@@ -43,13 +43,12 @@ export const useMonitorDetail = (
     },
     sort: [{ '@timestamp': 'desc' as const }],
   };
-  const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
-    params,
-    [configId, location, remoteName],
-    {
-      name: 'getMonitorStatusByLocation',
-    }
-  );
+  const { data: result, loading } = useSyntheticsEsSearch<
+    Ping & { '@timestamp': string },
+    SearchRequest
+  >(params, [configId, location, remoteName], {
+    name: 'getMonitorStatusByLocation',
+  });
 
   if (!result || result.hits.hits.length !== 1) return { data: undefined, loading };
   return {

@@ -29,7 +29,6 @@ import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../../../flyout_v2/document/main/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useShowRelatedAlertsByAncestry } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_same_source_event';
@@ -71,7 +70,6 @@ jest.mock('../../../../common/hooks/use_experimental_features');
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
-const selectedPatterns = 'alerts';
 const mockSearchHit = {
   _id: 'some-id',
   _index: 'alerts-index',
@@ -88,13 +86,6 @@ const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
-  };
-});
-
-const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
-  return {
-    useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
 });
 
@@ -141,7 +132,6 @@ describe('<InsightsSection />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseExpandSection.mockReturnValue(true);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
@@ -191,7 +181,7 @@ describe('<InsightsSection />', () => {
     });
   });
 
-  it('should render the component collapsed if value is false in local storage', async () => {
+  it('should render the component collapsed if value is false in local storage', () => {
     mockUseExpandSection.mockReturnValue(false);
 
     const contextValue = {
@@ -204,9 +194,7 @@ describe('<InsightsSection />', () => {
 
     const wrapper = renderInsightsSection(contextValue);
 
-    await act(async () => {
-      expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).not.toBeVisible();
-    });
+    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).not.toBeVisible();
   });
 
   it('should render the component expanded if value is true in local storage', async () => {

@@ -11,27 +11,31 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiCallOut,
-  EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SigEvent } from '@kbn/streams-schema';
+import { SIG_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
+import type { SigEvent, SigEventStatus } from '@kbn/streams-schema';
+import useInterval from 'react-use/lib/useInterval';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchSigEvents } from '../../../../../hooks/sig_events/use_fetch_sig_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { SigEventFlyout } from './sig_event_flyout';
+import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
+import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
+import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import { VERDICT_OPTIONS, getVerdictColor } from './filter_constants';
+import { getSigEventStatusColor } from '../shared/status_display';
+import { SIG_EVENT_STATUS_LABELS } from '../shared/translations';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -68,27 +72,28 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
-    field: 'verdict',
-    name: i18n.translate('xpack.streams.sigEventsTab.verdictColumn', {
-      defaultMessage: 'Verdict',
-    }),
-    width: '110px',
-    render: (verdict: string) => <EuiBadge color={getVerdictColor(verdict)}>{verdict}</EuiBadge>,
-  },
-  {
     field: 'title',
     name: i18n.translate('xpack.streams.sigEventsTab.titleColumn', {
       defaultMessage: 'Title',
     }),
     truncateText: true,
-    width: '40%',
+  },
+  {
+    field: 'status',
+    name: i18n.translate('xpack.streams.sigEventsTab.statusColumn', {
+      defaultMessage: 'Status',
+    }),
+    width: '100px',
+    render: (status: SigEventStatus) => (
+      <EuiBadge color={getSigEventStatusColor(status)}>{SIG_EVENT_STATUS_LABELS[status]}</EuiBadge>
+    ),
   },
   {
     field: 'stream_names',
     name: i18n.translate('xpack.streams.sigEventsTab.streamsColumn', {
       defaultMessage: 'Streams',
     }),
-    width: '150px',
+    width: '160px',
     render: (streamNames: string[]) => {
       const names = streamNames ?? [];
       const visible = names.slice(0, MAX_VISIBLE_STREAMS);
@@ -116,18 +121,8 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
       defaultMessage: 'Criticality',
     }),
-    width: '90px',
-    render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
-  },
-  {
-    field: 'recommended_action',
-    name: i18n.translate('xpack.streams.sigEventsTab.actionColumn', {
-      defaultMessage: 'Action',
-    }),
     width: '100px',
-    render: (action: string) => (
-      <EuiBadge color={action === 'escalate' ? 'danger' : 'hollow'}>{action}</EuiBadge>
-    ),
+    render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
   },
 ];
 
@@ -151,11 +146,9 @@ const buildSelectableOptions = <T extends string>({
 
 export const SigEventsTab = () => {
   const { timeState } = useTimefilter();
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
-  const { filteredStreams } = useKiGeneration();
 
-  const [verdictFilter, setVerdictFilter] = useState<string[]>([]);
+  const { filteredStreams } = useKiGeneration();
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
@@ -165,19 +158,25 @@ export const SigEventsTab = () => {
     [filteredStreams]
   );
 
+  const { isRunning, isCanceling, handleRun, handleCancel } =
+    useSignificantEventsDiscoveryContext();
+
   const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchSigEvents({
     from: timeState.start,
     to: timeState.end,
-    verdict: verdictFilter.length > 0 ? verdictFilter : undefined,
+    status: statusFilter.length > 0 ? statusFilter : undefined,
     stream: streamFilter.length > 0 ? streamFilter : undefined,
     search: debouncedSearch || undefined,
   });
+  useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
+
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 
-  const onVerdictChange = useCallback(
-    (opts: EuiSelectableOption[]) => setVerdictFilter(extractCheckedKeys(opts)),
+  const onStatusChange = useCallback(
+    (opts: EuiSelectableOption[]) => setStatusFilter(extractCheckedKeys(opts)),
     []
   );
+
   const onStreamChange = useCallback(
     (opts: EuiSelectableOption[]) => setStreamFilter(extractCheckedKeys(opts)),
     []
@@ -186,16 +185,19 @@ export const SigEventsTab = () => {
   const filters = useMemo(
     () => [
       {
-        label: i18n.translate('xpack.streams.sigEventsTab.filter.verdict', {
-          defaultMessage: 'Verdict',
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.status', {
+          defaultMessage: 'Status',
         }),
-        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.verdictAriaLabel', {
-          defaultMessage: 'Filter by verdict',
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.statusAriaLabel', {
+          defaultMessage: 'Filter by status',
         }),
-        options: buildSelectableOptions({ values: VERDICT_OPTIONS, selected: verdictFilter }),
-        numFilters: VERDICT_OPTIONS.length,
-        numActiveFilters: verdictFilter.length,
-        onChange: onVerdictChange,
+        options: buildSelectableOptions({
+          values: SIG_EVENT_STATUS_OPTIONS,
+          selected: statusFilter,
+        }),
+        numFilters: SIG_EVENT_STATUS_OPTIONS.length,
+        numActiveFilters: statusFilter.length,
+        onChange: onStatusChange,
       },
       {
         label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
@@ -214,7 +216,7 @@ export const SigEventsTab = () => {
         onChange: onStreamChange,
       },
     ],
-    [verdictFilter, streamFilter, streamOptions, onVerdictChange, onStreamChange]
+    [statusFilter, streamFilter, streamOptions, onStatusChange, onStreamChange]
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -223,21 +225,32 @@ export const SigEventsTab = () => {
     }
   };
 
+  const handleQueryChange: StreamsAppSearchBarProps['onQueryChange'] = (queryPayload) => {
+    setSearchQuery(String(queryPayload.query?.query ?? ''));
+  };
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow>
-            <EuiFieldSearch
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+          <EuiFlexItem grow style={{ minWidth: 160 }}>
+            <StreamsAppSearchBar
+              onQuerySubmit={handleQueryChange}
+              onQueryChange={handleQueryChange}
               placeholder={SEARCH_PLACEHOLDER}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              query={{
+                query: searchQuery,
+                language: 'text',
+              }}
+              showDatePicker
+              showQueryInput
+              enableDateRangePicker
+              submitButtonStyle="iconOnly"
               isClearable
-              fullWidth
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
+            <EuiFilterGroup compressed>
               {filters.map((f) => (
                 <FilterPopover
                   key={f.label}
@@ -252,12 +265,12 @@ export const SigEventsTab = () => {
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={rangeFrom}
-              end={rangeTo}
-              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
-              onRefresh={() => refetch()}
-              showUpdateButton="iconOnly"
+            <FindSignificantEventsButton
+              onRun={handleRun}
+              onCancel={handleCancel}
+              isRunning={isRunning}
+              isCanceling={isCanceling}
+              isDisabled={isRunning}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

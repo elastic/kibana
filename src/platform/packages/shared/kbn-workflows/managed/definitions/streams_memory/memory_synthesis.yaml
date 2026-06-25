@@ -1,0 +1,63 @@
+version: "1"
+
+name: Memory Synthesis
+description: >
+  Synthesizes significant events knowledge indicators into wiki pages using the
+  streams-memory-synthesis skill. The default Agent Builder agent loads the skill,
+  reads existing pages and insights via skill tools, and writes updates via memory_write.
+enabled: false
+settings:
+  timeout: "30m"
+  concurrency:
+    key: "streams-sigevents-memory"
+    strategy: drop
+    max: 1
+tags:
+  - observability
+  - streams
+  - sigevents
+  - memory
+
+triggers:
+  - type: manual
+    inputs:
+      - name: connectorId
+        type: string
+        default: ".anthropic-claude-4.6-sonnet-chat_completion"
+        required: false
+        description: "AI connector ID to use for the synthesis agent."
+
+steps:
+  - name: synthesize_memory
+    type: ai.agent
+    connector-id: "${{ inputs.connectorId }}"
+    create-conversation: true
+    timeout: 1800s
+    with:
+      message: |
+        First, call the load_skill tool with skill path skills/platform/streams/streams-memory-synthesis.
+        Wait for the skill to load before calling any other tools.
+
+        Then review the current state of the memory wiki and the latest significant events insights, and synthesize new or updated wiki pages.
+      schema:
+        type: object
+        properties:
+          pages_written:
+            type: array
+            description: page_name values of pages written or updated in this run.
+            items:
+              type: string
+          pages_deleted:
+            type: array
+            description: page_name values of pages soft-deleted in this run.
+            items:
+              type: string
+          summary:
+            type: string
+            description: Brief summary of what was synthesized and why.
+        required:
+          - pages_written
+          - pages_deleted
+          - summary
+    on-failure:
+      continue: false

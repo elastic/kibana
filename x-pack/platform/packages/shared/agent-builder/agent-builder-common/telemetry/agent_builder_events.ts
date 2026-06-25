@@ -33,6 +33,8 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   UsedByWarningProceeded: `${TELEMETRY_PREFIX}_used_by_warning_proceeded`,
   InappChatOpen: `${TELEMETRY_PREFIX}_inapp_chat_open`,
   FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
+  HitlPromptShown: `${TELEMETRY_PREFIX}_hitl_prompt_shown`,
+  HitlQuestionAnswered: `${TELEMETRY_PREFIX}_hitl_question_answered`,
 } as const;
 
 export type OptInSource =
@@ -66,6 +68,7 @@ export interface ReportOptOutParams {
 export interface ReportAddToChatClickedParams {
   pathway: string;
   attachments?: string[];
+  item_count?: number;
 }
 
 export type AgentBuilderUiClickElementKind =
@@ -161,6 +164,8 @@ export interface ReportSkillCreatedParams {
   skill_id: string;
   /** Optional origin (`custom` for direct API creates, `plugin` for plugin-bundled creates). */
   origin?: SkillCreationOrigin;
+  /** Deduplicated, normalized tool IDs included in the created skill. */
+  tool_ids: string[];
 }
 
 /** Telemetry params reported when a user-created skill is updated. */
@@ -173,6 +178,8 @@ export interface ReportSkillUpdatedParams {
   skill_id: string;
   /** Optional origin (`custom` for direct API updates, `plugin` for plugin-bundled updates). */
   origin?: SkillCreationOrigin;
+  /** Deduplicated, normalized tool IDs included in the updated skill. */
+  tool_ids: string[];
 }
 
 /** Telemetry params reported when a user-created skill is deleted. */
@@ -274,6 +281,26 @@ export interface ReportFullscreenEntryPointParams {
   source: FullscreenEntryPointSource;
 }
 
+export interface ReportHitlPromptShownParams {
+  prompt_id: string;
+  total_questions: number;
+  conversation_id?: string;
+  agent_id?: string;
+}
+
+export type HitlQuestionAnsweredOutcome = 'answered' | 'skipped' | 'skipped_all';
+
+export interface ReportHitlQuestionAnsweredParams {
+  prompt_id: string;
+  conversation_id?: string;
+  agent_id?: string;
+  question_index: number;
+  is_multi_select: boolean;
+  outcome: HitlQuestionAnsweredOutcome;
+  used_custom_text: boolean;
+  selected_option_count: number;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -301,6 +328,8 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded]: ReportUsedByWarningProceededParams;
   [AGENT_BUILDER_EVENT_TYPES.InappChatOpen]: ReportInappChatOpenParams;
   [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
+  [AGENT_BUILDER_EVENT_TYPES.HitlPromptShown]: ReportHitlPromptShownParams;
+  [AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered]: ReportHitlQuestionAnsweredParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -324,7 +353,9 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportUsedByWarningShownParams>
   | EventTypeOpts<ReportUsedByWarningProceededParams>
   | EventTypeOpts<ReportInappChatOpenParams>
-  | EventTypeOpts<ReportFullscreenEntryPointParams>;
+  | EventTypeOpts<ReportFullscreenEntryPointParams>
+  | EventTypeOpts<ReportHitlPromptShownParams>
+  | EventTypeOpts<ReportHitlQuestionAnsweredParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -347,7 +378,9 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded
   | typeof AGENT_BUILDER_EVENT_TYPES.InappChatOpen
-  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint;
+  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint
+  | typeof AGENT_BUILDER_EVENT_TYPES.HitlPromptShown
+  | typeof AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -472,6 +505,13 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
+    item_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of items added via bulk add-to-chat. Absent for single-item pathways.',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -573,6 +613,21 @@ const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
+    tool_ids: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID included in the created skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        },
+      },
+      _meta: {
+        description:
+          'Tool IDs included in the created skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -593,6 +648,21 @@ const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
         description:
           'Origin of the updated skill (custom for direct API updates, plugin for plugin-bundled updates)',
         optional: true,
+      },
+    },
+    tool_ids: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID included in the updated skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        },
+      },
+      _meta: {
+        description:
+          'Tool IDs included in the updated skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+        optional: false,
       },
     },
   },
@@ -1193,6 +1263,72 @@ const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const HITL_PROMPT_SHOWN_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.HitlPromptShown,
+  schema: {
+    prompt_id: {
+      type: 'keyword',
+      _meta: { description: 'Unique ID of the ask_user_question prompt', optional: false },
+    },
+    total_questions: {
+      type: 'integer',
+      _meta: { description: 'Number of questions in this prompt', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+  },
+};
+
+const HITL_QUESTION_ANSWERED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered,
+  schema: {
+    prompt_id: {
+      type: 'keyword',
+      _meta: { description: 'Unique ID of the ask_user_question prompt', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'Conversation ID', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+    question_index: {
+      type: 'integer',
+      _meta: {
+        description: '0-based index of the question being answered/skipped',
+        optional: false,
+      },
+    },
+    is_multi_select: {
+      type: 'boolean',
+      _meta: { description: 'Whether the question allows multiple selections', optional: false },
+    },
+    outcome: {
+      type: 'keyword',
+      _meta: {
+        description: 'How the user responded (answered|skipped|skipped_all)',
+        optional: false,
+      },
+    },
+    used_custom_text: {
+      type: 'boolean',
+      _meta: { description: 'Whether the user filled in the free-text field', optional: false },
+    },
+    selected_option_count: {
+      type: 'integer',
+      _meta: { description: 'Number of options selected (0 when skipped)', optional: false },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1203,6 +1339,8 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   USED_BY_WARNING_PROCEEDED_EVENT,
   INAPP_CHAT_OPEN_EVENT,
   FULLSCREEN_ENTRY_POINT_EVENT,
+  HITL_PROMPT_SHOWN_EVENT,
+  HITL_QUESTION_ANSWERED_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
