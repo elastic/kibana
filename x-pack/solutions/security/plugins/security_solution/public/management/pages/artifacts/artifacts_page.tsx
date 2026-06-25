@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiTabs,
@@ -41,6 +41,13 @@ import { TrustedDevicesList } from '../trusted_devices/view/trusted_devices_list
 import { EventFiltersList } from '../event_filters/view/event_filters_list';
 import { HostIsolationExceptionsList } from '../host_isolation_exceptions/view/host_isolation_exceptions_list';
 import { Blocklist } from '../blocklist/view/blocklist';
+import { ArtifactsVersionHistoryButton, ArtifactsVersionHistoryFlyout } from './version_history';
+import {
+  ArtifactsVersionHistoryHighlightProvider,
+  useArtifactsVersionHistoryHighlight,
+} from './version_history/artifacts_version_history_highlight_context';
+import { getPathForArtifactChange } from './version_history/get_path_for_artifact_change';
+import type { ArtifactChangeHistoryItem } from './version_history/types';
 import {
   ENDPOINT_EXCEPTIONS_TAB,
   TRUSTED_APPS_TAB,
@@ -135,10 +142,18 @@ function getActiveTabFromPathname(
   return visibleTabs[0] ?? AdministrationSubTab.trustedApps;
 }
 
-export const ArtifactsPage = memo(() => {
+export const ArtifactsPage = memo(() => (
+  <ArtifactsVersionHistoryHighlightProvider>
+    <ArtifactsPageContent />
+  </ArtifactsVersionHistoryHighlightProvider>
+));
+
+const ArtifactsPageContent = memo(() => {
   const location = useLocation();
   const history = useHistory();
   const http = useHttp();
+  const { startFlashing } = useArtifactsVersionHistoryHighlight();
+  const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
   const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
@@ -219,53 +234,73 @@ export const ArtifactsPage = memo(() => {
     [history, visibleTabs]
   );
 
+  const openVersionHistory = useCallback(() => setIsVersionHistoryOpen(true), []);
+  const closeVersionHistory = useCallback(() => setIsVersionHistoryOpen(false), []);
+  const handleViewChangeDetails = useCallback(
+    (item: ArtifactChangeHistoryItem) => {
+      startFlashing(item.artifactItemId);
+      history.push(getPathForArtifactChange(item));
+    },
+    [history, startFlashing]
+  );
+
   return (
-    <AdministrationListPage
-      data-test-subj="artifactsPage"
-      title={ARTIFACTS_PAGE_TITLE}
-      subtitle={ARTIFACTS_PAGE_DESCRIPTION}
-      hasBottomBorder={false}
-    >
-      <EuiTabs>
-        {visibleTabs.map((tab, index) => (
-          <EuiTab
-            key={tab}
-            isSelected={index === effectiveSelectedIndex}
-            onClick={() => onTabClick(tab)}
-          >
-            {getTabLabel(tab)}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-      <EuiSpacer size="l" />
-      <TrackApplicationView viewId={TAB_PAGE_NAMES[activeTab] ?? SecurityPageName.artifacts}>
-        {activeTab === AdministrationSubTab.endpointExceptions && <EndpointExceptions />}
-        {activeTab === AdministrationSubTab.trustedApps && <TrustedAppsList />}
-        {activeTab === AdministrationSubTab.trustedDevices && <TrustedDevicesList />}
-        {activeTab === AdministrationSubTab.eventFilters && <EventFiltersList />}
-        {activeTab === AdministrationSubTab.hostIsolationExceptions &&
-          isHostIsolationExceptionsAccessLoading && (
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="xl" data-test-subj="artifactsPage-hieAccessLoading" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        {activeTab === AdministrationSubTab.hostIsolationExceptions &&
-          !isHostIsolationExceptionsAccessLoading &&
-          !hasAccessToHostIsolationExceptions && (
-            <NoPrivilegesPage
-              docLinkSelector={({ securitySolution }) => securitySolution.privileges}
-            />
-          )}
-        {activeTab === AdministrationSubTab.hostIsolationExceptions &&
-          !isHostIsolationExceptionsAccessLoading &&
-          hasAccessToHostIsolationExceptions && <HostIsolationExceptionsList />}
-        {activeTab === AdministrationSubTab.blocklist && <Blocklist />}
-        <SpyRoute pageName={SecurityPageName.artifacts} />
-      </TrackApplicationView>
-    </AdministrationListPage>
+    <>
+      {isVersionHistoryOpen && (
+        <ArtifactsVersionHistoryFlyout
+          onClose={closeVersionHistory}
+          onViewDetails={handleViewChangeDetails}
+        />
+      )}
+      <AdministrationListPage
+        data-test-subj="artifactsPage"
+        title={ARTIFACTS_PAGE_TITLE}
+        subtitle={ARTIFACTS_PAGE_DESCRIPTION}
+        hasBottomBorder={false}
+        actions={<ArtifactsVersionHistoryButton onClick={openVersionHistory} />}
+      >
+        <EuiTabs>
+          {visibleTabs.map((tab, index) => (
+            <EuiTab
+              key={tab}
+              isSelected={index === effectiveSelectedIndex}
+              onClick={() => onTabClick(tab)}
+            >
+              {getTabLabel(tab)}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        <EuiSpacer size="l" />
+        <TrackApplicationView viewId={TAB_PAGE_NAMES[activeTab] ?? SecurityPageName.artifacts}>
+          {activeTab === AdministrationSubTab.endpointExceptions && <EndpointExceptions />}
+          {activeTab === AdministrationSubTab.trustedApps && <TrustedAppsList />}
+          {activeTab === AdministrationSubTab.trustedDevices && <TrustedDevicesList />}
+          {activeTab === AdministrationSubTab.eventFilters && <EventFiltersList />}
+          {activeTab === AdministrationSubTab.hostIsolationExceptions &&
+            isHostIsolationExceptionsAccessLoading && (
+              <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="xl" data-test-subj="artifactsPage-hieAccessLoading" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          {activeTab === AdministrationSubTab.hostIsolationExceptions &&
+            !isHostIsolationExceptionsAccessLoading &&
+            !hasAccessToHostIsolationExceptions && (
+              <NoPrivilegesPage
+                docLinkSelector={({ securitySolution }) => securitySolution.privileges}
+              />
+            )}
+          {activeTab === AdministrationSubTab.hostIsolationExceptions &&
+            !isHostIsolationExceptionsAccessLoading &&
+            hasAccessToHostIsolationExceptions && <HostIsolationExceptionsList />}
+          {activeTab === AdministrationSubTab.blocklist && <Blocklist />}
+          <SpyRoute pageName={SecurityPageName.artifacts} />
+        </TrackApplicationView>
+      </AdministrationListPage>
+    </>
   );
 });
 
 ArtifactsPage.displayName = 'ArtifactsPage';
+ArtifactsPageContent.displayName = 'ArtifactsPageContent';
