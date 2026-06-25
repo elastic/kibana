@@ -20,17 +20,15 @@ import type { DomainEvent, DomainEventType } from '@kbn/domain-events';
 export interface DomainEventsServiceSetup {
   /**
    * Subscribe to a single domain event type.
-   * @returns an unsubscribe function.
    */
   subscribe<T extends DomainEventType>(
     type: T,
     handler: (event: DomainEvent<T>) => void | Promise<void>
-  ): () => void;
+  ): void;
   /**
    * Subscribe to every event published on the bus.
-   * @returns an unsubscribe function.
    */
-  subscribeAll(handler: (event: DomainEvent) => void | Promise<void>): () => void;
+  subscribeAll(handler: (event: DomainEvent) => void | Promise<void>): void;
 }
 
 /**

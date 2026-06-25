@@ -33,8 +33,12 @@ export class DomainEventsService
 
   public setup(): DomainEventsServiceSetup {
     return {
-      subscribe: (type, handler) => this.bus.subscribe(type, handler),
-      subscribeAll: (handler) => this.bus.subscribeAll(handler),
+      subscribe: (type, handler) => {
+        this.bus.subscribe(type, handler);
+      },
+      subscribeAll: (handler) => {
+        this.bus.subscribeAll(handler);
+      },
     };
   }
 

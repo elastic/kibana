@@ -16,8 +16,8 @@ import { lazyObject } from '@kbn/lazy-object';
 export const domainEventsServiceMock = {
   createSetupContract: (): jest.Mocked<DomainEventsServiceSetup> =>
     lazyObject({
-      subscribe: jest.fn().mockReturnValue(jest.fn()),
-      subscribeAll: jest.fn().mockReturnValue(jest.fn()),
+      subscribe: jest.fn(),
+      subscribeAll: jest.fn(),
     }),
 
   createStartContract: (): jest.Mocked<DomainEventsServiceStart> =>

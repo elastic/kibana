@@ -139,8 +139,6 @@ export class WorkflowsExecutionEnginePlugin
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
   /** Set in start(); the domain-event subscriber registered during setup() defers to it. */
   private triggerEventHandler?: TriggerEventHandler;
-  /** Unsubscribe for the domain-event bus subscription registered during setup(). */
-  private domainEventsUnsubscribe?: () => void;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -166,9 +164,7 @@ export class WorkflowsExecutionEnginePlugin
 
     // Subscriptions must be registered during setup(); the handler is created in start(),
     // and events are only published at runtime (after start), so deferring is safe.
-    this.domainEventsUnsubscribe = core.domainEvents.subscribeAll((event) =>
-      this.triggerEventHandler?.handleDomainEvent(event)
-    );
+    core.domainEvents.subscribeAll((event) => this.triggerEventHandler?.handleDomainEvent(event));
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -1364,10 +1360,6 @@ export class WorkflowsExecutionEnginePlugin
       resumeWorkflowExecution,
       triggerEvents,
     };
-  }
-
-  public stop() {
-    this.domainEventsUnsubscribe?.();
   }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
