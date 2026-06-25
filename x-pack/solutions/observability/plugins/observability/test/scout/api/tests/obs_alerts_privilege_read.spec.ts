@@ -37,13 +37,13 @@ apiTest.describe(
       await teardownObsAlertsPrivilegeRules(apiClient, state.adminCreds, state.createdRules);
     });
 
-    apiTest('can find alerts via RAC', async ({ apiClient }) => {
+    apiTest('can find the alert via RAC', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/find', {
         headers: { ...KIBANA_HEADERS, ...withReadPrivilegeCreds.apiKeyHeader },
         body: {
           rule_type_ids: ['.es-query'],
           consumers: ['logs'],
-          query: { match_all: {} },
+          query: { ids: { values: [state.realAlertId] } },
           size: 10,
         },
         responseType: 'json',
@@ -53,10 +53,11 @@ apiTest.describe(
       const body = response.body as {
         hits?: {
           total?: { value?: number };
-          hits?: Array<{ _source: Record<string, unknown> }>;
+          hits?: Array<{ _id: string }>;
         };
       };
       expect(body.hits?.total?.value).toBeGreaterThan(0);
+      expect(body.hits?.hits?.map((hit) => hit._id)).toContain(state.realAlertId);
     });
 
     for (const spec of RULE_SPECS) {
