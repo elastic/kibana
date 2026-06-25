@@ -171,7 +171,7 @@ export const toNavigationItems = (
       maybeMarkActive(child, 2, navNode);
       return {
         id: child.id,
-        label: toSentenceCase(warnIfMissing(child, 'title', 'Missing Title 😭')),
+        label: warnIfMissing(child, 'title', 'Missing Title 😭'),
         href: warnIfMissing(child, 'href', 'Missing Href 😭'),
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),

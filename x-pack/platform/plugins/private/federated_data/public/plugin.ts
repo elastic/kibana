@@ -60,6 +60,7 @@ export class FederatedDataPlugin
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
         order: 2,
+        visibleIn: ['globalSearch', 'projectSideNav'],
         async mount(params: ManagementAppMountParams) {
           const { mountManagementSection } = await import('./mount_management_section');
           const [nextCoreStart, pluginsStart] = await core.getStartServices();
