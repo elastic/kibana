@@ -10,12 +10,12 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
-import type { ExperimentalFeatures } from '../../../../common';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { WatchlistConfigClient } from '../../../lib/entity_analytics/watchlists/management/watchlist_config';
-import { getUserWatchlistPrivileges } from '../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
-import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import { securityTool } from '../constants';
+import type { ExperimentalFeatures } from '../../../../../common';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
+import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
+import { getUserWatchlistPrivileges } from '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges';
+import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
+import { securityTool } from '../../constants';
 
 const schema = z.object({
   nameContains: z

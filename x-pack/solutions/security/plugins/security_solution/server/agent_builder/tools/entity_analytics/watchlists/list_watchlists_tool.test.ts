@@ -12,12 +12,12 @@ import {
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
-} from '../../__mocks__/test_helpers';
-import type { ExperimentalFeatures } from '../../../../common';
-import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+} from '../../../__mocks__/test_helpers';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import { listWatchlistsTool } from './list_watchlists_tool';
 
-jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
+jest.mock('../../../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
 }));
 
@@ -28,9 +28,9 @@ const mockExperimentalFeatures = {
 } as ExperimentalFeatures;
 
 const mockListFn = jest.fn();
-jest.mock('../../../lib/entity_analytics/watchlists/management/watchlist_config', () => {
+jest.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_config', () => {
   const actual = jest.requireActual(
-    '../../../lib/entity_analytics/watchlists/management/watchlist_config'
+    '../../../../lib/entity_analytics/watchlists/management/watchlist_config'
   );
   return {
     ...actual,
@@ -42,7 +42,7 @@ jest.mock('../../../lib/entity_analytics/watchlists/management/watchlist_config'
 
 const mockGetUserWatchlistPrivileges = jest.fn();
 jest.mock(
-  '../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
+  '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
   () => ({
     getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
   })
