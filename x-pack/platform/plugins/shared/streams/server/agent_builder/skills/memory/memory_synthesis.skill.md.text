@@ -4,7 +4,7 @@ Significant events knowledge is **cross-stream by default**: organize around **s
 
 ## Your task
 
-Use `platform_streams_sig_events_search_knowledge_indicators` to fetch **knowledge indicators** (KIs) — observed facts about streams and services extracted from logs and telemetry — and synthesize them into focused wiki pages. Pages have **names** (unique ids, e.g. "nginx-error-patterns"), **titles**, **content** (Markdown), and **categories** (e.g. "services", "operations", "streams/logs-nginx").
+Use `platform_streams_sig_events_ki_search` to fetch **knowledge indicators** (KIs) — observed facts about streams and services extracted from logs and telemetry — and synthesize them into focused wiki pages. Pages have **names** (unique ids, e.g. "nginx-error-patterns"), **titles**, **content** (Markdown), and **categories** (e.g. "services", "operations", "streams/logs-nginx").
 
 ## What to store
 
