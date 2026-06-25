@@ -366,22 +366,22 @@ describe('setXState', () => {
       {
         name: 'experimental with since',
         availability: { stability: 'experimental' as const, since: '8.0.0' },
-        expected: 'Technical Preview; added in 8.0.0',
+        expected: 'Experimental; added in 8.0.0',
       },
       {
         name: 'experimental without since',
         availability: { stability: 'experimental' as const },
+        expected: 'Experimental',
+      },
+      {
+        name: 'tech_preview with since',
+        availability: { stability: 'tech_preview' as const, since: '8.0.0' },
+        expected: 'Technical Preview; added in 8.0.0',
+      },
+      {
+        name: 'tech_preview without since',
+        availability: { stability: 'tech_preview' as const },
         expected: 'Technical Preview',
-      },
-      {
-        name: 'beta with since',
-        availability: { stability: 'beta' as const, since: '8.0.0' },
-        expected: 'Beta; added in 8.0.0',
-      },
-      {
-        name: 'beta without since',
-        availability: { stability: 'beta' as const },
-        expected: 'Beta',
       },
       {
         name: 'no availability',
@@ -422,22 +422,22 @@ describe('setXState', () => {
       {
         name: 'experimental with since',
         availability: { stability: 'experimental' as const, since: '8.0.0' },
-        expected: 'Technical Preview',
+        expected: 'Experimental',
       },
       {
         name: 'experimental without since',
         availability: { stability: 'experimental' as const },
+        expected: 'Experimental',
+      },
+      {
+        name: 'tech_preview with since',
+        availability: { stability: 'tech_preview' as const, since: '8.0.0' },
         expected: 'Technical Preview',
       },
       {
-        name: 'beta with since',
-        availability: { stability: 'beta' as const, since: '8.0.0' },
-        expected: 'Beta',
-      },
-      {
-        name: 'beta without since',
-        availability: { stability: 'beta' as const },
-        expected: 'Beta',
+        name: 'tech_preview without since',
+        availability: { stability: 'tech_preview' as const },
+        expected: 'Technical Preview',
       },
       {
         name: 'no availability',

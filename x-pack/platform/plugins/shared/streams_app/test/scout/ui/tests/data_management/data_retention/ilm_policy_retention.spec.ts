@@ -11,10 +11,12 @@ import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
   closeToastsIfPresent,
-  openRetentionModal,
+  openLifecycleMethodFlyout,
+  RETENTION_TEST_IDS,
   saveRetentionChanges,
+  selectIlmPolicy,
   toggleInheritSwitch,
-} from '../../../fixtures/retention_helpers';
+} from '../../../fixtures/data_lifecycle_helpers';
 
 test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
@@ -58,38 +60,30 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await apiServices.streams.clearStreamChildren('logs.otel');
   });
 
-  test('should show ILM policy button', async ({ page }) => {
-    await openRetentionModal(page);
+  test('should show ILM method card', async ({ page }) => {
+    await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-    await expect(page.getByRole('button', { name: 'ILM policy' })).toBeVisible();
+    await expect(page.getByTestId(RETENTION_TEST_IDS.methodCardIlm)).toBeVisible();
   });
 
   test('should select and save ILM policy', async ({ page }) => {
-    await openRetentionModal(page);
+    await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-
-    // Click ILM policy button
-    await page.getByRole('button', { name: 'ILM policy' }).click();
-
-    // Wait for the listbox to appear and select the first available policy
-    await page.getByRole('listbox', { name: 'Filter options' }).waitFor();
-    await page.getByRole('option', { name: /.alerts-ilm-policy/ }).click();
+    await selectIlmPolicy(page, '.alerts-ilm-policy');
 
     // Save changes
     await saveRetentionChanges(page);
 
-    // Verify ILM policy is displayed in subtitle
-    await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
+    // Subtitle is phase/downsampling counts only (policy name is shown in the header badge).
+    await expect
+      .poll(async () => page.getByTestId('retention-metric-subtitle').textContent())
+      .toMatch(/data phases?/);
   });
 
   test('should display selected ILM policy name', async ({ page }) => {
-    await openRetentionModal(page);
+    await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-
-    // Click ILM policy button and select policy
-    await page.getByRole('button', { name: 'ILM policy' }).click();
-    await page.getByRole('listbox', { name: 'Filter options' }).waitFor();
-    await page.getByRole('option', { name: /.alerts-ilm-policy/ }).click();
+    await selectIlmPolicy(page, '.alerts-ilm-policy');
 
     // Save changes
     await saveRetentionChanges(page);
@@ -101,20 +95,18 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
   });
 
   test('should persist ILM policy selection across page reload', async ({ page, pageObjects }) => {
-    await openRetentionModal(page);
+    await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-
-    // Select ILM policy
-    await page.getByRole('button', { name: 'ILM policy' }).click();
-    await page.getByRole('listbox', { name: 'Filter options' }).waitFor();
-    await page.getByRole('option', { name: /.alerts-ilm-policy/ }).click();
+    await selectIlmPolicy(page, '.alerts-ilm-policy');
     await saveRetentionChanges(page);
 
     // Reload page
     await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
-    // Verify ILM policy persists
-    await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
+    // Verify ILM policy persists (policy name in header badge; subtitle is phase/downsampling counts only)
+    await expect
+      .poll(async () => page.getByTestId('retention-metric-subtitle').textContent())
+      .toMatch(/data phases?/);
     await expect(page.getByTestId('lifecycleBadge-logs.otel.nginx')).toContainText(
       '.alerts-ilm-policy'
     );
@@ -122,13 +114,9 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
 
   test('should open ILM lifecycle phase popup and display phase details', async ({ page }) => {
     // First set an ILM policy
-    await openRetentionModal(page);
+    await openLifecycleMethodFlyout(page);
     await toggleInheritSwitch(page, false);
-
-    // Click ILM policy button and select a policy
-    await page.getByRole('button', { name: 'ILM policy' }).click();
-    await page.getByRole('listbox', { name: 'Filter options' }).waitFor();
-    await page.getByRole('option', { name: /.alerts-ilm-policy/ }).click();
+    await selectIlmPolicy(page, '.alerts-ilm-policy');
     await saveRetentionChanges(page);
 
     // Click on the hot phase button using test ID
@@ -248,15 +236,9 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
 
         await pageObjects.streams.gotoDataRetentionTab(TSDB_STREAM);
 
-        await openRetentionModal(page);
+        await openLifecycleMethodFlyout(page);
         await toggleInheritSwitch(page, false);
-
-        // Click ILM policy button and select the downsampling policy
-        await page.getByRole('button', { name: 'ILM policy' }).click();
-        const ilmListbox = page.getByRole('listbox', { name: 'Filter options' });
-        await ilmListbox.waitFor();
-        await page.getByPlaceholder('Filter options').fill(policyName);
-        await page.getByTestId(`ilmPolicy-${policyName}`).click();
+        await selectIlmPolicy(page, policyName);
         await saveRetentionChanges(page);
 
         // Verify downsampling is rendered for the policy
@@ -270,7 +252,10 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await page.getByTestId('editPolicyModal-overwriteButton').click();
 
         await expect(page.getByTestId('lifecyclePhase-warm-button')).toBeVisible();
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
       } finally {
         await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
       }
@@ -319,15 +304,9 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
 
         await pageObjects.streams.gotoDataRetentionTab(TSDB_STREAM);
 
-        await openRetentionModal(page);
+        await openLifecycleMethodFlyout(page);
         await toggleInheritSwitch(page, false);
-
-        // Click ILM policy button and select the downsampling policy
-        await page.getByRole('button', { name: 'ILM policy' }).click();
-        const ilmListbox = page.getByRole('listbox', { name: 'Filter options' });
-        await ilmListbox.waitFor();
-        await page.getByPlaceholder('Filter options').fill(policyName);
-        await page.getByTestId(`ilmPolicy-${policyName}`).click();
+        await selectIlmPolicy(page, policyName);
         await saveRetentionChanges(page);
 
         // Verify downsampling is rendered for the policy
@@ -347,7 +326,10 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await expect(page.getByTestId(`lifecycleBadge-${TSDB_STREAM}`)).toContainText(
           newPolicyName
         );
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
       } finally {
         await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
         await esClient.ilm.deleteLifecycle({ name: newPolicyName }).catch(() => {});
@@ -393,19 +375,16 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
 
         await pageObjects.streams.gotoDataRetentionTab(TSDB_STREAM);
 
-        await openRetentionModal(page);
+        await openLifecycleMethodFlyout(page);
         await toggleInheritSwitch(page, false);
-
-        // Click ILM policy button and select the policy
-        await page.getByRole('button', { name: 'ILM policy' }).click();
-        const ilmListbox = page.getByRole('listbox', { name: 'Filter options' });
-        await ilmListbox.waitFor();
-        await page.getByPlaceholder('Filter options').fill(policyName);
-        await page.getByTestId(`ilmPolicy-${policyName}`).click();
+        await selectIlmPolicy(page, policyName);
         await saveRetentionChanges(page);
 
-        // Verify there is no downsampling step before editing
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        // Verify there is no downsampling step before editing (empty state is always rendered for TSDB)
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
 
         // Edit warm phase and enable downsampling
         await page.getByTestId('lifecyclePhase-warm-button').click();
@@ -417,7 +396,11 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await page.getByTestId('streamsEditIlmPhasesFlyoutFromSummaryTab-warm').click();
 
         // Scope to the visible "Downsampling" section (hot/warm/cold all exist in the DOM)
-        await flyout.getByRole('switch', { name: 'Downsampling' }).click();
+        const downsamplingToggle = page.locator(
+          '[data-test-subj="streamsEditIlmPhasesFlyoutFromSummaryDownsamplingSwitch"]:visible'
+        );
+        await expect(downsamplingToggle).toBeVisible();
+        await downsamplingToggle.click();
 
         // Set an explicit interval to keep the rendered step deterministic
         const intervalValue = page.locator(

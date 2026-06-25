@@ -190,7 +190,6 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     find: jest.fn(),
     countAlertsAttachedToCase: jest.fn(),
     countAlertsWithinCase: jest.fn(),
-    executeCaseActionsAggregations: jest.fn(),
     executeCaseAggregations: jest.fn(),
     countPersistableStateAndExternalReferenceAttachments: jest.fn(),
   });
@@ -233,7 +232,7 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
     deleteTemplate: jest.fn(),
     getTags: jest.fn(),
     getAuthors: jest.fn(),
-    getTemplateVersionsForExtendedFieldSearch: jest.fn(),
+    getTemplateVersionsForExtendedFieldSearch: jest.fn().mockResolvedValue([]),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -242,7 +241,7 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
 
 export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock => {
   const service: PublicMethodsOf<FieldDefinitionsService> = lazyObject({
-    getFieldDefinitions: jest.fn(),
+    getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
     getFieldDefinition: jest.fn(),
     createFieldDefinition: jest.fn(),
     updateFieldDefinition: jest.fn(),

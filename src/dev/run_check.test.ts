@@ -50,11 +50,9 @@ jest.mock('@kbn/tooling-log', () => ({
 }));
 
 const mockRunJestViaMoon = jest.fn();
-const mockFindJestConfig = jest.fn();
 
 jest.mock('@kbn/test', () => ({
   runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
-  findJestConfig: (...args: unknown[]) => mockFindJestConfig(...args),
   JEST_CONFIG_NAMES: [
     'jest.config.dev.js',
     'jest.config.js',
@@ -68,6 +66,7 @@ jest.mock('@kbn/test', () => ({
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
   existsSync: jest.fn(),
+  readdirSync: jest.fn(),
 }));
 
 const mockExecaFn = jest.fn();
@@ -83,6 +82,7 @@ const mockExecuteTypeCheckValidation = jest.requireMock('./type_check_validation
 const mockExecuteEslintValidation = jest.requireMock('./eslint/run_eslint_contract')
   .executeEslintValidation as jest.Mock;
 const mockExistsSync = jest.requireMock('fs').existsSync as jest.Mock;
+const mockReaddirSync = jest.requireMock('fs').readdirSync as jest.Mock;
 const mockExeca = mockExecaFn;
 
 let handler: (args: {
@@ -150,6 +150,7 @@ describe('run_check', () => {
       (p: string) =>
         p === '/repo/packages/foo/jest.config.js' || p === '/repo/packages/bar/jest.config.js'
     );
+    mockReaddirSync.mockReturnValue([]);
     mockExecuteEslintValidation.mockResolvedValue({
       fileCount: 3,
       fixedFiles: [],
@@ -166,9 +167,6 @@ describe('run_check', () => {
       failed: [],
       exitCode: 0,
     });
-
-    // For fast path tests
-    mockFindJestConfig.mockReturnValue('packages/foo/jest.config.js');
   });
 
   afterEach(() => {
@@ -263,7 +261,7 @@ describe('run_check', () => {
     expect(output).toContain('lint  ✓ 10 files (fixed 2 files)');
   });
 
-  it('skips fast path when changed test files are integration tests', async () => {
+  it('skips fast path for integration test files', async () => {
     mockResolveValidationBaseContext.mockResolvedValue({
       ...baseContext,
       runContext: {
@@ -272,23 +270,66 @@ describe('run_check', () => {
       },
     });
 
-    mockExistsSync.mockImplementation((p: string) => {
-      // Simulate a jest.integration.config.js in the test file's directory
-      if (p === '/repo/src/core/server/integration_tests/user_storage/jest.integration.config.js') {
-        return true;
-      }
-      return p === '/repo/packages/foo/jest.config.js' || p === '/repo/packages/bar/jest.config.js';
-    });
+    mockExistsSync.mockImplementation(
+      (p: string) =>
+        p === '/repo/src/core/server/integration_tests/user_storage/jest.integration.config.js'
+    );
 
     await handler(createArgs());
 
-    // Fast path (execa) must not have been called
     expect(mockExeca).not.toHaveBeenCalled();
-    // Should fall through to the Moon path instead
     expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 
-  it('uses test-only fast path when all changed files are test files', async () => {
+  it('skips fast path for Scout test files', async () => {
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts',
+        ],
+      },
+    });
+
+    mockExistsSync.mockReturnValue(false);
+    mockReaddirSync.mockImplementation((dir: string) =>
+      dir === '/repo/x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api'
+        ? ['playwright.config.ts']
+        : []
+    );
+
+    await handler(createArgs());
+
+    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockRunJestViaMoon).toHaveBeenCalled();
+  });
+
+  it('skips fast path for Scout test files with parallel playwright config', async () => {
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts',
+        ],
+      },
+    });
+
+    mockExistsSync.mockReturnValue(false);
+    mockReaddirSync.mockImplementation((dir: string) =>
+      dir === '/repo/src/platform/plugins/shared/discover/test/scout/ui'
+        ? ['parallel.playwright.config.ts']
+        : []
+    );
+
+    await handler(createArgs());
+
+    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockRunJestViaMoon).toHaveBeenCalled();
+  });
+
+  it('uses test-only fast path when all changed files are jest unit test files', async () => {
     mockResolveValidationBaseContext.mockResolvedValue({
       ...baseContext,
       runContext: {
@@ -296,6 +337,8 @@ describe('run_check', () => {
         changedFiles: ['packages/foo/src/bar.test.ts', 'packages/foo/src/baz.test.ts'],
       },
     });
+
+    mockExistsSync.mockImplementation((p: string) => p === '/repo/packages/foo/jest.config.js');
 
     mockExeca.mockResolvedValue({
       exitCode: 0,
@@ -317,6 +360,8 @@ describe('run_check', () => {
         changedFiles: ['packages/foo/src/bar.test.ts'],
       },
     });
+
+    mockExistsSync.mockImplementation((p: string) => p === '/repo/packages/foo/jest.config.js');
 
     mockExeca.mockResolvedValue({
       exitCode: 1,

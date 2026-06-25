@@ -71,11 +71,7 @@ describe('appearance settings', () => {
   const renderComponent = (stateOverrides: Partial<MetricVisualizationState> = {}) => {
     const state = { ...fullState, ...stateOverrides } as MetricVisualizationState;
     const { ...rtlRest } = render(
-      <MetricAppearanceSettings state={state} setState={mockSetState} />,
-      {
-        // fails in concurrent mode
-        legacyRoot: true,
-      }
+      <MetricAppearanceSettings state={state} setState={mockSetState} />
     );
 
     return {

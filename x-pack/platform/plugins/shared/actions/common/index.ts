@@ -96,6 +96,8 @@ export type {
   StartOAuthFlowPathParams,
   StartOAuthFlowResponse,
   DisconnectOAuthPathParams,
+  CancelOAuthPathParams,
+  CancelOAuthBody,
 } from './routes/connector/apis/oauth';
 export {
   OAuthAuthorizationStatus,

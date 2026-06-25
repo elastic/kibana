@@ -411,10 +411,10 @@ describe('search embeddable transform utils', () => {
       expect(result.ref_id).toBe('session-without-ref-array');
     });
 
-    it('prefers savedObjectId on state over the matching saved search reference', () => {
+    it('prefers the saved search reference over a stale savedObjectId on state', () => {
       const storedSearch: SearchEmbeddableByReferenceState = {
         title: 'Panel',
-        savedObjectId: 'id-from-state',
+        savedObjectId: 'stale-id-from-source-space',
       };
       const references: SavedObjectReference[] = [
         {
@@ -424,7 +424,7 @@ describe('search embeddable transform utils', () => {
         },
       ];
       const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
-      expect(result.ref_id).toBe('id-from-state');
+      expect(result.ref_id).toBe('id-from-reference');
     });
   });
 

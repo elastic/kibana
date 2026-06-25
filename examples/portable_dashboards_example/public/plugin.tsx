@@ -57,14 +57,7 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
     });
   }
 
-  public async start(core: CoreStart, deps: StartDeps) {
-    deps.presentationUtil.registerPanelPlacementSettings(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
-      placementSettings: {
-        width: 48,
-        height: 12,
-      },
-    }));
-  }
+  public async start(core: CoreStart, deps: StartDeps) {}
 
   public stop() {}
 }

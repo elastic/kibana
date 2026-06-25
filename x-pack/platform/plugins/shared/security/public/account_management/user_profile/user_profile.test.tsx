@@ -75,8 +75,9 @@ describe('useUserProfileForm', () => {
           },
           "userSettings": Object {
             "contrastMode": "system",
-            "darkMode": "space_default",
+            "darkMode": "system",
             "locale": "en",
+            "rememberSelectedSpace": true,
           },
         },
         "user": Object {
@@ -85,6 +86,18 @@ describe('useUserProfileForm', () => {
         },
       }
     `);
+  });
+
+  it('should initialise rememberSelectedSpace from user profile data', () => {
+    const data: UserProfileData = {
+      avatar: {},
+      userSettings: {
+        rememberSelectedSpace: true,
+      },
+    };
+    const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+    expect(result.current.values.data?.userSettings?.rememberSelectedSpace).toBe(true);
   });
 
   it('should initialise form with values from user avatar if present', () => {

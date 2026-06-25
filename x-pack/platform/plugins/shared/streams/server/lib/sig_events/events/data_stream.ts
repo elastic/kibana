@@ -16,31 +16,22 @@ export const eventsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    verdict: mappings.keyword(),
     event_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
-    rule_names: mappings.keyword(),
+    previous_event_id: mappings.keyword(),
     stream_names: mappings.keyword(),
-    verdict_id: mappings.keyword(),
-    recommended_action: mappings.keyword(),
-    title: mappings.text({
-      fields: {
-        keyword: { type: 'keyword', ignore_above: 512 },
-      },
-    }),
+    status: mappings.keyword(),
+    title: mappings.text(),
     summary: mappings.text(),
-    root_cause: mappings.text(),
-    recommendations: mappings.text(),
   },
 } satisfies MappingsDefinition;
-
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
 export type { SigEvent };
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 1,
+  version: 6,
   hidden: true,
   template: {
     priority: 500,

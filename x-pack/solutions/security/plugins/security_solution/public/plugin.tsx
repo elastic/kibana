@@ -25,6 +25,9 @@ import type {
   SecuritySolutionAlertFlyoutFooterFeature,
   SecuritySolutionAlertFlyoutHeaderTitleFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
+  SecuritySolutionAttackFlyoutFooterFeature,
+  SecuritySolutionAttackFlyoutHeaderFeature,
+  SecuritySolutionAttackFlyoutOverviewTabFeature,
   SecuritySolutionCellRendererFeature,
   SecuritySolutionIOCFlyoutFooterFeature,
   SecuritySolutionIOCFlyoutHeaderFeature,
@@ -58,7 +61,6 @@ import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { getLazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
-import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
 import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
@@ -75,7 +77,8 @@ import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint';
 import { getEventType } from './cases/attachments/event';
 import { getSecurityAlertType } from './cases/attachments/alert';
 import { isSecuritySolutionAccessible } from './helpers_access';
-import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
+import { getIndicatorAttachment } from './cases/attachments/indicator';
+import { getTimelineAttachment } from './cases/attachments/timeline';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
@@ -83,6 +86,7 @@ import {
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
   registerRuleAttachment,
+  registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -106,6 +110,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _startedSubPluginsPromise?: Promise<StartedSubPlugins>;
   private _discoverFlyoutStorePromise?: Promise<SecurityAppStore>;
   private _securityCanvasContextPromise?: Promise<SecurityCanvasEmbeddedBundle>;
+  private _coreSetup?: CoreSetup<StartPluginsDependencies, PluginStart>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -129,6 +134,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
     plugins: SetupPlugins
   ): PluginSetup {
+    this._coreSetup = core;
     this.services.setup(core, plugins);
 
     const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
@@ -290,10 +296,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    cases.attachmentFramework.registerExternalReference(generateIndicatorAttachmentType());
+    cases.attachmentFramework.registerUnified(getIndicatorAttachment());
     cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
     cases.attachmentFramework.registerUnified(getEventType());
     cases.attachmentFramework.registerUnified(getSecurityAlertType());
+    cases.attachmentFramework.registerUnified(getTimelineAttachment());
 
     this.registerDiscoverSharedFeatures(core, plugins);
 
@@ -306,6 +313,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
     if (plugins.agentBuilder?.attachments) {
+      const coreSetup = this._coreSetup;
+      if (!coreSetup) {
+        throw new Error('Security Solution setup contract is required to register attachments');
+      }
+
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
       registerRuleAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -330,15 +342,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
       });
+      if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
+        registerRulePreviewAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          data: plugins.data,
+          getServices: () => this.getDiscoverFlyoutServices(coreSetup),
+          getStore: () => this.getDiscoverFlyoutStore(coreSetup),
+          spaces: plugins.spaces,
+        });
+      }
     }
 
-    // Enable CPS picker only for individual dashboard views (not the listing page).
-    // TODO: Remove this restriction once CPS is enabled across all Security Solution pages.
-    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
-      /security\/dashboards\/[^?]+/.test(location)
-        ? ProjectRoutingAccess.EDITABLE
-        : ProjectRoutingAccess.DISABLED
-    );
+    // Enable CPS picker in READ_ONLY mode for all Security Solution pages
+    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, () => ProjectRoutingAccess.READONLY);
 
     return this.contract.getStartContract(core);
   }
@@ -609,6 +625,80 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     };
     discoverFeatureRegistry.register(iocFlyoutHeaderFeature);
+
+    const LazyAttackFlyoutOverviewTab = React.lazy(async () => {
+      const { AttackFlyoutOverviewTab } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutOverviewTab };
+    });
+
+    const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
+      id: 'security-solution-attack-flyout-overview-tab',
+      render: ({ hit }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutOverviewTab
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutOverviewTabFeature);
+
+    const LazyAttackFlyoutHeader = React.lazy(async () => {
+      const { AttackFlyoutHeader } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutHeader };
+    });
+
+    const attackFlyoutHeaderFeature: SecuritySolutionAttackFlyoutHeaderFeature = {
+      id: 'security-solution-attack-flyout-header',
+      renderHeader: ({ hit, onAttackUpdated }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutHeader
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutHeaderFeature);
+
+    const LazyAttackFlyoutFooter = React.lazy(async () => {
+      const { AttackFlyoutFooter } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutFooter };
+    });
+
+    const attackFlyoutFooterFeature: SecuritySolutionAttackFlyoutFooterFeature = {
+      id: 'security-solution-attack-flyout-footer',
+      renderFooter: ({ hit, onAttackUpdated }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutFooter
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutFooterFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {
@@ -811,12 +901,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       package: 'endpoint',
       view: 'package-policy-create',
       Component: getLazyEndpointPolicyCreateExtension(registerOptions),
-    });
-
-    registerExtension({
-      package: 'endpoint',
-      view: 'package-policy-create-multi-step',
-      Component: LazyEndpointPolicyCreateMultiStepExtension,
     });
 
     registerExtension({

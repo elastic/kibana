@@ -33,7 +33,7 @@ export const EXAMPLES_SECTION_TITLE = i18n.translate(
 );
 
 export const RUNS_SECTION_TITLE = i18n.translate('xpack.evals.datasetDetail.runsSectionTitle', {
-  defaultMessage: 'Runs',
+  defaultMessage: 'Experiments',
 });
 
 export const METADATA_DESCRIPTION_LABEL = i18n.translate(
@@ -57,9 +57,19 @@ export const METADATA_UPDATED_AT_LABEL = i18n.translate(
   }
 );
 
-export const EDIT_METADATA_BUTTON = i18n.translate('xpack.evals.datasetDetail.editMetadataButton', {
-  defaultMessage: 'Edit metadata',
-});
+export const EDIT_DESCRIPTION_BUTTON = i18n.translate(
+  'xpack.evals.datasetDetail.editDescriptionButton',
+  {
+    defaultMessage: 'Edit description',
+  }
+);
+
+export const DELETE_DATASET_BUTTON = i18n.translate(
+  'xpack.evals.datasetDetail.deleteDatasetButton',
+  {
+    defaultMessage: 'Delete dataset',
+  }
+);
 
 export const ADD_EXAMPLE_BUTTON = i18n.translate('xpack.evals.datasetDetail.addExampleButton', {
   defaultMessage: 'Add example',
@@ -89,8 +99,8 @@ export const COLUMN_ACTIONS = i18n.translate('xpack.evals.datasetDetail.columns.
   defaultMessage: 'Actions',
 });
 
-export const COLUMN_RUN_ID = i18n.translate('xpack.evals.datasetDetail.runsColumns.runId', {
-  defaultMessage: 'Run ID',
+export const COLUMN_RUN_NAME = i18n.translate('xpack.evals.datasetDetail.runsColumns.runName', {
+  defaultMessage: 'Name',
 });
 
 export const COLUMN_RUN_TIMESTAMP = i18n.translate(
@@ -99,10 +109,6 @@ export const COLUMN_RUN_TIMESTAMP = i18n.translate(
     defaultMessage: 'Timestamp',
   }
 );
-
-export const COLUMN_RUN_SUITE = i18n.translate('xpack.evals.datasetDetail.runsColumns.suite', {
-  defaultMessage: 'Suite',
-});
 
 export const COLUMN_RUN_TASK_MODEL = i18n.translate(
   'xpack.evals.datasetDetail.runsColumns.taskModel',
@@ -117,6 +123,14 @@ export const COLUMN_RUN_EVALUATOR_MODEL = i18n.translate(
     defaultMessage: 'Evaluator model',
   }
 );
+
+export const COLUMN_RUN_BRANCH = i18n.translate('xpack.evals.datasetDetail.runsColumns.branch', {
+  defaultMessage: 'Branch',
+});
+
+export const COLUMN_RUN_REPS = i18n.translate('xpack.evals.datasetDetail.runsColumns.reps', {
+  defaultMessage: 'Reps',
+});
 
 export const EDIT_EXAMPLE_ACTION = i18n.translate('xpack.evals.datasetDetail.editExampleAction', {
   defaultMessage: 'Edit',
@@ -155,10 +169,10 @@ export const MODAL_DELETE_BUTTON = i18n.translate('xpack.evals.datasetDetail.mod
   defaultMessage: 'Delete',
 });
 
-export const EDIT_METADATA_MODAL_TITLE = i18n.translate(
-  'xpack.evals.datasetDetail.editMetadataModalTitle',
+export const EDIT_DESCRIPTION_MODAL_TITLE = i18n.translate(
+  'xpack.evals.datasetDetail.editDescriptionModalTitle',
   {
-    defaultMessage: 'Edit dataset metadata',
+    defaultMessage: 'Edit dataset description',
   }
 );
 
@@ -203,7 +217,7 @@ export const EXAMPLES_EMPTY_MESSAGE = i18n.translate(
 );
 
 export const RUNS_EMPTY_MESSAGE = i18n.translate('xpack.evals.datasetDetail.runsEmptyMessage', {
-  defaultMessage: 'No runs found for this dataset.',
+  defaultMessage: 'No experiments found for this dataset.',
 });
 
 export const DATASET_NOT_FOUND_TITLE = i18n.translate(
@@ -255,6 +269,10 @@ export const DELETE_EXAMPLE_BUTTON = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
+
+export const CLOSE_FLYOUT_BUTTON = i18n.translate('xpack.evals.datasetDetail.closeFlyoutButton', {
+  defaultMessage: 'Close',
+});
 
 export const FLYOUT_INPUT_SECTION = i18n.translate('xpack.evals.datasetDetail.flyoutInputSection', {
   defaultMessage: 'Input',

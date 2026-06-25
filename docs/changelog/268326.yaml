@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/268326
+issues:
+- https://github.com/elastic/kibana/issues/259129
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Dashboards and visualizations
+title: Show "Go to dashboard" button in save success toast
+description: 'Adds a "Go to dashboard" navigation button to the dashboard save toast when saving from outside the Dashboard app.'

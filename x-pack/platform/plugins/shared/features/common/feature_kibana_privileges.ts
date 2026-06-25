@@ -149,6 +149,12 @@ export interface FeatureKibanaPrivileges {
        * ```
        */
       manage_rule_settings?: AlertingKibanaPrivilege;
+      /**
+       * List of rule types and consumers for which users should have the ability to mute and unmute
+       * per-alert instances when granted this privilege. Per-alert snooze/unsnooze reuses the
+       * muteAlert/unmuteAlert operations internally and is therefore also covered.
+       */
+      mute_alerts?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**
@@ -290,6 +296,21 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     manageTemplates?: readonly string[];
+  };
+
+  /**
+   * If your feature requires read access to the alerting v2 data streams that persist the rule events and alert actions, then specify it here.
+   * Read more about the alerting v2 resources here x-pack/platform/plugins/shared/alerting_v2/server/resources/README.md
+   *
+   * @example
+   * ```ts
+   *  {
+   *    alerts: { read: true }
+   *  }
+   * ```
+   */
+  alerts?: {
+    read?: boolean;
   };
 
   /**

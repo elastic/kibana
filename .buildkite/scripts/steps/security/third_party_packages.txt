@@ -1,3 +1,4 @@
+knip
 safe-stable-stringify
 ajv-draft-04
 ajv-formats
@@ -5,7 +6,6 @@ ajv-formats
 @langchain/langgraph-checkpoint
 dom-to-image-more
 pdf-lib
-tree-dump
 @a2a-js/sdk
 @opentelemetry/exporter-metrics-otlp-http
 inversify
@@ -49,3 +49,4 @@ jszip
 @opentelemetry/exporter-logs-otlp-grpc
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
+just-bash

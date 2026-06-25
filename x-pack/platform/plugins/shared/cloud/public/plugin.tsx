@@ -14,6 +14,7 @@ import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { getIsEce } from '../common/get_is_ece';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
@@ -28,11 +29,14 @@ export interface CloudConfigType {
   organization_id?: string;
   cname?: string;
   csp?: string;
+  region?: string;
   base_url?: string;
   profile_url?: string;
   deployments_url?: string;
   deployment_url?: string;
+  create_deployment_url?: string;
   projects_url?: string;
+  create_project_url?: string;
   billing_url?: string;
   organization_url?: string;
   users_and_roles_url?: string;
@@ -40,6 +44,9 @@ export interface CloudConfigType {
   trial_end_date?: string;
   isSaasContainer?: boolean;
   is_elastic_staff_owned?: boolean;
+  managed_otlp?: {
+    url?: string;
+  };
   onboarding?: {
     default_solution?: string;
   };
@@ -73,7 +80,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   public setup(core: CoreSetup): CloudSetup {
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
 
-    const { id, cname, is_elastic_staff_owned: isElasticStaffOwned, csp } = this.config;
+    const { id, cname, is_elastic_staff_owned: isElasticStaffOwned, csp, region } = this.config;
 
     let decodedId: DecodedCloudId | undefined;
     if (id) {
@@ -82,6 +89,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const kibanaUrl = decodedId?.kibanaUrl;
 
     this.cloudUrls.setup(this.config, core, kibanaUrl);
+    const isEce = getIsEce({
+      isCloudEnabled: this.isCloudEnabled,
+      isServerlessEnabled: this.isServerlessEnabled,
+      isSaasContainer: this.config.isSaasContainer,
+    });
 
     return {
       cloudId: id,
@@ -89,12 +101,16 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
       csp,
+      region,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
-      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
+      isEce,
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
+      },
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
       },
@@ -165,6 +181,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         organizationInTrial: this.config.serverless?.in_trial,
       },
       fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
+      },
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),

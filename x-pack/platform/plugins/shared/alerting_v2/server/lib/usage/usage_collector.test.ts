@@ -106,33 +106,6 @@ describe('registerAlertingV2UsageCollector', () => {
             },
             type: 'array',
           },
-          count_by_no_data_behavior: {
-            last_status: {
-              _meta: { description: 'Number of rules with last_status behavior.' },
-              type: 'long',
-            },
-            no_data: {
-              _meta: { description: 'Number of rules with no_data behavior.' },
-              type: 'long',
-            },
-            recover: {
-              _meta: { description: 'Number of rules with recover behavior.' },
-              type: 'long',
-            },
-          },
-          count_by_no_data_timeframe: {
-            items: {
-              name: {
-                _meta: { description: 'No data timeframe duration string.' },
-                type: 'keyword',
-              },
-              value: {
-                _meta: { description: 'Number of rules with this no data timeframe.' },
-                type: 'long',
-              },
-            },
-            type: 'array',
-          },
           count_by_pending_timeframe: {
             items: {
               name: {
@@ -159,16 +132,6 @@ describe('registerAlertingV2UsageCollector', () => {
             },
             type: 'array',
           },
-          count_by_recovery_policy_type: {
-            no_breach: {
-              _meta: { description: 'Number of rules with recovery policy type no_breach.' },
-              type: 'long',
-            },
-            query: {
-              _meta: { description: 'Number of rules with recovery policy type query.' },
-              type: 'long',
-            },
-          },
           count_by_schedule: {
             items: {
               name: { _meta: { description: 'Schedule interval string.' }, type: 'keyword' },
@@ -189,14 +152,6 @@ describe('registerAlertingV2UsageCollector', () => {
           },
           count_with_grouping: {
             _meta: { description: 'Number of rules with grouping enabled.' },
-            type: 'long',
-          },
-          count_with_no_data: {
-            _meta: { description: 'Number of rules with no data handling configured.' },
-            type: 'long',
-          },
-          count_with_recovery_policy: {
-            _meta: { description: 'Number of rules with a recovery policy.' },
             type: 'long',
           },
           dispatcher_executions_count_24hr: {

@@ -274,20 +274,15 @@ var ENV_DOCS = [
     example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
   },
   {
-    name: 'EVALUATIONS_ES_URL',
-    description: 'Elasticsearch URL where evaluation results are exported.',
-    example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
-  },
-  {
-    name: 'EVALUATIONS_ES_API_KEY',
-    description: 'API key for authenticating with the evaluations Elasticsearch cluster.',
-    example: 'EVALUATIONS_ES_API_KEY=...',
-  },
-  {
-    name: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT',
+    name: 'EVALUATIONS_KBN_URL',
     description:
-      'Skip the Elasticsearch export preflight check (not recommended for CI). Preflight runs a small sentinel write against the configured evaluations cluster.',
-    example: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT=true',
+      'Kibana URL used for eval score ingestion and dataset operations when targeting a non-local cluster.',
+    example: 'EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601',
+  },
+  {
+    name: 'EVALUATIONS_KBN_API_KEY',
+    description: 'API key for authenticating to EVALUATIONS_KBN_URL.',
+    example: 'EVALUATIONS_KBN_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',
@@ -348,7 +343,7 @@ function runFastHelp() {
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');
   logInfo('  scout                         Start Scout server for evals');
-  logInfo('  clear-index                   Delete kibana-evaluations indices (reset export)');
+  logInfo('  clear-index                   Delete .evaluation-scores indices (reset export)');
   logInfo('  run [--suite <id>] [...]      Run an eval suite');
   logInfo('  list [--refresh] [--json]     List eval suites');
   logInfo('  labels [suite-id ...]         Create/sync GitHub eval suite labels');
@@ -356,6 +351,7 @@ function runFastHelp() {
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');
   logInfo('  ci-map [--json]               Output CI label mapping');
+  logInfo('  ext <command> [...]           Run the experimental evals extensions CLI');
   logInfo('');
   logInfo('Examples:');
   logInfo('  node scripts/evals init');
@@ -363,6 +359,7 @@ function runFastHelp() {
   logInfo('  node scripts/evals stop');
   logInfo('  node scripts/evals logs --service scout');
   logInfo('  node scripts/evals run --suite agent-builder --judge eis-gpt-4.1');
+  logInfo('  node scripts/evals ext red-team --suite agent-builder --dry-run');
   return true;
 }
 
@@ -373,6 +370,15 @@ function main() {
     command = null;
   }
   var repoRoot = process.cwd();
+
+  // Delegate the experimental extensions CLI: `node scripts/evals ext <command> [...]`.
+  if (command === 'ext') {
+    process.argv = [process.argv[0], process.argv[1]].concat(args.slice(1));
+    process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
+    require('@kbn/setup-node-env');
+    void require('@kbn/evals-extensions').cli.run();
+    return;
+  }
 
   var hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
 

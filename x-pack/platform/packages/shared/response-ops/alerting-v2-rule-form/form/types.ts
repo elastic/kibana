@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-// Import and re-export RuleKind and RecoveryPolicyType from schema
-import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import type { RuleKind, RecoveryStrategy, NoDataStrategy } from '@kbn/alerting-v2-schemas';
+import type { ActionFormValue } from '../actions_form';
+
+export type { RuleKind, RecoveryStrategy, NoDataStrategy };
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
 export const DELAY_MODE = {
@@ -18,9 +20,30 @@ export const DELAY_MODE = {
 
 export type StateTransitionDelayMode = (typeof DELAY_MODE)[keyof typeof DELAY_MODE];
 
-/**
- * Rule metadata containing identification and categorization info.
- */
+// ---------------------------------------------------------------------------
+// RuleQuery — composed/standalone query schema matching the API.
+// ---------------------------------------------------------------------------
+
+export interface ComposedQuery {
+  format: 'composed';
+  base: string;
+  breach: { segment: string };
+  recovery?: { segment: string };
+}
+
+export interface StandaloneQuery {
+  format: 'standalone';
+  no_data?: { query: string };
+  breach: { query: string };
+  recovery?: { query: string };
+}
+
+export type RuleQuery = ComposedQuery | StandaloneQuery;
+
+// ---------------------------------------------------------------------------
+// Shared sub-types
+// ---------------------------------------------------------------------------
+
 export interface RuleMetadata {
   name: string;
   enabled: boolean;
@@ -33,21 +56,9 @@ export interface RuleSchedule {
   every: string;
   lookback: string;
 }
-export interface RuleEvaluation {
-  query: {
-    base: string;
-  };
-}
 
 export interface RuleGrouping {
   fields: string[];
-}
-
-export interface RecoveryPolicy {
-  type: RecoveryPolicyType;
-  query?: {
-    base?: string | null;
-  };
 }
 
 export interface RuleArtifact {
@@ -56,9 +67,10 @@ export interface RuleArtifact {
   value: string;
 }
 
-/**
- * State transition configuration for alert-type rules.
- */
+export interface RuleNotificationsValue {
+  workflows: ActionFormValue;
+}
+
 export interface StateTransition {
   pendingCount?: number | null;
   pendingTimeframe?: string | null;
@@ -66,21 +78,28 @@ export interface StateTransition {
   recoveringTimeframe?: string | null;
 }
 
-/**
- * Form values for creating a new alerting rule.
- * This interface defines the contract for the rule creation form,
- * independent of the API schema to allow for controlled evolution.
- */
+// ---------------------------------------------------------------------------
+// FormValues — the single canonical form type for rule creation/editing.
+//
+// Matches the API schema structurally (same `query` discriminated union,
+// same field semantics). Only diverges in casing (camelCase for RHF) and
+// UI-only fields (delay modes, metadata.enabled, split artifact arrays).
+// ---------------------------------------------------------------------------
+
 export interface FormValues {
   kind: RuleKind;
   metadata: RuleMetadata;
   timeField: string;
   schedule: RuleSchedule;
-  evaluation: RuleEvaluation;
+  query: RuleQuery;
+  recoveryStrategy?: RecoveryStrategy;
+  noDataStrategy?: NoDataStrategy;
   grouping?: RuleGrouping;
-  recoveryPolicy?: RecoveryPolicy;
   stateTransition?: StateTransition;
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
+  notifications?: RuleNotificationsValue;
+  runbookArtifacts?: RuleArtifact[];
+  dashboardArtifacts?: RuleArtifact[];
 }

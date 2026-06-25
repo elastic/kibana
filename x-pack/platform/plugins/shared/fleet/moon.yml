@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/i18n-react'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/deeplinks-management'
   - '@kbn/core-application-common'
   - '@kbn/core-capabilities-common'
   - '@kbn/i18n'
@@ -111,7 +112,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/licensing-types'
   - '@kbn/alerting-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
@@ -127,6 +128,8 @@ dependsOn:
   - '@kbn/yaml-loader'
   - '@kbn/charts-theme'
   - '@kbn/search-types'
+  - '@kbn/human-readable-id'
+  - '@kbn/elastic-agent-condition-language'
 tags:
   - plugin
   - prod

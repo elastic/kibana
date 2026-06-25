@@ -17,11 +17,12 @@ export interface AlertEpisodeAction {
   last_ack_actor: string | null;
 }
 
-export const buildEpisodeActionsQuery = (episodeIds: string[]) => {
+export const buildEpisodeActionsQuery = (spaceId: string, episodeIds: string[]) => {
   const episodeIdLiterals = episodeIds.map((id) => esql.str(id));
 
   // prettier-ignore
   return esql.from(ALERT_ACTIONS_DATA_STREAM)
+    .where`space_id == ${spaceId}`
     .where`episode_id IN (${episodeIdLiterals})`
     .where`action_type IN ("ack", "unack", "assign")`
     .pipe`EVAL

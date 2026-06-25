@@ -9,6 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { chunk } from 'lodash';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../common/constants';
+import { buildIndexNameWithNamespace } from '../utils/build_index_name_with_namespace';
+import { buildSpaceIdFilter } from '../utils/build_space_id_filter';
 import { prefixIndexPatternsWithCcs } from '../utils/ccs_utils';
 
 const MAX_ACTION_IDS_PER_BATCH = 1000;
@@ -41,7 +43,8 @@ interface ActionResponseAggregation {
 export const getResultCountsForActions = async (
   esClient: ElasticsearchClient,
   actionIds: string[],
-  namespace = 'default',
+  spaceId: string,
+  integrationNamespaces: readonly string[] = ['default'],
   ccsEnabled = false
 ): Promise<ResultCountsMap> => {
   if (actionIds.length === 0) {
@@ -51,7 +54,9 @@ export const getResultCountsForActions = async (
   const batches = chunk(actionIds, MAX_ACTION_IDS_PER_BATCH);
 
   const batchResults = await Promise.all(
-    batches.map((batchIds) => fetchResultCountsBatch(esClient, batchIds, namespace, ccsEnabled))
+    batches.map((batchIds) =>
+      fetchResultCountsBatch(esClient, batchIds, spaceId, integrationNamespaces, ccsEnabled)
+    )
   );
 
   const result: ResultCountsMap = new Map();
@@ -67,20 +72,27 @@ export const getResultCountsForActions = async (
 const fetchResultCountsBatch = async (
   esClient: ElasticsearchClient,
   actionIds: string[],
-  namespace: string,
+  spaceId: string,
+  integrationNamespaces: readonly string[],
   ccsEnabled: boolean
 ): Promise<ResultCountsMap> => {
-  const index = prefixIndexPatternsWithCcs(
-    `${ACTION_RESPONSES_DATA_STREAM_INDEX}-${namespace}`,
-    ccsEnabled
-  );
+  const baseIndex = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
+  const indexPattern =
+    integrationNamespaces.length > 0
+      ? integrationNamespaces
+          .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
+          .join(',')
+      : baseIndex;
+  const index = prefixIndexPatternsWithCcs(indexPattern, ccsEnabled);
 
   const response = await esClient.search<unknown, ActionResponseAggregation>({
+    allow_no_indices: true,
     index,
+    ignore_unavailable: true,
     size: 0,
     query: {
-      terms: {
-        action_id: actionIds,
+      bool: {
+        filter: [{ terms: { action_id: actionIds } }, buildSpaceIdFilter(spaceId)],
       },
     },
     aggs: {

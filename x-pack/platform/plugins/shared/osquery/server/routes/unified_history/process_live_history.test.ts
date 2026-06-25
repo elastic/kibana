@@ -124,7 +124,9 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      'default'
+      'default',
+      ['default'],
+      false
     );
   });
 
@@ -164,7 +166,34 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1', 'query-2'],
-      'default'
+      'default',
+      ['default'],
+      false
+    );
+  });
+
+  it('uses integration namespaces and CCS setting for result counts', async () => {
+    mockGetResultCountsForActions.mockResolvedValue(
+      new Map([
+        ['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+      ])
+    );
+
+    await processLiveHistory({
+      liveHits: [createLiveHit()],
+      osqueryContext: createMockOsqueryContext() as never,
+      spaceId: 'production',
+      integrationNamespaces: ['prod'],
+      ccsEnabled: true,
+      logger: {} as never,
+    });
+
+    expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
+      expect.anything(),
+      ['query-1'],
+      'production',
+      ['prod'],
+      true
     );
   });
 

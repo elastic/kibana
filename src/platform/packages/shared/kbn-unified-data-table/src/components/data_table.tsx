@@ -214,7 +214,7 @@ interface InternalUnifiedDataTableProps {
   /**
    * function to change sorting of the documents, skipped when isSortEnabled is set to false
    */
-  onSort?: (sort: string[][]) => void;
+  onSort?: (sort: SortOrder[]) => void;
   /**
    * Array of documents provided by Elasticsearch
    */
@@ -251,6 +251,13 @@ interface InternalUnifiedDataTableProps {
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
+  /**
+   * Only for ES|QL mode for now.
+   * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
+   * server-side (e.g. via a SORT clause in ES|QL) so the table displays the already-sorted rows
+   * verbatim instead of reordering them again. Defaults to true.
+   */
+  isInMemorySortEnabled?: boolean;
   /**
    * Current sort setting
    */
@@ -425,6 +432,14 @@ interface InternalUnifiedDataTableProps {
    **/
   visibleCellActions?: number;
   /**
+   * Total number of visible slots in the actions column, including the overflow
+   * menu button when it appears. Defaults to 2 (one inline control + one overflow menu).
+   *
+   * When the total number of controls is `visibleRowLeadingControls` or fewer,
+   * all render inline with no overflow menu.
+   */
+  visibleRowLeadingControls?: number;
+  /**
    * Disable cell actions for the table.
    */
   disableCellActions?: boolean;
@@ -522,6 +537,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateHeaderRowHeight,
       controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
       dataView,
       loadingState,
       onFilter,
@@ -537,6 +553,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
+      isInMemorySortEnabled = true,
       isPaginationEnabled = true,
       paginationMode = DEFAULT_PAGINATION_MODE,
       cellActionsTriggerId,
@@ -663,6 +680,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataView,
       isPlainRecord,
       isSortEnabled,
+      isInMemorySortEnabled,
       defaultColumns,
       onSort,
     });
@@ -1119,6 +1137,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
         externalControlColumns,
+        visibleRowLeadingControls,
       });
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
@@ -1132,6 +1151,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
     ]);
 
     const additionalControls = useMemo(() => {

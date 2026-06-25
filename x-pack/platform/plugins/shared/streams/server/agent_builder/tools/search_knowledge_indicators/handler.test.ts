@@ -7,22 +7,19 @@
 
 import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { FeatureClient } from '../../../lib/streams/feature/feature_client';
-import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../../../lib/streams/ki';
 import type { StreamsClient } from '../../../lib/streams/client';
 import { searchKnowledgeIndicatorsToolHandler } from './handler';
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
-    uuid: 'feature-uuid',
     id: 'feature-id',
+    uuid: 'feature-uuid',
     stream_name: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
     properties: {},
     confidence: 90,
-    status: 'active',
-    last_seen: new Date().toISOString(),
     ...overrides,
   };
 }
@@ -45,14 +42,12 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     listStreams: jest.fn(),
   } as unknown as StreamsClient;
 
-  const featureClient = {
+  const kiClient = {
     getFeatures: jest.fn(),
-  } as unknown as FeatureClient;
-
-  const queryClient = {
+    findFeatures: jest.fn(),
     findQueries: jest.fn(),
     getQueryLinks: jest.fn(),
-  } as unknown as QueryClient;
+  } as unknown as KnowledgeIndicatorClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,11 +58,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
 
-    featureClient.getFeatures = jest
+    kiClient.getFeatures = jest
       .fn()
       .mockResolvedValue({ hits: [makeFeature({ id: 'f1', confidence: 80 })], total: 1 });
 
-    queryClient.getQueryLinks = jest.fn().mockResolvedValue([
+    kiClient.getQueryLinks = jest.fn().mockResolvedValue([
       {
         'asset.uuid': 'a1',
         'asset.type': 'query',
@@ -81,8 +76,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
     const result = await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
-      featureClient,
-      queryClient,
+      kiClient,
       logger,
       params: {},
     });
@@ -92,12 +86,12 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(result.knowledge_indicators[1].kind).toBe('query');
   });
 
-  it('returns only queries when kind is [query] and does not call featureClient', async () => {
+  it('returns only queries when kind is [query] and does not call kiClient.getFeatures', async () => {
     streamsClient.listStreams = jest
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
 
-    queryClient.getQueryLinks = jest.fn().mockResolvedValue([
+    kiClient.getQueryLinks = jest.fn().mockResolvedValue([
       {
         'asset.uuid': 'a1',
         'asset.type': 'query',
@@ -111,13 +105,12 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
     const result = await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
-      featureClient,
-      queryClient,
+      kiClient,
       logger,
       params: { kind: ['query'] },
     });
 
-    expect(featureClient.getFeatures).not.toHaveBeenCalled();
+    expect(kiClient.getFeatures).not.toHaveBeenCalled();
     expect(result.knowledge_indicators).toEqual([
       {
         kind: 'query',
@@ -142,20 +135,19 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
 
-    queryClient.findQueries = jest.fn().mockResolvedValue([]);
+    kiClient.findQueries = jest.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
-      featureClient,
-      queryClient,
+      kiClient,
       logger,
       params: { search_text: 'payment' },
     });
 
-    expect(queryClient.findQueries).toHaveBeenCalledWith(['logs.test'], 'payment', {
+    expect(kiClient.findQueries).toHaveBeenCalledWith(['logs.test'], 'payment', {
       ruleUnbacked: 'include',
     });
-    expect(queryClient.getQueryLinks).not.toHaveBeenCalled();
+    expect(kiClient.getQueryLinks).not.toHaveBeenCalled();
   });
 
   it('filters requested streamNames against accessible streams', async () => {
@@ -163,20 +155,19 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       .fn()
       .mockResolvedValue([{ name: 'logs.allowed' } as Streams.all.Definition]);
 
-    featureClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
-    queryClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+    kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
+    kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
-      featureClient,
-      queryClient,
+      kiClient,
       logger,
       params: { stream_names: ['logs.allowed', 'logs.not_allowed'] },
     });
 
-    expect(featureClient.getFeatures).toHaveBeenCalledTimes(1);
-    expect(featureClient.getFeatures).toHaveBeenCalledWith('logs.allowed', expect.any(Object));
-    expect(queryClient.getQueryLinks).toHaveBeenCalledWith(['logs.allowed'], {
+    expect(kiClient.getFeatures).toHaveBeenCalledTimes(1);
+    expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.allowed', expect.any(Object));
+    expect(kiClient.getQueryLinks).toHaveBeenCalledWith(['logs.allowed'], {
       ruleUnbacked: 'include',
     });
   });
@@ -189,19 +180,18 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         { name: 'logs.good' } as Streams.all.Definition,
       ]);
 
-    featureClient.getFeatures = jest.fn().mockImplementation((streamName: string) => {
+    kiClient.getFeatures = jest.fn().mockImplementation((streamName: string) => {
       if (streamName === 'logs.bad') {
         return Promise.reject(new Error('boom'));
       }
       return Promise.resolve({ hits: [makeFeature({ id: 'ok' })], total: 1 });
     });
 
-    queryClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+    kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
-      featureClient,
-      queryClient,
+      kiClient,
       logger,
       params: { kind: ['feature'] },
     });

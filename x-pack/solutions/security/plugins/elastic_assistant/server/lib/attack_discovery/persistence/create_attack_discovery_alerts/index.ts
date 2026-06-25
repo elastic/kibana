@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AttackDiscoveryApiAlert,
   CreateAttackDiscoveryAlertsParams,
 } from '@kbn/elastic-assistant-common';
+import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/elastic-assistant-common';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,10 +20,13 @@ import { transformToAlertDocuments } from '../transforms/transform_to_alert_docu
 import { getCreatedDocumentIds } from './get_created_document_ids';
 import { getCreatedAttackDiscoveryAlerts } from './get_created_attack_discovery_alerts';
 
+import { updateAlertsWithAttackIds } from '../../schedules/register_schedule/updateAlertsWithAttackIds';
+
 interface CreateAttackDiscoveryAlerts {
   adhocAttackDiscoveryDataClient: IRuleDataClient;
   authenticatedUser: AuthenticatedUser;
   createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams;
+  esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
 }
@@ -33,6 +37,7 @@ export const createAttackDiscoveryAlerts = async ({
   adhocAttackDiscoveryDataClient,
   authenticatedUser,
   createAttackDiscoveryAlertsParams,
+  esClient,
   logger,
   spaceId,
 }: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryApiAlert[]> => {
@@ -108,6 +113,29 @@ export const createAttackDiscoveryAlerts = async ({
       const allErrorDetails = errorDetails.join(', ');
       throw new Error(`Failed to bulk insert Attack discovery alerts ${allErrorDetails}`);
     }
+
+    // Build a map of underlying detection alert IDs to the newly created ad-hoc attack discovery alert IDs.
+    // This allows us to link the detection alerts back to the attack discovery alerts that group them.
+    const alertIdToAttackIdsMap: Record<string, string[]> = {};
+    for (const alertDocument of alertDocuments) {
+      const alertDocId = alertDocument[ALERT_UUID];
+      if (alertDocId) {
+        const underlyingAlertIds =
+          (alertDocument[ALERT_ATTACK_DISCOVERY_ALERT_IDS] as string[]) ?? [];
+        for (const alertId of underlyingAlertIds) {
+          alertIdToAttackIdsMap[alertId] = alertIdToAttackIdsMap[alertId] ?? [];
+          alertIdToAttackIdsMap[alertId].push(alertDocId);
+        }
+      }
+    }
+
+    // Update the underlying detection alerts with the new ad-hoc attack discovery alert IDs.
+    // This ensures that the detection alerts are properly linked to the ad-hoc attacks they belong to.
+    await updateAlertsWithAttackIds({
+      esClient,
+      alertIdToAttackIdsMap,
+      spaceId,
+    });
 
     logger.debug(
       () =>

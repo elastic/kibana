@@ -8,6 +8,7 @@ spec:
   type: url
   targets:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/cloud-security-posture/cspm-agentless-scout.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/evals/kibana-evals-on-demand.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/evals/kibana-evals.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-agent-builder-smoke-tests-daily.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-apis-capacity-testing-daily.yml
@@ -19,6 +20,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-chromium-linux-build.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-codeql.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-console-definitions-sync.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-console-packaging-publish.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-coverage-daily.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-cloud.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-project.yml

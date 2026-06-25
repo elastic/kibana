@@ -159,20 +159,22 @@ describe('Trusted devices form', () => {
     await waitForEuiPopoverOpen();
   };
 
-  const getConditionsFieldSelect = (dataTestSub: string = formPrefix): HTMLButtonElement => {
-    return renderResult.getByTestId(`${dataTestSub}-fieldSelect`) as HTMLButtonElement;
+  const getEntryFieldSelect = (index = 0): HTMLButtonElement =>
+    renderResult.getByTestId(`${formPrefix}-entry${index}fieldSelect`) as HTMLButtonElement;
+
+  const getEntryOperatorSelect = (index = 0): HTMLButtonElement =>
+    renderResult.getByTestId(`${formPrefix}-entry${index}operatorSelect`) as HTMLButtonElement;
+
+  const getEntryValueField = (index = 0): HTMLInputElement => {
+    const comboBox = renderResult.getByTestId(`${formPrefix}-entry${index}valueField`);
+    return comboBox.querySelector('input[role="combobox"]') as HTMLInputElement;
   };
 
-  const getConditionsOperatorSelect = (dataTestSub: string = formPrefix): HTMLButtonElement => {
-    return renderResult.getByTestId(`${dataTestSub}-operatorSelect`) as HTMLButtonElement;
-  };
+  const getEntryRemoveButton = (index: number): HTMLButtonElement =>
+    renderResult.getByTestId(`${formPrefix}-entry${index}removeButton`) as HTMLButtonElement;
 
-  const getConditionsValueField = (dataTestSub: string = formPrefix): HTMLInputElement => {
-    const comboBox = renderResult.getByTestId(`${dataTestSub}-valueField`);
-    // EuiComboBox has a searchable input inside it
-    const searchInput = comboBox.querySelector('input[role="combobox"]');
-    return searchInput as HTMLInputElement;
-  };
+  const getAndButton = (): HTMLButtonElement =>
+    renderResult.getByTestId(`${formPrefix}-AndButton`) as HTMLButtonElement;
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
@@ -313,7 +315,7 @@ describe('Trusted devices form', () => {
 
     it('should display field options based on OS selection', async () => {
       // Form defaults to Windows+Mac OS, so USERNAME field should NOT be available
-      const fieldSelect = getConditionsFieldSelect();
+      const fieldSelect = getEntryFieldSelect();
       await userEvent.click(fieldSelect);
 
       const options = Array.from(
@@ -345,7 +347,7 @@ describe('Trusted devices form', () => {
       );
 
       // Check field options - USERNAME should now be available
-      const fieldSelect = getConditionsFieldSelect();
+      const fieldSelect = getEntryFieldSelect();
       await userEvent.click(fieldSelect);
 
       const options = Array.from(
@@ -380,7 +382,7 @@ describe('Trusted devices form', () => {
       rerenderWithLatestProps();
 
       // Check field options - USERNAME should be hidden
-      const fieldSelect = getConditionsFieldSelect();
+      const fieldSelect = getEntryFieldSelect();
       await userEvent.click(fieldSelect);
 
       const options = Array.from(
@@ -404,7 +406,7 @@ describe('Trusted devices form', () => {
     });
 
     it('should toggle operator from "is" to "matches" and update entry type to wildcard', async () => {
-      const operatorSelect = getConditionsOperatorSelect();
+      const operatorSelect = getEntryOperatorSelect();
       await userEvent.click(operatorSelect);
 
       const operatorOptions = Array.from(
@@ -422,10 +424,10 @@ describe('Trusted devices form', () => {
     });
 
     it('should clear value field when field selection changes', async () => {
-      const valueField = getConditionsValueField();
+      const valueField = getEntryValueField();
       await setTextFieldValue(valueField, 'device-123');
 
-      const fieldSelect = getConditionsFieldSelect();
+      const fieldSelect = getEntryFieldSelect();
       await userEvent.click(fieldSelect);
       await userEvent.click(
         screen.getByRole('option', {
@@ -440,28 +442,55 @@ describe('Trusted devices form', () => {
       expect(renderResult.container.querySelectorAll('.euiFormErrorText').length).toBe(0);
     });
 
+    it('should clear only the changed row value and preserve other rows values', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-123'),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+        ],
+      });
+      latestUpdatedItem = formProps.item;
+      rerenderWithLatestProps();
+
+      await userEvent.click(getEntryFieldSelect(0));
+      await userEvent.click(
+        screen.getByRole('option', {
+          name: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        })
+      );
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.PRODUCT_ID);
+      expect(lastCall?.item.entries[0].value).toBe('');
+      expect(lastCall?.item.entries[1].field).toBe(TrustedDeviceConditionEntryField.HOST);
+      expect(lastCall?.item.entries[1].value).toBe('my-host');
+    });
+
     it('should show value required error after blur when empty', async () => {
       await setTextFieldValue(getNameField(), 'some name');
 
       act(() => {
-        fireEvent.blur(getConditionsValueField());
+        fireEvent.blur(getEntryValueField());
       });
 
       expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
     });
 
     it('should show performance warning when operator is matches and value contains "**"', async () => {
-      await userEvent.click(getConditionsOperatorSelect());
+      await userEvent.click(getEntryOperatorSelect());
       await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
 
       // ensure the component receives the updated item with type: 'wildcard'
       rerenderWithLatestProps();
 
-      const valueField = getConditionsValueField();
+      const valueField = getEntryValueField();
       await setTextFieldValue(valueField, 'prefix**suffix');
 
+      // Re-render so currentItem reflects the typed value before blur
+      rerenderWithLatestProps();
+
       act(() => {
-        fireEvent.blur(valueField);
+        fireEvent.blur(getEntryValueField());
       });
 
       // Assert the help text is rendered within the conditions row
@@ -473,39 +502,41 @@ describe('Trusted devices form', () => {
       ).toBeTruthy();
     });
 
-    it('should reset USERNAME field to DEVICE_ID when OS changes from Windows to Mac', async () => {
-      // Start with USERNAME field and Windows OS
+    it('should remove the USERNAME entry and fall back to a default DEVICE_ID entry when OS changes from Windows to Mac', async () => {
+      // Start with a single USERNAME entry and Windows-only OS
       formProps.item = createItem({
         os_types: [OperatingSystem.WINDOWS],
         entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'testuser')],
       });
       rerenderWithLatestProps();
 
-      // Change OS to Mac-only
+      // Change OS to Mac-only — USERNAME is not available on Mac, so the entry is removed
       await openOsCombo();
       await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
 
-      // Expect field to be reset to DEVICE_ID and value cleared
+      // The only entry was USERNAME, so entries falls back to [defaultDeviceEntry()] → DEVICE_ID with ''
       const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries).toHaveLength(1);
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
       expect(lastCall?.item.entries?.[0]?.value).toBe('');
       expect(lastCall?.item.os_types).toEqual([OperatingSystem.MAC]);
     });
 
-    it('should reset USERNAME field to DEVICE_ID when OS changes from Windows to Windows+Mac', async () => {
-      // Start with USERNAME field and Windows OS
+    it('should remove the USERNAME entry and fall back to a default DEVICE_ID entry when OS changes from Windows to Windows+Mac', async () => {
+      // Start with a single USERNAME entry and Windows-only OS
       formProps.item = createItem({
         os_types: [OperatingSystem.WINDOWS],
         entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'testuser')],
       });
       rerenderWithLatestProps();
 
-      // Change OS to Windows+Mac
+      // Change OS to Windows+Mac — USERNAME is not available on Mac (multi-OS), so the entry is removed
       await openOsCombo();
       await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
 
-      // Expect field to be reset to DEVICE_ID and value cleared
+      // The only entry was USERNAME, so entries falls back to [defaultDeviceEntry()] → DEVICE_ID with ''
       const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries).toHaveLength(1);
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
       expect(lastCall?.item.entries?.[0]?.value).toBe('');
       expect(lastCall?.item.os_types).toEqual([OperatingSystem.WINDOWS, OperatingSystem.MAC]);
@@ -531,6 +562,403 @@ describe('Trusted devices form', () => {
       const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.HOST);
       expect(lastCall?.item.entries?.[0]?.value).toBe('myhost');
+    });
+
+    describe('Multiple condition entries', () => {
+      it('should render an AND button', () => {
+        expect(getAndButton()).toBeTruthy();
+      });
+
+      it('should add a second entry when the AND button is clicked', async () => {
+        await userEvent.click(getAndButton());
+
+        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        expect(lastCall?.item.entries).toHaveLength(2);
+        expect(lastCall?.item.entries[1]).toMatchObject({
+          field: TrustedDeviceConditionEntryField.DEVICE_ID,
+          type: 'match',
+          operator: 'included',
+          value: '',
+        });
+      });
+
+      it('should not show the AND connector badge with a single entry', () => {
+        expect(renderResult.queryByTestId(`${formPrefix}-andConnector`)).toBeNull();
+      });
+
+      it('should show the AND connector badge after adding a second entry', async () => {
+        await userEvent.click(getAndButton());
+        rerenderWithLatestProps();
+
+        expect(renderResult.getByTestId(`${formPrefix}-andConnector`)).toBeTruthy();
+      });
+
+      it('should render field, operator, value controls for the second entry', async () => {
+        await userEvent.click(getAndButton());
+        rerenderWithLatestProps();
+
+        expect(getEntryFieldSelect(1)).toBeTruthy();
+        expect(getEntryOperatorSelect(1)).toBeTruthy();
+        expect(getEntryValueField(1)).toBeTruthy();
+      });
+
+      it('should call onChange with updated entries[1].value when the second entry value changes', async () => {
+        await userEvent.click(getAndButton());
+        rerenderWithLatestProps();
+
+        const secondValueField = getEntryValueField(1);
+        await setTextFieldValue(secondValueField, 'my-second-device');
+
+        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        expect(lastCall?.item.entries).toHaveLength(2);
+        expect(lastCall?.item.entries[1].value).toBe('my-second-device');
+      });
+    });
+
+    describe('Entry removal', () => {
+      it('should disable the remove button when only one entry exists', () => {
+        expect(getEntryRemoveButton(0)).toBeDisabled();
+      });
+
+      it('should enable both remove buttons after a second entry is added', async () => {
+        await userEvent.click(getAndButton());
+        rerenderWithLatestProps();
+
+        expect(getEntryRemoveButton(0)).not.toBeDisabled();
+        expect(getEntryRemoveButton(1)).not.toBeDisabled();
+      });
+
+      it('should remove entry at index 0 and keep entry at index 1', async () => {
+        formProps.item = createItem({
+          entries: [
+            createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'first-device'),
+            createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+          ],
+        });
+        latestUpdatedItem = formProps.item;
+        rerenderWithLatestProps();
+
+        await userEvent.click(getEntryRemoveButton(0));
+
+        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        expect(lastCall?.item.entries).toHaveLength(1);
+        expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.HOST);
+        expect(lastCall?.item.entries[0].value).toBe('my-host');
+      });
+
+      it('should remove entry at index 1 and keep entry at index 0', async () => {
+        formProps.item = createItem({
+          entries: [
+            createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'first-device'),
+            createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+          ],
+        });
+        latestUpdatedItem = formProps.item;
+        rerenderWithLatestProps();
+
+        await userEvent.click(getEntryRemoveButton(1));
+
+        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        expect(lastCall?.item.entries).toHaveLength(1);
+        expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+        expect(lastCall?.item.entries[0].value).toBe('first-device');
+      });
+    });
+  });
+
+  describe('Duplicate field validation', () => {
+    it('should show a duplicate field error immediately without requiring user interaction', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-2'),
+        ],
+      });
+      await render();
+
+      // Duplicate errors are always surfaced — no blur or visit required
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+    });
+
+    it('should not show a duplicate field error when entries use different fields', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+        ],
+      });
+      await render();
+
+      expect(
+        renderResult.queryByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeNull();
+    });
+
+    it('should report isValid as false (disabling the submit button) when a duplicate field error is present', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-2'),
+        ],
+      });
+      await render();
+
+      // Trigger an onChange so we can inspect isValid
+      await setTextFieldValue(getNameField(), 'My TD');
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.isValid).toBe(false);
+    });
+
+    it('should show duplicate-field error immediately and empty-value error only after blur', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-2'),
+        ],
+      });
+      await render();
+
+      // Duplicate error visible right away
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+      // Empty-value error not yet shown (no entry visited)
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
+
+      // After visiting an entry value, the empty-value error also appears
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+
+      expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+    });
+
+    it('should keep the duplicate-field error visible after changing the operator', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-2'),
+        ],
+      });
+      await render();
+
+      // Duplicate error is visible immediately
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+
+      // Change the operator on entry 0
+      await userEvent.click(getEntryOperatorSelect(0));
+      await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
+      rerenderWithLatestProps();
+
+      // Duplicate error must still be visible — changing the operator doesn't fix it
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+    });
+
+    it('should hide the empty-value error after changing the operator', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+        ],
+      });
+      await render();
+
+      // Visit the empty entry to surface its error
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+      expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+
+      // Changing the operator should hide the empty-value error
+      await userEvent.click(getEntryOperatorSelect(0));
+      await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
+      rerenderWithLatestProps();
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
+    });
+
+    it('should hide the empty-value error after adding an entry', async () => {
+      formProps.item = createItem({
+        entries: [createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', '')],
+      });
+      await render();
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+      expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+
+      await userEvent.click(getAndButton());
+      rerenderWithLatestProps();
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
+    });
+
+    it('should hide the empty-value error after removing an entry', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+        ],
+      });
+      await render();
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+      expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+
+      await userEvent.click(getEntryRemoveButton(1));
+      rerenderWithLatestProps();
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeNull();
+    });
+
+    it('should show duplicate-field error when two non-adjacent entries share the same field', async () => {
+      // entries[0] and entries[2] both use DEVICE_ID; entries[1] uses a different field (HOST)
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-3'),
+        ],
+      });
+      await render();
+
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+    });
+  });
+
+  describe('Per-entry blur validation', () => {
+    it('should show empty-value error when any entry is visited and any entry is empty', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', ''),
+        ],
+      });
+      await render();
+
+      await setTextFieldValue(getNameField(), 'My TD');
+      rerenderWithLatestProps();
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(1));
+      });
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+
+      // The form should be invalid (both entries are empty)
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.isValid).toBe(false);
+    });
+
+    it('should show both empty-value and duplicate-field errors when entry 0 is empty, entry 1 has a value, and both use the same field', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'some-device'),
+        ],
+      });
+      await render();
+
+      // Duplicate error is visible without any interaction
+      expect(
+        renderResult.queryByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+
+      // Trigger an onChange so we can later inspect isValid, then blur to surface the empty-value error
+      await setTextFieldValue(getNameField(), 'My TD');
+      rerenderWithLatestProps();
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(1));
+      });
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+      expect(
+        renderResult.queryByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.isValid).toBe(false);
+    });
+  });
+
+  describe('OS change preserves multiple entries', () => {
+    it('should preserve all entries when OS changes and no entry uses USERNAME field', async () => {
+      formProps.item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'dev-1'),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'host-1'),
+        ],
+      });
+      await render();
+
+      (formProps.onChange as jest.Mock).mockClear();
+
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries).toHaveLength(2);
+      expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+      expect(lastCall?.item.entries[0].value).toBe('dev-1');
+      expect(lastCall?.item.entries[1].field).toBe(TrustedDeviceConditionEntryField.HOST);
+      expect(lastCall?.item.entries[1].value).toBe('host-1');
+    });
+
+    it('should drop only the USERNAME entry and preserve other entries when OS changes to Mac', async () => {
+      formProps.item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'dev-1'),
+          createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'user-1'),
+        ],
+      });
+      await render();
+
+      (formProps.onChange as jest.Mock).mockClear();
+
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      // USERNAME entry is removed; only the DEVICE_ID entry survives
+      expect(lastCall?.item.entries).toHaveLength(1);
+      expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+      expect(lastCall?.item.entries[0].value).toBe('dev-1');
     });
   });
 

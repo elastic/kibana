@@ -21,6 +21,12 @@ export {
   builtInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export {
+  builtinWorkflowInputDefinitions,
+  builtinWorkflowInputDefinitionRefValuesForZod,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+  mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
+} from './spec/builtin_workflow_input_definitions';
 export type {
   BaseTriggerDefinition,
   TriggerDocumentation,
@@ -39,6 +45,8 @@ export * from './spec/deprecated_step_metadata';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
+export * from './common/workflows_events';
+export type * from './common/event_trigger_replay';
 export * from './common/well_known_trigger_sources';
 export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_execution_schedule_metadata';
 export * from './common/privileges';

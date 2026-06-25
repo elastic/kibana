@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
+
+const dirHasPlaywrightConfig = (dir: string): boolean => {
+  try {
+    return readdirSync(dir).some((f) => f.endsWith('playwright.config.ts'));
+  } catch {
+    return false;
+  }
+};
 import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
@@ -23,7 +31,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, type Message, type Writer } from '@kbn/tooling-log';
 import {
   runJestViaMoon,
-  findJestConfig,
+  JEST_CONFIG_NAMES,
   type MoonJestResult,
   type JestFailedTest,
 } from '@kbn/test';
@@ -138,16 +146,22 @@ const TEST_FILE_RE = /\.(?:test|spec)\.(js|mjs|ts|tsx)$/;
 
 const isTestFile = (filePath: string) => TEST_FILE_RE.test(filePath);
 
-const isIntegrationTestFile = (filePath: string): boolean => {
+/** Walk up from a test file to find the nearest jest unit config, stopping at integration or Scout configs. */
+const findJestUnitConfig = (filePath: string): string | undefined => {
   let dir = Path.dirname(Path.resolve(REPO_ROOT, filePath));
   while (true) {
-    if (existsSync(Path.join(dir, 'jest.integration.config.js'))) {
-      return true;
+    if (existsSync(Path.join(dir, 'jest.integration.config.js')) || dirHasPlaywrightConfig(dir)) {
+      return undefined;
+    }
+    for (const configName of JEST_CONFIG_NAMES) {
+      if (existsSync(Path.join(dir, configName))) {
+        return Path.relative(REPO_ROOT, Path.join(dir, configName));
+      }
     }
     if (dir === REPO_ROOT || dir === Path.dirname(dir)) break;
     dir = Path.dirname(dir);
   }
-  return false;
+  return undefined;
 };
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
@@ -285,11 +299,11 @@ run(
         jestProgress.writeResult(line('jest', '—', 'no changed files', jestProgress.elapsed()));
       } else if (
         changedFiles.every(isTestFile) &&
-        !changedFiles.some(isIntegrationTestFile) &&
         (() => {
-          // Fast path only safe when all test files share a single jest config.
-          const configs = new Set(changedFiles.map(findJestConfig).filter(Boolean));
-          return configs.size <= 1;
+          // Fast path only safe when all test files share exactly one jest unit config.
+          // findJestUnitConfig returns undefined for integration and Scout test files.
+          const configs = new Set(changedFiles.map(findJestUnitConfig).filter(Boolean));
+          return configs.size === 1;
         })()
       ) {
         // Fast path: all changes are test files under one config — run them directly.

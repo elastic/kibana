@@ -7,11 +7,12 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
 import {
   EuiHorizontalRule,
   EuiFlyoutBody,
   EuiTitle,
+  EuiFlexGroup,
   EuiFlyout,
   EuiSkeletonText,
   useGeneratedHtmlId,
@@ -27,12 +28,14 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
+  getMalformedMatchesFields,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import {
+  MalformedMatchesValueCallout,
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
 } from '@kbn/securitysolution-exception-list-components';
@@ -85,17 +88,13 @@ interface EditExceptionFlyoutProps {
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
-  ${() => css`
-    &.builder-section {
-      overflow-y: scroll;
-    }
-  `}
+  &.builder-section {
+    overflow-y: scroll;
+  }
 `;
 
 const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
 `;
 
 const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
@@ -134,6 +133,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       expireErrorExists,
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
+      malformedMatchesValueExists,
+      malformedMatchesFields,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -149,6 +150,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     expireErrorExists: false,
     wildcardWarningExists: false,
     partialCodeSignatureWarningExists: false,
+    malformedMatchesValueExists: false,
+    malformedMatchesFields: [],
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -193,6 +196,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
       });
+      const fields = getMalformedMatchesFields(items);
+      dispatch({ type: 'setMalformedMatchesValue', fields });
       dispatch({
         type: 'setExceptionItems',
         items,
@@ -357,12 +362,12 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   ]);
 
   const handleOnSubmit = useCallback(() => {
-    if (wildcardWarningExists) {
+    if (wildcardWarningExists || malformedMatchesValueExists) {
       setShowConfirmModal(true);
     } else {
       return handleSubmitException();
     }
-  }, [wildcardWarningExists, handleSubmitException]);
+  }, [wildcardWarningExists, malformedMatchesValueExists, handleSubmitException]);
 
   const isSubmitButtonDisabled = useMemo(
     () =>
@@ -397,7 +402,10 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const confirmModal = useMemo(() => {
     const labels = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
-      { hasWildcardWithWrongOperator: wildcardWarningExists },
+      {
+        hasWildcardWithWrongOperator: wildcardWarningExists,
+        hasMalformedMatchesValue: malformedMatchesFields,
+      },
       links
     );
 
@@ -409,7 +417,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, wildcardWarningExists, links, handleSubmitException]);
+  }, [listType, wildcardWarningExists, links, handleSubmitException, malformedMatchesFields]);
 
   return (
     <EuiFlyout
@@ -445,8 +453,15 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        {(wildcardWarningExists ||
+          malformedMatchesValueExists ||
+          partialCodeSignatureWarningExists) && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+            {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+            {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+          </EuiFlexGroup>
+        )}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />

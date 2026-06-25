@@ -122,7 +122,7 @@ describe('templatesToYaml', () => {
     expect(yaml).toContain('        timezone: local');
   });
 
-  it('serializes DATE_PICKER default when js-yaml parses it as a Date object (unquoted ISO)', () => {
+  it('serializes DATE_PICKER default when yaml parses it as a Date object (unquoted ISO)', () => {
     const templates: ParsedTemplate[] = [
       {
         templateId: 'template-dp',
@@ -140,7 +140,7 @@ describe('templatesToYaml', () => {
               name: 'due_date',
               control: 'DATE_PICKER',
               type: 'date',
-              // js-yaml parses unquoted ISO timestamps as native Date objects
+              // yaml parses unquoted ISO timestamps as native Date objects
               metadata: { default: new Date('2024-06-01T00:00:00.000Z') } as unknown as {
                 show_time?: boolean;
                 timezone?: 'utc' | 'local';
@@ -702,6 +702,136 @@ describe('display and validation serialization', () => {
     const yaml = templatesToYaml([template]);
 
     expect(yaml).not.toContain('validation:');
+  });
+});
+
+describe('TEXTAREA field serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-textarea',
+    name: 'Textarea template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Textarea template', fields: [] },
+    definitionString: 'name: Textarea template\nfields: []',
+  };
+
+  it('serializes TEXTAREA with markdown: true', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'instructions',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: true, default: '## Steps' },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "TEXTAREA"');
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        default: "## Steps"');
+    expect(yaml).toContain('        markdown: true');
+  });
+
+  it('serializes TEXTAREA with only default (no markdown)', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'details',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { default: 'Enter details here...' },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        default: "Enter details here..."');
+    expect(yaml).not.toContain('markdown');
+  });
+
+  it('omits metadata block when TEXTAREA has no metadata', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'notes',
+            control: 'TEXTAREA',
+            type: 'keyword',
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "TEXTAREA"');
+    expect(yaml).not.toContain('metadata:');
+  });
+
+  it('omits metadata block when markdown is false and no default', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'notes',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: false },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).not.toContain('metadata:');
+    expect(yaml).not.toContain('markdown');
+  });
+
+  it('serializes TEXTAREA with only markdown: true (no default)', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'instructions',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: true },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        markdown: true');
+    expect(yaml).not.toContain('default:');
   });
 });
 

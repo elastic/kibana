@@ -42,6 +42,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
+  `${internalNamespaces.security}.run_rule_preview`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
@@ -50,6 +51,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
+  `${internalNamespaces.security}.siem_readiness.get_coverage`,
+  `${internalNamespaces.security}.siem_readiness.get_quality`,
+  `${internalNamespaces.security}.siem_readiness.get_continuity`,
+  `${internalNamespaces.security}.siem_readiness.get_retention`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -69,12 +74,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
-  `${internalNamespaces.workflows}.workflow_insert_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step_property`,
-  `${internalNamespaces.workflows}.workflow_modify_property`,
-  `${internalNamespaces.workflows}.workflow_delete_step`,
-  `${internalNamespaces.workflows}.workflow_set_yaml`,
   `${internalNamespaces.workflows}.workflow_execute_step`,
 ] as const;
 
@@ -87,6 +86,9 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  `${internalNamespaces.streams}.significant-events.discovery.investigator`,
+  `${internalNamespaces.streams}.significant-events.discovery.judge`,
+  `${internalNamespaces.streams}.investigation`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -121,8 +123,14 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Streams
   'streams-management',
   'significant-events-memory',
+  'significant-events-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'streams-memory-synthesis',
+  'streams-memory-consolidation',
+  'streams-conversation-scraper',
+  'significant-events-onboarding',
+  'streams-gap-detection',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -134,7 +142,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'threat-hunting',
+  'find-security-rules',
   'pci-compliance',
+  'siem-readiness',
 
   // O11Y
   'observability.rca',
@@ -148,6 +158,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.vector-hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
+  `${internalNamespaces.search}.elasticsearch-tutorial`,
+  'skill-authoring',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

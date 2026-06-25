@@ -16,22 +16,17 @@ export const discoveriesMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    status: mappings.keyword(),
+    kind: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
-    rule_names: mappings.keyword(),
-    stream_names: mappings.keyword(),
+    parent_discovery_id: mappings.keyword(),
+    event_id: mappings.keyword(),
     grouped_discovery_ids: mappings.keyword(),
-    title: mappings.text({
-      fields: {
-        keyword: { type: 'keyword', ignore_above: 512 },
-      },
-    }),
-    summary: mappings.text(),
-    root_cause: mappings.text(),
+    criticality: mappings.integer(),
+    closed_by_execution_id: mappings.keyword(),
     detections: mappings.object({
       properties: {
-        rule_uuid: mappings.keyword(),
+        rule_uuid: { type: 'keyword' as const },
       },
     }),
   },
@@ -45,7 +40,7 @@ export const discoveriesDataStream: DataStreamDefinition<
   StoredDiscovery
 > = {
   name: DISCOVERIES_DATA_STREAM,
-  version: 1,
+  version: 4,
   hidden: true,
   template: {
     priority: 500,

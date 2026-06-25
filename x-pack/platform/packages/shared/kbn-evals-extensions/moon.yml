@@ -18,6 +18,10 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-extensions
 dependsOn:
   - '@kbn/evals'
+  - '@kbn/evals-common'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/tooling-log'
 tags:
   - test-helper
   - package

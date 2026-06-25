@@ -193,9 +193,9 @@ export const DataStreamsTable = ({
         name: i18n.TABLE_COLUMN_HEADERS.status,
         sortable: true,
         render: (status: DataStreamResponse['status'], item: DataStreamResponse) => (
-          <Status status={status} isDeleting={isDeleting(item)} />
+          <Status status={status} phase={item.phase} isDeleting={isDeleting(item)} />
         ),
-        width: '120px',
+        width: '220px',
       },
       {
         name: i18n.TABLE_COLUMN_HEADERS.actions,
@@ -238,7 +238,7 @@ export const DataStreamsTable = ({
       <EuiBasicTable<DataStreamResponse>
         items={sortedItems}
         columns={dataStreamColumns}
-        tableLayout="auto"
+        tableLayout="fixed"
         tableCaption={i18n.DATA_STREAMS_TITLE}
         sorting={sorting}
         onChange={onTableChange}

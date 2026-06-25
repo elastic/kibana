@@ -10,11 +10,15 @@
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
-import { AppMenuRegistry, dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
+import {
+  AppMenuActionId,
+  AppMenuRegistry,
+  dismissFlyouts,
+  DiscoverFlyouts,
+} from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
@@ -22,12 +26,14 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useI18n } from '@kbn/i18n-react';
+import { shouldShowAlertingV2CreateRuleFlyout } from '@kbn/alerting-v2-utils';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
+  getCreateRuleOptionsAppMenuItem,
   getNewSearchAppMenuItem,
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
@@ -40,7 +46,6 @@ import {
   internalStateActions,
   selectTabSavedSearchByValueAttributes,
   useCurrentDataView,
-  useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
@@ -49,27 +54,19 @@ import {
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
+import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
 
-/**
- * Helper function to build the top nav links
- */
-export const useTopNavLinks = ({
-  dataView,
-  services,
-  onOpenInspector,
-  hasUnsavedChanges,
-  isEsqlMode,
-  adHocDataViews,
-  hasShareIntegration,
-  persistedDiscoverSession,
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-}: {
+const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
+  AppMenuActionId.alerts,
+  AppMenuActionId.export,
+  AppMenuActionId.inspect,
+]);
+
+export interface UseTopNavLinksParams {
   dataView: DataView | undefined;
   services: DiscoverServices;
-  onOpenInspector?: () => void;
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
@@ -77,7 +74,22 @@ export const useTopNavLinks = ({
   persistedDiscoverSession: DiscoverSession | undefined;
   onOpenSaveModal: () => void;
   onOpenSaveAsModal: () => void;
-}): AppMenuConfig => {
+}
+
+/**
+ * Helper function to build the top nav links
+ */
+export const useTopNavLinks = ({
+  dataView,
+  services,
+  hasUnsavedChanges,
+  isEsqlMode,
+  adHocDataViews,
+  hasShareIntegration,
+  persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
+}: UseTopNavLinksParams): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
@@ -94,6 +106,8 @@ export const useTopNavLinks = ({
   const dataStateContainer = useCurrentTabDataStateContainer();
   const totalHits$ = dataStateContainer.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
+  const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
+    useCurrentTabMenuActions({ currentDataView });
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
     ruleTypes
@@ -130,26 +144,14 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
-      actions: {
-        updateAdHocDataViews: async (adHocDataViewList) => {
-          await dispatch(internalStateActions.loadDataViewList());
-          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
-        },
-      },
     }),
-    [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
+    [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
-  const canCreateESQLRule = !!services.capabilities.alertingVTwo;
-  const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
+  const showCreateRuleV2 = isEsqlMode && shouldShowAlertingV2CreateRuleFlyout(services.core);
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
-
-    if (onOpenInspector) {
-      const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
-      items.push(inspectAppMenuItem);
-    }
 
     const hasV1AlertsAccess = discoverParams.authorizedRuleTypeIds.length > 0;
     const shouldShowAlertsMenu = hasV1AlertsAccess || showCreateRuleV2;
@@ -160,8 +162,7 @@ export const useTopNavLinks = ({
         services,
         tabId: currentTab.id,
         getState,
-        subscribe,
-        showCreateRuleV2,
+        dispatch,
       });
       items.push(alertsAppMenuItem);
     }
@@ -178,7 +179,9 @@ export const useTopNavLinks = ({
             trackingProps: { openedFrom: 'background search button' },
             onBackgroundSearchOpened: ({ session, event }) => {
               event?.preventDefault();
-              dispatch(internalStateActions.openSearchSessionInNewTab({ searchSession: session }));
+              void dispatch(
+                internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+              );
             },
             onClose: onFinishAction,
           });
@@ -231,29 +234,69 @@ export const useTopNavLinks = ({
     });
     items.push(...shareAppMenuItem);
 
+    if (canSwitchLanguageMode) {
+      items.push({
+        id: AppMenuActionId.switchLanguageMode,
+        order: 2,
+        label: isDataViewMode
+          ? i18n.translate('discover.localMenu.switchToESQLTitle', {
+              defaultMessage: 'Query in ES|QL',
+            })
+          : i18n.translate('discover.localMenu.switchToClassicTitle', {
+              defaultMessage: 'Switch to Classic',
+            }),
+        tooltipContent: isDataViewMode
+          ? i18n.translate('discover.localMenu.switchToESQLTooltip', {
+              defaultMessage:
+                'Search, transform, join and aggregate your data with ES|QL or PromQL',
+            })
+          : i18n.translate('discover.localMenu.switchToClassicTooltip', {
+              defaultMessage: 'Search your data with data views and KQL in Classic Discover',
+            }),
+        iconType: isDataViewMode ? 'code' : 'discoverApp',
+        testId: isDataViewMode ? 'select-text-based-language-btn' : 'select-classic-mode-btn',
+        run: switchLanguageMode,
+      });
+    }
+
+    items.push(getInspectAppMenuItem({ onOpenInspector: openInspector }));
+
+    const firstTabScopedMenuItem = items
+      .filter(({ id }) => TAB_SCOPED_APP_MENU_ITEM_IDS.has(id))
+      .sort((left, right) => left.order - right.order)[0];
+
+    if (firstTabScopedMenuItem) {
+      const firstItemIndex = items.findIndex(({ id }) => id === firstTabScopedMenuItem.id);
+
+      if (firstItemIndex >= 0) {
+        items[firstItemIndex] = {
+          ...items[firstItemIndex],
+          separator: 'above',
+        };
+      }
+    }
+
     return items;
   }, [
+    canSwitchLanguageMode,
     services,
     discoverParams,
     appId,
     dispatch,
     getState,
-    subscribe,
     isEsqlMode,
     currentDataView,
     currentTab,
-    onOpenInspector,
+    isDataViewMode,
+    openInspector,
     persistedDiscoverSession,
     hasShareIntegration,
     hasUnsavedChanges,
     totalHitsState,
     intl,
     showCreateRuleV2,
+    switchLanguageMode,
   ]);
-
-  const transitionFromDataViewToESQL = useCurrentTabAction(
-    internalStateActions.transitionFromDataViewToESQL
-  );
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
 
@@ -261,29 +304,6 @@ export const useTopNavLinks = ({
     const newAppMenuRegistry = new AppMenuRegistry();
 
     newAppMenuRegistry.registerItems(appMenuItems);
-
-    // Only show the ES|QL button in classic mode (not in ES|QL mode)
-    // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
-    if (services.uiSettings.get(ENABLE_ESQL) && !isEsqlMode) {
-      newAppMenuRegistry.registerItem({
-        id: 'esql',
-        order: 2,
-        label: i18n.translate('discover.localMenu.tryESQLTitle', {
-          defaultMessage: 'ES|QL',
-        }),
-        iconType: 'code',
-        tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
-          defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
-        }),
-        run: () => {
-          if (dataView) {
-            dispatch(transitionFromDataViewToESQL({ dataView }));
-            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
-          }
-        },
-        testId: 'select-text-based-language-btn',
-      });
-    }
 
     if (services.capabilities.discover_v2.save) {
       const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
@@ -387,18 +407,34 @@ export const useTopNavLinks = ({
 
     const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
 
+    const CreateRuleOptionsFlyout = services.alertingVTwo?.CreateRuleOptionsFlyout;
+
+    if (showCreateRuleV2 && CreateRuleOptionsFlyout) {
+      registry.registerItem(
+        getCreateRuleOptionsAppMenuItem({
+          CreateRuleOptionsFlyout,
+          baseItem: registry.getItem(AppMenuActionId.alerts),
+          alertsPopoverItems: registry.getPopoverItems(AppMenuActionId.alerts),
+          services,
+          tabId: currentTab.id,
+          getState,
+          subscribe,
+        })
+      );
+    }
+
     return registry;
   }, [
     getAppMenuAccessor,
     discoverParams,
     appMenuItems,
     services,
-    isEsqlMode,
-    dataView,
+    currentTab.id,
     dispatch,
     getState,
+    subscribe,
+    showCreateRuleV2,
     hasUnsavedChanges,
-    transitionFromDataViewToESQL,
     transferBackToEditor,
     persistedDiscoverSession,
     onOpenSaveModal,

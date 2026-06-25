@@ -99,3 +99,21 @@ export const taskSchemaV9 = taskSchemaV8.extends({
     })
   ),
 });
+
+export const taskSchemaV10 = taskSchemaV9.extends({
+  // Make cost more lenient to allow for future cost values without breaking forward compatibility.
+  // Coerced to 'normal' in V10->V9 forward compatibility function if value is not recognized.
+  cost: schema.maybe(schema.string({ maxLength: 100 })),
+});
+
+export const taskSchemaV11 = taskSchemaV10.extends({
+  userScope: schema.maybe(
+    schema.object({
+      apiKeyId: schema.string(),
+      uiamApiKeyId: schema.maybe(schema.string()),
+      spaceId: schema.string(),
+      apiKeyCreatedByUser: schema.boolean(),
+      userProfileId: schema.maybe(schema.string()),
+    })
+  ),
+});

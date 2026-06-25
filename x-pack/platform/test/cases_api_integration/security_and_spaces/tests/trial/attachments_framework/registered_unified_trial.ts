@@ -51,9 +51,12 @@ export default ({ getService }: FtrProviderContext): void => {
           file: '971c419dd609331343dee105fffd0f4608dc0bf2',
           lens: '45d27f9672c86ca48baf24ef1b04d4802555aee2',
           comment: '118a9989815489c24b81b160782015890ed2085e',
+          osquery: '99bee68fce8ee84e81d67c536e063d3e1a2cee96',
+          'security.indicator': '2d656e81a76ba7a4b53f9781df993c528cc58e9b',
           'security.endpoint': '16a05a198eed9dda49ac2997921142b7b6b602d9',
           'security.event': '0337735d3e57178e44b426e41e616aae57fd794d',
           'security.alert': '1bd2e2db3314929fbd4b03feae1010c09b2e97cd',
+          'security.timeline': 'ccf37f135657dfa479411f88ee44ec3fd8863720',
           'observability.alert': 'fd6ee185111ca9bd45e98e5414428399583a7e5e',
           'stack.alert': '3c45f9f2b29831df4d9c7262c59d3a7e2f29b9ee',
           'aiops.change_point_chart': '2620ad738edfb370b0f9053c25ce0f40a1658ab7',
@@ -62,6 +65,9 @@ export default ({ getService }: FtrProviderContext): void => {
           'ml.anomaly_charts': 'e52fc630b685fa5e8fa7f64c5a37c28304ee21ac',
           'ml.anomaly_swimlane': '6260e10758142f6ebe7e4d5e51b23d24b78abd66',
           'ml.single_metric_viewer': 'f011c0a8d142163e1d626ab78372bd9a8b5b444e',
+          dashboard: 'f90453ec712ce4505cc425e7e881e1d58ea274c3',
+          discoverSession: 'e4d51ad49552db8d708898824dcd9fb06372e321',
+          map: '37745ed7a0f005fb14522c5cc7c1ba3d9e0df579',
         });
       });
     });

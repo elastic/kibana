@@ -6,14 +6,42 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
+import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
 import { MemoryServiceImpl } from '../lib/memory';
+import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+import { registerAgentBuilderAttachments } from './attachments/register_attachments';
+import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
+import { registerInvestigationAgents } from './agents/investigation';
+
+export const createMemoryToolsOptions = ({
+  getScopedClients,
+  server,
+  logger,
+}: {
+  getScopedClients: GetScopedClients;
+  server: StreamsServer;
+  logger: Logger;
+}): MemoryToolsOptions => {
+  const getMemoryService = (esClient: ElasticsearchClient) =>
+    new MemoryServiceImpl({
+      logger: logger.get('memory'),
+      esClient,
+    });
+
+  return {
+    getMemoryService,
+    getSecurity: () => server.core.security,
+    getScopedClients,
+    server,
+    logger,
+  };
+};
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -21,57 +49,29 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
-  isMemoryEnabled,
+  streamsKIsOnboardingClient,
+  investigationEnabled = false,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  isMemoryEnabled: () => Promise<boolean>;
-}) => {
+  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
+  investigationEnabled?: boolean;
+}): Promise<void> => {
+  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
+
+  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry });
-
-  const getMemoryService = () =>
-    new MemoryServiceImpl({
-      logger: logger.get('memory'),
-      esClient: server.core.elasticsearch.client.asInternalUser,
-    });
-
-  // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
-  // This avoids exposing the skill to the agent when memory is not configured.
-  // Call onMemorySettingChanged when observability:streamsEnableMemory may have changed (e.g. from a uiSettings subscription).
-  let memorySkillRegistered = false;
-
-  const ensureMemorySkillRegistered = () => {
-    if (memorySkillRegistered) {
-      return;
-    }
-    memorySkillRegistered = true;
-    agentBuilder.skills.register(
-      createSigEventsMemorySkill({
-        getMemoryService,
-        getSecurity: () => server.core.security,
-      })
-    );
-    logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
-  };
-
-  if (await isMemoryEnabled()) {
-    ensureMemorySkillRegistered();
+  registerAgentBuilderSkills({
+    agentBuilder,
+    telemetry,
+    streamsKIsOnboardingClient,
+    memoryToolsOptions,
+  });
+  registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
+  if (investigationEnabled) {
+    registerInvestigationAgents(agentBuilder);
   }
-
-  return {
-    ensureMemorySkillRegistered,
-    /**
-     * Call this from a uiSettings change subscription (e.g. in plugin start)
-     * to auto-register the memory skill when the setting is toggled on.
-     */
-    onMemorySettingChanged: async () => {
-      if (await isMemoryEnabled()) {
-        ensureMemorySkillRegistered();
-      }
-    },
-  };
 };

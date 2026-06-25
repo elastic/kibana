@@ -57,7 +57,7 @@ pivot:
     #     security: ">security-breaking"
     #     other:
     # Simple string form: labels as comma-separated string
-    bug-fix: "release_note:fix"
+    bug-fix: "release_note:fix, release_note:bug"
     deprecation: "release_note:deprecation"
     feature: "release_note:feature"
     enhancement: "release_note:enhancement"
@@ -331,4 +331,4 @@ bundle:
       output: "security/{version}.yaml"
     serverless-release:
       output_products: "cloud-serverless {version} {lifecycle}"
-      output: "cloud-serverless/{version}.yaml"
+      output: "cloud-serverless/kibana-{version}.yaml"

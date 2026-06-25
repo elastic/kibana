@@ -18,6 +18,7 @@ import { AttachmentType, UserActionActions, UserActionTypes } from '../../../com
 import { decodeOrThrow } from '../../common/runtime_types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
@@ -218,10 +219,7 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const res = transformToExternalModel(
-          doc,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
+        const res = transformToExternalModel(doc);
 
         const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -282,10 +280,7 @@ export class CaseUserActionService {
         return;
       }
 
-      const res = transformToExternalModel(
-        userActions.saved_objects[0],
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const res = transformToExternalModel(userActions.saved_objects[0]);
 
       const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -365,10 +360,7 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const res = transformToExternalModel(
-          doc,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
+        const res = transformToExternalModel(doc);
 
         const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -412,10 +404,7 @@ export class CaseUserActionService {
           rawPushDoc
         );
 
-      const res = transformToExternalModel(
-        doc,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const res = transformToExternalModel(doc);
 
       const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
       return { ...res, attributes: decodeRes };
@@ -532,10 +521,7 @@ export class CaseUserActionService {
           sortOrder: 'asc',
         });
 
-      const transformedUserActions = legacyTransformFindResponseToExternalModel(
-        userActions,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const transformedUserActions = legacyTransformFindResponseToExternalModel(userActions);
 
       const validatedUserActions: Array<SavedObjectsFindResult<CaseUserActionDeprecatedResponse>> =
         [];
@@ -762,8 +748,9 @@ export class CaseUserActionService {
      * Calculate total_hidden_comment_updates by summing updates for DELETED comments.
      * These are edit actions that are no longer visible to users because the comment was deleted.
      */
-    const commentBuckets =
-      response.aggregations?.nonDeletedCommentUpdates?.comments?.byCommentId?.buckets ?? [];
+    const commentBuckets = Object.values(
+      response.aggregations?.nonDeletedCommentUpdates?.comments?.buckets ?? {}
+    ).flatMap((bucket) => bucket.byCommentId?.buckets ?? []);
 
     for (const bucket of commentBuckets) {
       const hasBeenDeleted = bucket.reverse?.hasDelete?.doc_count > 0;
@@ -838,9 +825,19 @@ export class CaseUserActionService {
         },
         aggs: {
           comments: {
-            filter: {
-              term: {
-                [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: CASE_COMMENT_SAVED_OBJECT,
+            filters: {
+              filters: {
+                [CASE_COMMENT_SAVED_OBJECT]: {
+                  term: {
+                    [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: CASE_COMMENT_SAVED_OBJECT,
+                  },
+                },
+                [CASE_ATTACHMENT_SAVED_OBJECT]: {
+                  term: {
+                    [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]:
+                      CASE_ATTACHMENT_SAVED_OBJECT,
+                  },
+                },
               },
             },
             aggs: {

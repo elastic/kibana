@@ -87,6 +87,7 @@ import { applyNamespaceCustomizationChange } from '../services/apply_namespace_c
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 import { packageHasAtLeastOneSecret } from '../utils';
+import { CreatePackagePolicyFormProvider } from '../contexts/create_package_policy_form_context';
 
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 
@@ -223,6 +224,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     defaultSetupTechnology,
     isAgentlessSelected,
     submitAttempted,
+    createDatasetTemplates,
+    setCreateDatasetTemplates,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -308,17 +311,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     if (!savedPackagePolicy || !packageInfo) {
       return;
     }
-    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.id) {
+    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.policy.id) {
       return;
     }
-    namespaceCustomizationAppliedRef.current = savedPackagePolicy.id;
+    namespaceCustomizationAppliedRef.current = savedPackagePolicy.policy.id;
     // Capture and reset the toggle value so stale state doesn't carry over if the form is reused.
     const wasEnabled = namespaceCustomizationEnabledRef.current;
     namespaceCustomizationEnabledRef.current = false;
     void applyNamespaceCustomizationChange(
       packageInfo.name,
       packageInfo.version,
-      savedPackagePolicy.namespace,
+      savedPackagePolicy.policy.namespace,
       wasEnabled,
       installedNamespaceCustomizationEnabledFor,
       notifications,
@@ -421,6 +424,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     packageInfo,
+    createDatasetTemplates,
   });
 
   const layoutProps = useMemo(
@@ -490,6 +494,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const replaceDefineStepView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-replace-define-step'
+  );
+  const createBottomExtensionView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-create-bottom'
   );
 
   // PLI auth blocks are registered to UI Extension context and are used to display upselling components.
@@ -579,7 +587,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isPackageInfoLoading || !isInitialized ? (
         <Loading />
       ) : packageInfo ? (
-        <>
+        <CreatePackagePolicyFormProvider
+          value={{ createDatasetTemplates, setCreateDatasetTemplates }}
+        >
           <StepDefinePackagePolicy
             namespacePlaceholder={getInheritedNamespace(
               agentPolicies,
@@ -611,6 +621,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               submitAttempted={submitAttempted}
               isAgentlessSelected={isAgentlessSelected}
               varGroupSelections={varGroupSelections}
+              bottomExtension={
+                createBottomExtensionView && packagePolicy.package?.name ? (
+                  <ExtensionWrapper>
+                    <createBottomExtensionView.Component newPolicy={packagePolicy} />
+                  </ExtensionWrapper>
+                ) : undefined
+              }
             />
           )}
 
@@ -623,7 +640,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               />
             </ExtensionWrapper>
           )}
-        </>
+        </CreatePackagePolicyFormProvider>
       ) : (
         <div />
       ),
@@ -638,12 +655,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
+      createBottomExtensionView,
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
       varGroupSelections,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
+      createDatasetTemplates,
+      setCreateDatasetTemplates,
     ]
   );
 
@@ -833,30 +853,30 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               )}
             {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallAzureArmTemplateModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
             {formState === 'SUBMITTED_CLOUD_FORMATION' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallCloudFormationModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
             {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallGoogleCloudShellModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />

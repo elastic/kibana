@@ -25,10 +25,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useIsRuleManagementABSkillAvailable } from '../../hooks/use_is_rule_management_ab_skill_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 
 import { RulesListTableContainer } from './rules_list_table_container';
@@ -62,8 +64,10 @@ export const RulesListPage = () => {
   ] = useBoolean(false);
   const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
   const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
-  const { flyout, openCreateFlyout, openEditFlyout } = useComposeDiscoverFlyout();
+  const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
+    useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
+  const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -137,12 +141,23 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
   };
+  const onCreateThresholdAlertFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateBuilderFlyout('threshold');
+  };
 
   return (
     <div>
       <EuiPageHeader
         pageTitle={
-          <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         rightSideItems={
           hasRules || hasActiveFilters
@@ -195,18 +210,22 @@ export const RulesListPage = () => {
                                   },
                                   'data-test-subj': 'createEsqlRuleButton',
                                 },
-                                {
-                                  name: i18n.translate(
-                                    'xpack.alertingV2.rulesList.createWithAgentButton',
-                                    { defaultMessage: 'Create with agent' }
-                                  ),
-                                  icon: 'sparkles',
-                                  onClick: () => {
-                                    closeCreateMenu();
-                                    navigateToAgentBuilder();
-                                  },
-                                  'data-test-subj': 'createWithAgentButton',
-                                },
+                                ...(isRuleManagementABSkillAvailable
+                                  ? [
+                                      {
+                                        name: i18n.translate(
+                                          'xpack.alertingV2.rulesList.createWithAgentButton',
+                                          { defaultMessage: 'Create with agent' }
+                                        ),
+                                        icon: 'sparkles' as const,
+                                        onClick: () => {
+                                          closeCreateMenu();
+                                          navigateToAgentBuilder();
+                                        },
+                                        'data-test-subj': 'createWithAgentButton',
+                                      },
+                                    ]
+                                  : []),
                               ],
                             },
                           ]}
@@ -248,7 +267,8 @@ export const RulesListPage = () => {
       {showEmptyState ? (
         <RuleCreateOptionsPanel
           onCreateEsqlRule={openCreateFlyout}
-          onCreateWithAgent={navigateToAgentBuilder}
+          onCreateWithAgent={isRuleManagementABSkillAvailable ? navigateToAgentBuilder : undefined}
+          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
       {hasRules || hasActiveFilters ? (
@@ -292,6 +312,7 @@ export const RulesListPage = () => {
             isLoading={isLoading}
             onTableChange={onTableChange}
             onEditInFlyout={openEditFlyout}
+            onCloneInFlyout={openCloneFlyout}
           />
         </>
       ) : null}
@@ -299,7 +320,10 @@ export const RulesListPage = () => {
         <RuleCreateOptionsFlyout
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
-          onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+          onCreateWithAgent={
+            isRuleManagementABSkillAvailable ? onCreateWithAgentFromOptionsFlyout : undefined
+          }
+          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
       {flyout}

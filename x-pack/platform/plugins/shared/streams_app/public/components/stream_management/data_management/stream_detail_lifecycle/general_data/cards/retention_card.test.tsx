@@ -5,32 +5,105 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Streams } from '@kbn/streams-schema';
 import { RetentionCard } from './retention_card';
+import { LifecycleAfterSaveProvider } from '../../common/hooks/lifecycle_after_save';
+import { useLifecycleAfterSave } from '../../common/hooks/lifecycle_after_save';
+import type { LifecyclePreviewState } from '../../common/hooks/lifecycle_preview';
+import {
+  LifecyclePreviewProvider,
+  useLifecyclePreview,
+} from '../../common/hooks/lifecycle_preview';
+
+import { useStreamsAppFetch } from '../../../../../../hooks/use_streams_app_fetch';
 
 jest.mock('../../../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     dependencies: {
       start: {
-        share: {
-          url: {
-            locators: {
-              get: () => ({
-                getRedirectUrl: () => 'http://localhost/ilm',
-              }),
-            },
-          },
+        streams: {
+          streamsRepositoryClient: { fetch: jest.fn() },
         },
       },
     },
   }),
 }));
 
+jest.mock('../../../../../../hooks/use_streams_app_fetch', () => ({
+  useStreamsAppFetch: jest.fn(() => ({
+    value: undefined,
+    loading: false,
+    refresh: jest.fn(),
+  })),
+}));
+
+const mockUseStreamsAppFetch = useStreamsAppFetch as unknown as jest.Mock;
+
+const AfterSaveTrigger = () => {
+  const { notifyAfterSave } = useLifecycleAfterSave();
+  return (
+    <button type="button" data-test-subj="afterSaveTrigger" onClick={notifyAfterSave}>
+      trigger
+    </button>
+  );
+};
+
+const PreviewInitializer = ({ initialState }: { initialState: Partial<LifecyclePreviewState> }) => {
+  const {
+    setIsActive,
+    setRetentionPeriod,
+    setDataPhasesCount,
+    setDownsampleStepsCount,
+    setHasUnsavedChanges,
+  } = useLifecyclePreview();
+  const didInit = useRef(false);
+
+  useLayoutEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+
+    if (initialState.isActive !== undefined) setIsActive(initialState.isActive);
+    if (initialState.retentionPeriod !== undefined)
+      setRetentionPeriod(initialState.retentionPeriod);
+    if (initialState.dataPhasesCount !== undefined)
+      setDataPhasesCount(initialState.dataPhasesCount);
+    if (initialState.downsampleStepsCount !== undefined)
+      setDownsampleStepsCount(initialState.downsampleStepsCount);
+    if (initialState.hasUnsavedChanges !== undefined)
+      setHasUnsavedChanges(initialState.hasUnsavedChanges);
+  }, [
+    initialState.dataPhasesCount,
+    initialState.downsampleStepsCount,
+    initialState.hasUnsavedChanges,
+    initialState.isActive,
+    initialState.retentionPeriod,
+    setDataPhasesCount,
+    setDownsampleStepsCount,
+    setHasUnsavedChanges,
+    setIsActive,
+    setRetentionPeriod,
+  ]);
+
+  return null;
+};
+
 describe('RetentionCard', () => {
-  const mockOpenEditModal = jest.fn();
+  const renderWithSync = (
+    ui: React.ReactElement,
+    initialState?: Partial<LifecyclePreviewState>
+  ) => {
+    return render(
+      <LifecycleAfterSaveProvider>
+        <LifecyclePreviewProvider>
+          {initialState ? <PreviewInitializer initialState={initialState} /> : null}
+          {ui}
+        </LifecyclePreviewProvider>
+      </LifecycleAfterSaveProvider>
+    );
+  };
 
   const createMockDefinition = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,7 +112,8 @@ describe('RetentionCard', () => {
     ingestLifecycle: any = { inherit: {} },
     streamName: string = 'logs-test',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    privileges: any = { lifecycle: true }
+    privileges: any = { lifecycle: true },
+    indexMode?: 'time_series' | 'standard'
   ): Streams.ingest.all.GetResponse =>
     ({
       stream: {
@@ -49,79 +123,121 @@ describe('RetentionCard', () => {
         },
       },
       effective_lifecycle: effectiveLifecycle,
+      index_mode: indexMode,
       privileges,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseStreamsAppFetch.mockReturnValue({
+      value: undefined,
+      loading: false,
+      refresh: jest.fn(),
+    });
   });
 
   describe('ILM lifecycle', () => {
-    it('renders ILM policy name', () => {
+    it('renders em dash when ILM stats are unavailable', () => {
+      const definition = createMockDefinition({ ilm: { policy: 'my-ilm-policy' } });
+
+      renderWithSync(<RetentionCard definition={definition} />);
+
+      expect(screen.getByTestId('retention-metric')).toHaveTextContent('—');
+    });
+
+    it('refetches ILM _stats after after-save notification', async () => {
+      const refresh = jest.fn();
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: {
+          phases: {
+            hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+            delete: { name: 'delete', min_age: '60d' },
+          },
+        },
+        loading: false,
+        refresh,
+      });
+
+      const definition = createMockDefinition({ ilm: { policy: 'my-ilm-policy' } });
+
+      renderWithSync(
+        <>
+          <RetentionCard definition={definition} />
+          <AfterSaveTrigger />
+        </>
+      );
+
+      expect(refresh).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByTestId('afterSaveTrigger'));
+
+      expect(refresh).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders ILM retention + phase count from lifecycle stats', () => {
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: {
+          phases: {
+            hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+            delete: { name: 'delete', min_age: '60d' },
+          },
+        },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
       const definition = createMockDefinition({
         ilm: {
           policy: 'my-ilm-policy',
         },
       });
 
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+      renderWithSync(<RetentionCard definition={definition} />);
 
       expect(screen.getByTestId('retentionCard-title')).toBeInTheDocument();
-      expect(screen.getByTestId('streamsAppLifecycleBadgeIlmPolicyNameLink')).toHaveTextContent(
-        'my-ilm-policy'
-      );
-      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('ILM policy');
+      expect(screen.getByTestId('retention-metric')).toHaveTextContent('60 days');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('2 data phases');
     });
 
-    it('shows inherit label for wired child inheriting', () => {
-      const definition: Streams.WiredStream.GetResponse = {
-        stream: {
-          type: 'wired',
-          name: 'logs-test.child',
-          description: '',
-          updated_at: new Date().toISOString(),
-          ingest: {
-            lifecycle: { inherit: {} }, // child is inheriting -> should show "Inherit from parent"
-            processing: { steps: [], updated_at: new Date().toISOString() },
-            settings: {},
-            wired: { fields: {}, routing: [] },
-            failure_store: { inherit: {} },
+    it('updates phase count and metric using preview phases when editing', () => {
+      const definition = createMockDefinition(
+        {
+          ilm: {
+            policy: 'my-ilm-policy',
           },
         },
-        // Effective lifecycle for wired streams must include a `from` field
-        effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
-        effective_settings: {},
-        data_stream_exists: true,
-        inherited_fields: {},
-        dashboards: [],
-        rules: [],
-        queries: [],
-        privileges: {
-          manage: true,
-          monitor: true,
-          lifecycle: true,
-          simulate: true,
-          text_structure: true,
-          read_failure_store: true,
-          manage_failure_store: true,
-          view_index_metadata: true,
-          create_snapshot_repository: true,
-        },
-        effective_failure_store: {
-          lifecycle: { enabled: { is_default_retention: true } },
-          from: 'logs-test',
-        },
-      };
+        { inherit: {} },
+        'logs-test',
+        { lifecycle: true },
+        'time_series'
+      );
 
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+      renderWithSync(<RetentionCard definition={definition} />, {
+        isActive: true,
+        retentionPeriod: '60d',
+        dataPhasesCount: 3,
+        downsampleStepsCount: 1,
+      });
 
+      expect(screen.getByTestId('retention-metric')).toHaveTextContent('60 days');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('3 data phases');
       expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
-        'ILM policy · Inherit from parent'
+        '1 downsample step'
       );
     });
-    it('shows override label for non-inheriting wired child', () => {
-      // Non-inheriting wired stream: ingest.lifecycle is not inherit, effective lifecycle still ILM
+
+    it('does not show inherited/override labels', () => {
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: {
+          phases: {
+            hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+          },
+        },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
       const definition: Streams.WiredStream.GetResponse = {
         stream: {
           type: 'wired',
@@ -129,7 +245,7 @@ describe('RetentionCard', () => {
           description: '',
           updated_at: new Date().toISOString(),
           ingest: {
-            lifecycle: { ilm: { policy: 'test-policy' } }, // override -> should show "Override parent"
+            lifecycle: { inherit: {} },
             processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             wired: { fields: {}, routing: [] },
@@ -160,65 +276,99 @@ describe('RetentionCard', () => {
         },
       };
 
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+      renderWithSync(<RetentionCard definition={definition} />);
 
-      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
-        'ILM policy · Override parent'
-      );
+      const subtitle = screen.getByTestId('retention-metric-subtitle');
+      expect(subtitle).not.toHaveTextContent('Inherit from');
+      expect(subtitle).not.toHaveTextContent('Override');
     });
   });
 
   describe('DSL lifecycle', () => {
-    it('renders custom retention period in days', () => {
-      const definition = createMockDefinition({
-        dsl: {
-          data_retention: '30d',
-        },
+    it('does not refetch ILM _stats after after-save notification', async () => {
+      const refresh = jest.fn();
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: undefined,
+        loading: false,
+        refresh,
       });
 
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+      const definition = createMockDefinition(
+        { dsl: { data_retention: '30d' } },
+        { inherit: {} },
+        'logs-test',
+        { lifecycle: true },
+        'time_series'
+      );
+
+      renderWithSync(
+        <>
+          <RetentionCard definition={definition} />
+          <AfterSaveTrigger />
+        </>
+      );
+
+      await userEvent.click(screen.getByTestId('afterSaveTrigger'));
+      expect(refresh).not.toHaveBeenCalled();
+    });
+
+    it('renders custom retention period in days', () => {
+      const definition = createMockDefinition(
+        {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '10d', fixed_interval: '1h' }],
+          },
+        },
+        { inherit: {} },
+        'logs-test',
+        { lifecycle: true },
+        'time_series'
+      );
+
+      renderWithSync(<RetentionCard definition={definition} />);
 
       expect(screen.getByTestId('retentionCard-title')).toBeInTheDocument();
       expect(screen.getByTestId('retention-metric')).toHaveTextContent('30 days');
-      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('Custom period');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('2 data phases');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
+        '1 downsample step'
+      );
     });
 
     it('renders indefinite symbol when no data_retention', () => {
-      const definition = createMockDefinition({
-        dsl: {},
-      });
+      const definition = createMockDefinition(
+        { dsl: {} },
+        { inherit: {} },
+        'logs-test',
+        { lifecycle: true },
+        'time_series'
+      );
 
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+      renderWithSync(<RetentionCard definition={definition} />);
 
       expect(screen.getByTestId('retention-metric')).toHaveTextContent('∞');
-      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('Indefinite');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('1 data phase');
     });
 
-    it('shows inherit label for classic streams inheriting', () => {
+    it('uses preview downsample step count while editing DSL downsampling', () => {
       const definition = createMockDefinition(
-        { dsl: { data_retention: '7d' } },
+        { dsl: {} },
         { inherit: {} },
-        'logs-test'
+        'logs-test',
+        { lifecycle: true },
+        'time_series'
       );
 
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+      renderWithSync(<RetentionCard definition={definition} />, {
+        isActive: true,
+        retentionPeriod: null,
+        dataPhasesCount: 1,
+        downsampleStepsCount: 2,
+      });
 
       expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
-        'Inherit from index template'
-      );
-    });
-
-    it('shows override label for non-inheriting classic streams', () => {
-      const definition = createMockDefinition(
-        { dsl: { data_retention: '7d' } },
-        { dsl: { data_retention: '7d' } },
-        'logs-test'
-      );
-
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
-
-      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
-        'Override index template'
+        '2 downsample steps'
       );
     });
   });
@@ -229,10 +379,10 @@ describe('RetentionCard', () => {
         disabled: {},
       });
 
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+      renderWithSync(<RetentionCard definition={definition} />);
 
       expect(screen.getByTestId('retention-metric')).toHaveTextContent('∞');
-      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('Disabled');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('1 data phase');
     });
   });
 
@@ -242,79 +392,9 @@ describe('RetentionCard', () => {
         unknown: {},
       });
 
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+      renderWithSync(<RetentionCard definition={definition} />);
 
       expect(screen.getByTestId('retention-metric')).toHaveTextContent('—');
-    });
-  });
-
-  describe('Edit interactions & privileges', () => {
-    it('invokes openEditModal when edit button clicked', async () => {
-      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
-
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
-
-      const editButton = screen.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton');
-      await userEvent.click(editButton);
-
-      expect(mockOpenEditModal).toHaveBeenCalledTimes(1);
-    });
-
-    it('disables edit button without lifecycle privilege', () => {
-      const definition = createMockDefinition(
-        { dsl: { data_retention: '30d' } },
-        undefined,
-        'logs-test',
-        { lifecycle: false }
-      );
-
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
-
-      const editButton = screen.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton');
-      expect(editButton).toBeDisabled();
-    });
-
-    it('provides accessibility label on edit button', () => {
-      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
-
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
-
-      const editButton = screen.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton');
-      expect(editButton).toHaveAttribute('aria-label', 'Edit retention method');
-    });
-
-    it('disables edit button when edit lifecycle flyout is open', async () => {
-      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
-
-      render(
-        <RetentionCard
-          definition={definition}
-          openEditModal={mockOpenEditModal}
-          isEditLifecycleFlyoutOpen={true}
-        />
-      );
-
-      const editButton = screen.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton');
-      expect(editButton).toBeDisabled();
-
-      await userEvent.click(editButton);
-      expect(mockOpenEditModal).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Root stream behavior', () => {
-    it('hides parent inheritance labels for root streams', () => {
-      const definition = createMockDefinition(
-        { dsl: { data_retention: '30d' } },
-        { dsl: { data_retention: '30d' } },
-        'logs'
-      );
-
-      render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
-
-      const subtitle = screen.getByTestId('retention-metric-subtitle');
-      expect(subtitle).not.toHaveTextContent('Inherit from parent');
-      expect(subtitle).not.toHaveTextContent('Override parent');
     });
   });
 });

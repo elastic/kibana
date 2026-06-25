@@ -7,8 +7,11 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { createAgentNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
-import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
+import {
+  createAgentNotFoundError,
+  createBadRequestError,
+  type AgentAccessControl,
+} from '@kbn/agent-builder-common';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import type {
   AgentAvailabilityContext,
@@ -17,16 +20,23 @@ import type {
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
+  AgentAccessControlUpdateRequest,
   AgentCreateRequest,
   AgentListOptions,
   AgentDeleteRequest,
   AgentUpdateRequest,
 } from '../../../common/agents';
-import type { WritableAgentProvider, ReadonlyAgentProvider } from './agent_source';
+import type { AgentDefinitionWithPermissions } from '../../../common/http_api/agents';
+import type {
+  AgentAccessControlResult,
+  GetAgentOptions,
+  WritableAgentProvider,
+  ReadonlyAgentProvider,
+} from './agent_source';
 import { isReadonlyProvider } from './agent_source';
 
 // internal definition for our agents
-export type InternalAgentDefinition = AgentDefinition & {
+export type InternalAgentDefinition = AgentDefinitionWithPermissions & {
   isAvailable: InternalAgentDefinitionAvailabilityHandler;
 };
 
@@ -36,11 +46,20 @@ export type InternalAgentDefinitionAvailabilityHandler = (
 
 export interface AgentRegistry {
   has(agentId: string): Promise<boolean>;
-  get(agentId: string): Promise<InternalAgentDefinition>;
+  /**
+   * Fetch an agent and assert the caller has at least `opts.access` rights (default: 'read').
+   * Throws `agentNotFound` if the agent doesn't exist OR the caller lacks the requested access.
+   */
+  get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition>;
   list(opts?: AgentListOptions): Promise<InternalAgentDefinition[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
+  getAccessControl(agentId: string): Promise<AgentAccessControlResult>;
+  updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl>;
 }
 
 interface CreateAgentRegistryOpts {
@@ -93,10 +112,10 @@ class AgentRegistryImpl implements AgentRegistry {
     return false;
   }
 
-  async get(agentId: string): Promise<InternalAgentDefinition> {
+  async get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition> {
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
-        const agent = await provider.get(agentId);
+        const agent = await provider.get(agentId, opts);
         if (!(await this.isAvailable(agent))) {
           throw createBadRequestError(`Agent ${agentId} is not available`);
         }
@@ -155,6 +174,37 @@ class AgentRegistryImpl implements AgentRegistry {
         } else {
           return provider.delete(agentId);
         }
+      }
+    }
+    throw createAgentNotFoundError({ agentId });
+  }
+
+  async getAccessControl(agentId: string): Promise<AgentAccessControlResult> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(agentId)) {
+        if (isReadonlyProvider(provider)) {
+          throw createBadRequestError(
+            `Agent ${agentId} is read-only and does not support access control lists`
+          );
+        }
+        return provider.getAccessControl(agentId);
+      }
+    }
+    throw createAgentNotFoundError({ agentId });
+  }
+
+  async updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(agentId)) {
+        if (isReadonlyProvider(provider)) {
+          throw createBadRequestError(
+            `Agent ${agentId} is read-only and does not support access control lists`
+          );
+        }
+        return provider.updateAccessControl(agentId, update);
       }
     }
     throw createAgentNotFoundError({ agentId });

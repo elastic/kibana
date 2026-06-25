@@ -11,8 +11,12 @@ import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { extractReferencedStepIds } from './extract_referenced_step_ids';
+import {
+  extractReferencedStepIds,
+  extractReferencedStepIdsFromVariables,
+} from './extract_referenced_step_ids';
 import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_types';
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -159,6 +163,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * answer — used by {@link hasEvictedOutputs} and the rehydration filter.
    */
   private readonly evictedOutputIds = new Set<string>();
+  /**
+   * Step execution ids that must not be evicted while a loop that references
+   * them is active. A `foreach`/`while` re-evaluates its source expression on
+   * every iteration (see `WorkflowContextManager.buildForeachContext`), so the
+   * referenced output must stay resident for the loop's whole lifetime.
+   * Without this, the concurrent persistence/eviction loop can evict the
+   * source between an inner step's `prepareForRead` (which saw nothing evicted)
+   * and the synchronous context re-evaluation, producing a blank loop item and
+   * a corrupt downstream step input. Populated by {@link pinForeachSource} at
+   * loop entry (and re-pinned on resume from the scope-walk in
+   * {@link computeRehydrationTargets}); cleared by {@link unpinForeachScope}
+   * when the loop exits.
+   *
+   * Keyed by the loop's `stepId` (a foreach cannot be nested inside itself, and
+   * each (re-)entry pins before it exits) so nested/sibling loops referencing
+   * the same source are unpinned independently — a source stays pinned until
+   * every loop that pinned it has exited.
+   */
+  private readonly pinnedOutputIdsByScope = new Map<string, Set<string>>();
   /**
    * Sizes for evicted outputs that we actually measured. Resume-time
    * deferred outputs land in {@link evictedOutputIds} only — their size is
@@ -323,6 +346,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     output: JsonValue | null,
     sizeBytes?: number
   ): void {
+    // Fresh in-memory output is authoritative — do not let a subsequent
+    // prepareForRead rehydrate from ES and overwrite with a stale doc
+    // (common when a deferred step completes on resume before flush).
+    this.clearEvicted(stepExecutionId);
+
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
     }
@@ -577,6 +605,41 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
+   * Pins the source outputs referenced by a loop's source value for the
+   * lifetime of the loop, keyed by the loop's `stepId`. Called unconditionally
+   * when a loop is entered (before any eviction has happened) so the source
+   * stays resident across the per-iteration source re-evaluation — the
+   * eviction-gated rehydration path ({@link computeRehydrationTargets}) cannot
+   * be relied on, because it is skipped entirely until something is evicted.
+   */
+  public pinForeachSource(foreachStepId: string, sourceValue: unknown): void {
+    const referencedStepIds = this.extractReferencedStepIdsFromValue(sourceValue);
+    if (referencedStepIds === null) {
+      return;
+    }
+    this.pinLatestExecutionIdsForScope(foreachStepId, referencedStepIds);
+  }
+
+  /** True if any active loop scope has pinned this output. */
+  private isPinned(stepExecutionId: string): boolean {
+    for (const ids of this.pinnedOutputIdsByScope.values()) {
+      if (ids.has(stepExecutionId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Clears all pins recorded for the given loop `stepId`. Called when a loop
+   * exits ({@link ExitForeachNodeImpl}) so its source output becomes evictable
+   * again. Idempotent.
+   */
+  public unpinForeachScope(foreachStepId: string): void {
+    this.pinnedOutputIdsByScope.delete(foreachStepId);
+  }
+
+  /**
    * Resolves the set of step execution IDs whose outputs need to be rehydrated
    * before the upcoming context build. Combines:
    *
@@ -613,12 +676,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       // Static analysis ambiguous (dynamic bracket access).
       fallbackToPredecessors();
     } else {
-      for (const stepId of referencedStepIds) {
-        const latestExec = this.state.getLatestStepExecution(stepId);
-        if (latestExec) {
-          neededIds.add(latestExec.id);
-        }
-      }
+      this.addLatestExecutionIdsForStepIds(neededIds, referencedStepIds);
       // If the analysis found nothing but a predecessor is actually evicted,
       // the analysis missed a reference. Fall back conservatively rather
       // than trust an empty set.
@@ -635,10 +693,73 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     while (!currentScope.isEmpty()) {
       const frame = currentScope.getCurrentScope();
       currentScope = currentScope.exitScope();
-      neededIds.add(buildStepExecutionId(executionId, frame.stepId, currentScope.stackFrames));
+      const scopeStepExecutionId = buildStepExecutionId(
+        executionId,
+        frame.stepId,
+        currentScope.stackFrames
+      );
+      neededIds.add(scopeStepExecutionId);
+
+      const scopeStepExecution = this.state.getStepExecution(scopeStepExecutionId);
+      if (scopeStepExecution?.stepType === 'foreach') {
+        const scopeInputStepIds = this.extractReferencedStepIdsFromValue(
+          this.getStepInput(scopeStepExecutionId)
+        );
+        if (scopeInputStepIds === null) {
+          fallbackToPredecessors();
+        } else {
+          this.addLatestExecutionIdsForStepIds(neededIds, scopeInputStepIds);
+          // Re-pin the loop's source outputs while the loop scope is active.
+          // Primary pinning happens unconditionally at loop entry
+          // (pinForeachSource); this re-pin covers resume, where the loop is
+          // re-entered mid-iteration without going through enterForeach.
+          this.pinLatestExecutionIdsForScope(frame.stepId, scopeInputStepIds);
+        }
+      }
     }
 
     return neededIds;
+  }
+
+  private addLatestExecutionIdsForStepIds(
+    neededIds: Set<string>,
+    referencedStepIds: ReadonlySet<string>
+  ): void {
+    for (const stepId of referencedStepIds) {
+      const latestExec = this.state.getLatestStepExecution(stepId);
+      if (latestExec) {
+        neededIds.add(latestExec.id);
+      }
+    }
+  }
+
+  /**
+   * Resolves the given step ids to their latest execution ids and pins them
+   * under the owning loop scope so they survive eviction until the loop exits.
+   */
+  private pinLatestExecutionIdsForScope(
+    foreachStepId: string,
+    referencedStepIds: ReadonlySet<string>
+  ): void {
+    let pinned = this.pinnedOutputIdsByScope.get(foreachStepId);
+    for (const stepId of referencedStepIds) {
+      const latestExec = this.state.getLatestStepExecution(stepId);
+      if (latestExec) {
+        if (!pinned) {
+          pinned = new Set<string>();
+          this.pinnedOutputIdsByScope.set(foreachStepId, pinned);
+        }
+        pinned.add(latestExec.id);
+      }
+    }
+  }
+
+  private extractReferencedStepIdsFromValue(value: unknown): Set<string> | null {
+    try {
+      return extractReferencedStepIdsFromVariables(scanForTemplateVariables(value));
+    } catch {
+      return null;
+    }
   }
 
   private hasEvictedPredecessor(
@@ -906,6 +1027,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     const step = this.state.getStepExecution(stepExecutionId);
     if (!step) return;
     if (step.stepType && this.pinnedStepTypes.has(step.stepType)) return;
+    if (this.isPinned(stepExecutionId)) return;
     this.outputs.delete(stepExecutionId);
     this.inputs.delete(stepExecutionId);
     this.clearOutputSize(stepExecutionId);
@@ -955,6 +1077,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     if (this.evictedOutputIds.has(stepExecutionId)) {
       return false;
     }
+    // Pinned outputs (e.g. an active loop's source) must stay resident.
+    if (this.isPinned(stepExecutionId)) {
+      return false;
+    }
     // Only evict COMPLETED steps. Failed steps have `output: null` (semantic
     // "no output") and evicting them would shift the meaning to `undefined`
     // (semantic "evicted"), which downstream code distinguishes.
@@ -986,6 +1112,8 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     const step = this.state.getStepExecution(stepExecutionId);
     if (!step) return false;
     if (this.evictedOutputIds.has(stepExecutionId)) return false;
+    // Pinned outputs (e.g. an active loop's source) must stay resident.
+    if (this.isPinned(stepExecutionId)) return false;
     if (step.status !== ExecutionStatus.COMPLETED) return false;
     if (!this.outputs.has(stepExecutionId)) return false;
     if (step.stepType && this.pinnedStepTypes.has(step.stepType)) return false;

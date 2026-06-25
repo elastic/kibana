@@ -24,6 +24,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
+    // `_no_data` is intentionally first: it expects a clean ES/Kibana state.
+    // Running it after other tests leaves residual managed/default data views
+    // (e.g. "All logs") that prevent Discover from rendering the no-data page.
     loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_filter_editor'));
     loadTestFile(require.resolve('./_field_data_with_fields_api'));

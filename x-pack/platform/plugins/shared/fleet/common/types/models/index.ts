@@ -7,6 +7,7 @@
 
 export * from './agent';
 export * from './agent_policy';
+export type * from './agentless_policy';
 export type * from './package_policy';
 export type * from './data_stream';
 export type * from './output';
@@ -23,3 +24,4 @@ export * from './setup_technology';
 export type * from './fleet_setup_lock';
 export * from './remote_synced_integrations';
 export * from './cloud_connector';
+export type * from './cloud_onboarding_deployment';

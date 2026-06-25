@@ -28,7 +28,6 @@ import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/dat
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { ADD_SAVED_BOOK_ACTION_ID } from './react_embeddables/saved_book/constants';
 import { ADD_FIELD_LIST_ACTION_ID } from './react_embeddables/field_list/constants';
-import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 import { setKibanaServices } from './kibana_services';
 import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
@@ -97,7 +96,6 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return createFieldListAction;
     });
 
-    registerFieldListPanelPlacementSetting(deps.presentationUtil);
     registerSearchPanelAction(deps.uiActions);
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
       const { createDataTableAction } = await import(

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RuleResponseOsqueryAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { AlertWithAgent } from './types';
 import { osqueryResponseAction } from './osquery_response_action';

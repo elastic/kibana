@@ -15,16 +15,20 @@ Object {
   "elasticsearchUrl": undefined,
   "instanceSizeMb": undefined,
   "isCloudEnabled": true,
-  "isEce": undefined,
+  "isEce": true,
   "isElasticStaffOwned": undefined,
   "isInTrial": [Function],
   "isServerlessEnabled": false,
   "kibanaUrl": undefined,
+  "managedOtlp": Object {
+    "url": undefined,
+  },
   "onboarding": Object {
     "defaultSolution": undefined,
   },
   "organizationId": undefined,
   "projectsUrl": "https://cloud.elastic.co/projects/",
+  "region": undefined,
   "serverless": Object {
     "orchestratorTarget": undefined,
     "organizationInTrial": undefined,
