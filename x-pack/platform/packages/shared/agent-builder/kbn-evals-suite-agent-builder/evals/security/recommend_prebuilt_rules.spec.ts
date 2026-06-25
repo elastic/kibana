@@ -34,6 +34,7 @@ const TACTIC_ID = 'TA0005';
 const TACTIC_NAME = 'Defense Evasion';
 
 const FIND_PREBUILT_RULES_TOOL_ID = 'security.find_prebuilt_rules';
+const GET_CATALOG_OVERVIEW_TOOL_ID = 'security.get_installable_catalog_overview';
 
 // Floor that guards against a vacuous pass: "every returned rule covers the
 // tactic" is trivially true on an empty result, so a missing/empty catalog would
@@ -52,7 +53,7 @@ const FLEET_BULK_INSTALL_PATH = '/api/fleet/epm/packages/_bulk';
 interface ToolCallStep {
   type?: string;
   tool_id?: string;
-  params?: { filter?: { mitreTactic?: unknown } };
+  params?: { filter?: { mitreTactic?: unknown; tags?: unknown } };
   results?: unknown[];
 }
 
@@ -96,6 +97,34 @@ const coversTactic = (rule: TacticRule): boolean =>
     (entry) => entry?.tactic?.id === TACTIC_ID || entry?.tactic?.name === TACTIC_NAME
   );
 
+const getCatalogOverviewCalls = (steps: ToolCallStep[]): ToolCallStep[] =>
+  steps.filter(
+    (step) => step?.type === 'tool_call' && step.tool_id === GET_CATALOG_OVERVIEW_TOOL_ID
+  );
+
+// The overview result is `[{ type, data: { total_installable_count, tags: [{ value, count }] } }]`.
+// Its tag values are the only legitimate source the skill may draw `tags` filters from.
+const catalogTagsFromStep = (step: ToolCallStep): string[] => {
+  const results = Array.isArray(step?.results) ? step.results : [];
+  for (const result of results) {
+    const tagBuckets = (result as { data?: { tags?: unknown } })?.data?.tags;
+    if (Array.isArray(tagBuckets)) {
+      return tagBuckets
+        .map((tag) => (tag as { value?: unknown })?.value)
+        .filter((value): value is string => typeof value === 'string');
+    }
+  }
+  return [];
+};
+
+// Tag values the agent passed to a `find_prebuilt_rules` `tags` filter.
+const tagsFromFilter = (step: ToolCallStep): string[] => {
+  const filterTags = step?.params?.filter?.tags;
+  return Array.isArray(filterTags)
+    ? filterTags.filter((tag): tag is string => typeof tag === 'string')
+    : [];
+};
+
 evaluate.describe(
   'Security Skills - Recommend Prebuilt Rules',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
@@ -115,12 +144,12 @@ evaluate.describe(
     });
 
     evaluate(
-      'a tactic recommendation surfaces only rules that cover that tactic',
+      'if user asks for rules covering a certain tactic, only rules that cover that tactic are returned',
       async ({ chatClient }) => {
         const response = await chatClient.converse({
           messages: [
             {
-              message: `Which installable prebuilt detection rules cover the ${TACTIC_NAME} tactic?`,
+              message: `Which rules can I install to cover the ${TACTIC_NAME} tactic?`,
             },
           ],
         });
@@ -149,6 +178,39 @@ evaluate.describe(
           .filter((rule) => !coversTactic(rule))
           .map((rule) => rule?.name ?? '<unknown>');
         expect(offTactic).toEqual([]);
+      }
+    );
+
+    evaluate(
+      'tag filters use only tag values from the catalog overview (no hallucinated tags)',
+      async ({ chatClient }) => {
+        // "Windows" maps to the `OS: Windows` tag (no tactic/severity equivalent), so per the
+        // skill's worked examples this exercises the overview-then-tags path.
+        const response = await chatClient.converse({
+          messages: [{ message: 'What Windows detection rules can I install?' }],
+        });
+
+        expect(response.errors).toEqual([]);
+
+        const steps = (response.steps ?? []) as ToolCallStep[];
+
+        // The skill must consult the catalog overview before any tags-filtered search.
+        const overviewCalls = getCatalogOverviewCalls(steps);
+        expect(overviewCalls.length).toBeGreaterThan(0);
+
+        // The only legitimate source of tag values: the overview result from this turn.
+        const catalogTags = new Set(overviewCalls.flatMap(catalogTagsFromStep));
+        expect(catalogTags.size).toBeGreaterThan(0);
+
+        // Tags the agent actually passed to find_prebuilt_rules.
+        const usedTags = getFindPrebuiltRulesCalls(steps).flatMap(tagsFromFilter);
+
+        // Guard against a vacuous pass: the query must have exercised the tags path.
+        expect(usedTags.length).toBeGreaterThan(0);
+
+        // Anti-hallucination: every tag used must come from the overview result.
+        const ungroundedTags = usedTags.filter((tag) => !catalogTags.has(tag));
+        expect(ungroundedTags).toEqual([]);
       }
     );
   }
