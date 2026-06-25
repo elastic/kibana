@@ -42,6 +42,7 @@ describe('episodes_list_url_state', () => {
         ruleId: 'r1',
         queryString: '  host  ',
         tags: ['a', 'b'],
+        severities: ['high', '__no_severity__'],
         assigneeUid: 'u1',
         extra: 'ignored',
         timeFrom: 'now-7d',
@@ -53,6 +54,7 @@ describe('episodes_list_url_state', () => {
           ruleId: 'r1',
           queryString: 'host',
           tags: ['a', 'b'],
+          severities: ['high', '__no_severity__'],
           assigneeUid: 'u1',
         },
         timeRange: { from: 'now-7d', to: 'now' },
@@ -139,6 +141,29 @@ describe('episodes_list_url_state', () => {
           timeTo: 'now',
         },
       });
+    });
+
+    it('round-trips severities', async () => {
+      const storage = await createKbnTestUrlStorage();
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        {
+          status: 'active',
+          severities: ['high', '__no_severity__'],
+        },
+        DEFAULT_EPISODES_LIST_TIME_RANGE
+      );
+
+      expect(storage.get('_a')).toEqual({
+        [EPISODES_LIST_APP_STATE_KEY]: {
+          severities: ['high', '__no_severity__'],
+        },
+      });
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.severities).toEqual([
+        'high',
+        '__no_severity__',
+      ]);
     });
 
     it('round-trips groupHash and groupingValues', async () => {

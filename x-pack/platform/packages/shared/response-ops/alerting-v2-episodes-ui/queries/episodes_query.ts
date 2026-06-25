@@ -15,6 +15,11 @@ import {
   PAGE_SIZE_ESQL_VARIABLE,
   HISTOGRAM_EPISODE_LIMIT,
 } from '../constants';
+import {
+  EPISODE_SEVERITY_FILTER_NONE,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+} from '../components/severity/severity_utils';
 
 export interface AlertEpisode {
   '@timestamp': string;
@@ -84,6 +89,8 @@ export interface EpisodesFilterState {
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
   tags?: string[] | null;
+  /** Severity values (OR). Includes EPISODE_SEVERITY_FILTER_NONE for episodes without severity. */
+  severities?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
 }
@@ -153,6 +160,32 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
   query.pipe(`WHERE (${clause})`);
 };
 
+const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
+  const severityValues = severities
+    .filter((severity) => severity !== EPISODE_SEVERITY_FILTER_NONE)
+    .filter(isSupportedEpisodeSeverity)
+    .map(normalizeEpisodeSeverity);
+  const includeNoSeverity = severities.includes(EPISODE_SEVERITY_FILTER_NONE);
+
+  if (severityValues.length === 0 && !includeNoSeverity) {
+    return;
+  }
+
+  if (severityValues.length === 0) {
+    query.pipe('WHERE severity IS NULL');
+    return;
+  }
+
+  const inList = severityValues.map((severity) => escapeStringValue(severity)).join(', ');
+
+  if (includeNoSeverity) {
+    query.pipe(`WHERE (severity IN (${inList}) OR severity IS NULL)`);
+    return;
+  }
+
+  query.pipe(`WHERE severity IN (${inList})`);
+};
+
 const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
   if (filterState.status) {
     query.where`effective_status == ${filterState.status}`;
@@ -165,6 +198,9 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   }
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);
+  }
+  if (filterState.severities?.length) {
+    addSeverityFilter(query, filterState.severities);
   }
   if (filterState.assigneeUid) {
     query.where`last_assignee_uid == ${filterState.assigneeUid}`;

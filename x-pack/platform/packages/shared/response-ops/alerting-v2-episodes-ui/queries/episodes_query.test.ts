@@ -253,6 +253,50 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('MV_CONTAINS(last_tags');
   });
 
+  it('should apply single severity filter', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severities: ['high'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IN ("high")');
+  });
+
+  it('should apply multiple severities with IN', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severities: ['high', 'critical'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IN ("high", "critical")');
+  });
+
+  it('should apply no-severity filter with severity IS NULL', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severities: ['__no_severity__'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE severity IS NULL');
+  });
+
+  it('should apply mixed severity and no-severity filters as OR', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severities: ['high', '__no_severity__'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE (severity IN ("high")) OR severity IS NULL');
+  });
+
   it('should trim queryString before applying', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
@@ -268,7 +312,14 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: null, status: null, ruleId: undefined, groupHash: null, tags: null }
+      {
+        queryString: null,
+        status: null,
+        ruleId: undefined,
+        groupHash: null,
+        tags: null,
+        severities: null,
+      }
     );
     const queryString = query.print('basic');
 
