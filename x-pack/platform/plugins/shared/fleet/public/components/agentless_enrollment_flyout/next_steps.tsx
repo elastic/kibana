@@ -15,11 +15,8 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { useStartServices } from '../../hooks';
 import type { PackagePolicy, RegistryPolicyTemplate } from '../../types';
-import { ELASTICSEARCH_PLUGIN_ID } from '../../../common/constants/plugin';
 
 export const NextSteps = ({
   packagePolicy,
@@ -87,32 +84,6 @@ export const NextSteps = ({
       );
     });
 
-  const connectorCards = packagePolicy.inputs
-    .filter((input) => !!input?.vars?.connector_id?.value || !!input?.vars?.connector_name?.value)
-    .map((input, index) => {
-      return (
-        <EuiFlexItem key={index}>
-          <EuiCard
-            data-test-subj={`agentlessStepConfirmData.connectorCard.${input?.vars?.connector_name?.value}`}
-            title={`${input?.vars?.connector_name.value}`}
-            description={i18n.translate(
-              'xpack.fleet.agentlessStepConfirmData.connectorCard.description',
-              {
-                defaultMessage: 'Configure Connector',
-              }
-            )}
-            onClick={() => {
-              application.navigateToApp(ELASTICSEARCH_PLUGIN_ID, {
-                path: input?.vars?.connector_id?.value
-                  ? `content/connectors/${input?.vars?.connector_id?.value}`
-                  : `content/connectors`,
-              });
-            }}
-          />
-        </EuiFlexItem>
-      );
-    });
-
   const actionButtons = configurationLinks
     .filter((link) => !!link && link?.type === 'action')
     .map((link, index) => {
@@ -132,10 +103,9 @@ export const NextSteps = ({
   return (
     <>
       <EuiSpacer size="m" />
-      {(nextStepsCards.length > 0 || connectorCards.length > 0) && (
+      {nextStepsCards.length > 0 && (
         <EuiFlexGroup alignItems="center" direction="row" wrap={true}>
           {nextStepsCards}
-          {connectorCards}
         </EuiFlexGroup>
       )}
       <EuiSpacer size="m" />
