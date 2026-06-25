@@ -15,9 +15,14 @@ import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { mockTelemetryClient } from '../../../services/telemetry/__mocks__/telemetry_client_mock';
+import { useSloFlyouts } from '../../../hooks/use_slo_flyouts';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_slo_flyouts', () => ({
+  useSloFlyouts: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_apm_router', () => ({
@@ -57,6 +62,11 @@ const mockUseKibana = useKibana as jest.Mock;
 const mockUseApmRouter = useApmRouter as jest.Mock;
 const mockUseApmParams = useApmParams as jest.Mock;
 const mockUseAnyOfApmParams = useAnyOfApmParams as jest.Mock;
+const mockUseSloFlyouts = useSloFlyouts as jest.Mock;
+
+const MockSloDetailsFlyout = jest.fn(() => (
+  <div data-test-subj="mockSloDetailsFlyout">SLO Details Flyout</div>
+));
 
 const createMockSlo = (overrides: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse =>
   ({
@@ -89,13 +99,15 @@ describe('SloOverviewFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockUseSloFlyouts.mockReturnValue({
+      CreateSLOFormFlyout: undefined,
+      SLODetailsFlyout: undefined,
+    });
+
     mockUseKibana.mockReturnValue({
       services: {
         uiSettings: {
           get: jest.fn().mockReturnValue('0.00%'),
-        },
-        slo: {
-          getSLODetailsFlyout: jest.fn(),
         },
         share: {
           url: {
@@ -428,21 +440,10 @@ describe('SloOverviewFlyout', () => {
 
   it('toggles the expand button between maximize and minimize when clicked', async () => {
     const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO', instanceId: '*' })];
-    const getSLODetailsFlyoutMock = jest.fn(() => null);
 
-    mockUseKibana.mockReturnValue({
-      services: {
-        uiSettings: { get: jest.fn().mockReturnValue('0.00%') },
-        slo: { getSLODetailsFlyout: getSLODetailsFlyoutMock },
-        share: {
-          url: {
-            locators: {
-              get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
-            },
-          },
-        },
-        telemetry: mockTelemetryClient,
-      },
+    mockUseSloFlyouts.mockReturnValue({
+      CreateSLOFormFlyout: undefined,
+      SLODetailsFlyout: MockSloDetailsFlyout,
     });
 
     mockUseFetcher.mockReturnValue({
@@ -463,7 +464,7 @@ describe('SloOverviewFlyout', () => {
     const expandButton = screen.getByTestId('apmSloExpandButton');
     expect(expandButton).toBeInTheDocument();
     expect(expandButton).toHaveAttribute('aria-label', 'Open SLO details');
-    expect(getSLODetailsFlyoutMock).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mockSloDetailsFlyout')).not.toBeInTheDocument();
 
     fireEvent.click(expandButton);
 
@@ -473,7 +474,7 @@ describe('SloOverviewFlyout', () => {
         'Close SLO details'
       );
     });
-    expect(getSLODetailsFlyoutMock).toHaveBeenCalled();
+    expect(screen.getByTestId('mockSloDetailsFlyout')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('apmSloExpandButton'));
 
