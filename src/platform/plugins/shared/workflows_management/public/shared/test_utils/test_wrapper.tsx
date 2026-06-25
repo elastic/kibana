@@ -19,7 +19,7 @@ interface TestWrapperProps {
   children: React.ReactNode;
   store?: Store;
   queryClient?: QueryClient;
-  routerHistory?: string[];
+  routerHistory?: React.ComponentProps<typeof MemoryRouter>['initialEntries'];
 }
 
 /**
