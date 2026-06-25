@@ -85,13 +85,13 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
   spaceTest(
     'should maintain separate DocViewer state for different tabs and retain it while switching tabs',
     async ({ pageObjects }) => {
-      const { discover, unifiedTabs } = pageObjects;
+      const { dataGrid, discover, unifiedTabs } = pageObjects;
 
       await spaceTest.step('tab 0: open DocViewer and switch to JSON tab', async () => {
-        await discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+        await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
         expect(await discover.isShowingDocViewer()).toBe(true);
 
-        await discover.openDocViewerTab(DOC_VIEWER_JSON_TAB_ID);
+        await dataGrid.openDocViewerTab(DOC_VIEWER_JSON_TAB_ID);
         expect(await discover.isDocViewerTabSelected(DOC_VIEWER_JSON_TAB_ID)).toBe(true);
       });
 
@@ -100,10 +100,10 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
         await discover.waitUntilTabIsLoaded();
 
         expect(await discover.isShowingDocViewer({ timeout: 1_000 })).toBe(false);
-        await discover.openAndWaitForDocViewerFlyout({ rowIndex: 1 });
+        await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 1 });
         expect(await discover.isShowingDocViewer()).toBe(true);
 
-        await discover.openDocViewerTab(DOC_VIEWER_TABLE_TAB_ID);
+        await dataGrid.openDocViewerTab(DOC_VIEWER_TABLE_TAB_ID);
         expect(await discover.isDocViewerTabSelected(DOC_VIEWER_TABLE_TAB_ID)).toBe(true);
       });
 
