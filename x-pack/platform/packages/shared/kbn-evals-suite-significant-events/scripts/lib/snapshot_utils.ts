@@ -9,7 +9,6 @@ import type { Client } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import inquirer from 'inquirer';
 import moment from 'moment';
-import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
@@ -88,49 +87,6 @@ export const parseDurationFlag = (
   const amount = Number(match[1]);
   const unit = match[2] as moment.unitOfTime.DurationConstructor;
   return moment.duration(amount, unit).asMilliseconds();
-};
-
-// Friendly `--onboarding` names → onboarding step ids. Listed in execution order; queries
-// generation depends on identified features, so steps are always run features-before-queries
-// regardless of the order they were passed.
-const ONBOARDING_STEP_ORDER: Array<[string, StreamsKIsOnboardingStep]> = [
-  ['features', StreamsKIsOnboardingStep.FeaturesIdentification],
-  ['queries', StreamsKIsOnboardingStep.QueriesGeneration],
-];
-
-/**
- * Parses the `--onboarding` flag (e.g. `features`, `queries`, or `features,queries`) into an
- * ordered list of onboarding steps. Defaults to features-only for backward compatibility;
- * throws on an unknown step name.
- */
-export const parseOnboardingFlag = (
-  raw: string | string[] | boolean | undefined
-): StreamsKIsOnboardingStep[] => {
-  // Default to features only for backward compatibility with existing invocations.
-  if (raw === undefined || raw === true || raw === '') {
-    return [StreamsKIsOnboardingStep.FeaturesIdentification];
-  }
-
-  const requested = new Set(
-    (Array.isArray(raw) ? raw : String(raw).split(','))
-      .map((token) => token.trim().toLowerCase())
-      .filter(Boolean)
-  );
-
-  for (const name of requested) {
-    if (!ONBOARDING_STEP_ORDER.some(([friendly]) => friendly === name)) {
-      throw new Error(
-        `Invalid --onboarding value "${name}". Valid: ${ONBOARDING_STEP_ORDER.map(
-          ([friendly]) => friendly
-        ).join(', ')}`
-      );
-    }
-  }
-
-  const steps = ONBOARDING_STEP_ORDER.filter(([friendly]) => requested.has(friendly)).map(
-    ([, step]) => step
-  );
-  return steps.length > 0 ? steps : [StreamsKIsOnboardingStep.FeaturesIdentification];
 };
 
 export async function resolvePatterns(

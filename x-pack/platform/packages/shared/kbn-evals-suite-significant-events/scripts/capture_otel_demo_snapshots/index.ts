@@ -52,7 +52,7 @@ import {
   SIGEVENTS_DISCOVERIES_TEMP_INDEX_PATTERN,
   SIGEVENTS_DETECTIONS_TEMP_INDEX_PATTERN,
 } from '../../src/data_generators/sigevents_snapshot_indices';
-import { parseDurationFlag, parseOnboardingFlag } from '../lib/snapshot_utils';
+import { parseDurationFlag } from '../lib/snapshot_utils';
 
 run(
   async ({ log, flags }) => {
@@ -64,14 +64,12 @@ run(
 
     const logsIndex = String(flags['logs-index'] || DEFAULT_LOGS_INDEX);
 
-    // `--discovery` (presence) turns the discovery workflow on; its optional value is the
-    // pre-discovery wait. A bare `--discovery` (no value) uses the default wait.
-    const discoveryFlag = flags.discovery;
-    const withDiscovery = discoveryFlag !== undefined && discoveryFlag !== false;
-    const discoveryWaitMs =
-      typeof discoveryFlag === 'string' && discoveryFlag.trim().length > 0
-        ? parseDurationFlag(discoveryFlag, 'discovery', DISCOVERY_WAIT_MS)
-        : DISCOVERY_WAIT_MS;
+    const withDiscovery = Boolean(flags['with-discovery']);
+    const discoveryWaitMs = parseDurationFlag(
+      flags['discovery-wait'],
+      'discovery-wait',
+      DISCOVERY_WAIT_MS
+    );
 
     const connectorId = String(flags['connector-id'] || '');
     const runId = String(flags['run-id'] || moment().format('YYYY-MM-DD'));
@@ -111,7 +109,11 @@ run(
       'extraction-timeout',
       KI_FEATURE_EXTRACTION_TIMEOUT_MS
     );
-    const onboardingSteps = parseOnboardingFlag(flags.onboarding);
+
+    const onboardingSteps = [
+      StreamsKIsOnboardingStep.FeaturesIdentification,
+      ...(withDiscovery ? [StreamsKIsOnboardingStep.QueriesGeneration] : []),
+    ];
 
     const failureScenarios = getDemoScenarios(demoType as DemoType);
     const allScenarios: Scenario[] = [HEALTHY_BASELINE_SCENARIO, ...failureScenarios];
@@ -227,7 +229,7 @@ run(
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --run-id 2026-02-19
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --dry-run
         node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --demo-app online-boutique
-        node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --discovery 10m
+        node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id bedrock-opus-46 --with-discovery --discovery-wait 10m
     `,
     flags: {
       string: [
@@ -241,20 +243,19 @@ run(
         'demo-app',
         'baseline-wait',
         'failure-wait',
-        'discovery',
-        'onboarding',
+        'discovery-wait',
         'extraction-timeout',
         'logs-index',
       ],
-      boolean: ['dry-run'],
+      boolean: ['dry-run', 'with-discovery'],
       help: `
         --logs-index       Logs index to use (default: logs)
         --connector-id     (required) LLM connector ID for feature extraction (e.g.: bedrock-opus-46)
         --run-id           Run identifier used as GCS subfolder (default: today's date in format YYYY-MM-DD)
         --scenario         Process only specific scenario(s) - can be repeated. Omit for all.
         --dry-run          Print what would happen without executing
-        --discovery        Also run the discovery workflow and fold its discoveries + detections into the snapshot. Optional value is how long to let data accumulate before triggering discovery, e.g. --discovery 10m (default: 5m); use --discovery 0 for no wait. Omit the flag to skip discovery.
-        --onboarding       KI onboarding steps to run, comma-separated: features, queries (queries always runs after features). Default: features.
+        --with-discovery   Also run the discovery workflow and fold its discoveries + detections into the snapshot. Adds query-KI onboarding (features onboarding always runs); query KIs are what discovery resolves to ES|QL. Omit to skip discovery (features-only snapshot).
+        --discovery-wait   Duration to let data accumulate before triggering discovery, e.g. 10m, 300s (default: 5m). Only applies with --with-discovery.
         --demo-app         Demo app to use (default: otel-demo). Must be a registered demo type.
         --baseline-wait    Duration to wait for baseline traffic, e.g. 3m, 90s, 1h (default: 3m)
         --failure-wait     Duration to wait after applying failure scenario, e.g. 15m, 300s (default: 5m)
@@ -357,10 +358,6 @@ async function processScenario(
     log.info(`[6/8] Persisted ${knowledgeIndicatorsResult.count} knowledge indicators`);
     snapshotIndices.push(knowledgeIndicatorsResult.index);
 
-    // Step 6b (optional) — Run the discovery workflow over the live scenario data and
-    // persist its discoveries + detections. Like feature extraction, this only persists —
-    // the single snapshot in step 7 folds the indices in. Must run before teardown so the
-    // workflow has data to query.
     if (withDiscovery) {
       // Let data accumulate after feature extraction so the discovery workflow's detection
       // step has signal to analyze before we trigger it.
