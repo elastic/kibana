@@ -51,10 +51,11 @@ export const registerBulkGetRoute = (
       const response = await client.bulkGet<unknown>(objects);
 
       const body: v1.BulkGetResponseHTTP = response.saved_objects.map((obj) => {
-        if (!isSavedObjectErrorResult(obj)) {
+        if (isSavedObjectErrorResult(obj)) {
+          return toSavedObjectWithMeta(obj);
+        } else { 
           return injectMetaAttributes(obj, managementService);
         }
-        return toSavedObjectWithMeta(obj);
       });
 
       return res.ok({ body });
