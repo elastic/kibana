@@ -1,6 +1,6 @@
 # Test plan: Super Timeline <!-- omit from toc -->
 
-**Status**: `in progress — PR 4 of 5`
+**Status**: `in progress — PR 5 of 5`
 
 ## Summary <!-- omit from toc -->
 
@@ -173,3 +173,67 @@ and notes attached to events and to the timelines themselves.
    - **ESQL** and **EQL** tabs are hidden.
    - If any selected timeline uses EQL or ESQL queries, a toast should name it.
 8. Close the modal and reopen Timelines — the Super Timeline should **not** reappear (transient).
+
+---
+
+## PR 5 — Cases timeline attachments entry point
+
+### What this introduces
+
+- "View Super Timeline" bulk action on the **Cases → Attachments** tab timeline table, enabled
+  when 2–10 timelines are selected. Calls `useOpenSuperTimeline` with the selected saved-object
+  IDs — reuses the same hook from PR 2.
+- `superTimeline` experimental flag also gates this entry point.
+- **Combined OR filter pill** is visible in the Query tab header (not just in the filter bar)
+  because `StatefulSearchOrFilter` is now rendered outside the `isSuperTimeline` guard.
+- **URL persistence**: `superTimelineSourceIds` is written to the `timeline` URL param so that
+  copying the URL and opening it in a new tab (or pressing browser back/forward) restores the
+  Super Timeline view.
+
+### Why
+
+Cases is the second contractual entry point — incident leads attach multiple analyst timelines
+to a Case before aggregating them. The filter-pill visibility fix and URL persistence are
+hardened in this PR because the Cases flow is the first to exercise both from the same session.
+
+### Prerequisites
+
+Enable the experimental flag in `config/kibana.dev.yml`:
+
+```yaml
+xpack.securitySolution.enableExperimental:
+  - superTimeline
+```
+
+### Generate test data
+
+```bash
+node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_super_timeline_cli.js
+```
+
+Then, in the Kibana UI:
+
+1. Navigate to **Security → Cases** and create a case.
+2. Open the case → **Attachments** tab.
+3. Click **Add attachment → Timelines** and attach 2–3 timelines created by the script above.
+
+### How to test in the browser
+
+1. Open the case you created and go to the **Attachments** tab.
+2. Select **2–10 timelines** using the row checkboxes.
+3. Open the **Bulk actions** popover → "View Super Timeline" should be **enabled**.
+4. Select **0 or 1 timeline** → the action should be **disabled**.
+5. Click **View Super Timeline** with 2–10 selected.
+6. Verify the modal:
+   - Header shows **"Super Timeline — read-only"** badge.
+   - No **Save**, **Attach to Case**, or **Add to Favorites** buttons.
+   - **Query tab header** shows the combined OR filter pill (one labelled sub-filter per source
+     timeline).
+   - **Pinned Events** tab shows the union of pinned events across all selected timelines.
+   - **Notes** tab shows notes from all selected timelines read-only (no add-note input).
+   - **ESQL** and **EQL** tabs are hidden.
+7. **URL persistence**: copy the browser URL. Open it in a new tab — the Super Timeline modal
+   should reopen automatically with the same source timelines loaded.
+8. Close the modal, then press the **browser back** button — the Super Timeline should reopen.
+9. Close the modal and navigate away from the Case — the Super Timeline should **not**
+   reappear on a fresh page load (transient once the URL param is gone).
