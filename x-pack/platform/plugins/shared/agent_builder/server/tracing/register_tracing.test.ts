@@ -242,7 +242,7 @@ describe('registerTracingExporter', () => {
 
     scopedUiSettings.get.mockResolvedValue(false);
     jest.advanceTimersByTime(30_000);
-    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(0);
 
     expect(getSettings().enabled).toBe(false);
   });
@@ -263,7 +263,7 @@ describe('registerTracingExporter', () => {
 
     scopedUiSettings.get.mockRejectedValue(new Error('SO unavailable'));
     jest.advanceTimersByTime(30_000);
-    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(0);
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to fetch tracing settings')
@@ -289,7 +289,7 @@ describe('registerTracingExporter', () => {
 
     scopedUiSettings.get.mockResolvedValue(false);
     jest.advanceTimersByTime(30_000);
-    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(0);
 
     const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
     expect(getSettings().enabled).toBe(true);

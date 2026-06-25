@@ -662,6 +662,7 @@ describe('AgentBuilderSpanProcessor', () => {
         ...createMockReadableSpan({
           [SHOULD_TRACK_ATTR]: true,
           [GenAISemanticConventions.GenAIAgentName]: builtinAgentName,
+          [GenAISemanticConventions.GenAIAgentId]: builtinAgentName,
         }),
         name: `invoke_agent ${builtinAgentName}`,
       };
