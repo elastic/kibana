@@ -35,14 +35,14 @@ spaceTest.describe(
     spaceTest(
       'drops a selected dimension when switching to a stream that does not emit it, and keeps the chart rendered',
       async ({ pageObjects, page }) => {
-        const { discover, metricsExperience } = pageObjects;
+        const { dataGrid, discover, metricsExperience } = pageObjects;
         const { ONLY_IN_A } = testData.METRICS_DIMENSION_FIELDS;
 
         // TODO: Move to Discover PO (issue: https://github.com/elastic/kibana/issues/265472)
         const submitEsqlQuery = async (query: string) => {
           await discover.codeEditor.setCodeEditorValue(query);
           await page.testSubj.click('querySubmitButton');
-          await discover.waitUntilSearchingHasFinished();
+          await dataGrid.waitUntilSearchingHasFinished();
         };
 
         await spaceTest.step('select a dimension on the first stream', async () => {
@@ -82,13 +82,13 @@ spaceTest.describe(
     spaceTest(
       'preserves the breakdown when the dimension is shared across streams',
       async ({ pageObjects, page }) => {
-        const { discover, metricsExperience } = pageObjects;
+        const { dataGrid, discover, metricsExperience } = pageObjects;
         const { DEFAULT_BREAKDOWN } = testData.METRICS_DIMENSION_FIELDS;
 
         const submitEsqlQuery = async (query: string) => {
           await discover.codeEditor.setCodeEditorValue(query);
           await page.testSubj.click('querySubmitButton');
-          await discover.waitUntilSearchingHasFinished();
+          await dataGrid.waitUntilSearchingHasFinished();
         };
 
         await spaceTest.step('select a shared dimension on the first stream', async () => {

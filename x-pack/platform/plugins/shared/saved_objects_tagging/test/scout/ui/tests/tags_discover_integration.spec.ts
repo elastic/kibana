@@ -47,7 +47,7 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -92,7 +92,7 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
 
   test('creating allows selecting tags for a new saved search', async ({ page, pageObjects }) => {
     await pageObjects.discover.selectDataView('logstash-*');
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     await page.testSubj.click('discoverSaveButton');
     await page.testSubj.fill('savedObjectTitle', 'My New Search');
     await page.testSubj.click('savedObjectTagSelector');
@@ -114,7 +114,7 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
 
   test('creating allows creating a tag from the tag selector', async ({ page, pageObjects }) => {
     await pageObjects.discover.selectDataView('logstash-*');
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     await page.testSubj.click('discoverSaveButton');
     await page.testSubj.fill('savedObjectTitle', 'search-with-new-tag');
     await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeEnabled();
@@ -143,7 +143,7 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
     pageObjects,
   }) => {
     await pageObjects.discover.loadSavedSearch('A Saved Search');
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     await page.testSubj.click('discoverSaveButton');
     await page.testSubj.click('savedObjectTagSelector');
     await page.testSubj.click('tagSelectorOption-tag-3');

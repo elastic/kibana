@@ -47,7 +47,7 @@ spaceTest.describe(
     });
 
     spaceTest('should save and restore a metrics session', async ({ pageObjects }) => {
-      const { metricsExperience, discover } = pageObjects;
+      const { dataGrid, metricsExperience, discover } = pageObjects;
 
       await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       await expect(metricsExperience.grid).toBeVisible();
@@ -58,7 +58,7 @@ spaceTest.describe(
         await expect(
           metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
         ).toBeVisible();
-        await discover.waitUntilSearchingHasFinished();
+        await dataGrid.waitUntilSearchingHasFinished();
       });
 
       const cardCountBefore = await metricsExperience.getVisibleCardCount();

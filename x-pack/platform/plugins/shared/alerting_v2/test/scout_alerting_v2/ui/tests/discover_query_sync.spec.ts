@@ -49,7 +49,7 @@ test.describe('Discover query sync — Rule flyout', { tag: '@local-stateful-cla
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         'FROM logs-* | WHERE message != "" | LIMIT 10'
       );
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
       await expect(pageObjects.ruleForm.flyout).toBeVisible();
     });
@@ -70,7 +70,7 @@ test.describe('Discover query sync — Rule flyout', { tag: '@local-stateful-cla
 
     await test.step('click search to submit the query', async () => {
       await pageObjects.ruleForm.submitDiscoverQuery();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     });
 
     await test.step('verify flyout reflects the updated query', async () => {

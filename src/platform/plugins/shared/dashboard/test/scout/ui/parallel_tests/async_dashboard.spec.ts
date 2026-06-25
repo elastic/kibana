@@ -55,7 +55,7 @@ spaceTest.describe.skip('Flights dashboard (sample data)', { tag: tags.deploymen
       await pageObjects.discover.goto();
       await pageObjects.discover.selectDataView(SAMPLE_DATA_VIEW);
       await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
     });
 

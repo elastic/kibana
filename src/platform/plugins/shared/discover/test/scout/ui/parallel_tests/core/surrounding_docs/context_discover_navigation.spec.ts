@@ -46,7 +46,7 @@ spaceTest.describe(
           await page.testSubj.fill('fieldListFiltersFieldSearch', columnName);
           await page.testSubj.click(`fieldToggle-${columnName}`);
         }
-        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
         await navigateToFirstDocContext(pageObjects);
 
@@ -86,7 +86,7 @@ spaceTest.describe(
       async ({ page, pageObjects, browserAuth }) => {
         await loginAndGoToDiscover({ browserAuth, pageObjects });
         await addFilters(page, TEST_FILTER_COLUMN_NAMES);
-        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
         await navigateToFirstDocContext(pageObjects);
 
@@ -115,8 +115,8 @@ spaceTest.describe(
       async ({ browserAuth, page, pageObjects }) => {
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
+        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
         const savedSearchName = 'my search';
         await pageObjects.discover.saveSearch(savedSearchName);
 
@@ -124,7 +124,7 @@ spaceTest.describe(
         await pageObjects.dashboard.addSavedSearch(savedSearchName);
         await pageObjects.dashboard.waitForRenderComplete();
 
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+        await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
         await pageObjects.contextPage.clickRowAction(0);
 
         // dashboard may prompt "unsaved changes" confirmation on navigation

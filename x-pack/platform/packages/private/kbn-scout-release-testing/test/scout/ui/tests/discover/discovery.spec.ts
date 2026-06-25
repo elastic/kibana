@@ -110,7 +110,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   test('should modify the time range when a bar is clicked', async ({ pageObjects }) => {
     const timeBefore = await pageObjects.datePicker.getTimeConfig();
     await pageObjects.discover.clickHistogramBar();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
     const timeAfter = await pageObjects.datePicker.getTimeConfig();
     expect(timeAfter.start).not.toBe(timeBefore.start);
@@ -232,7 +232,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     // Can download saved searches only, so save first
     await pageObjects.discover.saveSearch(queryName3);
     await pageObjects.toasts.closeAll(); // close toast to avoid obstruction
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     // Wait for download
     const download = await pageObjects.discover.exportAsCsv();
     downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;

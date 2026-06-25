@@ -91,7 +91,7 @@ spaceTest.describe(
             RICH_TRACE.SERVICE_NAME,
             'apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover'
           );
-          await pageObjects.discover.waitForDocTableRendered();
+          await pageObjects.dataGrid.waitForDocTableRendered();
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
       }
@@ -308,7 +308,7 @@ spaceTest.describe(
             RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR
           );
           await clickAndWaitForDiscover(page, 'errorGroupDetailsOpenErrorInDiscoverButton');
-          await pageObjects.discover.waitForDocTableRendered();
+          await pageObjects.dataGrid.waitForDocTableRendered();
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
       }

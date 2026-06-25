@@ -56,7 +56,7 @@ spaceTest.describe(
 
         await spaceTest.step('brush the first chart card', async () => {
           await metricsExperience.chartInteractions.brushChartInCard(0);
-          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await pageObjects.dataGrid.waitUntilSearchingHasFinished();
         });
 
         await spaceTest.step(

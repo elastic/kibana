@@ -67,7 +67,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify histogram and document grid are rendered for the sample query', async () => {
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await expect(page.testSubj.locator('unifiedHistogramRendered')).toBeVisible();
       await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
     });
@@ -119,7 +119,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       const updatedQuery = await pageObjects.discover.getEsqlQueryValue();
       expect(updatedQuery).toContain(`agent.keyword == ${variableName}`);
 
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
     });
   });
@@ -290,8 +290,8 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       // Expanding a row proves the embedded saved-search grid is fully
       // interactive end-to-end: rows are rendered, the expand action
       // surfaces, and the document-viewer flyout opens for the row.
-      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-      await pageObjects.discover.closeDocViewerFlyout();
+      await pageObjects.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+      await pageObjects.dataGrid.closeDocViewerFlyout();
     });
   });
 

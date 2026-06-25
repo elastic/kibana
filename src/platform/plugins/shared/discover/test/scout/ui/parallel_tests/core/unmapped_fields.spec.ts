@@ -44,7 +44,7 @@ spaceTest.describe('Data view with unmapped fields', { tag: tags.stateful.classi
 
   spaceTest('unmapped fields exist on a new saved search', async ({ pageObjects }) => {
     // Wait for search to complete
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
     // Verify hit count
     await expect.poll(() => pageObjects.discover.getHitCountInt(), { timeout: 10000 }).toBe(4);
@@ -72,7 +72,7 @@ spaceTest.describe('Data view with unmapped fields', { tag: tags.stateful.classi
     await pageObjects.discover.loadSavedSearch('Existing Saved Search');
 
     // Wait for search to complete
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
 
     // Verify hit count
     await expect.poll(() => pageObjects.discover.getHitCountInt(), { timeout: 10000 }).toBe(4);

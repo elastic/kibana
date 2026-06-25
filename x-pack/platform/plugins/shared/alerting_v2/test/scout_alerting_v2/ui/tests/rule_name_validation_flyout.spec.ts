@@ -38,7 +38,7 @@ test.describe('Rule name validation — Discover flyout', { tag: '@local-statefu
     await pageObjects.discover.writeAndSubmitEsqlQuery(
       `FROM ${SOURCE_INDEX} | WHERE message != "" | LIMIT 10`
     );
-    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.dataGrid.waitUntilSearchingHasFinished();
   });
 
   test.afterAll(async ({ esClient }) => {

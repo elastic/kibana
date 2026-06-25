@@ -46,12 +46,12 @@ spaceTest.describe(
           await pageObjects.discover.goto({ queryMode: 'classic' });
 
           await spaceTest.step('wait for results to load', async () => {
-            await pageObjects.discover.waitForDocTableRendered();
+            await pageObjects.dataGrid.waitForDocTableRendered();
           });
 
           await spaceTest.step('verify trace-specific columns are not present', async () => {
             for (const column of pageObjects.tracesExperience.grid.profileSpecificColumns) {
-              await expect(pageObjects.discover.getColumnHeader(column)).toBeHidden();
+              await expect(pageObjects.dataGrid.getColumnHeader(column)).toBeHidden();
             }
           });
         }

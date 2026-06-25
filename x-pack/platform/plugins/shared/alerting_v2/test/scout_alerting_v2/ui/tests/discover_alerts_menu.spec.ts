@@ -32,7 +32,7 @@ test.describe.skip(
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         'FROM kibana_sample_data_ecommerce | LIMIT 10'
       );
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
     });
 
     test.afterAll(async ({ apiServices }) => {

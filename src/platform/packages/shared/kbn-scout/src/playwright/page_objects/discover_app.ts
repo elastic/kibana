@@ -209,7 +209,7 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   /**
@@ -324,7 +324,7 @@ export class DiscoverApp {
     // Click the saved search
     const savedSearchId = searchName.split(' ').join('-');
     await this.page.testSubj.click(`savedObjectTitle${savedSearchId}`);
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   async getHitCountInt(): Promise<number> {
@@ -346,39 +346,10 @@ export class DiscoverApp {
     await canvas.click();
   }
 
-  async waitUntilSearchingHasFinished() {
-    await this.dataGrid.waitUntilSearchingHasFinished();
-  }
-
   // Waits for a Discover tab to finish loading.
   async waitUntilTabIsLoaded() {
     await this.waitForDiscoverPage();
-    await this.waitUntilSearchingHasFinished();
-  }
-
-  // Waits for the document table to be fully rendered and stable
-  async waitForDocTableRendered() {
-    await this.dataGrid.waitForDocTableRendered();
-  }
-
-  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
-    await this.dataGrid.openDocumentDetails({ rowIndex });
-  }
-
-  async waitForDocViewerFlyoutOpen() {
-    await this.dataGrid.waitForDocViewerFlyoutOpen();
-  }
-
-  async openAndWaitForDocViewerFlyout({ rowIndex }: { rowIndex: number }) {
-    await this.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex });
-  }
-
-  /**
-   * Close the Discover document-viewer flyout and wait for it to disappear.
-   */
-  async closeDocViewerFlyout() {
-    await this.page.testSubj.click('euiFlyoutCloseButton');
-    await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   async getDocTableIndex(index: number): Promise<string> {
@@ -449,7 +420,7 @@ export class DiscoverApp {
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
     const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
     await button.click();
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   async revertUnsavedChanges() {
@@ -461,15 +432,11 @@ export class DiscoverApp {
     await expect(revertButton).toBeVisible();
     await revertButton.click();
 
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   unsavedChangesIndicator(): Locator {
     return this.page.testSubj.locator('split-button-notification-indicator');
-  }
-
-  getColumnHeader(name: string): Locator {
-    return this.dataGrid.getColumnHeader(name);
   }
 
   public readonly controls = {
@@ -480,7 +447,7 @@ export class DiscoverApp {
   };
 
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.getColumnHeader(field);
+    const header = this.dataGrid.getColumnHeader(field);
     await header.click();
     await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
       state: 'visible',
@@ -570,7 +537,7 @@ export class DiscoverApp {
     await this.page.testSubj.fill('queryInput', query);
     await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
     await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   async dragFieldToGrid(fieldName: string[]) {
@@ -614,8 +581,7 @@ export class DiscoverApp {
   }
 
   async moveColumn(fieldName: string, direction: 'left' | 'right') {
-    await this.page.testSubj.hover(`dataGridHeaderCell-${fieldName}`);
-    await this.page.testSubj.click(`dataGridHeaderCellActionButton-${fieldName}`);
+    await this.dataGrid.openColumnMenuByField(fieldName);
     await this.page.getByText(`Move ${direction}`).click();
   }
 
@@ -626,7 +592,7 @@ export class DiscoverApp {
       await this.page.testSubj.click('select-text-based-language-btn');
     }
 
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
     await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
@@ -634,7 +600,7 @@ export class DiscoverApp {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
     await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   /**
@@ -648,7 +614,7 @@ export class DiscoverApp {
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
     await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
 
@@ -680,7 +646,7 @@ export class DiscoverApp {
 
     await expect(queryOption).toBeVisible();
     await queryOption.click();
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
@@ -708,7 +674,7 @@ export class DiscoverApp {
     await this.waitUntilFieldPopoverIsLoaded();
 
     await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
   }
 
   private async waitUntilFieldPopoverIsLoaded() {
@@ -731,7 +697,7 @@ export class DiscoverApp {
     // the text genuinely isn't in the DOM.
     const PER_POSITION_TIMEOUT_MS = 500;
 
-    await this.waitUntilSearchingHasFinished();
+    await this.dataGrid.waitUntilSearchingHasFinished();
     const docTable = this.page.testSubj.locator('discoverDocTable');
     await expect(docTable).toBeVisible();
 
