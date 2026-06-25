@@ -46,7 +46,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.region', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.region', {
           defaultMessage: 'Region',
         })}
         fullWidth
@@ -62,7 +62,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.endpoint', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.endpoint', {
           defaultMessage: 'Endpoint',
         })}
         fullWidth
@@ -98,7 +98,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.s3.fields.accessKeyRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.accessKeyRequired', {
                   defaultMessage: 'Access key is required.',
                 }),
         }
@@ -112,7 +112,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.s3.fields.secretKeyRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.secretKeyRequired', {
                   defaultMessage: 'Secret key is required.',
                 }),
         }
@@ -129,7 +129,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.accessKey', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.accessKey', {
           defaultMessage: 'Access key',
         })}
         fullWidth
@@ -148,7 +148,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.secretKey', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.secretKey', {
           defaultMessage: 'Secret key',
         })}
         fullWidth
@@ -191,7 +191,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.s3.fields.roleArnRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArnRequired', {
                   defaultMessage: 'Role ARN is required.',
                 }),
         }
@@ -229,7 +229,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.roleArn', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArn', {
           defaultMessage: 'Role ARN',
         })}
         fullWidth
@@ -257,17 +257,17 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
         data-test-subj="createDataSourceFlyoutS3FederatedAdvancedToggle"
       >
         {isAdvancedOpen
-          ? i18n.translate('dataSets.createFlyout.s3.federated.advanced.hide', {
+          ? i18n.translate('xpack.dataFederation.createFlyout.s3.federated.advanced.hide', {
               defaultMessage: 'Hide optional authentication settings',
             })
-          : i18n.translate('dataSets.createFlyout.s3.federated.advanced.show', {
+          : i18n.translate('xpack.dataFederation.createFlyout.s3.federated.advanced.show', {
               defaultMessage: 'Show optional authentication settings',
             })}
       </EuiButtonEmpty>
       <div id={advancedId} hidden={!isAdvancedOpen}>
         <EuiSpacer size="s" />
         <EuiFormRow
-          label={i18n.translate('dataSets.createFlyout.s3.fields.jwtAudience', {
+          label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.jwtAudience', {
             defaultMessage: 'JWT audience',
           })}
           fullWidth
@@ -286,7 +286,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('dataSets.createFlyout.s3.fields.roleSessionName', {
+          label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleSessionName', {
             defaultMessage: 'Role session name',
           })}
           fullWidth
@@ -302,7 +302,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('dataSets.createFlyout.s3.fields.stsEndpoint', {
+          label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.stsEndpoint', {
             defaultMessage: 'STS endpoint',
           })}
           fullWidth
@@ -318,7 +318,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('dataSets.createFlyout.s3.fields.stsRegion', {
+          label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.stsRegion', {
             defaultMessage: 'STS region',
           })}
           fullWidth

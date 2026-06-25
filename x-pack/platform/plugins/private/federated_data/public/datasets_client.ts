@@ -45,7 +45,7 @@ export class DatasetsClient {
     const nameTrimmed = name.trim();
     if (!nameTrimmed) {
       throw new Error(
-        i18n.translate('dataSets.errors.dataSetNameRequired', {
+        i18n.translate('xpack.dataFederation.errors.dataSetNameRequired', {
           defaultMessage: 'Name is required.',
         })
       );

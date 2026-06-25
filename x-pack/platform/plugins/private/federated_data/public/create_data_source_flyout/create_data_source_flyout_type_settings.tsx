@@ -63,10 +63,10 @@ export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
         data-test-subj="createDataSourceFlyoutConnectionSettingsToggle"
       >
         {isOpen
-          ? i18n.translate('dataSets.createFlyout.connectionSettings.hide', {
+          ? i18n.translate('xpack.dataFederation.createFlyout.connectionSettings.hide', {
               defaultMessage: 'Hide connection settings',
             })
-          : i18n.translate('dataSets.createFlyout.connectionSettings.show', {
+          : i18n.translate('xpack.dataFederation.createFlyout.connectionSettings.show', {
               defaultMessage: 'Show connection settings',
             })}
       </EuiButtonEmpty>

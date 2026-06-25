@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { SetupDependencies, StartDependencies, FederatedDataPluginStart } from './types';
 import { PLUGIN_ID } from '../common';
 
-const PLUGIN_NAME = i18n.translate('dataFederation.pluginName', {
+const PLUGIN_NAME = i18n.translate('xpack.dataFederation.pluginName', {
   defaultMessage: 'ES|QL Data Federation',
 });
 

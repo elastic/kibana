@@ -51,7 +51,7 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.gcs.fields.projectId', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.projectId', {
           defaultMessage: 'Project ID',
         })}
         fullWidth
@@ -67,7 +67,7 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.gcs.fields.endpoint', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.endpoint', {
           defaultMessage: 'Endpoint',
         })}
         fullWidth
@@ -83,7 +83,7 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.gcs.fields.tokenUri', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.tokenUri', {
           defaultMessage: 'Token URI',
         })}
         fullWidth
@@ -119,7 +119,7 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.gcs.fields.credentialsRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.credentialsRequired', {
                   defaultMessage: 'Credentials are required.',
                 }),
         }
@@ -134,7 +134,7 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
 
   return (
     <EuiFormRow
-      label={i18n.translate('dataSets.createFlyout.gcs.fields.credentials', {
+      label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.credentials', {
         defaultMessage: 'Credentials',
       })}
       fullWidth
@@ -183,7 +183,7 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.gcs.fields.stsAudienceRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.stsAudienceRequired', {
                   defaultMessage: 'STS audience is required.',
                 }),
         }
@@ -214,7 +214,7 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.gcs.fields.stsAudience', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.stsAudience', {
           defaultMessage: 'STS audience',
         })}
         fullWidth
@@ -242,17 +242,17 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
         data-test-subj="createDataSourceFlyoutGcsFederatedOptionalToggle"
       >
         {isOptionalOpen
-          ? i18n.translate('dataSets.createFlyout.gcs.federated.optional.hide', {
+          ? i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.optional.hide', {
               defaultMessage: 'Hide optional authentication settings',
             })
-          : i18n.translate('dataSets.createFlyout.gcs.federated.optional.show', {
+          : i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.optional.show', {
               defaultMessage: 'Show optional authentication settings',
             })}
       </EuiButtonEmpty>
       <div id={optionalId} hidden={!isOptionalOpen}>
         <EuiSpacer size="s" />
         <EuiFormRow
-          label={i18n.translate('dataSets.createFlyout.gcs.fields.jwtAudience', {
+          label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.jwtAudience', {
             defaultMessage: 'JWT audience',
           })}
           fullWidth
@@ -271,9 +271,12 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('dataSets.createFlyout.gcs.fields.serviceAccountImpersonationUrl', {
-            defaultMessage: 'Service account impersonation URL',
-          })}
+          label={i18n.translate(
+            'xpack.dataFederation.createFlyout.gcs.fields.serviceAccountImpersonationUrl',
+            {
+              defaultMessage: 'Service account impersonation URL',
+            }
+          )}
           fullWidth
         >
           <EuiFieldText

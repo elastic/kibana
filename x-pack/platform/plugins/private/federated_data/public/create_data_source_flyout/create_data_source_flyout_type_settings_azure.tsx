@@ -41,7 +41,7 @@ export function CreateDataSourceFlyoutTypeSettingsAzure({
 
   return (
     <EuiFormRow
-      label={i18n.translate('dataSets.createFlyout.azure.fields.endpoint', {
+      label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.endpoint', {
         defaultMessage: 'Endpoint',
       })}
       fullWidth
@@ -115,7 +115,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.azure.fields.tenantIdRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.azure.fields.tenantIdRequired', {
                   defaultMessage: 'Tenant ID is required.',
                 }),
         }
@@ -130,7 +130,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.azure.fields.clientIdRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.azure.fields.clientIdRequired', {
                   defaultMessage: 'Client ID is required.',
                 }),
         }
@@ -161,7 +161,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.azure.fields.tenantId', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.tenantId', {
           defaultMessage: 'Tenant ID',
         })}
         fullWidth
@@ -180,7 +180,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.azure.fields.clientId', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.clientId', {
           defaultMessage: 'Client ID',
         })}
         fullWidth
@@ -208,17 +208,17 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
         data-test-subj="createDataSourceFlyoutAzureFederatedOptionalToggle"
       >
         {isOptionalOpen
-          ? i18n.translate('dataSets.createFlyout.azure.federated.optional.hide', {
+          ? i18n.translate('xpack.dataFederation.createFlyout.azure.federated.optional.hide', {
               defaultMessage: 'Hide optional authentication settings',
             })
-          : i18n.translate('dataSets.createFlyout.azure.federated.optional.show', {
+          : i18n.translate('xpack.dataFederation.createFlyout.azure.federated.optional.show', {
               defaultMessage: 'Show optional authentication settings',
             })}
       </EuiButtonEmpty>
       <div id={optionalId} hidden={!isOptionalOpen}>
         <EuiSpacer size="s" />
         <EuiFormRow
-          label={i18n.translate('dataSets.createFlyout.azure.fields.jwtAudience', {
+          label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.jwtAudience', {
             defaultMessage: 'JWT audience',
           })}
           fullWidth
@@ -258,7 +258,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.azure.fields.accountRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.azure.fields.accountRequired', {
                   defaultMessage: 'Account is required.',
                 }),
         }
@@ -272,7 +272,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
           validate: (value?: string) =>
             value?.trim()
               ? true
-              : i18n.translate('dataSets.createFlyout.azure.fields.keyRequired', {
+              : i18n.translate('xpack.dataFederation.createFlyout.azure.fields.keyRequired', {
                   defaultMessage: 'Key is required.',
                 }),
         }
@@ -289,7 +289,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.azure.fields.account', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.account', {
           defaultMessage: 'Account',
         })}
         fullWidth
@@ -308,7 +308,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.azure.fields.key', {
+        label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.key', {
           defaultMessage: 'Key',
         })}
         fullWidth

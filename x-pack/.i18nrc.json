@@ -43,7 +43,7 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
     "xpack.features": "platform/plugins/shared/features",
-    "xpack.federatedData": "platform/plugins/private/federated_data",
+    "xpack.dataFederation": "platform/plugins/private/data_federation",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
     "xpack.fileUpload": "platform/plugins/private/file_upload",

@@ -47,7 +47,7 @@ export const getFlyoutSaveErrorMessage = (error: unknown): string => {
   if (fromUnknown) {
     return fromUnknown;
   }
-  return i18n.translate('dataSets.errors.unknown', {
+  return i18n.translate('xpack.dataFederation.errors.unknown', {
     defaultMessage: 'Unknown error',
   });
 };

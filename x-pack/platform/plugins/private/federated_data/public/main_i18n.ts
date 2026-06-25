@@ -8,214 +8,226 @@
 import { i18n } from '@kbn/i18n';
 
 export const mainTranslations = {
-  pageTitle: i18n.translate('dataSets.pageTitle', {
+  pageTitle: i18n.translate('xpack.dataFederation.pageTitle', {
     defaultMessage: 'ES|QL Data Federation',
   }),
 
   columns: {
     dataSources: {
-      name: i18n.translate('dataSets.table.columnName', {
+      name: i18n.translate('xpack.dataFederation.table.columnName', {
         defaultMessage: 'Name',
       }),
-      type: i18n.translate('dataSets.table.columnType', {
+      type: i18n.translate('xpack.dataFederation.table.columnType', {
         defaultMessage: 'Type',
       }),
-      dataSetsCount: i18n.translate('dataSets.table.columnDataSetsCount', {
+      dataSetsCount: i18n.translate('xpack.dataFederation.table.columnDataSetsCount', {
         defaultMessage: 'Data sets',
       }),
-      description: i18n.translate('dataSets.table.columnDescription', {
+      description: i18n.translate('xpack.dataFederation.table.columnDescription', {
         defaultMessage: 'Description',
       }),
-      actions: i18n.translate('dataSets.table.columnActions', {
+      actions: i18n.translate('xpack.dataFederation.table.columnActions', {
         defaultMessage: 'Actions',
       }),
-      editAction: i18n.translate('dataSets.table.editAction', {
+      editAction: i18n.translate('xpack.dataFederation.table.editAction', {
         defaultMessage: 'Edit',
       }),
-      editActionDescription: i18n.translate('dataSets.table.editActionDescription', {
+      editActionDescription: i18n.translate('xpack.dataFederation.table.editActionDescription', {
         defaultMessage: 'Edit data source',
       }),
-      deleteAction: i18n.translate('dataSets.table.deleteAction', {
+      deleteAction: i18n.translate('xpack.dataFederation.table.deleteAction', {
         defaultMessage: 'Delete',
       }),
-      deleteActionDescription: i18n.translate('dataSets.table.deleteActionDescription', {
-        defaultMessage: 'Delete data source',
-      }),
-      caption: i18n.translate('dataSets.table.caption', {
+      deleteActionDescription: i18n.translate(
+        'xpack.dataFederation.table.deleteActionDescription',
+        {
+          defaultMessage: 'Delete data source',
+        }
+      ),
+      caption: i18n.translate('xpack.dataFederation.table.caption', {
         defaultMessage: 'Data sources',
       }),
-      noItems: i18n.translate('dataSets.table.noItems', {
+      noItems: i18n.translate('xpack.dataFederation.table.noItems', {
         defaultMessage: 'No data sources found',
       }),
-      searchPlaceholder: i18n.translate('dataSets.search.placeholder', {
+      searchPlaceholder: i18n.translate('xpack.dataFederation.search.placeholder', {
         defaultMessage: 'Search data sources…',
       }),
     },
     dataSets: {
-      name: i18n.translate('dataSets.setsTable.columnName', {
+      name: i18n.translate('xpack.dataFederation.setsTable.columnName', {
         defaultMessage: 'Name',
       }),
-      dataSourceId: i18n.translate('dataSets.setsTable.columnDataSourceId', {
+      dataSourceId: i18n.translate('xpack.dataFederation.setsTable.columnDataSourceId', {
         defaultMessage: 'Data source',
       }),
-      dataSourceType: i18n.translate('dataSets.setsTable.columnDataSourceType', {
+      dataSourceType: i18n.translate('xpack.dataFederation.setsTable.columnDataSourceType', {
         defaultMessage: 'Data source type',
       }),
-      dataSourceTypeMissing: i18n.translate('dataSets.setsTable.dataSourceTypeMissing', {
-        defaultMessage: 'Unknown',
-      }),
-      resource: i18n.translate('dataSets.setsTable.columnResource', {
+      dataSourceTypeMissing: i18n.translate(
+        'xpack.dataFederation.setsTable.dataSourceTypeMissing',
+        {
+          defaultMessage: 'Unknown',
+        }
+      ),
+      resource: i18n.translate('xpack.dataFederation.setsTable.columnResource', {
         defaultMessage: 'Resource',
       }),
-      description: i18n.translate('dataSets.setsTable.columnDescription', {
+      description: i18n.translate('xpack.dataFederation.setsTable.columnDescription', {
         defaultMessage: 'Description',
       }),
-      actions: i18n.translate('dataSets.setsTable.columnActions', {
+      actions: i18n.translate('xpack.dataFederation.setsTable.columnActions', {
         defaultMessage: 'Actions',
       }),
-      editAction: i18n.translate('dataSets.setsTable.editAction', {
+      editAction: i18n.translate('xpack.dataFederation.setsTable.editAction', {
         defaultMessage: 'Edit',
       }),
-      editActionDescription: i18n.translate('dataSets.setsTable.editActionDescription', {
-        defaultMessage: 'Edit data set',
-      }),
-      deleteAction: i18n.translate('dataSets.setsTable.deleteAction', {
+      editActionDescription: i18n.translate(
+        'xpack.dataFederation.setsTable.editActionDescription',
+        {
+          defaultMessage: 'Edit data set',
+        }
+      ),
+      deleteAction: i18n.translate('xpack.dataFederation.setsTable.deleteAction', {
         defaultMessage: 'Delete',
       }),
-      deleteActionDescription: i18n.translate('dataSets.setsTable.deleteActionDescription', {
-        defaultMessage: 'Delete data set',
-      }),
-      caption: i18n.translate('dataSets.setsTable.caption', {
+      deleteActionDescription: i18n.translate(
+        'xpack.dataFederation.setsTable.deleteActionDescription',
+        {
+          defaultMessage: 'Delete data set',
+        }
+      ),
+      caption: i18n.translate('xpack.dataFederation.setsTable.caption', {
         defaultMessage: 'Data sets',
       }),
-      noItems: i18n.translate('dataSets.setsTable.noItems', {
+      noItems: i18n.translate('xpack.dataFederation.setsTable.noItems', {
         defaultMessage: 'No data sets found',
       }),
-      searchPlaceholder: i18n.translate('dataSets.setsSearch.placeholder', {
+      searchPlaceholder: i18n.translate('xpack.dataFederation.setsSearch.placeholder', {
         defaultMessage: 'Search data sets…',
       }),
-      addButtonLabel: i18n.translate('dataSets.setsAddButtonLabel', {
+      addButtonLabel: i18n.translate('xpack.dataFederation.setsAddButtonLabel', {
         defaultMessage: 'Add data set',
       }),
     },
   },
 
   tabs: {
-    sets: i18n.translate('dataSets.tabs.sets', {
+    sets: i18n.translate('xpack.dataFederation.tabs.sets', {
       defaultMessage: 'Data sets',
     }),
-    sources: i18n.translate('dataSets.tabs.sources', {
+    sources: i18n.translate('xpack.dataFederation.tabs.sources', {
       defaultMessage: 'Data sources',
     }),
   },
 
   actions: {
-    deleteButtonLabel: i18n.translate('dataSets.deleteButtonLabel', {
+    deleteButtonLabel: i18n.translate('xpack.dataFederation.deleteButtonLabel', {
       defaultMessage: 'Delete',
     }),
-    addButtonLabel: i18n.translate('dataSets.addButtonLabel', {
+    addButtonLabel: i18n.translate('xpack.dataFederation.addButtonLabel', {
       defaultMessage: 'Connect data source',
     }),
   },
 
   filters: {
-    dataSource: i18n.translate('dataSets.filters.dataSource', {
+    dataSource: i18n.translate('xpack.dataFederation.filters.dataSource', {
       defaultMessage: 'Data source',
     }),
-    allDataSources: i18n.translate('dataSets.filters.allDataSources', {
+    allDataSources: i18n.translate('xpack.dataFederation.filters.allDataSources', {
       defaultMessage: 'All data sources',
     }),
   },
 
   confirmDeleteDataSource: {
-    title: i18n.translate('dataSets.confirmDeleteDataSource.title', {
+    title: i18n.translate('xpack.dataFederation.confirmDeleteDataSource.title', {
       defaultMessage: 'Delete data source',
     }),
-    prompt: i18n.translate('dataSets.confirmDeleteDataSource.prompt', {
+    prompt: i18n.translate('xpack.dataFederation.confirmDeleteDataSource.prompt', {
       defaultMessage: 'Are you sure you want to delete this data source?',
     }),
-    warning: i18n.translate('dataSets.confirmDeleteDataSource.warning', {
+    warning: i18n.translate('xpack.dataFederation.confirmDeleteDataSource.warning', {
       defaultMessage: 'This action cannot be undone.',
     }),
-    cancelButton: i18n.translate('dataSets.confirmDeleteDataSource.cancelButton', {
+    cancelButton: i18n.translate('xpack.dataFederation.confirmDeleteDataSource.cancelButton', {
       defaultMessage: 'Cancel',
     }),
-    confirmButton: i18n.translate('dataSets.confirmDeleteDataSource.confirmButton', {
+    confirmButton: i18n.translate('xpack.dataFederation.confirmDeleteDataSource.confirmButton', {
       defaultMessage: 'Delete',
     }),
-    errorTitle: i18n.translate('dataSets.confirmDeleteDataSource.errorTitle', {
+    errorTitle: i18n.translate('xpack.dataFederation.confirmDeleteDataSource.errorTitle', {
       defaultMessage: 'Delete failed',
     }),
   },
 
   confirmDeleteDataSources: {
-    title: i18n.translate('dataSets.confirmDeleteDataSources.title', {
+    title: i18n.translate('xpack.dataFederation.confirmDeleteDataSources.title', {
       defaultMessage: 'Delete data sources',
     }),
     prompt: (count: number) =>
-      i18n.translate('dataSets.confirmDeleteDataSources.prompt', {
+      i18n.translate('xpack.dataFederation.confirmDeleteDataSources.prompt', {
         defaultMessage: 'Are you sure you want to delete {count} data sources?',
         values: { count },
       }),
     countLabel: (count: number) =>
-      i18n.translate('dataSets.confirmDeleteDataSources.countLabel', {
+      i18n.translate('xpack.dataFederation.confirmDeleteDataSources.countLabel', {
         defaultMessage: '{count} data sources selected',
         values: { count },
       }),
-    warning: i18n.translate('dataSets.confirmDeleteDataSources.warning', {
+    warning: i18n.translate('xpack.dataFederation.confirmDeleteDataSources.warning', {
       defaultMessage: 'This action cannot be undone.',
     }),
-    cancelButton: i18n.translate('dataSets.confirmDeleteDataSources.cancelButton', {
+    cancelButton: i18n.translate('xpack.dataFederation.confirmDeleteDataSources.cancelButton', {
       defaultMessage: 'Cancel',
     }),
-    confirmButton: i18n.translate('dataSets.confirmDeleteDataSources.confirmButton', {
+    confirmButton: i18n.translate('xpack.dataFederation.confirmDeleteDataSources.confirmButton', {
       defaultMessage: 'Delete',
     }),
-    errorTitle: i18n.translate('dataSets.confirmDeleteDataSources.errorTitle', {
+    errorTitle: i18n.translate('xpack.dataFederation.confirmDeleteDataSources.errorTitle', {
       defaultMessage: 'Delete failed',
     }),
   },
 
   confirmDeleteDataSet: {
-    title: i18n.translate('dataSets.confirmDeleteDataSet.title', {
+    title: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.title', {
       defaultMessage: 'Delete data set',
     }),
-    prompt: i18n.translate('dataSets.confirmDeleteDataSet.prompt', {
+    prompt: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.prompt', {
       defaultMessage: 'Are you sure you want to delete this data set?',
     }),
-    warning: i18n.translate('dataSets.confirmDeleteDataSet.warning', {
+    warning: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.warning', {
       defaultMessage: 'This action cannot be undone.',
     }),
-    cancelButton: i18n.translate('dataSets.confirmDeleteDataSet.cancelButton', {
+    cancelButton: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.cancelButton', {
       defaultMessage: 'Cancel',
     }),
-    confirmButton: i18n.translate('dataSets.confirmDeleteDataSet.confirmButton', {
+    confirmButton: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.confirmButton', {
       defaultMessage: 'Delete',
     }),
-    errorTitle: i18n.translate('dataSets.confirmDeleteDataSet.errorTitle', {
+    errorTitle: i18n.translate('xpack.dataFederation.confirmDeleteDataSet.errorTitle', {
       defaultMessage: 'Delete failed',
     }),
   },
 
   confirmDeleteDataSets: {
-    title: i18n.translate('dataSets.confirmDeleteDataSets.title', {
+    title: i18n.translate('xpack.dataFederation.confirmDeleteDataSets.title', {
       defaultMessage: 'Delete data sets',
     }),
     prompt: (count: number) =>
-      i18n.translate('dataSets.confirmDeleteDataSets.prompt', {
+      i18n.translate('xpack.dataFederation.confirmDeleteDataSets.prompt', {
         defaultMessage: 'Are you sure you want to delete {count} data sets?',
         values: { count },
       }),
-    warning: i18n.translate('dataSets.confirmDeleteDataSets.warning', {
+    warning: i18n.translate('xpack.dataFederation.confirmDeleteDataSets.warning', {
       defaultMessage: 'This action cannot be undone.',
     }),
-    cancelButton: i18n.translate('dataSets.confirmDeleteDataSets.cancelButton', {
+    cancelButton: i18n.translate('xpack.dataFederation.confirmDeleteDataSets.cancelButton', {
       defaultMessage: 'Cancel',
     }),
-    confirmButton: i18n.translate('dataSets.confirmDeleteDataSets.confirmButton', {
+    confirmButton: i18n.translate('xpack.dataFederation.confirmDeleteDataSets.confirmButton', {
       defaultMessage: 'Delete',
     }),
-    errorTitle: i18n.translate('dataSets.confirmDeleteDataSets.errorTitle', {
+    errorTitle: i18n.translate('xpack.dataFederation.confirmDeleteDataSets.errorTitle', {
       defaultMessage: 'Delete failed',
     }),
   },

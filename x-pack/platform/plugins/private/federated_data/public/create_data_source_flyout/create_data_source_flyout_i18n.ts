@@ -10,52 +10,52 @@ import { i18n } from '@kbn/i18n';
 /** Localized strings for the create / edit data source flyout. */
 export const createDataSourceFlyoutStrings = {
   createTitle: () =>
-    i18n.translate('dataSets.createFlyout.title', {
+    i18n.translate('xpack.dataFederation.createFlyout.title', {
       defaultMessage: 'Configure cloud data source',
     }),
 
   editTitle: () =>
-    i18n.translate('dataSets.createFlyout.editTitle', {
+    i18n.translate('xpack.dataFederation.createFlyout.editTitle', {
       defaultMessage: 'Edit data source',
     }),
 
   nameRequired: () =>
-    i18n.translate('dataSets.createFlyout.nameRequired', {
+    i18n.translate('xpack.dataFederation.createFlyout.nameRequired', {
       defaultMessage: 'Name is required.',
     }),
 
   nameAlreadyExists: () =>
-    i18n.translate('dataSets.createFlyout.nameAlreadyExists', {
+    i18n.translate('xpack.dataFederation.createFlyout.nameAlreadyExists', {
       defaultMessage: 'A data source with this name already exists.',
     }),
 
   typeLabel: () =>
-    i18n.translate('dataSets.createFlyout.typeLabel', {
+    i18n.translate('xpack.dataFederation.createFlyout.typeLabel', {
       defaultMessage: 'Data source type',
     }),
 
   typeAriaLabel: () =>
-    i18n.translate('dataSets.createFlyout.typeAriaLabel', {
+    i18n.translate('xpack.dataFederation.createFlyout.typeAriaLabel', {
       defaultMessage: 'Data source type',
     }),
 
   nameLabel: () =>
-    i18n.translate('dataSets.createFlyout.nameLabel', {
+    i18n.translate('xpack.dataFederation.createFlyout.nameLabel', {
       defaultMessage: 'Name',
     }),
 
   descriptionLabel: () =>
-    i18n.translate('dataSets.createFlyout.descriptionLabel', {
+    i18n.translate('xpack.dataFederation.createFlyout.descriptionLabel', {
       defaultMessage: 'Description',
     }),
 
   cancelButton: () =>
-    i18n.translate('dataSets.createFlyout.cancelButton', {
+    i18n.translate('xpack.dataFederation.createFlyout.cancelButton', {
       defaultMessage: 'Cancel',
     }),
 
   saveButton: () =>
-    i18n.translate('dataSets.createFlyout.saveButton', {
+    i18n.translate('xpack.dataFederation.createFlyout.saveButton', {
       defaultMessage: 'Save',
     }),
 };

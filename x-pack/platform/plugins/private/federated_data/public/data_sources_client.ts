@@ -43,7 +43,7 @@ export class DataSourcesClient {
     const trimmed = id.trim();
     if (!trimmed) {
       throw new Error(
-        i18n.translate('dataSets.errors.idRequired', {
+        i18n.translate('xpack.dataFederation.errors.idRequired', {
           defaultMessage: 'Name is required.',
         })
       );
@@ -58,7 +58,7 @@ export class DataSourcesClient {
     const nameTrimmed = name.trim();
     if (!nameTrimmed) {
       throw new Error(
-        i18n.translate('dataSets.errors.idRequired', {
+        i18n.translate('xpack.dataFederation.errors.idRequired', {
           defaultMessage: 'Name is required.',
         })
       );

@@ -49,7 +49,7 @@ export const getCreateDataSourceAuthenticationOptions = (
     return [
       {
         value: 'credentials',
-        text: i18n.translate('dataSets.createFlyout.authentication.azure.credentials', {
+        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.azure.credentials', {
           defaultMessage: 'Credentials',
         }),
       },
@@ -57,15 +57,18 @@ export const getCreateDataSourceAuthenticationOptions = (
         ? [
             {
               value: 'federated_identity' as const,
-              text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
-                defaultMessage: 'Federated Identity',
-              }),
+              text: i18n.translate(
+                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
+                {
+                  defaultMessage: 'Federated Identity',
+                }
+              ),
             },
           ]
         : []),
       {
         value: 'anonymous',
-        text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
+        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
           defaultMessage: 'Anonymous',
         }),
       },
@@ -76,23 +79,29 @@ export const getCreateDataSourceAuthenticationOptions = (
     return [
       {
         value: 'access_and_secret_keys',
-        text: i18n.translate('dataSets.createFlyout.authentication.accessAndSecretKeys', {
-          defaultMessage: 'Access and Secret Keys',
-        }),
+        text: i18n.translate(
+          'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
+          {
+            defaultMessage: 'Access and Secret Keys',
+          }
+        ),
       },
       ...(enableFederatedIdentity
         ? [
             {
               value: 'federated_identity' as const,
-              text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
-                defaultMessage: 'Federated Identity',
-              }),
+              text: i18n.translate(
+                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
+                {
+                  defaultMessage: 'Federated Identity',
+                }
+              ),
             },
           ]
         : []),
       {
         value: 'anonymous',
-        text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
+        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
           defaultMessage: 'Anonymous',
         }),
       },
@@ -103,23 +112,29 @@ export const getCreateDataSourceAuthenticationOptions = (
     return [
       {
         value: 'access_and_secret_keys',
-        text: i18n.translate('dataSets.createFlyout.authentication.accessAndSecretKeys', {
-          defaultMessage: 'Access and Secret Keys',
-        }),
+        text: i18n.translate(
+          'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
+          {
+            defaultMessage: 'Access and Secret Keys',
+          }
+        ),
       },
       ...(enableFederatedIdentity
         ? [
             {
               value: 'federated_identity' as const,
-              text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
-                defaultMessage: 'Federated Identity',
-              }),
+              text: i18n.translate(
+                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
+                {
+                  defaultMessage: 'Federated Identity',
+                }
+              ),
             },
           ]
         : []),
       {
         value: 'anonymous',
-        text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
+        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
           defaultMessage: 'Anonymous',
         }),
       },
@@ -129,13 +144,13 @@ export const getCreateDataSourceAuthenticationOptions = (
   return [
     {
       value: 'access_and_secret_keys',
-      text: i18n.translate('dataSets.createFlyout.authentication.accessAndSecretKeys', {
+      text: i18n.translate('xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys', {
         defaultMessage: 'Access and Secret Keys',
       }),
     },
     {
       value: 'anonymous',
-      text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
+      text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
         defaultMessage: 'Anonymous',
       }),
     },
@@ -159,17 +174,17 @@ export const showsAuthenticationCredentialFields = (
 };
 
 export const createDataSourceFlyoutAuthenticationLabel = (): string =>
-  i18n.translate('dataSets.createFlyout.authentication.label', {
+  i18n.translate('xpack.dataFederation.createFlyout.authentication.label', {
     defaultMessage: 'Preferred method',
   });
 
 export const createDataSourceFlyoutAuthenticationTitle = (): string =>
-  i18n.translate('dataSets.createFlyout.authentication.title', {
+  i18n.translate('xpack.dataFederation.createFlyout.authentication.title', {
     defaultMessage: 'Authentication',
   });
 
 export const createDataSourceFlyoutAuthenticationHelpAriaLabel = (): string =>
-  i18n.translate('dataSets.createFlyout.authentication.helpAriaLabel', {
+  i18n.translate('xpack.dataFederation.createFlyout.authentication.helpAriaLabel', {
     defaultMessage: 'Open Cloud security documentation',
   });
 
