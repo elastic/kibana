@@ -145,7 +145,17 @@ export class NavigationCustomizationService {
           // access to the user-storage saved object), so surface a toast rather
           // than letting the failure pass silently and the change vanish on the
           // next page load.
-          core.userStorage.set(NAV_CUSTOMIZATION_STORAGE_KEY, c).catch((error: Error) => {
+          //
+          // When the user applied a reset (or manually returned every item to
+          // its default position/visibility), the customization is the identity
+          // — remove the stored key rather than writing an empty object so the
+          // storage stays clean and a future page load starts with no key.
+          const persist =
+            c.moves.length === 0 && c.hidden.length === 0
+              ? core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY)
+              : core.userStorage.set(NAV_CUSTOMIZATION_STORAGE_KEY, c);
+
+          persist.catch((error: Error) => {
             // `toastMessage` provides a friendlier, actionable body than the raw
             // HTTP error (which is just "Internal Server Error"); the underlying
             // error stays available via the toast's "See the full error" action.
@@ -162,8 +172,12 @@ export class NavigationCustomizationService {
           closeModal();
         },
         onReset: () => {
+          // Only update the live preview — the server write is deferred until
+          // the user clicks Apply, keeping Reset consistent with the
+          // preview-until-Apply model used by every other edit in this modal.
+          // If the user cancels after a Reset, onClose restores savedCustomization
+          // and the server is never touched, so the stored value is preserved.
           chrome.project.setNavigationCustomization(undefined);
-          core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY);
           return this.getNavigationItems(chrome).then((nav) => nav.items);
         },
         onClose: () => {
