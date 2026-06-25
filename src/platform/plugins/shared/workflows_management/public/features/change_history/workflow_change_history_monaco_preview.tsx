@@ -395,19 +395,17 @@ const componentStyles = {
         borderRadius: '2px',
       },
     }),
-  editor: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: '1 1 0',
-      minHeight: 0,
-      overflow: 'hidden',
-      position: 'relative',
-      zIndex: 0,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      // Monaco scrollbars default to z-index 11; keep them below floating overlays.
-      '& .monaco-editor .scrollbar': {
-        zIndex: 1,
-      },
-    }),
+  editor: css({
+    flex: '1 1 0',
+    minHeight: 0,
+    overflow: 'hidden',
+    position: 'relative',
+    zIndex: 0,
+    // Monaco scrollbars default to z-index 11; keep them below floating overlays.
+    '& .monaco-editor .scrollbar': {
+      zIndex: 1,
+    },
+  }),
   monacoHost: css({
     height: '100%',
 

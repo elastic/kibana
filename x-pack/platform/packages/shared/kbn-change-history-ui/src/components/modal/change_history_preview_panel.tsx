@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
@@ -28,11 +29,37 @@ const fullHeightCenterCss = css`
 const previewContainerCss = css`
   height: 100%;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 `;
 
+const usePreviewFrameStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return useMemo(
+    () =>
+      css`
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        margin: ${euiTheme.size.s};
+        border-radius: ${euiTheme.border.radius.small};
+        border: ${euiTheme.border.thin};
+        background: ${euiTheme.colors.backgroundBaseSubdued};
+      `,
+    [euiTheme]
+  );
+};
+
 const previewContentCss = css`
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 `;
 
 const PreviewPanelState = ({
@@ -53,6 +80,7 @@ const PreviewPanelState = ({
 );
 
 export function ChangeHistoryPreviewPanel(): JSX.Element {
+  const previewFrameCss = usePreviewFrameStyles();
   const { adapter, objectId, renderPreview, selectedChangeId } = useChangeHistoryConfig();
   const listItems = useChangeHistoryListItems();
   const compareChangeId = getPreviousChangeId(listItems, selectedChangeId);
@@ -125,8 +153,8 @@ export function ChangeHistoryPreviewPanel(): JSX.Element {
       css={previewContainerCss}
       data-test-subj="changeHistoryPreview"
     >
-      <EuiFlexItem grow={true} css={previewContentCss}>
-        {renderPreview({ change, objectId, compareChange })}
+      <EuiFlexItem grow={true} css={previewFrameCss} data-test-subj="changeHistoryPreviewFrame">
+        <div css={previewContentCss}>{renderPreview({ change, objectId, compareChange })}</div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

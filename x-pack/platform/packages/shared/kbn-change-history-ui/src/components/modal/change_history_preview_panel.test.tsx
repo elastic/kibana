@@ -96,6 +96,7 @@ describe('ChangeHistoryPreviewPanel', () => {
 
     render(<ChangeHistoryPreviewPanel />);
 
+    expect(screen.getByTestId('changeHistoryPreviewFrame')).toBeInTheDocument();
     expect(screen.getByTestId('previewRender')).toHaveTextContent('with-compare');
     expect(mockUseChangeHistoryDetail).toHaveBeenCalledWith(
       expect.objectContaining({
