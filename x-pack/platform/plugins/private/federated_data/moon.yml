@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/cloud-plugin'
   - '@kbn/shared-ux-router'
+  - '@kbn/features-plugin'
 tags:
   - plugin
   - prod
