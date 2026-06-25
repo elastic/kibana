@@ -10,6 +10,7 @@ import moment from 'moment';
 import { unflattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { entityStoreMetrics } from '../../../monitor/metrics';
 import type { Entity } from '../../../../common/domain/definitions/entity.gen';
 import {
@@ -69,12 +70,19 @@ interface RemoteExtractToUpdatesResult {
   logsCapApplied?: boolean;
 }
 
+const getEsErrorType = (error: unknown): string | undefined =>
+  isResponseError(error) ? (error.body as ElasticsearchErrorDetails)?.error?.type : undefined;
+
 // CPS is not enabled, so '_origin' can't be resolved
-const isNoSuchRemoteClusterError = (message: string) =>
-  message.includes('no_such_remote_cluster_exception');
+const isNoSuchRemoteClusterError = (type?: string) => type === 'no_such_remote_cluster_exception';
 
 // no linked projects, so '-_origin:*' resolves to an empty scope, ESQL throws 500
-const isNoSuchElementError = (message: string) => message.includes('no_such_element_exception');
+const isNoSuchElementError = (type?: string) => type === 'no_such_element_exception';
+
+const isRemoteUnavailableError = (error: unknown): boolean => {
+  const type = getEsErrorType(error);
+  return isNoSuchElementError(type) || isNoSuchRemoteClusterError(type);
+};
 
 export class RemoteLogsExtractionClient {
   private readonly logger: Logger;
@@ -94,12 +102,9 @@ export class RemoteLogsExtractionClient {
       return await this.doExtractToUpdates(params);
     } catch (error) {
       const message = getErrorMessage(error);
-      if (
-        this.strategy.id === 'cps' &&
-        (isNoSuchElementError(message) || isNoSuchRemoteClusterError(message))
-      ) {
+      if (this.strategy.id === 'cps' && isRemoteUnavailableError(error)) {
         this.logger.warn(
-          `CPS remote extraction unavailable (no linked projects or CPS disabled): ${message}. Returning empty result.`
+          `remote extraction unavailable (no linked projects or CPS disabled): ${message}. Returning empty result.`
         );
         return { count: 0, pages: 0 };
       }
