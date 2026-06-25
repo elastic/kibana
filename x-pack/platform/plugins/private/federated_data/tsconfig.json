@@ -16,7 +16,8 @@
     "@kbn/i18n",
     "@kbn/core-http-browser",
     "@kbn/cloud-plugin",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/features-plugin"
   ],
   "exclude": [
     "target/**/*",
