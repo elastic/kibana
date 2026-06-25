@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { once } from 'lodash';
 import type {
   MlCapabilities,
@@ -61,9 +62,24 @@ function disableAdminPrivileges(capabilities: MlCapabilities) {
 
 export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<void>;
 
+export type MlAuthorizationService = SecurityPluginSetup['authz'];
+
+async function checkMlCapabilitiesViaPrivileges(
+  authorization: MlAuthorizationService,
+  request: KibanaRequest,
+  capabilities: MlCapabilitiesKey[]
+): Promise<boolean> {
+  const kibanaPrivileges = capabilities.map((cap) => authorization.actions.ui.get('ml', cap));
+  const { hasAllRequested } = await authorization
+    .checkPrivilegesWithRequest(request)
+    .globally({ kibana: kibanaPrivileges });
+  return hasAllRequested;
+}
+
 export function hasMlCapabilitiesProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
-  request: KibanaRequest
+  request: KibanaRequest,
+  authorization?: MlAuthorizationService
 ) {
   let mlCapabilities: MlCapabilities | null = null;
 
@@ -82,6 +98,17 @@ export function hasMlCapabilitiesProvider(
     }
 
     if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
+      if (request.isFakeRequest && authorization) {
+        const hasPrivileges = await checkMlCapabilitiesViaPrivileges(
+          authorization,
+          request,
+          capabilities
+        );
+        if (hasPrivileges) {
+          return;
+        }
+      }
+
       throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
     }
   };

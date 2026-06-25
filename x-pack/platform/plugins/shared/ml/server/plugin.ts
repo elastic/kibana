@@ -323,6 +323,7 @@ export class MlServerPlugin
       registerAnomalyDetectionAgentBuilder({
         agentBuilder: plugins.agentBuilder,
         resolveMlCapabilities,
+        authorization: plugins.security?.authz,
       });
     }
 

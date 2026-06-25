@@ -11,6 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { AD_CREATE_JOB_TOOL_ID } from './tool_ids';
 
@@ -28,7 +29,8 @@ const schema = z.object({
 });
 
 export const createAdCreateJobTool = (
-  resolveMlCapabilities: ResolveMlCapabilities
+  resolveMlCapabilities: ResolveMlCapabilities,
+  authorization?: MlAuthorizationService
 ): BuiltinToolDefinition<typeof schema> => ({
   id: AD_CREATE_JOB_TOOL_ID,
   type: ToolType.builtin,
@@ -40,7 +42,11 @@ export const createAdCreateJobTool = (
     { operation, job_id: jobId, job_config: jobConfig, datafeed_config: datafeedConfig },
     { esClient, request }
   ) => {
-    const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, request);
+    const hasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      request,
+      authorization
+    );
     const ml = esClient.asCurrentUser.ml;
 
     try {
