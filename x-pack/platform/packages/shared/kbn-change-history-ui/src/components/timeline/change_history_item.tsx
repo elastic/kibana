@@ -53,85 +53,130 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
     [item, renderBadge]
   );
 
+  const panelStyles = useMemo(
+    () => css`
+      margin: 0;
+      padding: ${euiTheme.size.base};
+
+      ${selected ? `background-color: ${euiTheme.colors.backgroundLightPrimary};` : ''}
+
+      &:hover {
+        background-color: ${selected
+          ? euiTheme.colors.backgroundLightPrimary
+          : euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    `,
+    [euiTheme, selected]
+  );
+
+  const selectableStyles = useMemo(
+    () => css`
+      flex: 1 1 auto;
+      min-width: 0;
+      cursor: pointer;
+      border-radius: ${euiTheme.border.radius.small};
+
+      &:hover,
+      &:focus {
+        outline: none;
+      }
+    `,
+    [euiTheme]
+  );
+
   return (
     <EuiPanel
       hasBorder
+      hasShadow={false}
       grow={false}
-      paddingSize="s"
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
+      paddingSize="none"
       data-test-subj={`changeHistoryItem-${item.id}`}
-      css={css`
-        margin: 0;
-        ${selected ? `background-color: ${euiTheme.colors.backgroundLightPrimary};` : ''}
-
-        &:hover,
-        &:focus {
-          box-shadow: none;
-          transform: none;
-        }
-      `}
+      data-selected={selected ? true : undefined}
+      css={panelStyles}
     >
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="flexStart"
-            justifyContent="spaceBetween"
-            responsive={false}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={onClick}
+            onKeyDown={handleKeyDown}
+            data-test-subj={`changeHistoryItemSelect-${item.id}`}
+            css={selectableStyles}
           >
-            <EuiFlexItem
-              css={css`
-                min-width: 0;
-                overflow: hidden;
-              `}
+            <EuiFlexGroup
+              gutterSize="m"
+              alignItems="center"
+              justifyContent="spaceBetween"
+              responsive={false}
             >
-              <EuiToolTip
-                position="top"
-                content={<ChangeHistoryListTimestamp value={timestamp} withSeconds />}
+              <EuiFlexItem
+                css={css`
+                  min-width: 0;
+                  overflow: hidden;
+                `}
               >
-                <EuiText
-                  size="xs"
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="none"
+                  responsive={false}
                   css={css`
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    font-weight: var(--Font-weight-Semi-Bold, 600);
+                    gap: 2px;
                   `}
                 >
-                  <ChangeHistoryListTimestamp value={timestamp} />
-                </EuiText>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                flex-shrink: 0;
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      position="top"
+                      content={<ChangeHistoryListTimestamp value={timestamp} withSeconds />}
+                    >
+                      <EuiText
+                        size="xs"
+                        css={css`
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          font-weight: ${euiTheme.font.weight.semiBold};
+                          color: ${euiTheme.colors.textHeading};
+                        `}
+                      >
+                        <ChangeHistoryListTimestamp value={timestamp} />
+                      </EuiText>
+                    </EuiToolTip>
+                  </EuiFlexItem>
 
-                .euiBadge {
-                  font-weight: ${euiTheme.font.weight.regular};
-                }
-              `}
-            >
-              {badge}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      css={css`
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                      `}
+                    >
+                      {item.actor.name}
+                      {item.changeCount != null && item.changeCount > 0
+                        ? ` • ${i18n.N_CHANGES(item.changeCount)}`
+                        : ''}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            css={css`
-              font-weight: ${euiTheme.font.weight.regular};
-            `}
-          >
-            {item.actor.name}
-            {item.changeCount != null && item.changeCount > 0
-              ? ` • ${i18n.N_CHANGES(item.changeCount)}`
-              : ''}
-          </EuiText>
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  flex-shrink: 0;
+
+                  .euiBadge {
+                    font-weight: ${euiTheme.font.weight.medium};
+                  }
+                `}
+              >
+                {badge}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         </EuiFlexItem>
 
         {item.comment && (

@@ -9,19 +9,17 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiPopover,
-  EuiPopoverTitle,
   EuiText,
   EuiToolTip,
+  transparentize,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { ClassNames, css } from '@emotion/react';
 import React, { useCallback, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +28,143 @@ import { changeHistoryPreviewTypography } from './change_history_preview_typogra
 export type WorkflowChangeHistoryCompareMode = 'unified' | 'split';
 
 const COMPARE_MODES: WorkflowChangeHistoryCompareMode[] = ['unified', 'split'];
+
+const COMPARE_TILE_WIDTH = 110;
+const COMPARE_TILE_HEIGHT = 100;
+const COMPARE_TILE_ILLUSTRATION_HEIGHT = 58;
+const COMPARE_TILE_FOOTER_HEIGHT = COMPARE_TILE_HEIGHT - COMPARE_TILE_ILLUSTRATION_HEIGHT - 1;
+
+const PANEL_HEADER_PADDING = 12;
+const PANEL_SECTION_PADDING = 16;
+const SECTION_LABEL_GAP = 8;
+const TILE_GAP = 16;
+const TILE_FOOTER_PADDING_X = 10;
+const SELECTED_TILE_TINT_ALPHA = 0.04;
+
+const ADDED_BAR_COLOR = '#16c5c0';
+const REMOVED_BAR_COLOR = '#f6726a';
+
+const ILLUSTRATION_BAR_HEIGHT = 8;
+const ILLUSTRATION_BAR_GROUP_HEIGHT = 36;
+const ILLUSTRATION_BAR_TOP = (COMPARE_TILE_ILLUSTRATION_HEIGHT - ILLUSTRATION_BAR_GROUP_HEIGHT) / 2;
+const ILLUSTRATION_BAR_ROW_OFFSETS = [0, 14, 28] as const;
+
+interface CompareModeIllustrationProps {
+  mode: WorkflowChangeHistoryCompareMode;
+  borderColor: string;
+}
+
+const CompareModeIllustration = ({
+  mode,
+  borderColor,
+}: CompareModeIllustrationProps): JSX.Element => {
+  const barY = (rowIndex: number): number =>
+    ILLUSTRATION_BAR_TOP + ILLUSTRATION_BAR_ROW_OFFSETS[rowIndex];
+
+  if (mode === 'unified') {
+    return (
+      <svg
+        width="80"
+        height={COMPARE_TILE_ILLUSTRATION_HEIGHT}
+        viewBox={`0 0 80 ${COMPARE_TILE_ILLUSTRATION_HEIGHT}`}
+        aria-hidden={true}
+        data-test-subj={`workflowChangeHistoryCompareIllustration-${mode}`}
+      >
+        <rect
+          x="0"
+          y={barY(0)}
+          width="80"
+          height={ILLUSTRATION_BAR_HEIGHT}
+          rx="4"
+          fill={ADDED_BAR_COLOR}
+        />
+        <rect
+          x="0"
+          y={barY(1)}
+          width="60"
+          height={ILLUSTRATION_BAR_HEIGHT}
+          rx="4"
+          fill={ADDED_BAR_COLOR}
+        />
+        <rect
+          x="0"
+          y={barY(2)}
+          width="80"
+          height={ILLUSTRATION_BAR_HEIGHT}
+          rx="4"
+          fill={REMOVED_BAR_COLOR}
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      width="86"
+      height={COMPARE_TILE_ILLUSTRATION_HEIGHT}
+      viewBox={`0 0 86 ${COMPARE_TILE_ILLUSTRATION_HEIGHT}`}
+      aria-hidden={true}
+      data-test-subj={`workflowChangeHistoryCompareIllustration-${mode}`}
+    >
+      <line
+        x1="43"
+        y1="0"
+        x2="43"
+        y2={COMPARE_TILE_ILLUSTRATION_HEIGHT}
+        stroke={borderColor}
+        strokeWidth="1"
+      />
+      <rect
+        x="0"
+        y={barY(0)}
+        width="33"
+        height={ILLUSTRATION_BAR_HEIGHT}
+        rx="4"
+        fill={ADDED_BAR_COLOR}
+      />
+      <rect
+        x="53"
+        y={barY(0)}
+        width="32"
+        height={ILLUSTRATION_BAR_HEIGHT}
+        rx="4"
+        fill={REMOVED_BAR_COLOR}
+      />
+      <rect
+        x="0"
+        y={barY(1)}
+        width="33"
+        height={ILLUSTRATION_BAR_HEIGHT}
+        rx="4"
+        fill={ADDED_BAR_COLOR}
+      />
+      <rect
+        x="53"
+        y={barY(1)}
+        width="32"
+        height={ILLUSTRATION_BAR_HEIGHT}
+        rx="4"
+        fill={REMOVED_BAR_COLOR}
+      />
+      <rect
+        x="0"
+        y={barY(2)}
+        width="26"
+        height={ILLUSTRATION_BAR_HEIGHT}
+        rx="4"
+        fill={ADDED_BAR_COLOR}
+      />
+      <rect
+        x="53"
+        y={barY(2)}
+        width="26"
+        height={ILLUSTRATION_BAR_HEIGHT}
+        rx="4"
+        fill={REMOVED_BAR_COLOR}
+      />
+    </svg>
+  );
+};
 
 export interface WorkflowChangeHistoryPreviewSettingsPopoverProps {
   hasCompare: boolean;
@@ -46,6 +181,7 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
   highlightValidationErrors,
   onHighlightValidationErrorsChange,
 }: WorkflowChangeHistoryPreviewSettingsPopoverProps): JSX.Element => {
+  const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
   const [isOpen, setIsOpen] = useState(false);
   const unifiedTileRef = useRef<HTMLButtonElement>(null);
@@ -142,71 +278,34 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
     const isSelected = compareMode === mode;
 
     return (
-      <EuiButtonEmpty
-        buttonRef={tileRef}
-        role="radio"
-        aria-checked={isSelected}
-        tabIndex={isSelected ? 0 : -1}
-        flush="both"
-        color="text"
-        css={[styles.compareTile, isSelected && styles.compareTileSelected]}
-        data-test-subj={testSubj}
-        aria-label={label}
-        onClick={() => selectCompareMode(mode)}
-        onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) =>
-          handleCompareTileKeyDown(event, mode)
-        }
-      >
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="s"
-          responsive={false}
-          css={styles.compareTileBody}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="center"
-              gutterSize="none"
-              responsive={false}
-              css={styles.illustrationFrame}
-              aria-hidden={true}
-            >
-              {mode === 'unified' ? (
-                <EuiFlexGroup
-                  direction="column"
-                  gutterSize="xs"
-                  responsive={false}
-                  css={styles.unifiedIllustration}
-                >
-                  <EuiText component="span" css={styles.illustrationBarAdded} />
-                  <EuiText component="span" css={styles.illustrationBarAdded} />
-                  <EuiText component="span" css={styles.illustrationBarRemoved} />
-                </EuiFlexGroup>
-              ) : (
-                <EuiFlexGroup gutterSize="none" responsive={false} css={styles.splitIllustration}>
-                  <EuiText component="span" css={styles.illustrationBarAdded} />
-                  <EuiText component="span" css={styles.illustrationBarRemoved} />
-                  <EuiText component="span" css={styles.illustrationBarAdded} />
-                  <EuiText component="span" css={styles.illustrationBarRemoved} />
-                  <EuiText component="span" css={styles.illustrationBarAdded} />
-                  <EuiText component="span" css={styles.illustrationBarRemoved} />
-                </EuiFlexGroup>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText component="span" css={styles.tileDivider} aria-hidden={true} />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-              css={[styles.tileFooter, isSelected && styles.tileFooterSelected]}
-            >
+      <ClassNames>
+        {({ css: cssClassName }) => (
+          <button
+            ref={tileRef}
+            type="button"
+            role="radio"
+            aria-checked={isSelected}
+            tabIndex={isSelected ? 0 : -1}
+            className={cssClassName(styles.compareTile, isSelected && styles.compareTileSelected)}
+            data-test-subj={testSubj}
+            aria-label={label}
+            onClick={() => selectCompareMode(mode)}
+            onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) =>
+              handleCompareTileKeyDown(event, mode)
+            }
+          >
+            {isSelected ? (
+              <EuiText
+                component="span"
+                css={styles.compareTileSelectedOverlay}
+                aria-hidden={true}
+              />
+            ) : null}
+            <EuiText component="span" css={styles.compareTileIllustration} aria-hidden={true}>
+              <CompareModeIllustration mode={mode} borderColor={euiTheme.colors.borderBasePlain} />
+            </EuiText>
+            <EuiText component="span" css={styles.compareTileDivider} aria-hidden={true} />
+            <EuiText component="span" css={styles.compareTileFooter}>
               <EuiText
                 component="span"
                 css={[styles.radioCircle, isSelected && styles.radioCircleSelected]}
@@ -215,10 +314,10 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
               <EuiText component="span" css={styles.compareTileLabel}>
                 {label}
               </EuiText>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiButtonEmpty>
+            </EuiText>
+          </button>
+        )}
+      </ClassNames>
     );
   };
 
@@ -230,6 +329,7 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
       closePopover={() => setIsOpen(false)}
       anchorPosition="upRight"
       panelPaddingSize="none"
+      panelStyle={{ width: 'auto' }}
       button={
         <EuiToolTip content={settingsLabel} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -243,22 +343,23 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
         </EuiToolTip>
       }
     >
-      <EuiPopoverTitle id={popoverTitleId} paddingSize="m">
-        <EuiText component="span" css={styles.title}>
-          {settingsLabel}
+      <EuiText component="div" css={styles.panel}>
+        <EuiText component="div" css={styles.header}>
+          <EuiText component="span" id={popoverTitleId} css={styles.title}>
+            {settingsLabel}
+          </EuiText>
         </EuiText>
-      </EuiPopoverTitle>
 
-      <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={styles.panelBody}>
+        <EuiHorizontalRule margin="none" />
+
         {hasCompare ? (
-          <>
+          <EuiText component="div" css={styles.compareSection}>
             <EuiText component="span" css={styles.sectionLabel} id={compareModeGroupLabelId}>
               {codeComparingLabel}
             </EuiText>
 
-            <EuiFlexGroup
-              gutterSize="s"
-              responsive={false}
+            <EuiText
+              component="div"
               css={styles.compareTileGroup}
               role="radiogroup"
               aria-labelledby={compareModeGroupLabelId}
@@ -275,13 +376,11 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
                 'workflowChangeHistoryCompareSplit',
                 splitTileRef
               )}
-            </EuiFlexGroup>
-
-            <EuiHorizontalRule margin="none" />
-          </>
+            </EuiText>
+          </EuiText>
         ) : null}
 
-        <EuiFlexGroup gutterSize="none" responsive={false} css={styles.checkboxRow}>
+        <EuiText component="div" css={styles.checkboxSection}>
           <EuiCheckbox
             id={highlightValidationId}
             data-test-subj="workflowChangeHistoryHighlightValidationErrors"
@@ -292,74 +391,132 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
             checked={highlightValidationErrors}
             onChange={(event) => onHighlightValidationErrorsChange(event.target.checked)}
           />
-        </EuiFlexGroup>
-      </EuiFlexGroup>
+        </EuiText>
+      </EuiText>
     </EuiPopover>
   );
 };
 
 const componentStyles = {
+  panel: ({ euiTheme }: UseEuiTheme) =>
+    css(changeHistoryPreviewTypography, {
+      width: 'fit-content',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      borderRadius: euiTheme.border.radius.medium,
+      overflow: 'hidden',
+    }),
+  header: css({
+    padding: `${PANEL_HEADER_PADDING}px`,
+  }),
   title: css`
     ${changeHistoryPreviewTypography}
+    margin: 0;
     font-weight: var(--Font-weight-Semi-bold, 600);
+    font-size: 14px;
+    line-height: 20px;
   `,
-  panelBody: ({ euiTheme }: UseEuiTheme) =>
-    css(changeHistoryPreviewTypography, {
+  compareSection: ({ euiTheme }: UseEuiTheme) =>
+    css({
       display: 'flex',
       flexDirection: 'column',
-      gap: euiTheme.size.m,
-      padding: euiTheme.size.m,
-      minWidth: '360px',
+      gap: `${SECTION_LABEL_GAP}px`,
+      padding: `${PANEL_SECTION_PADDING}px`,
+      borderBottom: euiTheme.border.thin,
     }),
   sectionLabel: css({
     fontWeight: 400,
+    fontSize: '14px',
+    lineHeight: '20px',
     color: 'inherit',
   }),
-  compareTileGroup: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: euiTheme.size.s,
-    }),
+  compareTileGroup: css({
+    display: 'grid',
+    gridTemplateColumns: `repeat(2, ${COMPARE_TILE_WIDTH}px)`,
+    gap: `${TILE_GAP}px`,
+    width: 'fit-content',
+  }),
   compareTile: ({ euiTheme }: UseEuiTheme) =>
     css({
+      position: 'relative',
       display: 'flex',
       flexDirection: 'column',
-      minHeight: '132px',
+      width: `${COMPARE_TILE_WIDTH}px`,
+      height: `${COMPARE_TILE_HEIGHT}px`,
+      minWidth: `${COMPARE_TILE_WIDTH}px`,
+      maxWidth: `${COMPARE_TILE_WIDTH}px`,
       padding: 0,
       border: euiTheme.border.thin,
-      borderRadius: euiTheme.border.radius.medium,
+      borderRadius: '8px',
       overflow: 'hidden',
       cursor: 'pointer',
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       textAlign: 'left',
+      appearance: 'none',
+      font: 'inherit',
+      color: 'inherit',
 
       '&:focus-visible': {
         outline: `${euiTheme.focus.width} solid ${euiTheme.focus.color}`,
-        outlineOffset: euiTheme.focus.width,
+        outlineOffset: 0,
       },
     }),
   compareTileSelected: ({ euiTheme }: UseEuiTheme) =>
     css({
       borderColor: euiTheme.colors.borderBasePrimary,
-      boxShadow: `inset 0 0 0 1px ${euiTheme.colors.borderBasePrimary}`,
     }),
-  compareTileBody: ({ euiTheme }: UseEuiTheme) =>
+  compareTileSelectedOverlay: ({ euiTheme }: UseEuiTheme) =>
     css({
-      display: 'flex',
-      flex: '1 1 auto',
-      flexDirection: 'column',
-      minHeight: 0,
-      padding: euiTheme.size.s,
-      gap: euiTheme.size.s,
+      position: 'absolute',
+      inset: 0,
+      zIndex: 0,
+      borderRadius: '7px',
+      backgroundColor: transparentize(euiTheme.colors.primary, SELECTED_TILE_TINT_ALPHA),
+      pointerEvents: 'none',
     }),
+  compareTileIllustration: css({
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: `0 0 ${COMPARE_TILE_ILLUSTRATION_HEIGHT}px`,
+    width: '100%',
+    height: `${COMPARE_TILE_ILLUSTRATION_HEIGHT}px`,
+    overflow: 'hidden',
+
+    svg: {
+      display: 'block',
+      flexShrink: 0,
+    },
+  }),
+  compareTileDivider: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      zIndex: 1,
+      flexShrink: 0,
+      height: '1px',
+      width: '100%',
+      backgroundColor: euiTheme.colors.borderBasePlain,
+    }),
+  compareTileFooter: css({
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    flex: `0 0 ${COMPARE_TILE_FOOTER_HEIGHT}px`,
+    alignItems: 'center',
+    gap: '6px',
+    width: '100%',
+    height: `${COMPARE_TILE_FOOTER_HEIGHT}px`,
+    padding: `0 ${TILE_FOOTER_PADDING_X}px`,
+    boxSizing: 'border-box',
+  }),
   radioCircle: ({ euiTheme }: UseEuiTheme) =>
     css({
       width: '16px',
       height: '16px',
       flexShrink: 0,
       borderRadius: '50%',
-      border: `2px solid ${euiTheme.colors.borderBasePlain}`,
+      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       boxSizing: 'border-box',
     }),
@@ -369,70 +526,14 @@ const componentStyles = {
       backgroundColor: euiTheme.colors.primary,
       boxShadow: `inset 0 0 0 3px ${euiTheme.colors.backgroundBasePlain}`,
     }),
-  illustrationFrame: ({ euiTheme }: UseEuiTheme) =>
+  compareTileLabel: ({ euiTheme }: UseEuiTheme) =>
     css({
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '64px',
-      minHeight: '64px',
-      padding: euiTheme.size.s,
-      borderRadius: euiTheme.border.radius.small,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      fontWeight: euiTheme.font.weight.bold,
+      fontSize: '14px',
+      lineHeight: '20px',
+      color: euiTheme.colors.textParagraph,
     }),
-  tileDivider: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      height: '1px',
-      margin: 0,
-      backgroundColor: euiTheme.colors.borderBaseSubdued,
-    }),
-  tileFooter: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: euiTheme.size.s,
-      minHeight: '32px',
-      padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-      borderRadius: euiTheme.border.radius.small,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    }),
-  tileFooterSelected: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundLightPrimary,
-    }),
-  unifiedIllustration: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    width: '72px',
+  checkboxSection: css({
+    padding: `${PANEL_SECTION_PADDING}px`,
   }),
-  splitIllustration: css({
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    columnGap: '6px',
-    rowGap: '4px',
-    width: '88px',
-    alignItems: 'center',
-  }),
-  illustrationBarAdded: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'block',
-      height: '6px',
-      borderRadius: '2px',
-      backgroundColor: euiTheme.colors.vis.euiColorVisSuccess0,
-    }),
-  illustrationBarRemoved: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'block',
-      height: '6px',
-      borderRadius: '2px',
-      backgroundColor: euiTheme.colors.vis.euiColorVisDanger0,
-    }),
-  compareTileLabel: css`
-    font-weight: var(--Font-weight-Semi-bold, 600);
-  `,
-  checkboxRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      paddingTop: euiTheme.size.xs,
-    }),
 };

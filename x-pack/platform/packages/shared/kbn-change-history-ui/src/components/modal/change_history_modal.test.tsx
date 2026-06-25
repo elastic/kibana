@@ -134,7 +134,7 @@ describe('ChangeHistoryModal', () => {
       expect(screen.getByTestId('changeHistoryItem-evt-2')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('changeHistoryItem-evt-2'));
+    fireEvent.click(screen.getByTestId('changeHistoryItemSelect-evt-2'));
 
     await waitFor(() => {
       expect(screen.getByTestId('previewYaml')).toHaveTextContent('name: older');
