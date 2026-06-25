@@ -10,6 +10,7 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -32,6 +33,8 @@ export interface BulkResponseConsoleProps {
   /** The Endpoint (or 3rd party EDR) Integration policy ID */
   integrationPolicyId: string;
   'data-test-subj'?: string;
+
+  // TODO: also add support for multiple agent IDs
 }
 
 export const BulkResponseConsole = memo<BulkResponseConsoleProps>(
@@ -129,10 +132,17 @@ export const BulkResponseConsoleModal = memo<BulkResponseConsoleModalProps>(
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="xpack.securitySolution.endpointPolicyTakeAction.consoleModalTitle"
-              defaultMessage="Bulk Respond"
-            />
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="console" size="l" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpointPolicyTakeAction.consoleModalTitle"
+                  defaultMessage="Bulk Respond"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
