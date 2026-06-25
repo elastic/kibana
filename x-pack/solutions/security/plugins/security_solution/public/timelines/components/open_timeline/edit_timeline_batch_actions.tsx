@@ -16,6 +16,11 @@ import type { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { getSelectedTimelineIdsAndSearchIds, getRequestIds } from '.';
+import {
+  MAX_SUPER_TIMELINE_COUNT,
+  useOpenSuperTimeline,
+} from '../super_timeline/use_open_super_timeline';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
@@ -36,6 +41,9 @@ export const useEditTimelineBatchActions = ({
     onOpenDeleteTimelineModal,
     onCloseDeleteTimelineModal,
   } = useEditTimelineActions();
+
+  const { openSuperTimeline } = useOpenSuperTimeline();
+  const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
 
   const onCompleteBatchActions = useCallback(
     (closePopover?: () => void) => {
@@ -67,6 +75,29 @@ export const useEditTimelineBatchActions = ({
     [onOpenDeleteTimelineModal]
   );
 
+  const selectedSavedObjectIds = useMemo(
+    () =>
+      (selectedItems ?? [])
+        .map((item) => item.savedObjectId)
+        .filter((id): id is string => id != null),
+    [selectedItems]
+  );
+
+  const isSuperTimelineActionEnabled = useMemo(
+    () =>
+      selectedSavedObjectIds.length >= 2 &&
+      selectedSavedObjectIds.length <= MAX_SUPER_TIMELINE_COUNT,
+    [selectedSavedObjectIds]
+  );
+
+  const handleOpenSuperTimeline = useCallback(
+    (closePopover: () => void) => {
+      closePopover();
+      openSuperTimeline(selectedSavedObjectIds);
+    },
+    [openSuperTimeline, selectedSavedObjectIds]
+  );
+
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {
       const disabled = selectedItems == null || selectedItems.length === 0;
@@ -81,6 +112,19 @@ export const useEditTimelineBatchActions = ({
             onClick={handleEnableExportTimelineDownloader}
           >
             {i18n.EXPORT_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
+      if (isSuperTimelineEnabled && timelineType === TimelineTypeEnum.default) {
+        items.push(
+          <EuiContextMenuItem
+            data-test-subj="view-super-timeline-action"
+            disabled={!isSuperTimelineActionEnabled}
+            icon="merge"
+            key="SuperTimelineItemKey"
+            onClick={() => handleOpenSuperTimeline(closePopover)}
+          >
+            {i18n.VIEW_SUPER_TIMELINE}
           </EuiContextMenuItem>
         );
       }
@@ -129,6 +173,9 @@ export const useEditTimelineBatchActions = ({
       timelineType,
       handleEnableExportTimelineDownloader,
       handleOnOpenDeleteTimelineModal,
+      isSuperTimelineActionEnabled,
+      isSuperTimelineEnabled,
+      handleOpenSuperTimeline,
     ]
   );
   return { onCompleteBatchActions, getBatchItemsPopoverContent };

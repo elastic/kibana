@@ -1,6 +1,6 @@
 # Test plan: Super Timeline <!-- omit from toc -->
 
-**Status**: `in progress — PR 3 of 5`
+**Status**: `in progress — PR 4 of 5`
 
 ## Summary <!-- omit from toc -->
 
@@ -10,9 +10,9 @@ read-only (never duplicated); KQL/filter queries are OR'd into one combined filt
 per-timeline labels. ESQL and EQL timelines still contribute their pins and notes — only their
 query is skipped.
 
-The view is **transient** — never saved. Opened from two entry points (added in PRs 4–5):
+The view is **transient** — never saved. Opened from two entry points (PR 4 adds the first):
 1. Timelines list page → bulk-select timelines → "View Super Timeline"
-2. Cases → Attachments tab → select timeline rows → "View Super Timeline"
+2. Cases → Attachments tab → select timeline rows → "View Super Timeline" (added in PR 5)
 
 ## References <!-- omit from toc -->
 
@@ -116,3 +116,57 @@ No browser entry point in this PR. Run the unit tests:
 ```bash
 node scripts/jest x-pack/solutions/security/plugins/security_solution/public/notes/store/notes.slice.test.ts
 ```
+
+---
+
+## PR 4 — 'View Super Timeline' bulk action on Timelines list
+
+### What this introduces
+
+- "View Super Timeline" item in the bulk-actions popover on the Timelines list page, enabled when
+  2–10 timelines are selected, disabled otherwise. Calls `useOpenSuperTimeline` with the selected
+  `savedObjectIds`.
+- `superTimeline` experimental feature flag — gates the action so the feature can be deployed
+  dark and enabled per-environment.
+
+### Why
+
+First user-facing entry point. The action is intentionally thin — a wrapper over
+`useOpenSuperTimeline`. The experimental flag allows incremental rollout without a separate
+feature branch or config server.
+
+### Prerequisites
+
+Enable the flag in `config/kibana.dev.yml`:
+
+```yaml
+xpack.securitySolution.enableExperimental:
+  - superTimeline
+```
+
+### Generate test data
+
+```bash
+node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_super_timeline_cli.js
+```
+
+This creates several timelines with distinct KQL filters, overlapping and unique pinned events,
+and notes attached to events and to the timelines themselves.
+
+### How to test in the browser
+
+1. Navigate to **Security → Timelines**.
+2. Select **2–10 timelines** using the row checkboxes.
+3. Open the **Bulk actions** popover → "View Super Timeline" should be **enabled**.
+4. Select **0 or 1 timeline** → the action should be **disabled**.
+5. Select **11+ timelines** → the action should be **disabled**.
+6. With 2–10 selected, click **View Super Timeline**.
+7. Verify the modal:
+   - Header shows **"Super Timeline — read-only"** badge.
+   - No **Save**, **Attach to Case**, or **Add to Favorites** buttons.
+   - **Query** tab shows the merged events from all selected timelines.
+   - **Pinned Events** tab shows the union of pinned events across all selected timelines.
+   - **Notes** tab shows notes from all selected timelines (no add-note input).
+   - **ESQL** and **EQL** tabs are hidden.
+   - If any selected timeline uses EQL or ESQL queries, a toast should name it.
+8. Close the modal and reopen Timelines — the Super Timeline should **not** reappear (transient).
