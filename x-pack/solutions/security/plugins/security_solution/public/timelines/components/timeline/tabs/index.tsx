@@ -253,6 +253,18 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     [timeline?.superTimelineSourceIds]
   );
 
+  // Super Timeline: eagerly fetch notes for all source timelines so the badge is populated
+  // immediately, without waiting for the user to open the Notes tab.
+  const fetchSuperTimelineNotes = useCallback(
+    () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: superTimelineSourceIds })),
+    [dispatch, superTimelineSourceIds]
+  );
+  useEffect(() => {
+    if (isSuperTimeline && superTimelineSourceIds.length > 0) {
+      fetchSuperTimelineNotes();
+    }
+  }, [fetchSuperTimelineNotes, isSuperTimeline, superTimelineSourceIds]);
+
   const notesNewSystem = useSelector((state: State) =>
     selectNotesBySavedObjectId(state, timelineSavedObjectId)
   );

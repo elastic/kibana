@@ -202,7 +202,10 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
-                <NotesList notes={notes} options={{ hideTimelineIcon: true }} />
+                <NotesList
+                  notes={notes}
+                  options={{ hideTimelineIcon: true, hideDeleteIcon: isSuperTimeline }}
+                />
               )}
               {!isSuperTimeline && canCreateNotes && (
                 <>
