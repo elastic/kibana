@@ -137,7 +137,6 @@ const tryFilestoreSubstitution = async ({
   }
 
   try {
-    // The store owns paths: look the result up by id rather than recomputing a path.
     const entry = await resultStore.getEntryByResultId(result.tool_result_id);
 
     // If entry exists and exceeds threshold, substitute with file reference
@@ -146,7 +145,6 @@ const tryFilestoreSubstitution = async ({
         tool_result_id: result.tool_result_id,
         type: ToolResultType.fileReference,
         data: {
-          // entry.path is mount-relative; embed the agent-visible (mounted) path.
           filepath: getToolCallEntryAbsolutePath(entry.path),
           comment:
             'The result has been stored in the virtual file system. You can access it using the read_file tool with the specified filepath.',

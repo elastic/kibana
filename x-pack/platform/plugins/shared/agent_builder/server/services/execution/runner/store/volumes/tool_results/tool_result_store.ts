@@ -21,8 +21,7 @@ export const createResultStore = ({ conversation }: { conversation?: Conversatio
 
 export class ToolResultStoreImpl implements WritableToolResultStore {
   private readonly results: Map<string, ToolResultWithMeta> = new Map();
-  /** tool_result_id → mount-relative path of the result's VFS entry. */
-  private readonly resultPaths: Map<string, string> = new Map();
+  private readonly resultIdToPath: Map<string, string> = new Map();
   private readonly volume: MemoryVolume;
 
   constructor({ toolCalls = [] }: { toolCalls?: ToolCallWithResult[] }) {
@@ -39,7 +38,7 @@ export class ToolResultStoreImpl implements WritableToolResultStore {
         tool_id: toolCall.tool_id,
         result,
       });
-      this.resultPaths.set(result.tool_result_id, relativePath);
+      this.resultIdToPath.set(result.tool_result_id, relativePath);
       this.volume.add(entry);
     }
   }
@@ -60,7 +59,7 @@ export class ToolResultStoreImpl implements WritableToolResultStore {
   }
 
   async getEntryByResultId(toolResultId: string) {
-    const relativePath = this.resultPaths.get(toolResultId);
+    const relativePath = this.resultIdToPath.get(toolResultId);
     if (!relativePath) {
       return undefined;
     }

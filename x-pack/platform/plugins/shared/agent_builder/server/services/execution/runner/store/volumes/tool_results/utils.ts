@@ -53,10 +53,6 @@ export const getToolCallEntryAbsolutePath = (relativePath: string): string => {
   return `${MOUNT_POINTS.toolCalls}${relativePath}`;
 };
 
-/**
- * A result file entry built for a tool call, paired with the originating result and its
- * mount-relative path so the store can populate its result-id indexes.
- */
 export interface BuiltResultEntry {
   entry: ToolCallFileEntry;
   result: ToolResult;
@@ -69,10 +65,7 @@ export interface BuiltToolCallEntries {
 }
 
 /**
- * Builds every VFS entry for a tool call in one pass: the `meta.json` entry and one
- * entry per result, using the mixed result-file naming convention. The result file
- * order follows the `results` array, which is the same on the live and reconstruct
- * paths — guaranteeing a call yields identical files either way.
+ * Builds every VFS entry for a tool call.
  */
 export const buildToolCallEntries = (toolCall: ToolCallWithResult): BuiltToolCallEntries => {
   const { tool_id: toolId, tool_call_id: toolCallId, params, results } = toolCall;
@@ -131,9 +124,7 @@ export const buildToolCallEntries = (toolCall: ToolCallWithResult): BuiltToolCal
 };
 
 /**
- * Flattens a conversation's persisted rounds into per-call records to seed the store on
- * run start. Tool-call steps already are `ToolCallWithResult`. Excludes tools opted out
- * of the filestore.
+ * Flattens a conversation's persisted rounds into per-call records to seed the store on run start.
  */
 export const extractConversationToolResults = (
   conversation: ConversationRound[]
