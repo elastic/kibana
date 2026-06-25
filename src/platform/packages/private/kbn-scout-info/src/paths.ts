@@ -58,7 +58,7 @@ export const SCOUT_TEST_CATEGORIES = ['api', 'ui'];
 
 export const SCOUT_CONFIG_PATH_GLOB =
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB +
-  `/{${SCOUT_TEST_CATEGORIES.join(',')}}/{,*.}playwright.config.ts`;
+  `/{,*/}{${SCOUT_TEST_CATEGORIES.join(',')}}/{,*.}playwright.config.ts`;
 
 export const SCOUT_CONFIG_PATH_REGEX = new RegExp(
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX.source +
@@ -67,14 +67,16 @@ export const SCOUT_CONFIG_PATH_REGEX = new RegExp(
 );
 
 export const SCOUT_CONFIG_MANIFEST_PATH_GLOB =
-  TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB + `/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/*.json`;
+  TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB +
+  `/{,*/}.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/*.json`;
 
 /**
  * Playwright configs under top-level `examples/` and `x-pack/examples/` (developer example plugins).
  * `module.name` for these paths is resolved from `plugin.id` in kibana.jsonc (see test_config.fromPath).
+ * Capture groups: 1=examplesRoot, 2=plugin, 3=serverConfigSet, 4=area (optional), 5=category, 6=configType.
  */
 export const SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX = new RegExp(
-  `^(examples|x-pack/examples)/([^/]+)/test/scout(?:_([^/]*))?/(${SCOUT_TEST_CATEGORIES.join(
+  `^(examples|x-pack/examples)/([^/]+)/test/scout(?:_([^/]*))?(?:/([^/]+))?/(${SCOUT_TEST_CATEGORIES.join(
     '|'
   )})/(\\w*)\\.?playwright\\.config\\.ts$`
 );
@@ -83,6 +85,11 @@ export const SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX = new RegExp(
  * Unified regex matching both platform/solution and example plugin Playwright config paths.
  * Uses named capture groups so callers can branch on `examplesRoot` to decide how to
  * resolve module metadata (kibana.jsonc vs directory-derived).
+ *
+ * Named groups:
+ *   - `area`           : optional one-level sub-directory under the scout root
+ *                        (e.g. `detection_engine` in `test/scout/detection_engine/ui/`).
+ *                        Absent for configs that live directly under `test/scout/{api,ui}/`.
  */
 export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
   `^(?:` +
@@ -95,6 +102,7 @@ export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
     `/(?<moduleName>[\\w|-]+(?:\\/[\\w|-]+)*)` +
     `)` +
     `/test/scout(?:_(?<serverConfigSet>[^/]*))?` +
+    `(?:/(?<area>[^/]+))?` +
     `/(?<testCategory>${SCOUT_TEST_CATEGORIES.join('|')})` +
     `/(?<testConfigType>\\w*)\\.?playwright\\.config\\.ts$`
 );
@@ -120,31 +128,46 @@ export const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
  * Path globs that uniquely identify a Scout test scope — i.e. a directory
  * containing a Playwright config and its co-located tests/fixtures/helpers.
  *
- * A "scope" is `<package-root>/test/(scout|scout_<custom>)/(api|ui)`, owning at
+ * A "scope" is `<package-root>/test/(scout|scout_<custom>)[/<area>]/(api|ui)`, owning at
  * most two configs:
  *   - <scope>/playwright.config.ts          (single-thread, tests under tests/)
  *   - <scope>/parallel.playwright.config.ts (parallel, tests under parallel_tests/)
  *
- * The `.meta/(api|ui)` variant covers auto-generated manifests that belong to
- * the matching scope. Both patterns derive their `(api|ui)` and `scout(_*,)`
- * segments from `SCOUT_TEST_CATEGORIES` and the same brace-expansion idiom used
- * by `SCOUT_CONFIG_MANIFEST_PATH_GLOB` so they all stay in sync.
+ * The optional `<area>` segment is a single-level sub-directory directly under
+ * the scout root (e.g. `test/scout/detection_engine/ui/`). It enables a single
+ * plugin to have multiple independent Playwright configs — one per logical team
+ * area — while still sharing the same server configuration.
+ *
+ * The `.meta/(api|ui)` variant covers auto-generated manifests. For area configs
+ * the manifest lives at `test/scout/<area>/.meta/(api|ui)/`.
+ *
+ * Both patterns derive their `(api|ui)` and `scout(_*,)` segments from
+ * `SCOUT_TEST_CATEGORIES` and the same brace-expansion idiom used by
+ * `SCOUT_CONFIG_MANIFEST_PATH_GLOB` so they all stay in sync.
  */
 export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
   `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/*/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
   `**/test/scout{_*,}/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/*/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
 ];
 
 /**
- * Captures `<prefix>/test/(scout|scout_<custom>)/(api|ui)/<rest?>` and the
- * `.meta/` variant `<prefix>/test/(scout|scout_<custom>)/.meta/(api|ui)/<rest?>`.
+ * Captures `<prefix>/test/(scout|scout_<custom>)[/<area>]/(api|ui)/<rest?>` and the
+ * `.meta/` variant `<prefix>/test/(scout|scout_<custom>)[/<area>]/.meta/(api|ui)/<rest?>`.
  *
- * Capture groups: 1=prefix, 2=scoutDir, 3=category (api|ui), 4=rest (optional).
+ * The optional `<area>` group uses a negative lookahead (`(?!\\.meta)`) to prevent
+ * the `.meta` directory name from being captured as an area.  Regex backtracking
+ * also prevents `api` / `ui` from being captured as an area: if the optional area
+ * group consumed a category name, the following required category group would fail,
+ * causing the engine to backtrack and leave area empty.
+ *
+ * Capture groups: 1=prefix, 2=scoutDir, 3=area (optional), 4=category (api|ui), 5=rest (optional).
  * The category alternation is derived from `SCOUT_TEST_CATEGORIES` for parity
  * with the rest of this file.
  */
 export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
-  `^(.+?)\\/test\\/(scout(?:_[^/]+)?)\\/(?:\\.meta\\/)?(${SCOUT_TEST_CATEGORIES.join(
+  `^(.+?)\\/test\\/(scout(?:_[^/]+)?)(?:\\/(?!\\.meta)([^/]+))?\\/(?:\\.meta\\/)?(${SCOUT_TEST_CATEGORIES.join(
     '|'
   )})(?:\\/(.*))?$`
 );

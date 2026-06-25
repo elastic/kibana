@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export * as archives from './archives';
-export * as detection_rules from './detection_rules';
-export type * from './entity_analytics';
-export { FULL_KIBANA_SECURITY_ROLE } from './roles';
+import { globalSetupHook } from '@kbn/scout-security';
+
+globalSetupHook('Global setup', async ({ log }) => {
+  log.debug('[setup] no archive ingestion needed for this area');
+});

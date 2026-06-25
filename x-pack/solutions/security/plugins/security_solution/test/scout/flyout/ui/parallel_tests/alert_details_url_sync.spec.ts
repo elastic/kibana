@@ -7,7 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
+import { CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 
 const RIGHT = 'right';
 

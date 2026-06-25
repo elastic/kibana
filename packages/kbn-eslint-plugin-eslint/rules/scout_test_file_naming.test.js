@@ -128,6 +128,74 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       filename:
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/global.teardown.ts',
     },
+
+    // ── Area (new structure) ──────────────────────────────────────────────────
+    // Valid: area UI test with .spec.ts
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/my_rule.spec.ts',
+    },
+    // Valid: area UI test inside a sub-folder of tests/
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/sub-feature/my_rule.spec.ts',
+    },
+    // Valid: area parallel_tests
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/my_rule.spec.ts',
+    },
+    // Valid: area API test
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/my_rule.spec.ts',
+    },
+    // Valid: area with scout_* root
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout_custom/detection_engine/ui/tests/my_rule.spec.ts',
+    },
+    // Valid: global.setup.ts inside an area parallel_tests directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.setup.ts',
+    },
+    // Valid: global.teardown.ts inside an area tests directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/global.teardown.ts',
+    },
+    // Valid: Playwright config inside an area directory (non-test file)
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/playwright.config.ts',
+    },
+    // Valid: parallel Playwright config inside an area directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel.playwright.config.ts',
+    },
+    // Valid: fixture file inside an area directory (non-test file)
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/fixtures/index.ts',
+    },
+    // Valid: helper file inside an area directory (non-test file)
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/helpers/utils.ts',
+    },
   ],
 
   invalid: [
@@ -269,6 +337,107 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
           data: {
             actual: 'randomplaywright.config.ts',
           },
+        },
+      ],
+    },
+
+    // ── Area (new structure) – invalid cases ──────────────────────────────────
+    // Invalid: area UI test with .ts instead of .spec.ts
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/my_rule.ts',
+      errors: [
+        {
+          messageId: 'invalidExtension',
+          data: {
+            actual: 'my_rule.ts',
+            expected: 'my_rule.spec.ts',
+          },
+        },
+      ],
+    },
+    // Invalid: area API test with .test.ts instead of .spec.ts
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/api/tests/my_rule.test.ts',
+      errors: [
+        {
+          messageId: 'invalidExtension',
+          data: {
+            actual: 'my_rule.test.ts',
+            expected: 'my_rule.spec.ts',
+          },
+        },
+      ],
+    },
+    // Invalid: area parallel_tests with wrong extension
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/my_rule.ts',
+      errors: [
+        {
+          messageId: 'invalidExtension',
+        },
+      ],
+    },
+    // Invalid: non-standard Playwright config in an area directory
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/custom.playwright.config.ts',
+      errors: [
+        {
+          messageId: 'invalidPlaywrightConfigName',
+          data: {
+            actual: 'custom.playwright.config.ts',
+          },
+        },
+      ],
+    },
+    // Invalid: two-level area – spec file (invalidAreaDepth)
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/my_team/ui/tests/my_rule.spec.ts',
+      errors: [
+        {
+          messageId: 'invalidAreaDepth',
+        },
+      ],
+    },
+    // Invalid: two-level area – parallel_tests spec file (invalidAreaDepth)
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/my_team/ui/parallel_tests/my_rule.spec.ts',
+      errors: [
+        {
+          messageId: 'invalidAreaDepth',
+        },
+      ],
+    },
+    // Invalid: two-level area – non-spec .ts file (invalidAreaDepth)
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/my_team/ui/fixtures/index.ts',
+      errors: [
+        {
+          messageId: 'invalidAreaDepth',
+        },
+      ],
+    },
+    // Invalid: two-level area with scout_* root (invalidAreaDepth)
+    {
+      code: '',
+      filename:
+        'x-pack/solutions/security/plugins/security_solution/test/scout_custom/area1/area2/ui/tests/my_rule.spec.ts',
+      errors: [
+        {
+          messageId: 'invalidAreaDepth',
         },
       ],
     },

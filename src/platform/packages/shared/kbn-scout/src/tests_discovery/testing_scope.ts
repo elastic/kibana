@@ -94,8 +94,10 @@ export const deriveScoutConfigsForFile = (
     return [];
   }
 
-  const [, prefix, scoutDir, type, rest = ''] = match;
-  const scope = `${prefix}/test/${scoutDir}/${type}`;
+  const [, prefix, scoutDir, area, type, rest = ''] = match;
+  const scope = area
+    ? `${prefix}/test/${scoutDir}/${area}/${type}`
+    : `${prefix}/test/${scoutDir}/${type}`;
 
   if (rest.startsWith('tests/')) {
     return filterExisting([`${scope}/${PLAYWRIGHT_CONFIG}`], repoRoot, existsCache);

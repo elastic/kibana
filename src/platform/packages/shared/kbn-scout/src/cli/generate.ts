@@ -58,6 +58,35 @@ function normalizeScoutRoot(scoutRootRaw: string): string {
   return stripped;
 }
 
+function normalizeArea(areaRaw: string): string {
+  const normalized = areaRaw.trim().replace(/\\/g, '/');
+
+  if (!normalized) {
+    throw createFlagError(`--area cannot be empty`);
+  }
+
+  if (normalized.includes('/')) {
+    throw createFlagError(`--area must be a single directory name with no slashes`);
+  }
+
+  const RESERVED_AREA_NAMES = new Set(['api', 'ui', '.meta', 'common']);
+  if (RESERVED_AREA_NAMES.has(normalized)) {
+    throw createFlagError(
+      `--area cannot be "${normalized}" — reserved names are: ${[...RESERVED_AREA_NAMES].join(
+        ', '
+      )}. ` + `"common" is reserved for a plain shared-utilities directory (no Playwright config).`
+    );
+  }
+
+  if (!/^[a-z][a-z0-9_]*$/.test(normalized)) {
+    throw createFlagError(
+      `--area must start with a lowercase letter and contain only lowercase letters, digits, and underscores, got "${normalized}"`
+    );
+  }
+
+  return normalized;
+}
+
 async function validatePath(input: string): Promise<boolean | string> {
   const normalizedPath = input.trim();
   if (!normalizedPath) {
@@ -108,17 +137,49 @@ async function pathExists(targetPath: string): Promise<boolean> {
   }
 }
 
+/**
+ * Returns the list of existing area sub-directories inside a scout root.
+ * Used by the interactive prompt to avoid surprising the developer with a
+ * hard mixing-guard error after they've already answered other questions.
+ */
+async function detectExistingAreas(scoutDir: string): Promise<string[]> {
+  const RESERVED = new Set(['ui', 'api', '.meta', 'common']);
+  try {
+    const entries = await Fsp.readdir(scoutDir, { withFileTypes: true });
+    const areas: string[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory() || RESERVED.has(entry.name) || entry.name.startsWith('.')) {
+        continue;
+      }
+      const hasAreaUi = await pathExists(Path.resolve(scoutDir, entry.name, 'ui'));
+      const hasAreaApi = await pathExists(Path.resolve(scoutDir, entry.name, 'api'));
+      if (hasAreaUi || hasAreaApi) areas.push(entry.name);
+    }
+    return areas;
+  } catch {
+    return [];
+  }
+}
+
 async function createDirectoryStructure(
   basePath: string,
-  opts: { scoutRoot: string; generateApi: boolean; generateUi: boolean; uiParallel: boolean }
+  opts: {
+    scoutRoot: string;
+    area?: string;
+    generateApi: boolean;
+    generateUi: boolean;
+    uiParallel: boolean;
+  }
 ): Promise<void> {
   const fullBasePath = Path.resolve(REPO_ROOT, basePath);
   const scoutRootDir = Path.resolve(fullBasePath, 'test', opts.scoutRoot);
+  // When an area is provided, all generated content lives under test/<scoutRoot>/<area>/
+  const contentRootDir = opts.area ? Path.resolve(scoutRootDir, opts.area) : scoutRootDir;
   const scoutPackage = getScoutPackageImport(basePath);
   const copyrightHeader = getCopyrightHeader(basePath);
 
   if (opts.generateApi) {
-    const apiTestDir = Path.resolve(scoutRootDir, 'api');
+    const apiTestDir = Path.resolve(contentRootDir, 'api');
     const apiFixturesDir = Path.resolve(apiTestDir, 'fixtures');
     const apiTestsDir = Path.resolve(apiTestDir, 'tests');
     const apiConfigPath = Path.resolve(apiTestDir, 'playwright.config.ts');
@@ -145,7 +206,7 @@ async function createDirectoryStructure(
   }
 
   if (opts.generateUi) {
-    const uiTestDir = Path.resolve(scoutRootDir, 'ui');
+    const uiTestDir = Path.resolve(contentRootDir, 'ui');
     const uiFixturesDir = Path.resolve(uiTestDir, 'fixtures');
     const uiPageObjectsDir = Path.resolve(uiFixturesDir, 'page_objects');
     const uiPageObjectsIndexPath = Path.resolve(uiPageObjectsDir, 'index.ts');
@@ -276,7 +337,7 @@ export const generateCmd: Command<void> = {
   generated configs can run in CI.
   `,
   flags: {
-    string: ['path', 'type', 'scout-root'],
+    string: ['path', 'type', 'scout-root', 'area'],
     boolean: ['force', 'ui-parallel'],
     alias: {
       p: 'path',
@@ -290,6 +351,9 @@ export const generateCmd: Command<void> = {
     --path             Relative path to the plugin or package (e.g. x-pack/platform/plugins/shared/maps)
     --type             Test type to generate: api | ui | both
     --scout-root       Directory name under <path>/test/ (default: scout). Example: scout_uiam_local
+    --area             Optional area sub-directory under test/<scout-root>/ (e.g. detection_engine).
+                       Creates test/<scout-root>/<area>/{ui,api}/ instead of test/<scout-root>/{ui,api}/.
+                       Useful for splitting a large plugin into independently-runnable CI configs per team area.
     --ui-parallel      For UI scaffolds, generate parallel tests (default: true). Use --no-ui-parallel for sequential.
     --force            If some Scout directories already exist, generate only the missing sections without prompting
   `,
@@ -297,6 +361,7 @@ export const generateCmd: Command<void> = {
     node scripts/scout.js generate --path x-pack/platform/plugins/shared/maps --type api
     node scripts/scout.js generate --path x-pack/platform/plugins/shared/maps --type ui --no-ui-parallel
     node scripts/scout.js generate --path x-pack/platform/plugins/shared/security --type both --scout-root scout_uiam_local --force
+    node scripts/scout.js generate --path x-pack/solutions/security/plugins/security_solution --type ui --area detection_engine
   `,
   },
   run: async ({ flagsReader, log }) => {
@@ -350,10 +415,99 @@ export const generateCmd: Command<void> = {
 
     const basePath = Path.resolve(REPO_ROOT, relativePath);
     const scoutRoot = normalizeScoutRoot(flagsReader.string('scout-root') ?? 'scout');
+    const areaRaw = flagsReader.string('area');
+    let area = areaRaw ? normalizeArea(areaRaw) : undefined;
 
     const scoutDir = Path.resolve(basePath, 'test', scoutRoot);
-    const apiDir = Path.resolve(scoutDir, 'api');
-    const uiDir = Path.resolve(scoutDir, 'ui');
+
+    // In interactive mode, detect existing areas and prompt the developer to
+    // pick one (or name a new one) before hitting the mixing-guard hard error.
+    if (!area && !isNonInteractive && (await pathExists(scoutDir))) {
+      const existingAreas = await detectExistingAreas(scoutDir);
+      if (existingAreas.length > 0) {
+        const NEW_AREA_SENTINEL = '__new__';
+        const { chosenArea } = await inquirer.prompt<{ chosenArea: string }>({
+          type: 'list',
+          name: 'chosenArea',
+          message: `This plugin uses area-based Scout structure. Which area do you want to scaffold?`,
+          choices: [
+            ...existingAreas.map((a) => ({ name: `${a} (existing)`, value: a })),
+            { name: 'Create a new area (enter name below)', value: NEW_AREA_SENTINEL },
+          ],
+        });
+
+        if (chosenArea === NEW_AREA_SENTINEL) {
+          const { newAreaName } = await inquirer.prompt<{ newAreaName: string }>({
+            type: 'input',
+            name: 'newAreaName',
+            message: 'New area name (lowercase letters, digits, underscores):',
+            validate: (input: string) => {
+              try {
+                normalizeArea(input);
+                return true;
+              } catch (e) {
+                return e instanceof Error ? e.message : 'Invalid area name';
+              }
+            },
+          });
+          area = normalizeArea(newAreaName);
+        } else {
+          area = chosenArea;
+        }
+        log.info(`Selected area: ${area}`);
+      }
+    }
+
+    // Content root is scout/<area>/ when area is given, otherwise scout/ directly
+    const contentDir = area ? Path.resolve(scoutDir, area) : scoutDir;
+    const apiDir = Path.resolve(contentDir, 'api');
+    const uiDir = Path.resolve(contentDir, 'ui');
+
+    const contentDirLabel = area ? `test/${scoutRoot}/${area}` : `test/${scoutRoot}`;
+
+    // Guard: a scout root must be either entirely root-level (test/<root>/{ui,api}/)
+    // or entirely area-based (test/<root>/<area>/{ui,api}/), never both at once.
+    if (await pathExists(scoutDir)) {
+      if (area) {
+        // Adding an area: fail if root-level category dirs already exist.
+        const rootUi = await pathExists(Path.resolve(scoutDir, 'ui'));
+        const rootApi = await pathExists(Path.resolve(scoutDir, 'api'));
+        if (rootUi || rootApi) {
+          const existing = [rootUi && 'ui', rootApi && 'api'].filter(Boolean).join(' and ');
+          throw createFlagError(
+            `Cannot add area '${area}' to '${relativePath}/test/${scoutRoot}' because root-level ` +
+              `${existing} ${
+                existing.includes(' and ')
+                  ? 'directories already exist'
+                  : 'directory already exists'
+              }. ` +
+              `A Scout root must use either root-level (test/${scoutRoot}/{ui,api}/) ` +
+              `or area-based (test/${scoutRoot}/<area>/{ui,api}/) structure, not both. ` +
+              `To use areas, first migrate the existing root-level tests into an area sub-directory.`
+          );
+        }
+      } else {
+        // Adding root-level categories: fail if any area sub-directory already exists.
+        const entries = await Fsp.readdir(scoutDir, { withFileTypes: true }).catch(() => []);
+        const RESERVED = new Set(['ui', 'api', '.meta', 'common']);
+        for (const entry of entries) {
+          if (!entry.isDirectory() || RESERVED.has(entry.name) || entry.name.startsWith('.')) {
+            continue;
+          }
+          const areaUi = await pathExists(Path.resolve(scoutDir, entry.name, 'ui'));
+          const areaApi = await pathExists(Path.resolve(scoutDir, entry.name, 'api'));
+          if (areaUi || areaApi) {
+            throw createFlagError(
+              `Cannot add root-level tests to '${relativePath}/test/${scoutRoot}' because area ` +
+                `'${entry.name}' already exists. ` +
+                `A Scout root must use either root-level (test/${scoutRoot}/{ui,api}/) ` +
+                `or area-based (test/${scoutRoot}/<area>/{ui,api}/) structure, not both. ` +
+                `To use root-level tests, first remove or migrate the existing area directories.`
+            );
+          }
+        }
+      }
+    }
 
     const scoutDirExists = await pathExists(scoutDir);
     const apiDirExists = await pathExists(apiDir);
@@ -361,7 +515,7 @@ export const generateCmd: Command<void> = {
 
     if (apiDirExists && uiDirExists) {
       log.warning(
-        `Both test/${scoutRoot}/api and test/${scoutRoot}/ui already exist. The generator will not modify existing sub-directories.`
+        `Both ${contentDirLabel}/api and ${contentDirLabel}/ui already exist. The generator will not modify existing sub-directories.`
       );
       return;
     }
@@ -370,13 +524,13 @@ export const generateCmd: Command<void> = {
     if (scoutDirExists || apiDirExists || uiDirExists) {
       const existingDirs: string[] = [];
       if (apiDirExists) {
-        existingDirs.push(`test/${scoutRoot}/api`);
+        existingDirs.push(`${contentDirLabel}/api`);
       }
       if (uiDirExists) {
-        existingDirs.push(`test/${scoutRoot}/ui`);
+        existingDirs.push(`${contentDirLabel}/ui`);
       }
       if (existingDirs.length === 0 && scoutDirExists) {
-        existingDirs.push(`test/${scoutRoot}`);
+        existingDirs.push(contentDirLabel);
       }
       log.warning(
         `Existing Scout test directories found: ${existingDirs.join(
@@ -387,7 +541,7 @@ export const generateCmd: Command<void> = {
       if (!force) {
         if (isNonInteractive) {
           throw createFlagError(
-            `Rerun with --force to generate only the missing sections under test/${scoutRoot}/`
+            `Rerun with --force to generate only the missing sections under ${contentDirLabel}/`
           );
         }
 
@@ -423,12 +577,12 @@ export const generateCmd: Command<void> = {
     if (requestedType) {
       if (requestedType === 'api' && !apiMissing) {
         throw createFlagError(
-          `test/${scoutRoot}/api already exists. The generator will not modify existing sub-directories.`
+          `${contentDirLabel}/api already exists. The generator will not modify existing sub-directories.`
         );
       }
       if (requestedType === 'ui' && !uiMissing) {
         throw createFlagError(
-          `test/${scoutRoot}/ui already exists. The generator will not modify existing sub-directories.`
+          `${contentDirLabel}/ui already exists. The generator will not modify existing sub-directories.`
         );
       }
       testType = requestedType;
@@ -485,6 +639,7 @@ export const generateCmd: Command<void> = {
     log.info('Creating directory structure...');
     await createDirectoryStructure(relativePath, {
       scoutRoot,
+      area,
       generateApi: shouldGenerateApi,
       generateUi: shouldGenerateUi,
       uiParallel,
@@ -493,7 +648,7 @@ export const generateCmd: Command<void> = {
     log.success(
       `Successfully generated Scout test structure for ${Path.posix.join(
         relativePath.replace(/\\\\/g, '/'),
-        `test/${scoutRoot}`
+        contentDirLabel
       )}`
     );
     log.write('\n');

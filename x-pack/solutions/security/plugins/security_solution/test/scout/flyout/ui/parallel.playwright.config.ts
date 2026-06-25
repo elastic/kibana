@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export * as archives from './archives';
-export * as detection_rules from './detection_rules';
-export type * from './entity_analytics';
-export { FULL_KIBANA_SECURITY_ROLE } from './roles';
+import { createPlaywrightConfig } from '@kbn/scout-security';
+
+export default createPlaywrightConfig({
+  testDir: './parallel_tests/',
+  workers: 2,
+  runGlobalSetup: true,
+});

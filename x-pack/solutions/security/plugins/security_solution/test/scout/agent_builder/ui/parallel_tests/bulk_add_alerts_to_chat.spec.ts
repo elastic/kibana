@@ -7,9 +7,8 @@
 
 import { createToolCallMessage } from '@kbn/ftr-llm-proxy';
 import { expect } from '@kbn/scout-security/ui';
-import { CUSTOM_QUERY_RULE } from '@kbn/scout-security';
-import { spaceTest, tags } from '../../fixtures';
-import { FULL_KIBANA_SECURITY_ROLE } from '../../common/roles';
+import { CUSTOM_QUERY_RULE, FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
+import { spaceTest, tags } from '../fixtures';
 
 const ALERT_COUNT = 3;
 

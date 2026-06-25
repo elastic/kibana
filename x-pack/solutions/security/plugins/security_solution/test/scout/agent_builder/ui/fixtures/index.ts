@@ -11,11 +11,11 @@ import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 
 const XSRF = { 'kbn-xsrf': 'scout-security-solution' };
 
-interface SecuritySolutionWorkerFixtures extends ScoutWorkerFixtures {
+interface AgentBuilderWorkerFixtures extends ScoutWorkerFixtures {
   llmProxy: LlmProxy;
 }
 
-export const spaceTest = baseSpaceTest.extend<{}, SecuritySolutionWorkerFixtures>({
+export const spaceTest = baseSpaceTest.extend<{}, AgentBuilderWorkerFixtures>({
   llmProxy: [
     // scoutSpace is declared first so Playwright sets up the test space before the proxy,
     // avoiding concurrent initialization that can delay Sourcerer setup.

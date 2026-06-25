@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout-security';
+import type { KibanaRole } from '@kbn/scout';
 
 /**
  * Role combining security alert index privileges with full Kibana access.
- * Shared by tests that need both alert visibility and Kibana-level features
+ * Used by tests that need both alert visibility and Kibana-level features
  * (e.g. agent builder, workflow management).
+ *
+ * The Security alerts page checks for all four privileges (read, write,
+ * view_index_metadata, manage) and shows an "Insufficient privileges"
+ * callout if any are missing, preventing the alerts table from rendering.
  */
 export const FULL_KIBANA_SECURITY_ROLE: KibanaRole = {
   elasticsearch: {
@@ -33,9 +37,6 @@ export const FULL_KIBANA_SECURITY_ROLE: KibanaRole = {
           '.lists*',
           '.items*',
         ],
-        // The Security alerts page checks for all four of these privileges and shows
-        // an "Insufficient privileges" callout if any are missing, preventing the
-        // alerts table from rendering.
         privileges: ['read', 'write', 'view_index_metadata', 'manage'],
       },
     ],

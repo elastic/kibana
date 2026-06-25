@@ -12,10 +12,25 @@
 const path = require('path');
 
 /**
- * Matches Scout test file paths following the pattern:
- * {scout,scout_*}/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts
+ * Matches Scout test file paths following the supported patterns:
+ *   {scout,scout_*}/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts          (no area)
+ *   {scout,scout_*}/<area>/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts   (single area level)
+ *
+ * The optional area segment `(?:\/[^/]+)?` uses regex backtracking to avoid
+ * consuming `ui`/`api` as an area: if the area group claims `ui`, the
+ * following required `\/(?:ui|api)\/` fails, the engine backtracks, and
+ * area is left empty.
  */
-const SCOUT_TEST_PATH_PATTERN = /\/test\/scout(_[^/]+)?\/(?:ui|api)\/(?:parallel_)?tests\//;
+const SCOUT_TEST_PATH_PATTERN =
+  /\/test\/scout(?:_[^/]+)?(?:\/[^/]+)?\/(?:ui|api)\/(?:parallel_)?tests\//;
+
+/**
+ * Detects unsupported two-level area paths, e.g.
+ * test/scout/<area1>/<area2>/{ui,api}/
+ * Only a single area level is allowed between the scout root and the
+ * {ui,api} category directory.
+ */
+const SCOUT_TOO_DEEP_AREA_PATTERN = /\/test\/scout(?:_[^/]+)?\/[^/]+\/[^/]+\/(?:ui|api)\//;
 
 /**
  * Checks if a file path is in a Scout test directory
@@ -93,7 +108,12 @@ module.exports = {
       invalidExtension:
         'Scout test files must end with .spec.ts extension. Found: "{{actual}}", expected: "{{expected}}"',
       invalidPath:
-        'Scout test files must be located in scout{_*}/{ui,api}/{parallel_,}tests/ directories.',
+        'Scout test files must be located in scout{_*}/[<area>/]{ui,api}/{parallel_,}tests/ directories, ' +
+        'where the optional <area> is a single sub-directory level.',
+      invalidAreaDepth:
+        'Scout test files support at most one area sub-directory between the scout root and the ' +
+        '{ui,api} directory: scout{_*}/<area>/{ui,api}/{parallel_,}tests/. ' +
+        'Found more than one area level; rename to use a single area segment.',
       invalidPlaywrightConfigName: `Scout Playwright config files must be named one of the following: ${[
         ...ALLOWED_PLAYWRIGHT_CONFIG_NAMES,
       ].join(', ')}. Found: "{{actual}}"`,
@@ -148,8 +168,20 @@ module.exports = {
         };
       }
 
-      // File is in /test/scout but not in the correct subdirectory structure
-      // Only report if it looks like a test file (has test/spec in name or is .ts)
+      // Check for unsupported two-level area paths, e.g. scout/<a>/<b>/{ui,api}/
+      if (SCOUT_TOO_DEEP_AREA_PATTERN.test(filename)) {
+        return {
+          Program(node) {
+            context.report({
+              node,
+              messageId: 'invalidAreaDepth',
+            });
+          },
+        };
+      }
+
+      // File is in /test/scout but not in the correct subdirectory structure.
+      // Only report if it looks like a test file (has spec in name or .spec.ts ext).
       const basename = path.basename(filename, '.ts');
       if (basename.includes('spec') || hasSpecExtension(filename)) {
         return {

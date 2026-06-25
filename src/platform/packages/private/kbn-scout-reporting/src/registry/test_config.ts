@@ -21,6 +21,8 @@ export interface ScoutTestConfig {
   path: string;
   category: string;
   type: string;
+  /** Optional area sub-directory (e.g. `detection_engine` for `test/scout/detection_engine/ui/`). */
+  area?: string;
   module: ScoutTestableModule;
   manifest: ScoutConfigManifest;
   server: {
@@ -57,6 +59,7 @@ const resolveModuleMetadata = (
 ): {
   module: ScoutTestableModule;
   serverConfigSet: string | undefined;
+  area: string | undefined;
   testCategory: string;
   testConfigType: string;
 } => {
@@ -99,6 +102,7 @@ const resolveModuleMetadata = (
   return {
     module,
     serverConfigSet: g.serverConfigSet,
+    area: g.area,
     testCategory: g.testCategory,
     testConfigType: g.testConfigType,
   };
@@ -119,26 +123,37 @@ export const testConfig = {
     }
 
     const moduleRoot = configPath.split('/test/scout')[0];
-    const { module, serverConfigSet, testCategory, testConfigType } = resolveModuleMetadata(
+    const { module, serverConfigSet, area, testCategory, testConfigType } = resolveModuleMetadata(
       configPath,
       moduleRoot
     );
 
     const scoutDirName = `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`;
-    const manifestPath = path.join(
-      moduleRoot,
-      'test',
-      scoutDirName,
-      '.meta',
-      testCategory,
-      `${testConfigType || 'standard'}.json`
-    );
+    const manifestPath = area
+      ? path.join(
+          moduleRoot,
+          'test',
+          scoutDirName,
+          area,
+          '.meta',
+          testCategory,
+          `${testConfigType || 'standard'}.json`
+        )
+      : path.join(
+          moduleRoot,
+          'test',
+          scoutDirName,
+          '.meta',
+          testCategory,
+          `${testConfigType || 'standard'}.json`
+        );
     const manifestFileData = loadScoutManifestFile(manifestPath);
 
     return {
       path: configPath,
       category: testCategory,
       type: testConfigType || 'standard',
+      ...(area ? { area } : {}),
       module,
       manifest: {
         path: manifestPath,
@@ -172,6 +187,38 @@ export const testConfigs = {
     const duration = (performance.now() - startTime) / 1000;
 
     this.log.info(`Loaded ${this._configs.length} Scout test configs in ${duration.toFixed(2)}s`);
+
+    // Structural validation: a scout root must be either entirely root-level or
+    // entirely area-based, never both. Group by (module.root + serverConfigSet) because
+    // custom config sets (scout_*) are independent roots from the scout runtime's perspective.
+    const byRoot = new Map<string, ScoutTestConfig[]>();
+    for (const config of this._configs) {
+      const key = `${config.module.root}/test/${
+        config.server.configSet === 'default' ? 'scout' : `scout_${config.server.configSet}`
+      }`;
+      if (!byRoot.has(key)) byRoot.set(key, []);
+      byRoot.get(key)!.push(config);
+    }
+    const mixedRoots: string[] = [];
+    for (const [scoutRoot, rootConfigs] of byRoot) {
+      const hasRootLevel = rootConfigs.some((c) => !c.area);
+      const hasArea = rootConfigs.some((c) => Boolean(c.area));
+      if (hasRootLevel && hasArea) {
+        const areaNames = [...new Set(rootConfigs.filter((c) => c.area).map((c) => c.area!))];
+        mixedRoots.push(
+          `  • ${scoutRoot}: root-level {ui,api}/ coexists with area dirs [${areaNames.join(', ')}]`
+        );
+      }
+    }
+    if (mixedRoots.length > 0) {
+      throw new Error(
+        `[Scout] Mixed test structure detected — a scout root must use either ` +
+          `root-level (test/scout/{ui,api}/) or area-based (test/scout/<area>/{ui,api}/) ` +
+          `structure, never both:\n\n` +
+          mixedRoots.join('\n') +
+          `\n\nMigrate root-level tests into area sub-directories or remove the area configs.`
+      );
+    }
   },
 
   reload() {
