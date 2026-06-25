@@ -179,6 +179,7 @@ export class RiskScoreDataClient {
     range: { readonly gte: string; readonly lte: string };
     scoreType?: string;
     pageSize: number;
+    includeContributions?: boolean;
   }): Promise<RiskScoreHistoryEntry[]> => {
     const { esClient, namespace } = this.options;
     const index = getRiskScoreTimeSeriesIndex(namespace);
@@ -202,7 +203,9 @@ export class RiskScoreDataClient {
     });
 
     return response.hits.hits
-      .map((hit) => toHistoryEntry(hit._source, params.entityType))
+      .map((hit) =>
+        toHistoryEntry(hit._source, params.entityType, params.includeContributions ?? false)
+      )
       .filter((entry): entry is RiskScoreHistoryEntry => entry !== undefined);
   };
 
@@ -568,7 +571,8 @@ const getRiskFromSource = (
 
 const toHistoryEntry = (
   source: RiskScoreTimeSeriesSource | undefined,
-  entityType: string
+  entityType: string,
+  includeContributions: boolean
 ): RiskScoreHistoryEntry | undefined => {
   if (source === undefined) {
     return undefined;
@@ -594,5 +598,14 @@ const toHistoryEntry = (
     ...(risk.score_type !== undefined && { score_type: risk.score_type }),
     ...(risk.category_1_score !== undefined && { category_1_score: risk.category_1_score }),
     ...(risk.category_1_count !== undefined && { category_1_count: risk.category_1_count }),
+    ...(includeContributions ? toContributionFields(risk) : {}),
   };
 };
+
+const toContributionFields = (risk: RiskScoreTimeSeriesRisk): Partial<RiskScoreHistoryEntry> => ({
+  ...(risk.inputs !== undefined && { inputs: risk.inputs }),
+  ...(risk.modifiers !== undefined && { modifiers: risk.modifiers }),
+  ...(risk.category_2_score !== undefined && { category_2_score: risk.category_2_score }),
+  ...(risk.category_2_count !== undefined && { category_2_count: risk.category_2_count }),
+  ...(risk.criticality_level !== undefined && { criticality_level: risk.criticality_level }),
+});

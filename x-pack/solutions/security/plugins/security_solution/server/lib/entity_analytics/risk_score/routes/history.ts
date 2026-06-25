@@ -55,6 +55,7 @@ export const riskScoreHistoryRoute = (
               to,
               score_type: scoreType,
               page_size: pageSize,
+              include_contributions: includeContributions,
             } = request.query;
 
             const riskScoreDataClient = (await context.securitySolution).getRiskScoreDataClient();
@@ -65,6 +66,7 @@ export const riskScoreHistoryRoute = (
               range: { gte: from ?? DEFAULT_FROM, lte: to ?? DEFAULT_TO },
               scoreType,
               pageSize: pageSize ?? DEFAULT_PAGE_SIZE,
+              includeContributions: includeContributions ?? false,
             });
 
             return response.ok({

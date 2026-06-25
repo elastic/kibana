@@ -145,6 +145,27 @@ components:
           type: string
           description: The EUID of the entity within the graph that generated this alert.
 
+    RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
+      type: object
+      properties:
+        type:
+          type: string
+        subtype:
+          type: string
+        modifier_value:
+          type: number
+          format: double
+        contribution:
+          type: number
+          format: double
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - type
+        - contribution
+
     RiskScoreCategories:
       type: string
       enum:
@@ -234,24 +255,7 @@ components:
           type: array
           description: A list of modifiers that were applied to the risk score calculation.
           items:
-            type: object
-            properties:
-              type:
-                type: string
-              subtype:
-                type: string
-              modifier_value:
-                type: number
-                format: double
-              contribution:
-                type: number
-                format: double
-              metadata:
-                type: object
-                additionalProperties: true
-            required:
-              - type
-              - contribution
+            $ref: "#/components/schemas/RiskScoreModifier"
         score_type:
           type: string
           enum:

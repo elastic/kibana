@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCallOut,
@@ -19,6 +20,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import dateMath from '@kbn/datemath';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
@@ -47,7 +49,14 @@ import { PreferenceFormattedDate } from '../../../../../common/components/format
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
 import type { RiskScoreState } from '../../../../api/hooks/use_risk_score';
 import { useGetWatchlists } from '../../../../api/hooks/use_get_watchlists';
-import type { EntityRiskScore, EntityType } from '../../../../../../common/search_strategy';
+import { useRiskScoreHistory } from '../../../../api/hooks/use_risk_score_history';
+import { RiskScoreTimeline } from '../../../risk_score_timeline';
+import type { RiskScoreHistoryEntry } from '../../../../../../common/api/entity_analytics';
+import type {
+  EntityRiskScore,
+  EntityType,
+  RiskStats,
+} from '../../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../../common/typed_json';
 import { buildEntityNameFilter } from '../../../../../../common/search_strategy';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
@@ -228,6 +237,7 @@ export const RiskInputsTab = <T extends EntityType>({
       subTab={subTab}
       entityType={entityType}
       entityName={entityName}
+      entityId={entityId}
       scopeId={scopeId}
       entityRiskScore={entityRiskScore}
       resolutionRiskScore={resolutionRiskScore}
@@ -250,6 +260,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   subTab?: RiskScoreLeftPanelSubTab;
   entityType: T;
   entityName: string;
+  entityId: string | undefined;
   scopeId: string;
   entityRiskScore: EntityRiskScore<T> | undefined;
   resolutionRiskScore: EntityRiskScore<T> | undefined;
@@ -268,6 +279,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   subTab,
   entityType,
   entityName,
+  entityId,
   scopeId,
   entityRiskScore,
   resolutionRiskScore,
@@ -286,6 +298,9 @@ const RiskInputsTabContent = <T extends EntityType>({
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
+  const [historyFrom, setHistoryFrom] = useState(DEFAULT_HISTORY_FROM);
+  const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
+  const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
   const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const showAiAssistantButton = !isAssistantToolDisabled || isAgentBuilderEnabled;
@@ -313,9 +328,48 @@ const RiskInputsTabContent = <T extends EntityType>({
 
   const isResolutionView =
     selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore;
-  const activeRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
+
+  const showTimeline = isRiskScoreHistoryEnabled && entityId !== undefined && !isResolutionView;
+  const pitSelectionActive = showTimeline && selectedTimestamp !== undefined;
+
+  const { data: pitHistoryData, isFetching: pitFetching } = useRiskScoreHistory({
+    entityType,
+    entityId,
+    from: selectedTimestamp,
+    to: selectedTimestamp,
+    scoreType: 'base',
+    includeContributions: true,
+    pageSize: 1,
+    skip: !pitSelectionActive,
+  });
+
+  const pitEntry = pitSelectionActive ? pitHistoryData?.entries[0] : undefined;
+  const pitRiskScore = useMemo(
+    () =>
+      pitEntry !== undefined && entityId !== undefined
+        ? mkEntityRiskScore(entityType, entityName, entityId, pitEntry)
+        : undefined,
+    [pitEntry, entityId, entityType, entityName]
+  );
+
+  const onHistoryRangeChange = useCallback((from: string) => {
+    setHistoryFrom(from);
+    setSelectedTimestamp((current) =>
+      isTimestampWithinRange(current, from) ? current : undefined
+    );
+  }, []);
+
+  const onViewChange = useCallback((id: string) => {
+    setUserSelectedView(id as RiskScoreLeftPanelSubTab);
+    setSelectedTimestamp(undefined);
+  }, []);
+
+  const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
+  const activeRiskScore = pitRiskScore ?? latestRiskScore;
   const activeInspectRiskScore = isResolutionView ? inspectResolutionRiskScore : inspectRiskScore;
-  const activeRiskScoreLoading = isResolutionView ? loadingResolutionRiskScore : loadingRiskScore;
+  const activeRiskScoreLoading = isResolutionView
+    ? loadingResolutionRiskScore
+    : loadingRiskScore || (pitSelectionActive && pitFetching);
   const activeRiskScoreRefetch = isResolutionView ? refetchResolutionRiskScore : refetch;
 
   useQueryInspector({
@@ -493,6 +547,7 @@ const RiskInputsTabContent = <T extends EntityType>({
     </>
   );
 
+  console.log('ENTITY ID', entityId);
   return (
     <>
       {hasResolutionScore && (
@@ -522,9 +577,53 @@ const RiskInputsTabContent = <T extends EntityType>({
               },
             ]}
             idSelected={selectedView}
-            onChange={(id) => setUserSelectedView(id as RiskScoreLeftPanelSubTab)}
+            onChange={onViewChange}
             data-test-subj="risk-input-score-view-toggle"
           />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      <RiskScoreTimeline
+        entityType={entityType}
+        entityId={entityId || 'unknown'}
+        from={historyFrom}
+        to={HISTORY_RANGE_TO}
+        scoreType="base"
+        selectedTimestamp={selectedTimestamp}
+        onPointSelect={setSelectedTimestamp}
+        onRangeChange={onHistoryRangeChange}
+      />
+      <EuiSpacer size="m" />
+      {pitSelectionActive && selectedTimestamp !== undefined && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            iconType="clock"
+            data-test-subj="riskInputsTabPitIndicator"
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.riskScoreTimeline.showingContributionsFor"
+                defaultMessage="Showing contributions for {timestamp}"
+                values={{
+                  timestamp: <PreferenceFormattedDate value={new Date(selectedTimestamp)} />,
+                }}
+              />
+            }
+          >
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              onClick={() => setSelectedTimestamp(undefined)}
+              data-test-subj="riskInputsTabBackToLatest"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.riskScoreTimeline.backToLatest"
+                defaultMessage="Back to latest"
+              />
+            </EuiButtonEmpty>
+          </EuiCallOut>
           <EuiSpacer size="m" />
         </>
       )}
@@ -888,3 +987,57 @@ const formatContribution = (value: number): string => {
 
   return fixedValue;
 };
+
+const DEFAULT_HISTORY_FROM = 'now-90d';
+const HISTORY_RANGE_TO = 'now';
+
+const isTimestampWithinRange = (timestamp: string | undefined, from: string): boolean => {
+  if (timestamp === undefined) {
+    return false;
+  }
+
+  const min = dateMath.parse(from)?.valueOf();
+  return min === undefined || new Date(timestamp).getTime() >= min;
+};
+
+/**
+ * Builds the `EntityRiskScore` wrapper the contribution tables consume from a
+ * point-in-time history entry, so a selected historical record can replace the
+ * latest record as the tables' source.
+ */
+const mkEntityRiskScore = <T extends EntityType>(
+  entityType: T,
+  entityName: string,
+  entityId: string,
+  entry: RiskScoreHistoryEntry
+): EntityRiskScore<T> => ({
+  '@timestamp': entry['@timestamp'],
+  // TypeScript cannot relate a computed key to a generic type parameter
+  // ({ [k]: v } widens to an index signature), and Record<T, V> would be
+  // unsatisfiable if T were a union. T is always a single entity type per
+  // flyout, so the assertion states an invariant the type system can't express.
+  ...({ [entityType]: { name: entityName, risk: toRiskStats(entry, entityId) } } as Record<
+    T,
+    { name: string; risk: RiskStats }
+  >),
+});
+
+const toRiskStats = (entry: RiskScoreHistoryEntry, entityId: string): RiskStats => ({
+  '@timestamp': entry['@timestamp'],
+  id_field: 'entity.id',
+  id_value: entityId,
+  calculated_level: entry.calculated_level,
+  calculated_score: entry.calculated_score ?? 0,
+  calculated_score_norm: entry.calculated_score_norm,
+  category_1_score: entry.category_1_score ?? 0,
+  category_1_count: entry.category_1_count ?? 0,
+  ...(entry.category_2_score !== undefined && { category_2_score: entry.category_2_score }),
+  ...(entry.category_2_count !== undefined && { category_2_count: entry.category_2_count }),
+  ...(entry.criticality_level !== undefined && { criticality_level: entry.criticality_level }),
+  ...(entry.score_type !== undefined && { score_type: entry.score_type }),
+  ...(entry.modifiers !== undefined && { modifiers: entry.modifiers }),
+  inputs: entry.inputs ?? [],
+  notes: [],
+  rule_risks: [],
+  multipliers: [],
+});

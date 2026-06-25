@@ -2503,6 +2503,97 @@ paths:
       summary: Run the risk scoring engine
       tags:
         - Security Entity Analytics API
+  /api/risk_score/history:
+    get:
+      description: Returns time-ordered historical risk score entries from the risk
+        score time-series index for a given entity.
+      operationId: GetRiskScoreHistory
+      parameters:
+        - description: The type of entity to retrieve history for.
+          in: query
+          name: entity_type
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdentifierType'
+        - description: The identifier of the entity to retrieve history for.
+          in: query
+          name: entity_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+        - description: Start of the time range, in date-math syntax. Defaults to 90 days
+            ago.
+          in: query
+          name: from
+          required: false
+          schema:
+            default: now-90d
+            maxLength: 100
+            type: string
+        - description: End of the time range, in date-math syntax. Defaults to now.
+          in: query
+          name: to
+          required: false
+          schema:
+            default: now
+            maxLength: 100
+            type: string
+        - description: Filter entries by the type of score recorded (`base`, `propagated`,
+            or `resolution`).
+          in: query
+          name: score_type
+          required: false
+          schema:
+            enum:
+              - base
+              - propagated
+              - resolution
+            type: string
+        - description: Maximum number of history entries to return per request.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            default: 100
+            maximum: 1000
+            minimum: 1
+            type: integer
+        - description: When true, each entry also includes the contributions recorded for
+            that scoring run (`inputs`, `modifiers`, category 2 fields, and
+            `criticality_level`), when present on the underlying document.
+          in: query
+          name: include_contributions
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                riskScoreHistory:
+                  summary: Risk score history for a user
+                  value:
+                    entity_id: alice
+                    entity_type: user
+                    entries:
+                      - '@timestamp': '2026-05-20T12:00:00.000Z'
+                        calculated_level: High
+                        calculated_score: 145.2
+                        calculated_score_norm: 72.4
+                        category_1_count: 18
+                        category_1_score: 102
+                        score_type: base
+              schema:
+                $ref: '#/components/schemas/RiskScoreHistoryResponse'
+          description: Successful response
+        '400':
+          description: Invalid request
+      summary: Get risk score history for an entity
+      tags:
+        - Security Entity Analytics API
 components:
   schemas:
     Asset:
@@ -3208,24 +3299,7 @@ components:
         modifiers:
           description: A list of modifiers that were applied to the risk score calculation.
           items:
-            type: object
-            properties:
-              contribution:
-                format: double
-                type: number
-              metadata:
-                additionalProperties: true
-                type: object
-              modifier_value:
-                format: double
-                type: number
-              subtype:
-                type: string
-              type:
-                type: string
-            required:
-              - type
-              - contribution
+            $ref: '#/components/schemas/RiskScoreModifier'
           type: array
         notes:
           items:
@@ -3400,6 +3474,13 @@ components:
             - name
       required:
         - entity
+    IdentifierType:
+      enum:
+        - host
+        - user
+        - service
+        - generic
+      type: string
     IdField:
       enum:
         - host.name
@@ -3673,6 +3754,71 @@ components:
       properties:
         success:
           type: boolean
+    RiskScoreHistoryEntry:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          maxLength: 33
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/EntityRiskLevels'
+        calculated_score:
+          format: double
+          type: number
+        calculated_score_norm:
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          type: integer
+        category_1_score:
+          format: double
+          type: number
+        category_2_count:
+          type: integer
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        inputs:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/RiskScoreInput'
+          type: array
+        modifiers:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/RiskScoreModifier'
+          type: array
+        score_type:
+          enum:
+            - base
+            - propagated
+            - resolution
+          type: string
+      required:
+        - '@timestamp'
+        - calculated_score_norm
+        - calculated_level
+    RiskScoreHistoryResponse:
+      type: object
+      properties:
+        entity_id:
+          maxLength: 1000
+          type: string
+        entity_type:
+          $ref: '#/components/schemas/IdentifierType'
+        entries:
+          items:
+            $ref: '#/components/schemas/RiskScoreHistoryEntry'
+          type: array
+      required:
+        - entity_id
+        - entity_type
+        - entries
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
       type: object
@@ -3714,6 +3860,26 @@ components:
         - index
         - description
         - category
+    RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
+      type: object
+      properties:
+        contribution:
+          format: double
+          type: number
+        metadata:
+          additionalProperties: true
+          type: object
+        modifier_value:
+          format: double
+          type: number
+        subtype:
+          type: string
+        type:
+          type: string
+      required:
+        - type
+        - contribution
     ServiceEntity:
       additionalProperties: false
       description: An entity record representing a service, stored in the Entity Store

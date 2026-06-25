@@ -87,6 +87,7 @@ describe('risk score history route', () => {
       range: { gte: 'now-30d', lte: 'now' },
       scoreType: 'base',
       pageSize: 50,
+      includeContributions: false,
     });
   });
 
@@ -101,7 +102,18 @@ describe('risk score history route', () => {
       range: { gte: 'now-90d', lte: 'now' },
       scoreType: undefined,
       pageSize: 100,
+      includeContributions: false,
     });
+  });
+
+  it('threads include_contributions through to the data client', async () => {
+    const request = buildRequest({ include_contributions: 'true' });
+
+    await server.inject(request, requestContextMock.convertContext(context));
+
+    expect(mockRiskScoreDataClient.getRiskScoreHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ includeContributions: true })
+    );
   });
 
   it('returns 200 with empty entries when no data exists', async () => {
