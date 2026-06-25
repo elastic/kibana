@@ -65,7 +65,10 @@ describe('createConversationActions.setAskUserQuestionAnswers', () => {
     const queryKey = queryKeys.conversations.byId(conversationId);
     const conversation = createNewConversation({ id: conversationId, agentId: 'agent-1' });
     conversation.rounds.push(
-      createNewRound({ userMessage: 'hello', steps: [createAskUserQuestionStep({ prompt_id: promptId, questions })] })
+      createNewRound({
+        userMessage: 'hello',
+        steps: [createAskUserQuestionStep({ prompt_id: promptId, questions })],
+      })
     );
     queryClient.setQueryData<Conversation>(queryKey, conversation);
 
