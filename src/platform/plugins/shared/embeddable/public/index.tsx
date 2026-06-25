@@ -14,6 +14,7 @@ import { EmbeddableFactoryRegistration } from '@kbn/embeddable-factory-types';
 import { declare } from '@kbn/plugin-di';
 import { EmbeddablePublicPlugin } from './plugin';
 import { registerEmbeddablePublicDefinition } from './react_embeddable_system';
+import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
 import type { EmbeddablePublicDefinition } from './react_embeddable_system';
 import { registerLegacyURLTransform } from './bwc/legacy_url_transform';
 
@@ -88,8 +89,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
  * Hosts the embeddable factory extension point and collects contributions.
  *
  * Consumer plugins `contribute(EmbeddableFactoryRegistration)` entries globally.
- * At start time, this module collects all entries and populates the internal
- * embeddable factory registry via `registerEmbeddablePublicDefinition`.
+ * Contributions only become available once every contributor has been set up, so
+ * collection happens at start time. {@link closeSetup} is called here, after the
+ * contributions are registered, because it must run *after* this `OnStart` hook —
+ * the classic `EmbeddablePublicPlugin.start()` (where it previously lived) runs
+ * before `OnStart` callbacks and would lock the registry before contributions land.
  */
 export const services = declare(({ bind, host }) => {
   host(EmbeddableFactoryRegistration);
@@ -109,6 +113,8 @@ export const services = declare(({ bind, host }) => {
         );
       }
     }
+
+    closeSetup();
   });
 });
 
