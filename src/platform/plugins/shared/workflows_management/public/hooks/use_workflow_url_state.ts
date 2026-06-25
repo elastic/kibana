@@ -25,6 +25,15 @@ export interface WorkflowUrlState {
   resume?: boolean;
 }
 
+/**
+ * Normalise a `query-string` value (which may be `string | string[] | null`)
+ * to `string | undefined`, taking the first element of any array.
+ */
+function firstString(value: string | string[] | null | undefined): string | undefined {
+  if (Array.isArray(value)) return value[0] ?? undefined;
+  return value ?? undefined;
+}
+
 export function useWorkflowUrlState() {
   const history = useHistory();
   const location = useLocation();
@@ -40,13 +49,13 @@ export function useWorkflowUrlState() {
   } => {
     const params = parse(location.search);
     return {
-      tab: (params.tab as WorkflowUrlStateTabType) || 'workflow',
+      tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       view: params.view === 'graph' ? 'graph' : 'yaml',
       direction: params.direction === 'LR' ? 'LR' : 'TB',
-      executionId: params.executionId as string | undefined,
-      stepExecutionId: params.stepExecutionId as string | undefined,
-      stepId: params.stepId as string | undefined,
-      shouldAutoResume: params.resume === 'true',
+      executionId: firstString(params.executionId),
+      stepExecutionId: firstString(params.stepExecutionId),
+      stepId: firstString(params.stepId),
+      shouldAutoResume: firstString(params.resume) === 'true',
     };
   }, [location.search]);
 
@@ -60,11 +69,11 @@ export function useWorkflowUrlState() {
         ...updates,
       };
 
-      // Remove undefined values to keep URL clean
-      const cleanParams: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
+      // Remove undefined/null values to keep URL clean
+      const cleanParams: Record<string, string | boolean> = {};
       Object.entries(newParams).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          cleanParams[key] = value;
+          cleanParams[key] = value as string | boolean;
         }
       });
 

@@ -483,4 +483,30 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   );
 }
 
-export const WorkflowGraphNode = memo(WorkflowGraphNodeInner);
+/**
+ * Field-level equality comparator so that a live-execution status poll that
+ * mints a fresh `data` object identity only re-renders nodes whose status
+ * actually changed — not every node in the graph on every poll.
+ *
+ * Mirrors the pattern used by `edgePropsAreEqual` in workflow_graph_edge.tsx.
+ */
+function nodePropsAreEqual(
+  prev: NodeProps<Node<WorkflowGraphNodeData>>,
+  next: NodeProps<Node<WorkflowGraphNodeData>>
+): boolean {
+  return (
+    prev.data.label === next.data.label &&
+    prev.data.stepType === next.data.stepType &&
+    prev.data.isTrigger === next.data.isTrigger &&
+    prev.data.stepExecution?.status === next.data.stepExecution?.status &&
+    prev.data.preview === next.data.preview &&
+    prev.data.step === next.data.step &&
+    prev.selected === next.selected &&
+    prev.targetPosition === next.targetPosition &&
+    prev.sourcePosition === next.sourcePosition &&
+    prev.xPos === next.xPos &&
+    prev.yPos === next.yPos
+  );
+}
+
+export const WorkflowGraphNode = memo(WorkflowGraphNodeInner, nodePropsAreEqual);

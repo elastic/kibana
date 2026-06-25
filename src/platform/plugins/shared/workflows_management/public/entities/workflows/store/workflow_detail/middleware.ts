@@ -29,6 +29,12 @@ const compute = (
   }
 };
 
+// Intentionally does not accept `loadedDefinition`: once the user starts
+// editing, their in-progress YAML is the source of truth. The initial compute
+// (below, with `loadedDefinition`) is a one-time bootstrap so the graph can
+// render the server-parsed definition even when the client parser is stricter.
+// If the client parse later fails on a user edit, the stateful layer's
+// `lastValidRef` keeps the canvas showing the last successfully-parsed graph.
 const debouncedCompute = debounce(
   (yamlString: string, store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) =>
     compute(yamlString, store),

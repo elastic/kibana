@@ -323,21 +323,24 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     if (selectedStepId) onStepSelect(undefined);
   }, [selectedStepId, onStepSelect]);
 
-  // Restrict panning to the graph's bounding box plus a comfortable margin
-  // so the user can't scroll far off into empty space.
-  const translateExtent = useMemo<[[number, number], [number, number]]>(() => {
-    if (decoratedNodes.length === 0) {
-      return [
-        [-1000, -1000],
-        [1000, 1000],
-      ];
+  const handleMoveEnd = useCallback(
+    (_event: MouseEvent | TouchEvent, viewport: Viewport) => onViewportChange?.(viewport),
+    [onViewportChange]
+  );
+
+  // Single-pass bounding-box over the stable layout output (`nodes`, not
+  // `decoratedNodes`) so that selection changes never invalidate the extent
+  // or reset-viewport callbacks.  `Math.min/max(...arr.map(...))` is avoided:
+  // spreading large arrays as call args can raise RangeError on very big graphs.
+  const graphBounds = useMemo(() => {
+    if (nodes.length === 0) {
+      return { minX: -1000, minY: -1000, maxX: 1000, maxY: 1000, centerX: 0 };
     }
-    const PAD = 400;
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
     let maxY = -Infinity;
-    for (const n of decoratedNodes) {
+    for (const n of nodes) {
       const w = typeof n.width === 'number' ? n.width : 300;
       const h = typeof n.height === 'number' ? n.height : 64;
       if (n.position.x < minX) minX = n.position.x;
@@ -345,11 +348,18 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       if (n.position.x + w > maxX) maxX = n.position.x + w;
       if (n.position.y + h > maxY) maxY = n.position.y + h;
     }
+    return { minX, minY, maxX, maxY, centerX: (minX + maxX) / 2 };
+  }, [nodes]);
+
+  // Restrict panning to the graph's bounding box plus a comfortable margin
+  // so the user can't scroll far off into empty space.
+  const translateExtent = useMemo<[[number, number], [number, number]]>(() => {
+    const PAD = 400;
     return [
-      [minX - PAD, minY - PAD],
-      [maxX + PAD, maxY + PAD],
+      [graphBounds.minX - PAD, graphBounds.minY - PAD],
+      [graphBounds.maxX + PAD, graphBounds.maxY + PAD],
     ];
-  }, [decoratedNodes]);
+  }, [graphBounds]);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
@@ -367,17 +377,17 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         return;
       }
 
-      if (decoratedNodes.length === 0) {
+      if (nodes.length === 0) {
         return;
       }
 
-      const widthOf = (n: (typeof decoratedNodes)[number]) =>
+      const widthOf = (n: (typeof nodes)[number]) =>
         typeof n.width === 'number' ? n.width : 200;
-      const heightOf = (n: (typeof decoratedNodes)[number]) =>
+      const heightOf = (n: (typeof nodes)[number]) =>
         typeof n.height === 'number' ? n.height : 64;
 
       if (focusStepId) {
-        const focusNode = findGraphFocusNode(decoratedNodes, focusStepId);
+        const focusNode = findGraphFocusNode(nodes, focusStepId);
         if (focusNode) {
           instance.setCenter(
             focusNode.position.x + widthOf(focusNode) / 2,
@@ -388,38 +398,27 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         }
       }
 
-      const minY = Math.min(...decoratedNodes.map((n) => n.position.y));
-      const minX = Math.min(...decoratedNodes.map((n) => n.position.x));
-      const maxX = Math.max(...decoratedNodes.map((n) => n.position.x + widthOf(n)));
-      const graphCenterX = (minX + maxX) / 2;
       const wrapperHeight = wrapperRef.current?.clientHeight ?? 600;
-      instance.setCenter(graphCenterX, minY + wrapperHeight / 2 - TOP_PADDING, {
+      instance.setCenter(graphBounds.centerX, graphBounds.minY + wrapperHeight / 2 - TOP_PADDING, {
         zoom: INITIAL_ZOOM,
         duration,
       });
     },
-    [decoratedNodes, fitViewProp, fitViewOptionsProp, focusStepId]
+    [nodes, graphBounds, fitViewProp, fitViewOptionsProp, focusStepId]
   );
 
   // Centers on the graph's top row at the initial zoom — always ignores
   // focusStepId so the button reliably returns to the trigger-row view.
   const handleResetView = useCallback(() => {
     const instance = flowInstanceRef.current;
-    if (!instance || decoratedNodes.length === 0) return;
+    if (!instance || nodes.length === 0) return;
 
-    const widthOf = (n: (typeof decoratedNodes)[number]) =>
-      typeof n.width === 'number' ? n.width : 200;
-
-    const minY = Math.min(...decoratedNodes.map((n) => n.position.y));
-    const minX = Math.min(...decoratedNodes.map((n) => n.position.x));
-    const maxX = Math.max(...decoratedNodes.map((n) => n.position.x + widthOf(n)));
-    const graphCenterX = (minX + maxX) / 2;
     const wrapperHeight = wrapperRef.current?.clientHeight ?? 600;
-    instance.setCenter(graphCenterX, minY + wrapperHeight / 2 - TOP_PADDING, {
+    instance.setCenter(graphBounds.centerX, graphBounds.minY + wrapperHeight / 2 - TOP_PADDING, {
       zoom: INITIAL_ZOOM,
       duration: 200,
     });
-  }, [decoratedNodes]);
+  }, [nodes.length, graphBounds]);
 
   // Position the initial view: if focusStepId matches a node, centre on
   // that node; otherwise centre on the graph's top row.
@@ -434,7 +433,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         return;
       }
 
-      if (decoratedNodes.length === 0) {
+      if (nodes.length === 0) {
         return;
       }
 
@@ -451,7 +450,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       resetViewportToInitialView(instance, 0);
       onReady?.();
     },
-    [decoratedNodes.length, defaultViewport, fitViewProp, onReady, resetViewportToInitialView]
+    [nodes.length, defaultViewport, fitViewProp, onReady, resetViewportToInitialView]
   );
 
   const previousDirectionRef = useRef(direction);
@@ -462,7 +461,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     previousDirectionRef.current = direction;
 
     const instance = flowInstanceRef.current;
-    if (!instance || decoratedNodes.length === 0) {
+    if (!instance || nodes.length === 0) {
       return;
     }
 
@@ -480,7 +479,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         cancelAnimationFrame(raf2);
       }
     };
-  }, [direction, decoratedNodes.length, resetViewportToInitialView]);
+  }, [direction, nodes.length, resetViewportToInitialView]);
 
   const minimapNodeColor = useCallback(
     (n: { type?: string; data?: unknown }) => {
@@ -561,7 +560,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               fitView={fitViewProp}
               fitViewOptions={fitViewProp ? fitViewOptionsProp : undefined}
               defaultViewport={defaultViewport}
-              onMoveEnd={(_event, viewport) => onViewportChange?.(viewport)}
+              onMoveEnd={handleMoveEnd}
               onNodeClick={handleNodeClick}
               onPaneClick={handlePaneClick}
               nodesDraggable={false}

@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: remove eslint exception and use explicit types
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 import { dagLayout } from '@kbn/dag-layout';
@@ -94,7 +91,7 @@ export function convertWorkflowGraphToReactFlow(graph: WorkflowGraph) {
         type: graphNode.type,
         currentDepth: meta?.currentDepth ?? 0,
         stepType: graphNode.type,
-        step: (graphNode as any).configuration,
+        step: 'configuration' in graphNode ? graphNode.configuration : undefined,
         label: graphNode.id,
         width,
         height: NODE_HEIGHT,
