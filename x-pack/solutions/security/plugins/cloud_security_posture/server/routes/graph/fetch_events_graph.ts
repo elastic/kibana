@@ -412,6 +412,7 @@ FROM ${indexPatterns
     OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
     OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
 | EVAL  __action_exists = event.action IS NOT NULL
+| EVAL data_stream.dataset = COALESCE(event.dataset, MV_FIRST(SPLIT(_index, "-")))
 ${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip'] })}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL

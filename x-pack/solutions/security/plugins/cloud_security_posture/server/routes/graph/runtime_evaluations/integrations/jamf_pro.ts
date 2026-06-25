@@ -76,11 +76,11 @@ export const jamf_proEvaluations = {
   ),
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
-    data_stream.dataset == "jamf_pro.events" AND event.action == "RestAPIOperation", jamf_pro.events.event.object_id,
-    data_stream.dataset == "jamf_pro.events" AND event.action == "ComputerPolicyFinished", jamf_pro.events.event.policy_id,
-    data_stream.dataset == "jamf_pro.events" AND event.action IN ("SmartGroupComputerMembershipChange", "SmartGroupMobileDeviceMembershipChange", "SmartGroupUserMembershipChange"), jamf_pro.events.event.jssid,
+    data_stream.dataset == "jamf_pro.events" AND event.action == "RestAPIOperation", TO_STRING(jamf_pro.events.event.object_id),
+    data_stream.dataset == "jamf_pro.events" AND event.action == "ComputerPolicyFinished", TO_STRING(jamf_pro.events.event.policy_id),
+    data_stream.dataset == "jamf_pro.events" AND event.action IN ("SmartGroupComputerMembershipChange", "SmartGroupMobileDeviceMembershipChange", "SmartGroupUserMembershipChange"), TO_STRING(jamf_pro.events.event.jssid),
     data_stream.dataset == "jamf_pro.events" AND event.action == "DeviceAddedToDEP", jamf_pro.events.event.serial_number,
-    data_stream.dataset == "jamf_pro.events" AND event.action == "ComputerPatchPolicyCompleted", jamf_pro.events.event.patch_policy_id,
+    data_stream.dataset == "jamf_pro.events" AND event.action == "ComputerPatchPolicyCompleted", TO_STRING(jamf_pro.events.event.patch_policy_id),
     null
   ),
   entity.target.name = CASE(
