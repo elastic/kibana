@@ -33,6 +33,10 @@ describe('LanguageSwitcher', () => {
     expect(
       screen.getByTestId('luceneLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
     ).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute(
+      'href',
+      startMock.docLinks.links.query.luceneQuerySyntax
+    );
   });
 
   it('should select the kql context menu if language is kuery', async () => {
@@ -41,27 +45,9 @@ describe('LanguageSwitcher', () => {
     expect(
       screen.getByTestId('kqlLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
     ).toBeTruthy();
-  });
-
-  it('links to KQL documentation if language is kuery', async () => {
-    await renderSwitcher({ language: 'kuery', onSelectLanguage: jest.fn() });
-
-    await userEvent.click(screen.getByRole('button'));
-
     expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute(
       'href',
       startMock.docLinks.links.query.kueryQuerySyntax
-    );
-  });
-
-  it('links to Lucene documentation if language is lucene', async () => {
-    await renderSwitcher({ language: 'lucene', onSelectLanguage: jest.fn() });
-
-    await userEvent.click(screen.getByRole('button'));
-
-    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute(
-      'href',
-      startMock.docLinks.links.query.luceneQuerySyntax
     );
   });
 
