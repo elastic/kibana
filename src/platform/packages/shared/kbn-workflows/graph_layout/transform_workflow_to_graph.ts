@@ -174,7 +174,11 @@ function transformInternal(
       });
       const inner = transformInternal([], childSteps, ids);
       Object.assign(nodeRefs, inner.nodeRefs);
-      bypassLaneNodes.push(...inner.bypassLaneNodes);
+      // inner.bypassLaneNodes stay on the group only — do NOT hoist them to the
+      // top-level list. The layout pipeline feeds group bypass nodes separately
+      // as compound-group children (workflow_layout_pipeline.ts:65). Hoisting
+      // would cause a duplicate node id for unbalanced if/switch inside a
+      // foreach/while body.
       foreachGroups.push({
         id,
         innerNodes: inner.nodes,

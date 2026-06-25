@@ -21,8 +21,6 @@ export const WORKFLOW_RANK_SEP = 70;
 export interface LayoutSnapshot {
   nodes: DagPositionedNode[];
   edges: DagPositionedEdge[];
-  triggerNodeIds: string[];
-  leafNodeIds: string[];
 }
 
 /**
@@ -78,11 +76,5 @@ export const computeWorkflowLayout = (
     compoundPadding: WORKFLOW_COMPOUND_PADDING,
   });
 
-  const triggerNodeIds = nodes.filter((n) => n.type === 'trigger').map((n) => n.id);
-  const outgoingBySource = new Set(edges.map((e) => e.source));
-  const leafNodeIds = nodes
-    .filter((n) => n.type === 'step' && !outgoingBySource.has(n.id))
-    .map((n) => n.id);
-
-  return { nodes: laid.nodes, edges: laid.edges, triggerNodeIds, leafNodeIds };
+  return { nodes: laid.nodes, edges: laid.edges };
 };

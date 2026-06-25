@@ -8,7 +8,6 @@
  */
 
 export {
-  WorkflowGraphCanvas,
   WorkflowGraphCanvasWithoutProvider,
   type WorkflowGraphCanvasProps,
 } from './workflow_graph_canvas';
@@ -21,11 +20,3 @@ export {
   type ToolMenuItemDef,
   useWorkflowBottomBarState,
 } from './workflow_graph_bottom_bar';
-export {
-  WorkflowGraphCanvasFloatingBar,
-  type WorkflowGraphCanvasFloatingBarProps,
-} from './workflow_graph_canvas_floating_bar';
-export {
-  WorkflowGraphCanvasToolbar,
-  type WorkflowGraphCanvasToolbarProps,
-} from './workflow_graph_canvas_toolbar';

@@ -10,11 +10,7 @@
 import type { Edge, Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 import { useMemo, useRef } from 'react';
-import {
-  computeTopologyFingerprint,
-  ExecutionStatus,
-  transformWorkflowToGraph,
-} from '@kbn/workflows';
+import { ExecutionStatus, transformWorkflowToGraph } from '@kbn/workflows';
 import type {
   HandleSide,
   LayoutDirection,
@@ -49,9 +45,6 @@ interface UseWorkflowLayoutParams {
 interface UseWorkflowLayoutResult {
   nodes: Node[];
   edges: Edge[];
-  triggerNodeIds: string[];
-  leafNodeIds: string[];
-  topologyFingerprint: string;
 }
 
 /**
@@ -69,8 +62,6 @@ export function useWorkflowLayout({
   onPerfMark,
   onLayoutFailed,
 }: UseWorkflowLayoutParams): UseWorkflowLayoutResult {
-  const topologyFingerprint = useMemo(() => computeTopologyFingerprint(workflow), [workflow]);
-
   const transformed = useMemo(() => {
     if (transformedProp) return transformedProp;
     if (!workflow) return { nodes: [], edges: [], foreachGroups: [], bypassLaneNodes: [] };
@@ -84,7 +75,7 @@ export function useWorkflowLayout({
   transformedRef.current = transformed;
 
   const layoutSnapshot = useMemo<LayoutSnapshot>(() => {
-    if (!workflow) return { nodes: [], edges: [], triggerNodeIds: [], leafNodeIds: [] };
+    if (!workflow) return { nodes: [], edges: [] };
     try {
       const t1 = performance.now();
       // When workflow is defined, `transformed` is either `transformedProp` or
@@ -98,7 +89,7 @@ export function useWorkflowLayout({
       return snap;
     } catch (err) {
       onLayoutFailed?.(err instanceof Error ? err.message : 'unknown');
-      return { nodes: [], edges: [], triggerNodeIds: [], leafNodeIds: [] };
+      return { nodes: [], edges: [] };
     }
     // Intentionally excludes `transformed`: `transformedRef` is a stable ref
     // whose `.current` is read inside the memo so dagre only re-runs on
@@ -311,11 +302,5 @@ export function useWorkflowLayout({
     transformed.nodes,
   ]);
 
-  return {
-    nodes: derivedNodes,
-    edges: derivedEdges,
-    triggerNodeIds: layoutSnapshot.triggerNodeIds,
-    leafNodeIds: layoutSnapshot.leafNodeIds,
-    topologyFingerprint,
-  };
+  return { nodes: derivedNodes, edges: derivedEdges };
 }

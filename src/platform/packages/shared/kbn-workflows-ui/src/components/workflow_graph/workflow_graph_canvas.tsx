@@ -17,7 +17,6 @@ import {
   Panel,
   ReactFlow,
   type ReactFlowInstance,
-  ReactFlowProvider,
   useReactFlow,
   type Viewport,
 } from '@xyflow/react';
@@ -617,18 +616,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         </div>
       </div>
     </WorkflowGraphActionsContext.Provider>
-  );
-}
-
-/**
- * Standalone canvas that owns its own ReactFlowProvider. Use when the canvas
- * is rendered without an outer provider (e.g. the list-page preview popover).
- */
-export function WorkflowGraphCanvas(props: WorkflowGraphCanvasProps) {
-  return (
-    <ReactFlowProvider>
-      <WorkflowGraphCanvasInner {...props} />
-    </ReactFlowProvider>
   );
 }
 

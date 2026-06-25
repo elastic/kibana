@@ -888,5 +888,49 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
       );
       expect(r.bypassLaneNodes).toHaveLength(0);
     });
+
+    it('does not hoist bypass lane nodes from inside a foreach body to the top level', () => {
+      // An unbalanced `if` (then-only) inside a `foreach` produces one bypass node
+      // for the missing else branch. That bypass node must stay on the foreach
+      // group only — NOT also appear in the top-level bypassLaneNodes list, which
+      // would cause a duplicate node id when the layout pipeline feeds both the
+      // standalone list and each group's list to dagre.
+      const r = transformWorkflowToGraph(
+        minimal({
+          steps: [
+            {
+              name: 'loop',
+              type: 'foreach',
+              value: '{{ steps }}',
+              steps: [
+                {
+                  name: 'gate',
+                  type: 'if',
+                  condition: 'x',
+                  steps: [{ name: 'inner-step', type: 'http' }],
+                  // no else branch → bypass lane node inside the group
+                } as unknown as WorkflowYaml['steps'][number],
+              ],
+            } as unknown as WorkflowYaml['steps'][number],
+            { name: 'after', type: 'http' } as unknown as WorkflowYaml['steps'][number],
+          ] as unknown as WorkflowYaml['steps'],
+        })
+      );
+
+      // The top-level list must be empty — the bypass node belongs to the group.
+      expect(r.bypassLaneNodes).toHaveLength(0);
+
+      // The foreach group holds exactly one bypass node for the missing else.
+      const group = r.foreachGroups.find((g) => g.id === 'loop');
+      expect(group).toBeDefined();
+      expect(group!.bypassLaneNodes).toHaveLength(1);
+
+      // All node ids across top-level and group bypass nodes are unique.
+      const allBypassIds = [
+        ...r.bypassLaneNodes.map((n) => n.id),
+        ...r.foreachGroups.flatMap((g) => g.bypassLaneNodes.map((n) => n.id)),
+      ];
+      expect(allBypassIds).toHaveLength(new Set(allBypassIds).size);
+    });
   });
 });

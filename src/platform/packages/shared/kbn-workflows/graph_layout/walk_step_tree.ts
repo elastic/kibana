@@ -17,32 +17,32 @@ import { isStep } from './types';
  */
 export const visitStepChildren = (
   step: Step,
-  callback: (children: Step[], key: string) => void
+  callback: (children: Step[]) => void
 ): void => {
   const record = step as Record<string, unknown>;
 
   if ('steps' in record && Array.isArray(record.steps)) {
-    callback((record.steps as unknown[]).filter(isStep), 'steps');
+    callback((record.steps as unknown[]).filter(isStep));
   }
   if ('else' in record && Array.isArray(record.else)) {
-    callback((record.else as unknown[]).filter(isStep), 'else');
+    callback((record.else as unknown[]).filter(isStep));
   }
   if ('branches' in record && Array.isArray(record.branches)) {
     for (const branch of record.branches as Array<{ steps?: unknown[] }>) {
       if (Array.isArray(branch.steps)) {
-        callback(branch.steps.filter(isStep), 'branches');
+        callback(branch.steps.filter(isStep));
       }
     }
   }
   if ('cases' in record && Array.isArray(record.cases)) {
     for (const caseItem of record.cases as Array<{ steps?: unknown[] }>) {
       if (Array.isArray(caseItem.steps)) {
-        callback(caseItem.steps.filter(isStep), 'cases');
+        callback(caseItem.steps.filter(isStep));
       }
     }
   }
   if ('default' in record && Array.isArray(record.default)) {
-    callback((record.default as unknown[]).filter(isStep), 'default');
+    callback((record.default as unknown[]).filter(isStep));
   }
 };
 
@@ -52,14 +52,13 @@ export const visitStepChildren = (
  */
 export const walkStepTree = (
   steps: ReadonlyArray<Step>,
-  visitor: (step: Step, depth: number, parentStep?: Step) => void,
-  depth: number = 0,
-  parentStep?: Step
+  visitor: (step: Step, depth: number) => void,
+  depth: number = 0
 ): void => {
   for (const step of steps) {
-    visitor(step, depth, parentStep);
+    visitor(step, depth);
     visitStepChildren(step, (children) => {
-      walkStepTree(children, visitor, depth + 1, step);
+      walkStepTree(children, visitor, depth + 1);
     });
   }
 };
