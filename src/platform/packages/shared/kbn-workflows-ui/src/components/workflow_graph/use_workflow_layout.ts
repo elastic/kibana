@@ -10,8 +10,6 @@
 import type { Edge, Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 import { useMemo, useRef } from 'react';
-import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
-import { dagLayout } from '@kbn/dag-layout';
 import {
   computeTopologyFingerprint,
   ExecutionStatus,
@@ -24,12 +22,8 @@ import type {
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-
-// Workflow-specific layout constants. These encode domain knowledge (foreach
-// header height, gutter widths) that does not belong in @kbn/dag-layout.
-const WORKFLOW_COMPOUND_PADDING = { top: 70, right: 32, bottom: 32, left: 32 } as const;
-const WORKFLOW_NODE_SEP = 50;
-const WORKFLOW_RANK_SEP = 70;
+import { computeWorkflowLayout } from './workflow_layout_pipeline';
+import type { LayoutSnapshot } from './workflow_layout_pipeline';
 
 const HANDLE_SIDE_TO_POSITION: Record<HandleSide, Position> = {
   top: Position.Top,
@@ -89,75 +83,26 @@ export function useWorkflowLayout({
   const transformedRef = useRef(transformed);
   transformedRef.current = transformed;
 
-  const layoutSnapshot = useMemo(() => {
-    if (!workflow) {
-      return {
-        nodes: [] as DagPositionedNode[],
-        edges: [] as DagPositionedEdge[],
-        triggerNodeIds: [] as string[],
-        leafNodeIds: [] as string[],
-      };
-    }
+  const layoutSnapshot = useMemo<LayoutSnapshot>(() => {
+    if (!workflow) return { nodes: [], edges: [], triggerNodeIds: [], leafNodeIds: [] };
     try {
-      const { nodes, edges, foreachGroups, bypassLaneNodes } = transformedRef.current;
-
-      const dagNodes = [
-        ...nodes.map((n) => ({
-          id: n.id,
-          width: n.style.width,
-          height: n.style.height,
-        })),
-        // Bypass lane nodes live outside domain `nodes` — add them here so dagre
-        // sees them and allocates lanes for unbalanced if/switch branches.
-        ...bypassLaneNodes.map((n) => ({
-          id: n.id,
-          width: n.style.width,
-          height: n.style.height,
-        })),
-      ];
-      const dagEdges = edges.map((e) => ({ id: e.id, source: e.source, target: e.target }));
-      const dagGroups = foreachGroups.map((g) => ({
-        id: g.id,
-        innerNodes: [
-          ...g.innerNodes.map((n) => ({
-            id: n.id,
-            width: n.style.width,
-            height: n.style.height,
-          })),
-          ...g.bypassLaneNodes.map((n) => ({
-            id: n.id,
-            width: n.style.width,
-            height: n.style.height,
-          })),
-        ],
-        innerEdges: g.innerEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
-      }));
-
       const t1 = performance.now();
-      const laid = dagLayout(dagNodes, dagEdges, dagGroups, {
-        direction,
-        nodeSep: WORKFLOW_NODE_SEP,
-        rankSep: WORKFLOW_RANK_SEP,
-        compoundPadding: WORKFLOW_COMPOUND_PADDING,
-      });
+      // When workflow is defined, `transformed` is either `transformedProp` or
+      // the result of `transformWorkflowToGraph` — never the empty fallback
+      // (`{ nodes: [], ... }`) which only runs when `!workflow`. The assertion
+      // is safe; the union arises from the two branches of the `transformed`
+      // memo and TypeScript cannot narrow `transformedRef.current` via the
+      // `workflow` guard above.
+      const snap = computeWorkflowLayout(transformedRef.current as TransformResult, { direction });
       onPerfMark?.('layout_ms', performance.now() - t1);
-
-      const triggerNodeIds = nodes.filter((n) => n.type === 'trigger').map((n) => n.id);
-      const outgoingBySource = new Set(edges.map((e) => e.source));
-      const leafNodeIds = nodes
-        .filter((n) => n.type === 'step' && !outgoingBySource.has(n.id))
-        .map((n) => n.id);
-
-      return { nodes: laid.nodes, edges: laid.edges, triggerNodeIds, leafNodeIds };
+      return snap;
     } catch (err) {
       onLayoutFailed?.(err instanceof Error ? err.message : 'unknown');
-      return {
-        nodes: [] as DagPositionedNode[],
-        edges: [] as DagPositionedEdge[],
-        triggerNodeIds: [] as string[],
-        leafNodeIds: [] as string[],
-      };
+      return { nodes: [], edges: [], triggerNodeIds: [], leafNodeIds: [] };
     }
+    // Intentionally excludes `transformed`: `transformedRef` is a stable ref
+    // whose `.current` is read inside the memo so dagre only re-runs on
+    // structural (workflow) changes, not on every transform identity change.
   }, [direction, onLayoutFailed, onPerfMark, workflow]);
 
   const stepExecutionMap = useMemo(() => {

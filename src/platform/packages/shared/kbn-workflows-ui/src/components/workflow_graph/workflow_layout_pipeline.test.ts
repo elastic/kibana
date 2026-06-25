@@ -9,22 +9,18 @@
 
 /**
  * Integration tests for the full workflow layout pipeline:
- *   transformWorkflowToGraph → map to DagNode[] → dagLayout → assert positions.
- *
- * Adapted from apply_graph_layout.test.ts (previously in @kbn/workflows) to
- * validate the mapping adapter introduced by this extraction. Both this suite
- * and @kbn/dag-layout's raw-fixture suite coexist; a follow-up will evaluate
- * overlap and decide what to trim.
+ *   transformWorkflowToGraph → computeWorkflowLayout → assert positions.
  */
 
 import { dagLayout, resolveShiftedEdgePoints } from '@kbn/dag-layout';
 import { transformWorkflowToGraph } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
-
-// Workflow-specific padding — matches the constants in use_workflow_layout.ts.
-const COMPOUND_PADDING = { top: 70, right: 32, bottom: 32, left: 32 } as const;
-const NODE_SEP = 50;
-const RANK_SEP = 70;
+import {
+  computeWorkflowLayout,
+  WORKFLOW_COMPOUND_PADDING,
+  WORKFLOW_NODE_SEP,
+  WORKFLOW_RANK_SEP,
+} from './workflow_layout_pipeline';
 
 const CENTER_TOLERANCE = 2;
 
@@ -38,42 +34,27 @@ const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
   } as unknown as WorkflowYaml);
 
 const runLayout = (yaml: WorkflowYaml, direction: 'TB' | 'LR' = 'TB') => {
-  const { nodes, edges, foreachGroups, bypassLaneNodes } = transformWorkflowToGraph(yaml);
-  const dagNodes = [
-    ...nodes.map((n) => ({ id: n.id, width: n.style.width, height: n.style.height })),
-    ...bypassLaneNodes.map((n) => ({ id: n.id, width: n.style.width, height: n.style.height })),
-  ];
-  const dagEdges = edges.map((e) => ({ id: e.id, source: e.source, target: e.target }));
-  const dagGroups = foreachGroups.map((g) => ({
-    id: g.id,
-    innerNodes: [
-      ...g.innerNodes.map((n) => ({ id: n.id, width: n.style.width, height: n.style.height })),
-      ...g.bypassLaneNodes.map((n) => ({
-        id: n.id,
-        width: n.style.width,
-        height: n.style.height,
-      })),
-    ],
-    innerEdges: g.innerEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
-  }));
+  const transformed = transformWorkflowToGraph(yaml);
   return {
-    result: dagLayout(dagNodes, dagEdges, dagGroups, {
-      direction,
-      nodeSep: NODE_SEP,
-      rankSep: RANK_SEP,
-      compoundPadding: COMPOUND_PADDING,
-    }),
-    foreachGroups,
+    result: computeWorkflowLayout(transformed, { direction }),
+    transformed,
   };
 };
 
-const findNode = (nodes: ReturnType<typeof dagLayout>['nodes'], id: string) => {
+const findNode = (
+  nodes: ReturnType<typeof computeWorkflowLayout>['nodes'],
+  id: string
+) => {
   const n = nodes.find((x) => x.id === id);
   if (!n) throw new Error(`Expected positioned node "${id}"`);
   return n;
 };
 
-const findEdge = (edges: ReturnType<typeof dagLayout>['edges'], source: string, target: string) => {
+const findEdge = (
+  edges: ReturnType<typeof computeWorkflowLayout>['edges'],
+  source: string,
+  target: string
+) => {
   const e = edges.find((x) => x.source === source && x.target === target);
   if (!e) throw new Error(`Expected edge ${source} → ${target}`);
   return e;
@@ -114,10 +95,10 @@ describe('workflow layout pipeline', () => {
     const groupNode = findNode(result.nodes, 'loop');
     const innerNode = findNode(result.nodes, 'inner');
     expect(groupNode.width).toBeGreaterThanOrEqual(
-      innerNode.width + COMPOUND_PADDING.left + COMPOUND_PADDING.right
+      innerNode.width + WORKFLOW_COMPOUND_PADDING.left + WORKFLOW_COMPOUND_PADDING.right
     );
     expect(groupNode.height).toBeGreaterThanOrEqual(
-      innerNode.height + COMPOUND_PADDING.top + COMPOUND_PADDING.bottom
+      innerNode.height + WORKFLOW_COMPOUND_PADDING.top + WORKFLOW_COMPOUND_PADDING.bottom
     );
   });
 
@@ -227,7 +208,7 @@ describe('workflow layout pipeline', () => {
       }),
       'TB'
     );
-    const trigger = result.nodes.find((n) => {
+    const triggerNode = result.nodes.find((n) => {
       const { nodes } = transformWorkflowToGraph(
         minimal({
           steps: [
@@ -240,8 +221,8 @@ describe('workflow layout pipeline', () => {
     });
     const a = findNode(result.nodes, 'a');
     const b = findNode(result.nodes, 'b');
-    if (trigger) {
-      const centers = [centerX(trigger), centerX(a), centerX(b)];
+    if (triggerNode) {
+      const centers = [centerX(triggerNode), centerX(a), centerX(b)];
       expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(CENTER_TOLERANCE);
     }
   });
@@ -360,7 +341,7 @@ describe('workflow layout pipeline', () => {
 
   it('throws on a cyclic foreach group graph', () => {
     // transformWorkflowToGraph never produces cycles; construct manually to
-    // verify the adapter correctly surfaces the dagLayout cycle error.
+    // verify computeWorkflowLayout correctly surfaces the dagLayout cycle error.
     transformWorkflowToGraph(minimal());
     const dagNodes = [
       { id: 'groupA', width: 300, height: 64 },
@@ -371,5 +352,14 @@ describe('workflow layout pipeline', () => {
       { id: 'groupB', innerNodes: [{ id: 'groupA', width: 300, height: 64 }], innerEdges: [] },
     ];
     expect(() => dagLayout(dagNodes, [], dagGroups)).toThrow(/cycle/i);
+  });
+
+  it('constants match the hook: nodeSep is WORKFLOW_NODE_SEP and rankSep is WORKFLOW_RANK_SEP', () => {
+    // Regression guard: if the constants drifted between the hook and the
+    // pipeline, layout results would silently differ. The test just asserts
+    // the exported values have the expected numeric meaning (50 / 70) that
+    // was hard-coded in the original use_workflow_layout.ts.
+    expect(WORKFLOW_NODE_SEP).toBe(50);
+    expect(WORKFLOW_RANK_SEP).toBe(70);
   });
 });
