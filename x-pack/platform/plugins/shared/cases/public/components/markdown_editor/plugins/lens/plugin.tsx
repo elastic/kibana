@@ -27,11 +27,12 @@ import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 
 import type { TypedLensByValueInput, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { TimeRange } from '@kbn/data-plugin/common';
-import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
@@ -47,6 +48,19 @@ const DEFAULT_TIMERANGE: TimeRange = {
 };
 
 type LensIncomingEmbeddablePackage = EmbeddablePackageState<TypedLensByValueInput>;
+
+// Lens may return attributes in either the API spec (when the `lens.apiFormat`
+// builder is enabled) or the internal Lens state (the default). Only the API
+// spec carries a chart type the builder can convert; internal state is keyed by
+// the saved-object type ('lens'), which has no converter. Guard on
+// `isSupported` so internal state passes through untouched instead of throwing
+// `No attributes converter found for chart type: lens`.
+const toLensAttributes = (attributes: Record<string, unknown>): Record<string, unknown> => {
+  const builder = new LensConfigBuilder();
+  return builder.isSupported(attributes.type as string | undefined)
+    ? builder.fromAPIFormat(attributes as Parameters<LensConfigBuilder['fromAPIFormat']>[0])
+    : attributes;
+};
 
 type LensEuiMarkdownEditorUiPlugin = EuiMarkdownEditorUiPlugin<{
   timeRange: TypedLensByValueInput['timeRange'];
@@ -89,11 +103,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
   const handleAdd = useCallback(
     (_attributes: Record<string, unknown>, timeRange?: TimeRange) => {
-      // For now, Lens attributes can come in either the API format or the internal format
-      // depending on the value of the lens.apiFormat feature flag
-      const attributes = isLensAPIFormat(_attributes)
-        ? new LensConfigBuilder().fromAPIFormat(_attributes)
-        : _attributes;
+      const attributes = toLensAttributes(_attributes);
 
       onSave(
         `!{${ID}${JSON.stringify({
@@ -116,11 +126,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       timeRange: TimeRange | undefined,
       position: EuiMarkdownAstNodePosition
     ) => {
-      // For now, Lens attributes can come in either the API format or the internal format
-      // depending on the value of the lens.apiFormat feature flag
-      const attributes = isLensAPIFormat(_attributes)
-        ? new LensConfigBuilder().fromAPIFormat(_attributes)
-        : _attributes;
+      const attributes = toLensAttributes(_attributes);
 
       markdownContext.replaceNode(
         position,
@@ -279,19 +285,16 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
             }
           : undefined;
 
-      if (draftComment?.position) {
-        handleUpdate(
-          lensEmbeddablePackage.serializedState.attributes,
-          newTimeRange,
-          draftComment.position
-        );
-        return;
-      }
-
-      if (draftComment) {
-        handleAdd(lensEmbeddablePackage.serializedState.attributes, newTimeRange);
-      }
+    if (draftComment.position) {
+      handleUpdate(
+        lensEmbeddablePackage.serializedState.attributes,
+        newTimeRange,
+        draftComment.position
+      );
+      return;
     }
+
+    handleAdd(lensEmbeddablePackage.serializedState.attributes, newTimeRange);
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);
 
   const createLensButton = (
