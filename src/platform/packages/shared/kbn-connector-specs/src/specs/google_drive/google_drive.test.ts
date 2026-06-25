@@ -12,7 +12,8 @@ import {
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
 } from '../../connector_utils';
 import type { ActionContext } from '../../connector_spec';
-import { GoogleDriveConnector, parseCommaSeparatedIds, parseDriveUrlsFromText } from './google_drive';
+import { GoogleDriveConnector } from './google_drive';
+import { parseCommaSeparatedIds, parseDriveUrlsFromText } from './google_drive_helpers';
 
 describe('GoogleDriveConnector', () => {
   const mockClient = {

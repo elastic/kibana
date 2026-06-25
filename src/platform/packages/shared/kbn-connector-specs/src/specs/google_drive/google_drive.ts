@@ -15,6 +15,7 @@ import {
   getEstimatedBase64OutputBytes,
 } from '../../connector_utils';
 import type { ConnectorSpec } from '../../connector_spec';
+import { parseCommaSeparatedIds, parseDriveUrlsFromText } from './google_drive_helpers';
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 const DEFAULT_PAGE_SIZE = 250;
@@ -66,49 +67,6 @@ const TEXT_EXPORT_SHEETS = 'text/csv';
 const TEXT_EXPORT_DEFAULT = 'text/plain';
 const DRIVE_FILE_LIST_FIELDS =
   'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink, parents, owners(emailAddress,displayName))';
-
-const DRIVE_URL_FILE_ID_PATTERNS = [
-  /https?:\/\/docs\.google\.com\/(?:document|spreadsheets|presentation|file)\/d\/([a-zA-Z0-9_-]+)/g,
-  /https?:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/g,
-  /https?:\/\/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/g,
-];
-
-export interface ParsedDriveUrlLink {
-  fileId: string;
-  url: string;
-}
-
-export function parseDriveUrlsFromText(text: string): ParsedDriveUrlLink[] {
-  if (!text || text.trim().length === 0) {
-    return [];
-  }
-
-  const linksById = new Map<string, ParsedDriveUrlLink>();
-
-  for (const pattern of DRIVE_URL_FILE_ID_PATTERNS) {
-    pattern.lastIndex = 0;
-    for (const match of text.matchAll(pattern)) {
-      const fileId = match[1];
-      const url = match[0];
-      if (fileId && url && !linksById.has(fileId)) {
-        linksById.set(fileId, { fileId, url });
-      }
-    }
-  }
-
-  return [...linksById.values()];
-}
-
-export function parseCommaSeparatedIds(value: string): string[] {
-  if (!value || value.trim().length === 0) {
-    return [];
-  }
-
-  return value
-    .split(',')
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0);
-}
 
 function buildSharedDriveListParams(input: {
   q: string;
