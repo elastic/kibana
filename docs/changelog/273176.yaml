@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/273176
-type: feature
-products:
-- product: cloud-serverless
-  target: 2026-06-25
-areas:
-- Alerting and reporting
-title: Add required_on_close to templates v2 field validation schema

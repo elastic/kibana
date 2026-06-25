@@ -8,5 +8,4 @@ products:
   target: 2026-06-25
 areas:
 - Search and data
-title: Remove feedback button
-description: Removes "Give feedback" button in Fleet UI.
+title: Remove feedback button from Fleet

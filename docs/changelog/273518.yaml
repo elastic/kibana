@@ -6,4 +6,4 @@ products:
   target: 2026-06-25
 areas:
 - AI and machine Learning
-title: "Fix unbounded string length validation in Machine Learning API schemas"
+title: "Fix unbounded string length validation in machine learning API schemas"

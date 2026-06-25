@@ -8,5 +8,4 @@ products:
   target: 2026-06-25
 areas:
 - Dashboards and visualizations
-title: "Fix save and return for Maps opened from the Visualize library"
-description: "Maps opened from the Visualize app listing page incorrectly advertised 'Save and return' support after dashboard listing tabs were added, so saving and returning to the dashboard failed."
+title: "Fix save and return for maps opened from the Visualize library"

@@ -6,4 +6,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-25
-title: Fix conversation save after select all
+title: "Fix all Security AI Assistant conversations deleted when saving one after select all"
+description: "Selecting all conversations in Stack Management and then saving a visibility change on one conversation no longer deletes every conversation. Only the edited conversation is updated."
