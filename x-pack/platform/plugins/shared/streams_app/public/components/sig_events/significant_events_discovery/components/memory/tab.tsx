@@ -856,19 +856,27 @@ function MemoryDiffViewer({
   const { euiTheme } = useEuiTheme();
 
   const sections = [
-    { label: 'Title', originalText: original.title, modifiedText: modified.title },
     {
-      label: 'Categories',
+      label: i18n.translate('xpack.streams.memory.diffTitleLabel', { defaultMessage: 'Title' }),
+      originalText: original.title,
+      modifiedText: modified.title,
+    },
+    {
+      label: i18n.translate('xpack.streams.memory.diffCategoriesLabel', {
+        defaultMessage: 'Categories',
+      }),
       originalText: original.categories.join('\n'),
       modifiedText: modified.categories.join('\n'),
     },
     {
-      label: 'Tags',
+      label: i18n.translate('xpack.streams.memory.diffTagsLabel', { defaultMessage: 'Tags' }),
       originalText: original.tags.join('\n'),
       modifiedText: modified.tags.join('\n'),
     },
     {
-      label: 'Content',
+      label: i18n.translate('xpack.streams.memory.diffContentLabel', {
+        defaultMessage: 'Content',
+      }),
       originalText: original.content,
       modifiedText: modified.content,
       alwaysShow: true,
@@ -955,10 +963,11 @@ function CreateEntryFlyout({
 
   const handleCreate = useCallback(() => {
     if (!title.trim()) return;
-    const name = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_|_$/g, '');
+    const name =
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_|_$/g, '') || `entry_${Date.now()}`;
     createEntry.mutate(
       {
         name,
