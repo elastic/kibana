@@ -70,6 +70,7 @@ import {
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
+import { clearDiscoveredSourceCache } from '../source_discovery';
 
 type MockRemoteLogsExtractionClient = jest.Mocked<
   Pick<RemoteLogsExtractionClient, 'extractToUpdates'>
@@ -1521,6 +1522,142 @@ describe('LogsExtractionClient', () => {
       expect(indexPatterns).not.toContain('-remote_cluster:logs-debug-*');
       // remote includes are also not returned
       expect(indexPatterns).not.toContain('remote_cluster:logs-*');
+    });
+  });
+
+  describe('deterministic source discovery (useDiscoveredIndexSource)', () => {
+    const UPDATES_DATA_STREAM = '.entities.v2.updates.security_default';
+    const ALERTS_INDEX = '.alerts-security.alerts-default';
+
+    describe('FROM replacement when discovered source patterns are supplied', () => {
+      it('builds updates ∪ additional ∪ discovered, skipping the data view (no lookup, no logs-* fallback)', async () => {
+        const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns(
+          ['custom-index'],
+          [],
+          ['logs-okta.system-default', ALERTS_INDEX]
+        );
+
+        expect(localIndexPatterns).toEqual(
+          expect.arrayContaining([
+            UPDATES_DATA_STREAM,
+            'custom-index',
+            'logs-okta.system-default',
+            ALERTS_INDEX,
+          ])
+        );
+        expect(localIndexPatterns).not.toContain('logs-*');
+        expect(mockDataViewsService.get).not.toHaveBeenCalled();
+      });
+
+      it('keeps the alerts index when discovery supplies it (no withoutAlerts stripping)', async () => {
+        const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns(
+          [],
+          [],
+          [ALERTS_INDEX]
+        );
+
+        expect(localIndexPatterns).toContain(ALERTS_INDEX);
+      });
+
+      it('extracts from updates-only when discovery returns no sources (no data view fallback)', async () => {
+        const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns([], [], []);
+
+        expect(localIndexPatterns).toEqual([UPDATES_DATA_STREAM]);
+        expect(mockDataViewsService.get).not.toHaveBeenCalled();
+      });
+
+      it('still appends excluded patterns as trailing negations', async () => {
+        const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns(
+          [],
+          ['logs-proxy-*'],
+          ['logs-okta.system-default']
+        );
+
+        const includeIdx = localIndexPatterns.indexOf('logs-okta.system-default');
+        const excludeIdx = localIndexPatterns.indexOf('-logs-proxy-*');
+        expect(includeIdx).toBeGreaterThanOrEqual(0);
+        expect(excludeIdx).toBeGreaterThan(includeIdx);
+      });
+
+      it('routes a cluster-prefixed discovered pattern to the remote set', async () => {
+        const { localIndexPatterns, remoteIndexPatterns } =
+          await client.getLocalAndRemoteIndexPatterns([], [], ['remote_cluster:logs-okta-default']);
+
+        expect(remoteIndexPatterns).toContain('remote_cluster:logs-okta-default');
+        expect(localIndexPatterns).not.toContain('remote_cluster:logs-okta-default');
+      });
+
+      it('getLocalIndexPatterns forwards discovered patterns and returns local-only', async () => {
+        const indexPatterns = await client.getLocalIndexPatterns(
+          [],
+          [],
+          ['logs-okta.system-default', 'remote_cluster:logs-okta-default']
+        );
+
+        expect(indexPatterns).toContain('logs-okta.system-default');
+        expect(indexPatterns).not.toContain('remote_cluster:logs-okta-default');
+        expect(mockDataViewsService.get).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('getDiscoveredSources', () => {
+      beforeEach(() => clearDiscoveredSourceCache());
+
+      it('returns enabled:false with empty results and makes no ES calls when the flag is off', async () => {
+        const resolveIndex = jest.fn();
+        const fieldCaps = jest.fn();
+        (mockEsClient as unknown as { indices: unknown }).indices = { resolveIndex };
+        (mockEsClient as unknown as { fieldCaps: unknown }).fieldCaps = fieldCaps;
+
+        const result = await client.getDiscoveredSources();
+
+        expect(result).toEqual({
+          enabled: false,
+          sources: { user: [], host: [], service: [], generic: [] },
+          provenance: [],
+        });
+        expect(resolveIndex).not.toHaveBeenCalled();
+        expect(fieldCaps).not.toHaveBeenCalled();
+      });
+
+      it('returns enabled:false when the store is not installed (global state missing)', async () => {
+        mockGlobalStateClient.find.mockResolvedValueOnce(undefined);
+
+        const result = await client.getDiscoveredSources();
+
+        expect(result.enabled).toBe(false);
+      });
+
+      it('returns discovered sources and provenance when the flag is on', async () => {
+        const dataStream = 'logs-okta.system-default';
+        const backingIndex = '.ds-logs-okta.system-default-2024.01.01-000001';
+        mockGlobalStateClient.find.mockResolvedValue({
+          logsExtraction: LogExtractionConfig.parse({ useDiscoveredIndexSource: true }),
+        } as EntityStoreGlobalState);
+        (mockEsClient as unknown as { indices: unknown }).indices = {
+          resolveIndex: jest.fn().mockResolvedValue({
+            indices: [],
+            aliases: [],
+            data_streams: [{ name: dataStream, backing_indices: [backingIndex] }],
+          }),
+        };
+        (mockEsClient as unknown as { fieldCaps: unknown }).fieldCaps = jest
+          .fn()
+          .mockResolvedValue({
+            indices: [backingIndex],
+            fields: { 'user.email': { keyword: { type: 'keyword', indices: [backingIndex] } } },
+          });
+
+        const result = await client.getDiscoveredSources();
+
+        expect(result.enabled).toBe(true);
+        expect(result.sources.user).toEqual([dataStream]);
+        expect(result.provenance).toContainEqual({
+          entityType: 'user',
+          sourceName: dataStream,
+          matchedFields: ['user.email'],
+        });
+      });
     });
   });
 

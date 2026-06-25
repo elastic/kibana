@@ -49,6 +49,12 @@ import {
   getSecuritySolutionDataViewName,
 } from '../asset_manager/external_indices_contants';
 import {
+  emptySources,
+  getCachedPerTypeSourceIndices,
+  type PerTypeSourceIndices,
+  type PerTypeSourceProvenance,
+} from '../source_discovery';
+import {
   type LogExtractionConfig,
   LogExtractionConfig as LogExtractionConfigSchema,
 } from '../saved_objects';
@@ -96,6 +102,16 @@ interface ExtractedLogsSummaryError {
 }
 
 type ExtractedLogsSummary = ExtractedLogsSummarySuccess | ExtractedLogsSummaryError;
+
+/** Visibility surface for the deterministic source-discovery POC. */
+export interface DiscoveredSourcesResult {
+  /** Whether `useDiscoveredIndexSource` is enabled for this namespace. */
+  enabled: boolean;
+  /** Per-entity-type resolved source patterns (empty when disabled). */
+  sources: PerTypeSourceIndices;
+  /** Why each source qualified for each type (empty when disabled). */
+  provenance: PerTypeSourceProvenance[];
+}
 
 export interface LogsExtractionClientDependencies {
   logger: Logger;
@@ -226,9 +242,11 @@ export class LogsExtractionClient {
   public async getRemainingLogsCount(type: EntityType): Promise<number> {
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
+      const discoveredSourcePatterns = await this.resolveDiscoveredSourcePatterns(type, config);
       const indexPatterns = await this.getLocalIndexPatterns(
         config.additionalIndexPatterns,
-        config.excludedIndexPatterns
+        config.excludedIndexPatterns,
+        discoveredSourcePatterns
       );
       const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
       const toDateISO = moment().utc().toISOString();
@@ -281,9 +299,11 @@ export class LogsExtractionClient {
     logsCapApplied: boolean;
     logsProcessed: number;
   }> {
+    const discoveredSourcePatterns = await this.resolveDiscoveredSourcePatterns(type, config);
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns,
-      config.excludedIndexPatterns
+      config.excludedIndexPatterns,
+      discoveredSourcePatterns
     );
 
     const mainPromise = this.runMainPath({
@@ -946,6 +966,47 @@ export class LogsExtractionClient {
   }
 
   /**
+   * Deterministic source discovery (POC). Returns the per-type discovered source
+   * patterns when `useDiscoveredIndexSource` is enabled, otherwise `undefined` so
+   * callers fall through to the legacy data-view path. The returned array is the
+   * complete source set for `type` (it may legitimately be empty, in which case
+   * the engine extracts from `updates ∪ additional` only — no data-view fallback).
+   */
+  private async resolveDiscoveredSourcePatterns(
+    type: EntityType,
+    config: LogExtractionConfig
+  ): Promise<string[] | undefined> {
+    if (!config.useDiscoveredIndexSource) {
+      return undefined;
+    }
+    const { sources } = await getCachedPerTypeSourceIndices({
+      esClient: this.esClient,
+      namespace: this.namespace,
+      logger: this.logger,
+    });
+    return sources[type];
+  }
+
+  /**
+   * Read-only visibility into deterministic discovery for this namespace: the
+   * resolved per-type sources and why each qualified. Returns `enabled: false`
+   * with empty results when the flag is off or the store is not installed.
+   */
+  public async getDiscoveredSources(): Promise<DiscoveredSourcesResult> {
+    const globalState = await this.globalStateClient.find();
+    const enabled = globalState?.logsExtraction.useDiscoveredIndexSource ?? false;
+    if (!enabled) {
+      return { enabled: false, sources: emptySources(), provenance: [] };
+    }
+    const { sources, provenance } = await getCachedPerTypeSourceIndices({
+      esClient: this.esClient,
+      namespace: this.namespace,
+      logger: this.logger,
+    });
+    return { enabled, sources, provenance };
+  }
+
+  /**
    * Returns local index patterns and remote patterns separately.
    * Cluster-prefixed patterns (`cluster1:logs-*`) go to remote (CCS strategy).
    * Unqualified patterns stay local; CPS strategy reuses local patterns for linked projects.
@@ -953,16 +1014,23 @@ export class LogsExtractionClient {
    */
   public async getLocalAndRemoteIndexPatterns(
     additionalIndexPatterns: string[] = [],
-    excludedIndexPatterns: string[] = []
+    excludedIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<{ localIndexPatterns: string[]; remoteIndexPatterns: string[] }> {
-    const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
+    const all = await this.getAllIndexPatternsIncludingRemote(
+      additionalIndexPatterns,
+      discoveredSourcePatterns
+    );
+    // The alerts index is normally stripped here. With deterministic discovery
+    // on, alerts are an intentional, per-type-qualified source, so keep them.
     const alertsIndex = getAlertsIndexName(this.namespace);
-    const withoutAlerts = all.filter((index) => index !== alertsIndex);
+    const candidatePatterns =
+      discoveredSourcePatterns !== undefined ? all : all.filter((index) => index !== alertsIndex);
 
     const localIndexPatterns: string[] = [];
     const remoteIndexPatterns: string[] = [];
 
-    withoutAlerts.forEach((index) => {
+    candidatePatterns.forEach((index) => {
       if (isNonLocalIndexName(index)) {
         remoteIndexPatterns.push(index);
       } else {
@@ -985,11 +1053,13 @@ export class LogsExtractionClient {
 
   public async getLocalIndexPatterns(
     additionalIndexPatterns: string[] = [],
-    excludedIndexPatterns: string[] = []
+    excludedIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<string[]> {
     const { localIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       additionalIndexPatterns,
-      excludedIndexPatterns
+      excludedIndexPatterns,
+      discoveredSourcePatterns
     );
     return localIndexPatterns;
   }
@@ -998,12 +1068,23 @@ export class LogsExtractionClient {
    * Builds the full list of index patterns (updates, additional, security data view),
    * including cluster-prefixed patterns from the data view, without alerts or
    * local/remote splitting applied.
+   *
+   * When `discoveredSourcePatterns` is provided (deterministic source-discovery
+   * POC), the engine sources from `updates ∪ additional ∪ discovered` only: the
+   * Security Solution data view is intentionally NOT consulted and there is no
+   * `logs-*` fallback.
    */
   private async getAllIndexPatternsIncludingRemote(
-    additionalIndexPatterns: string[] = []
+    additionalIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<string[]> {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
     const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
+
+    if (discoveredSourcePatterns !== undefined) {
+      indexPatterns.push(...discoveredSourcePatterns);
+      return indexPatterns;
+    }
 
     try {
       const secSolDataView = await this.dataViewsService.get(
