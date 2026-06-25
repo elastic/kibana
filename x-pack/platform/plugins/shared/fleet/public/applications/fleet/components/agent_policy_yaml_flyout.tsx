@@ -63,7 +63,6 @@ export const AgentPolicyYamlFlyout = memo<{
       <Loading />
     ) : error ? (
       <EuiCallOut
-        announceOnMount
         title={
           <FormattedMessage
             id="xpack.fleet.policyDetails.errorGettingFullAgentPolicy"
@@ -124,7 +123,6 @@ export const AgentPolicyYamlFlyout = memo<{
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
-              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.secretsTitle"
