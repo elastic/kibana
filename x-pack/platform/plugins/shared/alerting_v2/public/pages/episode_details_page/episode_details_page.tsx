@@ -434,11 +434,11 @@ export function EpisodeDetailsPage() {
                       services={detailsServices}
                     />
                     <AlertEpisodeSeverityHeatmapSection
-                    episodeId={episodeId}
-                    services={detailsServices}
-                  />
-                  <EuiSpacer size="l" />
-                  <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
+                      episodeId={episodeId}
+                      services={detailsServices}
+                    />
+                    <EuiSpacer size="l" />
+                    <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
                   </EuiFlexGroup>
                 </EuiPanel>
               )}
