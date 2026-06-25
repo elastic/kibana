@@ -31,10 +31,6 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
-import {
-  WorkflowChangeHistoryAction,
-  type WorkflowChangeHistoryActionType,
-} from './workflow_change_history_constants';
 import type {
   IndexWorkflowDocumentOptions,
   ReadModifyWriteWorkflowDocumentParams,
@@ -42,6 +38,10 @@ import type {
   WorkflowDocumentGetOptions,
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
+import {
+  WorkflowChangeHistoryAction,
+  type WorkflowChangeHistoryActionType,
+} from '../../common/lib/workflow_change_history/constants';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { deleteWorkflows } from '../api/lib/workflow_deletion';
