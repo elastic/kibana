@@ -30,6 +30,7 @@ import type { LockManagerService } from '@kbn/lock-manager';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { FleetConfigType } from '../../common/types';
@@ -89,6 +90,7 @@ class AppContextService {
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
   private workflowsManagementSetup: WorkflowsServerPluginSetup | undefined;
+  private agentBuilderSetup: AgentBuilderPluginSetup | undefined;
   private includedHiddenTypes: string[] = [
     UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     KibanaSavedObjectType.alertingRuleTemplate,
@@ -358,6 +360,14 @@ class AppContextService {
 
   public getWorkflowsManagementSetup() {
     return this.workflowsManagementSetup;
+  }
+
+  public setAgentBuilderSetup(setup?: AgentBuilderPluginSetup) {
+    this.agentBuilderSetup = setup;
+  }
+
+  public getAgentBuilderSetup() {
+    return this.agentBuilderSetup;
   }
 
   public getReportingStart() {

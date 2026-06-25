@@ -150,4 +150,80 @@ describe('SDLC intel golden-path assets', () => {
     expect(manifest).toContain('google_drive_connector_id');
     expect(manifest).toContain('gdrive_roadmap_folder_ids');
   });
+
+  it('includes Phase E agentic workflow assets', () => {
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/sdlc-agent-insights.json'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/agent-coverage-analysis.yaml'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/agent-scope-alignment.yaml'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/agent/sdlc-coverage-analysis.yaml'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/agent/sdlc-scope-alignment.yaml'))
+    ).toBe(true);
+
+    const coverageWorkflow = fs.readFileSync(
+      path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/agent-coverage-analysis.yaml'),
+      'utf8'
+    );
+    expect(coverageWorkflow).toContain('REPLACE_WITH_FLEET_AGENT_sdlc-coverage-analysis');
+
+    const manifest = fs.readFileSync(path.join(FLEET_PACKAGE_ROOT, 'manifest.yml'), 'utf8');
+    expect(manifest).toContain('ai_connector_id');
+  });
+
+  it('includes Phase F knowledge base and alerting template assets', () => {
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'docs/knowledge_base/sdlc-github-data-model.md')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'docs/knowledge_base/sdlc-epic-phases-schema.md')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'docs/knowledge_base/sdlc-team-dimension-guide.md')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          FLEET_PACKAGE_ROOT,
+          'kibana/alerting_rule_template/sdlc-stale-epic-thin-tickets.json'
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/alerting_rule_template/sdlc-epic-failing-gates.json')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/alerting_rule_template/sdlc-no-linked-prd.json')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          FLEET_PACKAGE_ROOT,
+          'kibana/alerting_rule_template/sdlc-roadmap-unassigned-team.json'
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, '../docs/PLATFORM_RFC_KIBANA_ASSET_EXTENSIONS.md')
+      )
+    ).toBe(true);
+  });
 });

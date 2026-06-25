@@ -48,12 +48,13 @@ When adding the integration policy, set:
 | `salesforce_product_area_field` | Salesforce Case product area field (default: `Product_Area__c`) |
 | `google_drive_connector_id` | Google Drive (`.google_drive`) connector ID for design-doc workflows |
 | `gdrive_roadmap_folder_ids` | Comma-separated shared Drive folder IDs for roadmap catalog (`multi: true`) |
+| `ai_connector_id` | Inference connector ID for SDLC agentic workflows (`ai.agent` steps) |
 
 If vars are unset, workflows retain `REPLACE_WITH_*` placeholders for manual editing.
 
 ## ILM retention
 
-Fleet installs `elasticsearch/ilm_policy/sdlc_intel_retention.json` during package install (unless Fleet internal ILM is disabled). All 24 index templates reference `index.lifecycle.name: sdlc_intel_retention`.
+Fleet installs `elasticsearch/ilm_policy/sdlc_intel_retention.json` during package install (unless Fleet internal ILM is disabled). All 25 index templates reference `index.lifecycle.name: sdlc_intel_retention`.
 
 | Phase | Age | Action |
 |-------|-----|--------|
@@ -183,6 +184,46 @@ Example analytics enabled by `sdlc-design-doc-coverage-view`:
 
 Do **not** bulk-download Google Docs content into Elasticsearch. Agents can call `downloadFile` on demand.
 
+### Phase E — Agentic workflows (read-only analysis)
+
+Two workflow-backed agents synthesize over existing SDLC indices and persist structured output to `sdlc-agent-insights`:
+
+| Workflow | Schedule | Fleet agent (after install) | Purpose |
+|----------|----------|----------------------------|---------|
+| **agent coverage analysis** | daily | `fleet-{space}-sdlc_intel-sdlc-coverage-analysis` | Thin epics, roadmap ownership gaps, failing phase gates |
+| **agent scope alignment** | every 12h | `fleet-{space}-sdlc_intel-sdlc-scope-alignment` | PR scope vs linked issue/epic intent |
+
+**Prerequisites:** `agentBuilder` + `workflowsManagement` enabled, `ai_connector_id` set on the integration policy, GitHub ingest + epic enrichment workflows populated.
+
+**Fleet-installed agents** — definitions ship under `kibana/agent/*.yaml` and are created as persisted Agent Builder agents on package install (no `security_solution` code). Agents use platform ES\|QL + integration knowledge tools only; schema semantics come from `docs/knowledge_base/`.
+
+No GitHub writes — findings land in `sdlc-agent-insights` only (NFR-003).
+
+### Phase F — Knowledge base and alerting templates (available today)
+
+**Integration knowledge base** — indexed automatically on package install from markdown under `docs/`:
+
+| File | Purpose |
+|------|---------|
+| `docs/knowledge_base/sdlc-github-data-model.md` | Index families, relationships, common fields |
+| `docs/knowledge_base/sdlc-epic-phases-schema.md` | Phase gates, rollup fields, example ES\|QL |
+| `docs/knowledge_base/sdlc-team-dimension-guide.md` | Team catalog and ownership coverage |
+
+Requires Enterprise license and **Integrations → Settings → Integration knowledge** enabled. Feeds Agent Builder / AI Assistant context for installed integrations.
+
+**Alerting rule templates** — shipped under `kibana/alerting_rule_template/` (installed as saved object templates):
+
+| Template ID | Detects |
+|-------------|---------|
+| `sdlc-stale-epic-thin-tickets` | Epics with fewer than 3 child tickets |
+| `sdlc-epic-failing-gates` | Epics with `rollup.gates_passed_pct < 100` |
+| `sdlc-no-linked-prd` | Roadmap epics missing `links.prd_url` |
+| `sdlc-roadmap-unassigned-team` | Roadmap project items without engineering team |
+
+Enable from **Fleet → Integrations → SDLC Intelligence → Alerting** after install. Rules are created **disabled**; add actions/connectors before enabling.
+
+Platform RFC for the generic extension (`KibanaAssetType.agent`): [`docs/PLATFORM_RFC_KIBANA_ASSET_EXTENSIONS.md`](docs/PLATFORM_RFC_KIBANA_ASSET_EXTENSIONS.md) — **P1/P2 implemented** in Fleet + Agent Builder.
+
 ## Dashboards
 
 | Dashboard | Data source | Purpose |
@@ -196,13 +237,13 @@ Do **not** bulk-download Google Docs content into Elasticsearch. Agents can call
 | **SDLC Salesforce feedback loop** | `sdlc-salesforce-feedback-view`, `sdlc-feedback-loop-enriched-view` | Case ↔ SDH linkage and Case → SDH → product three-hop view |
 | **SDLC Design doc coverage** | `sdlc-design-doc-coverage-view` | Epic/product/SDH issues linked to Google Drive design docs |
 
-## Fleet workflow auto-install
+## Fleet workflow and agent auto-install
 
-When the `workflowsManagement` plugin is enabled, Fleet installs package workflows from `kibana/workflow/*.yaml` during package installation. Workflow IDs follow the pattern `fleet-{spaceId}-{pkgName}-{file-base}`.
+When the `workflowsManagement` plugin is enabled, Fleet installs package workflows from `kibana/workflow/*.yaml` during package installation. When `agentBuilder` is enabled, Fleet installs persisted agents from `kibana/agent/*.yaml` first, then workflows. IDs follow `fleet-{spaceId}-{pkgName}-{file-base}`.
 
-Connector IDs, org login, Salesforce field names, SDH repo pattern, SDH label, Google Drive connector ID, and roadmap folder IDs from the integration policy vars replace `REPLACE_WITH_GITHUB_CONNECTOR_ID`, `REPLACE_WITH_SLACK_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CONNECTOR_ID`, `REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD`, `REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD`, `REPLACE_WITH_SDH_REPO_PATTERN`, `REPLACE_WITH_SDH_LABEL`, `REPLACE_WITH_GDRIVE_CONNECTOR_ID`, `REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS`, and `REPLACE_WITH_ORG_LOGIN` during install.
+Connector IDs, org login, Salesforce field names, SDH repo pattern, SDH label, Google Drive connector ID, roadmap folder IDs, and AI connector ID from the integration policy vars replace `REPLACE_WITH_*` placeholders during install. Workflow `agent-id` placeholders `REPLACE_WITH_FLEET_AGENT_{file-base}` resolve to the matching fleet agent ID.
 
-On package uninstall, workflow assets are deleted via `workflowsManagement.deleteWorkflows`.
+On package uninstall, agent assets are deleted via `agentBuilder.management.deletePackageManagedAgent` and workflow assets via `workflowsManagement.deleteWorkflows`.
 
 ## Validation
 
@@ -213,6 +254,7 @@ node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/specs/goo
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/salesforce.test.ts
 node scripts/jest src/platform/packages/shared/kbn-workflows/spec/examples/sdlc_intel_package.test.ts
 node scripts/jest x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_workflow_assets.test.ts
+node scripts/jest x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_agent_assets.test.ts
 ```
 
 ## Related Kibana code
@@ -221,6 +263,7 @@ node scripts/jest x-pack/platform/plugins/shared/fleet/server/services/epm/packa
 - Slack ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/slack/`
 - Salesforce ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/`
 - Google Drive ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/`
+- Fleet agent installer: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_agent_assets.ts`
 - Fleet workflow installer: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_workflow_assets.ts`
 - Fleet workflow uninstall: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/remove.ts`
 - Bundled workflow examples: `src/platform/packages/shared/kbn-workflows/spec/examples/sdlc_*.yml`

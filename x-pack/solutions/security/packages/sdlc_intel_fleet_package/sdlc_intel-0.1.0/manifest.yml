@@ -105,6 +105,15 @@ vars:
     multi: true
     required: false
     show_user: true
+  - name: ai_connector_id
+    type: text
+    title: AI inference connector ID
+    description: >
+      Kibana connector ID for the inference provider used by SDLC agentic workflows
+      (coverage analysis and scope alignment).
+    multi: false
+    required: false
+    show_user: true
 policy_templates:
   - name: sdlc_intel
     title: SDLC Intelligence

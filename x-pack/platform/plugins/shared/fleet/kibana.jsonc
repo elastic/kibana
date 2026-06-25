@@ -43,7 +43,8 @@
       "alerting",
       "sloShared",
       "reporting",
-      "workflowsManagement"
+      "workflowsManagement",
+      "agentBuilder"
     ],
     "requiredBundles": [
       "kibanaReact",

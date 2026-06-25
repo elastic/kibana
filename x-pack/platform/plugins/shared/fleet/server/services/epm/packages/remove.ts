@@ -248,8 +248,12 @@ export async function deleteKibanaAssets({
   const workflowAssets = installedObjects.filter(
     (asset) => asset.type === KibanaSavedObjectType.workflow
   );
+  const agentAssets = installedObjects.filter(
+    (asset) => asset.type === KibanaSavedObjectType.agent
+  );
   const savedObjectAssets = installedObjects.filter(
-    (asset) => asset.type !== KibanaSavedObjectType.workflow
+    (asset) =>
+      asset.type !== KibanaSavedObjectType.workflow && asset.type !== KibanaSavedObjectType.agent
   );
 
   const workflowsApi = appContextService.getWorkflowsManagementSetup()?.management;
@@ -264,6 +268,22 @@ export async function deleteKibanaAssets({
   } else if (workflowAssets.length > 0) {
     logger.debug(
       `Skipping deletion of ${workflowAssets.length} workflow assets: workflowsManagement unavailable`
+    );
+  }
+
+  const agentBuilderApi = appContextService.getAgentBuilderSetup()?.management;
+  if (agentAssets.length > 0 && agentBuilderApi) {
+    logger.debug(`Deleting ${agentAssets.length} agent assets via agentBuilder`);
+    for (const asset of agentAssets) {
+      try {
+        await agentBuilderApi.deletePackageManagedAgent(asset.id, spaceId);
+      } catch (err) {
+        logger.warn(`Failed to delete agent asset ${asset.id}: ${err}`);
+      }
+    }
+  } else if (agentAssets.length > 0) {
+    logger.debug(
+      `Skipping deletion of ${agentAssets.length} agent assets: agentBuilder unavailable`
     );
   }
 

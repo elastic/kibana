@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { substituteWorkflowConnectorIds } from './step_install_workflow_assets';
+import { substituteWorkflowConnectorIds, substituteFleetAgentIds } from './step_install_workflow_assets';
 
 describe('substituteWorkflowConnectorIds', () => {
   const sampleYaml = `
@@ -20,6 +20,7 @@ consts:
   sdhLabel: REPLACE_WITH_SDH_LABEL
   gdriveConnectorId: REPLACE_WITH_GDRIVE_CONNECTOR_ID
   roadmapFolderIds: REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS
+  aiConnectorId: REPLACE_WITH_AI_CONNECTOR_ID
 `;
 
   it('substitutes connector and org placeholders from package policy vars', () => {
@@ -33,6 +34,7 @@ consts:
       sdh_label: 'sdh',
       google_drive_connector_id: 'gdrive-conn-4',
       gdrive_roadmap_folder_ids: ['folder-roadmap-1', 'folder-okrs-2'],
+      ai_connector_id: 'ai-conn-5',
       org_login: 'my-org',
     });
 
@@ -46,6 +48,7 @@ consts:
     expect(result).toContain('sdhLabel: sdh');
     expect(result).toContain('gdriveConnectorId: gdrive-conn-4');
     expect(result).toContain('roadmapFolderIds: folder-roadmap-1,folder-okrs-2');
+    expect(result).toContain('aiConnectorId: ai-conn-5');
     expect(result).not.toContain('REPLACE_WITH_ORG_LOGIN');
     expect(result).not.toContain('REPLACE_WITH_GITHUB_CONNECTOR_ID');
     expect(result).not.toContain('REPLACE_WITH_SLACK_CONNECTOR_ID');
@@ -56,6 +59,7 @@ consts:
     expect(result).not.toContain('REPLACE_WITH_SDH_LABEL');
     expect(result).not.toContain('REPLACE_WITH_GDRIVE_CONNECTOR_ID');
     expect(result).not.toContain('REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS');
+    expect(result).not.toContain('REPLACE_WITH_AI_CONNECTOR_ID');
   });
 
   it('joins multi-value roadmap folder IDs for workflow substitution', () => {
@@ -82,5 +86,6 @@ consts:
     expect(result).toContain('REPLACE_WITH_SDH_LABEL');
     expect(result).toContain('REPLACE_WITH_GDRIVE_CONNECTOR_ID');
     expect(result).toContain('REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS');
+    expect(result).toContain('REPLACE_WITH_AI_CONNECTOR_ID');
   });
 });

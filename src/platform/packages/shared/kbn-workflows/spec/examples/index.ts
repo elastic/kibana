@@ -373,6 +373,24 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     tags: ['scheduled', 'github', 'google_drive', 'ingest', 'sdlc', 'documents', 'design', 'enrich'],
     filename: 'sdlc_github_extract_drive_links.yml',
   },
+  {
+    id: 'sdlc_agent_coverage_analysis',
+    name: 'SDLC agent coverage analysis',
+    description:
+      'Agentic planning workflow over SDLC indices; persists coverage findings to sdlc-agent-insights',
+    category: 'security',
+    tags: ['scheduled', 'agent', 'ai', 'sdlc', 'planning', 'coverage'],
+    filename: 'sdlc_agent_coverage_analysis.yml',
+  },
+  {
+    id: 'sdlc_agent_scope_alignment',
+    name: 'SDLC agent scope alignment',
+    description:
+      'Agentic development workflow comparing PR scope to linked issues/epics; persists to sdlc-agent-insights',
+    category: 'security',
+    tags: ['scheduled', 'agent', 'ai', 'sdlc', 'development', 'scope-alignment'],
+    filename: 'sdlc_agent_scope_alignment.yml',
+  },
 ];
 
 /** Allowlisted example IDs — prevents path traversal attacks when reading files */

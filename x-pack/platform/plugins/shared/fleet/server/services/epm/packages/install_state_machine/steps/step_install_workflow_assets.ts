@@ -29,6 +29,7 @@ const SDH_REPO_PATTERN_PLACEHOLDER = 'REPLACE_WITH_SDH_REPO_PATTERN';
 const SDH_LABEL_PLACEHOLDER = 'REPLACE_WITH_SDH_LABEL';
 const GDRIVE_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_GDRIVE_CONNECTOR_ID';
 const GDRIVE_ROADMAP_FOLDER_IDS_PLACEHOLDER = 'REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS';
+const AI_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_AI_CONNECTOR_ID';
 const ORG_LOGIN_PLACEHOLDER = 'REPLACE_WITH_ORG_LOGIN';
 
 const formatManifestVarForSubstitution = (value: unknown): string | undefined => {
@@ -61,6 +62,7 @@ export const substituteWorkflowConnectorIds = (
   const sdhLabel = vars.sdh_label;
   const googleDriveConnectorId = vars.google_drive_connector_id;
   const gdriveRoadmapFolderIds = formatManifestVarForSubstitution(vars.gdrive_roadmap_folder_ids);
+  const aiConnectorId = vars.ai_connector_id;
   const orgLogin = vars.org_login;
 
   if (typeof githubConnectorId === 'string' && githubConnectorId.length > 0) {
@@ -92,6 +94,9 @@ export const substituteWorkflowConnectorIds = (
   }
   if (gdriveRoadmapFolderIds) {
     result = result.replaceAll(GDRIVE_ROADMAP_FOLDER_IDS_PLACEHOLDER, gdriveRoadmapFolderIds);
+  }
+  if (typeof aiConnectorId === 'string' && aiConnectorId.length > 0) {
+    result = result.replaceAll(AI_CONNECTOR_PLACEHOLDER, aiConnectorId);
   }
   if (typeof orgLogin === 'string' && orgLogin.length > 0) {
     result = result.replaceAll(ORG_LOGIN_PLACEHOLDER, orgLogin);
@@ -129,6 +134,29 @@ export const getFleetPackageWorkflowId = (params: {
 }): string => {
   const baseName = params.fileName.replace(/\.ya?ml$/i, '');
   return `fleet-${params.spaceId}-${params.pkgName}-${baseName}`;
+};
+
+const FLEET_AGENT_PLACEHOLDER_PREFIX = 'REPLACE_WITH_FLEET_AGENT_';
+
+export const substituteFleetAgentIds = (
+  yaml: string,
+  params: { pkgName: string; spaceId: string }
+): string => {
+  let result = yaml;
+  const placeholderRegex = new RegExp(`${FLEET_AGENT_PLACEHOLDER_PREFIX}([a-z0-9_-]+)`, 'gi');
+  const matches = yaml.matchAll(placeholderRegex);
+
+  for (const match of matches) {
+    const fileBase = match[1];
+    const agentId = getFleetPackageWorkflowId({
+      pkgName: params.pkgName,
+      spaceId: params.spaceId,
+      fileName: `${fileBase}.yaml`,
+    });
+    result = result.replaceAll(match[0], agentId);
+  }
+
+  return result;
 };
 
 export async function stepInstallWorkflowAssets(
@@ -189,7 +217,8 @@ export async function stepInstallWorkflowAssets(
       workflowEntries,
       async ({ fileName, yaml }) => {
         const workflowId = getFleetPackageWorkflowId({ pkgName, spaceId, fileName });
-        const workflowYaml = substituteWorkflowConnectorIds(yaml, connectorVars);
+        let workflowYaml = substituteWorkflowConnectorIds(yaml, connectorVars);
+        workflowYaml = substituteFleetAgentIds(workflowYaml, { pkgName, spaceId });
         const existingWorkflow = await workflowsApi.getWorkflow(workflowId, spaceId);
 
         if (existingWorkflow) {

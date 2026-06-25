@@ -1,0 +1,124 @@
+version: '1'
+name: SDLC agent coverage analysis
+description: >
+  Agentic planning workflow. Runs the SDLC coverage analysis agent over sdlc-epic-phases,
+  github-intel-project-items, and sdlc-team-dimension, then persists structured findings to
+  sdlc-agent-insights. Read-only analysis (NFR-003).
+enabled: false
+tags:
+  - sdlc
+  - agent
+  - planning
+  - coverage
+  - analysis
+
+consts:
+  aiConnectorId: REPLACE_WITH_AI_CONNECTOR_ID
+  insightsIndex: sdlc-agent-insights
+  workflowSource: agent-coverage-analysis
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-agent-coverage-analysis
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+    inputs:
+      properties:
+        min_ticket_count:
+          type: integer
+          default: 3
+          minimum: 0
+          maximum: 100
+          description: Flag epics with fewer than this many child tickets.
+        connector_id:
+          type: string
+          default: REPLACE_WITH_AI_CONNECTOR_ID
+          description: Inference connector ID for the coverage analysis agent.
+      additionalProperties: false
+
+steps:
+  - name: run_coverage_analysis_agent
+    type: ai.agent
+    agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-coverage-analysis
+    connector-id: REPLACE_WITH_AI_CONNECTOR_ID
+    create-conversation: true
+    with:
+      timeout: 1200s
+      message: |
+        Run SDLC planning coverage analysis.
+
+        Parameters:
+        - min_ticket_count: {{ inputs.min_ticket_count | default: 3 }}
+
+        Tasks:
+        1. Query sdlc-epic-phases, github-intel-project-items, and sdlc-team-dimension with ES|QL.
+        2. Synthesize thin epics, roadmap ownership gaps, and failing gates into prioritized findings.
+        3. Return structured output only — no external writes.
+      schema:
+        type: object
+        properties:
+          summary:
+            type: string
+          status:
+            type: string
+            enum: [healthy, actionsRequired, noData]
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          findings:
+            type: array
+            items:
+              type: object
+              properties:
+                category:
+                  type: string
+                severity:
+                  type: string
+                title:
+                  type: string
+                detail:
+                  type: string
+                entity_url:
+                  type: string
+                recommended_action:
+                  type: string
+              required:
+                - category
+                - severity
+                - title
+                - detail
+          scope_claim:
+            type: object
+        required:
+          - summary
+          - status
+          - findings
+          - scope_claim
+
+  - name: persist_coverage_analysis
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.insightsIndex }}'
+      id: '{{ consts.workflowSource }}-{{ execution.id }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        workflow:
+          execution_id: '{{ execution.id }}'
+          name: SDLC agent coverage analysis
+          source: '{{ consts.workflowSource }}'
+        analysis:
+          type: coverage_analysis
+          status: '${{ steps.run_coverage_analysis_agent.output.status }}'
+          summary: '${{ steps.run_coverage_analysis_agent.output.summary }}'
+          confidence: '${{ steps.run_coverage_analysis_agent.output.confidence ?? 0.7 }}'
+        findings: '${{ steps.run_coverage_analysis_agent.output.findings | json }}'
+        scope_claim: '${{ steps.run_coverage_analysis_agent.output.scope_claim | json }}'
+        payload: '${{ steps.run_coverage_analysis_agent.output | json }}'

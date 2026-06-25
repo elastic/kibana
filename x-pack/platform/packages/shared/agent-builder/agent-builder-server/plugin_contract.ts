@@ -7,6 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AgentCreateRequest } from '@kbn/agent-builder-common';
 import type {
   Conversation,
   ConversationWithoutRounds,
@@ -190,6 +191,19 @@ export interface TopSnippetsConfig {
 }
 
 /**
+ * Internal management API for package-owned persisted agents (e.g. Fleet install step).
+ */
+export interface AgentBuilderManagementSetup {
+  createOrUpdateAgent(
+    params: AgentCreateRequest,
+    request: KibanaRequest
+  ): Promise<unknown>;
+  deleteAgent(agentId: string, request: KibanaRequest): Promise<boolean>;
+  deletePackageManagedAgent(agentId: string, spaceId: string): Promise<boolean>;
+  getAgent(agentId: string, request: KibanaRequest): Promise<unknown | null>;
+}
+
+/**
  * Setup contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginSetup {
@@ -222,6 +236,10 @@ export interface AgentBuilderPluginSetup {
    * Exposed so that dependent plugins can pass these values to search utilities.
    */
   topSnippets: TopSnippetsConfig;
+  /**
+   * Internal management API for programmatic agent CRUD (Fleet package install).
+   */
+  management: AgentBuilderManagementSetup;
 }
 
 /**
