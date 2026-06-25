@@ -11,6 +11,7 @@ jest.mock('./verify_access_and_context', () => ({
 jest.mock('../lib/oauth_state_client');
 jest.mock('../lib/oauth_authorization_service');
 
+import Boom from '@hapi/boom';
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
@@ -560,6 +561,27 @@ describe('oauthAuthorizeRoute', () => {
         },
       })
     );
+  });
+
+  it('returns 404 when actionsClient.get throws a Boom notFound error', async () => {
+    mockActionsClient.get.mockRejectedValue(Boom.notFound('Connector not found'));
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'unknown-connector-id' },
+      body: {},
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(res.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 404,
+      })
+    );
+    expect(mockLogger.error).not.toHaveBeenCalled();
   });
 
   it('preserves statusCode from errors that have one', async () => {

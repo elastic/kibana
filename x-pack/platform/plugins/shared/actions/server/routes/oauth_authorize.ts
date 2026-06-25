@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -365,6 +366,8 @@ function handleOAuthStartError(
   const statusCode =
     err instanceof OAuthRouteError
       ? err.statusCode
+      : Boom.isBoom(err)
+      ? err.output.statusCode
       : err instanceof Error && typeof (err as { statusCode?: unknown }).statusCode === 'number'
       ? (err as Error & { statusCode: number }).statusCode
       : 500;
