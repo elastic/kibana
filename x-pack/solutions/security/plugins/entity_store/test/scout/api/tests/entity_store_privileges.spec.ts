@@ -204,7 +204,7 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
       const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
         headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
         responseType: 'json',
-        body: {},
+        body: { logExtraction: {} },
       });
 
       expect(response.statusCode).toBe(403);
@@ -232,7 +232,7 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
       const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
         headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
         responseType: 'json',
-        body: {},
+        body: { logExtraction: {} },
       });
 
       expect(response.statusCode).toBe(403);
