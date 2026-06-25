@@ -170,7 +170,7 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('renders the form with noValidate to suppress native browser validation', () => {
-    const { container } = render(
+    render(
       <I18nProvider>
         <SavedObjectSaveModal
           hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
