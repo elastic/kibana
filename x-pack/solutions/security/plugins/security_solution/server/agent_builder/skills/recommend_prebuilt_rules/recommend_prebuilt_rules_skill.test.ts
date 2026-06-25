@@ -54,9 +54,6 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     );
   });
 
-  // Cheap silent-breakage tripwires: if a tool stops being named in the prompt the model may
-  // never call it, and if a tactic id is dropped the coverage diff breaks. Behavior itself is
-  // covered by evals, not by asserting prompt prose.
   it('content names all four tools', () => {
     const { getStartServices, logger, ml } = createDeps();
     const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });

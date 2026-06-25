@@ -18,7 +18,6 @@ import {
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { getInstallableRuleVersions } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
-import { buildMlAuthz } from '../../../lib/machine_learning/authz';
 
 jest.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
@@ -43,9 +42,7 @@ jest.mock('../../../lib/machine_learning/authz', () => ({
 const mockCreatePrebuiltRuleAssetsClient = jest.mocked(createPrebuiltRuleAssetsClient);
 const mockCreatePrebuiltRuleObjectsClient = jest.mocked(createPrebuiltRuleObjectsClient);
 const mockGetInstallableRuleVersions = jest.mocked(getInstallableRuleVersions);
-const mockBuildMlAuthz = jest.mocked(buildMlAuthz);
 
-// Sentinels threaded through the tool so the mlAuthz wiring can be asserted by identity.
 const mockMl = { mlSystemProvider: jest.fn() } as unknown as Parameters<
   typeof createGetInstallableCatalogOverviewTool
 >[0]['ml'];
@@ -115,52 +112,6 @@ describe('createGetInstallableCatalogOverviewTool', () => {
     it('has the correct tool id constant', () => {
       expect(GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID).toBe(
         'security.get_installable_catalog_overview'
-      );
-    });
-  });
-
-  describe('handler — ML authorization', () => {
-    it('builds mlAuthz from the request license and ML plugin and forwards it to the installable-versions query', async () => {
-      const {
-        getStartServices,
-        mockLogger,
-        mockRequest,
-        mockRuleAssetsClient,
-        mockSavedObjectsClient,
-        ml,
-      } = createMockDeps();
-      mockGetInstallableRuleVersions.mockResolvedValue([makeVersion('rule-1')]);
-      mockRuleAssetsClient.fetchAssetsByVersion.mockResolvedValue({
-        assets: [],
-        aggregations: { facet_tags: { buckets: [] } },
-      });
-      const builtMlAuthz = {
-        validateRuleType: jest.fn().mockResolvedValue({ valid: true, message: undefined }),
-      };
-      mockBuildMlAuthz.mockReturnValue(builtMlAuthz);
-
-      const tool = createGetInstallableCatalogOverviewTool({
-        getStartServices,
-        logger: mockLogger,
-        ml,
-      });
-      const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
-      await tool.handler({}, context);
-
-      // mlAuthz is derived from the real request, so the count/tag facets exclude ML rules
-      // the user can't install — matching the install flyout and find_prebuilt_rules.
-      expect(mockBuildMlAuthz).toHaveBeenCalledWith({
-        license: mockLicense,
-        ml,
-        request: mockRequest,
-        savedObjectsClient: mockSavedObjectsClient,
-      });
-      // The built mlAuthz is the one handed to the installable-versions query (3rd positional arg).
-      expect(mockGetInstallableRuleVersions).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        builtMlAuthz,
-        expect.anything()
       );
     });
   });

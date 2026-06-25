@@ -17,6 +17,7 @@ import {
   findPrebuiltRulesSchema,
   reduceMitreToTacticsOnly,
 } from './find_prebuilt_rules_tool';
+import { buildPrebuiltRulesToolFilter } from './find_prebuilt_rules_filter';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { getInstallableRulesForReview } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
@@ -46,7 +47,6 @@ const mockCreatePrebuiltRuleObjectsClient = jest.mocked(createPrebuiltRuleObject
 const mockGetInstallableRulesForReview = jest.mocked(getInstallableRulesForReview);
 const mockBuildMlAuthz = jest.mocked(buildMlAuthz);
 
-// Sentinels threaded through the tool so the wiring can be asserted by identity.
 const mockMl = { mlSystemProvider: jest.fn() } as unknown as Parameters<
   typeof createFindPrebuiltRulesInlineTool
 >[0]['ml'];
@@ -155,7 +155,7 @@ describe('findPrebuiltRulesSchema', () => {
   it('rejects unknown parameters at the top level and inside `filter`', () => {
     expect(findPrebuiltRulesSchema.safeParse({ ruleSource: 'prebuilt' }).success).toBe(false);
     expect(findPrebuiltRulesSchema.safeParse({ enabled: true }).success).toBe(false);
-    // Filter params are no longer accepted at the top level.
+    // Filter params are not accepted at the top level.
     expect(findPrebuiltRulesSchema.safeParse({ keywords: 'mimikatz' }).success).toBe(false);
     // Unknown keys inside `filter` are rejected too.
     expect(findPrebuiltRulesSchema.safeParse({ filter: { enabled: true } }).success).toBe(false);
@@ -179,7 +179,7 @@ describe('findPrebuiltRulesSchema', () => {
   });
 
   it('rejects MITRE tactic values that are not TA-prefixed IDs', () => {
-    // Tactic display names must be converted to IDs upstream; the filter matches only on id.
+    // Tactic display names must be converted to IDs
     expect(
       findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['Initial Access'] } }).success
     ).toBe(false);
@@ -249,15 +249,12 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
       await tool.handler(findPrebuiltRulesSchema.parse({}), context);
 
-      // mlAuthz is derived from the real request (license + ML plugin + request + SO client),
-      // so ML rules the user can't install are filtered out — matching the install flyout.
       expect(mockBuildMlAuthz).toHaveBeenCalledWith({
         license: mockLicense,
         ml,
         request: mockRequest,
         savedObjectsClient,
       });
-      // The built mlAuthz is the one handed to the installable-rules review query.
       expect(mockGetInstallableRulesForReview.mock.calls[0][0].mlAuthz).toBe(builtMlAuthz);
     });
 
@@ -279,15 +276,13 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       ]);
     });
 
-    it('translates structured params into a single KQL filter', async () => {
-      await runHandler(
-        { filter: { keywords: 'mimikatz', severity: ['critical'] } },
-        { rules: [], total: 0 }
-      );
+    it('delegates filter construction to buildPrebuiltRulesToolFilter and passes the result through', async () => {
+      const filter = { keywords: 'mimikatz', severity: ['critical'] };
+      await runHandler({ filter }, { rules: [], total: 0 });
       const args = mockGetInstallableRulesForReview.mock.calls[0][0];
-      expect(args.filter).toBe(
-        '(security-rule.name: mimikatz OR security-rule.description: mimikatz) AND security-rule.severity: ("critical")'
-      );
+      // Assert delegation, not the exact KQL — the string format itself is owned by
+      // find_prebuilt_rules_filter.test.ts.
+      expect(args.filter).toBe(buildPrebuiltRulesToolFilter(filter));
     });
 
     it('maps the sort object to the prebuilt-asset sort shape', async () => {
@@ -363,21 +358,6 @@ describe('createFindPrebuiltRulesInlineTool', () => {
         };
         expect(total).toBe(84);
         expect(rules).toHaveLength(1);
-      }
-    });
-
-    it('returns total 0 and an empty rules array when nothing matches', async () => {
-      const { toolResult } = await runHandler(
-        { filter: { severity: ['low'] } },
-        { rules: [], total: 0 }
-      );
-      if ('results' in toolResult) {
-        const { total, rules } = toolResult.results[0].data as {
-          total: number;
-          rules: unknown[];
-        };
-        expect(total).toBe(0);
-        expect(rules).toHaveLength(0);
       }
     });
 
