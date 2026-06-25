@@ -185,6 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_analytics:lead_generation:engine',
         'entity_analytics:monitoring:privileges:engine',
         'entity_store:v2:entity_maintainer_task:accesses_frequently_and_infrequently',
+        'entity_store:v2:entity_maintainer_task:administers',
         'entity_store:v2:entity_maintainer_task:automated-resolution',
         'entity_store:v2:entity_maintainer_task:communicates_with',
         'entity_store:v2:entity_maintainer_task:risk-score',
