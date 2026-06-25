@@ -35,7 +35,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./dashboard_grid'));
     loadTestFile(require.resolve('./view_edit'));
-    loadTestFile(require.resolve('./lose_changes_warning'));
     loadTestFile(require.resolve('./dashboard_saved_query'));
     // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
     // https://github.com/elastic/kibana/issues/46752
@@ -43,6 +42,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // If we don't use the timestamp in the URL, the colors in the charts will be different.
     loadTestFile(require.resolve('./dashboard_snapshots'));
     loadTestFile(require.resolve('./dashboard_esql_chart'));
-    loadTestFile(require.resolve('./dashboard_esql_no_data'));
   });
 }

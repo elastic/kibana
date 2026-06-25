@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '../../../..';
+import { Parser } from '@elastic/esql';
 import { summary } from './summary';
 
 const assertSummary = (query: string, { expectedNewColumns }: { expectedNewColumns: string[] }) => {
@@ -29,6 +29,16 @@ describe('PROMQL summary', () => {
   it('returns the step column when step param is present', () => {
     assertSummary('PROMQL index=metrics step="5m" col0=(sum(bytes))', {
       expectedNewColumns: ['step', 'col0'],
+    });
+  });
+  it('returns the step column when buckets param is used', () => {
+    assertSummary('PROMQL index=metrics buckets=6 col0=(sum(bytes))', {
+      expectedNewColumns: ['step', 'col0'],
+    });
+  });
+  it('does not return the step column when time param is used', () => {
+    assertSummary('PROMQL index=metrics time="2026-01-13T11:30:00.000Z" col0=(sum(bytes))', {
+      expectedNewColumns: ['col0'],
     });
   });
   it.todo('returns query text as column name when no label is provided');

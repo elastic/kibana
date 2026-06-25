@@ -6,9 +6,7 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*",
-    // Emotion theme typing
-    "../../../../../typings/emotion.d.ts"
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

@@ -8,25 +8,24 @@
  */
 
 // Target type for filtering Playwright configs by deployment target
-export type TargetType = 'all' | 'mki' | 'ech';
+import type { ScoutTargetArch, ScoutTargetDomain } from '@kbn/scout-info';
+
+export type TargetType = 'all' | 'local' | 'local-stateful-only' | 'mki' | 'ech';
 
 // Valid target types
-export const TARGET_TYPES: TargetType[] = ['all', 'mki', 'ech'];
-
-export type DeploymentType =
-  | 'classic'
-  | 'elasticsearch'
-  | 'security'
-  | 'observability'
-  | 'observability logs-essentials'
-  | 'security essentials'
-  | 'security ease';
+export const TARGET_TYPES: TargetType[] = ['all', 'local', 'local-stateful-only', 'mki', 'ech'];
 
 // Module discovery information used in regular CI pipelines with locally run servers
 export interface ModuleDiscoveryInfo {
   name: string;
   group: string;
   type: 'plugin' | 'package';
+  /**
+   * Set when --code-changes is provided: true if this module's @kbn/ ID is in
+   * the affected set (or if it owns an affected config in the tests-only fast
+   * path). Used to drive the "affected " prefix on Buildkite step labels.
+   */
+  isAffected?: boolean;
   configs: {
     path: string;
     hasTests: boolean;
@@ -38,9 +37,11 @@ export interface ModuleDiscoveryInfo {
 
 // Flattened config group used in CI pipelines targeting test runs in Cloud
 export interface FlattenedConfigGroup {
-  mode: 'serverless' | 'stateful';
+  testTarget: {
+    arch: ScoutTargetArch;
+    domain: ScoutTargetDomain;
+  };
   group: string;
-  deploymentType: DeploymentType;
-  scoutCommand: string; // Full scout command (e.g., "node scripts/scout run-tests --serverless=es --testTarget=cloud")
+  scoutCommand: string; // Full scout command (e.g., "node scripts/scout run-tests --location cloud --arch serverless --domain search")
   configs: string[];
 }

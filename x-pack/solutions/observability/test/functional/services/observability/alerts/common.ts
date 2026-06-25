@@ -56,21 +56,15 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const navigateToRulesPage = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      '/alerts/rules',
-      '',
-      { ensureCurrentUrl: false }
-    );
+    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', '', '', {
+      ensureCurrentUrl: false,
+    });
   };
 
   const navigateToRulesLogsPage = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      '/alerts/rules/logs',
-      '',
-      { ensureCurrentUrl: false }
-    );
+    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', '/logs', '', {
+      ensureCurrentUrl: false,
+    });
   };
 
   const navigateToAlertDetails = async (alertId: string) => {
@@ -84,10 +78,12 @@ export function ObservabilityAlertsCommonProvider({
 
   const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      `/alerts/rules/${ruleId}`,
+      'rules',
+      `rule/${encodeURIComponent(ruleId)}`,
       '?',
-      { ensureCurrentUrl: false }
+      {
+        ensureCurrentUrl: false,
+      }
     );
   };
 
@@ -322,6 +318,14 @@ export function ObservabilityAlertsCommonProvider({
 
   // Date picker
   const getTimeRange = async () => {
+    if (await testSubjects.exists('dateRangePickerControlButton', { timeout: 2000 })) {
+      // New DateRangePicker renders the humanised range as the control button's
+      // visible text (the `dateRangePickerValueDisplay` node), e.g. "Last 10 days"
+      // or "30 days ago → 10 days ago". The button has no `value` attribute; the
+      // raw range is only exposed via its `data-date-range` attribute.
+      return await testSubjects.getVisibleText('dateRangePickerValueDisplay');
+    }
+
     const isAbsoluteRange = await testSubjects.exists('superDatePickerstartDatePopoverButton');
 
     if (isAbsoluteRange) {

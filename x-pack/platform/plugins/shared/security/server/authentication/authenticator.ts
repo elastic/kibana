@@ -8,6 +8,8 @@
 import { performance } from 'perf_hooks';
 
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,7 +17,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
-import { HTTPAuthorizationHeader } from './http_authentication';
 import type {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
@@ -42,6 +43,7 @@ import {
   SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
+import { LogoutReason } from '../../common/types';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -93,7 +95,7 @@ export interface AuthenticatorOptions {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
+  config: Pick<ConfigType, 'authc' | 'accessAgreement' | 'uiam'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;
@@ -103,6 +105,7 @@ export interface AuthenticatorOptions {
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
+  userActivity: UserActivityServiceStart;
 }
 
 /** @internal */
@@ -122,7 +125,7 @@ const providerMap = new Map<
   new (
     options: AuthenticationProviderOptions,
     providerSpecificOptions?: AuthenticationProviderSpecificOptions
-  ) => BaseAuthenticationProvider
+  ) => BaseAuthenticationProvider<any>
 >([
   [BasicAuthenticationProvider.type, BasicAuthenticationProvider],
   [KerberosAuthenticationProvider.type, KerberosAuthenticationProvider],
@@ -243,12 +246,22 @@ export class Authenticator {
   private readonly logger: Logger;
 
   /**
+   * Dedicated logger for session invalidation events, allowing them to be managed
+   * independently of general authenticator logs.
+   */
+  private readonly sessionInvalidationLogger: Logger;
+
+  /**
    * Instantiates Authenticator and bootstrap configured providers.
    * @param options Authenticator options.
    */
   constructor(private readonly options: Readonly<AuthenticatorOptions>) {
     this.session = this.options.session;
     this.logger = this.options.loggers.get('authenticator');
+    this.sessionInvalidationLogger = this.options.loggers.get(
+      'authenticator',
+      'session_invalidation'
+    );
 
     const providerCommonOptions = {
       client: this.options.clusterClient,
@@ -349,7 +362,7 @@ export class Authenticator {
       const authenticationResult = await provider.login(
         request,
         attempt.value,
-        ownsSession ? existingSessionValue!.state : null
+        ownsSession ? existingSessionValue! : null
       );
 
       securityTelemetry.recordLoginDuration(performance.now() - startTime, {
@@ -439,7 +452,7 @@ export class Authenticator {
 
       let authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSession.value!.state : null
+        ownsSession ? existingSession.value! : null
       );
 
       if (!authenticationResult.notHandled()) {
@@ -562,7 +575,7 @@ export class Authenticator {
     // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
     // available then `getSessionValue` should have returned `null`.
     const provider = this.providers.get(existingSessionValue.provider.name)!;
-    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    const authenticationResult = await provider.authenticate(request, existingSessionValue);
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
@@ -589,13 +602,14 @@ export class Authenticator {
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
     if (suggestedProviderName) {
+      this.sessionInvalidationLogger.debug('Invalidating session: explicit logout request.');
       await this.invalidateSessionValue({ request, sessionValue });
 
       // Provider name may be passed in a query param and sourced from the browser's local storage;
       // hence, we can't assume that this provider exists, so we have to check it.
       const provider = this.providers.get(suggestedProviderName);
       if (provider) {
-        return provider.logout(request, sessionValue?.state ?? null);
+        return provider.logout(request, sessionValue ?? null);
       }
     } else {
       // In case logout is called and we cannot figure out what provider is supposed to handle it,
@@ -743,6 +757,9 @@ export class Authenticator {
       this.logger.warn(
         `Attempted to retrieve session for the "${existingSession.value.provider.type}/${existingSession.value.provider.name}" provider, but it is not configured.`
       );
+      this.sessionInvalidationLogger.warn(
+        `Invalidating session: provider "${existingSession.value.provider.type}/${existingSession.value.provider.name}" is no longer configured.`
+      );
       await this.invalidateSessionValue({ request, sessionValue: existingSession.value });
       return { error: new SessionUnexpectedError(), value: null };
     }
@@ -754,6 +771,7 @@ export class Authenticator {
    * Updates, creates, extends or clears session value based on the received authentication result.
    * @param request Request instance.
    * @param provider Provider that produced provided authentication result.
+   * @param providerInstance Provider instance that produced provided authentication result.
    * @param authenticationResult Result of the authentication or login attempt.
    * @param existingSessionValue Value of the existing session if any.
    */
@@ -787,6 +805,14 @@ export class Authenticator {
       );
     }
 
+    // Don't update session if request is "minimally" authenticated.
+    if (request.route.options.security?.authc?.enabled === 'minimal') {
+      this.logger.debug(
+        'Session should not be changed for requests that require minimal authentication, skipping session update.'
+      );
+      return null;
+    }
+
     if (!existingSessionValue && !authenticationResult.shouldUpdateState()) {
       return null;
     }
@@ -795,6 +821,9 @@ export class Authenticator {
     // attempt didn't fail.
     if (authenticationResult.shouldClearState()) {
       this.logger.debug('Authentication provider requested to invalidate existing session.');
+      this.sessionInvalidationLogger.debug(
+        'Invalidating session: authentication provider explicitly requested state clear.'
+      );
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       return null;
     }
@@ -809,6 +838,9 @@ export class Authenticator {
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
         this.logger.warn('Authentication attempt failed, existing session will be invalidated.');
+        this.sessionInvalidationLogger.warn(
+          'Invalidating session: 401 authentication failure for session-owning provider.'
+        );
         await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       }
       return null;
@@ -846,6 +878,9 @@ export class Authenticator {
       this.logger.warn(
         'Authentication provider has changed, existing session will be invalidated.'
       );
+      this.sessionInvalidationLogger.warn(
+        'Invalidating session: authentication provider changed since session was created.'
+      );
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
@@ -854,6 +889,9 @@ export class Authenticator {
       ) {
         this.logger.debug(
           'Session is authenticated, existing unauthenticated session will be invalidated.'
+        );
+        this.sessionInvalidationLogger.debug(
+          'Invalidating intermediate session: login succeeded and provider requires a fresh session.'
         );
         await this.invalidateSessionValue({
           request,
@@ -869,6 +907,9 @@ export class Authenticator {
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
+      this.sessionInvalidationLogger.warn(
+        'Invalidating session: authenticated username changed from previous session.'
+      );
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     }
@@ -943,6 +984,21 @@ export class Authenticator {
             authenticationType: provider.type,
           })
         );
+        const { username } = authenticationResult.user;
+        this.options.userActivity.trackUserAction({
+          message: `User logged in via ${provider.type} provider "${provider.name}".`,
+          event: { action: 'log_in_user', type: 'start' },
+          object: {
+            id: userProfileId ?? username,
+            name: username,
+            type: 'user',
+            tags: [],
+          },
+          metadata: {
+            authenticationProvider: provider.name,
+            authenticationType: provider.type,
+          },
+        });
       }
     } else if (authenticationResult.shouldUpdateState()) {
       newSessionValue = await this.session.update(request, {
@@ -978,6 +1034,21 @@ export class Authenticator {
     if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(userLogoutEvent(sessionValue));
+
+      this.options.userActivity.trackUserAction({
+        message: `User logged out via ${sessionValue.provider.type} provider "${sessionValue.provider.name}".`,
+        event: { action: 'log_out_user', type: 'end' },
+        object: {
+          id: sessionValue.userProfileId ?? sessionValue.username,
+          name: sessionValue.username,
+          type: 'user',
+          tags: [],
+        },
+        metadata: {
+          authenticationProvider: sessionValue.provider.name,
+          authenticationType: sessionValue.provider.type,
+        },
+      });
     }
 
     await this.session.invalidate(request, { match: 'current' });
@@ -1098,7 +1169,16 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
-    if (this.options.customLogoutURL) {
+    const sessionExpiredReasons: string[] = [
+      LogoutReason.SESSION_EXPIRED,
+      LogoutReason.SESSION_IDLE_TIMEOUT,
+      LogoutReason.SESSION_LIFESPAN_TIMEOUT,
+    ];
+    const sessionExpired = sessionExpiredReasons.includes(
+      request.url.searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) ?? ''
+    );
+
+    if (this.options.customLogoutURL && !sessionExpired) {
       return this.options.customLogoutURL;
     }
 
@@ -1107,7 +1187,7 @@ export class Authenticator {
     const searchParams = new URLSearchParams();
     for (const [key, defaultValue] of [
       [NEXT_URL_QUERY_STRING_PARAMETER, null],
-      [LOGOUT_REASON_QUERY_STRING_PARAMETER, 'LOGGED_OUT'],
+      [LOGOUT_REASON_QUERY_STRING_PARAMETER, LogoutReason.LOGGED_OUT],
     ] as Array<[string, string | null]>) {
       const value = request.url.searchParams.get(key) || defaultValue;
       if (value) {

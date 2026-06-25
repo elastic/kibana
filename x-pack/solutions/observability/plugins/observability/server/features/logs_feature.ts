@@ -8,33 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
-import {
-  AlertConsumers,
-  DEPRECATED_ALERTING_CONSUMERS,
-  LOG_THRESHOLD_ALERT_TYPE_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { AlertConsumers, LOG_ALERTING_FEATURES_WITH_SHARED } from '@kbn/rule-data-utils';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { infraSourceConfigurationSavedObjectName } from '../saved_objects/infra_saved_objects';
 
-const logsRuleTypes = [
-  LOG_THRESHOLD_ALERT_TYPE_ID,
-  ES_QUERY_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-];
 export const getLogsFeature = (): KibanaFeatureConfig => {
-  const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => {
-    const consumers = [AlertConsumers.LOGS, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
-
-    return {
-      ruleTypeId,
-      consumers,
-    };
-  });
+  const logsAlertingFeatures = LOG_ALERTING_FEATURES_WITH_SHARED;
 
   const LOGS_FEATURE = {
     id: AlertConsumers.LOGS,
@@ -61,6 +40,9 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
         alerting: {
           rule: {
             all: logsAlertingFeatures,
+            enable: logsAlertingFeatures,
+            manual_run: logsAlertingFeatures,
+            manage_rule_settings: logsAlertingFeatures,
           },
           alert: {
             all: logsAlertingFeatures,

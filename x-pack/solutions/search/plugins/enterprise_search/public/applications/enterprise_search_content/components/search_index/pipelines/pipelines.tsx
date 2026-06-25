@@ -280,7 +280,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     }
                   )
             }
-            iconType="compute"
+            iconType="processor"
           >
             <MlInferencePipelineProcessorsCard />
           </DataPanel>

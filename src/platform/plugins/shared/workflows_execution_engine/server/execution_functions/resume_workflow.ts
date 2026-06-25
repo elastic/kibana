@@ -8,8 +8,16 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { isTerminalStatus } from '@kbn/workflows';
+import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
+import type { WorkflowsMeteringService } from '../metering';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -21,6 +29,9 @@ export async function resumeWorkflow({
   logger,
   config,
   fakeRequest,
+  workflowsExecutionEngine,
+  meteringService,
+  internalResumeWorkflowExecution,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -29,33 +40,77 @@ export async function resumeWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
+  meteringService?: WorkflowsMeteringService;
+  internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
 }): Promise<void> {
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
     esClient,
     workflowTaskManager,
     workflowExecutionRepository,
-  } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+  } = await setupDependencies(
+    workflowRunId,
+    spaceId,
+    logger,
+    config,
+    dependencies,
+    fakeRequest,
+    workflowsExecutionEngine
+  );
+
+  const loadedExecution = workflowExecutionState.getWorkflowExecution();
+  if (isTerminalStatus(loadedExecution.status)) {
+    logger.info(
+      `Resume skipped for ${workflowRunId}: already in terminal status ${loadedExecution.status}`
+    );
+    return;
+  }
 
   await workflowRuntime.resume();
 
-  await workflowExecutionLoop({
-    workflowRuntime,
-    stepExecutionRuntimeFactory,
-    workflowExecutionState,
-    workflowExecutionRepository,
-    workflowLogger,
-    nodesFactory,
-    workflowExecutionGraph,
-    esClient,
+  try {
+    await workflowExecutionLoop({
+      workflowRuntime,
+      stepExecutionRuntimeFactory,
+      workflowExecutionState,
+      stepIoService,
+      workflowExecutionRepository,
+      workflowLogger,
+      nodesFactory,
+      workflowExecutionGraph,
+      esClient,
+      fakeRequest,
+      coreStart: dependencies.coreStart,
+      taskAbortController,
+      workflowTaskManager,
+    });
+  } finally {
+    await emitWorkflowExecutionFailedEventIfFailed({
+      workflowRuntime,
+      workflowExecutionState,
+      emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
+      request: fakeRequest,
+      logger,
+      workflowRunId,
+    });
+  }
+
+  await handlePostExecutionLoop({
+    workflowRunId,
+    spaceId,
+    logger,
     fakeRequest,
-    coreStart: dependencies.coreStart,
-    taskAbortController,
+    workflowExecutionRepository,
+    internalResumeWorkflowExecution,
     workflowTaskManager,
+    meteringService,
+    cloudSetup: dependencies.cloudSetup,
   });
 }

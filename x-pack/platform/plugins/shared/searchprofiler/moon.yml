@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/searchprofiler-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/searchprofiler-plugin'
+  title: '@kbn/searchprofiler-plugin'
   description: Moon project for @kbn/searchprofiler-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/searchprofiler
+  sourceRoot: x-pack/platform/plugins/shared/searchprofiler
 dependsOn:
   - '@kbn/core'
   - '@kbn/es-ui-shared-plugin'
@@ -35,6 +34,7 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -46,17 +46,8 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type Primitive = string | number | boolean | null | undefined;
 
@@ -21,13 +21,19 @@ export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
-export const recursiveRecord: z.ZodType<RecursiveRecord> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(primitive), z.array(z.unknown()), recursiveRecord]))
-);
+export const recursiveRecord: z.ZodType<RecursiveRecord> = z
+  .lazy(() =>
+    z.record(
+      z.string(),
+      z.union([primitive, z.array(primitive), z.array(z.unknown()), recursiveRecord])
+    )
+  )
+  .meta({ id: 'RecursiveRecord' });
 
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
+  z.string(),
   z.union([primitive, z.array(primitive), z.array(z.unknown())])
 );
 

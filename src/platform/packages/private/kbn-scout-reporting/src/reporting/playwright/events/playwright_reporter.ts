@@ -20,7 +20,12 @@ import type {
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import {
+  BROWSER_CONSOLE_ERRORS_ATTACHMENT,
+  SCOUT_REPORT_OUTPUT_ROOT,
+  ScoutTestRunConfigCategory,
+  ScoutTestTarget,
+} from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
@@ -30,7 +35,6 @@ import {
   getOwningTeamsForPath,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import { SCOUT_TARGET_TYPE, SCOUT_TARGET_MODE } from '@kbn/scout-info';
 import {
   ScoutEventsReport,
   ScoutReportEventAction,
@@ -76,11 +80,14 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
+
+    const testTarget = ScoutTestTarget.tryFromEnv();
+
     this.baseTestRunInfo = {
       id: this.runId,
       target: {
-        type: SCOUT_TARGET_TYPE,
-        mode: SCOUT_TARGET_MODE,
+        type: testTarget?.location || 'unknown',
+        mode: testTarget?.tagWithoutLocation || 'unknown',
       },
     };
     this.codeOwnersEntries = getCodeOwnersEntries();
@@ -152,6 +159,12 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (result) {
       testProps.status = result.status;
       testProps.duration = result.duration;
+      const consoleErrors = result.attachments
+        .find((a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT)
+        ?.body?.toString('utf-8');
+      if (consoleErrors) {
+        testProps.console_errors = consoleErrors;
+      }
     }
 
     return testProps;

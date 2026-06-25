@@ -56,7 +56,7 @@ const AddCisIntegrationButton = () => {
     <EuiButton
       data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       href={http.basePath.prepend(integrationsPath)}
     >
       <FormattedMessage

@@ -7,7 +7,6 @@
 
 import {
   EuiBasicTable,
-  type EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -16,6 +15,8 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiSpacer,
+  EuiToolTip,
+  type EuiBasicTableColumn,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -206,17 +207,24 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
         name: '',
         width: '40px',
         render: (_value: unknown, item: LegendStep) => (
-          <EuiButtonIcon
-            aria-label={i18n.translate('xpack.infra.legendSteps.deleteButtonAriaLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.legendSteps.deleteButtonAriaLabel', {
               defaultMessage: 'Delete step',
             })}
-            color="danger"
-            iconType="trash"
-            size="xs"
-            onClick={() => handleDeleteStep(item)}
-            disabled={steps.length <= MIN_STEPS}
-            data-test-subj="infraLegendStepsDeleteStepButton"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate('xpack.infra.legendSteps.deleteButtonAriaLabel', {
+                defaultMessage: 'Delete step',
+              })}
+              color="danger"
+              iconType="trash"
+              size="xs"
+              onClick={() => handleDeleteStep(item)}
+              disabled={steps.length <= MIN_STEPS}
+              data-test-subj="infraLegendStepsDeleteStepButton"
+            />
+          </EuiToolTip>
         ),
       },
     ],
@@ -229,7 +237,7 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
         <>
           <EuiCallOut
             color="danger"
-            iconType="alert"
+            iconType="warning"
             announceOnMount
             title={i18n.translate('xpack.infra.legendSteps.validationErrorTitle', {
               defaultMessage: 'Please fix the following errors:',

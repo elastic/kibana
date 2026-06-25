@@ -54,7 +54,7 @@ export function createCriteriaEvaluator({
   const criteriaById = new Map(structuredCriteria.map((criterion) => [criterion.id, criterion]));
 
   return {
-    evaluate: async ({ input, output }) => {
+    evaluate: async ({ input, output, metadata }) => {
       function toScores(
         evaluatedCriteria: Array<{ id: string; result: 'PASS' | 'FAIL' | 'N/A'; reason?: string }>
       ) {
@@ -88,8 +88,9 @@ export function createCriteriaEvaluator({
           prompt: LlmCriteriaEvaluationPrompt,
           inferenceClient,
           input: {
-            input: JSON.stringify(input),
+            input: JSON.stringify(input ?? {}),
             output: JSON.stringify(output),
+            metadata: metadata != null ? JSON.stringify(metadata) : undefined,
             criteria: structuredCriteria.map((criterion) => {
               return `${criterion.id}: ${criterion.text}`;
             }),

@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
-import type { PackageInfo, PackageMetadata } from '../../../../../types';
+import type { PackageInfo, PackageMetadata, RegistryPolicyTemplate } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
   useGetPackagePoliciesQuery,
@@ -43,10 +43,16 @@ import {
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
 import { BulkActionContextProvider } from '../../installed_integrations/hooks/use_bulk_actions_context';
-import { KeepPoliciesUpToDateSwitch } from '../components';
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+
+import { KeepPoliciesUpToDateSwitch, NamespaceCustomizationSection } from '../components';
 import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
+
+import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
+
+import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
@@ -86,15 +92,31 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
   );
 };
 
+const InstalledVersionLink = ({ name, version }: { name: string; version: string }) => {
+  const { getHref } = useLink();
+  const settingsPath = getHref('integration_details_settings', {
+    pkgkey: `${name}-${version}`,
+  });
+  return (
+    <EuiLink href={settingsPath}>
+      <FormattedMessage
+        id="xpack.fleet.integrations.settings.packageInstalledVersionLink"
+        defaultMessage="installed version"
+      />
+    </EuiLink>
+  );
+};
+
 interface Props {
   packageInfo: PackageInfo;
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
   isCustomPackage: boolean;
+  integrationInfo?: RegistryPolicyTemplate;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage, integrationInfo }: Props) => {
     const authz = useAuthz();
     const canInstallPackages = authz.integrations.installPackages;
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
@@ -140,8 +162,69 @@ export const SettingsPage: React.FC<Props> = memo(
     );
 
     const updatePackageMutation = useUpdatePackageMutation();
+    const updateNamespaceCustomizationMutation = useUpdatePackageMutation();
 
     const { notifications } = useStartServices();
+    const { allowedNamespacePrefixes } = useSpaceSettingsContext();
+
+    const installationInfo =
+      'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+
+    const namespaceCustomizationEnabledFor = useMemo(
+      () => installationInfo?.namespace_customization_enabled_for ?? [],
+      [installationInfo?.namespace_customization_enabled_for]
+    );
+
+    const handleNamespaceCustomizationChange = useCallback(
+      (next: string[]) => {
+        updateNamespaceCustomizationMutation.mutate(
+          {
+            pkgName: packageInfo.name,
+            pkgVersion: packageInfo.version,
+            body: {
+              namespace_customization_enabled_for: next,
+            },
+          },
+          {
+            onSuccess: () => {
+              notifications.toasts.addSuccess({
+                title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+                  defaultMessage: 'Integration settings saved',
+                }),
+                text: i18n.translate(
+                  'xpack.fleet.integrations.namespaceCustomizationSavedSuccess',
+                  {
+                    defaultMessage: 'Applying changes to namespace index templates for {title}.',
+                    values: { title },
+                  }
+                ),
+              });
+            },
+            onError: (error) => {
+              notifications.toasts.addError(error, {
+                title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+                  defaultMessage: 'Error saving integration settings',
+                }),
+                toastMessage: i18n.translate(
+                  'xpack.fleet.integrations.namespaceCustomizationError',
+                  {
+                    defaultMessage: 'Error updating namespace index templates for {title}',
+                    values: { title },
+                  }
+                ),
+              });
+            },
+          }
+        );
+      },
+      [
+        notifications.toasts,
+        packageInfo.name,
+        packageInfo.version,
+        title,
+        updateNamespaceCustomizationMutation,
+      ]
+    );
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
       return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
@@ -157,6 +240,10 @@ export const SettingsPage: React.FC<Props> = memo(
     const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
       keepPoliciesUpToDate ?? false
     );
+
+    useEffect(() => {
+      setKeepPoliciesUpToDateSwitchValue(keepPoliciesUpToDate ?? false);
+    }, [keepPoliciesUpToDate]);
 
     const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
       setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
@@ -215,7 +302,7 @@ export const SettingsPage: React.FC<Props> = memo(
     const updateAvailable =
       installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
 
-    const isViewingOldPackage = version < latestVersion;
+    const isViewingOldPackage = semverLt(version, latestVersion);
     // hide install/remove options if the user has version of the package is installed
     // and this package is out of date or if they do have a version installed but it's not this one
     const hideInstallOptions =
@@ -240,15 +327,9 @@ export const SettingsPage: React.FC<Props> = memo(
           <SideBarColumn grow={1} />
           <EuiFlexItem grow={7}>
             <EuiText>
-              <EuiTitle>
-                <h3>
-                  <FormattedMessage
-                    id="xpack.fleet.integrations.settings.packageSettingsTitle"
-                    defaultMessage="Settings"
-                  />
-                </h3>
-              </EuiTitle>
               <EuiSpacer size="s" />
+              <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
+              <DeprecatedFeaturesCallout packageInfo={packageInfo} />
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>
@@ -304,6 +385,19 @@ export const SettingsPage: React.FC<Props> = memo(
                     </>
                   )}
 
+                  {installationInfo && (
+                    <>
+                      <NamespaceCustomizationSection
+                        savedNamespaces={namespaceCustomizationEnabledFor}
+                        allowedNamespacePrefixes={allowedNamespacePrefixes}
+                        disabled={!authz.integrations.writePackageSettings}
+                        isSubmitting={updateNamespaceCustomizationMutation.isLoading}
+                        onSave={handleNamespaceCustomizationChange}
+                      />
+                      <EuiSpacer size="l" />
+                    </>
+                  )}
+
                   {(updateAvailable || isUpgradingPackagePolicies) && (
                     <>
                       <UpdateAvailableCallout
@@ -325,6 +419,8 @@ export const SettingsPage: React.FC<Props> = memo(
                       <p>
                         <UpdateButton
                           {...packageInfo}
+                          name={packageInfo.name}
+                          title={wrapTitleWithDeprecated({ packageInfo })}
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}
@@ -513,34 +609,57 @@ export const SettingsPage: React.FC<Props> = memo(
                   )}
                 </div>
               )}
-              {hideInstallOptions && isViewingOldPackage && !isUpdating && (
+              {hideInstallOptions && !isUpdating && (
                 <div>
                   <EuiSpacer size="s" />
                   <div>
                     <EuiTitle>
                       <h4>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageInstallTitle"
-                          defaultMessage="Install {title}"
-                          values={{
-                            title,
-                          }}
-                        />
+                        {installedVersion ? (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageManageTitle"
+                            defaultMessage="Manage {title}"
+                            values={{
+                              title,
+                            }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageInstallTitle"
+                            defaultMessage="Install {title}"
+                            values={{
+                              title,
+                            }}
+                          />
+                        )}
                       </h4>
                     </EuiTitle>
                     <EuiSpacer size="s" />
                     <p>
                       <EuiText color="subdued">
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
-                          defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
-                          values={{
-                            version,
-                            latestVersion: (
-                              <LatestVersionLink name={name} version={latestVersion} />
-                            ),
-                          }}
-                        />
+                        {installedVersion ? (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageSettingsDifferentVersionMessage"
+                            defaultMessage="Version {version} is different from the currently installed version. Navigate to the {installedVersionLink} to add or manage this integration."
+                            values={{
+                              version,
+                              installedVersionLink: (
+                                <InstalledVersionLink name={name} version={installedVersion} />
+                              ),
+                            }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
+                            defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
+                            values={{
+                              version,
+                              latestVersion: (
+                                <LatestVersionLink name={name} version={latestVersion} />
+                              ),
+                            }}
+                          />
+                        )}
                       </EuiText>
                     </p>
                   </div>

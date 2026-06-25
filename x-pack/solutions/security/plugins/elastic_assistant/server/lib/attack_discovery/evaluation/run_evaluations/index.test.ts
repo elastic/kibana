@@ -6,11 +6,11 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import type { InferenceClient, InferenceConnector } from '@kbn/inference-common';
 
 import { runEvaluations } from '.';
 import { type DefaultAttackDiscoveryGraph } from '../../graphs/default_attack_discovery_graph';
@@ -51,6 +51,8 @@ const actionsClient = {
 const connectorTimeout = 1000;
 const datasetName = 'test-dataset';
 const evaluatorConnectorId = 'test-evaluator-connector-id';
+const getInferenceConnectorById = jest.fn();
+const inferenceClient = {} as InferenceClient;
 const langSmithApiKey = 'test-api-key';
 const logger = loggerMock.create();
 const connectors = [mockExperimentConnector];
@@ -58,7 +60,7 @@ const connectors = [mockExperimentConnector];
 const projectName = 'test-lang-smith-project';
 
 const graphs: Array<{
-  connector: Connector;
+  connector: InferenceConnector;
   graph: DefaultAttackDiscoveryGraph;
   llmType: string | undefined;
   name: string;
@@ -67,7 +69,7 @@ const graphs: Array<{
     tracers: LangChainTracer[];
   };
 }> = connectors.map((connector) => {
-  const llmType = getLlmType(connector.actionTypeId);
+  const llmType = getLlmType(connector.type);
 
   const traceOptions = {
     projectName,
@@ -102,6 +104,8 @@ describe('runEvaluations', () => {
       connectorTimeout,
       datasetName,
       evaluatorConnectorId,
+      getInferenceConnectorById,
+      inferenceClient,
       graphs,
       langSmithApiKey,
       logger,
@@ -129,6 +133,8 @@ describe('runEvaluations', () => {
       connectorTimeout,
       datasetName,
       evaluatorConnectorId,
+      getInferenceConnectorById,
+      inferenceClient,
       graphs,
       langSmithApiKey,
       logger,

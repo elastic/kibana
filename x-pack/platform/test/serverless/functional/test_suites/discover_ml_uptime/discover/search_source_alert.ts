@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover/search_source_alert.ts
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -230,19 +231,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const openDiscoverAlertFlyout = async () => {
     await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('discoverAlertsButton');
-    // Different create rule buttons in serverless
     if (await testSubjects.exists('discoverCreateAlertButton')) {
       await testSubjects.click('discoverCreateAlertButton');
-    } else {
+    } else if (await testSubjects.exists('discoverLegacySearchThresholdRule')) {
+      await testSubjects.click('discoverLegacySearchThresholdRule');
+    } else if (await testSubjects.exists('discoverAppMenuCustomThresholdRule')) {
       await testSubjects.click('discoverAppMenuCustomThresholdRule');
+    } else {
+      throw new Error('No discover alert rule option found in the app menu');
     }
   };
 
   const openManagementAlertFlyout = async () => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
     // TODO: Navigation to Rule Management is different in Serverless
-    await PageObjects.common.navigateToApp('triggersActions');
+    await PageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('createFirstRuleButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -276,6 +280,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ruleId = value;
     }
 
+    await testSubjects.click('discoverQueryTotalHits'); // dismiss tooltip
     await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
 
     await retry.waitFor('results', async () => {
@@ -304,7 +309,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const openAlertRuleInManagement = async (ruleName: string) => {
     // Navigation to Rule Management is different in Serverless
-    await PageObjects.common.navigateToApp('triggersActions');
+    await PageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     let retries = 0;
@@ -317,7 +324,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       }
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${ruleName}"]`
+      );
       await alertRule.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
@@ -326,7 +335,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const clickViewInApp = async (ruleName: string) => {
     // navigate to discover using view in app link
     await openAlertRuleInManagement(ruleName);
-    await testSubjects.click('ruleDetails-viewInApp');
+    await testSubjects.click('ruleDetails-viewInDiscover');
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -387,8 +396,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search source Alert', function () {
     // Failing in Observability projects: https://github.com/elastic/kibana/issues/203045
     // Failing in MKI Search projects: https://github.com/elastic/kibana/issues/207865
-    // Failing in MKI Security projects: https://github.com/elastic/kibana/issues/252028
-    this.tags(['skipSvlOblt', 'failsOnMKI']);
+    this.tags(['skipSvlOblt', 'skipSvlSearch']);
 
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
@@ -469,6 +477,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
 
       await testSubjects.click('ruleFormStep-definition');
@@ -487,7 +496,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 
@@ -497,6 +506,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
       await retry.try(async () => {
         await testSubjects.missingOrFail('ruleFlyoutFooterSaveButton');
@@ -505,7 +515,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertRuleInManagement(RULE_NAME);
-      await testSubjects.click('ruleDetails-viewInApp');
+      await testSubjects.click('ruleDetails-viewInDiscover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
@@ -521,6 +531,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
@@ -608,6 +619,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
       await retry.try(async () => {
         await testSubjects.missingOrFail('ruleFlyoutFooterSaveButton');
@@ -670,11 +682,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should check that there are no errors detected after an alert is created', async () => {
+      try {
+        await deleteDataView(SOURCE_DATA_VIEW);
+      } catch {
+        // continue
+      }
+
       const newAlert = 'New Alert for checking its status';
-      await createDataView('search-source*');
+      await createDataView(SOURCE_DATA_VIEW);
 
       // Navigation to Rule Management is different in Serverless
-      await PageObjects.common.navigateToApp('triggersActions');
+      await PageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('createRuleButton');
@@ -700,7 +720,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="search-source*"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 

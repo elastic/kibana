@@ -16,9 +16,11 @@ The agentBuilder plugin has 4 main packages:
 
 AgentBuilder agents are compatible with the Kibana inference tracing.
 
-You can enable tracing on your local instance by adding the following config parameters:
+You can enable tracing on your local instance by adding the following config parameters to `kibana.dev.yml`:
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
 telemetry.enabled: true
 telemetry.tracing.enabled: true
 
@@ -26,6 +28,8 @@ telemetry.tracing.exporters.phoenix.base_url: {phoenix server url}
 telemetry.tracing.exporters.phoenix.public_url: {phoenix server url}
 telemetry.tracing.exporters.phoenix.project_name: {your project name}
 ```
+
+> **Note:** `elastic.apm.active: false` and `elastic.apm.contextPropagationOnly: false` are required — Elastic APM and OpenTelemetry tracing cannot run simultaneously.
 
 To run phoenix locally and configuring Kibana inference tracing accordingly:
 
@@ -36,6 +40,8 @@ docker run -p 6006:6006 -p 4317:4317 -i -t arizephoenix/phoenix:latest
 and then edit the Kibana config:
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
 telemetry.enabled: true
 telemetry.tracing.enabled: true
 
@@ -125,6 +131,97 @@ Agents can be either built-in or user-defined.
 ### Registering a built-in agent
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
+
+## Hooks
+
+The hooks API lets you register lifecycle callbacks around agent execution. Register hooks
+in your plugin `setup` by calling `agentBuilder.hooks.register`.
+
+### Lifecycle: user prompt → response
+
+A **conversation round** is one turn in the chat: the user sends a message and the agent produces a full response (possibly after multiple LLM calls and tool calls).
+
+| Order | Hook | Layer | When it runs | What you can mutate |
+|-------|------|--------|----------------|---------------------|
+| 1 | `beforeAgent` | Agent | After conversation transformation (e.g. HITL), before agent execution | `nextInput` (user message, attachments, etc.) |
+| 2 | `beforeToolCall` | Runner | Before each tool invocation | `toolParams` |
+| 3 | `afterToolCall` | Runner | After each tool returns | `toolReturn` (tool result) |
+| 4 | (steps 2–3 repeat as the agent loops: model → tools → model → …) | | | |
+
+Example: register hooks for every lifecycle event in a single call. `priority` apply to all entries; each lifecycle entry has `mode` and `handler`:
+
+```ts
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
+
+export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup) => {
+  if (!agentBuilder) return;
+
+  agentBuilder.hooks.register({
+    id: 'example-hooks',
+    hooks: {
+      [HookLifecycle.beforeAgent]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('beforeAgent');
+          return {
+            nextInput: {
+              ...context.nextInput,
+              message: context.nextInput.message
+                ? `${context.nextInput.message} (hooked)`
+                : undefined,
+            },
+          };
+        },
+      },
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('beforeToolCall');
+          return {
+            toolParams: {
+              ...context.toolParams,
+              _hooked: true,
+            },
+          };
+        },
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('afterToolCall');
+        },
+      },
+    }
+  });
+};
+```
+
+
+### Execution order
+The hook execution respects the priority field  and after that the registration order.
+
+* before* hooks: First to last
+* after* hooks: Last to first (reverse)
+
+#### Execution flow
+```
+Before hooks run in order:
+
+    hook_1 beforeAgent
+    hook_2 beforeAgent
+    hook_3 beforeAgent
+
+    hook_1 beforeToolCall
+    hook_2 beforeToolCall
+    hook_3 beforeToolCall
+
+After hooks run in reverse order:
+
+    hook_3 afterToolCall
+    hook_2 afterToolCall
+    hook_1 afterToolCall
+```
 
 ## MCP Server
 

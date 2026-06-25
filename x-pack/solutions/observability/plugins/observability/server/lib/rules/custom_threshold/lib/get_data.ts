@@ -8,7 +8,7 @@
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsQueryConfig } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type {
@@ -84,12 +84,71 @@ interface ResponseAggregations extends Partial<Aggs> {
   };
 }
 
+interface ElasticsearchErrorCause {
+  type?: unknown;
+  reason?: unknown;
+  root_cause?: unknown;
+  caused_by?: unknown;
+}
+
+interface ElasticsearchError {
+  message?: unknown;
+  meta?: {
+    body?: {
+      error?: unknown;
+    };
+  };
+}
+
 const NO_DATA_RESPONSE = {
   [UNGROUPED_FACTORY_KEY]: {
     value: null,
     trigger: false,
     bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
+};
+
+// ES BucketHelpers throws this when top_metrics returns null (no docs); the same prefix appears in
+// two other BucketHelpers errors, but only the null-value branch fires for last_value aggs, so the
+// .includes() match below is safe.
+const LAST_VALUE_NO_DATA_ERROR_REASON =
+  'buckets_path must reference either a number value or a single value numeric metric aggregation';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const hasLastValueNoDataReason = (errorCause: unknown): boolean => {
+  if (!isRecord(errorCause)) {
+    return false;
+  }
+
+  const {
+    reason,
+    root_cause: rootCause,
+    caused_by: causedBy,
+  } = errorCause as ElasticsearchErrorCause;
+  if (typeof reason === 'string' && reason.includes(LAST_VALUE_NO_DATA_ERROR_REASON)) {
+    return true;
+  }
+
+  if (Array.isArray(rootCause) && rootCause.some(hasLastValueNoDataReason)) {
+    return true;
+  }
+
+  return hasLastValueNoDataReason(causedBy);
+};
+
+const isLastValueNoDataError = (error: unknown): boolean => {
+  if (!isRecord(error)) {
+    return false;
+  }
+
+  const { message, meta } = error as ElasticsearchError;
+  if (typeof message === 'string' && message.includes(LAST_VALUE_NO_DATA_ERROR_REASON)) {
+    return true;
+  }
+
+  return hasLastValueNoDataReason(meta?.body?.error);
 };
 
 const createContainerList = (containerContext: ContainerContext) => {
@@ -108,6 +167,7 @@ export const getData = async (
   timeFieldName: string,
   groupBy: string | undefined | string[],
   searchConfiguration: SearchConfigurationType,
+  dataView: DataViewBase | undefined,
   esQueryConfig: EsQueryConfig,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
@@ -130,6 +190,10 @@ export const getData = async (
     if (aggs.groupings) {
       const { groupings } = aggs;
       const nextAfterKey = groupings.after_key;
+      if (groupings.buckets.length === 0 && Object.keys(previous).length === 0) {
+        return NO_DATA_RESPONSE;
+      }
+
       for (const bucket of groupings.buckets) {
         const key = Object.values(bucket.key).join(',');
         const { shouldTrigger, missingGroup, currentPeriod, additionalContext, containerContext } =
@@ -176,6 +240,7 @@ export const getData = async (
           timeFieldName,
           groupBy,
           searchConfiguration,
+          dataView,
           esQueryConfig,
           compositeSize,
           alertOnGroupDisappear,
@@ -220,6 +285,7 @@ export const getData = async (
       compositeSize,
       alertOnGroupDisappear,
       searchConfiguration,
+      dataView,
       esQueryConfig,
       runtimeMappings,
       lastPeriodEnd,
@@ -228,7 +294,17 @@ export const getData = async (
       fieldsExisted
     ),
   };
-  const body = await esClient.search<undefined, ResponseAggregations>(request);
+  let body: SearchResponse<undefined, ResponseAggregations>;
+  try {
+    body = await esClient.search<undefined, ResponseAggregations>(request);
+  } catch (error) {
+    if (isLastValueNoDataError(error)) {
+      logger.debug(`Swallowed ES bucket_script error for last_value no-data condition: ${error}`);
+      return NO_DATA_RESPONSE;
+    }
+    throw error;
+  }
+
   const { aggregations, _shards } = body;
   if (aggregations) {
     return handleResponse(aggregations, previousResults, _shards.successful);

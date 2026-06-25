@@ -23,7 +23,6 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { getMockMaintenanceWindow } from './maintenance_windows_service.mock';
 
 const logger = loggingSystemMock.create().get();
-const mockBasePathService = { set: jest.fn() };
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
 const apiKey = mockedRawRuleSO.attributes.apiKey!;
@@ -251,31 +250,33 @@ describe('filterMaintenanceWindows', () => {
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id1',
-      scopedQuery: {
-        kql: "_id: '1234'",
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-              key: 'kibana.alert.action_group',
-              field: 'kibana.alert.action_group',
-              params: {
-                query: 'test',
+      scope: {
+        alerting: {
+          kql: "_id: '1234'",
+          filters: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'kibana.alert.action_group',
+                field: 'kibana.alert.action_group',
+                params: {
+                  query: 'test',
+                },
+                type: 'phrase',
               },
-              type: 'phrase',
-            },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.action_group': 'test',
+              $state: {
+                store: FilterStateStore.APP_STATE,
+              },
+              query: {
+                match_phrase: {
+                  'kibana.alert.action_group': 'test',
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       },
     },
     {
@@ -319,31 +320,33 @@ describe('filterMaintenanceWindowsIds', () => {
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id1',
-      scopedQuery: {
-        kql: "_id: '1234'",
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-              key: 'kibana.alert.action_group',
-              field: 'kibana.alert.action_group',
-              params: {
-                query: 'test',
+      scope: {
+        alerting: {
+          kql: "_id: '1234'",
+          filters: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'kibana.alert.action_group',
+                field: 'kibana.alert.action_group',
+                params: {
+                  query: 'test',
+                },
+                type: 'phrase',
               },
-              type: 'phrase',
-            },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.action_group': 'test',
+              $state: {
+                store: FilterStateStore.APP_STATE,
+              },
+              query: {
+                match_phrase: {
+                  'kibana.alert.action_group': 'test',
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       },
     },
     {
@@ -381,7 +384,6 @@ describe('filterMaintenanceWindowsIds', () => {
 
 function getTaskRunnerContext() {
   return {
-    basePathService: mockBasePathService,
     getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
   };
 }

@@ -28,6 +28,13 @@ export const UNKNOWN = i18n.translate(
   }
 );
 
+export const OVERVIEW_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.overviewTab',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+
 export const ALERTS_TAB = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
   defaultMessage: 'Alerts',
 });
@@ -50,13 +57,6 @@ export const EXECUTION_RESULTS_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionResultsTab',
   {
     defaultMessage: 'Execution results',
-  }
-);
-
-export const EXECUTION_EVENTS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab',
-  {
-    defaultMessage: 'Execution events',
   }
 );
 

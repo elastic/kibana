@@ -14,8 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { PackageList } from '../../../common';
@@ -52,7 +51,7 @@ import {
 import type { FetchFindLatestPackageOptions } from './registry';
 import { getPackageFieldsMetadata } from './registry';
 import * as Registry from './registry';
-import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
+import { fetchFindLatestPackageOrThrow } from './registry';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import {
@@ -64,8 +63,10 @@ import {
   getPackageInfo,
   getInstalledPackages,
 } from './packages';
+import { getPackageFromSource } from './packages/get';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
-import { getEsPackage } from './archive/storage';
+import { getAsset, getEsPackage } from './archive/storage';
+import type { PackageAsset } from './archive/storage';
 import { createArchiveIteratorFromMap } from './archive/archive_iterator';
 import { rollbackInstallation } from './packages/rollback';
 
@@ -119,8 +120,8 @@ export interface PackageClient {
   getPackage(
     packageName: string,
     packageVersion: string,
-    options?: Parameters<typeof getPackage>['2']
-  ): ReturnType<typeof getPackage>;
+    options?: { ignoreUnverified?: boolean }
+  ): ReturnType<typeof getPackageFromSource>;
 
   getPackageFieldsMetadata(
     params: Parameters<typeof getPackageFieldsMetadata>['0'],
@@ -143,7 +144,8 @@ export interface PackageClient {
     pkgVersion?: string,
     isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
-    ignoreUnverified?: boolean
+    ignoreUnverified?: boolean,
+    injectWiredStreamsRouting?: boolean
   ): Promise<string>;
 
   reinstallEsAssets(
@@ -156,6 +158,11 @@ export interface PackageClient {
   ): Promise<GetInstalledPackagesResponse>;
 
   rollbackPackage(options: { pkgName: string }): Promise<RollbackPackageResponse>;
+
+  getPackageAsset(
+    assetPath: string,
+    savedObjectsClient?: SavedObjectsClientContract
+  ): Promise<PackageAsset | undefined>;
 }
 
 export class PackageServiceImpl implements PackageService {
@@ -326,7 +333,8 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string,
     isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
-    ignoreUnverified?: boolean
+    ignoreUnverified?: boolean,
+    injectWiredStreamsRouting?: boolean
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
 
@@ -343,17 +351,23 @@ class PackageClientImpl implements PackageClient {
       'yml',
       isInputIncluded,
       prerelease,
-      ignoreUnverified
+      ignoreUnverified,
+      injectWiredStreamsRouting
     );
   }
 
   public async getPackage(
     packageName: string,
     packageVersion: string,
-    options?: Parameters<typeof getPackage>['2']
+    options?: { ignoreUnverified?: boolean }
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
-    return getPackage(packageName, packageVersion, options);
+    return getPackageFromSource({
+      pkgName: packageName,
+      pkgVersion: packageVersion,
+      savedObjectsClient: this.internalSoClient,
+      ignoreUnverified: options?.ignoreUnverified,
+    });
   }
 
   public async getPackageFieldsMetadata(
@@ -480,6 +494,15 @@ class PackageClientImpl implements PackageClient {
       request: this.request,
     });
     return installedTransforms;
+  }
+
+  public async getPackageAsset(
+    assetPath: string,
+    savedObjectsClient: SavedObjectsClientContract = this.internalSoClient
+  ): Promise<PackageAsset | undefined> {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    return getAsset({ savedObjectsClient, path: assetPath });
   }
 
   async #runPreflight(requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) {

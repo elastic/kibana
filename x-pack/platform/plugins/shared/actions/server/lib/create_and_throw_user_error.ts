@@ -9,7 +9,7 @@ import type { AxiosError } from 'axios';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
 export const httpResponseUserErrorCodes = [
-  401, 402, 403, 407, 409, 412, 413, 417, 422, 423, 429, 451,
+  401, 402, 403, 404, 407, 409, 412, 413, 417, 422, 423, 429, 451,
 ];
 
 /**

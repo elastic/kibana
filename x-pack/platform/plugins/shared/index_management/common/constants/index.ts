@@ -67,3 +67,5 @@ export const PLUGIN = {
 
 export const MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX = 2000000000; // 2 billion documents
 export const MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX = 1; // Single shard
+
+export const DEFAULT_DOCUMENT_PAGE_SIZE = 10;

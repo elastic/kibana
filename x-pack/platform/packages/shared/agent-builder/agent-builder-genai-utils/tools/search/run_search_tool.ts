@@ -6,11 +6,12 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
+import type { ModelProvider, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
+import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { createSearchToolGraph } from './graph';
 
 export const runSearchTool = async ({
@@ -18,41 +19,52 @@ export const runSearchTool = async ({
   index,
   rowLimit,
   customInstructions,
-  model,
+  allowPatternTarget = false,
+  timeRange,
+  modelProvider,
   esClient,
   logger,
   events,
+  topSnippetsConfig,
 }: {
   nlQuery: string;
   index?: string;
   rowLimit?: number;
   customInstructions?: string;
-  model: ScopedModel;
+  /** When true, a pattern (e.g. logs-*) targets all matching indices via ESQL. When false, a single index is chosen via index explorer. */
+  allowPatternTarget?: boolean;
+  timeRange?: TimeRange;
+  modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
+  topSnippetsConfig?: TopSnippetsConfig;
 }): Promise<ToolHandlerResult[]> => {
-  const toolGraph = createSearchToolGraph({
-    model,
+  const toolGraph = await createSearchToolGraph({
+    modelProvider,
     esClient,
     logger,
     events,
+    topSnippetsConfig,
   });
 
   return withActiveInferenceSpan(
-    'SearchToolGraph',
+    'search_tool',
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
       },
     },
     async () => {
+      const resolvedTimeRange = timeRange ?? { from: 'now-24h', to: 'now' };
       const outState = await toolGraph.invoke(
         {
           nlQuery,
           targetPattern: index,
           rowLimit,
           customInstructions,
+          allowPatternTarget,
+          timeRange: resolvedTimeRange,
         },
         { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
       );

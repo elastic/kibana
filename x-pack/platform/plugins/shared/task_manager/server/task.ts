@@ -11,9 +11,8 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { Frequency } from '@kbn/rrule';
+import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
-import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import type { DecoratedError } from './task_running';
 
@@ -28,8 +27,38 @@ export enum TaskPriority {
 export enum TaskCost {
   Tiny = 1,
   Normal = 2,
+  Large = 4,
   ExtraLarge = 10,
 }
+
+/**
+ * String values for task cost as stored in the task schema (e.g. in saved objects).
+ * Use these when reading cost from task params or instance attributes.
+ */
+export enum InstanceTaskCost {
+  Tiny = 'tiny',
+  Normal = 'normal',
+  Large = 'large',
+  ExtraLarge = 'extralarge',
+}
+
+/** Maps schema cost strings to their integer values for capacity calculations. */
+const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
+  [InstanceTaskCost.Tiny]: TaskCost.Tiny,
+  [InstanceTaskCost.Normal]: TaskCost.Normal,
+  [InstanceTaskCost.Large]: TaskCost.Large,
+  [InstanceTaskCost.ExtraLarge]: TaskCost.ExtraLarge,
+};
+
+/**
+ * Translates cost string from task params/instance (e.g. 'extralarge') to the
+ * corresponding TaskCost integer. Returns undefined if the string is invalid or null.
+ */
+export const getTaskCostFromInstance = (cost?: InstanceTaskCost): number | undefined => {
+  if (cost) {
+    return INSTANCE_TASK_COST_TO_INT[cost];
+  }
+};
 
 /*
  * Type definitions and validations for tasks.
@@ -64,6 +93,15 @@ export interface RunContext {
    */
   fakeRequest?: KibanaRequest;
   abortController: AbortController;
+
+  /**
+   * If the task has a known `profile_uid`, binds it to a child fake request
+   * so `security.authc.getCurrentUser(request)` resolves to the originating
+   * user. Intended for tasks that construct child fake requests to invoke
+   * profile-keyed APIs. Throws on non-fake requests; calling twice on the
+   * same fake request is a no-op (first-wins) and emits a warning.
+   */
+  enrichRequest?: (request: KibanaRequest) => void;
 }
 
 /**
@@ -124,8 +162,9 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
-export type RunFunction = () => Promise<RunResult | undefined | void>;
-export type CancelFunction = () => Promise<RunResult | undefined | void>;
+export type AnyRunResult = RunResult | undefined | void;
+export type RunFunction = () => Promise<AnyRunResult>;
+export type CancelFunction = () => Promise<AnyRunResult>;
 export interface CancellableTask<T = never> {
   run: RunFunction;
   cancel?: CancelFunction;
@@ -254,59 +293,15 @@ export enum TaskLifecycleResult {
 }
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
-export interface IntervalSchedule {
-  /**
-   * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
-   * */
-  interval: Interval;
-  rrule?: never;
-}
 
-export type Rrule = RruleMonthly | RruleWeekly | RruleDaily | RruleHourly;
-export interface RruleSchedule {
-  rrule: Rrule;
-  interval?: never;
-}
-
-interface RruleCommon {
-  dtstart?: string;
-  freq: Frequency;
-  interval: number;
-  tzid: string;
-}
-interface RruleMonthly extends RruleCommon {
-  freq: Frequency.MONTHLY;
-  bymonthday?: number[];
-  byhour?: number[];
-  byminute?: number[];
-  byweekday?: string[];
-}
-interface RruleWeekly extends RruleCommon {
-  freq: Frequency.WEEKLY;
-  byweekday?: string[];
-  byhour?: number[];
-  byminute?: number[];
-  bymonthday?: never;
-}
-interface RruleDaily extends RruleCommon {
-  freq: Frequency.DAILY;
-  byhour?: number[];
-  byminute?: number[];
-  byweekday?: string[];
-  bymonthday?: never;
-}
-interface RruleHourly extends RruleCommon {
-  freq: Frequency.HOURLY;
-  byhour?: never;
-  byminute?: number[];
-  byweekday?: never;
-  bymonthday?: never;
-}
+export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 
 export interface TaskUserScope {
   apiKeyId: string;
+  uiamApiKeyId?: string;
   spaceId?: string;
   apiKeyCreatedByUser: boolean;
+  userProfileId?: string;
 }
 
 /*
@@ -416,9 +411,14 @@ export interface TaskInstance {
   partition?: number;
 
   /**
-   * Used to allow tasks to be scoped to a user via their API key
+   * Used to allow tasks to be scoped to a user via their ES API key
    */
   apiKey?: string;
+
+  /**
+   * Used to allow tasks to be scoped to a user via their UIAM API key
+   */
+  uiamApiKey?: string;
 
   /**
    * Meta data related to the API key associated with this task
@@ -429,6 +429,14 @@ export interface TaskInstance {
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
+
+  /**
+   * Optional cost for this task instance, overriding the task type's default cost.
+   * When set, must be one of the InstanceTaskCost enum values ('tiny', 'normal', 'extralarge').
+   * Used by the task selector and capacity logic to limit concurrent work.
+   * Use getTaskCostFromInstance() to translate to the integer TaskCost.
+   */
+  cost?: InstanceTaskCost;
 }
 
 /**
@@ -562,6 +570,7 @@ export type SerializedConcreteTaskInstance = Omit<
   runAt: string;
   partition?: number;
   apiKey?: string;
+  uiamApiKey?: string;
   userScope?: TaskUserScope;
 };
 
@@ -572,6 +581,17 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 export interface ApiKeyOptions {
   request?: KibanaRequest;
   regenerateApiKey?: boolean;
+  /**
+   * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
+   * tests and narrow internal flows (e.g. exercising UIAM provisioning on tasks that have ES
+   * credentials only).
+   */
+  onEsKey?: boolean;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+
+// Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
+export interface TaskEventLogger {
+  logEvent(properties: object, id?: string): void;
+}

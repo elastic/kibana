@@ -15,9 +15,7 @@ import type {
 } from '@kbn/response-ops-alerts-fields-browser/types';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { ColumnHeaderOptions } from '../../../../common/types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useDataView as useDataViewOld } from '../../../common/containers/source/use_data_view';
 import { useKibana } from '../../../common/lib/kibana';
 import type { State } from '../../../common/store';
 import { sourcererSelectors } from '../../../common/store';
@@ -55,12 +53,10 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   removeColumn,
   upsertColumn,
 }) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const [dataView, setDataView] = useState<DataView | null>(null);
-  const { dataView: experimentalDataView } = useDataView(sourcererScope);
+  const [dv, setDv] = useState<DataView | null>(null);
+  const { dataView } = useDataView(sourcererScope);
 
   const { startTransaction } = useStartTransaction();
-  const { indexFieldsSearch } = useDataViewOld();
   const {
     dataViewFieldEditor,
     data: { dataViews },
@@ -68,55 +64,25 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   const missingPatterns = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeMissingPatterns(state, sourcererScope);
   });
-  const sourcererDataViewId = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, sourcererScope);
-  });
 
-  const selectedDataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView?.id : sourcererDataViewId),
-    [sourcererDataViewId, experimentalDataView?.id, newDataViewPickerEnabled]
-  );
+  const selectedDataViewId = useMemo(() => dataView?.id, [dataView?.id]);
   useEffect(() => {
-    let ignore = false;
-    const fetchAndSetDataView = async (dataViewId: string) => {
-      if (newDataViewPickerEnabled) {
-        if (experimentalDataView) setDataView(experimentalDataView);
-        return;
-      }
-      const aDatView = await dataViews.get(dataViewId);
-      if (ignore) return;
-      setDataView(aDatView);
-    };
-    if (selectedDataViewId != null && !missingPatterns.length) {
-      fetchAndSetDataView(selectedDataViewId);
+    if (dataView && selectedDataViewId != null && !missingPatterns.length) {
+      setDv(dataView);
     }
-
-    return () => {
-      ignore = true;
-    };
-  }, [
-    selectedDataViewId,
-    missingPatterns,
-    dataViews,
-    newDataViewPickerEnabled,
-    experimentalDataView,
-  ]);
+  }, [selectedDataViewId, missingPatterns, dataViews, dataView]);
 
   const openFieldEditor = useCallback<OpenFieldEditor>(
     async (fieldName) => {
-      if (dataView && selectedDataViewId) {
+      if (dv && selectedDataViewId) {
         const closeFieldEditor = await dataViewFieldEditor.openEditor({
-          ctx: { dataView },
+          ctx: { dataView: dv },
           fieldName,
           onSave: async (savedFields: DataViewField[]) => {
             startTransaction({ name: FIELD_BROWSER_ACTIONS.FIELD_SAVED });
             // Fetch the updated list of fields
             // Using cleanCache since the number of fields might have not changed, but we need to update the state anyway
-            if (newDataViewPickerEnabled) {
-              dataViews.clearInstanceCache(selectedDataViewId);
-            } else {
-              await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
-            }
+            dataViews.clearInstanceCache(selectedDataViewId);
 
             for (const savedField of savedFields) {
               if (fieldName && fieldName !== savedField.name) {
@@ -151,14 +117,12 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
       }
     },
     [
-      dataView,
+      dv,
       selectedDataViewId,
       dataViewFieldEditor,
       editorActionsRef,
       startTransaction,
-      newDataViewPickerEnabled,
       dataViews,
-      indexFieldsSearch,
       upsertColumn,
       removeColumn,
     ]
@@ -166,33 +130,19 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
 
   const openDeleteFieldModal = useCallback<OpenDeleteFieldModal>(
     (fieldName: string) => {
-      if (dataView && selectedDataViewId) {
+      if (dv && selectedDataViewId) {
         dataViewFieldEditor.openDeleteModal({
-          ctx: { dataView },
+          ctx: { dataView: dv },
           fieldName,
           onDelete: async () => {
             startTransaction({ name: FIELD_BROWSER_ACTIONS.FIELD_DELETED });
-
-            if (newDataViewPickerEnabled) {
-              dataViews.clearInstanceCache(selectedDataViewId);
-            } else {
-              await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
-            }
+            dataViews.clearInstanceCache(selectedDataViewId);
             removeColumn(fieldName);
           },
         });
       }
     },
-    [
-      dataView,
-      selectedDataViewId,
-      dataViewFieldEditor,
-      startTransaction,
-      newDataViewPickerEnabled,
-      removeColumn,
-      dataViews,
-      indexFieldsSearch,
-    ]
+    [dv, selectedDataViewId, dataViewFieldEditor, startTransaction, removeColumn, dataViews]
   );
 
   const hasFieldEditPermission = useMemo(
@@ -201,8 +151,8 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   );
 
   const createFieldButton = useCreateFieldButton({
-    isAllowed: hasFieldEditPermission && !!selectedDataViewId && !dataView?.managed,
-    loading: !dataView,
+    isAllowed: hasFieldEditPermission && !!selectedDataViewId && !dv?.managed,
+    loading: !dv,
     openFieldEditor,
   });
 

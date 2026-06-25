@@ -12,6 +12,7 @@ export const registerMigrationsRoutes = ({
   logger,
   config,
   getStartServices,
+  hasEncryptionKey,
 }: EntityAnalyticsRoutesDeps) => {
-  entityAnalyticsRunMigrationsRoute(router, logger, getStartServices);
+  entityAnalyticsRunMigrationsRoute(router, logger, getStartServices, config, hasEncryptionKey);
 };

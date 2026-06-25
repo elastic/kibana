@@ -13,8 +13,16 @@ import type {
   ClusterPutComponentTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
+export { reindex } from './reindex';
+export type { ReindexOptions } from './reindex';
+export { updateByQueryWithScript } from './ingest';
+export type { UpdateByQueryWithScriptOptions } from './ingest';
+export { waitForTaskToComplete } from './wait_for_task';
+export type { WaitForTaskOptions } from './wait_for_task';
+
 export interface CreateOptions {
   throwIfExists?: boolean;
+  aliases?: Record<string, object>;
 }
 
 export const createIndex = async (
@@ -23,7 +31,7 @@ export const createIndex = async (
   options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
-    await esClient.indices.create({ index });
+    await esClient.indices.create({ index, aliases: options.aliases });
   } catch (error) {
     if (
       !options.throwIfExists &&

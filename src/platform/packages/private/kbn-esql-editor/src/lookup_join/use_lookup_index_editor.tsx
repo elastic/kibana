@@ -15,7 +15,7 @@ import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { isEqual } from 'lodash';
 import type React from 'react';
@@ -56,8 +56,15 @@ async function isCurrentAppSupported(
 export function getMonacoCommandString(
   indexName: string,
   isExistingIndex: boolean,
-  indexPrivileges: LookupIndexPrivileges
+  indexPrivileges: LookupIndexPrivileges,
+  isClosedIndex?: boolean
 ): string | undefined {
+  if (isClosedIndex) {
+    return i18n.translate('esqlEditor.lookupIndex.closed', {
+      defaultMessage: '⚠ Index is closed — reopen it before using it in a lookup join.',
+    });
+  }
+
   const { canEditIndex, canReadIndex, canCreateIndex } = indexPrivileges;
 
   let actionLabel = '';
@@ -165,6 +172,7 @@ export const useLookupIndexCommand = (
   const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
   const lookupIndexEditBadgeClassName = 'lookupIndexEditBadge';
+  const lookupIndexClosedBadgeClassName = 'lookupIndexClosedBadge';
   const lookupIndexBadgeStyle = css`
     .${lookupIndexBaseBadgeClassName} {
       white-space: nowrap;
@@ -178,6 +186,11 @@ export const useLookupIndexCommand = (
     .${lookupIndexEditBadgeClassName} {
       border-bottom: ${euiTheme.border.width.thick} dotted ${euiTheme.colors.textParagraph};
     }
+
+    .${lookupIndexClosedBadgeClassName} {
+      border-bottom: ${euiTheme.border.width.thick} dotted ${euiTheme.colors.warning};
+      color: ${euiTheme.colors.warning};
+    }
   `;
 
   const { run: addLookupIndicesDecorator } = useDebounceFn(async () => {
@@ -187,23 +200,38 @@ export const useLookupIndexCommand = (
 
     const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
     const lookupIndices: string[] = inQueryLookupIndices.current;
-    const permissions = await getPermissions(lookupIndices);
+    const nonClosedIndices = lookupIndices.filter(
+      (name) => !existingIndices.indices.find((i) => i.name === name)?.isClosed
+    );
+    const permissions = await getPermissions(nonClosedIndices);
     const newDecorations: monaco.editor.IModelDeltaDecoration[] = [];
 
     for (let i = 0; i < lookupIndices.length; i++) {
       const lookupIndex = lookupIndices[i];
 
-      const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
+      const existingIndex = existingIndices.indices.find((index) => index.name === lookupIndex);
+      const isExistingIndex = !!existingIndex;
+      const isClosedIndex = existingIndex?.isClosed;
       const matches =
         editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
 
       const commandString = getMonacoCommandString(
         lookupIndex,
         isExistingIndex,
-        permissions[lookupIndex]
+        permissions[lookupIndex],
+        isClosedIndex
       );
 
       if (!commandString) continue;
+
+      let badgeClassName: string;
+      if (isClosedIndex) {
+        badgeClassName = lookupIndexClosedBadgeClassName;
+      } else if (isExistingIndex) {
+        badgeClassName = lookupIndexEditBadgeClassName;
+      } else {
+        badgeClassName = lookupIndexAddBadgeClassName;
+      }
 
       matches.forEach((match) => {
         newDecorations.push({
@@ -216,10 +244,7 @@ export const useLookupIndexCommand = (
               isTrusted: true,
             },
 
-            inlineClassName:
-              lookupIndexBaseBadgeClassName +
-              ' ' +
-              (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
+            inlineClassName: lookupIndexBaseBadgeClassName + ' ' + badgeClassName,
           },
         });
       });
@@ -280,7 +305,7 @@ export const useLookupIndexCommand = (
       canEditIndex = true,
       triggerSource = 'esql_autocomplete'
     ) => {
-      await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
+      await uiActions.executeTriggerActions('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID', {
         indexName,
         doesIndexExist,
         canEditIndex,

@@ -19,7 +19,7 @@ import {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
@@ -30,6 +30,7 @@ import type {
   CasesServerSetupDependencies,
   CasesServerStart,
   CasesServerStartDependencies,
+  CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeatures } from './features';
@@ -39,6 +40,7 @@ import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
+import { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import { UserProfileService } from './services';
 import {
   LICENSING_CASE_ASSIGNMENT_FEATURE,
@@ -52,8 +54,14 @@ import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
+import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { CasesEventBus } from './events/event_bus';
+import { registerCaseWorkflowSteps } from './workflows';
+import { registerCaseWorkflowTriggers } from './workflows/triggers';
+import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
   implements
@@ -72,10 +80,14 @@ export class CasePlugin
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
+  private templatesMigrationTaskManager?: TemplatesMigrationTaskManager;
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
+  private casesEventBus?: CasesEventBus;
+  private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -84,6 +96,7 @@ export class CasePlugin
     this.clientFactory = new CasesClientFactory(this.logger);
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+    this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
@@ -98,10 +111,9 @@ export class CasePlugin
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    registerInternalAttachments(
-      this.externalReferenceAttachmentTypeRegistry,
-      this.persistableStateAttachmentTypeRegistry
-    );
+    initUiSettings(core.uiSettings);
+
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry);
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
     registerCasesAnalyticsIndexesTasks({
@@ -122,6 +134,8 @@ export class CasePlugin
       plugins.features.registerKibanaFeature(casesFeatures.v2);
       plugins.features.registerKibanaFeature(casesFeatures.v3);
     }
+
+    this.casesEventBus = new CasesEventBus();
 
     registerSavedObjects({
       core,
@@ -154,6 +168,14 @@ export class CasePlugin
         this.incrementalIdTaskManager = new IncrementalIdTaskManager(
           plugins.taskManager,
           this.caseConfig.incrementalId,
+          this.logger,
+          plugins.usageCollection
+        );
+      }
+
+      if (this.caseConfig.templates.enabled) {
+        this.templatesMigrationTaskManager = new TemplatesMigrationTaskManager(
+          plugins.taskManager,
           this.logger,
           plugins.usageCollection
         );
@@ -202,7 +224,11 @@ export class CasePlugin
       getCasesClient,
       getSpaceId,
       serverlessProjectType,
+      isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
     });
+
+    registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+    registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     return {
       attachmentFramework: {
@@ -212,8 +238,14 @@ export class CasePlugin
         registerPersistableState: (persistableStateAttachmentType) => {
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
         },
+        registerUnified: (unifiedAttachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
+        },
       },
       config: this.caseConfig,
+      registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => {
+        this.closeReasonValidators.set(owner, validator);
+      },
     };
   }
 
@@ -225,6 +257,18 @@ export class CasePlugin
 
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+      }
+
+      if (this.caseConfig.templates.enabled && this.templatesMigrationTaskManager) {
+        void this.templatesMigrationTaskManager
+          .scheduleMigrationTask(plugins.taskManager, core)
+          .catch((err) =>
+            this.logger.error(
+              `Failed to initialize templates migration task: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            )
+          );
       }
       if (this.caseConfig.analytics.index?.enabled) {
         const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
@@ -254,6 +298,10 @@ export class CasePlugin
       licensingPluginStart: plugins.licensing,
     });
 
+    // this.casesEventBus will be set to a defined value in the setup() function
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
+
     this.clientFactory.initialize({
       // securityPluginSetup will be set to a defined value in the setup() function
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -272,6 +320,7 @@ export class CasePlugin
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
@@ -280,6 +329,17 @@ export class CasePlugin
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
+      casesEventBus: this.casesEventBus,
+      closeReasonValidator:
+        this.closeReasonValidators.size > 0
+          ? (closeReason, owner, request) => {
+              const ownerValidator = this.closeReasonValidators.get(owner);
+              if (ownerValidator) {
+                return ownerValidator(closeReason, request);
+              }
+              return Promise.resolve(false);
+            }
+          : undefined,
     });
 
     return {
@@ -287,6 +347,7 @@ export class CasePlugin
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
+      getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
       config: this.caseConfig,
     };
   }

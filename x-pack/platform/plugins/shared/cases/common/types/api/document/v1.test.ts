@@ -6,6 +6,7 @@
  */
 
 import { DocumentResponseRt } from './v1';
+import { DocumentResponseSchema } from '../../api_zod/document/v1';
 
 describe('Documents', () => {
   describe('DocumentResponseRt', () => {
@@ -41,6 +42,20 @@ describe('Documents', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
+      const result = DocumentResponseSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
+      const result = DocumentResponseSchema.safeParse([{ ...defaultRequest[0], foo: 'bar' }]);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

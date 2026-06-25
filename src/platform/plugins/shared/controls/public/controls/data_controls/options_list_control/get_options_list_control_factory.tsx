@@ -22,18 +22,23 @@ import {
 } from 'rxjs';
 
 import {
-  DEFAULT_SEARCH_TECHNIQUE,
+  ControlValuesSource,
   OPTIONS_LIST_CONTROL,
-  OPTIONS_LIST_DEFAULT_SORT,
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
 } from '@kbn/controls-constants';
-import type { OptionsListControlState } from '@kbn/controls-schemas';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { OptionsListSelection, OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import {
+  apiHasPinnedPanels,
+  apiHasSections,
+  panelIsRelatedByGlobalFilters,
+  initializeRelatedPanels,
+  initializeStateApi,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
-import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
-import { coreServices } from '../../../services/kibana_services';
+import { isValidSearch } from '../../../../common/options_list';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
@@ -51,7 +56,7 @@ import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { buildFilter } from './utils/filter_utils';
 import {
   clearSelections,
@@ -60,21 +65,41 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-export const getOptionsListControlFactory = (): EmbeddableFactory<
-  OptionsListControlState,
+// TODO Remove when we're able to get accurate document counts for ES|QL-source controls and can reenable doc-count sorting on them
+const normalizeEsqlSort = (
+  controlState: OptionsListDSLControlState
+): OptionsListDSLControlState => {
+  if (
+    controlState.values_source !== ControlValuesSource.ESQL ||
+    (controlState.sort?.by ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.by) !== '_count'
+  ) {
+    return controlState;
+  }
+
+  return {
+    ...controlState,
+    sort: {
+      by: '_key',
+      direction: controlState.sort?.direction ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.direction,
+    },
+  };
+};
+
+export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
+  OptionsListDSLControlState,
   OptionsListControlApi
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState;
+      const state = normalizeEsqlSort(initialState);
 
-      if (isOptionsListESQLControlState(state)) {
-        throw new Error('ES|QL control state handling not yet implemented');
-      }
       const editorStateManager = initializeEditorStateManager(state);
-      const temporaryStateManager = initializeTemporayStateManager();
+      const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
       const selectionsManager = initializeSelectionsManager(state);
 
       const dataControlManager: DataControlStateManager =
@@ -92,7 +117,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
       );
-
       /** Handle loading state; since suggestion fetching and validation are tied, only need one loading subject */
       const loadingSuggestions$ = new BehaviorSubject<boolean>(false);
       const dataLoadingSubscription = combineLatest([
@@ -129,32 +153,23 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const fieldChangedSubscription = combineLatest([
         dataControlManager.api.fieldName$,
         dataControlManager.api.dataViewId$,
+        dataControlManager.api.valuesSource$,
       ])
         .pipe(
+          filter(([, , valuesSource]) => valuesSource === ControlValuesSource.FIELD),
+          distinctUntilChanged(
+            ([fieldNameA, dataViewIdA], [fieldNameB, dataViewIdB]) =>
+              fieldNameA === fieldNameB && dataViewIdA === dataViewIdB
+          ),
           skip(1) // skip first, since this represents initialization
         )
         .subscribe(() => {
           temporaryStateManager.api.setSearchString('');
-          selectionsManager.api.setSelectedOptions(undefined);
+          selectionsManager.api.setSelectedOptions(DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options);
           selectionsManager.api.setExistsSelected(false);
           selectionsManager.api.setExclude(false);
-          selectionsManager.api.setSort(OPTIONS_LIST_DEFAULT_SORT);
+          selectionsManager.api.setSort(DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
           temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
-        });
-
-      // we do not want to delay the embeddable creation waiting for this, so do not await promise
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
-      coreServices.http
-        .get<{
-          allowExpensiveQueries: boolean;
-        }>('/internal/controls/getExpensiveQueriesSetting', {
-          version: '1',
-        })
-        .catch(() => {
-          return { allowExpensiveQueries: true }; // default to true on error
-        })
-        .then(({ allowExpensiveQueries }) => {
-          if (!allowExpensiveQueries) allowExpensiveQueries$.next(false);
         });
 
       /** Fetch the suggestions and perform validation */
@@ -169,7 +184,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           parentApi,
           uuid,
         },
-        allowExpensiveQueries$,
         requestSize$: temporaryStateManager.api.requestSize$,
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
         selectedOptions$: selectionsManager.api.selectedOptions$,
@@ -188,7 +202,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         // fetch was successful so set all attributes from result
         const successResponse = result as OptionsListSuccessResponse;
         temporaryStateManager.api.setAvailableOptions(successResponse.suggestions);
-        temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality ?? 0);
+        temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality);
         temporaryStateManager.api.setInvalidSelections(
           new Set(successResponse.invalidSelections ?? [])
         );
@@ -209,7 +223,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         });
 
       const hasSelections$ = new BehaviorSubject<boolean>(
-        Boolean(state.selectedOptions?.length || state.existsSelected)
+        Boolean(state.selected_options?.length || state.exists_selected)
       );
       const hasSelectionsSubscription = combineLatest([
         selectionsManager.api.selectedOptions$,
@@ -243,9 +257,9 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             if (!dataView) return;
 
             const newFilter = buildFilter(dataView, uuid, {
-              fieldName,
-              selectedOptions,
-              existsSelected,
+              field_name: fieldName,
+              selected_options: selectedOptions,
+              exists_selected: existsSelected,
               exclude,
               sectionId,
             });
@@ -253,21 +267,16 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListControlState {
-        return {
+      const stateApi = initializeStateApi<OptionsListDSLControlState>({
+        uuid,
+        parentApi,
+        serializeState: (): OptionsListDSLControlState => ({
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
           ...editorStateManager.getLatestState(),
-
           // serialize state that cannot be changed to keep it consistent
-          displaySettings: state.displaySettings,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+          display_settings: state.display_settings,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
@@ -279,23 +288,27 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             ...selectionComparators,
             ...editorComparators,
             // This state cannot currently be changed after the control is created
-            displaySettings: 'skip',
+            display_settings: 'skip',
           };
         },
         defaultState: {
-          searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
-          sort: OPTIONS_LIST_DEFAULT_SORT,
+          search_technique: DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
+          sort: DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
           exclude: false,
-          existsSelected: false,
+          exists_selected: false,
         },
-        onReset: (lastSaved) => {
-          if (isOptionsListESQLControlState(lastSaved)) {
-            throw new Error('ES|QL control state handling not yet implemented');
-          }
-          dataControlManager.reinitializeState(lastSaved);
-          selectionsManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          const normalizedState = normalizeEsqlSort(nextState);
+          dataControlManager.reinitializeState(normalizedState);
+          selectionsManager.reinitializeState(normalizedState);
+          editorStateManager.reinitializeState(normalizedState);
         },
+      });
+
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
       });
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -311,20 +324,19 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...dataControlManager.api,
+        ...relatedPanelsApi,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
-        serializeState,
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
 
-      const componentApi: OptionsListComponentApi = {
+      const componentApi: DSLOptionsListComponentApi = {
         ...api,
-        ...dataControlManager.api,
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,
@@ -342,8 +354,9 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }),
         selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
-        allowExpensiveQueries$,
       };
+
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,
@@ -360,6 +373,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
               errorsSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
@@ -367,10 +382,10 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             <OptionsListControlContext.Provider
               value={{
                 componentApi,
-                displaySettings: state.displaySettings ?? {},
+                displaySettings: state.display_settings ?? {},
               }}
             >
-              <OptionsListControl />
+              <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );
         },

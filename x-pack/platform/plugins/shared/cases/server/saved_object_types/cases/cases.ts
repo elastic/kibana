@@ -13,7 +13,7 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsType,
 } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_EXTENDED_FIELDS, CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { handleExport } from '../import_export/export';
 import { caseMigrations } from '../migrations';
@@ -26,12 +26,15 @@ import {
   modelVersion6,
   modelVersion7,
   modelVersion8,
+  modelVersion9,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
+import type { ConfigType } from '../../config';
 
 export const createCaseSavedObjectType = (
   coreSetup: CoreSetup,
-  logger: Logger
+  logger: Logger,
+  config: ConfigType
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -271,6 +274,20 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      template: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          version: {
+            type: 'integer',
+          },
+        },
+      },
+      [CASE_EXTENDED_FIELDS]: {
+        type: 'flattened',
+      },
     },
   },
   migrations: caseMigrations,
@@ -283,6 +300,7 @@ export const createCaseSavedObjectType = (
     6: modelVersion6,
     7: modelVersion7,
     8: modelVersion8,
+    9: modelVersion9,
   },
   management: {
     importableAndExportable: true,
@@ -292,7 +310,7 @@ export const createCaseSavedObjectType = (
     onExport: async (
       context: SavedObjectsExportTransformContext,
       objects: Array<SavedObject<CasePersistedAttributes>>
-    ) => handleExport({ context, objects, coreSetup, logger }),
+    ) => handleExport({ context, objects, coreSetup, logger, config }),
     onImport: (objects: Array<SavedObject<CasePersistedAttributes>>) => handleImport({ objects }),
   },
 });

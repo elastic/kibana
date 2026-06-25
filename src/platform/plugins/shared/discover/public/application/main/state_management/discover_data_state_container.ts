@@ -26,12 +26,17 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+  getChartHidden,
+  getTableHidden,
+  getEsqlDataView,
+} from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
-import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
@@ -39,11 +44,11 @@ import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import { getDefaultProfileState } from './utils/get_default_profile_state';
+import { getDefaultProfileState, getProfileStateSnapshot } from './utils/default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { createSearchSource } from './utils/create_search_source';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -134,7 +139,6 @@ export interface DiscoverDataStateContainer {
   inspectorAdapters: {
     requests: RequestAdapter;
     lensRequests?: RequestAdapter;
-    cascadeRequests?: RequestAdapter;
   };
   /**
    * Return the initial fetch status
@@ -142,6 +146,10 @@ export interface DiscoverDataStateContainer {
    *  LOADING: data is fetched initially (when Discover is rendered, or data views are switched)
    */
   getInitialFetchStatus: () => FetchStatus;
+  /**
+   * Clean up ES|QL state when saved search changes
+   */
+  cleanupEsql: () => void;
 }
 
 /**
@@ -154,7 +162,6 @@ export function getDataStateContainer({
   searchSessionManager,
   internalState,
   runtimeStateManager,
-  savedSearchContainer,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -162,7 +169,6 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  savedSearchContainer: DiscoverSavedSearchContainer;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
@@ -195,6 +201,15 @@ export function getDataStateContainer({
   };
 
   /**
+   * Allows skipping any fetches that would occur from state updates in the callback
+   */
+  const withSkipNextFetch = async (callback: () => Promise<void>) => {
+    disableNextFetchOnStateChange$.next(true);
+    await callback();
+    disableNextFetchOnStateChange$.next(false);
+  };
+
+  /**
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
@@ -224,8 +239,7 @@ export function getDataStateContainer({
 
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
-  // Make sure to clean up the ES|QL state when the saved search changes
-  savedSearchContainer.getInitial$().subscribe(cleanupEsql);
+  // ES|QL state cleanup is handled by Redux listener middleware (resetOnSavedSearchChange action)
 
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
@@ -266,7 +280,14 @@ export function getDataStateContainer({
             subscription.unsubscribe();
           }
 
-          const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
+          const tabState = getCurrentTab();
+          const {
+            id: currentTabId,
+            defaultProfileState,
+            dataRequestParams,
+            appState,
+            globalState,
+          } = tabState;
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
@@ -283,6 +304,13 @@ export function getDataStateContainer({
               searchSessionManager.getNextSearchSessionId());
           }
 
+          const searchSource = createSearchSource({
+            dataView: currentDataView$.getValue(),
+            appState,
+            globalState,
+            services,
+          });
+
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
             initialFetchStatus: getInitialFetchStatus(),
@@ -290,14 +318,13 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             internalState,
-            savedSearch: savedSearchContainer.getState(),
+            searchSource,
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,
           };
 
-          abortController?.abort(AbortReason.REPLACED);
-          abortControllerFetchMore?.abort(AbortReason.REPLACED);
+          cancel(AbortReason.REPLACED);
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
@@ -332,29 +359,96 @@ export function getDataStateContainer({
             })
           );
 
-          await scopedProfilesManager.resolveDataSourceProfile(
-            {
-              dataSource: getCurrentTab().appState.dataSource,
-              dataView: currentDataView$.getValue(),
-              query: getCurrentTab().appState.query,
-            },
-            resetFetchChart$
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+              cascadedDocumentsState: {
+                ...getCurrentTab().cascadedDocumentsState,
+                columnsMeta: {},
+                cascadedDocumentsMap: {},
+              },
+            })
           );
 
+          const { didProfileChange, isFirstResolution } =
+            await scopedProfilesManager.resolveDataSourceProfile(
+              {
+                dataSource: getCurrentTab().appState.dataSource,
+                dataView: currentDataView$.getValue(),
+                query: getCurrentTab().appState.query,
+              },
+              resetFetchChart$
+            );
+
+          let shouldApplyDefaultProfileState = true;
+
+          // If the data source profile changed, we may need to restore previous profile state
+          if (didProfileChange) {
+            const profileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
+            const profileStateSnapshot =
+              getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
+            const profileStateUpdate = getProfileStateSnapshot(
+              profileStateSnapshot ?? {},
+              defaultProfileState.fieldsToReset
+            );
+            const hasProfileStateUpdate =
+              profileStateUpdate && Object.keys(profileStateUpdate).length > 0;
+
+            // Only apply the default profile state if we have no profile state to restore
+            shouldApplyDefaultProfileState = !hasProfileStateUpdate;
+
+            if (hasProfileStateUpdate) {
+              await withSkipNextFetch(() =>
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                    appState: profileStateUpdate,
+                  })
+                )
+              );
+            } else {
+              // If it's not the first profile resolution (i.e. page load or tab init),
+              // and there's no profile state to restore, fall back to shared layout state
+              if (!isFirstResolution) {
+                await withSkipNextFetch(async () =>
+                  internalState.dispatch(
+                    injectCurrentTab(internalStateActions.setAppState)({
+                      appState: {
+                        ...getCurrentTab().appState,
+                        hideChart: getChartHidden(services.storage, 'discover'),
+                        hideTable: getTableHidden(services.storage, 'discover'),
+                      },
+                      isSystemTriggered: true,
+                    })
+                  )
+                );
+              }
+
+              // If there is no profile state yet, sync a snapshot of the current
+              // state so it can be restored when switching back to this profile
+              internalState.dispatch(
+                injectCurrentTab(internalStateActions.syncProfileStateSnapshot)({})
+              );
+            }
+          }
+
           const dataView = currentDataView$.getValue();
-          const defaultProfileState = dataView
-            ? getDefaultProfileState({ scopedProfilesManager, resetDefaultProfileState, dataView })
-            : undefined;
-          const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
+          const resolvedDefaultProfileState =
+            shouldApplyDefaultProfileState && dataView
+              ? getDefaultProfileState({
+                  scopedProfilesManager,
+                  defaultProfileState,
+                  dataView,
+                })
+              : undefined;
+          const preFetchStateUpdate = resolvedDefaultProfileState?.getPreFetchState();
 
           if (preFetchStateUpdate) {
-            disableNextFetchOnStateChange$.next(true);
-            await internalState.dispatch(
-              injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
-                appState: preFetchStateUpdate,
-              })
+            await withSkipNextFetch(() =>
+              internalState.dispatch(
+                injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                  appState: preFetchStateUpdate,
+                })
+              )
             );
-            disableNextFetchOnStateChange$.next(false);
           }
 
           abortController = new AbortController();
@@ -413,6 +507,7 @@ export function getDataStateContainer({
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
                     cascadedDocumentsState: {
+                      ...getCurrentTab().cascadedDocumentsState,
                       availableCascadeGroups: newAvailableGroups,
                       selectedCascadeGroups: newSelectedGroups,
                     },
@@ -422,6 +517,7 @@ export function getDataStateContainer({
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
                     cascadedDocumentsState: {
+                      ...getCurrentTab().cascadedDocumentsState,
                       availableCascadeGroups: [],
                       selectedCascadeGroups: [],
                     },
@@ -429,15 +525,15 @@ export function getDataStateContainer({
                 );
               }
 
-              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
+              const { defaultProfileState: currentDefaultProfileState } = getCurrentTab();
 
-              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
+              if (currentDefaultProfileState.resetId !== defaultProfileState.resetId) {
                 return;
               }
 
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-              const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
+              const postFetchStateUpdate = resolvedDefaultProfileState?.getPostFetchState({
                 defaultColumns,
                 esqlQueryColumns,
               });
@@ -450,16 +546,11 @@ export function getDataStateContainer({
                 );
               }
 
-              // Clear the default profile state flags after the data fetching
+              // Clear the profile state field-reset flags after data fetching
               // is done so refetches don't reset the state again
               internalState.dispatch(
-                injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-                  resetDefaultProfileState: {
-                    columns: false,
-                    rowHeight: false,
-                    breakdownField: false,
-                    hideChart: false,
-                  },
+                injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+                  fieldsToReset: 'none',
                 })
               );
             },
@@ -520,9 +611,15 @@ export function getDataStateContainer({
     sendResetMsg(dataSubjects, getInitialFetchStatus());
   };
 
-  const cancel = () => {
-    abortController?.abort(AbortReason.CANCELED);
-    abortControllerFetchMore?.abort(AbortReason.CANCELED);
+  const cancel = (reason: AbortReason = AbortReason.CANCELED) => {
+    const { cascadedDocumentsFetcher$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      getCurrentTab().id
+    );
+
+    cascadedDocumentsFetcher$.getValue().cancelAllFetches();
+    abortController?.abort(reason);
+    abortControllerFetchMore?.abort(reason);
   };
 
   const getAbortController = () => {
@@ -542,5 +639,6 @@ export function getDataStateContainer({
     getInitialFetchStatus,
     cancel,
     getAbortController,
+    cleanupEsql,
   };
 }

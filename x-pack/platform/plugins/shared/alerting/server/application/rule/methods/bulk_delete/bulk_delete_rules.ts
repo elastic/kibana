@@ -10,6 +10,8 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import {
   combineFiltersWithInternalRuleTypeFilter,
   constructIgnoreInternalRuleTypesFilter,
@@ -29,11 +31,7 @@ import {
   buildKueryNodeFilter,
 } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import type {
-  BulkOperationError,
-  BulkDeleteRulesResult,
-  BulkDeleteRulesRequestBody,
-} from './types';
+import type { BulkOperationError, BulkDeleteRulesResult, BulkDeleteRulesParams } from './types';
 import { validateBulkDeleteRulesBody } from './validation';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -42,10 +40,11 @@ import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
-  options: BulkDeleteRulesRequestBody
+  options: BulkDeleteRulesParams
 ): Promise<BulkDeleteRulesResult<Params>> => {
   try {
     validateBulkDeleteRulesBody(options);
@@ -87,7 +86,12 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         action: 'DELETE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDeleteWithOCC(context, { filter: filterKueryNode }),
+          bulkDeleteWithOCC(context, {
+            filter: filterKueryNode,
+            changeTracking: {
+              metadata: { bulkCount: total, ...options.changeTracking?.metadata },
+            },
+          }),
         filter: finalFilter,
       })
   );
@@ -106,7 +110,9 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
     }),
     bulkMarkApiKeysForInvalidation(
-      { apiKeys: apiKeysToInvalidate },
+      {
+        apiKeys: apiKeysToInvalidate,
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     ),
@@ -124,7 +130,6 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
@@ -151,7 +156,10 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
 
 const bulkDeleteWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  {
+    filter,
+    changeTracking,
+  }: { filter: KueryNode | null; changeTracking: RuleChangeTracking<never> }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -169,6 +177,7 @@ const bulkDeleteWithOCC = async (
 
   const rulesToDelete: Array<SavedObject<RawRule>> = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
+  const uiamApiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
 
@@ -176,10 +185,19 @@ const bulkDeleteWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+        await bulkMigrateLegacyActions({
+          context,
+          rules: response.saved_objects,
+          skipActionsValidation: true,
+        });
         for (const rule of response.saved_objects) {
-          if (rule.attributes.apiKey && !rule.attributes.apiKeyCreatedByUser) {
-            apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
+          const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
+
+          if (apiKey && !apiKeyCreatedByUser) {
+            apiKeyToRuleIdMapping[rule.id] = apiKey;
+          }
+          if (uiamApiKey && !apiKeyCreatedByUser) {
+            uiamApiKeyToRuleIdMapping[rule.id] = uiamApiKey;
           }
           const ruleName = rule.attributes.name;
           if (ruleName) {
@@ -227,6 +245,7 @@ const bulkDeleteWithOCC = async (
     );
   }
 
+  const deletionTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
     () =>
@@ -237,14 +256,17 @@ const bulkDeleteWithOCC = async (
   );
 
   const deletedRuleIds: string[] = [];
-  const apiKeysToInvalidate: string[] = [];
+  const apiKeysToInvalidate = new Set<string>();
   const taskIdsToDelete: string[] = [];
   const errors: BulkOperationError[] = [];
 
   result.statuses.forEach((status) => {
     if (status.error === undefined) {
       if (apiKeyToRuleIdMapping[status.id]) {
-        apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
+        apiKeysToInvalidate.add(apiKeyToRuleIdMapping[status.id]);
+      }
+      if (uiamApiKeyToRuleIdMapping[status.id]) {
+        apiKeysToInvalidate.add(uiamApiKeyToRuleIdMapping[status.id]);
       }
       if (taskIdToRuleIdMapping[status.id]) {
         taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
@@ -263,9 +285,19 @@ const bulkDeleteWithOCC = async (
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
+  await logRuleChanges({
+    ruleSOs: rules,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDelete,
+      timestamp: deletionTimestamp,
+      metadata: changeTracking?.metadata,
+    },
+  });
+
   return {
     errors,
     rules,
-    accListSpecificForBulkOperation: [apiKeysToInvalidate, taskIdsToDelete],
+    accListSpecificForBulkOperation: [Array.from(apiKeysToInvalidate), taskIdsToDelete],
   };
 };

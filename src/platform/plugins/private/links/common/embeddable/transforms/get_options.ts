@@ -7,15 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardLink, ExternalLink, LinkOptions } from '../../../server';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
+import type {
+  DashboardLink,
+  ExternalLink,
+  ExternalLinkOptions,
+  LinkOptions,
+  LinksByValueState,
+} from '../../../server';
 import type { LinkType } from '../../content_management';
 import { DASHBOARD_LINK_TYPE } from '../../content_management';
 
-export function getOptions(type: LinkType, options: LinkOptions) {
-  if (!options) return undefined;
-
+export function getOptions(
+  type: LinkType,
+  options: LinkOptions
+): LinksByValueState['links'][number]['options'] {
   if (type === DASHBOARD_LINK_TYPE) {
-    const dashboardOptions = options as DashboardLink['options'];
+    const dashboardOptions = options as DashboardLink['options'] | undefined;
     return {
       ...(typeof dashboardOptions?.open_in_new_tab === 'boolean' && {
         open_in_new_tab: dashboardOptions.open_in_new_tab,
@@ -40,12 +48,24 @@ export function getOptions(type: LinkType, options: LinkOptions) {
         'boolean' && {
         use_time_range: (dashboardOptions as { useCurrentDateRange?: boolean }).useCurrentDateRange,
       }),
-    } as DashboardLink['options'];
+    } as DashboardNavigationOptions;
   }
 
-  const urlOptions = options as Required<ExternalLink>['options'];
+  const urlOptions = options as ExternalLink['options'] | undefined;
   return {
-    ...(typeof urlOptions.openInNewTab === 'boolean' && { openInNewTab: urlOptions.openInNewTab }),
-    ...(typeof urlOptions.encodeUrl === 'boolean' && { encodeUrl: urlOptions.encodeUrl }),
-  };
+    ...(typeof urlOptions?.open_in_new_tab === 'boolean' && {
+      open_in_new_tab: urlOptions.open_in_new_tab,
+    }),
+    // <9.4 stored as openInNewTab
+    ...(typeof (urlOptions as { openInNewTab?: boolean })?.openInNewTab === 'boolean' && {
+      open_in_new_tab: (urlOptions as { openInNewTab?: boolean }).openInNewTab,
+    }),
+    ...(typeof urlOptions?.encode_url === 'boolean' && {
+      encode_url: urlOptions.encode_url,
+    }),
+    // <9.4 stored as encodeUrl
+    ...(typeof (urlOptions as { encodeUrl?: boolean })?.encodeUrl === 'boolean' && {
+      encode_url: (urlOptions as { encodeUrl?: boolean }).encodeUrl,
+    }),
+  } as ExternalLinkOptions;
 }

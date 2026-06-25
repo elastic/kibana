@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 import type { RuleFormData } from '../types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),
@@ -65,6 +66,8 @@ describe('rulePageShowRequestModal', () => {
     expect(screen.getByTestId('modalSubtitle').textContent).toBe(
       'This Kibana request will create this rule.'
     );
+    expect(screen.queryByTestId('showRequestCreateTab')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('showRequestUpdateTab')).not.toBeInTheDocument();
     expect(screen.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
       "POST kbn:/api/alerting/rule
       {
@@ -102,18 +105,44 @@ describe('rulePageShowRequestModal', () => {
     `);
   });
 
-  test('renders edit request correctly', async () => {
+  test('renders tabs and defaults to create view when id is present', () => {
     useRuleFormState.mockReturnValue({
       formData,
       multiConsumerSelection: 'logs',
       id: 'test-id',
     });
 
-    render(<RulePageShowRequestModal isEdit />);
+    render(<RulePageShowRequestModal />);
 
-    expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Edit alerting rule request');
+    expect(screen.getByTestId('showRequestCreateTab')).toBeInTheDocument();
+    expect(screen.getByTestId('showRequestUpdateTab')).toBeInTheDocument();
+    expect(screen.getByTestId('showRequestCreateTab')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('showRequestUpdateTab')).toHaveAttribute('aria-selected', 'false');
     expect(screen.getByTestId('modalSubtitle').textContent).toBe(
-      'This Kibana request will edit this rule.'
+      'This Kibana request will create this rule.'
+    );
+    expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Create alerting rule request');
+    expect(screen.getByTestId('modalRequestCodeBlock').textContent).toContain(
+      'POST kbn:/api/alerting/rule'
+    );
+  });
+
+  test('renders update request correctly for existing rule', async () => {
+    useRuleFormState.mockReturnValue({
+      formData,
+      multiConsumerSelection: 'logs',
+      id: 'test-id',
+    });
+
+    render(<RulePageShowRequestModal />);
+
+    await userEvent.click(await screen.findByTestId('showRequestUpdateTab'));
+    expect(screen.getByTestId('showRequestCreateTab')).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByTestId('showRequestUpdateTab')).toHaveAttribute('aria-selected', 'true');
+
+    expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Update alerting rule request');
+    expect(screen.getByTestId('modalSubtitle').textContent).toBe(
+      'This Kibana request will update this rule.'
     );
     expect(screen.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
       "PUT kbn:/api/alerting/rule/test-id
@@ -157,7 +186,7 @@ describe('rulePageShowRequestModal', () => {
       id: 'test-id',
     });
 
-    render(<RulePageShowRequestModal isEdit />);
+    render(<RulePageShowRequestModal />);
     fireEvent.click(screen.getByLabelText('Closes this modal window'));
     expect(onCloseMock).toHaveBeenCalled();
   });

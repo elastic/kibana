@@ -7,12 +7,14 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
+import { kqlToInfluencerQuery } from './kql_to_influencer_query';
 
 type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 
@@ -22,8 +24,13 @@ export async function getToolHandler({
   mlClient,
   request,
   logger,
+  group,
   jobIds = [],
   jobsLimit,
+  anomalyRecordsLimit,
+  minAnomalyScore,
+  includeExplanation,
+  influencerFilter,
   rangeStart,
   rangeEnd,
 }: {
@@ -32,8 +39,13 @@ export async function getToolHandler({
   mlClient: Ml;
   request: KibanaRequest;
   logger: Logger;
+  group?: string;
   jobIds?: string[];
   jobsLimit: number;
+  anomalyRecordsLimit: number;
+  minAnomalyScore: number;
+  includeExplanation: boolean;
+  influencerFilter?: string;
   rangeStart: string;
   rangeEnd: string;
 }) {
@@ -45,7 +57,13 @@ export async function getToolHandler({
     throw new Error('Machine Learning plugin is unavailable.');
   }
 
-  const { jobs = [] } = await mlClient.getJobs({ job_id: jobIds.join(',') }).catch((error) => {
+  // The ML getJobs API job_id parameter accepts: job identifiers, group names,
+  // comma-separated lists, or wildcard expressions. When a group name is passed,
+  // it automatically expands to all jobs belonging to that group.
+  // See: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-jobs
+  const jobIdParam = [group, ...jobIds].filter(Boolean).join(',');
+
+  const { jobs = [] } = await mlClient.getJobs({ job_id: jobIdParam }).catch((error) => {
     if (error.statusCode === 404) {
       return { jobs: [] };
     }
@@ -55,7 +73,7 @@ export async function getToolHandler({
 
   // Get job stats for state information
   const { jobs: jobsStats = [] } = await mlClient
-    .getJobStats({ job_id: jobIds.join(',') })
+    .getJobStats({ job_id: jobIdParam })
     .catch((error) => {
       if (error.statusCode === 404) {
         return { jobs: [] };
@@ -68,12 +86,19 @@ export async function getToolHandler({
 
   return Promise.all(
     jobs.slice(0, jobsLimit).map(async (job) => {
-      const topAnomalies = await getTopAnomalyRecords({
-        mlSystem,
-        jobId: job.job_id,
-        start: rangeStart,
-        end: rangeEnd,
-      });
+      const topAnomalies =
+        anomalyRecordsLimit > 0
+          ? await getTopAnomalyRecords({
+              mlSystem,
+              jobId: job.job_id,
+              anomalyRecordsLimit,
+              minAnomalyScore,
+              includeExplanation,
+              influencerFilter,
+              start: rangeStart,
+              end: rangeEnd,
+            })
+          : [];
 
       const jobStats = jobsStatsMap.get(job.job_id);
 
@@ -101,45 +126,60 @@ export async function getToolHandler({
 async function getTopAnomalyRecords({
   mlSystem,
   jobId,
+  anomalyRecordsLimit,
+  minAnomalyScore,
+  includeExplanation,
+  influencerFilter,
   start,
   end,
 }: {
   mlSystem: MlSystem;
   jobId: string;
+  anomalyRecordsLimit: number;
+  minAnomalyScore: number;
+  includeExplanation: boolean;
+  influencerFilter?: string;
   start: string;
   end: string;
 }) {
+  const sourceFields = [
+    'timestamp',
+    'record_score',
+    'by_field_name',
+    'by_field_value',
+    'partition_field_name',
+    'partition_field_value',
+    'field_name',
+    'typical',
+    'actual',
+    'influencers',
+    ...(includeExplanation ? ['anomaly_score_explanation'] : []),
+  ];
+
+  const filters: QueryDslQueryContainer[] = [
+    { term: { job_id: jobId } },
+    { term: { result_type: 'record' } },
+    { term: { is_interim: false } },
+    { range: { timestamp: { gte: start, lte: end } } },
+    { range: { record_score: { gte: minAnomalyScore } } },
+  ];
+
+  const influencerQuery = kqlToInfluencerQuery(influencerFilter);
+  if (influencerQuery) {
+    filters.push(influencerQuery);
+  }
+
   const response = await mlSystem.mlAnomalySearch<MlAnomalyRecordDoc>(
     {
       track_total_hits: false,
-      size: 100,
+      size: anomalyRecordsLimit,
       sort: [{ record_score: { order: 'desc' as const } }],
       query: {
         bool: {
-          filter: [
-            { term: { job_id: jobId } },
-            { term: { result_type: 'record' } },
-            { term: { is_interim: false } },
-            {
-              range: {
-                timestamp: { gte: start, lte: end },
-              },
-            },
-          ],
+          filter: filters,
         },
       },
-      _source: [
-        'timestamp',
-        'record_score',
-        'by_field_name',
-        'by_field_value',
-        'partition_field_name',
-        'partition_field_value',
-        'field_name',
-        'anomaly_score_explanation',
-        'typical',
-        'actual',
-      ],
+      _source: sourceFields,
     },
     [jobId]
   );
@@ -156,8 +196,12 @@ async function getTopAnomalyRecords({
     partitionFieldName: record.partition_field_name,
     partitionFieldValue: record.partition_field_value,
     fieldName: record.field_name,
-    anomalyScoreExplanation: record.anomaly_score_explanation,
     typicalValue: record.typical,
     actualValue: record.actual,
+    influencers: record.influencers?.map((inf) => ({
+      fieldName: inf.influencer_field_name,
+      fieldValues: inf.influencer_field_values,
+    })),
+    ...(includeExplanation && { anomalyScoreExplanation: record.anomaly_score_explanation }),
   }));
 }

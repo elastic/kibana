@@ -212,12 +212,15 @@ export const MetricsAlertDropdown = () => {
       <EuiPopover
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate('xpack.infra.alerting.alertDropdownAriaLabel', {
+          defaultMessage: 'Alerts and rules',
+        })}
         button={
           <EuiHeaderLink
             buttonRef={alertsButtonRef}
             color="primary"
             iconSide={'right'}
-            iconType={'arrowDown'}
+            iconType={'chevronSingleDown'}
             onClick={togglePopover}
             data-test-subj="infrastructure-alerts-and-rules"
           >

@@ -10,7 +10,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  CONTROL_MENU_TRIGGER,
+  ControlValuesSource,
+  DEFAULT_DATA_CONTROL_STATE,
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+  DEFAULT_RANGE_SLIDER_STATE,
+  DEFAULT_TIME_SLIDER_STATE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
@@ -26,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   ControlGroupRuntimeState,
   ControlPanelState,
@@ -35,13 +41,14 @@ import type {
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<DataControlState & Partial<FlattenedPinnedControlState>, 'type'>,
+    controlState: Partial<Omit<DataControlState & FlattenedPinnedControlState, 'type'>> &
+      Required<Pick<DataControlState, 'data_view_id' | 'field_name'>>,
     uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
     const type = await getCompatibleControlType(
-      controlState.dataViewId,
-      controlState.fieldName,
+      controlState.data_view_id,
+      controlState.field_name,
       uiActionsService
     );
     if (!type)
@@ -53,6 +60,8 @@ export const controlGroupStateBuilder = {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_DATA_CONTROL_STATE,
+        ...DEFAULT_PINNED_CONTROL_STATE,
         type,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
@@ -61,20 +70,26 @@ export const controlGroupStateBuilder = {
   },
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<
-      Omit<PinnedControlState, keyof OptionsListDSLControlState | 'config'> &
-        OptionsListDSLControlState,
-      'type'
-    >,
+    controlState: Partial<
+      Omit<
+        Omit<PinnedControlState, keyof OptionsListDSLControlState | 'config'> &
+          OptionsListDSLControlState,
+        'type'
+      >
+    > &
+      Required<Pick<OptionsListDSLControlState, 'data_view_id' | 'field_name'>>,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         type: OPTIONS_LIST_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
-      },
+        values_source: ControlValuesSource.FIELD,
+      } as ControlPanelState,
     };
   },
   addRangeSliderControl: (
@@ -82,16 +97,20 @@ export const controlGroupStateBuilder = {
     controlState: Omit<
       Omit<PinnedControlState, keyof RangeSliderControlState> & RangeSliderControlState,
       'type'
-    >,
+    > &
+      Required<Pick<RangeSliderControlState, 'data_view_id' | 'field_name'>>,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_RANGE_SLIDER_STATE,
         type: RANGE_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
-      },
+        values_source: ControlValuesSource.FIELD,
+      } as unknown as ControlPanelState,
     };
   },
   addTimeSliderControl: (
@@ -101,9 +120,11 @@ export const controlGroupStateBuilder = {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_TIME_SLIDER_STATE,
         type: TIME_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         width: 'large',
+        grow: true,
       },
     };
   },

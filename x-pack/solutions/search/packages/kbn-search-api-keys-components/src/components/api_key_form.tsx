@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -46,16 +47,23 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true, minWidt
         copyValueDataTestSubj="APIKeyButtonCopy"
         minWidth={minWidth}
         actions={[
-          <EuiButtonIcon
-            iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
-            size="s"
-            color="text"
-            onClick={toggleApiKeyVisibility}
-            data-test-subj="showAPIKeyButton"
-            aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
+          <EuiToolTip
+            content={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
               defaultMessage: 'Show API Key',
             })}
-          />,
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType={status === Status.showPreviewKey ? 'eyeSlash' : 'eye'}
+              size="s"
+              color="text"
+              onClick={toggleApiKeyVisibility}
+              data-test-subj="showAPIKeyButton"
+              aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
+                defaultMessage: 'Show API Key',
+              })}
+            />
+          </EuiToolTip>,
         ]}
       />
     );

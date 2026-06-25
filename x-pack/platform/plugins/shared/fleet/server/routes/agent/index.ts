@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthz } from '../../../common';
@@ -16,12 +18,15 @@ import {
   GetAgentsRequestSchema,
   GetTagsRequestSchema,
   GetOneAgentRequestSchema,
+  GetAgentEffectiveConfigRequestSchema,
   UpdateAgentRequestSchema,
   MigrateSingleAgentRequestSchema,
   BulkMigrateAgentsRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
+  PostRemoveCollectorRequestSchema,
+  PostBulkRemoveCollectorsRequestSchema,
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
@@ -66,6 +71,9 @@ import {
   PostCancelActionRequestSchema,
   PostNewAgentActionResponseSchema,
   PostRetrieveAgentsByActionsResponseSchema,
+  PostGenerateAgentsReportRequestSchema,
+  PostGenerateAgentsReportResponseSchema,
+  GetAgentEffectiveConfigResponseSchema,
 } from '../../types/rest_spec/agent';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { calculateRouteAuthz } from '../../services/security/security';
@@ -90,12 +98,17 @@ import {
   postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
   getAgentStatusRuntimeFieldHandler,
+  getAgentEffectiveConfigHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
   postCancelActionHandlerBuilder,
 } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
+import {
+  postBulkRemoveCollectorsHandler,
+  postRemoveCollectorHandler,
+} from './remove_collector_handler';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 import {
   bulkRequestDiagnosticsHandler,
@@ -107,6 +120,7 @@ import {
   changeAgentPrivilegeLevelHandler,
 } from './change_privilege_level_handlers';
 import { bulkRollbackAgentHandler, rollbackAgentHandler } from './rollback_handlers';
+import { generateReportHandler } from './generate_report_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(
@@ -131,6 +145,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent.yaml'),
+        },
         validate: {
           request: GetOneAgentRequestSchema,
           response: {
@@ -147,6 +164,148 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       getAgentHandler
     );
+
+  if (experimentalFeatures.enableOpAMP) {
+    // Get effective config
+    router.versioned
+      .get({
+        path: AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+          },
+        },
+        summary: `Get an agent's effective config`,
+        description: `Get an agent's effective config by ID.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GetAgentEffectiveConfigRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => GetAgentEffectiveConfigResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+                description: 'A bad request.',
+              },
+            },
+          },
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            effective_config: {},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+        },
+        getAgentEffectiveConfigHandler
+      );
+
+    // Remove collector (single)
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.REMOVE_COLLECTOR_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Remove an OpAMP collector`,
+        description: `Remove a specific OpAMP collector from the Fleet agents list. Marks the collector as unenrolled. This action does not invalidate API keys, so the collector can reconnect on its own.`,
+        options: {
+          tags: ['oas-tag:Elastic Agent actions'],
+          availability: {
+            since: '9.5.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () => path.join(__dirname, 'examples/post_remove_collector.yaml'),
+          },
+          validate: { request: PostRemoveCollectorRequestSchema, response: {} },
+        },
+        postRemoveCollectorHandler
+      );
+
+    // Bulk remove collectors
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.BULK_REMOVE_COLLECTORS_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Bulk remove OpAMP collectors`,
+        description: `Remove multiple OpAMP collectors from the Fleet agents list. Marks the collectors as unenrolled. This action does not invalidate API keys, so collectors can reconnect on their own.`,
+        options: {
+          tags: ['oas-tag:Elastic Agent actions'],
+          availability: {
+            since: '9.5.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () =>
+              path.join(__dirname, 'examples/post_bulk_remove_collectors.yaml'),
+          },
+          validate: {
+            request: PostBulkRemoveCollectorsRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => PostBulkActionResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        postBulkRemoveCollectorsHandler
+      );
+  }
 
   // Migrate
   // Single agent migration
@@ -167,6 +326,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_migrate_agent.yaml'),
+        },
         validate: {
           request: MigrateSingleAgentRequestSchema,
           response: {
@@ -203,6 +365,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_bulk_migrate_agents.yaml'),
+        },
         validate: {
           request: BulkMigrateAgentsRequestSchema,
           response: {
@@ -238,6 +403,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_agent.yaml'),
+        },
         validate: {
           request: UpdateAgentRequestSchema,
           response: {
@@ -265,6 +433,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk update agent tags`,
+      description: `Add or remove tags across multiple agents.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -272,6 +441,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_bulk_update_agent_tags.yaml'),
+        },
         validate: {
           request: PostBulkUpdateAgentTagsRequestSchema,
           response: {
@@ -307,6 +480,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_agent.yaml'),
+        },
         validate: {
           request: DeleteAgentRequestSchema,
           response: {
@@ -334,6 +510,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Get agents`,
+      description: `List agents, with optional filtering and pagination.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -341,6 +518,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agents.yaml'),
+        },
         validate: {
           request: GetAgentsRequestSchema,
           response: {
@@ -368,6 +548,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Get agent tags`,
+      description: `Get a list of all tags used across enrolled agents.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -375,6 +556,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent_tags.yaml'),
+        },
         validate: {
           request: GetTagsRequestSchema,
           response: {
@@ -402,6 +586,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Create an agent action`,
+      description: `Create a new action for a specific agent.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -409,6 +594,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_agent_action.yaml'),
+        },
         validate: {
           request: PostNewAgentActionRequestSchema,
           response: {
@@ -440,6 +628,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Cancel an agent action`,
+      description: `Cancel a pending action for a specific agent.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -447,6 +636,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_cancel_action.yaml'),
+        },
         validate: {
           request: PostCancelActionRequestSchema,
           response: {
@@ -479,6 +671,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Get agents by action ids`,
+      description: `Retrieve agents associated with specific action IDs.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -486,6 +679,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_get_agents_by_actions.yaml'),
+        },
         validate: {
           request: PostRetrieveAgentsByActionsRequestSchema,
           response: {
@@ -512,6 +709,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Unenroll an agent`,
+      description: `Unenroll a specific agent, optionally revoking its enrollment API key.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -519,6 +717,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_unenroll_agent.yaml'),
+        },
         validate: { request: PostAgentUnenrollRequestSchema, response: {} },
       },
       postAgentUnenrollHandler
@@ -533,6 +734,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Reassign an agent`,
+      description: `Reassign an agent to a different agent policy.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -540,6 +742,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_reassign_agent.yaml'),
+        },
         validate: {
           request: PostAgentReassignRequestSchema,
           response: {
@@ -566,6 +771,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Request agent diagnostics`,
+      description: `Request a diagnostics bundle from a specific agent.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -573,6 +779,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_request_diagnostics.yaml'),
+        },
         validate: {
           request: PostRequestDiagnosticsActionRequestSchema,
           response: {
@@ -599,6 +808,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk request diagnostics from agents`,
+      description: `Request diagnostics bundles from multiple agents.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -606,6 +816,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_bulk_request_diagnostics.yaml'),
+        },
         validate: {
           request: PostBulkRequestDiagnosticsActionRequestSchema,
           response: {
@@ -632,6 +846,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Get agent uploads`,
+      description: `Get a list of files uploaded by a specific agent.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -639,6 +854,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent_uploads.yaml'),
+        },
         validate: {
           request: ListAgentUploadsRequestSchema,
           response: {
@@ -673,6 +891,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent_upload_file.yaml'),
+        },
         validate: {
           request: GetAgentUploadFileRequestSchema,
           response: {
@@ -707,6 +928,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_agent_upload_file.yaml'),
+        },
         validate: {
           request: DeleteAgentUploadFileRequestSchema,
           response: {
@@ -735,6 +959,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           getRouteRequiredAuthz('get', AGENT_API_ROUTES.STATUS_PATTERN)
         ).granted,
       summary: `Get an agent status summary`,
+      description: `Get a summary of agent statuses for a given agent policy.`,
       options: {
         tags: ['oas-tag:Elastic Agent status'],
       },
@@ -742,6 +967,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent_status.yaml'),
+        },
         validate: {
           request: GetAgentStatusRequestSchema,
           response: {
@@ -768,6 +996,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Get incoming agent data`,
+      description: `Get the data streams that an agent is actively sending data to.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -775,6 +1004,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agent_data.yaml'),
+        },
         validate: {
           request: GetAgentDataRequestSchema,
           response: {
@@ -802,6 +1034,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Upgrade an agent`,
+      description: `Upgrade a specific agent to a newer version.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -809,6 +1042,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_upgrade_agent.yaml'),
+        },
         validate: {
           request: PostAgentUpgradeRequestSchema,
           response: {
@@ -835,6 +1071,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk upgrade agents`,
+      description: `Upgrade multiple agents to a newer version, with optional rollout controls.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -842,6 +1079,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_bulk_upgrade_agents.yaml'),
+        },
         validate: {
           request: PostBulkAgentUpgradeRequestSchema,
           response: {
@@ -869,6 +1109,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Get an agent action status`,
+      description: `Get the current status of recent agent actions.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -876,6 +1117,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_action_status.yaml'),
+        },
         validate: {
           request: GetActionStatusRequestSchema,
           response: {
@@ -903,6 +1147,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk reassign agents`,
+      description: `Reassign multiple agents to a different agent policy.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -910,6 +1155,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_bulk_reassign_agents.yaml'),
+        },
         validate: {
           request: PostBulkAgentReassignRequestSchema,
           response: {
@@ -937,6 +1185,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk unenroll agents`,
+      description: `Unenroll multiple agents, optionally revoking their enrollment API keys.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -944,6 +1193,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_bulk_unenroll_agents.yaml'),
+        },
         validate: {
           request: PostBulkAgentUnenrollRequestSchema,
           response: {
@@ -971,6 +1223,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Get available agent versions`,
+      description: `Get a list of Elastic Agent versions available for upgrade.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -978,6 +1231,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_available_versions.yaml'),
+        },
         validate: {
           request: {},
           response: {
@@ -1203,6 +1459,44 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
 
         bulkChangeAgentsPrivilegeLevelHandler
+      );
+
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
+        access: 'internal',
+        enableQueryVersion: true,
+        security: {
+          authz: {
+            requiredPrivileges: [
+              FLEET_API_PRIVILEGES.AGENTS.READ,
+              FLEET_API_PRIVILEGES.GENERATE_REPORTS.ALL,
+            ],
+          },
+        },
+        summary: `Generate agent csv report`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          validate: {
+            request: PostGenerateAgentsReportRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => PostGenerateAgentsReportResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        generateReportHandler
       );
   }
 

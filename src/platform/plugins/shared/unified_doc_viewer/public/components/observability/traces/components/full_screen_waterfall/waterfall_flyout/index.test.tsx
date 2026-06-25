@@ -12,6 +12,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WaterfallFlyout, type Props } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { FlyoutContentId } from '../../../common/constants';
+import { setUnifiedDocViewerServices } from '../../../../../../plugin';
+import { mockUnifiedDocViewerServices } from '../../../../../../__mocks__';
+import { OriginDocTypeContext } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
+
+setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
 jest.mock('../../../../../doc_viewer_table', () => ({
   __esModule: true,
@@ -50,6 +56,7 @@ describe('WaterfallFlyout', () => {
     hit: mockHit,
     loading: false,
     dataView: dataViewMock,
+    flyoutContentId: FlyoutContentId.SPAN_DETAIL,
     children: <div data-test-subj="customChildren">Custom Children Content</div>,
   };
 
@@ -63,13 +70,44 @@ describe('WaterfallFlyout', () => {
 
       expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutNotFound')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('not found state', () => {
+    it('should display the not found empty prompt when the fetch finishes with no hit', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={null} loading={false} />);
+
+      expect(screen.getByTestId('unifiedDocViewerWaterfallFlyoutNotFound')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutFetchError')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('fetch error state', () => {
+    it('should display the fetch error empty prompt with the error message when no hit and an error is set', () => {
+      render(
+        <WaterfallFlyout {...defaultProps} hit={null} loading={false} error="Boom: timeout" />
+      );
+
+      expect(screen.getByTestId('unifiedDocViewerWaterfallFlyoutFetchError')).toBeInTheDocument();
+      expect(screen.getByText('Boom: timeout')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutNotFound')
+      ).not.toBeInTheDocument();
     });
 
-    it('should display skeleton when hit is unavailable', () => {
-      render(<WaterfallFlyout {...defaultProps} hit={null} />);
+    it('should still render the tabs when a hit is present even if error is set', () => {
+      render(<WaterfallFlyout {...defaultProps} loading={false} error="Refetch failed" />);
 
-      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
-      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+      expect(screen.getByTestId('customChildren')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutFetchError')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -114,6 +152,15 @@ describe('WaterfallFlyout', () => {
 
       expect(screen.getByRole('heading', { name: 'Custom Title' })).toBeInTheDocument();
     });
+
+    it('should apply the provided flyout data-test-subj', () => {
+      render(<WaterfallFlyout {...defaultProps} dataTestSubj="traceWaterfallDocumentFlyout" />);
+
+      expect(screen.getByTestId('traceWaterfallDocumentFlyout')).toHaveAttribute(
+        'data-test-subj',
+        'traceWaterfallDocumentFlyout'
+      );
+    });
   });
 
   describe('close behavior', () => {
@@ -125,6 +172,27 @@ describe('WaterfallFlyout', () => {
       fireEvent.click(closeButton);
 
       expect(onCloseFlyout).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('originDocType telemetry', () => {
+    it('forwards the parent OriginDocTypeContext value into the unified_doc_viewer_viewed event', () => {
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      render(
+        <OriginDocTypeContext.Provider value="log">
+          <WaterfallFlyout {...defaultProps} flyoutContentId={FlyoutContentId.SPAN_DETAIL} />
+        </OriginDocTypeContext.Provider>
+      );
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        'unified_doc_viewer_viewed',
+        expect.objectContaining({
+          originDocType: 'log',
+          contentId: FlyoutContentId.SPAN_DETAIL,
+        })
+      );
     });
   });
 });

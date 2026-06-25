@@ -17,6 +17,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
   const {
     continuousModeDateField,
     createDataView,
+    deferValidation,
     isContinuousModeEnabled,
     isRetentionPolicyEnabled,
     retentionPolicyDateField,
@@ -162,6 +163,20 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
             })}
           >
             <span>{transformSettingsNumFailureRetries}</span>
+          </EuiFormRow>
+        ) : null}
+        {deferValidation ? (
+          <EuiFormRow
+            data-test-subj={'transformWizardAdvancedSettingsDeferValidationLabel'}
+            label={i18n.translate('xpack.transform.stepDetailsSummary.deferValidationLabel', {
+              defaultMessage: 'Skip validation',
+            })}
+          >
+            <span>
+              {i18n.translate('xpack.transform.stepDetailsSummary.deferValidationEnabled', {
+                defaultMessage: 'On',
+              })}
+            </span>
           </EuiFormRow>
         ) : null}
       </EuiAccordion>

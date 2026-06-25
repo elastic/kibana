@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -26,6 +27,40 @@ is_auto_commit_disabled() {
   is_pr_with_label "ci:no-auto-commit"
 }
 
+should_enable_fips() {
+  case "${TEST_ENABLE_FIPS_VERSION:-}" in
+    140-2|140-3)
+      return 0
+      ;;
+  esac
+
+  is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"
+}
+
+# Buildkite checkouts push with the Buildkite GitHub App credential, which has limited scopes. It cannot push to workflows for example.
+# Use an isolated git config so gh can provide GITHUB_TOKEN credentials for this push without changing global auth.
+push_as_github_token() {
+  local required_env_var
+
+  for required_env_var in GITHUB_TOKEN GITHUB_PR_OWNER GITHUB_PR_REPO GITHUB_PR_BRANCH; do
+    if [[ -z "${!required_env_var:-}" ]]; then
+      echo "Missing required environment variable for GITHUB_TOKEN push: $required_env_var" >&2
+      exit 1
+    fi
+  done
+
+  (
+    git_config_global="$(mktemp)"
+    trap 'rm -f "$git_config_global"' EXIT
+
+
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" gh auth setup-git --hostname github.com --force
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" git push \
+      "https://github.com/${GITHUB_PR_OWNER}/${GITHUB_PR_REPO}.git" \
+      "HEAD:${GITHUB_PR_BRANCH}"
+  )
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -33,6 +68,7 @@ check_for_changed_files() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-Changes from $1}"
+  FORCE_GITHUB_TOKEN_PUSH_ARG="${4:-}"
   GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
 
   if [ "$GIT_CHANGES" ]; then
@@ -55,7 +91,11 @@ check_for_changed_files() {
         echo "$CUSTOM_FIX_MESSAGE" >> "$COLLECT_COMMITS_MARKER_FILE"
       else
         echo "Auto-committing and pushing these changes."
-        git push
+        if [[ "${FORCE_GITHUB_TOKEN_PUSH:-}" == "true" || "$FORCE_GITHUB_TOKEN_PUSH_ARG" == "true" ]]; then
+          push_as_github_token
+        else
+          git push
+        fi
       fi
       exit 1
     else
@@ -124,8 +164,46 @@ set_git_merge_base() {
   GITHUB_PR_MERGE_BASE="$(buildkite-agent meta-data get merge-base --default '')"
 
   if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
-    git fetch origin "$GITHUB_PR_TARGET_BRANCH"
-    GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD)"
+    if git fetch origin "$GITHUB_PR_TARGET_BRANCH" 2>/dev/null; then
+      GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    fi
+
+    if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+      local compare_target="${GITHUB_PR_HEAD_SHA:-}"
+      local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+      local compare_ref
+
+      if [[ ! "$compare_target" && "${GITHUB_PR_OWNER:-}" && "${GITHUB_PR_BRANCH:-}" ]]; then
+        compare_target="${GITHUB_PR_OWNER}:${GITHUB_PR_BRANCH}"
+      fi
+
+      if [[ ! "$compare_target" ]]; then
+        echo "Failed to resolve PR merge base: PR head ref is not available for gh api fallback" >&2
+        return 1
+      fi
+
+      echo "Falling back to GitHub compare API for PR merge-base"
+      compare_ref="$(
+        jq -rn \
+          --arg base "$GITHUB_PR_TARGET_BRANCH" \
+          --arg head "$compare_target" \
+          '$base + "..." + $head | @uri'
+      )"
+
+      GITHUB_PR_MERGE_BASE="$(
+        curl -fsSL \
+          -H 'Accept: application/vnd.github+json' \
+          -H "Authorization: Bearer ${github_token}" \
+          "https://api.github.com/repos/${GITHUB_PR_BASE_OWNER}/${GITHUB_PR_BASE_REPO}/compare/${compare_ref}" |
+          jq -r '.merge_base_commit.sha // empty' || true
+      )"
+    fi
+
+    if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+      echo "Failed to resolve PR merge base" >&2
+      return 1
+    fi
+
     buildkite-agent meta-data set merge-base "$GITHUB_PR_MERGE_BASE"
   fi
 
@@ -136,6 +214,46 @@ set_git_merge_base() {
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+}
+
+GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
+download_tmp_artifact() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3" fallback="${4:-true}"
+  local region use_gcs=false
+
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    if [[ "${BUILDKITE_AGENT_GCP_REGION:-}" == "$region" ]]; then
+      use_gcs=true
+      break
+    fi
+  done
+
+  if [[ "$use_gcs" == "true" ]]; then
+    "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}"
+    if gcloud storage cp \
+      "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
+      "${dest_dir}/${artifact_name}"; then
+      return 0
+    fi
+    echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
+  fi
+
+  if [[ "$fallback" != "true" ]]; then
+    return 1
+  fi
+
+  echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
+  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
+}
+upload_tmp_artifact() {
+  local local_path="$1" artifact_name="$2" build_id="$3"
+
+  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
+
+  printf '%s\n' "${GCS_CI_ARTIFACT_REGIONS[@]}" | xargs -P 0 -I{} \
+    env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
+      "$local_path" \
+      "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
 }
 
 print_if_dry_run() {
@@ -210,4 +328,10 @@ force_clean_ports() {
   done
 
   set -e
+}
+
+
+clean_cached_images() {
+  docker images -q | sort -u | xargs -r docker rmi -f || true
+  docker image prune -af || true
 }

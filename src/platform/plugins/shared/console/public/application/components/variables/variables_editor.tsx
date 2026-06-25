@@ -210,16 +210,27 @@ export const VariablesEditor = (props: Props) => {
         const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
         return (
-          <EuiButtonIcon
-            iconType={itemIdToExpandedRowMapValues[id] ? 'arrowUp' : 'pencil'}
-            aria-label={i18n.translate('console.variablesPage.variablesTable.columns.editButton', {
+          <EuiToolTip
+            content={i18n.translate('console.variablesPage.variablesTable.columns.editButton', {
               defaultMessage: 'Edit {variable}',
               values: { variable: variable.name },
             })}
-            color="primary"
-            onClick={() => toggleDetails(id)}
-            data-test-subj="variableEditButton"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType={itemIdToExpandedRowMapValues[id] ? 'chevronSingleUp' : 'pencil'}
+              aria-label={i18n.translate(
+                'console.variablesPage.variablesTable.columns.editButton',
+                {
+                  defaultMessage: 'Edit {variable}',
+                  values: { variable: variable.name },
+                }
+              )}
+              color="primary"
+              onClick={() => toggleDetails(id)}
+              data-test-subj="variableEditButton"
+            />
+          </EuiToolTip>
         );
       },
     },
@@ -228,16 +239,27 @@ export const VariablesEditor = (props: Props) => {
       name: '',
       width: '40px',
       render: (id: string, variable: DevToolsVariable) => (
-        <EuiButtonIcon
-          iconType="trash"
-          aria-label={i18n.translate('console.variablesPage.variablesTable.columns.deleteButton', {
+        <EuiToolTip
+          content={i18n.translate('console.variablesPage.variablesTable.columns.deleteButton', {
             defaultMessage: 'Delete {variable}',
             values: { variable: variable.name },
           })}
-          color="danger"
-          onClick={() => setDeleteModalForVariable(id)}
-          data-test-subj="variablesRemoveButton"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            aria-label={i18n.translate(
+              'console.variablesPage.variablesTable.columns.deleteButton',
+              {
+                defaultMessage: 'Delete {variable}',
+                values: { variable: variable.name },
+              }
+            )}
+            color="danger"
+            onClick={() => setDeleteModalForVariable(id)}
+            data-test-subj="variablesRemoveButton"
+          />
+        </EuiToolTip>
       ),
     },
   ];
@@ -285,7 +307,7 @@ export const VariablesEditor = (props: Props) => {
       <div>
         <EuiButton
           data-test-subj="variablesAddButton"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => {
             setIsAddingVariable(true);
             collapseExpandedRows();

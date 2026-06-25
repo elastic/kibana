@@ -426,12 +426,13 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       'xpack.observability.advancedSettings.searchExcludedDataTiersDesc',
       {
         defaultMessage: `Specify the data tiers to exclude from search, such as data_cold and/or data_frozen.
-        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM, Infrastructure`,
+        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM, Infrastructure, Synthetics`,
       }
     ),
     value: [],
     schema: schema.arrayOf(
-      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')]),
+      { maxSize: 2 }
     ),
     requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],

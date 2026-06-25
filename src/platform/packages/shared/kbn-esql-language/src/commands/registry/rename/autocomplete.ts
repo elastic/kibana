@@ -6,11 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {
-  pipeCompleteItem,
+  newLineAndPipeCompleteItems,
   asCompletionItem,
   assignCompletionItem,
   commaCompleteItem,
@@ -43,7 +43,7 @@ export async function autocomplete(
   }
 
   if (/rename(?:\s+\S+\s+(as|=)\s+\S+\s*,)*\s+\S+\s+(as|=)\s+[^\s,]+\s+$/i.test(innerText)) {
-    return [pipeCompleteItem, { ...commaCompleteItem, text: ', ' }];
+    return [...newLineAndPipeCompleteItems, { ...commaCompleteItem, text: ', ' }];
   }
 
   if (/as\s+$/i.test(innerText)) {

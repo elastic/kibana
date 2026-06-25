@@ -33,6 +33,8 @@ describe('geminiAdapter', () => {
       connectorId: 'test-connector-id',
       config: {},
       capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
     });
     processVertexStreamMock.mockReset().mockImplementation(() => tap(noop));
     processVertexResponseMock.mockReset().mockImplementation(() => tap(noop));
@@ -310,6 +312,38 @@ describe('geminiAdapter', () => {
             },
           },
         ],
+      });
+    });
+
+    it('filters out messages with empty parts and re-merges consecutive same-role messages', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'first',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: '',
+              toolCalls: [],
+            },
+            {
+              role: MessageRole.User,
+              content: 'second',
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      const { messages } = getCallParams();
+      expect(messages).toHaveLength(1);
+      expect(messages[0]).toEqual({
+        role: 'user',
+        parts: [{ text: 'first' }, { text: 'second' }],
       });
     });
 

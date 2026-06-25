@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const detectionsApi = getService('detectionsApi');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Install API', () => {
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI Install API', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(installResponse.body).toEqual({
         statusCode: 400,
         error: 'Bad Request',
-        message: '[request body]: Expected object, received null',
+        message: '[request body]: Invalid input: expected object, received null',
       });
     });
   });

@@ -5,7 +5,14 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiButtonIcon, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -83,19 +90,24 @@ export function AttachmentsTable({
   );
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Attachment>> => {
+    const viewDetailsLabel = i18n.translate(
+      'xpack.streams.attachmentTable.detailsButtonAriaLabel',
+      { defaultMessage: 'View details' }
+    );
+
     const detailsColumn: EuiBasicTableColumn<Attachment> = {
       field: 'details',
       name: '',
       width: '40px',
       render: (_, attachment) => (
-        <EuiButtonIcon
-          data-test-subj="streamsAppAttachmentDetailsButton"
-          iconType="expand"
-          aria-label={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
-            defaultMessage: 'View details',
-          })}
-          onClick={() => onViewDetails?.(attachment)}
-        />
+        <EuiToolTip content={viewDetailsLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="streamsAppAttachmentDetailsButton"
+            iconType="maximize"
+            aria-label={viewDetailsLabel}
+            onClick={() => onViewDetails?.(attachment)}
+          />
+        </EuiToolTip>
       ),
     };
 
@@ -112,7 +124,7 @@ export function AttachmentsTable({
             defaultMessage: 'See attachment details',
           }),
           type: 'icon',
-          icon: 'tableDensityExpanded',
+          icon: 'tableDensityLow',
           onClick: (attachment) => onViewDetails?.(attachment),
           'data-test-subj': 'streamsAppAttachmentSeeDetailsAction',
         },
@@ -150,7 +162,7 @@ export function AttachmentsTable({
             defaultMessage: 'Remove this attachment from stream',
           }),
           type: 'icon',
-          icon: 'unlink',
+          icon: 'linkSlash',
           enabled: () => onUnlinkAttachment !== undefined,
           onClick: (attachment) => {
             onUnlinkAttachment?.(attachment);

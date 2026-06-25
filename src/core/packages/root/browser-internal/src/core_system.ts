@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/css';
-import { filter, firstValueFrom } from 'rxjs';
+import { type Subscription, filter, firstValueFrom, pairwise } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
@@ -43,6 +43,7 @@ import { PricingService } from '@kbn/core-pricing-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
+import { UserStorageService } from '@kbn/core-user-storage-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
 import { CoreInjectionService } from '@kbn/core-di-browser-internal';
@@ -115,8 +116,10 @@ export class CoreSystem {
   private readonly customBranding: CustomBrandingService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly userStorage: UserStorageService;
   private readonly pricing: PricingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
+  private overlayNavigationSubscription: Subscription | undefined;
 
   constructor(params: CoreSystemParams) {
     const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
@@ -159,6 +162,7 @@ export class CoreSystem {
     this.httpRateLimiter = new HttpRateLimiterService();
     this.uiSettings = new UiSettingsService();
     this.settings = new SettingsService();
+    this.userStorage = new UserStorageService();
     this.overlay = new OverlayService();
     this.chrome = new ChromeService({
       browserSupportsCsp,
@@ -269,11 +273,12 @@ export class CoreSystem {
       const chrome = this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
+      const userStorage = this.userStorage.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
       const customBranding = this.customBranding.setup({ injectedMetadata });
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
-      const featureFlags = this.featureFlags.setup({ injectedMetadata });
+      const featureFlags = this.featureFlags.setup({ http, injectedMetadata });
 
       const core: InternalCoreSetup = {
         analytics,
@@ -288,6 +293,7 @@ export class CoreSystem {
         theme,
         uiSettings,
         settings,
+        userStorage,
         executionContext,
         customBranding,
         security,
@@ -322,6 +328,7 @@ export class CoreSystem {
       const injection = this.injection.start();
       const uiSettings = this.uiSettings.start();
       const settings = this.settings.start();
+      const userStorage = this.userStorage.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = this.http.start();
       const i18n = this.i18n.start();
@@ -357,6 +364,12 @@ export class CoreSystem {
         curApp$: application.currentAppId$,
       });
 
+      this.overlayNavigationSubscription = application.currentAppId$
+        .pipe(pairwise())
+        .subscribe(() => {
+          this.overlay.closeAllFlyouts();
+        });
+
       const featureFlags = await this.featureFlags.start();
 
       // Temp hack: https://github.com/elastic/kibana/issues/247820
@@ -378,7 +391,6 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
-        analytics,
         featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
@@ -433,6 +445,7 @@ export class CoreSystem {
         overlays,
         uiSettings,
         settings,
+        userStorage,
         fatalErrors,
         deprecations,
         customBranding,
@@ -458,7 +471,15 @@ export class CoreSystem {
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
       this.rendering.renderCore(
-        { chrome, application, overlays, featureFlags },
+        {
+          chrome,
+          application,
+          overlays,
+          featureFlags,
+          http,
+          docLinks,
+          customBranding,
+        },
         coreUiTargetDomElement
       );
 
@@ -487,6 +508,7 @@ export class CoreSystem {
   }
 
   public stop() {
+    this.overlayNavigationSubscription?.unsubscribe();
     this.plugins.stop();
     this.coreApp.stop();
     this.notifications.stop();
@@ -494,6 +516,7 @@ export class CoreSystem {
     this.integrations.stop();
     this.uiSettings.stop();
     this.settings.stop();
+    this.userStorage.stop();
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();

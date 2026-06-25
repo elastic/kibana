@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
-
 import { useKibana } from '../../../../common/lib/kibana';
-import { useListsIndex } from './use_lists_index';
 import { useListsPrivileges } from './use_lists_privileges';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useSecuritySolutionInitialization } from '../../../../common/components/initialization';
+import {
+  INITIALIZATION_FLOW_CREATE_LIST_INDICES,
+  INITIALIZATION_FLOW_STATUS_READY,
+  INITIALIZATION_FLOW_STATUS_ERROR,
+} from '../../../../../common/api/initialization';
 
 export interface UseListsConfigReturn {
   canManageIndex: boolean | null;
@@ -19,33 +21,23 @@ export interface UseListsConfigReturn {
   loading: boolean;
   needsConfiguration: boolean;
   needsIndex: boolean;
-  canCreateIndex: boolean | null;
 }
 
 export const useListsConfig = (): UseListsConfigReturn => {
-  const { createIndex, indexExists, loading: indexLoading, error: indexError } = useListsIndex();
+  const initState = useSecuritySolutionInitialization([INITIALIZATION_FLOW_CREATE_LIST_INDICES]);
   const { canManageIndex, canWriteIndex, loading: privilegesLoading } = useListsPrivileges();
-  const { detectionEnginePrivileges } = useUserPrivileges();
 
   const { lists } = useKibana().services;
 
-  const canManageCluster = detectionEnginePrivileges.result?.cluster.manage ?? null;
-  const enabled = lists != null;
-  const loading = indexLoading || privilegesLoading;
-  const needsIndex = indexExists === false;
-  const hasIndexError = indexError != null;
-  const needsIndexConfiguration =
-    needsIndex && (canManageIndex === false || (canManageIndex === true && hasIndexError));
-  const needsConfiguration = !enabled || needsIndexConfiguration;
-  // Index can be created only when manage cluster privilege assigned to user role.
-  // It's needed to create index templates
-  const canCreateIndex = canManageIndex && canManageCluster;
+  const listIndicesState = initState[INITIALIZATION_FLOW_CREATE_LIST_INDICES];
+  const initLoading = listIndicesState.loading;
+  const initReady = listIndicesState.result?.status === INITIALIZATION_FLOW_STATUS_READY;
+  const initError = listIndicesState.result?.status === INITIALIZATION_FLOW_STATUS_ERROR;
 
-  useEffect(() => {
-    if (needsIndex && canCreateIndex && !indexLoading) {
-      createIndex();
-    }
-  }, [createIndex, needsIndex, canCreateIndex, indexLoading]);
+  const enabled = lists != null;
+  const loading = initLoading || privilegesLoading;
+  const needsIndex = !initReady;
+  const needsConfiguration = !enabled || (needsIndex && !initLoading && initError);
 
   return {
     canManageIndex,
@@ -54,6 +46,5 @@ export const useListsConfig = (): UseListsConfigReturn => {
     loading,
     needsConfiguration,
     needsIndex,
-    canCreateIndex,
   };
 };

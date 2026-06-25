@@ -4,6 +4,15 @@
     "outDir": "target/types"
   },
   "include": ["**/*"],
-  "kbn_references": ["@kbn/synthtrace-client", "@kbn/scout-oblt", "@kbn/apm-types"],
+  "kbn_references": [
+    "@kbn/synthtrace-client",
+    "@kbn/synthtrace",
+    "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
+    "@kbn/apm-types",
+    // Synth helpers, shared constants, and the ingestApmMetricsFixtures()
+    // helper used by both UI and API global setups.
+    { "path": "../shared/tsconfig.json" }
+  ],
   "exclude": ["target/**/*"]
 }

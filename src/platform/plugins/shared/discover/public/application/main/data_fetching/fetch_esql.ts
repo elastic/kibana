@@ -10,7 +10,14 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { Query, AggregateQuery, Filter, TimeRange, ProjectRouting } from '@kbn/es-query';
+import {
+  type Query,
+  type AggregateQuery,
+  type Filter,
+  type TimeRange,
+  type ProjectRouting,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -18,8 +25,11 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import moment from 'moment';
+import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
+import { getColumnsWithHighlights } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -30,22 +40,7 @@ interface EsqlErrorResponse {
   type: 'error';
 }
 
-export function fetchEsql({
-  query,
-  inputQuery,
-  filters,
-  timeRange,
-  dataView,
-  abortSignal,
-  inspectorAdapters,
-  data,
-  expressions,
-  scopedProfilesManager,
-  esqlVariables,
-  searchSessionId,
-  projectRouting,
-  inspectorConfig,
-}: {
+export interface FetchEsqlParams {
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
@@ -63,7 +58,24 @@ export function fetchEsql({
     title: string;
     description: string;
   };
-}): Promise<RecordsFetchResponse> {
+}
+
+export function fetchEsql({
+  query,
+  inputQuery,
+  filters,
+  timeRange,
+  dataView,
+  abortSignal,
+  inspectorAdapters,
+  data,
+  expressions,
+  scopedProfilesManager,
+  esqlVariables,
+  searchSessionId,
+  projectRouting,
+  inspectorConfig,
+}: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
     inputQuery,
@@ -100,12 +112,24 @@ export function fetchEsql({
           } else {
             const table = response as Datatable;
             const rows = table?.rows ?? [];
+            const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
+            let inlineHighlights: ESQLColumnsWithHighlights | undefined;
+            if (isOfAggregateQueryType(query)) {
+              try {
+                inlineHighlights = getColumnsWithHighlights(query.esql);
+              } catch (_e) {
+                inlineHighlights = undefined;
+              }
+            }
             finalData = rows.map((row, idx) => {
+              const raw = Object.keys(inlineHighlights ?? {}).length
+                ? { ...row, inline_highlights: inlineHighlights }
+                : row;
               const record: DataTableRecord = {
-                id: String(idx),
-                raw: row,
+                id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
+                raw,
                 flattened: row,
               };
 

@@ -9,12 +9,12 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { EuiSpacer } from '@elastic/eui';
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
-import { ExpandableSection } from '../../shared/components/expandable_section';
+import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
+import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { AttackChain } from '../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
 import { useAttackDetailsContext } from '../context';
-import { SectionPanel } from './section_panel';
+import { SectionPanel } from '../../../flyout_v2/attack/main/components/section_panel';
 
 const KEY = 'visualizations';
 

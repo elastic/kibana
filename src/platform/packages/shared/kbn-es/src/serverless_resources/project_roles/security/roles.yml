@@ -1,7 +1,11 @@
 # ----- Copy from internal roles config in elasticsearch-controller
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - '.siem-signals*'
@@ -14,7 +18,8 @@ viewer:
     - names:
         - '.alerts*'
         - '.preview.alerts*'
-        - '.adhoc.alerts*'
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -35,9 +40,13 @@ viewer:
         - 'risk-score.risk-score-*'
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
-        - '.entities.v1.history.*.security_*'
         - '.entities.v1.updates.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
+        - '.entity_analytics.entity-leads*'
+        - '.entity_analytics.watchlists.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -48,8 +57,9 @@ viewer:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.endpoint_exceptions_read
+        - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
-        - feature_securitySolutionCasesV2.read
+        - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.minimal_all
         - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_securitySolutionTimeline.read
@@ -62,7 +72,6 @@ viewer:
         - feature_maps_v2.all
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
-        - feature_dataQuality.all
         - feature_agentBuilder.read
         - feature_workflowsManagement.read
       resources: '*'
@@ -70,7 +79,11 @@ viewer:
 
 # modeled after t3_analyst
 editor:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - '.siem-signals*'
@@ -101,8 +114,9 @@ editor:
         - '.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
-        - '.internal.adhoc.alerts*'
-        - '.adhoc.alerts*'
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
+        - '.internal.adhoc.alerts-security.attack.discovery.alerts*'
         - 'risk-score.risk-score-*'
       privileges:
         - 'read'
@@ -112,21 +126,28 @@ editor:
     - names:
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
-        - '.entities.v1.history.*.security_*'
-        - '.entities.v1.reset.*'
         - '.entities.v1.updates.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
       privileges:
         - 'read'
+        - 'view_index_metadata'
         - 'write'
-    - names:
-        - .entities.v1.latest.security_*
-      privileges:
-        - delete
       allow_restricted_indices: false
     - names:
         - '.ml-anomalies-*'
       privileges:
         - read
+    - names:
+        - 'kibana_sample_data_*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'manage'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -135,7 +156,6 @@ editor:
         - feature_siemV5.endpoint_list_all
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.trusted_applications_all
-        - feature_siemV5.trusted_devices_all
         - feature_siemV5.event_filters_all
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
@@ -145,12 +165,13 @@ editor:
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all # Response actions history
         - feature_siemV5.file_operations_all
+        - feature_siemV5.scripts_management_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
@@ -166,7 +187,11 @@ editor:
   run_as: []
 
 t1_analyst:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - '.alerts-security*'
@@ -175,6 +200,14 @@ t1_analyst:
         - read
         - write
         - maintenance
+    - names:
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -193,8 +226,11 @@ t1_analyst:
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
         - .entities.v1.updates.security_*
+        - '.entities.v1.latest.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -206,10 +242,11 @@ t1_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
-        - feature_securitySolutionCasesV2.read
+        - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_actions.read
@@ -226,7 +263,11 @@ t1_analyst:
       resources: '*'
 
 t2_analyst:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - .alerts-security*
@@ -235,6 +276,14 @@ t2_analyst:
         - read
         - write
         - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -252,8 +301,9 @@ t2_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
         - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -261,8 +311,10 @@ t2_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
   applications:
     - application: 'kibana-.kibana'
@@ -270,12 +322,13 @@ t2_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
-        - feature_securitySolutionCasesV2.all
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -290,7 +343,11 @@ t2_analyst:
       resources: '*'
 
 t3_analyst:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -303,9 +360,11 @@ t3_analyst:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .alerts-security*
@@ -314,6 +373,14 @@ t3_analyst:
         - read
         - write
         - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -327,8 +394,9 @@ t3_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
         - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -352,13 +420,14 @@ t3_analyst:
         - feature_siemV5.actions_log_management_all # Response actions history
         - feature_siemV5.file_operations_all
         - feature_siemV5.scan_operations_all
+        - feature_siemV5.scripts_management_all
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
@@ -373,7 +442,11 @@ t3_analyst:
       resources: '*'
 
 threat_intelligence_analyst:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -390,8 +463,10 @@ threat_intelligence_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .lists*
@@ -408,13 +483,22 @@ threat_intelligence_analyst:
         - write
         - maintenance
     - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
         - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
       privileges:
         - read
@@ -428,11 +512,11 @@ threat_intelligence_analyst:
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
@@ -446,7 +530,11 @@ threat_intelligence_analyst:
       resources: '*'
 
 rule_author:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -459,17 +547,20 @@ rule_author:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .alerts-security*
         - .siem-signals-*
         - .internal.preview.alerts-security*
         - .preview.alerts-security*
-        - .internal.adhoc.alerts-security*
-        - .adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -481,14 +572,16 @@ rule_author:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
         - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -510,11 +603,11 @@ rule_author:
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -528,7 +621,11 @@ rule_author:
       resources: '*'
 
 soc_manager:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -541,6 +638,11 @@ soc_manager:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
+        - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -550,8 +652,9 @@ soc_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -568,21 +671,10 @@ soc_manager:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
-        - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
-        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
-    - names:
-        - .alerts-security.attack.discovery.alerts*
-        - .internal.alerts-security.attack.discovery.alerts*
-        - .adhoc.alerts-security.attack.discovery.alerts*
-        - .internal.adhoc.alerts-security.attack.discovery.alerts*
-      privileges:
-        - read
-        - view_index_metadata
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -603,10 +695,11 @@ soc_manager:
         - feature_siemV5.file_operations_all
         - feature_siemV5.execute_operations_all
         - feature_siemV5.scan_operations_all
+        - feature_siemV5.scripts_management_all
         - feature_siemV5.workflow_insights_all
         - feature_siemV5.soc_management_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
@@ -626,7 +719,10 @@ soc_manager:
       resources: '*'
 
 detections_admin:
-  cluster: ['manage_index_templates', 'manage_transform']
+  metadata:
+    public: true
+    reserved: true
+  cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
         - apm-*-transaction*
@@ -644,8 +740,9 @@ detections_admin:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -666,15 +763,13 @@ detections_admin:
     - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
         - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
       privileges:
         - read
         - write
-    - names:
-        - .entities.v1.latest.security_*
-      privileges:
-        - delete
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -683,11 +778,11 @@ detections_admin:
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.endpoint_exceptions_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
@@ -701,6 +796,9 @@ detections_admin:
       resources: '*'
 
 platform_engineer:
+  metadata:
+    public: true
+    reserved: true
   cluster:
     - manage
   indices:
@@ -720,8 +818,9 @@ platform_engineer:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
         - risk-score.risk-score-*
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -729,16 +828,15 @@ platform_engineer:
     - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
-        - .entities.v1.reset.*
         - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset*'
+        - '.entities.v2.latest.security_*'
+        - 'entities-latest-*'
       privileges:
         - read
+        - view_index_metadata
         - write
-    - names:
-        - .entities.v1.latest.security_*
-      privileges:
-        - delete
     - names:
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
@@ -759,13 +857,14 @@ platform_engineer:
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.actions_log_management_read
+        - feature_siemV5.scripts_management_read
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_fleet.all
@@ -782,7 +881,11 @@ platform_engineer:
       resources: '*'
 
 endpoint_operations_analyst:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -804,8 +907,9 @@ endpoint_operations_analyst:
         - .items*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
         - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -815,22 +919,32 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
         - maintenance
     - names:
-        - .asset-criticality.asset-criticality-*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
+        - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
+      privileges:
+        - read
+        - view_index_metadata
         - write
   applications:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.all
+        # TODO this role did not have crud_alerts. Oversight or intentional?
         - feature_siemV5.policy_management_all
         - feature_siemV5.endpoint_list_all
         - feature_siemV5.global_artifact_management_all
@@ -846,13 +960,14 @@ endpoint_operations_analyst:
         - feature_siemV5.file_operations_all
         - feature_siemV5.execute_operations_all
         - feature_siemV5.scan_operations_all
+        - feature_siemV5.scripts_management_all
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
-        - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
+        - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
@@ -869,7 +984,11 @@ endpoint_operations_analyst:
       resources: '*'
 
 endpoint_policy_manager:
-  cluster: []
+  metadata:
+    public: true
+    reserved: true
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -889,15 +1008,19 @@ endpoint_policy_manager:
         - logstash-*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
-        - .entities.v1.history.*.security_*
         - .entities.v1.updates.security_*
+        - '.entities.v1.history.*.security_*'
+        - 'entities-latest-*'
+        - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - '.entities.v2.latest.security_*'
       privileges:
         - read
+        - view_index_metadata
         - write
     - names:
         - .lists*
@@ -911,16 +1034,13 @@ endpoint_policy_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
         - manage
-    - names:
-        - '.ml-anomalies-*'
-      privileges:
-        - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -937,7 +1057,7 @@ endpoint_policy_manager:
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCasesV2.all
+        - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all

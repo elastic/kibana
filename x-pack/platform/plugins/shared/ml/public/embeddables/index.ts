@@ -6,34 +6,56 @@
  */
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_charts';
+import type { Reference } from '@kbn/content-management-utils';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type { MlCoreSetup } from '../plugin';
-import {
-  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-} from './constants';
 
-export * from './constants';
 export type * from './types';
 
-export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
-  embeddable.registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
+export function registerEmbeddables(
+  embeddable: EmbeddableSetup,
+  core: MlCoreSetup,
+  usageCollection?: UsageCollectionSetup
+) {
+  embeddable.registerEmbeddablePublicDefinition(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
     const { getAnomalySwimLaneEmbeddableFactory } = await import('./anomaly_swimlane');
     return getAnomalySwimLaneEmbeddableFactory(core.getStartServices);
   });
-
-  embeddable.registerReactEmbeddableFactory(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, async () => {
-    const { getAnomalyChartsReactEmbeddableFactory } = await import(
-      './anomaly_charts/anomaly_charts_embeddable_factory'
+  embeddable.registerLegacyURLTransform(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
+    const { transformOut } = await import(
+      '../../common/embeddables/anomaly_swimlane/transform_out'
     );
-    return getAnomalyChartsReactEmbeddableFactory(core.getStartServices);
+    return transformOut as (storedState: object, references?: Reference[]) => object;
   });
 
-  embeddable.registerReactEmbeddableFactory(
+  embeddable.registerEmbeddablePublicDefinition(
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    async () => {
+      const { getAnomalyChartsReactEmbeddableFactory } = await import(
+        './anomaly_charts/anomaly_charts_embeddable_factory'
+      );
+      return getAnomalyChartsReactEmbeddableFactory(core.getStartServices, usageCollection);
+    }
+  );
+  embeddable.registerLegacyURLTransform(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, async () => {
+    const { transformOut } = await import('../../common/embeddables/anomaly_charts/transform_out');
+    return transformOut as (storedState: object, references?: Reference[]) => object;
+  });
+
+  embeddable.registerEmbeddablePublicDefinition(
     ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     async () => {
       const { getSingleMetricViewerEmbeddableFactory } = await import('./single_metric_viewer');
-      return getSingleMetricViewerEmbeddableFactory(core.getStartServices);
+      return getSingleMetricViewerEmbeddableFactory(core.getStartServices, usageCollection);
     }
   );
+  embeddable.registerLegacyURLTransform(ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE, async () => {
+    const { transformOut } = await import(
+      '../../common/embeddables/single_metric_viewer/transform_out'
+    );
+    return transformOut as (storedState: object, references?: Reference[]) => object;
+  });
 }

@@ -18,14 +18,11 @@ import type { Filter } from '@kbn/es-query';
 import {
   apiPublishesESQLVariable,
   type ESQLControlVariable,
-  type ESQLVariableType,
   type PublishesESQLVariable,
 } from '@kbn/esql-types';
 import {
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
-} from '@kbn/presentation-containers';
-import {
   apiAppliesFilters,
   apiAppliesTimeslice,
   apiHasSerializableState,
@@ -92,7 +89,7 @@ export const useChildrenApi = (
     /**
      * Define behaviour subjects that will rely on compatible children API observables
      */
-    const esqlVariables$ = new BehaviorSubject<ESQLVariableType[]>([]);
+    const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
     const esqlVariablesSubscription = combineCompatibleChildrenApis<
       PublishesESQLVariable,
       ESQLControlVariable[]
@@ -102,7 +99,7 @@ export const useChildrenApi = (
         esqlVariables$.next(variables);
       });
 
-    const appliedFilters$ = new BehaviorSubject<Filter | undefined>(undefined);
+    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
     const appliedFiltersSubscription = combineCompatibleChildrenApis<
       AppliesFilters,
       Filter[] | undefined

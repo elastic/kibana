@@ -11,13 +11,20 @@ import { v4 as uuidv4 } from 'uuid';
 import type { AgentPolicy, Agent } from '../../types';
 
 import { FleetError, FleetUnauthorizedError } from '../../errors';
+import { sendActionTelemetryEvents } from '../action_sender';
+
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { bulkMigrateAgents, migrateSingleAgent } from './migrate';
 import { createAgentAction, createErrorActionResults } from './actions';
-import { getAgentPolicyForAgents, getAgents } from './crud';
+import { detectTargetClusterType } from './detect_target_cluster_type';
+import { getAgentPolicyForAgents, getAgents, getAgentsByKuery, openPointInTime } from './crud';
+import * as migrateActionRunner from './migrate_action_runner';
 
 // Mock the imported functions
 jest.mock('./actions');
+jest.mock('../action_sender');
+jest.mock('./detect_target_cluster_type');
 
 jest.mock('./crud', () => {
   return {
@@ -42,6 +49,7 @@ jest.mock('..', () => {
     appContextService: {
       getLogger: jest.fn(),
       getTelemetryEventsSender: jest.fn(),
+      getCloud: jest.fn(),
     },
   };
 });
@@ -81,9 +89,14 @@ const mockedPolicy: AgentPolicy = {
   namespace: 'default',
 };
 
+const mockedDetectTargetClusterType = detectTargetClusterType as jest.MockedFunction<
+  typeof detectTargetClusterType
+>;
+
 describe('Agent migration', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
   let mockLicenseService: any;
+  let mockAppContextService: any;
   const soClientMock = {
     getCurrentNamespace: jest.fn(),
   } as any;
@@ -93,10 +106,19 @@ describe('Agent migration', () => {
     jest.resetAllMocks();
     esClientMock = elasticsearchServiceMock.createInternalClient();
 
-    // Get the mocked license service
     mockLicenseService = jest.requireMock('..').licenseService;
-    // Default to having the required license
     mockLicenseService.hasAtLeast.mockReturnValue(true);
+
+    mockAppContextService = jest.requireMock('..').appContextService;
+    mockAppContextService.getLogger.mockReturnValue({ debug: jest.fn() });
+    mockAppContextService.getTelemetryEventsSender.mockReturnValue({
+      queueTelemetryEvents: jest.fn(),
+    });
+    mockAppContextService.getCloud.mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: false,
+      deploymentId: 'dep-123',
+    });
 
     (getAgentPolicyForAgents as jest.Mock).mockResolvedValue([mockedPolicy]);
 
@@ -112,6 +134,9 @@ describe('Agent migration', () => {
     mockedUuidv4.mockReturnValue('test-action-id' as any);
 
     mockedPolicy.is_protected = false;
+
+    // Default: target detected as ECH
+    mockedDetectTargetClusterType.mockReturnValue('ech');
   });
 
   describe('migrateSingleAgent', () => {
@@ -183,6 +208,67 @@ describe('Agent migration', () => {
             enrollment_token: options.enrollment_token,
           },
         })
+      );
+    });
+
+    it('should send telemetry with source ECH and detected serverless target', async () => {
+      mockedDetectTargetClusterType.mockReturnValue('serverless');
+
+      await migrateSingleAgent(esClientMock, soClientMock, 'agent-123', mockedPolicy, mockedAgent, {
+        policyId: 'policy-456',
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({
+          eventType: 'MIGRATE',
+          agentCount: 1,
+          sourceType: 'ech',
+          targetType: 'serverless',
+        })
+      );
+    });
+
+    it('should send telemetry with undefined sourceType when not on cloud', async () => {
+      mockAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+        deploymentId: undefined,
+      });
+
+      await migrateSingleAgent(esClientMock, soClientMock, 'agent-123', mockedPolicy, mockedAgent, {
+        policyId: 'policy-456',
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({
+          eventType: 'MIGRATE',
+          agentCount: 1,
+          sourceType: undefined,
+        })
+      );
+    });
+
+    it('should send telemetry with undefined targetType when detection fails', async () => {
+      mockedDetectTargetClusterType.mockReturnValue(undefined);
+
+      await migrateSingleAgent(esClientMock, soClientMock, 'agent-123', mockedPolicy, mockedAgent, {
+        policyId: 'policy-456',
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({ targetType: undefined })
       );
     });
 
@@ -386,6 +472,52 @@ describe('Agent migration', () => {
       );
     });
 
+    it('should send telemetry with source and target cluster types', async () => {
+      mockedDetectTargetClusterType.mockReturnValue('serverless');
+      (getAgents as jest.Mock).mockResolvedValue([mockedAgent]);
+
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        agentIds: [mockedAgent.id],
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({
+          eventType: 'MIGRATE',
+          sourceType: 'ech',
+          targetType: 'serverless',
+        })
+      );
+    });
+
+    it('should send telemetry with undefined sourceType when not on cloud', async () => {
+      mockAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+        deploymentId: undefined,
+      });
+      mockedDetectTargetClusterType.mockReturnValue('ech');
+      (getAgents as jest.Mock).mockResolvedValue([mockedAgent]);
+
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        agentIds: [mockedAgent.id],
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({
+          eventType: 'MIGRATE',
+          sourceType: undefined,
+        })
+      );
+    });
+
     it('should record error result if the agent is protected', async () => {
       (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
       const options = {
@@ -528,5 +660,136 @@ describe('Agent migration', () => {
       expect(getAgents as jest.Mock).toHaveBeenCalled();
       expect(result).toEqual({ actionId: 'test-action-id' });
     });
+  });
+});
+
+describe('bulkMigrateAgents kuery path — cheap count and sync/async branching', () => {
+  const soClient2 = { getCurrentNamespace: jest.fn() } as any;
+  let esClient2: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  const baseOptions = { enrollment_token: 'token', uri: 'https://target.example.com' };
+  let mockBulkMigrateAgentsBatch: jest.SpyInstance;
+  let mockMigrateActionRunner: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient2 = elasticsearchServiceMock.createInternalClient();
+    const mockLicenseService = jest.requireMock('..').licenseService;
+    mockLicenseService.hasAtLeast.mockReturnValue(true);
+    const mockAppContextService = jest.requireMock('..').appContextService;
+    mockAppContextService.getLogger.mockReturnValue({ debug: jest.fn() });
+    mockAppContextService.getTelemetryEventsSender.mockReturnValue({
+      queueTelemetryEvents: jest.fn(),
+    });
+    mockAppContextService.getCloud.mockReturnValue({ isCloudEnabled: false });
+    (detectTargetClusterType as jest.Mock).mockReturnValue('ech');
+    (openPointInTime as jest.Mock).mockResolvedValue('pit-id');
+    mockBulkMigrateAgentsBatch = jest
+      .spyOn(migrateActionRunner, 'bulkMigrateAgentsBatch')
+      .mockResolvedValue({ actionId: 'test-action-id' });
+    mockMigrateActionRunner = jest
+      .spyOn(migrateActionRunner, 'MigrateActionRunner')
+      .mockImplementation(
+        () =>
+          ({
+            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+          } as any)
+      );
+  });
+
+  afterEach(() => {
+    mockBulkMigrateAgentsBatch.mockRestore();
+    mockMigrateActionRunner.mockRestore();
+  });
+
+  it('uses perPage:0 for the initial count query', async () => {
+    (getAgentsByKuery as jest.Mock).mockResolvedValue({
+      agents: [],
+      total: 0,
+      page: 1,
+      perPage: 0,
+    });
+
+    await bulkMigrateAgents(esClient2, soClient2, { ...baseOptions, kuery: 'status:online' });
+
+    expect(getAgentsByKuery as jest.Mock).toHaveBeenCalledWith(
+      esClient2,
+      soClient2,
+      expect.objectContaining({ perPage: 0 })
+    );
+  });
+
+  it('runs inline and fetches agents when total <= batchSize', async () => {
+    const agents = [{ id: 'agent-1' }];
+    (getAgentsByKuery as jest.Mock)
+      .mockResolvedValueOnce({ agents: [], total: 5, page: 1, perPage: 0 })
+      .mockResolvedValueOnce({ agents, total: 5, page: 1, perPage: SO_SEARCH_LIMIT });
+
+    await bulkMigrateAgents(esClient2, soClient2, { ...baseOptions, kuery: 'status:online' });
+
+    // count call (perPage: 0) and fetch call (perPage: SO_SEARCH_LIMIT) both happened
+    expect(getAgentsByKuery as jest.Mock).toHaveBeenCalledWith(
+      esClient2,
+      soClient2,
+      expect.objectContaining({ perPage: 0 })
+    );
+    expect(getAgentsByKuery as jest.Mock).toHaveBeenCalledWith(
+      esClient2,
+      soClient2,
+      expect.objectContaining({ perPage: SO_SEARCH_LIMIT })
+    );
+    expect(mockBulkMigrateAgentsBatch).toHaveBeenCalledWith(
+      esClient2,
+      soClient2,
+      agents,
+      expect.anything()
+    );
+    expect(mockMigrateActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('schedules async task and returns actionId immediately when total > batchSize', async () => {
+    const batchSize = 100;
+    (getAgentsByKuery as jest.Mock).mockResolvedValue({
+      agents: [],
+      total: 500,
+      page: 1,
+      perPage: 0,
+    });
+
+    const result = await bulkMigrateAgents(esClient2, soClient2, {
+      ...baseOptions,
+      kuery: 'status:online',
+      batchSize,
+    });
+
+    expect(result).toEqual({ actionId: 'async-action-id' });
+    // only the count call — no second full-doc fetch
+    expect(getAgentsByKuery as jest.Mock).not.toHaveBeenCalledWith(
+      esClient2,
+      soClient2,
+      expect.objectContaining({ perPage: batchSize })
+    );
+    expect(mockMigrateActionRunner).toHaveBeenCalledWith(
+      esClient2,
+      soClient2,
+      expect.objectContaining({ batchSize, total: 500 }),
+      expect.anything()
+    );
+    expect(mockBulkMigrateAgentsBatch).not.toHaveBeenCalled();
+  });
+
+  it('runs inline when total equals batchSize (boundary)', async () => {
+    const batchSize = 100;
+    (getAgentsByKuery as jest.Mock)
+      .mockResolvedValueOnce({ agents: [], total: 100, page: 1, perPage: 0 })
+      .mockResolvedValueOnce({ agents: [], total: 100, page: 1, perPage: batchSize });
+
+    await bulkMigrateAgents(esClient2, soClient2, {
+      ...baseOptions,
+      kuery: 'status:online',
+      batchSize,
+    });
+
+    expect(mockBulkMigrateAgentsBatch).toHaveBeenCalled();
+    expect(mockMigrateActionRunner).not.toHaveBeenCalled();
   });
 });

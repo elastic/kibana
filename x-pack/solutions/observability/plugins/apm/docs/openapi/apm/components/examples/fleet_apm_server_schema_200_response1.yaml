@@ -1,0 +1,3 @@
+# summary:
+description: An example of a successful response from `POST /api/apm/fleet/apm_server_schema`. The response body is intentionally empty.
+value: {}

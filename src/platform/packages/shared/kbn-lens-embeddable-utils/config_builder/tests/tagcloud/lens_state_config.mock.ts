@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 /**
  * Simple tag cloud generated from kibana
@@ -102,7 +103,7 @@ export const tagcloudAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -241,7 +242,7 @@ export const tagcloudAttributesWithFullConfig = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -275,14 +276,14 @@ export const tagcloudESQLAttributes = {
         colorMode: { type: 'categorical' },
       },
     },
-    query: { esql: 'FROM kibana_sample_data_logsn| STATS AVG(bytes) BY geo.dest' },
+    query: { esql: 'FROM kibana_sample_data_logs| STATS AVG(bytes) BY geo.dest' },
     filters: [],
     datasourceStates: {
       textBased: {
         layers: {
           'ab578f6a-d0c2-4bf0-84a8-86c722d9b434': {
             index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
-            query: { esql: 'FROM kibana_sample_data_logsn| STATS AVG(bytes) BY geo.dest' },
+            query: { esql: 'FROM kibana_sample_data_logs| STATS AVG(bytes) BY geo.dest' },
             columns: [
               {
                 columnId: 'AVG(bytes)',
@@ -336,6 +337,6 @@ export const tagcloudESQLAttributes = {
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [],
 } satisfies LensAttributes;

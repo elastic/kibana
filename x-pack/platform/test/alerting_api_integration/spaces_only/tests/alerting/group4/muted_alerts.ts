@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
@@ -24,6 +24,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const es = getService('es');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('mutedAlerts', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -81,6 +82,10 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       return alerts;
     };
 
+    before(async () => {
+      await esTestIndexTool.setup();
+    });
+
     afterEach(async () => {
       await es.deleteByQuery({
         index: alertAsDataIndex,
@@ -91,6 +96,10 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         ignore_unavailable: true,
       });
       await objectRemover.removeAll();
+    });
+
+    after(async () => {
+      await esTestIndexTool.destroy();
     });
 
     it('should reflect muted alert instance ids in rule', async () => {
@@ -277,21 +286,23 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      await alertUtils.runSoon(ruleId, { force: true });
 
       // Wait for alerts to be muted
       await retry.try(async () => {
         const alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
         alerts.forEach((alert: any) => {
           expect(alert._source[ALERT_MUTED]).to.be(true);
         });
       });
 
       // Now unmute all alerts
-      await alertUtils.getUnmuteAllRequest(ruleId);
+      await alertUtils.unmuteAll(ruleId);
 
-      // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      // Run the rule to trigger reconciliation. Use force so we do not get "Rule is already
+      // running" without queueing a run; muted flags only reconcile on execution.
+      await alertUtils.runSoon(ruleId, { force: true });
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {

@@ -7,38 +7,78 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public/plugin';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import {
+  APP_ICON,
+  APP_NAME,
+  MARKDOWN_EMBEDDABLE_TYPE,
+  MARKDOWN_SAVED_OBJECT_TYPE,
+} from '../common/constants';
+import type { MarkdownEmbeddableState } from '../server';
 import { ADD_MARKDOWN_ACTION_ID, CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './constants';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import { setupLegacyVis } from './legacy_vis/setup';
+import { setKibanaServices } from './services/kibana_services';
 
-export interface SetupDeps {
+export interface MarkdownSetupDeps {
+  contentManagement: ContentManagementPublicSetup;
   embeddable: EmbeddableSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
+  visualizations: VisualizationsSetup;
 }
 
-export interface StartDeps {
+export interface MarkdownStartDeps {
   uiActions: UiActionsStart;
 }
 
-export class DashboardMarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { embeddable }: SetupDeps) {
-    embeddable.registerReactEmbeddableFactory(MARKDOWN_EMBEDDABLE_TYPE, async () => {
+export class DashboardMarkdownPlugin
+  implements Plugin<void, void, MarkdownSetupDeps, MarkdownStartDeps>
+{
+  public setup(
+    core: CoreSetup<MarkdownStartDeps>,
+    { contentManagement, embeddable, expressions, visualizations }: MarkdownSetupDeps
+  ) {
+    embeddable.registerEmbeddablePublicDefinition(MARKDOWN_EMBEDDABLE_TYPE, async () => {
       const { markdownEmbeddableFactory } = await import('./async_services');
       return markdownEmbeddableFactory;
     });
+
+    embeddable.registerAddFromLibraryType({
+      onAdd: async (container, savedObject) => {
+        container.addNewPanel<MarkdownEmbeddableState>(
+          {
+            panelType: MARKDOWN_EMBEDDABLE_TYPE,
+            serializedState: {
+              ref_id: savedObject.id,
+            },
+          },
+          {
+            displaySuccessMessage: true,
+          }
+        );
+      },
+      savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
+      savedObjectName: APP_NAME,
+      getIconForSavedObject: () => APP_ICON,
+    });
+
+    setupLegacyVis(core.getStartServices, expressions, visualizations);
   }
 
-  public start(core: CoreStart, deps: StartDeps) {
-    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_MARKDOWN_ACTION_ID, async () => {
+  public start(core: CoreStart, plugins: MarkdownStartDeps) {
+    setKibanaServices(core, plugins);
+    plugins.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_MARKDOWN_ACTION_ID, async () => {
       const { createMarkdownAction } = await import('./async_services');
       return createMarkdownAction();
     });
 
-    deps.uiActions.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
+    plugins.uiActions.addTriggerActionAsync(
+      ON_OPEN_PANEL_MENU,
       CONVERT_LEGACY_MARKDOWN_ACTION_ID,
       async () => {
         const { getConvertLegacyMarkdownAction } = await import('./async_services');

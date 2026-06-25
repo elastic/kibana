@@ -7,7 +7,7 @@
 
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { z } from '@kbn/zod/v4';
-import type { FormConfig } from '../form';
+import type { FormConfig, ResolvedMetaFunctions } from '../form';
 
 export enum WidgetType {
   Text = 'text',
@@ -16,6 +16,7 @@ export enum WidgetType {
   FormFieldset = 'formFieldset',
   Hidden = 'hidden',
   Object = 'object',
+  FileUpload = 'fileUpload',
 }
 
 export interface BaseWidgetProps<
@@ -29,6 +30,8 @@ export interface BaseWidgetProps<
   schema: TSchema;
   /* Global form configuration */
   formConfig: FormConfig;
+  /* Meta functions for accessing schema metadata */
+  meta: ResolvedMetaFunctions;
   /* Configuration specific to the field */
   fieldConfig: {
     label?: string;

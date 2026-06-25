@@ -11,9 +11,7 @@ import { useMemo } from 'react';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { useInspector } from '../../hooks/use_inspector';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
 import {
@@ -24,10 +22,12 @@ import {
 import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
-  stateContainer,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
   persistedDiscoverSession,
 }: {
-  stateContainer: DiscoverStateContainer;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
   persistedDiscoverSession: DiscoverSession | undefined;
 }) => {
   const services = useDiscoverServices();
@@ -37,36 +37,31 @@ export const useDiscoverTopNav = ({
   const topNavBadges = useMemo(
     () =>
       getTopNavBadges({
-        stateContainer,
-        services,
         isMobile,
+        isManaged: Boolean(persistedDiscoverSession?.managed),
+        services,
       }),
-    [stateContainer, services, isMobile]
+    [services, isMobile, persistedDiscoverSession?.managed]
   );
 
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
-  const onOpenInspector = useInspector({
-    inspector: services.inspector,
-    stateContainer,
-  });
   const hasShareIntegration = useHasShareIntegration(services);
 
   const topNavMenu = useTopNavLinks({
     dataView,
     services,
-    state: stateContainer,
-    onOpenInspector,
     hasUnsavedChanges,
     isEsqlMode,
     adHocDataViews,
     hasShareIntegration,
     persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
   });
 
-  return {
-    topNavMenu,
-    topNavBadges,
-  };
+  return { topNavMenu, topNavBadges };
 };
+
+export type DiscoverTopNavHookResult = ReturnType<typeof useDiscoverTopNav>;

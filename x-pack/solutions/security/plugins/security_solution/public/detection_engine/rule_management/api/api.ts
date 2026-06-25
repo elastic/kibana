@@ -23,6 +23,8 @@ import type {
   PerformRuleInstallationResponseBody,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
+  ReviewRuleDeprecationRequestBody,
+  ReviewRuleDeprecationResponseBody,
   RevertPrebuiltRulesRequest,
   RevertPrebuiltRulesResponseBody,
   ReviewRuleInstallationRequestBody,
@@ -31,13 +33,14 @@ import type {
   ReviewRuleUpgradeResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  BOOTSTRAP_PREBUILT_RULES_URL,
+  BOOTSTRAP_EASE_RULES_URL,
   GET_PREBUILT_RULES_BASE_VERSION_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
   REVERT_PREBUILT_RULES_URL,
+  REVIEW_RULE_DEPRECATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
@@ -51,11 +54,14 @@ import type {
   GetRuleManagementFiltersResponse,
   ImportRulesResponse,
   BulkManualRuleFillGaps,
+  RuleChangesHistoryResponse,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
+  RULE_HISTORY_URL,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   RULE_MANAGEMENT_FILTERS_URL,
+  RULE_MANAGEMENT_RULES_URL_SEARCH,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -77,8 +83,11 @@ import type {
   CreateRulesProps,
   ExportDocumentsProps,
   FetchCoverageOverviewProps,
+  FetchRuleHistoryProps,
   FetchRuleProps,
   FetchRuleSnoozingProps,
+  FetchSearchRulesProps,
+  FetchSearchRulesResponse,
   FetchRulesProps,
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
@@ -90,7 +99,7 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
-import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import type { RuleBootstrapResults } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_ease_rules/bootstrap_ease_rules.gen';
 import { defaultRangeValue } from '../../rule_gaps/constants';
 
 /**
@@ -198,6 +207,7 @@ export const fetchRules = async ({
     perPage: 20,
   },
   signal,
+  schedulerId,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
 
@@ -216,6 +226,7 @@ export const fetchRules = async ({
       ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
       : {}),
     ...(kql !== '' ? { filter: kql } : {}),
+    ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
@@ -224,6 +235,67 @@ export const fetchRules = async ({
     query,
     signal,
   });
+};
+
+/**
+ * Fetches all rules from the Detection Engine API with the option to include aggregations
+ * and deep pagination via `search_after`.
+ *
+ * @param fields subset of rule attributes to return (omit for all attributes)
+ * @param filter structured KQL filter
+ * @param search free-text search (e.g. `{ term, mode }`)
+ * @param sort_field field to sort by
+ * @param sort_order sort order (e.g. `asc` or `desc`)
+ * @param aggregations aggregations to include (e.g. `{ counts: ['tags', 'enabled'] }`)
+ * @param pagination pagination options (e.g. `{ page, perPage }`)
+ * @param search_after for deep pagination
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchSearchRules = async ({
+  fields,
+  filter,
+  search,
+  sort_field = 'enabled',
+  sort_order = 'desc',
+  pagination = {
+    page: 1,
+    perPage: 20,
+  },
+  signal,
+  aggregations,
+  search_after,
+  gap_fill_statuses,
+  gaps_range_start,
+  gaps_range_end,
+  gap_auto_fill_scheduler_id,
+}: FetchSearchRulesProps): Promise<FetchSearchRulesResponse> => {
+  const body = {
+    page: pagination.page,
+    per_page: pagination.perPage,
+    sort_field,
+    sort_order,
+    fields,
+    ...(filter != null && filter.term.trim() !== '' ? { filter } : {}),
+    search,
+    aggregations,
+    search_after,
+    ...(gap_fill_statuses?.length ? { gap_fill_statuses } : {}),
+    ...(gaps_range_start ? { gaps_range_start } : {}),
+    ...(gaps_range_end ? { gaps_range_end } : {}),
+    ...(gap_auto_fill_scheduler_id ? { gap_auto_fill_scheduler_id } : {}),
+  };
+
+  return KibanaServices.get().http.fetch<FetchSearchRulesResponse>(
+    RULE_MANAGEMENT_RULES_URL_SEARCH,
+    {
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
 };
 
 /**
@@ -246,6 +318,32 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
     query: { id },
     signal,
   });
+
+/**
+ * Fetch the change history for a Rule.
+ *
+ * @param ruleId Rule SO id (not `rule_id`)
+ * @param page 1-based page number
+ * @param perPage items per page
+ * @param signal to cancel request
+ *
+ * @returns Promise<RuleChangesHistoryResponse>
+ */
+export const fetchRuleChangeHistoryById = async ({
+  ruleId,
+  page,
+  perPage,
+  signal,
+}: FetchRuleHistoryProps): Promise<RuleChangesHistoryResponse> =>
+  KibanaServices.get().http.fetch<RuleChangesHistoryResponse>(
+    RULE_HISTORY_URL.replace('{ruleId}', encodeURIComponent(ruleId)),
+    {
+      method: 'GET',
+      version: '1',
+      query: { page, per_page: perPage },
+      signal,
+    }
+  );
 
 /**
  * Fetch rule snooze settings for each provided ruleId
@@ -365,6 +463,7 @@ export type QueryOrIds =
       ids?: undefined;
       gapRange?: { start: string; end: string };
       gapFillStatuses?: GapFillStatus[];
+      schedulerId?: string;
     }
   | { query?: undefined; ids: string[] };
 
@@ -439,6 +538,7 @@ export async function performBulkAction({
         : undefined,
     fill_gaps:
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
+    gap_auto_fill_scheduler_id: 'schedulerId' in bulkAction ? bulkAction.schedulerId : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -669,6 +769,27 @@ export const getPrebuiltRulesStatus = async ({
   );
 
 /**
+ * Review deprecated prebuilt rules
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const reviewRuleDeprecation = async ({
+  signal,
+  request,
+}: {
+  signal: AbortSignal | undefined;
+  request: ReviewRuleDeprecationRequestBody;
+}): Promise<ReviewRuleDeprecationResponseBody> =>
+  KibanaServices.get().http.fetch<ReviewRuleDeprecationResponseBody>(REVIEW_RULE_DEPRECATION_URL, {
+    method: 'POST',
+    version: '1',
+    signal,
+    body: JSON.stringify(request),
+  });
+
+/**
  * Review prebuilt rules upgrade
  *
  * @param signal AbortSignal for cancelling request
@@ -740,8 +861,8 @@ export const performUpgradeRules = async (
     body: JSON.stringify(body),
   });
 
-export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesResponse> =>
-  KibanaServices.get().http.fetch(BOOTSTRAP_PREBUILT_RULES_URL, {
+export const bootstrapEaseRules = async (): Promise<RuleBootstrapResults> =>
+  KibanaServices.get().http.fetch(BOOTSTRAP_EASE_RULES_URL, {
     method: 'POST',
     version: '1',
   });

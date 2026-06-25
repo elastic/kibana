@@ -8,40 +8,47 @@
 import { useMemo } from 'react';
 import type { QueryClient } from '@kbn/react-query';
 import produce from 'immer';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type {
   ConversationRound,
   ReasoningStep,
   ToolCallProgress,
   ToolCallStep,
   Conversation,
+  CompactionStep,
+  BackgroundAgentCompleteStep,
+  TodosStep,
 } from '@kbn/agent-builder-common';
-import { isToolCallStep, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  isToolCallStep,
+  isCompactionStep,
+  findTodosStep,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  carriedOverTodos,
+} from '@kbn/agent-builder-common';
+import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
-import { storageKeys } from '../../storage_keys';
 import { buildOptimisticAttachments } from '../../utils/build_optimistic_attachments';
-import {
-  createNewConversation,
-  createNewRound,
-  newConversationId,
-} from '../../utils/new_conversation';
+import { patchConversationList } from '../../utils/conversation_sidebar_list_cache';
+import { createNewConversation, createNewRound } from '../../utils/new_conversation';
 
 export interface ConversationActions {
-  removeNewConversationQuery: () => void;
   invalidateConversation: () => void;
   addOptimisticRound: ({
     userMessage,
     attachments,
+    agentId,
   }: {
     userMessage: string;
     attachments?: AttachmentInput[];
-  }) => void;
+    agentId: string;
+  }) => Promise<void>;
   removeOptimisticRound: () => void;
-  setAgentId: (agentId: string) => void;
+  clearLastRoundResponse: () => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
   setToolCallProgress: ({
@@ -60,41 +67,41 @@ export interface ConversationActions {
   }) => void;
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
+  clearAssistantMessage: () => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
-  setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
-  clearPendingPrompt: () => void;
-  onConversationCreated: ({
-    conversationId,
-    title,
+  addPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
+  clearPendingPrompts: () => void;
+  onConversationCreated: ({ title }: { title: string }) => void;
+  addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
+  addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => void;
+  setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => void;
+  addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
+  setCompactionStepComplete: ({
+    tokenCountAfter,
+    summarizedRoundCount,
   }: {
-    conversationId: string;
-    title: string;
+    tokenCountAfter: number;
+    summarizedRoundCount: number;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
+  onRoundComplete: (conversationRound: ConversationRound) => void;
 }
 
 interface UseConversationActionsParams {
   conversationId?: string;
   queryClient: QueryClient;
   conversationsService: ConversationsService;
-  onConversationCreated?: (params: { conversationId: string; title: string }) => void;
   onDeleteConversation?: (params: { id: string; isCurrentConversation: boolean }) => void;
 }
 
-interface CreateConversationActionsParams extends UseConversationActionsParams {
-  setAgentIdStorage: (value: string) => void;
-}
-
-const createConversationActions = ({
+export const createConversationActions = ({
   conversationId,
   queryClient,
-  setAgentIdStorage,
   conversationsService,
-  onConversationCreated,
   onDeleteConversation,
-}: CreateConversationActionsParams): ConversationActions => {
-  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+}: UseConversationActionsParams): ConversationActions => {
+  const queryKey = queryKeys.conversations.byId(conversationId ?? '');
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
   };
@@ -110,20 +117,35 @@ const createConversationActions = ({
   };
 
   return {
-    removeNewConversationQuery: () => {
-      queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
-    },
     invalidateConversation: () => {
+      // Only this conversation's byId cache. The streamed chunks are best-effort writes;
+      // a server refetch produces canonical state. We deliberately do NOT prefix-invalidate
+      // `['conversations']` — that would also refetch the sidebar list, clobbering any
+      // concurrent optimistic rows for other in-flight new conversations the server hasn't
+      // persisted yet.
       queryClient.invalidateQueries({ queryKey });
     },
 
-    addOptimisticRound: ({
+    addOptimisticRound: async ({
       userMessage,
       attachments,
+      agentId,
     }: {
       userMessage: string;
       attachments?: AttachmentInput[];
+      agentId: string;
     }) => {
+      if (!conversationId) {
+        return;
+      }
+      // Cancel any in-flight refetch on this conversation's query before mutating
+      // the cache. After a previous successful stream, the mutation's finally block
+      // calls invalidateConversation() + clearActiveStream(), which opens the
+      // useConversation gate and triggers a GET refetch. If that refetch is still
+      // in flight when we write the optimistic round, its response will overwrite
+      // our write — and the round will then be erroneously popped by
+      // removeOptimisticRound() if this stream errors.
+      await queryClient.cancelQueries({ queryKey });
       setConversation(
         produce((draft) => {
           const current = queryClient.getQueryData<Conversation>(queryKey);
@@ -132,16 +154,28 @@ const createConversationActions = ({
             conversationAttachments: current?.attachments,
           });
 
+          const prevTodosStep = findTodosStep(draft?.rounds?.at(-1)?.steps);
+          const carryoverTodos = carriedOverTodos(prevTodosStep?.todos);
+
           const nextRound = createNewRound({
             userMessage,
             attachments: fallbackAttachments,
+            steps: carryoverTodos
+              ? [
+                  {
+                    type: ConversationRoundStepType.updateTodos,
+                    todos: carryoverTodos,
+                    carried_over: true,
+                  },
+                ]
+              : [],
           });
           if (attachmentRefs.length) {
             nextRound.input.attachment_refs = attachmentRefs;
           }
 
           if (!draft) {
-            const newConversation = createNewConversation();
+            const newConversation = createNewConversation({ id: conversationId, agentId });
             newConversation.rounds.push(nextRound);
             return newConversation;
           }
@@ -157,23 +191,12 @@ const createConversationActions = ({
         })
       );
     },
-    setAgentId: (agentId: string) => {
-      // We allow to change agent only at the start of the conversation
-      if (conversationId) {
-        return;
-      }
-      setConversation(
-        produce((draft) => {
-          if (!draft) {
-            const newConversation = createNewConversation();
-            newConversation.agent_id = agentId;
-            return newConversation;
-          }
-
-          draft.agent_id = agentId;
-        })
-      );
-      setAgentIdStorage(agentId);
+    clearLastRoundResponse: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+        round.steps = [];
+        round.status = ConversationRoundStatus.inProgress;
+      });
     },
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {
@@ -210,6 +233,58 @@ const createConversationActions = ({
         }
       });
     },
+    addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
+      });
+    },
+    addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => {
+      setCurrentRound((round) => {
+        const existing = findTodosStep(round.steps);
+        if (existing) {
+          existing.todos = todos;
+          existing.carried_over = false;
+        } else {
+          const step: TodosStep = { type: ConversationRoundStepType.updateTodos, todos };
+          round.steps.push(step);
+        }
+      });
+    },
+    setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => {
+      setConversation(
+        produce((draft) => {
+          if (draft) {
+            draft.attachments = attachments;
+          }
+        })
+      );
+    },
+    addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
+      setCurrentRound((round) => {
+        const step: CompactionStep = {
+          type: ConversationRoundStepType.compaction,
+          summarized_round_count: 0,
+          token_count_before: tokenCountBefore,
+          token_count_after: 0,
+        };
+        round.steps.push(step);
+      });
+    },
+    setCompactionStepComplete: ({
+      tokenCountAfter,
+      summarizedRoundCount,
+    }: {
+      tokenCountAfter: number;
+      summarizedRoundCount: number;
+    }) => {
+      setCurrentRound((round) => {
+        const step = round.steps.find(isCompactionStep);
+        if (step) {
+          step.token_count_after = tokenCountAfter;
+          step.summarized_round_count = summarizedRoundCount;
+        }
+      });
+    },
     setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => {
       setCurrentRound((round) => {
         round.response.message = assistantMessage;
@@ -220,50 +295,51 @@ const createConversationActions = ({
         round.response.message += messageChunk;
       });
     },
+    clearAssistantMessage: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+      });
+    },
     setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => {
       setCurrentRound((round) => {
         round.time_to_first_token = timeToFirstToken;
       });
     },
-    setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => {
+    addPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => {
       setCurrentRound((round) => {
-        round.pending_prompt = prompt;
+        if (!round.pending_prompts) {
+          round.pending_prompts = [];
+        }
+        round.pending_prompts.push(prompt);
         round.status = ConversationRoundStatus.awaitingPrompt;
       });
     },
-    clearPendingPrompt: () => {
+    clearPendingPrompts: () => {
       setCurrentRound((round) => {
-        round.pending_prompt = undefined;
+        round.pending_prompts = undefined;
         round.status = ConversationRoundStatus.inProgress;
       });
     },
-    onConversationCreated: ({
-      conversationId: id,
-      title,
-    }: {
-      conversationId: string;
-      title: string;
-    }) => {
-      const current = queryClient.getQueryData<Conversation>(queryKey);
-      if (!current) {
-        throw new Error('Conversation not created');
-      }
-
-      // Update individual conversation cache (with rounds)
-      queryClient.setQueryData<Conversation>(
-        queryKeys.conversations.byId(id),
-        produce(current, (draft) => {
-          draft.id = id;
-          draft.title = title;
+    onConversationCreated: ({ title }: { title: string }) => {
+      setConversation(
+        produce((draft) => {
+          if (draft) {
+            draft.title = title;
+          }
         })
       );
-
-      // Invalidate conversation list to get updated data from server
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-
-      // Call provider-specific callback if provided
-      if (onConversationCreated) {
-        onConversationCreated({ conversationId: id, title });
+      // Patch the optimistic sidebar list row with the server-generated title (it was
+      // inserted with a placeholder by `insertSidebarConversationListRow`).
+      if (conversationId) {
+        const conversation = queryClient.getQueryData<Conversation>(queryKey);
+        if (conversation?.agent_id) {
+          patchConversationList({
+            queryClient,
+            agentId: conversation.agent_id,
+            conversationId,
+            values: { title },
+          });
+        }
       }
     },
     deleteConversation: async (id: string) => {
@@ -278,6 +354,17 @@ const createConversationActions = ({
       // Call provider-specific callback if provided
       if (onDeleteConversation) {
         onDeleteConversation({ id, isCurrentConversation });
+      }
+    },
+    onRoundComplete: (round: ConversationRound) => {
+      const conversation = queryClient.getQueryData<Conversation>(queryKey);
+      if (conversation?.agent_id) {
+        patchConversationList({
+          queryClient,
+          agentId: conversation.agent_id,
+          conversationId: conversation.id,
+          values: { status: round.status, read: false, updated_at: new Date().toISOString() },
+        });
       }
     },
     renameConversation: async (id: string, title: string) => {
@@ -305,29 +392,17 @@ export const useConversationActions = ({
   conversationId,
   queryClient,
   conversationsService,
-  onConversationCreated,
   onDeleteConversation,
 }: UseConversationActionsParams): ConversationActions => {
-  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
-
   const conversationActions = useMemo(
     () =>
       createConversationActions({
         conversationId,
         queryClient,
-        setAgentIdStorage,
         conversationsService,
-        onConversationCreated,
         onDeleteConversation,
       }),
-    [
-      conversationId,
-      queryClient,
-      setAgentIdStorage,
-      conversationsService,
-      onConversationCreated,
-      onDeleteConversation,
-    ]
+    [conversationId, queryClient, conversationsService, onDeleteConversation]
   );
 
   return conversationActions;

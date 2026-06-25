@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -19,12 +20,16 @@ import { EnvironmentsContextProvider } from '../../../../context/environments_co
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
-import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_groups_button_group';
-import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
+import { ActionsMenu } from './actions_menu';
 import { getNoDataConfig } from '../no_data_config';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
+
+// Garantee's responsiveness of the header content
+const headerContentStyles = css`
+  contain: inline-size;
+`;
 
 /*
  * This template contains:
@@ -33,26 +38,23 @@ const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
  *  - Page title
  *
  *  Optionally:
- *   - EnvironmentFilter
  *   - ServiceGroupSaveButton
  */
 export function ApmMainTemplate({
   pageTitle,
   pageHeader,
   children,
-  environmentFilter = true,
+  searchBar,
+  showActionsMenu = false,
   showServiceGroupSaveButton = false,
-  showServiceGroupsNav = false,
-  selectedNavButton,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
-  environmentFilter?: boolean;
+  searchBar?: React.ReactNode;
+  showActionsMenu?: boolean;
   showServiceGroupSaveButton?: boolean;
-  showServiceGroupsNav?: boolean;
-  selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
@@ -115,9 +117,52 @@ export function ApmMainTemplate({
   });
 
   const rightSideItems = [
+    ...(pageHeader?.rightSideItems ?? []),
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
-    ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
+    ...(showActionsMenu ? [<ActionsMenu />] : []),
   ];
+
+  const resolvedPageTitle = pageHeader?.pageTitle ?? pageTitle;
+  const titleWithActions =
+    rightSideItems.length > 0 ? (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>{resolvedPageTitle}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {rightSideItems.map((item, i) => (
+              <EuiFlexItem key={i} grow={false}>
+                {item}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      resolvedPageTitle
+    );
+
+  const callerChildren = pageHeader?.children;
+  const callerTabs = pageHeader?.tabs;
+  const headerChildren = (
+    <div css={headerContentStyles}>
+      {callerChildren}
+      {callerTabs && callerTabs.length > 0 && (
+        <EuiTabs bottomBorder={false} size="m">
+          {callerTabs.map(({ label, ...tabRest }, index) => (
+            <EuiTab key={index} {...tabRest}>
+              {label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      )}
+      {searchBar && (
+        <>
+          <EuiSpacer size="s" />
+          {searchBar}
+        </>
+      )}
+    </div>
+  );
 
   return (
     <EnvironmentsContextProvider>
@@ -125,18 +170,12 @@ export function ApmMainTemplate({
         noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
         isPageDataLoaded={isLoading === false}
         pageHeader={{
-          rightSideItems,
           ...pageHeader,
-          pageTitle: pageHeader?.pageTitle ?? pageTitle,
-          children: (
-            <>
-              {showServiceGroupsNav && selectedNavButton && (
-                <EuiFlexGroup direction="column">
-                  <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
-                </EuiFlexGroup>
-              )}
-            </>
-          ),
+          color: 'subdued' as unknown as EuiPageHeaderProps['color'],
+          tabs: undefined,
+          rightSideItems: [],
+          pageTitle: titleWithActions,
+          children: headerChildren,
         }}
         {...pageTemplateProps}
       >

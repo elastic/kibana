@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
-import { TrialCompanion } from './trial_companion';
+import { filterAvailableTODOs, sameArrays, TrialCompanion } from './trial_companion';
 import { useKibana } from '../common/lib/kibana';
 import { useGetNBA } from './hooks/use_get_nba';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
@@ -17,16 +17,25 @@ import {
   GET_SET_UP_DISMISS_BUTTON_TEST_ID,
   TEST_SUBJ_PREFIX,
 } from './nba_get_setup_panel';
+import type { NBA, NBATODOItem } from './nba_translations';
 import { NBA_TODO_LIST } from './nba_translations';
 import { TestProviders } from '../common/mock';
 import userEvent from '@testing-library/user-event';
 import { postNBADismiss } from './api';
+import { useProductFeatureKeys } from '../common/hooks/use_product_feature_keys';
+import {
+  ProductFeatureKey,
+  type ProductFeatureKeyType,
+} from '@kbn/security-solution-features/src/product_features_keys';
 
 jest.mock('../common/lib/kibana');
 jest.mock('./hooks/use_get_nba');
 jest.mock('../common/hooks/use_experimental_features');
 jest.mock('./api', () => ({
   postNBADismiss: jest.fn(),
+}));
+jest.mock('../common/hooks/use_product_feature_keys', () => ({
+  useProductFeatureKeys: jest.fn(),
 }));
 
 interface NBAResponse {
@@ -46,6 +55,7 @@ jest.mock('react-use/lib/useInterval', () => {
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGetNBA = useGetNBA as jest.Mock;
 const mockPostNBADismiss = postNBADismiss as jest.Mock;
+const mockUseProductFeatureKeys = useProductFeatureKeys as jest.Mock;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('TrialCompanion', () => {
@@ -54,6 +64,12 @@ describe('TrialCompanion', () => {
       isInTrial: jest.fn().mockReturnValue(true),
     },
   };
+
+  const fullFeatureSet = new Set([
+    ProductFeatureKey.detections,
+    ProductFeatureKey.attackDiscovery,
+    ProductFeatureKey.assistant,
+  ]);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,6 +80,7 @@ describe('TrialCompanion', () => {
     });
 
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseProductFeatureKeys.mockReturnValue(fullFeatureSet);
   });
 
   describe('should not show Get set up panel', () => {
@@ -235,27 +252,153 @@ describe('TrialCompanion', () => {
   });
 
   describe('dismiss button', () => {
-    it('should be when all items are done and hide the pannel', async () => {
-      mockUseGetNBA.mockReturnValue({
-        value: { openTODOs: [] },
-        error: undefined,
-        loading: false,
-      });
+    it.each<{
+      product: string;
+      openTODOs: Milestone[];
+      features: Set<ProductFeatureKeyType>;
+    }>([
+      {
+        product: 'complete',
+        openTODOs: [],
+        features: fullFeatureSet,
+      },
+      {
+        product: 'essential',
+        openTODOs: [Milestone.M5],
+        features: new Set([ProductFeatureKey.detections]),
+      },
+      {
+        product: 'search_ai_lake',
+        openTODOs: [Milestone.M3, Milestone.M5],
+        features: new Set([]),
+      },
+    ])(
+      '$product: should show when all items from TODO are done and hide the panel',
+      async ({ openTODOs, features }) => {
+        mockUseGetNBA.mockReturnValue({
+          value: { openTODOs },
+          error: undefined,
+          loading: false,
+        });
+        mockUseProductFeatureKeys.mockReturnValue(features);
 
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <TrialCompanion />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(getByTestId(GET_SET_UP_ACCORDION_TEST_ID)).toBeInTheDocument();
-        expect(getByTestId(GET_SET_UP_DISMISS_BUTTON_TEST_ID)).toBeInTheDocument();
-      });
-      await userEvent.click(getByTestId(GET_SET_UP_DISMISS_BUTTON_TEST_ID));
+        const { getByTestId, queryByTestId } = render(
+          <TestProviders>
+            <TrialCompanion />
+          </TestProviders>
+        );
+        await waitFor(() => {
+          expect(getByTestId(GET_SET_UP_ACCORDION_TEST_ID)).toBeInTheDocument();
+          expect(getByTestId(GET_SET_UP_DISMISS_BUTTON_TEST_ID)).toBeInTheDocument();
+        });
+        await userEvent.click(getByTestId(GET_SET_UP_DISMISS_BUTTON_TEST_ID));
 
-      expect(mockPostNBADismiss).toHaveBeenCalled();
+        expect(mockPostNBADismiss).toHaveBeenCalled();
 
-      expect(queryByTestId(GET_SET_UP_ACCORDION_TEST_ID)).toBeNull();
+        expect(queryByTestId(GET_SET_UP_ACCORDION_TEST_ID)).toBeNull();
+      }
+    );
+  });
+
+  describe('filterAvailableTODOs', () => {
+    const mockNBA: NBA = {
+      message: 'test',
+      title: 'test',
+      apps: [],
+    };
+
+    it.each<{
+      scenario: string;
+      todoList: NBATODOItem[];
+      features: Set<ProductFeatureKeyType>;
+      expected: Milestone[];
+    }>([
+      {
+        scenario: 'all disabled',
+        todoList: [
+          {
+            milestoneId: Milestone.M1,
+            translate: mockNBA,
+            features: [ProductFeatureKey.detections],
+          },
+          {
+            milestoneId: Milestone.M2,
+            translate: mockNBA,
+            features: [ProductFeatureKey.detections],
+          },
+          {
+            milestoneId: Milestone.M3,
+            translate: mockNBA,
+            features: [ProductFeatureKey.detections],
+          },
+        ],
+        features: new Set(),
+        expected: [],
+      },
+      {
+        scenario: 'enabled by default',
+        todoList: NBA_TODO_LIST,
+        features: new Set(),
+        expected: [Milestone.M1, Milestone.M2, Milestone.M6],
+      },
+      {
+        scenario: 'soc ai',
+        todoList: NBA_TODO_LIST,
+        features: new Set([ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant]),
+        expected: [Milestone.M1, Milestone.M2, Milestone.M5, Milestone.M6],
+      },
+      {
+        scenario: 'only detections',
+        todoList: NBA_TODO_LIST,
+        features: new Set([ProductFeatureKey.detections]),
+        expected: [Milestone.M1, Milestone.M2, Milestone.M3, Milestone.M6],
+      },
+      {
+        scenario: 'full',
+        todoList: NBA_TODO_LIST,
+        features: fullFeatureSet,
+        expected: NBA_TODO_LIST.map((i) => i.milestoneId),
+      },
+    ])('$scenario', ({ todoList, features, expected }) => {
+      const result = filterAvailableTODOs(todoList, features);
+      expect(result.map((v) => v.milestoneId)).toEqual(expected);
+    });
+  });
+
+  describe('sameArrays', () => {
+    it.each<{
+      scenario: string;
+      first: Milestone[];
+      second: Milestone[];
+      expected: boolean;
+    }>([
+      {
+        scenario: 'empty',
+        first: [],
+        second: [],
+        expected: true,
+      },
+      {
+        scenario: 'first different',
+        first: [Milestone.M1, Milestone.M2, Milestone.M3],
+        second: [Milestone.M3, Milestone.M1],
+        expected: false,
+      },
+      {
+        scenario: 'second different',
+        first: [Milestone.M3, Milestone.M1, Milestone.M5],
+        second: [Milestone.M1, Milestone.M2, Milestone.M3],
+        expected: false,
+      },
+      {
+        scenario: 'same with different order',
+        first: [Milestone.M3, Milestone.M1, Milestone.M5],
+        second: [Milestone.M1, Milestone.M5, Milestone.M3],
+        expected: true,
+      },
+    ])('$scenario', ({ first, second, expected }) => {
+      const result = sameArrays(first, second);
+      expect(result).toEqual(expected);
     });
   });
 });

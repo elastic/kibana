@@ -34,8 +34,8 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -47,7 +47,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -143,8 +143,8 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -156,7 +156,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -268,8 +268,8 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.indices.getIndexTemplate
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getIndexTemplate
         .mockImplementationOnce(async () => ({
           index_templates: [
             {
@@ -293,7 +293,7 @@ describe('translateClassicStreamPipelineActions', () => {
           ],
         }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -414,8 +414,8 @@ describe('translateClassicStreamPipelineActions', () => {
         template: 'my-template',
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.ingest.getPipeline.mockImplementationOnce(async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.ingest.getPipeline.mockImplementationOnce(async () => {
         return {
           'my-template-pipeline': {
             processors: [
@@ -435,7 +435,7 @@ describe('translateClassicStreamPipelineActions', () => {
           },
         };
       });
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -447,7 +447,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -467,7 +467,7 @@ describe('translateClassicStreamPipelineActions', () => {
       } as ActionsByType);
     });
 
-    it('upserts only the pipeline if a processors is added', async () => {
+    it('also adds update_default_ingest_pipeline for the new data stream when a processor is added', async () => {
       const actionsByType = emptyActionsByType();
       actionsByType.append_processor_to_ingest_pipeline.push({
         type: 'append_processor_to_ingest_pipeline',
@@ -486,8 +486,8 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.ingest.getPipeline.mockImplementationOnce(async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.ingest.getPipeline.mockImplementationOnce(async () => {
         return {
           'my-template-pipeline': {
             processors: [
@@ -511,7 +511,7 @@ describe('translateClassicStreamPipelineActions', () => {
           },
         };
       });
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -523,7 +523,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -563,6 +563,15 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           },
         ],
+        update_default_ingest_pipeline: [
+          {
+            type: 'update_default_ingest_pipeline',
+            request: {
+              name: 'my-other-datastream',
+              pipeline: 'my-template-pipeline',
+            },
+          },
+        ],
       } as ActionsByType);
     });
 
@@ -592,8 +601,8 @@ describe('translateClassicStreamPipelineActions', () => {
         template: 'my-template',
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.ingest.getPipeline.mockImplementationOnce(async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.ingest.getPipeline.mockImplementationOnce(async () => {
         return {
           'my-template-pipeline': {
             processors: [
@@ -617,7 +626,7 @@ describe('translateClassicStreamPipelineActions', () => {
           },
         };
       });
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -629,7 +638,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -660,6 +669,15 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           },
         ],
+        update_default_ingest_pipeline: [
+          {
+            type: 'update_default_ingest_pipeline',
+            request: {
+              name: 'my-other-datastream',
+              pipeline: 'my-template-pipeline',
+            },
+          },
+        ],
       } as ActionsByType);
     });
   });
@@ -675,8 +693,8 @@ describe('translateClassicStreamPipelineActions', () => {
         template: 'my-template',
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.ingest.getPipeline
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.ingest.getPipeline
         .mockImplementationOnce(async () => {
           return {
             'my-template-pipeline': {
@@ -711,7 +729,7 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           };
         });
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -723,7 +741,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -766,8 +784,8 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.ingest.getPipeline
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.ingest.getPipeline
         .mockImplementationOnce(async () => {
           return {
             'my-template-pipeline': {
@@ -782,7 +800,7 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           };
         });
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -794,7 +812,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -840,8 +858,8 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.ingest.getPipeline
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.ingest.getPipeline
         .mockImplementationOnce(async () => {
           return {
             'my-template-pipeline': {
@@ -876,7 +894,7 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           };
         });
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -888,7 +906,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -940,8 +958,8 @@ describe('translateClassicStreamPipelineActions', () => {
         },
       });
 
-      const clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      clusterClient.asCurrentUser.ingest.getPipeline
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.ingest.getPipeline
         .mockImplementationOnce(async () => {
           return {
             'my-template-pipeline': {
@@ -971,7 +989,7 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           };
         });
-      clusterClient.asCurrentUser.indices.getIndexTemplate.mockImplementationOnce(async () => ({
+      esClient.indices.getIndexTemplate.mockImplementationOnce(async () => ({
         index_templates: [
           {
             name: 'my-template',
@@ -983,7 +1001,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, esClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -1050,5 +1068,7 @@ function emptyActionsByType(): ActionsByType {
     unlink_features: [],
     update_ingest_settings: [],
     update_failure_store: [],
+    upsert_esql_view: [],
+    delete_esql_view: [],
   };
 }

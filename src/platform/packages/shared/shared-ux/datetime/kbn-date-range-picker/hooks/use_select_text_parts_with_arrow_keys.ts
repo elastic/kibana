@@ -1,0 +1,227 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { useEffect, useRef, type RefObject } from 'react';
+import { keys } from '@elastic/eui';
+
+import { MODIFICATION_INCREASE, MODIFICATION_DECREASE } from '../constants';
+import type { DateType, ModificationAction } from '../types';
+import { parseInputParts, type RangePart } from '../parse/parse_range_parts';
+import { getInputScrollLeftToCenter } from '../utils';
+
+interface UseSelectTextPartsOptions {
+  /** Ref to the input element */
+  inputRef: RefObject<HTMLInputElement>;
+  /** Whether the hook is active (e.g. when the input is mounted) */
+  isActive: boolean;
+  /**
+   * What to select when the hook first becomes active.
+   * - `'all'` selects the entire input text (default)
+   * - `'first'` selects the first text part
+   * - `'none'` leaves the caret as-is
+   * @default 'all'
+   */
+  initialSelection?: 'none' | 'first' | 'all';
+  /** The start and end types used to assign collapsed inputs to the correct side. */
+  rangeType?: [DateType, DateType];
+  /**
+   * Called when ArrowUp/ArrowDown is pressed on a selected part.
+   * Return the new full input text, or `undefined` to skip the modification.
+   */
+  onModifyPart?: (params: {
+    text: string;
+    part: RangePart;
+    parts: RangePart[];
+    action: ModificationAction;
+  }) => string | undefined;
+}
+
+/**
+ * Hook to navigate through the text parts of a text input with arrow keys.
+ * Optionally supports modifying parts via ArrowUp/ArrowDown when `onModifyPart` is provided.
+ */
+export function useSelectTextPartsWithArrowKeys({
+  inputRef,
+  isActive,
+  initialSelection = 'all',
+  rangeType,
+  onModifyPart,
+}: UseSelectTextPartsOptions) {
+  // Stored in a ref so the effect doesn't re-run
+  // (and re-trigger initialSelection) when the callback changes
+  const onModifyPartRef = useRef(onModifyPart);
+  onModifyPartRef.current = onModifyPart;
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    let currentIndex = -1; // -1 means no part is selected (caret mode)
+    let inCaretMode = false;
+
+    const getPartsAndSyncIndex = () => {
+      const inputEl = inputRef.current;
+      if (!inputEl) return [];
+
+      const parts = parseInputParts(inputEl.value, rangeType).filter((part) => part.navigable);
+      const matchingPartIndex = parts.findIndex(
+        (part) => part.start === inputEl.selectionStart && part.end === inputEl.selectionEnd
+      );
+      currentIndex = matchingPartIndex; // -1 if selection doesn't match any part
+
+      return parts;
+    };
+
+    const selectPart = (index: number, parts: RangePart[]) => {
+      const inputEl = inputRef.current;
+      if (!inputEl) return;
+
+      // If navigating past the ends, go to caret mode
+      if (index < 0) {
+        currentIndex = -1;
+        inCaretMode = true;
+        inputEl.setSelectionRange(0, 0);
+        inputEl.scrollLeft = 0;
+        return;
+      }
+      if (index >= parts.length) {
+        currentIndex = -1;
+        inCaretMode = true;
+        inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+        inputEl.scrollLeft = inputEl.scrollWidth - inputEl.clientWidth;
+        return;
+      }
+
+      inCaretMode = false;
+      currentIndex = index;
+      const part = parts[currentIndex];
+
+      inputEl.focus();
+      inputEl.setSelectionRange(part.start, part.end);
+      inputEl.scrollLeft = getInputScrollLeftToCenter(inputEl, part.start);
+    };
+
+    const modifyPart = (action: ModificationAction) => {
+      if (!onModifyPartRef.current) return;
+
+      const inputEl = inputRef.current;
+      if (!inputEl) return;
+
+      const parts = getPartsAndSyncIndex();
+      if (currentIndex < 0 || currentIndex >= parts.length) return;
+
+      const part = parts[currentIndex];
+      const newText = onModifyPartRef.current({ text: inputEl.value, part, parts, action });
+
+      if (newText !== undefined) {
+        inputEl.value = newText;
+        const updatedParts = parseInputParts(newText, rangeType).filter((p) => p.navigable);
+        selectPart(currentIndex, updatedParts);
+      }
+
+      return newText;
+    };
+
+    const keydownHandler = (event: KeyboardEvent) => {
+      // Skip if modifier keys are pressed
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const inputEl = inputRef.current;
+      if (!inputEl) return;
+
+      if (inCaretMode) return;
+
+      if (event.key.startsWith('Arrow')) {
+        // Always refresh parts and sync index on arrow key press
+        const parts = getPartsAndSyncIndex();
+
+        if (parts.length === 0) return;
+
+        switch (event.key) {
+          case keys.ARROW_RIGHT:
+            event.preventDefault();
+            // If in caret mode, select the first part to the right of caret
+            if (currentIndex === -1) {
+              const caretPos = inputEl.selectionStart ?? 0;
+              const nextPartIndex = parts.findIndex((part) => part.start >= caretPos);
+              selectPart(nextPartIndex !== -1 ? nextPartIndex : parts.length, parts);
+            } else {
+              selectPart(currentIndex + 1, parts);
+            }
+            return;
+          case keys.ARROW_LEFT:
+            event.preventDefault();
+            // If in caret mode, select the first part to the left of caret
+            if (currentIndex === -1) {
+              const caretPos = inputEl.selectionStart ?? 0;
+              const prevPartIndex = parts.findLastIndex((part) => part.end <= caretPos);
+              selectPart(prevPartIndex, parts);
+            } else {
+              selectPart(currentIndex - 1, parts);
+            }
+            return;
+          case keys.ARROW_UP: {
+            if (currentIndex < 0) return;
+            event.preventDefault();
+            modifyPart(MODIFICATION_INCREASE);
+            event.stopImmediatePropagation();
+            return;
+          }
+          case keys.ARROW_DOWN: {
+            if (currentIndex < 0) return;
+            event.preventDefault();
+            modifyPart(MODIFICATION_DECREASE);
+            event.stopImmediatePropagation();
+            return;
+          }
+        }
+      }
+    };
+
+    const pointerDownHandler = () => {
+      inCaretMode = true;
+      currentIndex = -1;
+    };
+
+    const selectionChangeHandler = () => {
+      if (document.activeElement !== inputEl) return;
+      const parts = getPartsAndSyncIndex();
+      if (currentIndex >= 0 && currentIndex < parts.length) {
+        inCaretMode = false;
+      }
+    };
+
+    const inputEl = inputRef.current;
+
+    inputEl?.addEventListener('keydown', keydownHandler);
+    inputEl?.addEventListener('pointerdown', pointerDownHandler);
+    document.addEventListener('selectionchange', selectionChangeHandler);
+
+    if (inputEl) {
+      switch (initialSelection) {
+        case 'none':
+          break;
+        case 'first': {
+          const parts = parseInputParts(inputEl.value, rangeType).filter((part) => part.navigable);
+          if (parts.length > 0) selectPart(0, parts);
+          break;
+        }
+        case 'all':
+        default:
+          inputEl.select();
+          break;
+      }
+    }
+
+    return () => {
+      inputEl?.removeEventListener('keydown', keydownHandler);
+      inputEl?.removeEventListener('pointerdown', pointerDownHandler);
+      document.removeEventListener('selectionchange', selectionChangeHandler);
+    };
+  }, [inputRef, isActive, initialSelection, rangeType]);
+}

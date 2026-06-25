@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, type EuiFlexGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   Attachment,
@@ -21,7 +21,7 @@ import {
   estimateTokens,
   hashContent,
 } from '@kbn/agent-builder-common/attachments';
-import { AttachmentReferencePill } from './round_attachment_reference_pill';
+import { css } from '@emotion/react';
 
 export interface RoundAttachmentReferencesProps {
   attachmentRefs?: AttachmentVersionRef[];
@@ -42,7 +42,19 @@ const labels = {
   attachments: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachments', {
     defaultMessage: 'Attachments',
   }),
+  attachmentAdded: (description: string) =>
+    i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachmentAdded', {
+      defaultMessage: 'Attachment added: {description}',
+      values: { description },
+    }),
 };
+
+const attachmentItemStyles = css`
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 const resolveOperation = (
   refOperation: AttachmentRefOperation | undefined,
@@ -76,6 +88,8 @@ const buildFallbackVersionedAttachments = (attachments: Attachment[]): Versioned
     current_version: 1,
     active: true,
     hidden: attachment.hidden,
+    ...(attachment.groupId !== undefined ? { group_id: attachment.groupId } : {}),
+    ...(attachment.description !== undefined ? { description: attachment.description } : {}),
   }));
 };
 
@@ -122,6 +136,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
     }
 
     const resolved: ResolvedReference[] = [];
+    const seenGroupIds = new Set<string>();
     for (const ref of refs) {
       const attachment = attachmentMap.get(ref.attachment_id);
       if (!attachment) {
@@ -136,6 +151,13 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       const operation = resolveOperation(ref.operation, ref.version);
       if (operation === ATTACHMENT_REF_OPERATION.read) {
         continue;
+      }
+
+      if (attachment.group_id) {
+        if (seenGroupIds.has(attachment.group_id)) {
+          continue;
+        }
+        seenGroupIds.add(attachment.group_id);
       }
 
       resolved.push({
@@ -156,7 +178,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
   return (
     <EuiFlexGroup
       gutterSize="s"
-      wrap
+      direction="column"
       responsive={false}
       justifyContent={justifyContent}
       role="list"
@@ -164,12 +186,13 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       data-test-subj="agentBuilderRoundAttachmentReferences"
     >
       {resolvedReferences.map((ref) => (
-        <EuiFlexItem key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`} grow={false}>
-          <AttachmentReferencePill
-            attachment={ref.attachment}
-            version={ref.version}
-            operation={ref.operation}
-          />
+        <EuiFlexItem
+          css={attachmentItemStyles}
+          key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}
+        >
+          <EuiText color="subdued" size="xs">
+            {labels.attachmentAdded(ref.attachment.description ?? '')}
+          </EuiText>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

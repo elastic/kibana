@@ -17,10 +17,14 @@ import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { Owner } from '../../../common/constants/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
-import {} from '../utils';
-import { validateCustomFields } from './validators';
+import {
+  validateCustomFields,
+  resolveGlobalFields,
+  validateCaseExtendedFields,
+} from './validators';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
 
@@ -34,7 +38,14 @@ export const create = async (
   casesClient: CasesClient
 ): Promise<Case> => {
   const {
-    services: { caseService, userActionService, licensingService, notificationService },
+    services: {
+      caseService,
+      userActionService,
+      licensingService,
+      notificationService,
+      templatesService,
+      fieldDefinitionsService,
+    },
     user,
     logger,
     authorization: auth,
@@ -63,6 +74,16 @@ export const create = async (
       await auth.ensureAuthorized({
         operation: Operations.createCase,
         entities: [{ owner: query.owner, id: savedObjectID }],
+      });
+    }
+
+    if (query.extended_fields) {
+      const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      await validateCaseExtendedFields({
+        extendedFields: query.extended_fields,
+        templateId: query.template?.id,
+        globalFields,
+        templatesService,
       });
     }
 
@@ -126,11 +147,28 @@ export const create = async (
       });
     }
 
+    if (query.template?.id) {
+      try {
+        await templatesService.incrementUsageStats(query.template.id);
+      } catch (error) {
+        logger.warn(
+          `Failed to update template usage stats for template ${query.template.id}: ${error}`
+        );
+      }
+    }
+
     const res = flattenCaseSavedObject({
       savedObject: newCase,
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    const createdCase = decodeOrThrow(CaseRt)(res);
+
+    clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
+      caseId: createdCase.id,
+      owner: createdCase.owner as Owner,
+    });
+
+    return createdCase;
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

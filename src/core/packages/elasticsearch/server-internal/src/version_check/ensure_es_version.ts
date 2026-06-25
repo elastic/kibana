@@ -28,6 +28,7 @@ import {
   retry,
   timer,
   defer,
+  combineLatest,
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -46,6 +47,8 @@ export interface PollEsNodesVersionOptions {
   ignoreVersionMismatch: boolean;
   /** @default 2500ms */
   healthCheckInterval: number;
+  /** @default ${healthCheckInterval} */
+  healthCheckFailureInterval?: number;
   healthCheckStartupInterval?: number;
   /** @default 3 */
   healthCheckRetry: number;
@@ -180,6 +183,7 @@ export const pollEsNodesVersion = ({
   kibanaVersion,
   ignoreVersionMismatch,
   healthCheckInterval,
+  healthCheckFailureInterval,
   healthCheckStartupInterval,
   healthCheckRetry,
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
@@ -189,13 +193,23 @@ export const pollEsNodesVersion = ({
     healthCheckStartupInterval !== undefined && healthCheckStartupInterval !== healthCheckInterval;
 
   const isStartup$ = new BehaviorSubject(hasStartupInterval);
+  const isCheckFailing$ = new BehaviorSubject(false);
 
   let currentInterval = 0;
-  const checkInterval$ = isStartup$.pipe(
-    distinctUntilChanged(),
-    map((useStartupInterval) =>
-      useStartupInterval ? healthCheckStartupInterval! : healthCheckInterval
-    ),
+  const checkInterval$ = combineLatest([isStartup$, isCheckFailing$]).pipe(
+    distinctUntilChanged((prev, curr) => prev[0] === curr[0] && prev[1] === curr[1]),
+    map(([isStartup, isCheckFailing]) => {
+      // on startup always use the startup interval
+      if (isStartup) {
+        return healthCheckStartupInterval!;
+      }
+      // on failure always use the failure interval
+      if (isCheckFailing) {
+        return healthCheckFailureInterval || healthCheckInterval;
+      }
+      // otherwise use the normal interval
+      return healthCheckInterval;
+    }),
     tap((ms) => (currentInterval = ms))
   );
 
@@ -236,6 +250,9 @@ export const pollEsNodesVersion = ({
       if (nodesVersionCompatibility.isCompatible) {
         isStartup$.next(false);
       }
+
+      const hasErrors = !!nodesVersionCompatibility.nodesInfoRequestError;
+      isCheckFailing$.next(hasErrors);
     }),
     shareReplay({ refCount: true, bufferSize: 1 })
   );

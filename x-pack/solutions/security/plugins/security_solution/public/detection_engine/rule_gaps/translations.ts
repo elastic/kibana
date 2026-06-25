@@ -272,17 +272,17 @@ export const RUN_SCHEDULE_LABEL = i18n.translate(
   }
 );
 
-export const AUTO_GAP_FILL_TOAST_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleSettings.save',
+export const RULE_SETTINGS_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.saveToastTitle',
   {
-    defaultMessage: 'Auto gap fill',
+    defaultMessage: 'Rule settings',
   }
 );
 
-export const AUTO_GAP_FILL_TOAST_TEXT = i18n.translate(
+export const RULE_SETTINGS_TOAST_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.saveSuccessToastText',
   {
-    defaultMessage: 'Auto gap fill settings updated successfully',
+    defaultMessage: 'Rule settings updated successfully',
   }
 );
 
@@ -297,5 +297,34 @@ export const RULE_SETTINGS_MODAL_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.save',
   {
     defaultMessage: 'Save',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_HEADER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeHeader',
+  {
+    defaultMessage: 'Gap detection scope',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_DESCRIPTION_WITH_AUTO_FILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeDescriptionWithAutoFill',
+  {
+    defaultMessage:
+      'Define what counts as a gap in your rule monitoring and what will be included in automatic gap filling.',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_DESCRIPTION_WITHOUT_AUTO_FILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeDescriptionWithoutAutoFill',
+  {
+    defaultMessage: 'Define what counts as a gap in your rule monitoring.',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_INCLUDE_DISABLED_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.includeDisabledGapsLabel',
+  {
+    defaultMessage: 'Include gaps created when a rule was disabled.',
   }
 );

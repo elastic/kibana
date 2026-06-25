@@ -6,17 +6,14 @@
  */
 
 import React from 'react';
-import { euiDarkVars } from '@kbn/ui-theme';
-import { ThemeProvider } from '@emotion/react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 interface Props {
   children?: React.ReactNode;
 }
 
 export const TestProvidersComponent = ({ children }: Props) => {
-  return (
-    <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>{children}</ThemeProvider>
-  );
+  return <EuiThemeProvider colorMode="dark">{children}</EuiThemeProvider>;
 };
 
 export const TestProviders = React.memo(TestProvidersComponent);

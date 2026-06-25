@@ -38,7 +38,7 @@ export function otelSendotlp({
     .generator((timestamp) => [
       otelService
         .transaction({ transactionName: OTEL_TRANSACTION_NAME })
-        .timestamp(timestamp)
+        .timestamp(timestamp + 1)
         .duration(15202)
         .success()
         .children(
@@ -51,7 +51,7 @@ export function otelSendotlp({
             .duration(1000)
             .success()
             .destination('foo_service-otel-native-synth')
-            .timestamp(timestamp)
+            .timestamp(timestamp + 1)
         ),
 
       otelService

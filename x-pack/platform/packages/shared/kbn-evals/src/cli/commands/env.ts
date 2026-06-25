@@ -9,6 +9,12 @@ import type { Command } from '@kbn/dev-cli-runner';
 
 const ENV_DOCS = [
   {
+    name: 'TEST_RUN_ID',
+    description:
+      'CI build identifier used as a seed for generating deterministic per-task experiment IDs and stored as execution_id in score documents. In CI, typically set to bk-${BUILDKITE_BUILD_ID}. Optional for local runs.',
+    example: 'TEST_RUN_ID=bk-abc123',
+  },
+  {
     name: 'EVALUATION_CONNECTOR_ID',
     description: 'Connector used for LLM-as-a-judge evaluators (required).',
     example: 'EVALUATION_CONNECTOR_ID=bedrock-claude',
@@ -22,6 +28,12 @@ const ENV_DOCS = [
     name: 'KBN_EVALS_EXECUTOR',
     description: 'Switch to the Phoenix-backed executor.',
     example: 'KBN_EVALS_EXECUTOR=phoenix',
+  },
+  {
+    name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
+    description:
+      'Skip automatic connector setup/teardown. Use this option when evaluating with pre-defined connectors.',
+    example: 'KBN_EVALS_SKIP_CONNECTOR_SETUP=true',
   },
   {
     name: 'PHOENIX_BASE_URL',
@@ -39,9 +51,26 @@ const ENV_DOCS = [
     example: 'TRACING_ES_URL=http://elastic:changeme@localhost:9200',
   },
   {
-    name: 'EVALUATIONS_ES_URL',
-    description: 'Elasticsearch URL where evaluation results are exported.',
-    example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
+    name: 'TRACING_ES_API_KEY',
+    description: 'API key for authenticating with the tracing Elasticsearch cluster.',
+    example: 'TRACING_ES_API_KEY=...',
+  },
+  {
+    name: 'TRACING_EXPORTERS',
+    description:
+      'JSON array of trace exporter configs (http/grpc/phoenix/langfuse). Overrides kibana.dev.yml tracing exporters when set.',
+    example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
+  },
+  {
+    name: 'EVALUATIONS_KBN_URL',
+    description:
+      'Kibana URL used for eval score ingestion and dataset operations when targeting a non-local cluster.',
+    example: 'EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601',
+  },
+  {
+    name: 'EVALUATIONS_KBN_API_KEY',
+    description: 'API key for authenticating to EVALUATIONS_KBN_URL.',
+    example: 'EVALUATIONS_KBN_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',

@@ -132,7 +132,7 @@ export const useRuleIndexPattern = ({
   index,
   dataViewId,
 }: UseRuleIndexPatternProps) => {
-  const { data } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
     useFetchIndex(index);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
@@ -148,14 +148,22 @@ export const useRuleIndexPattern = ({
     if (dataSourceType === DataSourceType.DataView) {
       const fetchDataView = async () => {
         if (dataViewId != null && dataViewId !== '') {
-          const dv = await data.dataViews.get(dataViewId);
-          setIndexPattern(dv);
+          // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
+          try {
+            const dv = await data.dataViews.get(dataViewId);
+            setIndexPattern(dv);
+          } catch (error) {
+            notifications.toasts.addDanger({
+              title: 'Error retrieving data view',
+              text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+            });
+          }
         }
       };
 
       fetchDataView();
     }
-  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern]);
+  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern, notifications]);
   return { indexPattern, isIndexPatternLoading, browserFields };
 };
 

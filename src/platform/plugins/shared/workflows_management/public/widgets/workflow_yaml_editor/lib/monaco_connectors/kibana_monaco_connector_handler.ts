@@ -83,8 +83,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       // Generate request example
       const requestExample = this.generateRequestExample(apiInfo, withParams);
 
-      // Create enhanced hover content with enhanced formatting and shadowed icons
-      const content = [
+      const bodyLines = [
         `**Endpoint**: \`${apiInfo.method} ${apiInfo.path}\``,
         '',
         apiInfo.description || `Execute ${apiInfo.method} request to ${apiInfo.path}`,
@@ -103,11 +102,11 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         examples ? '' : '',
         '---',
         `_<span style="text-shadow: 0 0 3px rgba(255,255,0,0.4); opacity: 0.7;">💡</span> Use Ctrl+Space for parameter autocomplete_`,
-      ]
-        .filter((line) => line !== null)
-        .join('\n');
+      ].filter((line) => line !== null);
 
-      return this.createMarkdownContent(content);
+      return this.createMarkdownContent(
+        this.prependStabilityBadgeToContent(connector.stability, bodyLines)
+      );
     } catch (error) {
       // console.warn('KibanaMonacoConnectorHandler: Error generating hover content', error);
       return null;

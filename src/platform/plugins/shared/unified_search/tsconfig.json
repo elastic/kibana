@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*", "public/**/*.json", "../../../../../typings/**/*"],
+  "include": ["public/**/*", "public/**/*.json", "test/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -37,18 +37,15 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/react-kibana-context-render",
     "@kbn/data-view-utils",
-    "@kbn/esql-utils",
     "@kbn/react-kibana-mount",
     "@kbn/field-utils",
-    "@kbn/language-documentation",
     "@kbn/esql-types",
-    "@kbn/aiops-utils",
-    "@kbn/esql-language",
     "@kbn/background-search",
-    "@kbn/split-button",
     "@kbn/cps",
     "@kbn/css-utils",
     "@kbn/kql",
+    "@kbn/date-range-picker",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

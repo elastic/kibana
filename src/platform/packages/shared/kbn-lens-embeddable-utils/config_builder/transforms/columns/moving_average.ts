@@ -16,12 +16,11 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
 export function fromMovingAverageAPItoLensState(
-  options: LensApiMovingAverageOperation,
-  ref: { id: string; field?: string; label?: string }
+  options: LensApiMovingAverageOperation
 ): MovingAverageIndexPatternColumn {
   return {
     operationType: 'moving_average',
-    references: [ref.id],
+    references: [], // populated later when we have the ID of the referenced column
     ...getLensStateMetricSharedProps(options),
     params: {
       window: options.window,

@@ -8,7 +8,17 @@
 import expect from '@kbn/expect';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
+} from '@kbn/management-settings-ids';
+import {
+  deleteStream,
+  disableStreams,
+  enableStreams,
+  forkStream,
+  indexDocument,
+} from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -35,6 +45,7 @@ async function simulateProcessingForStream(
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
@@ -80,12 +91,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
 
       // Create a test document
-      await indexDocument(esClient, 'logs', testDoc);
+      await indexDocument(esClient, 'logs.otel', testDoc);
 
       // Create a forked stream for testing
-      await forkStream(apiClient, 'logs', {
+      await forkStream(apiClient, 'logs.otel', {
         stream: {
-          name: 'logs.test',
+          name: 'logs.otel.test',
         },
         where: {
           field: 'resource.attributes.host.name',
@@ -101,7 +112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Successful simulations', () => {
       it('should simulate additive processing', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [basicGrokProcessor],
           },
@@ -125,7 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate with detected fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: { steps: [basicGrokProcessor] },
           documents: [createTestDocument()],
           detected_fields: [
@@ -143,7 +154,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate multiple sequential processors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -177,7 +188,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate partially parsed documents', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -211,7 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return processor metrics', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -231,6 +242,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const processorsMetrics = response.body.processors_metrics;
         const dissectMetrics = processorsMetrics['dissect-uuid'];
         const grokMetrics = processorsMetrics.draft;
+
+        if (!dissectMetrics || !grokMetrics) {
+          throw new Error('Expected metrics for dissect and grok processors');
+        }
 
         expect(dissectMetrics.detected_fields).to.eql([
           'attributes.parsed_level',
@@ -255,7 +270,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return accurate rates', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -289,6 +304,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const dissectMetrics = processorsMetrics['dissect-uuid'];
         const grokMetrics = processorsMetrics.draft;
 
+        if (!dissectMetrics || !grokMetrics) {
+          throw new Error('Expected metrics for dissect and grok processors');
+        }
+
         expect(dissectMetrics.failed_rate).to.be(0.25);
         expect(dissectMetrics.parsed_rate).to.be(0.75);
         expect(grokMetrics.failed_rate).to.be(0.75);
@@ -296,7 +315,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return metrics for skipped documents due to non-hit condition', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -323,13 +342,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const processorsMetrics = response.body.processors_metrics;
         const dissectMetrics = processorsMetrics['dissect-uuid'];
 
+        if (!dissectMetrics) {
+          throw new Error('Expected metrics for dissect processor');
+        }
+
         expect(dissectMetrics.failed_rate).to.be(0);
         expect(dissectMetrics.parsed_rate).to.be(0.25);
         expect(dissectMetrics.skipped_rate).to.be(0.75);
       });
 
       it('should allow overriding fields detected by previous simulation processors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -364,7 +387,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return the errors for each partially parsed or failed document', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -392,7 +415,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return failed simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -409,6 +432,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const processorsMetrics = response.body.processors_metrics;
         const grokMetrics = processorsMetrics.draft;
+
+        if (!grokMetrics) {
+          throw new Error('Expected metrics for grok processor');
+        }
 
         expect(grokMetrics.errors).to.eql([
           {
@@ -466,6 +493,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const processorsMetrics = response.body.processors_metrics;
           const processorMetrics = processorsMetrics.draft;
 
+          if (!processorMetrics) {
+            throw new Error('Expected metrics for draft processor');
+          }
+
           expect(processorMetrics.errors).to.eql([
             {
               processor_id: 'draft',
@@ -477,7 +508,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return mappings simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -504,7 +535,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Simulate detected fields mapping issue
         const detectedFieldsFailureResponse = await simulateProcessingForStream(
           apiClient,
-          'logs.test',
+          'logs.otel.test',
           {
             processing: {
               steps: [basicGrokProcessor],
@@ -553,7 +584,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should properly report ignored fields for geo.location in OTEL streams', async () => {
         // logs.test is a wired stream (OTEL stream) created in the parent describe's before hook
         // Test with geo.location field using OTEL semantic conventions (flattened format)
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -676,7 +707,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Temporary fields that are created and then deleted should NOT appear in detected_fields
 
       it('should NOT include temporary fields (created then deleted) in detected_fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -714,7 +745,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should include fields that are created and kept in detected_fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -745,7 +776,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should NOT include fields that are modified then deleted in detected_fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -788,7 +819,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should track per-processor fields even for temporary fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -821,7 +852,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should handle mixed temporary and permanent fields correctly', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -868,6 +899,201 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(value).to.have.property('attributes.parsed_timestamp', TEST_TIMESTAMP);
         expect(value).to.have.property('attributes.parsed_message', 'test');
         expect(value).to.not.have.property('attributes.temp_level');
+      });
+    });
+
+    describe('Draft stream simulation', function () {
+      this.tags(['skipCloud', 'skipMKI', 'skipServerless']);
+
+      const MATERIALIZED_PARENT = 'logs.otel.sim-parent';
+      const DRAFT_CHILD = 'logs.otel.sim-parent.sim-draft';
+      const NESTED_DRAFT = 'logs.otel.sim-parent.sim-draft.sim-nested';
+
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: true,
+        });
+
+        await forkStream(apiClient, 'logs.otel', {
+          stream: { name: MATERIALIZED_PARENT },
+          where: { field: 'resource.attributes.host.name', eq: 'sim-host' },
+          status: 'enabled',
+        });
+
+        await forkStream(apiClient, MATERIALIZED_PARENT, {
+          stream: { name: DRAFT_CHILD },
+          where: { field: 'severity_text', eq: 'error' },
+          draft: true,
+        });
+      });
+
+      after(async () => {
+        await deleteStream(apiClient, DRAFT_CHILD).catch(() => {});
+        await deleteStream(apiClient, MATERIALIZED_PARENT).catch(() => {});
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: false,
+        });
+      });
+
+      it('should simulate additive processing on a draft stream', async () => {
+        const response = await simulateProcessingForStream(apiClient, DRAFT_CHILD, {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'draft-grok',
+                action: 'grok' as const,
+                from: 'body.text',
+                patterns: [
+                  '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:attributes.parsed_level} %{GREEDYDATA:attributes.parsed_message}',
+                ],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { detected_fields, errors, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        expect(errors).to.eql([]);
+        expect(detected_fields).to.eql([
+          { processor_id: 'draft-grok', name: 'attributes.parsed_level' },
+          { processor_id: 'draft-grok', name: 'attributes.parsed_message' },
+          { processor_id: 'draft-grok', name: 'attributes.parsed_timestamp' },
+        ]);
+        expect(value).to.have.property('attributes.parsed_level', 'error');
+        expect(value).to.have.property('attributes.parsed_message', 'test');
+        expect(value).to.have.property('attributes.parsed_timestamp', TEST_TIMESTAMP);
+      });
+
+      it('should simulate multiple sequential processors on a draft stream', async () => {
+        const response = await simulateProcessingForStream(apiClient, DRAFT_CHILD, {
+          processing: {
+            steps: [
+              basicDissectProcessor,
+              {
+                customIdentifier: 'set-service',
+                action: 'set' as const,
+                to: 'attributes.service.type',
+                value: 'web',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        expect(value).to.have.property('attributes.parsed_level', 'error');
+        expect(value).to.have.property('attributes.parsed_message', 'test');
+        expect(value).to.have.property('attributes.service.type', 'web');
+      });
+
+      it('should validate detected field mappings for a draft stream', async () => {
+        const response = await simulateProcessingForStream(apiClient, DRAFT_CHILD, {
+          processing: {
+            steps: [basicGrokProcessor],
+          },
+          documents: [createTestDocument()],
+          detected_fields: [{ name: 'attributes.parsed_timestamp', type: 'boolean' }],
+        });
+
+        expect(response.body.documents[0].errors).to.not.be.empty();
+        expect(response.body.documents[0].errors[0].type).to.be('field_mapping_failure');
+        expect(response.body.documents[0].status).to.be('failed');
+      });
+
+      it('should include draft field definitions in mapping validation', async () => {
+        const response = await simulateProcessingForStream(apiClient, DRAFT_CHILD, {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-parsed',
+                action: 'set' as const,
+                to: 'attributes.processed',
+                value: 'true',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+        expect(response.body.documents[0].status).to.be('parsed');
+      });
+
+      describe('Nested draft simulation', () => {
+        before(async () => {
+          await forkStream(apiClient, DRAFT_CHILD, {
+            stream: { name: NESTED_DRAFT },
+            where: { field: 'body.text', contains: 'critical' },
+            draft: true,
+          });
+        });
+
+        after(async () => {
+          await deleteStream(apiClient, NESTED_DRAFT).catch(() => {});
+        });
+
+        it('should simulate processing on a nested draft (draft child of draft)', async () => {
+          const response = await simulateProcessingForStream(apiClient, NESTED_DRAFT, {
+            processing: {
+              steps: [
+                {
+                  customIdentifier: 'nested-set',
+                  action: 'set' as const,
+                  to: 'attributes.nested_flag',
+                  value: 'true',
+                  where: { always: {} },
+                },
+              ],
+            },
+            documents: [createTestDocument()],
+          });
+
+          expect(response.body.documents_metrics.parsed_rate).to.be(1);
+          expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+          const { status, value } = response.body.documents[0];
+          expect(status).to.be('parsed');
+          expect(value).to.have.property('attributes.nested_flag', 'true');
+        });
+
+        it('should handle processor failures correctly on nested drafts', async () => {
+          const response = await simulateProcessingForStream(apiClient, NESTED_DRAFT, {
+            processing: {
+              steps: [
+                {
+                  customIdentifier: 'nested-grok',
+                  action: 'grok' as const,
+                  from: 'body.text',
+                  patterns: ['%{IP:attributes.ip_addr}'],
+                  where: { always: {} },
+                },
+              ],
+            },
+            documents: [createTestDocument()],
+          });
+
+          expect(response.body.documents_metrics.failed_rate).to.be(1);
+          expect(response.body.documents_metrics.parsed_rate).to.be(0);
+
+          const { status, errors } = response.body.documents[0];
+          expect(status).to.be('failed');
+          expect(errors).to.have.length(1);
+          expect(errors[0].type).to.be('generic_processor_failure');
+        });
       });
     });
   });

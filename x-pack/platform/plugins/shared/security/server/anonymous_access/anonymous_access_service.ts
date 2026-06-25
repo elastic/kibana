@@ -8,14 +8,14 @@
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { IClusterClient } from '@kbn/core-elasticsearch-server';
-import type { FakeRawRequest, IBasePath, KibanaRequest } from '@kbn/core-http-server';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
-import type { HTTPAuthorizationHeader } from '../authentication';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -28,7 +28,6 @@ export interface AnonymousAccessServiceStart {
 }
 
 interface AnonymousAccessServiceStartParams {
-  basePath: IBasePath;
   capabilities: CapabilitiesStart;
   clusterClient: IClusterClient;
   spaces?: SpacesServiceStart;
@@ -66,7 +65,6 @@ export class AnonymousAccessService {
   }
 
   start({
-    basePath,
     capabilities,
     clusterClient,
     spaces,
@@ -107,13 +105,11 @@ export class AnonymousAccessService {
 
         // We should use credentials of the anonymous service account instead of credentials of the
         // current user to get capabilities relevant to the anonymous access itself.
+        const spaceId = spaces?.getSpaceId(request);
         const fakeAnonymousRequest = this.createFakeAnonymousRequest({
           authenticateRequest: !useDefaultCapabilities,
+          spaceId: spaceId ? asSpaceId(spaceId) : undefined,
         });
-        const spaceId = spaces?.getSpaceId(request);
-        if (spaceId) {
-          basePath.set(fakeAnonymousRequest, addSpaceIdToPath('/', spaceId));
-        }
 
         try {
           return await capabilities.resolveCapabilities(fakeAnonymousRequest, {
@@ -161,7 +157,13 @@ export class AnonymousAccessService {
    * @param authenticateRequest Indicates whether or not we should include authorization header with
    * anonymous service account credentials.
    */
-  private createFakeAnonymousRequest({ authenticateRequest }: { authenticateRequest: boolean }) {
+  private createFakeAnonymousRequest({
+    authenticateRequest,
+    spaceId,
+  }: {
+    authenticateRequest: boolean;
+    spaceId?: SpaceId;
+  }) {
     const fakeRawRequest: FakeRawRequest = {
       headers:
         authenticateRequest && this.httpAuthorizationHeader
@@ -170,7 +172,7 @@ export class AnonymousAccessService {
       // This flag is essential for the security capability switcher that relies on it to decide if
       // it should perform a privileges check or automatically disable all capabilities.
       auth: { isAuthenticated: authenticateRequest },
-      path: '/',
+      spaceId,
     };
     return kibanaRequestFactory(fakeRawRequest);
   }

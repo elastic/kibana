@@ -10,26 +10,35 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
+import { evaluateKql } from '@kbn/eval-kql';
 import {
+  type EsWorkflowStepExecution,
   type SerializedError,
   type StackFrame,
   type StepContext,
   type WorkflowContext,
 } from '@kbn/workflows';
-import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
+import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
-import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import {
+  callKibanaApi,
+  type CallKibanaApiParams,
+  type CallKibanaApiResult,
+} from '../lib/call_kibana_api';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, evaluateKql } from '../utils';
+import { buildStepExecutionId, isTemplateExpression } from '../utils';
+import { isSerializedError } from '../utils/errors';
 
 export interface ContextManagerInit {
   // New properties for logging
   templateEngine: WorkflowTemplatingEngine;
   workflowExecutionGraph: WorkflowGraph;
   workflowExecutionState: WorkflowExecutionState;
+  stepIoService: StepIoService;
   node: GraphNodeUnion;
   stackFrames: StackFrame[];
   // New properties for internal actions
@@ -39,9 +48,18 @@ export interface ContextManagerInit {
   dependencies: ContextDependencies;
 }
 
+interface ScopeEntry {
+  topFrame: NonNullable<ReturnType<WorkflowScopeStack['getCurrentScope']>>;
+  stepExecution: StepExecutionMetadata | undefined;
+}
+
+type ContextPathSegment = string | number;
+type ContextPath = ContextPathSegment[];
+
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionState: WorkflowExecutionState;
+  private stepIoService: StepIoService;
   private esClient: ElasticsearchClient;
   private templateEngine: WorkflowTemplatingEngine;
   private fakeRequest: KibanaRequest;
@@ -51,6 +69,21 @@ export class WorkflowContextManager {
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
 
+  /**
+   * Cached predecessors for this node. Since `node` is readonly and the graph is immutable
+   * during execution, the result of `getAllPredecessors` is constant for the lifetime of
+   * the instance. Computed once on first access to avoid redundant O(V+E) DAG traversals
+   * on every `getContext()` call (invoked 5-10x per step via renderValueAccordingToContext, etc.).
+   */
+  private predecessorsCache: GraphNodeUnion[] | undefined;
+
+  private get predecessors(): ReadonlyArray<GraphNodeUnion> {
+    if (!this.predecessorsCache) {
+      this.predecessorsCache = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
+    }
+    return this.predecessorsCache;
+  }
+
   public get scopeStack(): WorkflowScopeStack {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
   }
@@ -58,6 +91,7 @@ export class WorkflowContextManager {
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionState = init.workflowExecutionState;
+    this.stepIoService = init.stepIoService;
     this.esClient = init.esClient;
     this.fakeRequest = init.fakeRequest;
     this.coreStart = init.coreStart;
@@ -65,6 +99,22 @@ export class WorkflowContextManager {
     this.stackFrames = init.stackFrames;
     this.templateEngine = init.templateEngine;
     this.dependencies = init.dependencies;
+  }
+
+  /**
+   * Pre-warms the execution state by rehydrating any evicted step outputs
+   * that will be needed by `getContext()`. Must be called before `getContext()`.
+   *
+   * This exists so that `getContext()` and all its synchronous callers
+   * (`renderValueAccordingToContext`, `evaluateBooleanExpressionInContext`, etc.)
+   * remain synchronous. When nothing has been evicted, this is a no-op with
+   * zero overhead.
+   */
+  public async ensureContextReady(): Promise<void> {
+    await this.stepIoService.prepareForRead({
+      node: this.node,
+      predecessorsResolver: () => this.predecessors,
+    });
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -76,11 +126,7 @@ export class WorkflowContextManager {
       variables: this.getVariables(),
     };
 
-    const currentNode = this.node;
-    const currentNodeId = currentNode.id;
-
-    const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
-    allPredecessors.forEach((node) => {
+    this.predecessors.forEach((node) => {
       const stepId = node.stepId;
       const stepData = this.getStepData(stepId);
 
@@ -137,7 +183,14 @@ export class WorkflowContextManager {
    * ```
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
-    const context = this.getContext();
+    return this.renderValueWithContext(obj, this.getRenderingContext(obj), additionalContext);
+  }
+
+  public renderValueWithContext<T>(
+    obj: T,
+    context: Record<string, unknown>,
+    additionalContext?: Record<string, unknown>
+  ): T {
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
@@ -183,32 +236,16 @@ export class WorkflowContextManager {
     );
   }
 
-  public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
-    const propertyPathSegments = parseJsPropertyAccess(propertyPath);
-    let result: unknown = this.getContext();
-
-    for (const segment of propertyPathSegments) {
-      if (result === null || result === undefined || typeof result !== 'object') {
-        return { pathExists: false, value: undefined }; // Path not found in context
-      }
-
-      const resultAsRecord = result as Record<string, unknown>;
-      if (!(segment in resultAsRecord)) {
-        return { pathExists: false, value: undefined }; // Path not found in context
-      }
-
-      result = resultAsRecord[segment];
-    }
-
-    return { pathExists: true, value: result };
-  }
-
   /**
    * Get the Elasticsearch client for internal actions
    * This client is already user-scoped if fakeRequest was available during initialization
    */
   public getEsClientAsUser(): ElasticsearchClient {
     return this.esClient;
+  }
+
+  public getWorkflowSpaceId(): string {
+    return this.workflowExecutionState.getWorkflowExecution().spaceId;
   }
 
   /**
@@ -226,26 +263,36 @@ export class WorkflowContextManager {
   }
 
   /**
+   * Calls a Kibana API route on the running Kibana instance, using the workflow's fake
+   * request for authentication and propagating event-chain headers so the receiving handler
+   * keeps the same chain-depth context.
+   *
+   * The transport (currently `fetch`) is an implementation detail; the public surface is
+   * intentionally narrow so it can be swapped to an in-process call later without affecting
+   * callers. Throws on non-2xx responses.
+   */
+  public async callKibanaApi<T = unknown>(
+    params: CallKibanaApiParams
+  ): Promise<CallKibanaApiResult<T>> {
+    return callKibanaApi<T>(
+      {
+        fakeRequest: this.fakeRequest,
+        coreStart: this.coreStart,
+        cloudSetup: this.dependencies.cloudSetup,
+        workflowRunId: this.workflowExecutionState.getWorkflowExecution().id,
+      },
+      params
+    );
+  }
+
+  /**
    * Get variables from all completed data.set steps in the workflow execution.
    * Variables are retrieved from step outputs, which are persisted in execution state.
    * This ensures variables survive across wait steps and task resumptions.
    * Steps are processed in execution order to ensure consistent variable assignment.
    */
   public getVariables(): Record<string, unknown> {
-    return this.workflowExecutionState
-      .getAllStepExecutions()
-      .filter(
-        (stepExecution) =>
-          stepExecution.stepType === 'data.set' &&
-          typeof stepExecution.output === 'object' &&
-          !Array.isArray(stepExecution.output)
-      )
-      .filter((stepExecution) => stepExecution.output)
-      .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
-      .reduce((acc, stepExecution) => {
-        Object.assign(acc, stepExecution.output);
-        return acc;
-      }, {});
+    return this.stepIoService.getDataSetVariables();
   }
 
   /**
@@ -258,6 +305,147 @@ export class WorkflowContextManager {
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
+  }
+
+  private getRenderingContext(value: unknown): StepContext {
+    if (!this.stackFramesAllowNarrowing()) {
+      return this.getContext();
+    }
+
+    const referencedVariableSegments = this.templateEngine.extractGlobalVariableSegments(value);
+    if (referencedVariableSegments === null) {
+      return this.getContext();
+    }
+
+    return this.getContextForVariableSegments(referencedVariableSegments);
+  }
+
+  // Active scopes (foreach/while/retry/if) bind new top-level identifiers and
+  // merge into steps[stepId] via enrichStepContextAccordingToStepScope, which
+  // doesn't compose with the partial steps map the narrowing path builds.
+  private stackFramesAllowNarrowing(): boolean {
+    return this.stackFrames.every((frame) =>
+      frame.nestedScopes.every((scope) => scope.nodeType === 'enter-timeout-zone')
+    );
+  }
+
+  private getContextForVariableSegments(referencedVariableSegments: ContextPath[]): StepContext {
+    const hasUnsupportedStepPath = referencedVariableSegments.some(
+      (path) => path[0] === 'steps' && typeof path[1] !== 'string'
+    );
+    if (hasUnsupportedStepPath) {
+      return this.getContext();
+    }
+
+    const referencedRoots = new Set(
+      referencedVariableSegments.flatMap((path) => (typeof path[0] === 'string' ? [path[0]] : []))
+    );
+
+    const stepContext: StepContext = {
+      ...this.buildWorkflowContext(),
+      steps: {},
+      variables: referencedRoots.has('variables') ? this.getVariables() : {},
+    };
+
+    if (referencedRoots.has('steps')) {
+      this.populateReferencedStepPaths(stepContext, referencedVariableSegments);
+    }
+
+    this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
+    return stepContext;
+  }
+
+  private populateReferencedStepPaths(
+    stepContext: StepContext,
+    referencedVariableSegments: ContextPath[]
+  ): void {
+    const pathsByStepId = new Map<string, ContextPath[]>();
+
+    for (const path of referencedVariableSegments) {
+      if (path[0] === 'steps') {
+        const [, stepId, ...stepPath] = path;
+        if (typeof stepId !== 'string') {
+          return;
+        }
+
+        const existing = pathsByStepId.get(stepId);
+        if (existing) {
+          existing.push(stepPath);
+        } else {
+          pathsByStepId.set(stepId, [stepPath]);
+        }
+      }
+    }
+
+    for (const [stepId, requestedPaths] of pathsByStepId) {
+      const stepData = this.getStepData(stepId);
+      if (stepData) {
+        const mergedStepData = {
+          ...stepData.runStepResult,
+          ...(stepData.stepState ?? {}),
+        };
+        stepContext.steps[stepId] ??= {};
+        const partialStepData = stepContext.steps[stepId];
+        for (const requestedPath of requestedPaths) {
+          if (requestedPath.length === 0) {
+            Object.assign(partialStepData, mergedStepData);
+          } else {
+            const { pathExists, value } = this.readValueAtPath(mergedStepData, requestedPath);
+            if (pathExists) {
+              this.writeValueAtPath(partialStepData, requestedPath, value);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private readValueAtPath(
+    value: unknown,
+    propertyPath: ContextPath
+  ): { pathExists: boolean; value: unknown } {
+    let result = value;
+
+    for (const segment of propertyPath) {
+      if (result === null || result === undefined || typeof result !== 'object') {
+        return { pathExists: false, value: undefined };
+      }
+
+      const resultAsRecord = result as Record<string | number, unknown>;
+      if (!(segment in resultAsRecord)) {
+        return { pathExists: false, value: undefined };
+      }
+
+      result = resultAsRecord[segment];
+    }
+
+    return { pathExists: true, value: result };
+  }
+
+  private writeValueAtPath(
+    target: Record<string, unknown>,
+    propertyPath: ContextPath,
+    value: unknown
+  ): void {
+    let currentTarget: Record<string, unknown> = target;
+
+    for (const [index, segment] of propertyPath.entries()) {
+      const targetKey = String(segment);
+      const isLeaf = index === propertyPath.length - 1;
+
+      if (isLeaf) {
+        currentTarget[targetKey] = value;
+        return;
+      }
+
+      const existingValue = currentTarget[targetKey];
+      if (existingValue === null || typeof existingValue !== 'object') {
+        currentTarget[targetKey] = {};
+      }
+
+      currentTarget = currentTarget[targetKey] as Record<string, unknown>;
+    }
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {
@@ -307,40 +495,170 @@ export class WorkflowContextManager {
       this.workflowExecutionState.getWorkflowExecution().scopeStack
     );
 
+    const executionId = this.workflowExecutionState.getWorkflowExecution().id;
+    const scopeEntries: Array<ScopeEntry> = [];
+    const foreachEntries: Array<ScopeEntry> = [];
+    const whileEntries: Array<ScopeEntry> = [];
+
     while (!scopeStack.isEmpty()) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const topFrame = scopeStack.getCurrentScope()!;
+      const topFrame = scopeStack.getCurrentScope();
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
-        buildStepExecutionId(
-          this.workflowExecutionState.getWorkflowExecution().id,
-          topFrame.stepId,
-          scopeStack.stackFrames
-        )
+        buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
       );
+      scopeEntries.push({ topFrame, stepExecution });
+      if (stepExecution?.stepType === 'foreach') {
+        foreachEntries.push({ topFrame, stepExecution });
+      }
+      if (stepExecution?.stepType === 'while') {
+        whileEntries.push({ topFrame, stepExecution });
+      }
+    }
 
+    // When there is only one foreach frame (e.g. single-step run with subgraph), use
+    // contextOverride.foreach as the parent so inner expressions like {{foreach.item}} resolve.
+    const contextOverride =
+      this.workflowExecutionState.getWorkflowExecution().context?.contextOverride;
+    if (foreachEntries.length === 1 && contextOverride?.foreach != null) {
+      stepContext.foreach = contextOverride.foreach;
+    }
+
+    // Build foreach context in outer-to-inner order so inner expressions like
+    // {{foreach.item}} resolve against the outer foreach context.
+    for (const { stepExecution } of foreachEntries.toReversed()) {
       if (stepExecution) {
-        switch (stepExecution.stepType) {
-          case 'foreach':
-            if (!stepContext.foreach) {
-              stepContext.foreach = stepExecution.state as StepContext['foreach'];
-            }
-            break;
-        }
-
-        if (topFrame.scopeId === 'fallback') {
-          // This is not good approach, but we can't do it better right now.
-          // The problem is that Context is dynamic depending on the step scopes (like whether the current step is inside foreach, fallback path, etc)
-          // but here we are trying to mutate the static StepContext object.
-          // Proper solution would be to have dynamic context object that would resolve properties on demand,
-          // but it requires significant changes in the codebase.
-          // So for now, we just set the error on the context when we are in fallback scope.
-          const stepContextGeneric = stepContext as Record<string, unknown>;
-          if (!stepContextGeneric.error) {
-            stepContextGeneric.error = stepExecution.state?.error;
+        const foreachCtx = this.buildForeachContext(stepExecution, stepContext);
+        stepContext.foreach = foreachCtx;
+        /**
+         * Merge foreach context into step context so that inner foreach can
+         * access the outer context.
+         */
+        if (stepExecution.stepId && foreachCtx) {
+          if (!stepContext.steps[stepExecution.stepId]) {
+            stepContext.steps[stepExecution.stepId] = {};
           }
+          const { item, items, index, total } = foreachCtx;
+          Object.assign(stepContext.steps[stepExecution.stepId], { item, items, index, total });
         }
       }
+    }
+
+    // Build while context in outer-to-inner order so the last write is the
+    // innermost while scope — {{while.iteration}} resolves to the closest
+    // enclosing while loop.
+    for (const { stepExecution } of whileEntries.toReversed()) {
+      if (stepExecution) {
+        const whileCtx = this.buildWhileContext(stepExecution);
+        stepContext.while = whileCtx;
+        if (stepExecution.stepId && whileCtx) {
+          if (!stepContext.steps[stepExecution.stepId]) {
+            stepContext.steps[stepExecution.stepId] = {};
+          }
+          Object.assign(stepContext.steps[stepExecution.stepId], {
+            iteration: whileCtx.iteration,
+          });
+        }
+      }
+    }
+
+    // Apply fallback scope error in original (innermost-first) order.
+    for (const { topFrame, stepExecution } of scopeEntries) {
+      if (topFrame.scopeId === 'fallback' && stepExecution) {
+        // This is not good approach, but we can't do it better right now.
+        // The problem is that Context is dynamic depending on the step scopes (like whether the current step is inside foreach, fallback path, etc)
+        // but here we are trying to mutate the static StepContext object.
+        // Proper solution would be to have dynamic context object that would resolve properties on demand,
+        // but it requires significant changes in the codebase.
+        // So for now, we just set the error on the context when we are in fallback scope.
+        const rawError = stepExecution.state?.error;
+        if (isSerializedError(rawError)) {
+          stepContext.error = rawError;
+        }
+      }
+    }
+  }
+
+  /**
+   * Builds the foreach context by combining the persisted state (index, total)
+   * with items derived by re-evaluating the foreach expression at resolution time.
+   * This avoids storing the entire items array in the step execution state on every iteration.
+   */
+  private buildForeachContext(
+    stepExecution: StepExecutionMetadata,
+    stepContext: StepContext
+  ): StepContext['foreach'] {
+    const foreachState = stepExecution.state ?? {};
+    const index = typeof foreachState.index === 'number' ? foreachState.index : 0;
+    const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
+
+    // Re-evaluate the foreach expression (stored in the step input at entry
+    // time) to derive the full items array and current item without
+    // persisting them in state. Input lives in `StepIoService` (lifecycle
+    // metadata vs IO data are owned separately); a foreach is non-terminal
+    // while iterating, so its input is never evicted by post-flush input
+    // eviction — the service read is safe here.
+    const foreachInput = this.stepIoService.getStepInput(stepExecution.id);
+    const foreachExpression = this.extractForeachExpression(foreachInput);
+    const items = foreachExpression
+      ? this.resolveForeachItems(foreachExpression, stepContext)
+      : undefined;
+
+    const availableItems = items ?? [];
+
+    return {
+      items: availableItems,
+      item: availableItems[index],
+      index,
+      total,
+    };
+  }
+
+  private buildWhileContext(stepExecution: StepExecutionMetadata): StepContext['while'] {
+    const whileState = stepExecution.state ?? {};
+    const iteration = typeof whileState.iteration === 'number' ? whileState.iteration : 0;
+    return { iteration };
+  }
+
+  /**
+   * Extracts the foreach expression string from a step execution's input.
+   * The input is typed as JsonValue, so we narrow it to a record and pull the `foreach` key.
+   */
+  private extractForeachExpression(input: EsWorkflowStepExecution['input']): string | undefined {
+    if (input !== null && typeof input === 'object' && !Array.isArray(input)) {
+      const { foreach: expression } = input;
+      return typeof expression === 'string' ? expression : undefined;
+    }
+    return undefined;
+  }
+
+  /**
+   * Evaluates a foreach expression against the given context and returns the resulting array.
+   * Mirrors the evaluation logic in EnterForeachNodeImpl.processForeachConfiguration / getItems.
+   */
+  private resolveForeachItems(
+    foreachExpression: string,
+    context: Record<string, unknown>
+  ): unknown[] | undefined {
+    try {
+      let resolvedValue: unknown;
+
+      if (isTemplateExpression(foreachExpression)) {
+        resolvedValue = this.templateEngine.evaluateExpression(foreachExpression, context);
+      } else {
+        resolvedValue = this.templateEngine.render(foreachExpression, context);
+      }
+
+      if (typeof resolvedValue === 'string') {
+        try {
+          resolvedValue = JSON.parse(resolvedValue);
+        } catch {
+          return undefined;
+        }
+      }
+
+      return Array.isArray(resolvedValue) ? resolvedValue : undefined;
+    } catch {
+      return undefined;
     }
   }
 
@@ -351,22 +669,21 @@ export class WorkflowContextManager {
           output: unknown;
           error: SerializedError | undefined;
         };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        stepState: Record<string, any> | undefined;
+        stepState: Record<string, unknown> | undefined;
       }
     | undefined {
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
-    if (!latestStepExecution) {
+    const io = this.stepIoService.getLatestStepIO(stepId);
+    if (!io) {
       return;
     }
-
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
     return {
       runStepResult: {
-        input: latestStepExecution?.input,
-        output: latestStepExecution?.output,
-        error: latestStepExecution?.error,
+        input: io.input,
+        output: io.output,
+        error: io.error,
       },
-      stepState: latestStepExecution.state,
+      stepState: latestStepExecution?.state,
     };
   }
 }

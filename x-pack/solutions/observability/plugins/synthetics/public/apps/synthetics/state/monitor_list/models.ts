@@ -25,6 +25,11 @@ export interface MonitorFilterState {
   schedules?: string[];
   locations?: string[];
   monitorQueryIds?: string[]; // Monitor Query IDs
+  configIds?: string[]; // Config IDs (UUIDs)
+  // Remote cluster aliases; only meaningful when CCS is enabled. The overview
+  // status route translates these into wildcard `_index` filters so we surface
+  // pings only from the selected remote clusters.
+  remoteNames?: string[];
   showFromAllSpaces?: boolean;
   useLogicalAndFor?: UseLogicalAndField[];
 }

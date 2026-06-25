@@ -10,27 +10,39 @@ import {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
+  AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { firstValueFrom, toArray } from 'rxjs';
+import { firstValueFrom, tap, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
+import {
+  CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+  resolveConnectorOrInferenceId,
+} from '../../common/resolve_connector_or_inference_id';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
 /**
  * Server step definition for the "ai.agent" step.
- * This step executes an agentBuilder agent using the internal runner service.
+ * This step executes an agentBuilder agent using the execution service.
  */
 export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
   return createServerStepDefinition({
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
+      // Accumulate token usage outside the try/catch so partial counts are
+      // preserved even if the event stream errors mid-execution.
+      const usage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+
       try {
-        const { schema, message, conversation_id: conversationId } = context.input;
+        const { schema, message, conversation_id: conversationId, attachments } = context.input;
 
         const {
           'agent-id': agentId,
-          'connector-id': connectorId,
+          'connector-id': connectorIdRaw,
+          'inference-id': inferenceIdRaw,
           'create-conversation': createConversation,
+          'plugin-id': pluginId,
+          'aggregate-by': aggregateBy,
         } = context.config;
 
         context.logger.debug('ai.agent step started');
@@ -39,39 +51,64 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           throw new Error('No request available in workflow context');
         }
 
-        context.logger.debug('Executing ai.agent step', {
-          agentId: agentId || agentBuilderDefaultAgentId,
-        });
-
         const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
-        const effectiveConnectorId = connectorId as string | undefined;
+        const effectiveConnectorId = resolveConnectorOrInferenceId(
+          { connectorId: connectorIdRaw, inferenceId: inferenceIdRaw },
+          CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
+        );
 
         const storeConversation = createConversation || Boolean(conversationId);
 
-        const chatService = serviceManager.internalStart?.chat;
-        if (!chatService) {
-          throw new Error('chat service is not available');
+        const executionService = serviceManager.internalStart?.execution;
+        if (!executionService) {
+          throw new Error('execution service is not available');
         }
 
-        const chatEvents$ = chatService.converse({
+        context.logger.debug('Executing ai.agent step', {
           agentId: effectiveAgentId,
-          connectorId: effectiveConnectorId,
-          conversationId,
-          autoCreateConversationWithId: createConversation,
-          storeConversation,
-          request,
-          abortSignal: context.abortSignal,
-          structuredOutput: !!schema,
-          outputSchema: schema,
-          nextInput: {
-            message,
-          },
         });
 
-        const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+        const { events$ } = await executionService.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          abortSignal: context.abortSignal,
+          params: {
+            agentId: effectiveAgentId,
+            connectorId: effectiveConnectorId,
+            conversationId,
+            autoCreateConversationWithId: createConversation,
+            storeConversation,
+            structuredOutput: !!schema,
+            outputSchema: schema,
+            nextInput: {
+              message,
+              attachments,
+            },
+            ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
+          },
+          // workflows already run as scheduled tasks
+          useTaskManager: false,
+        });
+
+        const events = await firstValueFrom(
+          events$.pipe(
+            tap((event) => {
+              if (isRoundCompleteEvent(event)) {
+                const { model_usage: modelUsage } = event.data.round;
+                if (modelUsage) {
+                  usage.inputTokens += modelUsage.input_tokens;
+                  usage.outputTokens += modelUsage.output_tokens;
+                  usage.totalTokens += modelUsage.input_tokens + modelUsage.output_tokens;
+                }
+              }
+            }),
+            toArray()
+          )
+        );
+
         const roundEvent = events.find(isRoundCompleteEvent);
         if (!roundEvent) {
-          throw new Error('No round_complete event received from chat service');
+          throw new Error('No round_complete event received from execution service');
         }
 
         const round = roundEvent.data.round;
@@ -95,6 +132,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             message: outputMessage,
             structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
+            metadata: { usage },
           },
         };
       } catch (error) {
@@ -103,6 +141,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           error instanceof Error ? error : new Error(String(error))
         );
         return {
+          output: { message: '', metadata: { usage } },
           error: error instanceof Error ? error : new Error(String(error)),
         };
       }

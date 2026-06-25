@@ -20,8 +20,8 @@ import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
-import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
@@ -86,6 +86,7 @@ export const App: FC<AppProps> = ({
       dashboard: deps.dashboard,
       data: deps.data,
       dataViewEditor: deps.dataViewEditor,
+      dataViewFieldEditor: deps.dataViewFieldEditor,
       dataViews: deps.data.dataViews,
       dataVisualizer: deps.dataVisualizer,
       embeddable: deps.embeddable,
@@ -111,6 +112,7 @@ export const App: FC<AppProps> = ({
       spaces: deps.spaces,
       fieldsMetadata: deps.fieldsMetadata,
       fileUpload: deps.fileUpload,
+      cps: deps.cps,
     };
   }, [deps, coreStart]);
 

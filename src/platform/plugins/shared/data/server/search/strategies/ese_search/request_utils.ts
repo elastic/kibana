@@ -36,7 +36,7 @@ export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchConfig: SearchConfigSchema,
   options: ISearchOptions,
-  isServerless: boolean = false
+  { isServerless = false, isPit = false } = {}
 ): Promise<
   Pick<
     AsyncSearchSubmitRequest,
@@ -56,10 +56,11 @@ export async function getDefaultAsyncSubmitParams(
     batched_reduce_size: searchConfig.asyncSearch.batchedReduceSize,
     // Decreases delays due to network when using CCS, only if not serverless.
     // In case of serverless, this setting is ignored or errors out (in case of CPS)
-    ...(isServerless ? {} : { ccs_minimize_roundtrips: true }),
+    // If PIT is used, this setting is ignored as well since its not supported.
+    ...(isServerless || isPit ? {} : { ccs_minimize_roundtrips: true }),
     ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
-    ...(await getDefaultSearchParams(uiSettingsClient)),
+    ...(await getDefaultSearchParams(uiSettingsClient, { isPit })),
   };
 }
 

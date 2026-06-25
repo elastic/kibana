@@ -96,6 +96,7 @@ const getComboBoxProps = (fields: ComboBoxFields): GetFieldComboBoxPropsReturn =
 
   const genericProps = getGenericComboBoxProps<DataViewFieldBase>({
     getLabel: (field) => field.name,
+    getOptionTestSubj: (field) => `filterFieldOption-${field.name}`,
     options: availableFields,
     selectedOptions: selectedFields,
   });
@@ -191,7 +192,7 @@ export const useEsField = ({
           content={labelTooltipText}
           position="bottom"
         >
-          <span tabIndex={0}>{label}</span>
+          <span>{label}</span>
         </EuiToolTip>
       );
     }
@@ -229,7 +230,6 @@ export const useEsField = ({
             {label}
             <EuiIcon
               data-test-subj="mappingConflictsWarningIcon"
-              tabIndex={0}
               type="warning"
               title={i18n.FIELD_CONFLICT_INDICES_WARNING_TITLE}
               size="s"

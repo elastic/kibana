@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-/**
- * Used by the security solution
- */
 export const validFields = {
   EXCEPTIONS_LIST: 'exceptionsList',
+  NOTE: 'note',
+  INVESTIGATION_FIELDS: 'investigationFields',
   RULE_SOURCE: 'ruleSource',
 } as const;
 

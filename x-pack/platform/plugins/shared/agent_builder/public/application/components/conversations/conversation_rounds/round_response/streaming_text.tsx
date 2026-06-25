@@ -7,6 +7,10 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import { ChatMessageText } from './chat_message_text';
 
 const TOKEN_DELAY = 17;
@@ -14,13 +18,25 @@ interface StreamingTextProps {
   content: string;
   steps: ConversationRoundStep[];
   tokenDelay?: number; // ms between tokens. Defaults to 17ms to ensure 60fps.
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
+  conversationId?: string;
 }
 
-export const StreamingText = ({ content, steps, tokenDelay = TOKEN_DELAY }: StreamingTextProps) => {
-  const [displayedText, setDisplayedText] = useState('');
+export const StreamingText = ({
+  content,
+  steps,
+  tokenDelay = TOKEN_DELAY,
+  conversationAttachments,
+  attachmentRefs,
+  conversationId,
+}: StreamingTextProps) => {
+  // Initial state derives from the content already in the cache so navigating away and back
+  // mid-stream doesn't replay the full text. Only chunks arriving AFTER mount get animated.
+  const [displayedText, setDisplayedText] = useState(content);
   const tokenQueueRef = useRef<string[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const previousContentLengthRef = useRef(0);
+  const previousContentLengthRef = useRef(content.length);
 
   useEffect(() => {
     const previousContentLength = previousContentLengthRef.current;
@@ -56,5 +72,14 @@ export const StreamingText = ({ content, steps, tokenDelay = TOKEN_DELAY }: Stre
     };
   }, [content, tokenDelay]);
 
-  return <ChatMessageText content={displayedText} steps={steps} />;
+  return (
+    <ChatMessageText
+      content={displayedText}
+      steps={steps}
+      conversationAttachments={conversationAttachments}
+      attachmentRefs={attachmentRefs}
+      conversationId={conversationId}
+      isStreaming
+    />
+  );
 };

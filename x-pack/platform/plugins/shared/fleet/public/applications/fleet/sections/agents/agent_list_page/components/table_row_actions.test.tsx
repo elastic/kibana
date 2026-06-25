@@ -51,6 +51,7 @@ function renderTableRowActions({
       onChangeAgentPrivilegeLevelClick={jest.fn()}
       onViewAgentJsonClick={jest.fn()}
       onRollbackClick={jest.fn()}
+      onViewAgentPolicyClick={jest.fn()}
     />
   );
 

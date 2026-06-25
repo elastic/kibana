@@ -6,7 +6,6 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { once } from 'lodash';
 import pRetry from 'p-retry';
@@ -95,9 +94,7 @@ export class ObservabilityAIAssistantService {
     const soClient = coreStart.savedObjects.getScopedClient(request);
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
 
-    const basePath = coreStart.http.basePath.get(request);
-
-    const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
+    const { spaceId } = request;
     const inferenceClient = plugins.inference.getClient({ request });
 
     const { asInternalUser } = coreStart.elasticsearch.client;
@@ -114,16 +111,20 @@ export class ObservabilityAIAssistantService {
       productDoc: plugins.productDocBase.management,
     });
 
+    const actionsClient = await plugins.actions.getActionsClientWithRequest(request);
+
     return new ObservabilityAIAssistantClient({
       core: this.core,
       config: this.config,
-      actionsClient: await plugins.actions.getActionsClientWithRequest(request),
+      actionsClient,
       uiSettingsClient,
       namespace: spaceId,
       esClient: {
         asInternalUser,
         asCurrentUser,
       },
+      getConnectorById: (id: string) =>
+        plugins.inference.getConnectorByIdWithoutClientRequest(id, actionsClient, asInternalUser),
       inferenceClient,
       logger: this.logger,
       user: user

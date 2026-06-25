@@ -52,7 +52,13 @@ export const Tabs = () => {
       {...tab}
       key={index}
       onClick={() => {
-        renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
+        if (tab.id === selectedTabId) return;
+
+        // On a tab click, mark the tab content as allowed to be rendered except for the logs tab.
+        if (tab.id !== TabIds.LOGS) {
+          renderedTabsSet.current.add(tab.id);
+        }
+
         setSelectedTabId(tab.id);
       }}
       isSelected={tab.id === selectedTabId}
@@ -71,11 +77,7 @@ export const Tabs = () => {
           <MetricsGrid />
         </div>
       )}
-      {renderedTabsSet.current.has(TabIds.LOGS) && (
-        <div hidden={selectedTabId !== TabIds.LOGS}>
-          <LogsTabContent />
-        </div>
-      )}
+      {selectedTabId === TabIds.LOGS && <LogsTabContent />}
       {renderedTabsSet.current.has(TabIds.ALERTS) && (
         <div hidden={selectedTabId !== TabIds.ALERTS}>
           <AlertsTabContent />

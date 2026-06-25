@@ -8,6 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiPopover, EuiSelectable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
@@ -41,6 +42,10 @@ export const RetentionPeriodField: FunctionComponent<{ disabled: boolean }> = ({
 
                 return (
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.failureStoreModal.retentionPeriodField.popoverAriaLabel',
+                      { defaultMessage: 'Select time unit' }
+                    )}
                     isOpen={open}
                     panelPaddingSize="none"
                     closePopover={() => setOpen(false)}
@@ -48,7 +53,7 @@ export const RetentionPeriodField: FunctionComponent<{ disabled: boolean }> = ({
                       <EuiButton
                         data-test-subj="selectFailureStoreRetentionPeriodUnit"
                         disabled={disabled}
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         iconSide="right"
                         color="text"
                         onClick={() => setOpen((isOpen) => !isOpen)}

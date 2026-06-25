@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IntegrationCards } from '../privileged_user_monitoring_onboarding/components/integrations_cards';
+import { IntegrationCards } from '../entity_analytics_integrations_cards';
 
 export const IntegrationsManageDataSource = () => {
   return (
     <EuiFlexGroup alignItems="flexStart" direction="column">
       <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiIcon size="l" type="plugs" />
+        <EuiIcon size="l" type="plugs" aria-hidden={true} />
         <EuiText>
           <h1>
             <FormattedMessage

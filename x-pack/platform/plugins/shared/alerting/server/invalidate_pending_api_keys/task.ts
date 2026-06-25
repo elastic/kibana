@@ -77,8 +77,10 @@ export function taskRunner(
     return {
       async run() {
         let totalInvalidated = 0;
+        let missingApiKeyRetries = { ...state.missing_api_key_retries };
         try {
-          const [{ savedObjects }, { encryptedSavedObjects, security }] = await coreStartServices;
+          const [{ savedObjects, security: securityCore }, { encryptedSavedObjects, security }] =
+            await coreStartServices;
           const savedObjectsClient = savedObjects.createInternalRepository([
             API_KEY_PENDING_INVALIDATION_TYPE,
             AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -88,10 +90,12 @@ export function taskRunner(
             includedHiddenTypes: [API_KEY_PENDING_INVALIDATION_TYPE],
           });
 
-          totalInvalidated = await runInvalidate({
+          const result = await runInvalidate({
             encryptedSavedObjectsClient,
             invalidateApiKeyFn: security?.authc.apiKeys.invalidateAsInternalUser,
+            invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
             logger,
+            missingApiKeyRetries,
             removalDelay: config.invalidateApiKeysTask.removalDelay,
             savedObjectsClient,
             savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
@@ -106,10 +110,13 @@ export function taskRunner(
               },
             ],
           });
+          totalInvalidated = result.totalInvalidated;
+          missingApiKeyRetries = result.missingApiKeyRetries;
 
           const updatedState: LatestTaskStateSchema = {
             runs: (state.runs || 0) + 1,
             total_invalidated: totalInvalidated,
+            missing_api_key_retries: missingApiKeyRetries,
           };
           return {
             state: updatedState,
@@ -122,6 +129,7 @@ export function taskRunner(
           const updatedState: LatestTaskStateSchema = {
             runs: state.runs + 1,
             total_invalidated: totalInvalidated,
+            missing_api_key_retries: missingApiKeyRetries,
           };
           return {
             state: updatedState,

@@ -13,20 +13,21 @@ import type {
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import type {
-  DefendInsight,
-  DefendInsightType,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-
-import {
-  ActionType,
-  type SearchParams,
-  type SecurityWorkflowInsight,
+import type {
+  DefendInsight,
+  WorkflowInsightType,
+  SearchParams,
+  SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
+import { WorkflowInsightActionType } from '../../../../common/endpoint/types/workflow_insights';
+
+import { ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT } from '../../../lib/telemetry/event_based/events';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
 import {
@@ -131,7 +132,10 @@ class SecurityWorkflowInsightsService {
    * Basic CRUD operations
    */
 
-  public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase | void> {
+  public async create(
+    insight: SecurityWorkflowInsight,
+    spaceId: string
+  ): Promise<WriteResponseBase | void> {
     await this.isInitialized;
 
     const insightToCreate = cloneDeep(insight);
@@ -139,11 +143,11 @@ class SecurityWorkflowInsightsService {
     const remediationExists = await checkIfRemediationExists({
       insight: insightToCreate,
       exceptionListsClient: this.endpointContext.getExceptionListsClient(),
-      endpointMetadataClient: this.endpointContext.getEndpointMetadataService(),
+      endpointMetadataClient: this.endpointContext.getEndpointMetadataService(spaceId),
     });
 
     if (remediationExists) {
-      insightToCreate.action.type = ActionType.Remediated;
+      insightToCreate.action.type = WorkflowInsightActionType.enum.remediated;
     }
 
     const id = generateInsightId(insightToCreate);
@@ -236,18 +240,29 @@ class SecurityWorkflowInsightsService {
   ): void {
     registerCallback(
       CallbackIds.DefendInsightsPostCreate,
-      this.createFromDefendInsights.bind(this)
+      (
+        defendInsights: DefendInsight[],
+        request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
+      ) =>
+        this.createFromDefendInsights(
+          defendInsights,
+          request.body.endpointIds,
+          request.body.insightType,
+          request.body.apiConfig.connectorId,
+          request.body.apiConfig.model,
+          this.endpointContext.getActiveSpaceId(request)
+        )
     );
     registerCallback(CallbackIds.DefendInsightsPreCreate, this.onBeforeCreate.bind(this));
     registerCallback(CallbackIds.DefendInsightsPostFetch, this.onAfterFetch.bind(this));
   }
 
-  private async suppressExistingInsights(endpointIds: string[], types: DefendInsightType[]) {
+  private async suppressExistingInsights(endpointIds: string[], types: WorkflowInsightType[]) {
     const existingInsights = await this.fetch({
       size: DEFAULT_SUPPRESS_SIZE,
       targetIds: endpointIds,
       types,
-      actionTypes: [ActionType.Refreshed],
+      actionTypes: [WorkflowInsightActionType.enum.refreshed],
     });
 
     return Promise.all(
@@ -259,7 +274,7 @@ class SecurityWorkflowInsightsService {
         const source = existingInsight._source as SecurityWorkflowInsight;
         return this.update(
           existingInsight._id as string,
-          { action: { ...source.action, type: ActionType.Suppressed } },
+          { action: { ...source.action, type: WorkflowInsightActionType.enum.suppressed } },
           existingInsight._index
         );
       })
@@ -282,12 +297,16 @@ class SecurityWorkflowInsightsService {
 
   public async createFromDefendInsights(
     defendInsights: DefendInsight[],
-    request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
-  ): Promise<Array<Awaited<WriteResponseBase | void>>> {
+    endpointIds: string[],
+    insightType: WorkflowInsightType,
+    connectorId: string,
+    model: string = '',
+    spaceId: string
+  ) {
     await this.isInitialized;
 
     // suppress existing insights since they might be stale, any current ones will be refreshed
-    await this.suppressExistingInsights(request.body.endpointIds, [request.body.insightType]);
+    await this.suppressExistingInsights(endpointIds, [insightType]);
 
     // comes after suppression since we should always suppress stale insights
     if (!defendInsights || !defendInsights.length) {
@@ -296,14 +315,33 @@ class SecurityWorkflowInsightsService {
 
     const workflowInsights = await buildWorkflowInsights({
       defendInsights,
-      request,
-      endpointMetadataService: this.endpointContext.getEndpointMetadataService(),
+      endpointMetadataService: this.endpointContext.getEndpointMetadataService(spaceId),
       esClient: this.esClient,
+      options: {
+        insightType,
+        endpointIds,
+        connectorId,
+        model,
+      },
     });
 
     const uniqueInsights = getUniqueInsights(workflowInsights);
 
-    return Promise.all(uniqueInsights.map((insight) => this.create(insight)));
+    const results = await Promise.all(
+      uniqueInsights.map((insight) => this.create(insight, spaceId))
+    );
+
+    try {
+      const telemetry = this.endpointContext.getTelemetryService();
+      telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT.eventType, {
+        insightType,
+        count: uniqueInsights.length,
+      });
+    } catch (e) {
+      this.logger.debug(`Failed to report insight creation telemetry: ${e.message}`);
+    }
+
+    return results;
   }
 
   public async ensureAgentIdsInCurrentSpace(

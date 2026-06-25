@@ -15,11 +15,23 @@ import type {
   GetResponse,
   IndexRequest,
   IndexResponse,
+  QueryDslQueryContainer,
   Result,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { InferSearchResponseOf } from '@kbn/es-types';
+import type { TransportRequestOptions } from '@elastic/transport';
+import type { ComposerQuery } from '@elastic/esql';
+import type { ESQLSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
+
+/**
+ * Curated subset of transport-level options that can be forwarded
+ * to the underlying Elasticsearch client on a per-request basis.
+ */
+export type StorageTransportOptions = Pick<
+  TransportRequestOptions,
+  'requestTimeout' | 'maxResponseSize' | 'maxCompressedResponseSize' | 'signal'
+>;
 
 interface StorageSchemaProperties {
   [x: string]: StorageMappingProperty;
@@ -49,9 +61,27 @@ export type StorageClientSearchResponse<
   TSearchRequest extends Omit<SearchRequest, 'index'>
 > = InferSearchResponseOf<TDocument, TSearchRequest>;
 
+/**
+ * Optimistic concurrency metadata for bulk `index` actions.
+ * elasticsearch requires `if_seq_no` and `if_primary_term` together — omit both for unconditional writes.
+ */
+export type StorageClientBulkIndexOccMetadata =
+  | { if_seq_no?: never; if_primary_term?: never }
+  | { if_seq_no: number; if_primary_term: number };
+
 export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
   | {
-      index: { document: Omit<TDocument, '_id'>; _id?: string };
+      index: {
+        document: Omit<TDocument, '_id'>;
+        _id?: string;
+      } & StorageClientBulkIndexOccMetadata;
+    }
+  | {
+      /**
+       * ES bulk `create` action: fails with a 409 conflict if `_id` already exists.
+       * Use `index` instead if you want silent upsert (overwrite) behaviour.
+       */
+      create: { document: Omit<TDocument, '_id'>; _id?: string };
     }
   | { delete: { _id: string } };
 
@@ -97,7 +127,8 @@ export type StorageClientGetResponse<TDocument extends { _id?: string }> = GetRe
 export type StorageClientSearch<TDocumentType = never> = <
   TSearchRequest extends StorageClientSearchRequest
 >(
-  request: TSearchRequest
+  request: TSearchRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientSearchResponse<TDocumentType, TSearchRequest>>;
 
 /**
@@ -108,24 +139,68 @@ export type StorageClientSearch<TDocumentType = never> = <
  * to throw a BulkOperationError when any operation fails.
  */
 export type StorageClientBulk<TDocumentType extends { _id?: string } = never> = (
-  request: StorageClientBulkRequest<TDocumentType>
+  request: StorageClientBulkRequest<TDocumentType>,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientBulkResponse>;
 
 export type StorageClientIndex<TDocumentType = never> = (
-  request: StorageClientIndexRequest<TDocumentType>
+  request: StorageClientIndexRequest<TDocumentType>,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientIndexResponse>;
 
 export type StorageClientDelete = (
-  request: StorageClientDeleteRequest
+  request: StorageClientDeleteRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientDeleteResponse>;
 
 export type StorageClientClean = () => Promise<StorageClientCleanResponse>;
 
 export type StorageClientGet<TDocumentType extends { _id?: string } = never> = (
-  request: StorageClientGetRequest
+  request: StorageClientGetRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientGetResponse<TDocumentType>>;
 
 export type StorageClientExistsIndex = () => Promise<boolean>;
+
+/**
+ * Executes an ES|QL query against the storage adapter's index. The adapter
+ * owns the `FROM`/`METADATA` prefix and applies the same read-side guarantees
+ * as `search`/`get`; the caller supplies the post-FROM pipeline via
+ * `pipeline`.
+ */
+export type StorageClientEsql = (
+  request: StorageClientEsqlRequest,
+  transportOptions?: StorageTransportOptions
+) => Promise<ESQLSearchResponse>;
+
+export interface StorageClientEsqlRequest {
+  /**
+   * The ES|QL processing pipeline (everything after FROM), built with the `esql` tagged template
+   * from `@elastic/esql`. The FROM clause is auto-generated from the adapter's storage index.
+   *
+   * Template holes (`${{ name: value }}`) are promoted to named parameters sent to Elasticsearch
+   * at the protocol level, never interpolated into the query string.
+   *
+   * @example
+   * ```ts
+   * import { esql } from '@elastic/esql';
+   * pipeline: esql`WHERE _id == ${{ id }} | LIMIT 1`
+   * ```
+   */
+  pipeline: ComposerQuery;
+  /** METADATA fields for the auto-generated `FROM` clause (e.g. `['_id', '_source']`). */
+  metadata?: string[];
+  /** DSL query ANDed with the pipeline. */
+  filter?: QueryDslQueryContainer;
+  drop_null_columns?: boolean;
+  /** Apply `maybeMigrateSource` to the `_source` column (default true; no-op without `metadata: ['_source', ...]`). */
+  migrateSource?: boolean;
+  /**
+   * SET options prepended before the FROM clause (e.g. `{ unmapped_fields: 'LOAD' }`).
+   * Use when querying indices with `dynamic: false` fields that must be loaded from `_source`.
+   */
+  setOptions?: Record<string, string>;
+}
 
 export interface InternalIStorageClient<TDocumentType extends { _id?: string } = never> {
   search: StorageClientSearch<TDocumentType>;
@@ -135,6 +210,7 @@ export interface InternalIStorageClient<TDocumentType extends { _id?: string } =
   clean: StorageClientClean;
   get: StorageClientGet<TDocumentType>;
   existsIndex: StorageClientExistsIndex;
+  esql: StorageClientEsql;
 }
 
 type UnionKeys<T> = T extends T ? keyof T : never;
@@ -173,8 +249,10 @@ export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Partia
   }>
 >;
 
-export { StorageIndexAdapter } from './src/index_adapter';
+export { StorageIndexAdapter, isEsqlUnknownIndexError } from './src/index_adapter';
 
 export { BulkOperationError } from './src/errors';
+
+export { getSchemaVersion } from './src/get_schema_version';
 
 export { types } from './types';

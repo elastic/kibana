@@ -8,7 +8,7 @@
  */
 
 export type { SecurityServiceSetup, SecurityServiceStart } from './src/contracts';
-export type { CoreAuthenticationService } from './src/authc';
+export type { CoreAuthenticationService, FakeRequestEnricher } from './src/authc';
 export type { CoreAuditService } from './src/audit';
 export type {
   CoreSecurityDelegateContract,
@@ -28,33 +28,16 @@ export type {
 } from './src/audit_logging/audit_events';
 export type { AuditLogger } from './src/audit_logging/audit_logger';
 
-export type {
-  APIKeysType,
-  APIKeysWithContextType,
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  InvalidateAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  GrantAPIKeyResult,
-  NativeAPIKeysType,
-  NativeAPIKeysWithContextType,
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-  UpdateCrossClusterAPIKeyParams,
-  UpdateRestAPIKeyParams,
-  UpdateRestAPIKeyWithKibanaPrivilegesParams,
-  UiamAPIKeysType,
-  UiamAPIKeysWithContextType,
-  GrantUiamAPIKeyParams,
-  InvalidateUiamAPIKeyParams,
-} from './src/authentication/api_keys';
+export type * from './src/authentication';
 
 export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';
-export { isCreateRestAPIKeyParams } from './src/authentication/api_keys';
+export {
+  isCreateRestAPIKeyParams,
+  extractApiKeyIdFromAuthzHeader,
+  decodeApiKeyId,
+  HTTPAuthorizationHeader,
+} from './src/authentication';
+export { isUiamCredential, isMissingApiKey, isRevokedApiKey } from './src/uiam';
 export type { CoreFipsService } from './src/fips';
 export { AuthzDisabled, AuthzOptOutReason, unwindNestedSecurityPrivileges } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';

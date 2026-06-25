@@ -138,6 +138,68 @@ describe('getOutputSchemaForStepType', () => {
     );
   });
 
+  describe('structural step nodes', () => {
+    it('should return conditionResult schema for enter-if node', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'if',
+        type: 'enter-if' as const,
+        exitNodeId: 'exit-id',
+        configuration: {},
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+      const parsed = result.safeParse({ conditionResult: true });
+
+      expect(parsed.success).toBe(true);
+      expect(parsed.data).toEqual({ conditionResult: true });
+    });
+
+    it('should return conditionResult schema for exit-if node', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'if',
+        type: 'exit-if' as const,
+        startNodeId: 'enter-id',
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+      const parsed = result.safeParse({ conditionResult: false });
+
+      expect(parsed.success).toBe(true);
+      expect(parsed.data).toEqual({ conditionResult: false });
+    });
+
+    it('should resolve structural schema by stepType regardless of node type', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'if',
+        type: 'exit-then-branch' as const,
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+      const parsed = result.safeParse({ conditionResult: true });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    it('should fall through to z.unknown() for structural nodes without a registered schema', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'retry',
+        type: 'enter-retry' as const,
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+
+      expect(result.def.type).toBe('unknown');
+    });
+  });
+
   describe('fallback behavior', () => {
     it('should return z.unknown() for unknown step types', () => {
       // Map is empty, connector not found
@@ -274,7 +336,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'dynamic-step',
-        inputSchema: {} as any,
         outputSchema: { def: { type: 'unknown' } } as any,
         editorHandlers: {
           dynamicSchema: {
@@ -320,7 +381,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'error-step',
-        inputSchema: {} as any,
         outputSchema: mockStaticSchema,
         editorHandlers: {
           dynamicSchema: {
@@ -366,7 +426,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'static-step',
-        inputSchema: {} as any,
         outputSchema: mockStaticSchema,
         // no getOutputSchema property
       };
@@ -386,6 +445,46 @@ describe('getOutputSchemaForStepType', () => {
       // Should return the static schema directly
       expect(result).toBe(mockStaticSchema);
       expect(result.def.type).toBe('array');
+    });
+
+    it('should resolve dynamic output schema for waitForInput with a typed schema', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'waitForInput',
+        type: 'waitForInput' as const,
+        configuration: {
+          with: {
+            schema: {
+              type: 'object',
+              properties: { approved: { type: 'boolean' } },
+              required: ['approved'],
+            },
+          },
+        },
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+
+      // Should produce a typed Zod schema, not the permissive record fallback.
+      const valid = result.safeParse({ approved: true });
+      const invalid = result.safeParse({ approved: 'not-a-boolean' });
+      expect(valid.success).toBe(true);
+      expect(invalid.success).toBe(false);
+    });
+
+    it('should return permissive record schema for waitForInput without a schema', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'waitForInput',
+        type: 'waitForInput' as const,
+        configuration: { with: { message: 'Please approve' } },
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+
+      expect(result.safeParse({ anything: true }).success).toBe(true);
     });
   });
 });

@@ -13,7 +13,8 @@
       "user": {
         "entity": {
           "id": "admin@example.com"
-        }
+        },
+        "id": "admin@example.com"
       },
       "client": {
         "user": {
@@ -380,7 +381,8 @@
       "user": {
         "entity": {
           "id": "admin6@example.com"
-        }
+        },
+        "id": "admin6@example.com"
       },
       "client": {
         "user": {
@@ -750,7 +752,8 @@
       "user": {
         "entity": {
           "id": "admin@example.com"
-        }
+        },
+        "id": "admin@example.com"
       },
       "client": {
         "user": {

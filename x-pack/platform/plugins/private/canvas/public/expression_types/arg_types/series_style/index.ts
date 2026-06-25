@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'react-recompose';
 import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
@@ -47,13 +46,6 @@ const EnhancedExtendedTemplate = compose<ExtendedTemplateProps, Props>(
     },
   })
 )(ExtendedTemplate);
-
-EnhancedExtendedTemplate.propTypes = {
-  argValue: PropTypes.any.isRequired,
-  setLabel: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
-  label: PropTypes.string,
-};
 
 export const seriesStyle = () => ({
   name: 'seriesStyle',

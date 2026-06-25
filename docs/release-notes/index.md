@@ -21,6 +21,934 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+% FEATURES, ENHANCEMENTS, FIXES
+% Paste in index.md
+
+## 9.4.2 [kibana-9.4.2-release-notes]
+
+:::{important}
+The 9.4.2 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.4.2-features-enhancements]
+
+**Search**:
+* Improves the **Add inference endpoint** and **Edit inference endpoint** flyouts with clearer titles, a footer **Save** button, task type descriptions in the selector, always-visible endpoint ID and API reference fields, and inline validation for required fields [#262143]({{kib-pull}}262143).
+
+### Fixes [kibana-9.4.2-fixes]
+
+**Alerting and cases**:
+* Fixes an issue that caused rules with large action parameter payloads to fail when saving or executing [#269467]({{kib-pull}}269467).
+* Fixes case workflow templates resolving from the wrong owner [#268719]({{kib-pull}}268719).
+* Fixes phrase search in the **All Cases** view [#266827]({{kib-pull}}266827).
+
+**Connectivity**:
+* Fixes the email connector to reject malformed email addresses (for example, local parts or domain labels with leading or trailing hyphens) that mail servers would reject, preventing unnecessary SMTP connection attempts [#268496]({{kib-pull}}268496).
+* Fixes HTTP connector TLS options when connecting through proxies [#269898]({{kib-pull}}269898).
+* Fixes client-side navigation in the content connectors UI to honor `server.basePath` and space URL prefixes, preventing 404s on connector detail tabs and after creation [#269571]({{kib-pull}}269571).
+
+**Dashboards and Visualizations**:
+* Fixes the links panel transform to remove an unsupported `enhancements` property [#270230]({{kib-pull}}270230).
+* Fixes the Lens API so XY charts with legends at the top or bottom return the correct configuration [#268729]({{kib-pull}}268729).
+* Fixes the Lens Visualization API rejecting `rank_by` with `operation: "count"` on terms buckets when no `field` is specified, so **Count** can rank by all documents without a field [#268620]({{kib-pull}}268620).
+* Fixes the Visualization API to correctly show default datatable colored badges [#268425]({{kib-pull}}268425).
+* Fixes gauge chart `min`, `max`, and `goal` configuration to reject unsupported reference-based metric operations (`moving_average`, `differences`, `cumulative_sum`, `counter_rate`) that require a date histogram [#268168]({{kib-pull}}268168).
+
+**Data ingestion and Fleet**:
+* Parses top-level `elasticsearch` fields in integration packages on upgrade or reinstall [#269080]({{kib-pull}}269080).
+* Fixes the agent enrollment **Confirm incoming data** step timing out for integrations that ingest backdated data by checking `event.ingested` instead of `@timestamp` [#268224]({{kib-pull}}268224).
+
+**Discover**:
+* Preserves the expanded document selection after refresh when comparing documents in Discover [#268328]({{kib-pull}}268328).
+
+**{{esql}} editor**:
+* Allows `null` in `CASE()` expressions combined with other types [#269051]({{kib-pull}}269051).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.4.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Management**:
+* Fixes missing modal and popover labels for screen readers across Stack Management UIs [#269652]({{kib-pull}}269652).
+
+**Machine Learning**:
+* Fixes File upload not disabling data view creation when the user lacks data view creation capabilities [#268167]({{kib-pull}}268167).
+
+**Workflows**:
+* Makes the `with` block optional in workflow YAML for connector steps that have no required parameters [#269047]({{kib-pull}}269047).
+
+## 9.4.1 [kibana-9.4.1-release-notes]
+
+### Fixes [kibana-9.4.1-fixes]
+
+**Alerting**:
+* Fixes empty rule type fields, such as `kibana.alert.reason`, on active alert documents when a delayed alert graduates to active during a flapping hold without an executor report. [#266012]({{kib-pull}}266012)
+
+**Dashboards and Visualizations**:
+* Fixes a critical validation failure that occurred when dashboard controls had `null` titles. Control titles are now converted to `undefined` during transforms, allowing validation to pass [#268220]({{kib-pull}}268220).
+* Fixes a regression where the dashboard remained locked in an open-flyout state after closing the {{esql}} control edit flyout when editing an existing query-based control [#267605]({{kib-pull}}267605).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+## 9.4.0 [kibana-9.4.0-release-notes]
+
+:::{important} - New recommended {{kib}} instance minimum size of 2 GB
+
+We now recommend that your {{kib}} instances have at least 2 GB of memory, especially when using Platinum or Enterprise {{kib}} features, and for production workloads.
+
+New {{ech}} deployments now default to 2 GB of RAM for each {{kib}} instance. 
+:::
+
+### Features and enhancements [kibana-9.4.0-features-enhancements]
+
+**Alerting**:
+* Makes `maximumCasesToOpen` a runtime property [#259255]({{kib-pull}}259255).
+* Adds an auto-push case option to the case connector [#249251]({{kib-pull}}249251).
+* Exposes the `maximumCasesToOpen` parameter in the case action connection [#247990]({{kib-pull}}247990).
+* Adds additional workflow steps [#256922]({{kib-pull}}256922).
+* Alert deletion is now generally available [#247465]({{kib-pull}}247465).
+
+**Elastic Agent Builder**:
+* Updates Test tool flyout to support datetime picker [#249549]({{kib-pull}}249549).
+* Simplifies the {{esql}} test tool parameter types [#249855]({{kib-pull}}249855).
+* Exposes `configuration_overrides` in `agent_builder/converse` API [#249256]({{kib-pull}}249256).
+* Adds support for array parameter types in {{esql}} tools [#250386]({{kib-pull}}250386).
+* Migrates the flyout to a sidebar [#252918]({{kib-pull}}252918).
+* Adds server-side support for user-created skills in Agent Builder [#252493]({{kib-pull}}252493).
+* Adds agent and tools RBAC sub features [#254464]({{kib-pull}}254464).
+* Agent Builder's default agent is no longer read-only and can now be customized per Kibana space [#256333]({{kib-pull}}256333).
+* Adds user-created skills to Agent Builder [#252221]({{kib-pull}}252221).
+* Allows Agent Builder to detect outdated attachments and lets users refresh them into the next message [#257658]({{kib-pull}}257658).
+* Allows {{esql}} generation to search index patterns [#253492]({{kib-pull}}253492).
+* Allows agents to run one or more workflows before each execution, enabling prompt modifications or conditional abort [#252452]({{kib-pull}}252452).
+* Adds audit logging for agent and tool create, update, and delete actions [#252143]({{kib-pull}}252143).
+
+**Connectivity**:
+* Adds support for the `region` parameter to the Bedrock Connector [#252956]({{kib-pull}}252956).
+* Adds a Jina Reader data source connector [#247527]({{kib-pull}}247527).
+* Adds a Jira Cloud data source connector [#251345]({{kib-pull}}251345).
+* Adds a SharePoint Online data source connector [#251544]({{kib-pull}}251544).
+* Adds a ServiceNow data source connector [#252430]({{kib-pull}}252430).
+* Adds a Microsoft Teams data source connector [#252465]({{kib-pull}}252465).
+* Adds a Tavily data source connector [#252717]({{kib-pull}}252717).
+* Adds a Google Calendar data source connector [#252740]({{kib-pull}}252740).
+* Adds a Slack data source connector [#252972]({{kib-pull}}252972).
+* Adds an Amazon S3 data source connector [#253753]({{kib-pull}}253753).
+* Adds a Salesforce data source connector [#254303]({{kib-pull}}254303).
+* Adds a Zendesk data source connector [#254739]({{kib-pull}}254739).
+* Adds a Firecrawl data source connector [#255004]({{kib-pull}}255004).
+* Adds a 1Password data source connector [#255076]({{kib-pull}}255076).
+* Adds a PagerDuty data source connector [#255154]({{kib-pull}}255154).
+* Adds a Zoom data source connector [#255174]({{kib-pull}}255174).
+* Adds a Figma data source connector [#255322]({{kib-pull}}255322).
+* Adds a Gmail data source connector [#255565]({{kib-pull}}255565).
+* Adds an AWS Lambda data source connector [#256150]({{kib-pull}}256150).
+* Adds a Confluence Cloud data source connector [#256508]({{kib-pull}}256508).
+* Adds a Google Cloud Storage data source connector [#257374]({{kib-pull}}257374).
+* Adds a SharePoint Server data source connector [#258014]({{kib-pull}}258014).
+* Adds a GitHub data source connector [#258169]({{kib-pull}}258169).
+* Adds an Azure Blob Storage data source connector [#259439]({{kib-pull}}259439).
+* Adds a GCP Cloud Functions data source connector [#261277]({{kib-pull}}261277).
+* Adds an AbuseIPDB data source connector [#245421]({{kib-pull}}245421).
+* Adds an AlienVault OTX data source connector [#245421]({{kib-pull}}245421).
+* Adds a GreyNoise data source connector [#245421]({{kib-pull}}245421).
+* Adds a Shodan data source connector [#245421]({{kib-pull}}245421).
+* Adds a URLVoid data source connector [#245421]({{kib-pull}}245421).
+* Adds a VirusTotal data source connector [#245421]({{kib-pull}}245421).
+
+**Dashboards and Visualizations**:
+% main features
+* A new Dashboard skill is now available in Agent Builder. This skill allows you to create and update dashboards through natural language [chat](docs-content://explore-analyze/ai-features/agent-builder/chat.md), using the chat UI in {{product.kibana}}, the [Chat API](docs-content://explore-analyze/ai-features/agent-builder/kibana-api.md), or the [MCP server](docs-content://explore-analyze/ai-features/agent-builder/mcp-server.md). Describe what you want to visualize and the agent builds a dashboard with [{{esql}}](docs-content://explore-analyze/query-filter/languages/esql-kibana.md)-powered visualizations. [#261530]({{kib-pull}}261530).
+* New API endpoints are now available in technical preview to manage your dashboards and visualization library. The Dashboards API gives you full read and write access to dashboards, including their panels, controls, sections, and display options. The Visualizations API lets you create and manage visualizations as standalone saved objects in the {{product.kibana}} Visualizations library. [#256302]({{kib-pull}}256302).
+* Adds the ability to show and export Dashboard API JSON in a flyout [#255382]({{kib-pull}}255382).
+
+% controls
+* Controls are now available as a panel type, allowing them to be freely placed anywhere in your dashboards [#245588]({{kib-pull}}245588).
+* Makes **Contains** the default search technique for options list controls [#250992]({{kib-pull}}250992).
+* Allows IP fields to be searched using CIDR notation in controls [#250875]({{kib-pull}}250875).
+
+% sections
+* Extends the selectable area for dragging, collapsing and expanding sections to their entire header [#258502]({{kib-pull}}258502).
+* Allows dragging of opened collapsible sections [#257191]({{kib-pull}}257191).
+* Enforces panel limits on dashboards: up to 100 top-level items (panels, unpinned controls, and sections combined), up to 100 panels per section, and up to 100 pinned controls [#256102]({{kib-pull}}256102).
+
+% dashboard usability
+* Makes the filter pills section collapsible [#255887]({{kib-pull}}255887).
+* Adds a grid size gauge while resizing panels [#255363]({{kib-pull}}255363).
+* Adds a borderless option to panel settings [#255021]({{kib-pull}}255021).
+* Adds library support for markdown panels [#248779]({{kib-pull}}248779).
+* Allows panels to be dragged while they're in focus for editing [#251327]({{kib-pull}}251327).
+* Redesigns the panel titles [#251720]({{kib-pull}}251720).
+* Refreshes the Dashboards app menu [#246153]({{kib-pull}}246153).
+
+% discover sessions in dashboards
+* Adds a **Discover session** panel option to dashboards [#256293]({{kib-pull}}256293).
+* Editing an unlinked Discover session panel in a dashboard now saves changes back to that panel [#250438]({{kib-pull}}250438).
+* Filtering a field value in a Discover {{esql}} session embedded in a dashboard now creates a DSL filter, consistent with how filtering works elsewhere [#249357]({{kib-pull}}249357).
+* Adds a tab selector to Discover session panels in Dashboards, with improved warning messages when a tab or data view can't be retrieved [#252311]({{kib-pull}}252311).
+
+% esql + viz
+* Adds {{esql}} support to Vega visualizations [#247186]({{kib-pull}}247186).
+* Enables {{esql}} multi-terms charts in Lens [#244743]({{kib-pull}}244743).
+* Allows filtering from legend actions when possible for {{esql}} visualizations [#248789]({{kib-pull}}248789).
+* Suggests line charts for timeseries {{esql}} queries (TS / PromQL) in Lens [#252661]({{kib-pull}}252661).
+* Retrieves variable types from the {{esql}} query response [#254436]({{kib-pull}}254436).
+* Enables dashboard and URL drilldown for {{esql}} charts [#253223]({{kib-pull}}253223).
+
+% chart options and improvements
+* Defaults the visualization type to line chart when the x-axis contains a timestamp, instead of a bar chart [#253930]({{kib-pull}}253930).
+* Adds a new optimized color palette for line charts [#253437]({{kib-pull}}253437).
+* Adds a **Badge** color option for table values in Lens, allowing cell values to be displayed as colored badges instead of text or background coloring [#257408]({{kib-pull}}257408).
+* Adds a new list legend layout for horizontal legends (top and bottom), offering a more space-efficient alternative to the grid layout. This is now the default for XY charts [#257092]({{kib-pull}}257092).
+* Adds sort order options for heatmap visualization axes [#244696]({{kib-pull}}244696).
+* Adds a middle position option for the primary metric styling settings of metric charts [#260902]({{kib-pull}}260902).
+* Improves tick labels for time-based X axes in {{esql}} heatmap visualizations [#259218]({{kib-pull}}259218).
+* Improves datatable visualization performance for large datasets in Lens [#256234]({{kib-pull}}256234).
+* Enables fixed-width number formatting in Lens visualizations for cleaner alignment [#251576]({{kib-pull}}251576).
+* Introduces a Severity color palette in Lens color mapping [#250198]({{kib-pull}}250198).
+* Improves the badge colors for metric trend indicators in Lens [#256255]({{kib-pull}}256255).
+* Legend actions in Lens XY and Partition charts now only appear on hover [#255616]({{kib-pull}}255616).
+* Removes the font-weight configuration option from Lens Metric chart titles, defaulting to medium weight [#254941]({{kib-pull}}254941).
+* Updates axis title and label colors in Lens and dashboard charts to be less visually prominent [#254587]({{kib-pull}}254587).
+* Displays row numbers by default in Lens data tables [#247834]({{kib-pull}}247834).
+
+**Data ingestion and Fleet**:
+* Allows remote {{es}} outputs and service tokens in Serverless [#262101]({{kib-pull}}262101).
+* Renames Cloud Connector to Federated Identity in the UX [#261353]({{kib-pull}}261353).
+* Adds support for monitoring OpenTelemetry (OTel) collectors in {{fleet}} in technical preview. You can now add OTel collector agents using the **Add** > **Collector (OpAMP)** button in the Fleet UI [#260654]({{kib-pull}}260654).
+* Introduces support for version-specific policies in {{fleet}} when integrations specify agent version requirements, ensuring agents receive only configurations compatible with their version [#258796]({{kib-pull}}258796).
+* Shows UI warnings for integrations with upcoming deprecations [#257937]({{kib-pull}}257937).
+* Resolves and merges templates listed in `template_paths` [#257730]({{kib-pull}}257730).
+* Adds permission verifier background tasks [#257516]({{kib-pull}}257516).
+* Installs package dependencies automatically [#256700]({{kib-pull}}256700).
+* Requests user review when auto-upgrading packages with deprecations [#255273]({{kib-pull}}255273).
+* Adds an out-of-the-box alerting rule template to freshly installed integrations for monitoring idle data streams [#254730]({{kib-pull}}254730).
+* Displays warnings for deprecated integration features [#253923]({{kib-pull}}253923).
+* Shows warnings in the UI when an integration is deprecated [#251860]({{kib-pull}}251860).
+* Allows {{fleet}} to install integration-managed SLO templates for creating new SLOs [#250369]({{kib-pull}}250369).
+* Migrates input configurations when the `migrate_from` field is specified in the package manifest [#242934]({{kib-pull}}242934).
+* Updates the maximum supported package specification version to 3.6 [#261362]({{kib-pull}}261362).
+* Adds a new **Alerting** tab to the integrations UI for viewing and managing alerting-related assets [#253948]({{kib-pull}}253948).
+* Allows integration rollback when only some integration policies are upgraded [#253646]({{kib-pull}}253646).
+* Ensures the time series index mode is not enabled for input packages with non-metrics data streams [#251205]({{kib-pull}}251205).
+* Adds authentication fields to {{agent}} binary download sources managed by {{fleet}} for connecting to self-hosted artifact registries [#250557]({{kib-pull}}250557).
+* Improves memory usage during {{fleet}} setup by deferring package reinstalls to async tasks [#248235]({{kib-pull}}248235).
+
+**Discover**:
+% esql mode
+* Redesigns the {{esql}} editor footer in Discover: removes the row limit and timestamp indicators, and adds query run statistics [#244284]({{kib-pull}}244284).
+* Adds a fields browser to the {{esql}} editor in Discover [#252749]({{kib-pull}}252749).
+* Adds a layout toggle to show or hide the data table in Discover, with the state persisted in the URL [#259083]({{kib-pull}}259083).
+* Adds a grouped view in Discover for {{esql}} queries that use `STATS ... BY` with a single grouping field. A new toolbar selector lets you pivot by that field or switch back to the standard table view. [#220119]({{kib-pull}}220119).
+* Converts DSL filters to {{esql}} when possible when switching to {{esql}} mode [#259260]({{kib-pull}}259260).
+* Persists the query mode ({{esql}} or classic) to local storage so that the next sessions open with the last mode used [#250388]({{kib-pull}}250388).
+* Shows Streams field descriptions in the {{esql}} editor and field sidebar [#260582]({{kib-pull}}260582).
+
+% metrics
+* Filters from the top-level {{esql}} WHERE clause now propagate into per-metric charts in the Discover metrics grid [#249103]({{kib-pull}}249103).
+* Adds support for visualizing `tdigest` and `exponential_histogram` histogram metrics in the Discover metrics grid [#249269]({{kib-pull}}249269).
+* Hides the data table by default when the metrics-specific Discover experience is triggered [#260607]({{kib-pull}}260607).
+
+% tabs and sessions
+* Adds the ability to restore recently closed tab groups [#253365]({{kib-pull}}253365).
+* Hovering over an entry in the recently closed tabs menu now shows a preview of what the tab contained [#246973]({{kib-pull}}246973).
+* Moves the inspector menu item to the tab menu [#258767]({{kib-pull}}258767).
+* The chart interval is now saved with Discover sessions and restored when reopening them [#246426]({{kib-pull}}246426).
+* Adds notifications for background search completion [#249857]({{kib-pull}}249857).
+* Adds a **Save Discover table to dashboard** option [#259626]({{kib-pull}}259626).
+
+% general
+* Adds default table columns for indexes and views with a small number of fields [#255292]({{kib-pull}}255292).
+
+% doc viewer
+* The doc viewer flyout now stays open when switching between Discover tabs and remembers which tab (such as **Table** or **JSON**) was active in each [#246612]({{kib-pull}}246612).
+
+**{{esql}} editor**:
+% new commands and language features
+* Adds PromQL support in {{kib}} through {{esql}} [#249854]({{kib-pull}}249854).
+* Adds support for the `USER_AGENT` command [#261314]({{kib-pull}}261314).
+* Adds support for the `MMR` command [#257208]({{kib-pull}}257208).
+* Adds autocomplete and validation support for the `approximate` setting in the {{esql}} editor [#248946]({{kib-pull}}248946).
+* Adds support for KQL syntax to the quick search option [#247224]({{kib-pull}}247224).
+* Adds autocomplete to the KQL function [#249510]({{kib-pull}}249510).
+* Adds support for unmapped fields [#248606]({{kib-pull}}248606).
+* Adds support for timezone handling [#247917]({{kib-pull}}247917).
+
+% GA commands
+* Makes the `FORK` command generally available [#261904]({{kib-pull}}261904).
+* Makes the `RERANK` command generally available [#252242]({{kib-pull}}252242).
+
+% editor UI and experience
+* Redesigns the {{esql}} editor interface [#251223]({{kib-pull}}251223).
+* Adds a data source browser to the {{esql}} editor [#251897]({{kib-pull}}251897).
+* Adds support for {{esql}} views to the editor [#261907]({{kib-pull}}261907).
+* Adds {{esql}} query statistics to the editor [#251029]({{kib-pull}}251029).
+* Improves {{esql}} editor autocomplete for full-text search functions: `MATCH_PHRASE`'s second argument now only suggests literal values, and FTS functions are excluded from `EVAL` suggestions except inside `SCORE()` [#247003]({{kib-pull}}247003).
+* Improves line commenting in the {{esql}} editor to match standard IDE conventions [#254851]({{kib-pull}}254851).
+* Improves query pretty printing [#257440]({{kib-pull}}257440).
+* Adds an {{esql}} indentation shortcut to the editor [#247234]({{kib-pull}}247234).
+* Simplifies the **Run** and **Cancel** button states in the {{esql}} editor [#254121]({{kib-pull}}254121).
+* Highlights multiple word occurrences in search results [#258764]({{kib-pull}}258764).
+
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.4.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* In container deployments, automatically sets the Node.js heap size to 60% of available memory, up to a maximum of 4096 MB, when no heap size is explicitly configured [#246073]({{kib-pull}}246073).
+* Adds a feedback button to {{kib}}'s header [#225074]({{kib-pull}}225074).
+* Remembers the pagination state when navigating back from an edit on the **Users** page, instead of always returning to page 1 and resetting the search [#261152]({{kib-pull}}261152).
+* Distinguishes between session idle timeouts and session lifespan timeouts [#252779]({{kib-pull}}252779).
+* Improves Index Management index list load performance on large clusters with many indices [#246276]({{kib-pull}}246276).
+* Adds a **Query Activity** page under Stack Management for viewing and canceling long-running queries [#253216]({{kib-pull}}253216).
+
+**Machine Learning**:
+* Updates Security ML jobs to use entity analytics fields for host and user fields [#255339]({{kib-pull}}255339).
+* Adds a link to manage anomaly detection jobs in the Machine Learning left navigation [#260605]({{kib-pull}}260605).
+* Anomaly detection now automatically closes the job when stopping a datafeed [#259603]({{kib-pull}}259603).
+* Adds aria labels to anomaly detection job wizard combo boxes [#258509]({{kib-pull}}258509).
+* Updates the `v3_rare_process_by_host_windows` bucket span to two hours [#255855]({{kib-pull}}255855).
+* Changes the rare process by host Windows job bucket span from 15m to 4h [#255385]({{kib-pull}}255385).
+* Adds a new single APM Correlations endpoint for latency and failed transactions [#254607]({{kib-pull}}254607).
+* Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet preconfigured connectors [#253109]({{kib-pull}}253109).
+* Adds a dynamic default connector in GenAI settings [#252861]({{kib-pull}}252861).
+* Adds a zoom in button to the date picker [#252252]({{kib-pull}}252252).
+* Adds Anthropic Claude Opus 4.6 preconfigured connector [#252177]({{kib-pull}}252177).
+* Uses the `location` field to correctly set provider config in AI/Inference Connector creation [#250838]({{kib-pull}}250838).
+* Adds the proxy URL setting for product documentation artifact [#250771]({{kib-pull}}250771).
+* Adds new preconfigured connectors [#249379]({{kib-pull}}249379).
+* Moves the results view buttons closer to the job selection controls in Anomaly Detection [#249261]({{kib-pull}}249261).
+* Adds missing {{esql}} commands and functions documentation for inference tasks [#249089]({{kib-pull}}249089).
+* Enhances model memory estimation for supplied configurations in anomaly detection [#248479]({{kib-pull}}248479).
+* Adds the `timeout` parameter to InferenceChatModel [#248326]({{kib-pull}}248326).
+* Adds time window buttons to the date picker [#248142]({{kib-pull}}248142).
+* Adds a button to synchronize saved objects in trained models [#247691]({{kib-pull}}247691).
+* Refreshes the Overview page [#247573]({{kib-pull}}247573).
+* Marks 429 errors as user errors in Inference/AI Connector [#246640]({{kib-pull}}246640).
+* Opens matching pattern docs in a new Discover tab [#245695]({{kib-pull}}245695).
+
+**Search**:
+* Adds warnings to the **Feature Settings** page for models that are invalid [#262262]({{kib-pull}}262262).
+* Deprecates search indices in favor of index management [#260210]({{kib-pull}}260210).
+* Adds a **Models** page for inference management [#259374]({{kib-pull}}259374).
+* Adds a **Model Settings** UI for inference endpoint assignments [#258871]({{kib-pull}}258871).
+* Sets Jina v5 as the default inference endpoint for `semantic_text` fields when it's available [#257464]({{kib-pull}}257464).
+* Adds an AI assistant-led onboarding option to the Elasticsearch getting started page [#255192]({{kib-pull}}255192).
+* Automatically creates AI connectors for Elastic Inference Service chat completion endpoints when they are added [#254826]({{kib-pull}}254826).
+* Adds sorting capabilities to the Inference Endpoints table, allowing users to sort by Endpoint, Service, Type, or Model using a dropdown or by clicking column headers [#252189]({{kib-pull}}252189).
+* Adds a summary stats bar to the Inference Endpoints page displaying counts for Services, Models, Types, and Endpoints [#251558]({{kib-pull}}251558).
+* Adds a copy-to-clipboard button for inference endpoint names in the Inference Endpoints management page [#251494]({{kib-pull}}251494).
+* Improves the External Inference page by hiding the Elasticsearch service provider from the **Add Inference Endpoint** flyout, since Elasticsearch endpoints are managed internally [#261851]({{kib-pull}}261851).
+* Adds a model detail flyout with endpoint management [#260307]({{kib-pull}}260307).
+* Reduces search latency by switching to long-polling when HTTP/2 multiplexing is available, eliminating unnecessary wait times [#256564]({{kib-pull}}256564).
+* Improves the Inference Endpoints management page by adding a view to group by service [#254296]({{kib-pull}}254296).
+* Improves the Inference Endpoints management page by adding a view to group by models, making this the default view [#252984]({{kib-pull}}252984).
+* Consolidates Type, Preconfigured, and Tech Preview badges under the endpoint name and removes the dedicated Type column in the inference endpoints table [#252621]({{kib-pull}}252621).
+* Improves AI connector setup by auto-populating the model field with recommended defaults [#250506]({{kib-pull}}250506).
+* Improves the inference endpoints page by adding a Model column and enabling search by model name [#249779]({{kib-pull}}249779).
+* Adds descriptions to the `semantic_text` field inference endpoint select [#249265]({{kib-pull}}249265).
+* Fixes layout instability in the inference endpoint selector when endpoint names are long [#247417]({{kib-pull}}247417).
+* Displays the API key tab if the user has permission, and hides it for users without API key management permissions [#246979]({{kib-pull}}246979).
+* Updates the Search homepage design [#246777]({{kib-pull}}246777).
+
+**Workflows**:
+* Adds import and export features for workflows [#257976]({{kib-pull}}257976).
+* Adds the `workflows.executionFailed` trigger so you can run workflows when another workflow fails. Use it to send notifications (for example, Slack), run cleanup, or trigger retries [#257633]({{kib-pull}}257633).
+* Adds a server-side workflow validation endpoint [#254502]({{kib-pull}}254502).
+* Makes the manual run API public [#253010]({{kib-pull}}253010).
+* Whitelists Streams APIs as Kibana workflow steps [#252068]({{kib-pull}}252068).
+* Adds the `entries` Liquid filter for iterating over object keys [#259249]({{kib-pull}}259249).
+* Adds cases workflow steps [#253119]({{kib-pull}}253119),[#256922]({{kib-pull}}256922).
+
+### Fixes [kibana-9.4.0-fixes]
+
+**Alerting**:
+* Fixes an issue where Stack alerts sent recovery notifications but remained `active` in {{kib}} instead of transitioning to `recovered` [#261012]({{kib-pull}}261012).
+* Fixes stale `uiamApiKey` leaking through object spread in rule updates [#263887]({{kib-pull}}263887).
+* Fixes OpenAPI alerting rule params schemas missing accepted keys for burn-rate windows and Elasticsearch query `sourceFields` [#263634]({{kib-pull}}263634).
+* Fixes an index template update failing due to system-managed fields [#262534]({{kib-pull}}262534).
+* Adds the `application/x-zip-compressed` MIME type as an accepted value for cases file attachment [#262414]({{kib-pull}}262414).
+* Fixes alert recovery targeting the wrong document when multiple lifecycles exist for the same instance ID [#261012]({{kib-pull}}261012).
+* Fixes `cloneRule` leaking source rule API keys to cloned rules [#260549]({{kib-pull}}260549).
+* Fixes `incremental_id` drift issues [#258789]({{kib-pull}}258789).
+* Fixes Webhook Connector `accessTokenUrl` validation [#258290]({{kib-pull}}258290).
+* Fixes additional fields not being included [#257625]({{kib-pull}}257625).
+* Fixes a discrepancy between tracked alerts and alerts in task state [#257235]({{kib-pull}}257235).
+* Fixes a problem generating a report with multi-page Canvas workpads [#255022]({{kib-pull}}255022).
+* Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
+* Fixes an error not being caught from `scheduleUnusedUrlsCleanupTask()` [#254574]({{kib-pull}}254574).
+* Fixes a bug with PagerDuty where setting the **Custom details** field causes rules to fail [#253683]({{kib-pull}}253683).
+* Improves error handling within the content stream code for multiple reporting attempts [#252982]({{kib-pull}}252982).
+* Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
+* Improves handling of `204` responses [#251090]({{kib-pull}}251090).
+* Fixes timestamp override for {{esql}} CSV scheduled reports with relative time ranges [#248169]({{kib-pull}}248169).
+* Fixes **Failed to check if maintenance windows are active** error [#261048]({{kib-pull}}261048).
+* Updates `total_event` in the Elasticsearch document when attaching an event [#247996]({{kib-pull}}247996).
+* Encodes the search term in the cases page [#247992]({{kib-pull}}247992).
+* Adds max character validation to the email connector params and config [#246453]({{kib-pull}}246453).
+* Fixes the wrong time zone being applied when a CSV report has a local date comparison [#244405]({{kib-pull}}244405).
+
+**Connectivity**:
+* Fixes `defaultModel` not being injected for the **Other** OpenAI provider on run and test sub-actions [#260747]({{kib-pull}}260747).
+* Fixes MCP connectors ignoring the proxy and SSL configuration from the actions plugin [#255813]({{kib-pull}}255813).
+* Adds the datasource name to the namespace to allow creating multiple sources of the same type [#249123]({{kib-pull}}249123).
+
+**Dashboards and Visualizations**:
+* Fixes an issue that could prevent a dashboard from showing its latest saved state [#262695]({{kib-pull}}262695).
+* Prevents a false positive warning about unsaved changes when sharing a dashboard while in View Mode [#261051]({{kib-pull}}261051).
+* Fixes regressions for space-relative links and same-window target [#260782]({{kib-pull}}260782).
+* Improves {{esql}} suggestions logic in Lens [#258475]({{kib-pull}}258475).
+* Adjusts scroll behavior when dropping a panel to a new position [#258445]({{kib-pull}}258445).
+* Fixes screen reader announcements when entering full screen mode on a dashboard [#258230]({{kib-pull}}258230).
+* Fixes an issue with logic for detecting unsaved changes for dashboards in non-default spaces [#257762]({{kib-pull}}257762).
+* Fixes an issue where visualizations stayed focused after closing the variables editor flyout [#257263]({{kib-pull}}257263).
+* Fixes **Add from library** adding incorrect embeddable state [#257261]({{kib-pull}}257261).
+* Fixes dashboard panels getting stuck in infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
+* Fixes an issue where editing a library visualization would correctly save changes but visually show its previous saved state in dashboards referencing that visualization until the page was refreshed [#256984]({{kib-pull}}256984).
+* Stops adding a default title when creating {{esql}} charts in Lens [#256475]({{kib-pull}}256475).
+* Fixes the pinned state for variable ({{esql}}) and range slider controls [#256035]({{kib-pull}}256035).
+* Fixes `timeFilter`'s `quick` mode in Maps stored state, that could prevent maps from loading [#255178]({{kib-pull}}255178).
+* Fixes an issue where saving a dashboard included access control features when a user profile, which is required for access control, was not available [#255065]({{kib-pull}}255065).
+* Fixes an issue occurring when saving a map containing filters [#253537]({{kib-pull}}253537).
+* Fixes configuration panel scrolling in the Lens editor when the content exceeds available height [#253247]({{kib-pull}}253247).
+* Changes dashboard background color to white [#253068]({{kib-pull}}253068).
+* Changes the default height of link panels to 2 rows [#252707]({{kib-pull}}252707).
+* Fixes the library annotation group not syncing across panels after an update in Lens [#252640]({{kib-pull}}252640).
+* Fixes KQL character escaping when a query is generated from the Top values column (breakdown) in Lens [#250925]({{kib-pull}}250925).
+* Fixes an issue where PDF/PNG reports are cut off at the end when a dashboard has a markdown panel [#249644]({{kib-pull}}249644).
+* Limits variable suggestions to variables within scope [#248365]({{kib-pull}}248365).
+* Re-fetches control options when the timerange changes [#248068]({{kib-pull}}248068).
+* Fixes link color contrast in Lens data tables [#247721]({{kib-pull}}247721).
+* Removes `| LIMIT 10` from the {{esql}} panel in dashboards when creating a visualization in Lens [#247427]({{kib-pull}}247427).
+* Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
+* Increases default top values from 3 or 5 to 9 categories in Lens [#247015]({{kib-pull}}247015).
+* Fixes the handling of a quote as a dead key [#246773]({{kib-pull}}246773).
+* Fixes an issue where embeddables cannot load when no references are provided [#257779]({{kib-pull}}257779).
+* Fixes `runtime_mappings` being ignored or overridden in Vega visualization data requests [#253560]({{kib-pull}}253560).
+* Changes the Gauge chart default color palette to the status palette [#246734]({{kib-pull}}246734).
+
+**Data ingestion and Fleet**:
+* Fixes package policy count filters: uses `NOT latest_revision:false` instead of `latest_revision:true` [#263717]({{kib-pull}}263717).
+* Disables the output selector for managed policies in the package policy edit form [#263494]({{kib-pull}}263494).
+* Fixes permissions for spanevents stored in logs data streams [#263415]({{kib-pull}}263415).
+* Handles compressed responses from {{es}} [#262394]({{kib-pull}}262394).
+* Fixes the table sorting announcement for accessibility [#262226]({{kib-pull}}262226).
+* Fixes the learn more focus for accessibility [#261902]({{kib-pull}}261902).
+* Fixes **Define as JSON** announcement for accessibility [#261896]({{kib-pull}}261896).
+* Fixes the pipelines table row index announcement for accessibility [#261369]({{kib-pull}}261369).
+* Includes `input_output` in inference processor [#260517]({{kib-pull}}260517).
+* Fixes the selected log level when there is a policy override [#259425]({{kib-pull}}259425).
+* Avoids icon announcement duplication for accessibility [#259185]({{kib-pull}}259185).
+* Fixes processors accessibility announcements [#259096]({{kib-pull}}259096).
+* Adds version-specific policies telemetry [#259031]({{kib-pull}}259031).
+* Fixes space-awareness for Fleet bulk agent actions (unenroll, upgrade, reassign to policy) [#258582]({{kib-pull}}258582).
+* Fixes an auto upgrade bug when upgrading agents in other policies interfered with the calculation [#258387]({{kib-pull}}258387).
+* Validates generated OpenAPI output [#258267]({{kib-pull}}258267).
+* Fixes package policy creation failing with a `data_stream.type` validation error for input-only integrations that use dynamic signal types, such as OpenTelemetry collector packages [#258143]({{kib-pull}}258143).
+* Improves error handling in debug API [#258115]({{kib-pull}}258115).
+* Fixes the unenroll task and adds an FTR test [#255726]({{kib-pull}}255726).
+* Fixes the incorrect installation of assets [#254923]({{kib-pull}}254923).
+* Filters out unenrolled agents in the cleanup policy revisions task [#254899]({{kib-pull}}254899).
+* Fixes an issue where an agent rolled back after an upgrade could not be upgraded again in the Fleet UI [#253850]({{kib-pull}}253850).
+* Fixes a TypeError when an integration has no SVG icons [#251308]({{kib-pull}}251308).
+* Adds back support for generating a CSV report of Fleet agent data in serverless environments [#247185]({{kib-pull}}247185).
+
+**Discover**:
+* Fixes the date picker showing empty when switching from KQL to {{esql}} [#261175]({{kib-pull}}261175).
+* Fixes a tab URL state leak when leaving Discover [#262929]({{kib-pull}}262929).
+* Resets the time field when the updated index pattern does not have it [#262001]({{kib-pull}}262001).
+* Resets the default profile state when transitioning between tab modes [#255226]({{kib-pull}}255226).
+* Makes matches cells expandable for long field filter matches [#255093]({{kib-pull}}255093).
+* Fixes URL, Badge, Color, and other field formatters incorrectly rendering fields with missing or null values [#251892]({{kib-pull}}251892).
+* Fixes filtering out null values from the Discover histogram legend in {{esql}} mode [#249302]({{kib-pull}}249302).
+* Fixes **Search entire time range** for date nanos [#248495]({{kib-pull}}248495).
+* Prevents doc viewer flyout tabs from unnecessarily re-mounting on query refresh [#248203]({{kib-pull}}248203).
+* Fixes dropdown menus staying open when switching tabs [#247836]({{kib-pull}}247836).
+* Makes static-lookup formatter work with aggregated boolean fields [#249311]({{kib-pull}}249311).
+* Adds a check to ensure {{esql}} is valid before matching the Metrics profile [#248917]({{kib-pull}}248917).
+* Prevents losing draft queries when switching tabs [#247968]({{kib-pull}}247968).
+* Fixes an issue where quickly opened tabs could not complete loading [#246941]({{kib-pull}}246941).
+* Fixes the default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
+
+**{{esql}} editor**:
+* Fixes {{esql}} multi-value filtering with `STATS` [#260998]({{kib-pull}}260998).
+* Fixes `STATS` generated columns with inline `WHERE` [#260196]({{kib-pull}}260196).
+* When no local indices are available, the {{esql}} query suggestion now correctly considers remote indices [#257340]({{kib-pull}}257340).
+* Fixes {{esql}} variable controls not displaying server-side errors in the editor [#263020]({{kib-pull}}263020).
+* Fixes autocomplete fetches piling up without cancellation when typing rapidly in the {{esql}} editor [#255664]({{kib-pull}}255664).
+* Fixes incorrect validation of the `TS` (time series) command [#253635]({{kib-pull}}253635).
+* Fixes some `GROK` patterns not being recognized, which caused columns to appear as unknown [#246871]({{kib-pull}}246871).
+* Aborts in-flight long-running queries for {{esql}} controls [#254487]({{kib-pull}}254487).
+* Fixes incorrect KQL bar results for some indices [#254119]({{kib-pull}}254119).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.4.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Sets `auto_expand_replicas` to fix yellow health on single-node Elasticsearch clusters [#263096]({{kib-pull}}263096).
+* Allows space color to be cleared, falling back to default [#261826]({{kib-pull}}261826).
+* Fixes the data stream and indices duplication for accessibility [#261786]({{kib-pull}}261786).
+* Fixes an incorrect announcement for accessibility [#261603]({{kib-pull}}261603).
+* Announces policy button with distinguishable names for accessibility [#261313]({{kib-pull}}261313).
+* Prevents duplicate **Leave without saving?** modal on solution view cancel [#260958]({{kib-pull}}260958).
+* Fixes inactive component template row focus and badge accessibility labels [#260719]({{kib-pull}}260719).
+* Fetches the last available version [#259798]({{kib-pull}}259798).
+* Fixes the Stack Monitoring shard legend not showing node placement [#257854]({{kib-pull}}257854).
+* Fixes Stack Monitoring Elasticsearch nodes CPU usage sorting [#257852]({{kib-pull}}257852).
+* Fixes an issue where the Kibana JSON logger could print a JSON object with a large number of numbered keys [#256233]({{kib-pull}}256233).
+* Resolves an issue with the spaces list displaying **No spaces match** text on load [#255654]({{kib-pull}}255654).
+* Adds `waitFor` for the privilege button [#255094]({{kib-pull}}255094).
+* Fixes the embeddable console auto-closing on chrome/overlay clicks [#253382]({{kib-pull}}253382).
+* Fixes a problem loading the doc count in index management when viewing larger page sizes with long index names [#252422]({{kib-pull}}252422).
+* Fixes share feature rounding [#251073]({{kib-pull}}251073).
+* Handles paging through more than 10,000 API keys [#250826]({{kib-pull}}250826).
+* Fixes Stack Monitoring Recent Log Entries timestamps to respect Kibana's time zone setting (`dateFormat:tz`) [#249016]({{kib-pull}}249016).
+* Fixes an issue with share modal where all time ranges were being shared as absolute [#248804]({{kib-pull}}248804).
+* Fixes `createAuditEvents` always returning failure as outcome [#247152]({{kib-pull}}247152).
+* Fixes the monitoring breadcrumbs for the solution view [#249751]({{kib-pull}}249751).
+
+**Machine Learning**:
+* Ensures the single metric chart shows anomaly actions correctly in Anomaly Explorer [#263925]({{kib-pull}}263925).
+* Formats `time_of_day` / `time_of_week` values in anomaly detection alerting rule notifications and results preview [#261034]({{kib-pull}}261034).
+* Fixes the anomaly swim lane embeddable refresh in Anomaly Detection [#259962]({{kib-pull}}259962).
+* Fixes a jobs list console error in Data frame analytics [#258591]({{kib-pull}}258591).
+* Disables start and update deployment actions for Rerank models in trained models [#257400]({{kib-pull}}257400).
+* Fixes the field statistics saved search not updating when the dashboard changes filter [#257241]({{kib-pull}}257241).
+* Fixes the update of the job rules flyout in Anomaly Detection Single Metric Viewer [#257196]({{kib-pull}}257196).
+* Fixes screen reader announcements for flyouts [#256409]({{kib-pull}}256409).
+* Improves Smart Grouping performance and re-enables it in Log rate analysis [#253704]({{kib-pull}}253704).
+* Fixes headings in Log rate and pattern analysis and Change point detection for accessibility [#253266]({{kib-pull}}253266).
+* Fixes the today and this week filters for Log Rate and Pattern Analysis embeddables [#252925]({{kib-pull}}252925).
+* Fixes the file size limit check in file upload [#251515]({{kib-pull}}251515).
+* Fixes occasional file preview corruption in file upload [#250532]({{kib-pull}}250532).
+* Fixes word break in Anomaly Detection page titles [#250058]({{kib-pull}}250058).
+* Passes abort signal to Elasticsearch in file upload [#249623]({{kib-pull}}249623).
+* Updates the Packetbeat DNS tunneling datafeed to include runtime mappings [#249317]({{kib-pull}}249317).
+* Fixes counter metric fields being missing in the Anomaly detection dropdown [#248187]({{kib-pull}}248187).
+* Fixes broken Data Visualizer and AIOps navigation breadcrumbs and sidebar in solutions [#248167]({{kib-pull}}248167).
+* Disables {{esql}} field stats for TS command [#247641]({{kib-pull}}247641).
+* Fixes the display of the map view for small screen sizes in Data Visualizer [#247615]({{kib-pull}}247615).
+* Fixes an anomaly chart empty query bug [#246841]({{kib-pull}}246841).
+* Fixes deanonymization offset drift and adds regression coverage [#256112]({{kib-pull}}256112).
+* Improves anonymization error messages when the NER model is not available [#247696]({{kib-pull}}247696).
+* Adds a refusal field to assistant conversations [#243423]({{kib-pull}}243423).
+
+**Management**:
+* Fixes the code box stale announcement for accessibility [#261921]({{kib-pull}}261921).
+* Announces data streams stats toggle change for accessibility [#261911]({{kib-pull}}261911).
+* Shows all `source_index` entries when `source_index` is an array [#261875]({{kib-pull}}261875).
+* Avoids search template announcement duplication for accessibility [#261585]({{kib-pull}}261585).
+* Fixes the data streams table row index announcement for accessibility [#261366]({{kib-pull}}261366).
+* Avoids duplications on icon announcement in **Edit policy** for accessibility [#261324]({{kib-pull}}261324).
+* Fixes policy list actions tooltip screen reader duplication for accessibility [#261322]({{kib-pull}}261322).
+* Fixes copy buttons announcement duplications for accessibility [#261311]({{kib-pull}}261311).
+* Fixes the gray color announcement in the Transform list for accessibility [#261307]({{kib-pull}}261307).
+* Announces an invalid field for accessibility [#260673]({{kib-pull}}260673).
+* Introduces polling for the summary extension [#260447]({{kib-pull}}260447).
+* Returns **Create Transform** focus to button [#258095]({{kib-pull}}258095).
+* Enhances screen reader notifications for bulk actions in Index Management tables [#257089]({{kib-pull}}257089).
+* Fixes the incorrect announcement options [#256948]({{kib-pull}}256948).
+* Improves the name announcement in the index mode modal [#256392]({{kib-pull}}256392).
+* Displays ILM name and link when `prefer_ilm` is set. Index management's data view list now shows the current configuration in the **Retention** column [#254609]({{kib-pull}}254609).
+* Fixes a bug when adding to an index template [#249168]({{kib-pull}}249168).
+* Fixes an indented body highlighting regression in **Dev Tools Console** [#257539]({{kib-pull}}257539).
+* Fixes Console autocomplete to insert `{}`/`[]` snippets instead of quoted braces when selecting suggestions in request bodies [#256286]({{kib-pull}}256286).
+* Fixes syntax highlighting for strings with unicode characters in **Dev Tools Console** [#255649]({{kib-pull}}255649).
+* Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements [#255426]({{kib-pull}}255426).
+* Fixes autocomplete not working in embedded console [#253306]({{kib-pull}}253306).
+* Prevents cloned managed ILM policies from being marked as managed [#248586]({{kib-pull}}248586).
+
+**Search**:
+* Fixes the save confirmation message not appearing after saving changes on the **Feature Settings** page [#263768]({{kib-pull}}263768).
+* Fixes the query rules UI rejecting case variants as duplicate values [#259506]({{kib-pull}}259506).
+* Fixes the query ruleset save deleting filtered-out rules [#259503]({{kib-pull}}259503).
+* Fixes the **Convert to lookup index** action being permanently disabled on the index list view in stateful deployments [#259449]({{kib-pull}}259449).
+* Removes the `exact_fuzzy` option from the Query Rules UI [#258278]({{kib-pull}}258278).
+* Prevents **Add field** from overwriting existing mappings [#256728]({{kib-pull}}256728).
+* Fixes {{esql}} tool crash with optional null parameters [#256588]({{kib-pull}}256588).
+* Fixes incompatible inference endpoints being selectable in the semantic text field [#256586]({{kib-pull}}256586).
+* Fixes Search Playground routes to limit the maximum size of arrays [#255881]({{kib-pull}}255881).
+* Fixes the focus behavior when there are errors in the connector flyout form [#255770]({{kib-pull}}255770).
+* Fixes the homepage throwing errors when the license level is below Enterprise [#251484]({{kib-pull}}251484).
+* Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
+* Fixes links being visible on Search homepage when user doesn't have access [#251437]({{kib-pull}}251437).
+* Fixes AI Connector form fields incorrectly resetting to default values when users clear them using backspace [#251095]({{kib-pull}}251095).
+* Fixes the agents count not updating on the homepage [#248657]({{kib-pull}}248657).
+* Fixes an issue when running Elasticsearch with a Basic license, where users could encounter errors when updating index mappings. Mapping updates now work as expected while advanced semantic text features continue to require the appropriate license [#248462]({{kib-pull}}248462).
+* Fixes OpenAI connector header add flow so the newly added header Key input receives focus for accessibility [#248204]({{kib-pull}}248204).
+* Disables **API keys** button on Elasticsearch homepage when logged in user has insufficient permissions [#248072]({{kib-pull}}248072).
+* Fixes **Show API key** button aria-label not updating to **Hide API key** when toggled for accessibility [#247982]({{kib-pull}}247982).
+* Fixes the token count display showing "NaN" in Search Playground [#246589]({{kib-pull}}246589).
+
+**Elastic Agent Builder**:
+* Fixes an EIS OpenAI GPT-OSS 120B reasoning error [#248943]({{kib-pull}}248943).
+* Fixes the server-side search in the user prompts API [#250882]({{kib-pull}}250882).
+* Fixes Agent Builder index search support for special text fields `match_only_text` and `pattern_text` [#252082]({{kib-pull}}252082).
+* Propagates connector API errors [#252372]({{kib-pull}}252372).
+* Fixes a UI bug with the workflow tool type [#252563]({{kib-pull}}252563).
+* Fixes workflow tools: choice parameters accepted invalid inputs [#259282]({{kib-pull}}259282).
+* Adds RBAC checks to new Agentic pages [#261895]({{kib-pull}}261895).
+* Fixes a bug with resetting of agent id [#263044]({{kib-pull}}263044).
+* Upgrades hono and @hono/node-server dependency [#263794]({{kib-pull}}263794).
+* Renders an inline attachment loading skeleton during streaming [#264408]({{kib-pull}}264408).
+* Fixes an issue where index search tools would skip non-searchable fields, causing incomplete search results [#257993]({{kib-pull}}257993).
+* Adds attachment origin to Converse API — accepts optional `origin` on attachments for by-reference flows, and rejects attachments with neither `data` nor `origin` [#259043]({{kib-pull}}259043).
+* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
+* Fixes {{esql}} test tool failing when the numerical value is zero [#251901]({{kib-pull}}251901).
+* Fixes a bug where Agent Builder Index Search tools would fail on aliases that contained `semantic_text` fields [#247877]({{kib-pull}}247877).
+
+**Workflows**:
+* Fixes connector step icons falling back to plugs in workflow list [#263880]({{kib-pull}}263880).
+* Adds input text sanitization [#259262]({{kib-pull}}259262).
+* Validates HTTP connector URL against `allowedHosts` at execution time [#258080]({{kib-pull}}258080).
+* Uses correct URL in `viewInAppUrl` and fixes `??` bug in redirect [#257910]({{kib-pull}}257910).
+* Fixes false validation errors for item/index in `data.map` steps [#257703]({{kib-pull}}257703).
+* Fixes an accessibility issue in the table with zoom [#257097]({{kib-pull}}257097).
+* Adds support for native YAML arrays for foreach step [#256298]({{kib-pull}}256298).
+* Fixes false Liquid validation errors from YAML comments [#256237]({{kib-pull}}256237).
+* Adds a generate API key server-side implementation [#256083]({{kib-pull}}256083).
+* Fixes liquidjs validation for variables used before assignment [#255337]({{kib-pull}}255337).
+* Fixes glitchy **Attributes** rendering [#255173]({{kib-pull}}255173).
+* Propagates inference errors [#254815]({{kib-pull}}254815).
+* Adds server-side validation for workflow inputs before execution [#254546]({{kib-pull}}254546).
+* Fixes execution tree clipping when the foreach step has many iterations [#253576]({{kib-pull}}253576).
+* Fixes the scrollbars color in Safari when the macOS appearance setting is the opposite of the selected Kibana Color Mode [#253484]({{kib-pull}}253484).
+* Fixes false validation errors for template-local variables in Liquid templates [#253405]({{kib-pull}}253405).
+* Adds datemath support to KQL evaluator [#252840]({{kib-pull}}252840).
+* Fixes the create new tool page when switching types [#252811]({{kib-pull}}252811).
+* Prevents table sorting when toggling the workflow enable state [#252724]({{kib-pull}}252724).
+* Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
+
+## 9.3.6 [kibana-9.3.6-release-notes]
+
+### Fixes [kibana-9.3.6-fixes]
+
+**Alerting**:
+* Fixes the **Stack Alerts** page fetching alerts twice on initial load by deferring table rendering until filter controls have finished initializing [#271441]({{kib-pull}}271441).
+
+**Connectivity**:
+* Removes the **Content Connectors** page from the menu for users who didn't have the appropriate role privileges [#271709]({{kib-pull}}271709).
+
+**Dashboards and Visualizations**:
+* Fixes a stale closure in the Canvas autoplay timer that could advance to the wrong slide when slides were added or removed while autoplay was running [#268398]({{kib-pull}}268398).
+
+**Data ingestion and Fleet**:
+* Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by replacing a full-output decrypt scan with targeted, non-decrypting queries for only the default outputs [#273848]({{kib-pull}}273848).
+* Optimizes `GET /api/fleet/agent_policies` (with `withAgentCount=true`) to compute agent counts in a single bucketed aggregation instead of multiple queries per policy, significantly reducing response time for deployments with many agent policies [#272429]({{kib-pull}}272429).
+* Fixes integration package reinstalls and upgrades performed from a space different from the original installation space incorrectly bucketing {{kib}} asset references, causing the **Assets** tab to display raw UUIDs instead of asset titles [#271800]({{kib-pull}}271800).
+* Fixes variable leakage and duplication between policy templates in input packages that define multiple policy templates [#273364]({{kib-pull}}273364).
+* Fixes security rule names not displaying in the integration **Assets** accordion when the rule object has no `title` field [#272089]({{kib-pull}}272089).
+* Fixes the agent logging level dropdown on the **Settings** tab not updating after **Reset to policy** is applied, so the displayed level now stays in sync with Fleet-polled agent metadata [#271964]({{kib-pull}}271964).
+
+**Discover**:
+* Fixes the {{esql}} document summary column incorrectly counting `null` and `undefined` field values against the `discover:maxDocFieldsDisplayed` limit, which caused fields with real values to be hidden behind an "and X more fields" label [#273610]({{kib-pull}}273610).
+* Fixes the **Extend** action icon in the **Background searches** row actions menu being invisible in dark mode by rendering it as an inline SVG that inherits the surrounding icon color [#272754]({{kib-pull}}272754).
+* Fixes slow KQL parsing caused by long runs of whitespace by improving keyword-adjacent whitespace handling in the KQL grammar [#266512]({{kib-pull}}266512).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.6 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Adds `notifications.connectors.default.email` to the list of supported Docker environment variables [#272761]({{kib-pull}}272761).
+
+## 9.3.5 [kibana-9.3.5-release-notes]
+
+:::{important}
+The 9.3.5 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Fixes [kibana-9.3.5-fixes]
+
+**Alerting and cases**:
+* Fixes {{stack}} rule upgrades failing when rule action `params` values exceed Elasticsearch field size limits by adding `ignore_above: 4096` to the `actions.params` mapping [#269467]({{kib-pull}}269467).
+* Fixes alert index template updates failing when auto-increasing `total_fields.limit` because system-managed read-only fields were included in the update request [#262534]({{kib-pull}}262534).
+* Fixes phrase search in the **All Cases** view so quoted queries match exact phrases and unquoted queries match individual terms [#266827]({{kib-pull}}266827).
+
+**Connectivity**:
+* Fixes the email connector to reject malformed email addresses (for example, addresses with leading or trailing hyphens in the local part or domain labels) that mail servers would reject, preventing unnecessary SMTP connection attempts. Existing connectors saved with invalid addresses will fail validation after upgrade and must be updated [#268496]({{kib-pull}}268496).
+
+**Dashboards and Visualizations**:
+* Fixes a regression where the dashboard remained locked in an open-flyout state after closing the control edit flyout when editing an existing query-based variable control [#267605]({{kib-pull}}267605).
+
+**Data ingestion and Fleet**:
+* Fixes agent policy background tasks failing with a `parse_exception` by sorting agent policies on `updated_at` instead of the non-existent `created_at` field [#267285]({{kib-pull}}267285).
+* Fixes a race condition during async integration knowledge base installation that could clear `installed_es` asset references for input packages and leave the **Assets** tab blank [#266841]({{kib-pull}}266841).
+* Uses password fields instead of cleartext inputs for multi-value secret variables in integration policy forms [#266823]({{kib-pull}}266823).
+
+**Discover**:
+* Fixes an issue in Discover's {{esql}} mode so the expanded document flyout correctly stays on the same result after a refresh when `METADATA _index, _id` is available, and shows the original document without pagination when that result is no longer in the refreshed set [#268328]({{kib-pull}}268328).
+* Ensures CSV exports from Discover use the absolute time range for the current session so exported data matches what you see on screen [#255005]({{kib-pull}}255005).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.5 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes date conversion in the file sharing service [#265131]({{kib-pull}}265131).
+
+**Machine Learning**:
+* Fixes Anomaly Detection chart markers in the Single Metric Viewer so sparse data points with a single value in the chart time range remain visible without hovering [#263632]({{kib-pull}}263632).
+
+**Management**:
+* Fixes the **IP Location** processor in **Ingest pipelines** saving the wrong `database_file` and showing duplicate selections when a local database filename matches a managed database label [#265740]({{kib-pull}}265740).
+* Adds accessible names to modals and popovers across Stack Management pages to improve screen reader support [#269652]({{kib-pull}}269652).
+* Fixes client-side navigation in the content connectors UI to honor `server.basePath` and {{kib}} space prefixes, resolving 404 errors on connector detail tabs and the post-creation **Manage connector** action [#269571]({{kib-pull}}269571).
+* Prevents each keystroke in the **Advanced Settings** search bar from adding a browser history entry, so the back button navigates away from the page in one step [#266278]({{kib-pull}}266278).
+
+**Search**:
+* Fixes query rules API routes to limit the maximum size of arrays accepted in request data [#265495]({{kib-pull}}265495).
+* Fixes the Search Applications document explorer rendering HTML markup from field `.snippet` values [#265319]({{kib-pull}}265319).
+
+## 9.3.4 [kibana-9.3.4-release-notes]
+
+### Features and enhancements [kibana-9.3.4-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.4 release information, refer to [Elastic Observability Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.4 release information, refer to [Elastic Security Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Remembers the pagination state when navigating back from an edit on the **Users** page, instead of always returning to page 1 and resetting the search [#261152]({{kib-pull}}261152).
+
+### Fixes [kibana-9.3.4-fixes]
+
+**Alerting**:
+* Fixes an issue where Stack alerts sent recovery notifications but remained `active` in {{kib}} instead of transitioning to `recovered` [#261012]({{kib-pull}}261012).
+* Adds the `application/x-zip-compressed` MIME type as an accepted value for case file attachments [#262414]({{kib-pull}}262414).
+* Fixes the "Failed to check if maintenance windows are active" error [#261048]({{kib-pull}}261048).
+
+**Data ingestion and Fleet**:
+* Fixes YAML file downloads being truncated at the first `#` character by properly URL-encoding the content [#264083]({{kib-pull}}264083).
+* Fixes package policy count filters to correctly identify non-latest revisions [#263717]({{kib-pull}}263717).
+* Only auto-installs content packages that are newer than the installed version [#262509]({{kib-pull}}262509).
+* Fixes Fleet Server diagnostic bundles failing to download when `elasticsearch.compression` is enabled [#262394]({{kib-pull}}262394).
+* Fixes missing sort-state announcements for screen readers in the **Ingest pipelines** list [#262226]({{kib-pull}}262226).
+* Fixes focus management for the **Learn more** link [#261902]({{kib-pull}}261902).
+* Fixes screen reader announcements for the **Define as JSON** toggle [#261896]({{kib-pull}}261896).
+* Fixes screen readers announcing duplicate row indices in the **Ingest pipelines** list [#261369]({{kib-pull}}261369).
+* Fixes the inference processor form to accept the `input_output` configuration shape [#260517]({{kib-pull}}260517).
+* Fixes screen readers announcing icon labels twice in the **Ingest pipelines** list [#259185]({{kib-pull}}259185).
+* Fixes screen readers incorrectly combining button announcements on the **Create Pipeline** page [#261603]({{kib-pull}}261603).
+
+**Data management**:
+* Fixes stale screen reader announcements in code boxes [#261921]({{kib-pull}}261921).
+* Fixes the transforms detail summary to show all `source_index` entries when `source_index` is an array [#261875]({{kib-pull}}261875).
+* Fixes screen readers announcing search template options twice [#261585]({{kib-pull}}261585).
+* Fixes screen readers announcing duplicate row indices on the data streams table [#261366]({{kib-pull}}261366).
+* Fixes screen readers announcing icon labels twice in the **Edit policy** flyout [#261324]({{kib-pull}}261324).
+* Fixes screen readers announcing policy actions tooltip text twice in the index lifecycle policies list [#261322]({{kib-pull}}261322).
+* Fixes screen readers announcing copy button labels twice [#261311]({{kib-pull}}261311).
+* Fixes screen readers announcing grey color badge text twice in the transforms list [#261307]({{kib-pull}}261307).
+* Fixes screen readers not announcing invalid field validation errors [#260673]({{kib-pull}}260673).
+
+**Discover**:
+* Resets the time field when the updated index pattern does not include it [#262001]({{kib-pull}}262001).
+* Fixes {{esql}} multi-value filtering with `STATS` [#260998]({{kib-pull}}260998).
+
+**Kibana platform**:
+* Adjusts the **API Key** flyout width [#263858]({{kib-pull}}263858).
+* Allows space colors to be cleared, falling back to the default [#261826]({{kib-pull}}261826).
+* Fixes screen readers announcing data stream and index options twice in the **Create policy** and **Restore snapshot** selectable lists [#261786]({{kib-pull}}261786).
+* Fixes policy buttons to have distinguishable names for screen readers [#261313]({{kib-pull}}261313).
+
+**Machine Learning**:
+* Fixes the single metric chart in Anomaly Explorer not showing anomaly actions correctly [#263925]({{kib-pull}}263925).
+* Updates the `hono` and `@hono/node-server` dependencies [#263794]({{kib-pull}}263794).
+* Fixes execution tree clipping when `foreach` has many iterations [#253576]({{kib-pull}}253576).
+
+## 9.3.3 [kibana-9.3.3-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+### Fixes [kibana-9.3.3-fixes]
+
+**Alerting**:
+* Fixes Webhook Connector `accessTokenUrl` validation [#258290]({{kib-pull}}258290).
+
+**Dashboards and Visualizations**:
+* Adjusts scrolling when you drag and drop a dashboard panel to avoid jumping [#258445]({{kib-pull}}258445).
+* Fixes Canvas library embeddables failing to load when `savedObjectId` is present without saved object references [#257779]({{kib-pull}}257779).
+* Fixes a race condition in the dashboard backup service and removes unnecessary error toasts [#257762]({{kib-pull}}257762).
+* Fixes **Add from library** in Canvas creating incorrect embeddable state [#257261]({{kib-pull}}257261).
+* Fixes Lens panels appearing to revert after inline edits until you refresh the page, even though changes are saved [#256984]({{kib-pull}}256984).
+
+**Data ingestion and Fleet**:
+* Improves screen reader announcements and focus when moving processors in the ingest pipeline editor [#259096]({{kib-pull}}259096).
+* Fixes Fleet bulk agent actions (unenroll, upgrade, reassign to policy) not respecting the current space when selection uses a kuery filter [#258582]({{kib-pull}}258582).
+* Fixes automatic agent upgrades stopping early with “target percentage already reached” because agents upgrading in other policies are also counted [#258387]({{kib-pull}}258387).
+
+**Data management**:
+* Restores keyboard focus to the **Create a transform** button on the **Transforms** page [#258095]({{kib-pull}}258095).
+* Enhances screen reader notifications for bulk actions in Index Management tables, providing live announcements when the bulk actions menu becomes visible or hidden [#257089]({{kib-pull}}257089).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.3 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Elasticsearch solution**:
+* Fixes the query rules UI rejecting case variants as duplicate values [#259506]({{kib-pull}}259506).
+* Fixes only passing filtered rules to the API and deleting rules not matching the filter in the Query Rule Set editor [#259503]({{kib-pull}}259503).
+* Prevents creating incompatible inference endpoints when adding a `semantic_text` field in the Index Management mappings editor [#256586]({{kib-pull}}256586).
+
+**Machine Learning**:
+* Fixes the anomaly swim lane dashboard panel not refreshing [#259962]({{kib-pull}}259962).
+* Fixes a console error when opening the data frame analytics jobs list [#258591]({{kib-pull}}258591).
+* Adds aria labels to job wizard combo boxes [#258509]({{kib-pull}}258509).
+
+## 9.3.2 [kibana-9.3.2-release-notes]
+
+:::{important}
+The 9.3.2 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.3.2-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Connectivity**:
+* Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet models to preconfigured connectors [#253109]({{kib-pull}}253109).
+
+### Fixes [kibana-9.3.2-fixes]
+
+**Elastic Agent Builder**:
+* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
+* Fixes MCP connectors ignoring the proxy and SSL configuration from the actions plugin (`xpack.actions` configuration property) [#255813]({{kib-pull}}255813).
+
+**Alerting**:
+* Fixes a problem generating a report with multi-page Canvas workpads [#255022]({{kib-pull}}255022).
+* Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
+* Improves handling of `204` responses [#251090]({{kib-pull}}251090).
+
+**Dashboards and Visualizations**:
+* Fixes an issue where embedded panels in Canvas workpads could lose their saved object references, causing panels to fail to load [#252191]({{kib-pull}}252191).
+* Fixes the **Add from library** action adding incorrect embeddable state [#257261]({{kib-pull}}257261).
+* Fixes Lens transforms [#257224]({{kib-pull}}257224).
+* Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
+* Fixes Maps failing to load when the stored time filter contained a `quick` mode value [#255178]({{kib-pull}}255178).
+
+**Data ingestion and Fleet**:
+* Fixes the unenroll task and adds an FTR test [#255726]({{kib-pull}}255726).
+* Fixes the incorrect installation of assets [#254923]({{kib-pull}}254923).
+
+**Discover**:
+* Fixes glitchy rendering in the **Attributes** tab [#255173]({{kib-pull}}255173).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes the spaces list displaying **No spaces match** text on load [#255654]({{kib-pull}}255654).
+* Fixes the embeddable console auto-closing on chrome or overlay clicks [#253382]({{kib-pull}}253382).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys [#256233]({{kib-pull}}256233).
+
+**Kibana security**:
+* Adds `waitFor` for the privilege button [#255094]({{kib-pull}}255094).
+* Fixes an issue where saving a dashboard included access control features when a user profile was not available [#255065]({{kib-pull}}255065).
+
+**Machine Learning**:
+* Fixes screen reader announcements for flyouts [#256409]({{kib-pull}}256409).
+
+**Management**:
+* Improves name announcement in the index mode modal [#256392]({{kib-pull}}256392).
+* Fixes an issue in **Dev Tools Console** where syntax highlighting broke when queries contained accented or non-ASCII characters [#255649]({{kib-pull}}255649).
+* Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements [#255426]({{kib-pull}}255426).
+
+**Search**:
+* Changes the **Run in Console** button type [#256455]({{kib-pull}}256455).
+* Fixes Search Playground routes to limit the maximum size of arrays [#255881]({{kib-pull}}255881).
+* Fixes focus behavior when there are errors in the connector flyout form [#255770]({{kib-pull}}255770).
+* Adds server-side API key generation [#256083]({{kib-pull}}256083).
+
+## 9.3.1 [kibana-9.3.1-release-notes]
+
+:::{important}
+The 9.3.1 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.3.1-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Allows integration rollback even if all package policies are not on an upgraded version [#253646]({{kib-pull}}253646).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Adds a dynamic default connector to GenAI settings [#252861]({{kib-pull}}252861).
+* Adds missing ES|QL commands and functions documentation for inference tasks [#249089]({{kib-pull}}249089).
+
+### Fixes [kibana-9.3.1-fixes]
+
+**Alerting and cases**:
+* Fixes a bug with PagerDuty where setting the **Custom details** field causes rules to fail [#253683]({{kib-pull}}253683).
+* Adds external reference IDs to the attached documents check when a case is selected [#253107]({{kib-pull}}253107).
+* Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
+* Improves handling of 204 responses [#251090]({{kib-pull}}251090).
+
+**Connectivity**:
+* Fixes AI Connector form fields incorrectly resetting to default values when cleared with backspace [#251095]({{kib-pull}}251095).
+* Updates connector description terminology to reference "pre-configured AI connectors" [#250649]({{kib-pull}}250649).
+
+**Dashboards and Visualizations**:
+* Fixes layer editor scrolling in the full Lens editor [#253247]({{kib-pull}}253247).
+* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
+
+**Data ingestion and Fleet**:
+* Fixes an issue where an agent rolled back after an upgrade could not be upgraded again in Fleet UI [#253850]({{kib-pull}}253850).
+
+**Discover**:
+* Fixes the handling of missing values [#251892]({{kib-pull}}251892).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.1 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
+* Fixes Stack Monitoring breadcrumb when in solution view [#249751]({{kib-pull}}249751).
+
+**Machine Learning**:
+* Fixes "today" and "this week" filters for Log Rate and Pattern Analysis embeddables [#252925]({{kib-pull}}252925).
+* Fixes word break in Anomaly Detection page titles [#250058]({{kib-pull}}250058).
+
+**Management**:
+* Fixes autocomplete not working in embedded console [#253306]({{kib-pull}}253306).
+* Fixes an issue loading the doc count in index management when viewing larger page sizes with long index names [#252422]({{kib-pull}}252422).
+* Fixes a validation error for AI pipeline suggestions with empty grok patterns [#251113]({{kib-pull}}251113).
+
+**Search**:
+* Fixes the homepage throwing errors when the license level is below Enterprise [#251484]({{kib-pull}}251484).
+* Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
+* Fixes links being visible on Search homepage when the user doesn't have access [#251437]({{kib-pull}}251437).
+
+**Workflows**:
+* Adds datemath support to the KQL evaluator [#252840]({{kib-pull}}252840).
+
 ## 9.3.0 [kibana-9.3.0-release-notes]
 
 % ::::{NOTE}
@@ -52,7 +980,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds option to edit report schedules [#241928]({{kib-pull}}241928).
 * Improves UI for specifying additional fields for IBM Resilient action [#238869]({{kib-pull}}238869).
 * Makes Agent ID the default observables type [#238533]({{kib-pull}}238533).
-* Adds `kibana.alert.index_pattern` to all alerts [#239450]({{kib-pull}}239450).
+* Adds `kibana.alert.index_pattern` to all Stack alerts. This change doesn't affect detection alerts [#239450]({{kib-pull}}239450).
 
 **Connectivity**:
 * Elastic will regularly be adding new AI models from 9.3 onwards which will appear as pre-configured AI connectors in  {{kib}}. Refer to [the Elastic Inference Service page](docs-content://explore-analyze/elastic-inference/eis.md) for more details.
@@ -310,7 +1238,7 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Fixes partition field settings errors in the single metric viewer dashboard panel [#237046]({{kib-pull}}237046).
 * Prevents URL-like strings from being displayed as links in alerts [#226849]({{kib-pull}}226849).
 * Improves anonymization error messages when NER model is unavailable [#247696]({{kib-pull}}247696).
-* Adds table caption for empty top categories in logs category table [#246041]({{kib-pull}}246041).
+* Adds a table caption for empty top categories in the logs category table [#246041]({{kib-pull}}246041).
 * Fixes broken Data Visualizer and AI Operations navigation breadcrumbs and sidebar in solutions [#248167]({{kib-pull}}248167).
 * Fixes counter metric fields missing in anomaly detection dropdown [#153021]({{kib-pull}}153021).
 
@@ -332,6 +1260,128 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Turns off custom suggestions on the embedded console [#241516]({{kib-pull}}241516).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
 
+## 9.2.8 [kibana-9.2.8-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+### Fixes [kibana-9.2.8-fixes]
+
+**Alerting**:
+* Fixes Webhook Connector `accessTokenUrl` validation [#258290]({{kib-pull}}258290).
+
+**Dashboards and Visualizations**:
+* Adjusts scrolling when you drag and drop a dashboard panel to avoid jumping [#258445]({{kib-pull}}258445).
+* Fixes Canvas library embeddables failing to load when `savedObjectId` was present without saved object references [#257779]({{kib-pull}}257779).
+* Fixes a race condition in the dashboard backup service and removes unnecessary error toasts [#257762]({{kib-pull}}257762).
+* Fixes **Add from library** in Canvas creating incorrect embeddable state [#257261]({{kib-pull}}257261).
+* Fixes Lens panels appearing to revert after inline edits until you refresh the page, even though changes were saved [#256984]({{kib-pull}}256984).
+
+**Data ingestion and Fleet**:
+* Ensures the log level from the assigned policy is used when an agent configuration doesn't mention one [#259425]({{kib-pull}}259425).
+* Improves screen reader announcements and focus when moving processors in the ingest pipeline editor [#259096]({{kib-pull}}259096).
+* Fixes Fleet bulk agent actions (unenroll, upgrade, reassign to policy) not respecting the current space when selection uses a kuery filter [#258582]({{kib-pull}}258582).
+* Fixes automatic agent upgrades stopping early with “target percentage already reached” because agents upgrading in other policies were also counted [#258387]({{kib-pull}}258387).
+
+**Data management**:
+* Restores keyboard focus to the **Create a transform** button on the **Transforms** page [#258095]({{kib-pull}}258095).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.8 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.8 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Elasticsearch solution**:
+* Fixes the query rules UI rejecting case variants as duplicate values [#259506]({{kib-pull}}259506).
+* Prevents only passing filtered rules to the API and deleting rules not matching the filter in the Query Rule Set editor [#259503]({{kib-pull}}259503).
+
+**Machine Learning**:
+* Fixes the anomaly swim lane dashboard panel not refreshing [#259962]({{kib-pull}}259962).
+
+## 9.2.7 [kibana-9.2.7-release-notes]
+
+:::{important}
+The 9.2.7 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.2.7-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+### Fixes [kibana-9.2.7-fixes]
+
+**Alerting**:
+* Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
+* Improves handling of `204` responses [#251090]({{kib-pull}}251090).
+
+**Dashboards and Visualizations**:
+* Fixes an issue where embedded panels in Canvas workpads could lose their saved object references, causing panels to fail to load [#252191]({{kib-pull}}252191).
+* Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
+
+**Data ingestion and Fleet**:
+* Fixes the unenroll task and adds an FTR test [#255726]({{kib-pull}}255726).
+* Fixes the incorrect installation of assets [#254923]({{kib-pull}}254923).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.7 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes the spaces list displaying **No spaces match** text on load [#255654]({{kib-pull}}255654).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys [#256233]({{kib-pull}}256233).
+
+**Kibana security**:
+* Adds `waitFor` for the privilege button [#255094]({{kib-pull}}255094).
+
+**Management**:
+* Improves name announcement in the index mode modal [#256392]({{kib-pull}}256392).
+* Fixes an issue in **Dev Tools Console** where syntax highlighting broke when queries contained accented or non-ASCII characters [#255649]({{kib-pull}}255649).
+* Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements [#255426]({{kib-pull}}255426).
+
+**Search**:
+* Fixes Search Playground routes to limit the maximum size of arrays [#255881]({{kib-pull}}255881).
+* Adds server-side API key generation [#256083]({{kib-pull}}256083).
+* Fixes glitchy rendering in the **Attributes** tab [#255173]({{kib-pull}}255173).
+* Fixes EQL sequence document merging to treat dot and nested notation the same [#254830]({{kib-pull}}254830).
+
+## 9.2.6 [kibana-9.2.6-release-notes]
+
+:::{important}
+The 9.2.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.2.6-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.2.6-fixes]
+
+**Alerting and cases**:
+* Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
+
+**Dashboards and Visualizations**:
+* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
+
+**Discover**:
+* Fixes the handling of missing values [#251892]({{kib-pull}}251892).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.6 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
+
+**Search**:
+* Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
 
 ## 9.2.5 [kibana-9.2.5-release-notes]
 
@@ -383,7 +1433,7 @@ For the Elastic Security 9.2.4 release information, refer to [Elastic Security S
 * Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
 
 **Discover**:
-* Fixes default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
+* Fixes the default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
 * Fixes an issue with {{esql}} tabs not loading properly [#246941]({{kib-pull}}246941).
 
 **Elastic Observability solution**:
@@ -1110,6 +2160,7 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Allows users to delete a snooze schedule from a rule using schedule ID [#213247]({{kib-pull}}213247).
 * Allows users to create a snooze schedule for rules using the schedule API [#210584]({{kib-pull}}210584).
 * Implements functionality to add observables, procedures, and custom fields to alerts for {{hive}} [#207255]({{kib-pull}}207255).
+* Updates the `context.link` variable to use the new Discover URL formatting in all {{es}} query rule types [#216376]({{kib-pull}}216376).
 
 **Dashboards and Visualizations**:
 * Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This rule allows you to generate an alert when the data on the chart crosses a certain threshold [#217719]({{kib-pull}}217719).

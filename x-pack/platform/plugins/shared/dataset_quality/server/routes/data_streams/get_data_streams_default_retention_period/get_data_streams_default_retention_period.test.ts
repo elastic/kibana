@@ -86,7 +86,7 @@ describe('getDataStreamDefaultRetentionPeriod', () => {
   it('returns undefined when user lacks permissions (403 error)', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const error = new Error('Forbidden');
-    (error as any).meta = { statusCode: 403 };
+    (error as Error & { meta?: { statusCode: number } }).meta = { statusCode: 403 };
     esClientMock.cluster.getSettings.mockRejectedValue(error);
 
     const result = await getDataStreamDefaultRetentionPeriod({
@@ -102,7 +102,7 @@ describe('getDataStreamDefaultRetentionPeriod', () => {
   it('throws error for non-403 errors', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const error = new Error('Internal Server Error');
-    (error as any).meta = { statusCode: 500 };
+    (error as Error & { meta?: { statusCode: number } }).meta = { statusCode: 500 };
     esClientMock.cluster.getSettings.mockRejectedValue(error);
 
     await expect(

@@ -22,7 +22,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { RuleAction } from '@kbn/alerting-types';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 
@@ -31,7 +32,6 @@ import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
@@ -77,6 +77,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    featureId: 'attack_discovery',
     settings,
   });
   const { data: { schedule } = { schedule: undefined }, isLoading: isLoadingSchedule } =
@@ -84,8 +85,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
       id: scheduleId,
     });
 
-  const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView } = useDataView(PageScope.alerts);
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -104,11 +104,11 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          sourcererDataView,
           uiSettings,
-          experimentalDataView
+          dataView
         );
         await updateAttackDiscoverySchedule({ id: scheduleId, scheduleToUpdate });
+        setHasUnsavedChanges(false);
         setIsEditing(false);
       } catch (err) {
         // Error is handled by the mutation's onError callback, so no need to do anything here
@@ -117,9 +117,8 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     [
       aiConnectors,
       alertsIndexPattern,
-      sourcererDataView,
       uiSettings,
-      experimentalDataView,
+      dataView,
       updateAttackDiscoverySchedule,
       scheduleId,
     ]

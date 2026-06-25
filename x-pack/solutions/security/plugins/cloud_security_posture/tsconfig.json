@@ -42,6 +42,7 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/core-saved-objects-api-server",
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",
@@ -75,7 +76,10 @@
     "@kbn/shared-ux-card-no-data",
     "@kbn/react-kibana-context-theme",
     "@kbn/react-query",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/entity-store",
+    "@kbn/logging-mocks",
+    "@kbn/core-spaces-common"
   ],
   "exclude": ["target/**/*"]
 }

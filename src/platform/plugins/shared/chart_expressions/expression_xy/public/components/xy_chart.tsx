@@ -16,10 +16,12 @@ import type {
   LegendPositionConfig,
   DisplayValueStyle,
   RecursivePartial,
-  AxisStyle,
   XYChartElementEvent,
   XYChartSeriesIdentifier,
   SettingsProps,
+  TooltipValue,
+  PointerValue,
+  AxisStyle,
 } from '@elastic/charts';
 import {
   Chart,
@@ -36,7 +38,7 @@ import {
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import type { IconType } from '@elastic/eui';
+import { type IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -52,8 +54,10 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { PersistedState } from '@kbn/visualizations-common';
 import {
+  ChartTooltipFooterMessage,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  getLegendLayout,
   getAccessorByDimension,
   getColumnByAccessor,
   getOverridesFor,
@@ -92,6 +96,7 @@ import {
   getLinesCausedPaddings,
   validateExtent,
   getOriginalAxisPosition,
+  getDecimalsFromFormat,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -118,6 +123,7 @@ import { XYCurrentTime } from './xy_current_time';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
+import { getComputedColumnWarning } from './tooltip/computed_column_warning';
 import { GlobalXYChartStyles } from './xy_chart.styles';
 
 declare global {
@@ -130,6 +136,7 @@ declare global {
 }
 
 const MULTILAYER_TIME_AXIS_TICKLINE_PADDING = 4;
+const DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -343,6 +350,25 @@ export function XYChart({
     [dataLayers, splitColumnAccessor, splitRowAccessor, formatFactory]
   );
 
+  const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
+
+  // Compute warning message for ES|QL computed columns that cannot be filtered.
+  const warningMessage = useMemo(
+    () => (isEsqlMode ? getComputedColumnWarning(dataLayers) : undefined),
+    [isEsqlMode, dataLayers]
+  );
+
+  const TooltipFooter = useMemo<
+    | React.ComponentType<{
+        items: Array<TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>>;
+        header: PointerValue<Record<string, string | number>> | null;
+      }>
+    | 'default'
+  >(() => {
+    if (!warningMessage) return 'default';
+    return () => <ChartTooltipFooterMessage message={warningMessage} />;
+  }, [warningMessage]);
+
   const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
 
   if (dataLayers.length === 0) {
@@ -360,11 +386,13 @@ export function XYChart({
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
+  const xTickDecimals = getDecimalsFromFormat(xAxisFormatter);
+
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
       ? String(value)
-      : String(xAxisFormatter.convert(value));
+      : String(xAxisFormatter.convertToText(value));
 
   const shouldRotate = isHorizontalChart(dataLayers);
 
@@ -413,8 +441,8 @@ export function XYChart({
   const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
-  const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
   const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
+  const isHorizontalBarChart = isHorizontalChart(dataLayers) && hasBars;
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     data.datatableUtilities,
@@ -452,7 +480,8 @@ export function XYChart({
     annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
-    timeFormat
+    timeFormat,
+    darkMode
   );
 
   const visualConfigs = [
@@ -478,7 +507,7 @@ export function XYChart({
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};
 
-  const getYAxesStyle = (axis: AxisConfiguration) => {
+  const getYAxesStyle = (axis: AxisConfiguration): RecursivePartial<AxisStyle> => {
     const tickVisible = axis.showLabels;
     const position = getOriginalAxisPosition(axis.position, shouldRotate);
 
@@ -696,6 +725,7 @@ export function XYChart({
     visible: xAxisConfig?.showGridLines,
     strokeWidth: 1,
   };
+
   const xAxisStyle: RecursivePartial<AxisStyle> = isHorizontalTimeAxis
     ? {
         tickLabel: {
@@ -828,6 +858,7 @@ export function XYChart({
                   : undefined
               }
               type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
+              footer={TooltipFooter}
             />
             <Settings
               noResults={
@@ -847,9 +878,15 @@ export function XYChart({
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+              legendLayout={getLegendLayout({
+                isInside: legend.isInside,
+                position: legend.position,
+                layout: legend.layout,
+              })}
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendValues={isHistogramViz ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
+              legendActionOnHover={interactive}
               theme={[
                 {
                   barSeriesStyle: {
@@ -859,7 +896,15 @@ export function XYChart({
                     color: undefined, // removes background for embeddables
                   },
                   legend: {
-                    labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                    labelOptions: legend.shouldTruncate
+                      ? {
+                          maxLines: legend?.maxLines ?? 1,
+                          widthLimit: DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT,
+                        }
+                      : {
+                          maxLines: 0,
+                          widthLimit: 0,
+                        },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
                   chartMargins: {
@@ -927,16 +972,18 @@ export function XYChart({
               title={xTitle}
               gridLine={gridLineStyle}
               hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
-              tickFormat={(d) => {
-                let value = safeXAccessorLabelRenderer(d) || '';
-                if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
-                  value = `${value.slice(0, xAxisConfig.truncate)}...`;
-                }
-                return value;
-              }}
+              tickFormat={(d) => safeXAccessorLabelRenderer(d) || ''}
+              maximumFractionDigits={xTickDecimals}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
+              tickLabelMaxLength={
+                xAxisConfig?.truncate ?? (isHorizontalBarChart ? '40%' : undefined)
+              }
+              tickLabelTruncate={
+                // If legacy truncate is set, preserve end truncation behavior.
+                isHorizontalBarChart ? (xAxisConfig?.truncate ? 'end' : 'middle') : undefined
+              }
               {...getOverridesFor(overrides, 'axisX')}
             />
             {isSplitChart && splitTable && (
@@ -947,6 +994,10 @@ export function XYChart({
               />
             )}
             {yAxesConfiguration.map((axis) => {
+              const tickDecimals = axis.formatter
+                ? getDecimalsFromFormat(axis.formatter)
+                : undefined;
+
               return (
                 <Axis
                   key={axis.groupId}
@@ -958,17 +1009,13 @@ export function XYChart({
                     visible: axis.showGridLines,
                   }}
                   hide={axis.hide || dataLayers[0]?.simpleView}
-                  tickFormat={(d) => {
-                    let value = axis.formatter?.convert(d) || '';
-                    if (axis.truncate && value.length > axis.truncate) {
-                      value = `${value.slice(0, axis.truncate)}...`;
-                    }
-                    return value;
-                  }}
+                  tickFormat={(d) => axis.formatter?.convertToText(d) || ''}
+                  maximumFractionDigits={tickDecimals}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}
                   showDuplicatedTicks={axis.showDuplicates}
+                  tickLabelMaxLength={axis.truncate}
                   {...getOverridesFor(
                     overrides,
                     /left/i.test(axis.groupId) ? 'axisLeft' : 'axisRight'

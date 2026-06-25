@@ -21,8 +21,9 @@ export async function createConnector(
   id = '',
   spaceId?: string
 ): Promise<string> {
+  const path = id ? `/api/actions/connector/${id}` : '/api/actions/connector';
   const { body } = await supertest
-    .post(withSpaceUrl(`/api/actions/connector/${id}`, spaceId))
+    .post(withSpaceUrl(path, spaceId))
     .set('kbn-xsrf', 'foo')
     .send(connector)
     .expect(200);

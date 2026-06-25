@@ -23,9 +23,12 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { alertProducersData } from '@kbn/response-ops-alerts-table/constants';
 import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { defaultAlertsTableSort } from '@kbn/response-ops-alerts-table/configuration';
-import type { AlertsTableSupportedConsumers } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertDetailsNavigation,
+  AlertsTableSupportedConsumers,
+} from '@kbn/response-ops-alerts-table/types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import type { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
@@ -45,6 +48,7 @@ import type { RuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_featu
 import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
+import { RuleAlertActionsCell } from '../../rule_details/components/rule_alert_actions_cell';
 
 /**
  * A unified view for all types of alerts
@@ -109,8 +113,27 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   authorizedToReadAnyRules,
   ruleTypeIdsByFeatureId,
 }) => {
-  const { data, http, notifications, fieldFormats, application, licensing, settings } =
-    useKibana().services;
+  const {
+    data,
+    http,
+    notifications,
+    rendering,
+    fieldFormats,
+    application,
+    licensing,
+    settings,
+    ruleTypeRegistry,
+  } = useKibana().services;
+
+  const getAlertFormatter = useCallback(
+    (ruleTypeId: string) => {
+      if (!ruleTypeRegistry.has(ruleTypeId)) {
+        return undefined;
+      }
+      return ruleTypeRegistry.get(ruleTypeId).format;
+    },
+    [ruleTypeRegistry]
+  );
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
@@ -119,6 +142,12 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   );
 
   const [consumers, setConsumers] = useState<string[]>(NON_SIEM_CONSUMERS);
+  const [filterControls, setFilterControls] = useState<Filter[]>();
+  const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
+  const hasInitialControlLoadingFinished = useMemo(
+    () => Boolean(controlApi) && Array.isArray(filterControls),
+    [controlApi, filterControls]
+  );
 
   const [selectedFilters, setSelectedFilters] = useState<AlertsFeatureIdsFilter[]>([]);
   const ruleStats = useRuleStats({ ruleTypeIds });
@@ -155,6 +184,23 @@ const PageContentComponent: React.FC<PageContentProps> = ({
     },
     [ruleTypeIdsByFeatureId]
   );
+
+  const { capabilities } = application;
+  const hasObservabilityAccess = [
+    capabilities.navLinks.apm,
+    capabilities.navLinks.metrics,
+    capabilities.navLinks.uptime,
+    capabilities.navLinks.synthetics,
+    capabilities.navLinks.slo,
+    capabilities.logs?.show,
+  ].some(Boolean);
+
+  const alertDetailsNavigation: AlertDetailsNavigation | undefined = hasObservabilityAccess
+    ? {
+        appId: 'observability',
+        getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
+      }
+    : undefined;
 
   const quickFilters = useMemo(() => {
     const filters: QuickFiltersMenuItem[] = [];
@@ -244,32 +290,41 @@ const PageContentComponent: React.FC<PageContentProps> = ({
             showFilterControls
             showFilterBar
             quickFilters={quickFilters}
+            filterControls={filterControls}
+            onFilterControlsChange={setFilterControls}
+            onControlApiAvailable={setControlApi}
             onEsQueryChange={setEsQuery}
             onFilterSelected={onFilterSelected}
           />
-          <AlertsTable
-            // Here we force a rerender when switching feature ids to prevent the data grid
-            // columns alignment from breaking after a change in the number of columns
-            key={ruleTypeIds.join()}
-            id="stack-alerts-page-table"
-            ruleTypeIds={ruleTypeIds}
-            consumers={consumers}
-            query={esQuery}
-            sort={defaultAlertsTableSort}
-            showAlertStatusWithFlapping
-            pageSize={20}
-            showInspectButton
-            renderActionsCell={AlertActionsCell}
-            services={{
-              data,
-              http,
-              notifications,
-              fieldFormats,
-              application,
-              licensing,
-              settings,
-            }}
-          />
+          {hasInitialControlLoadingFinished && (
+            <AlertsTable
+              // Here we force a rerender when switching feature ids to prevent the data grid
+              // columns alignment from breaking after a change in the number of columns
+              key={ruleTypeIds.join()}
+              id="stack-alerts-page-table"
+              ruleTypeIds={ruleTypeIds}
+              consumers={consumers}
+              query={esQuery}
+              sort={defaultAlertsTableSort}
+              showAlertStatusWithFlapping
+              pageSize={20}
+              showInspectButton
+              renderActionsCell={RuleAlertActionsCell}
+              actionsColumnWidth={120}
+              getAlertFormatter={getAlertFormatter}
+              alertDetailsNavigation={alertDetailsNavigation}
+              services={{
+                data,
+                http,
+                notifications,
+                rendering,
+                fieldFormats,
+                application,
+                licensing,
+                settings,
+              }}
+            />
+          )}
         </EuiFlexGroup>
       )}
     </>

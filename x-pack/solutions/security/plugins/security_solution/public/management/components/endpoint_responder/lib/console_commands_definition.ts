@@ -15,7 +15,7 @@ import type { SupportedHostOsType } from '../../../../../common/endpoint/constan
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
-import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
+import { CancelablePendingActionsSelector } from '../../console_argument_selectors/cancelable_pending_actions_selector/cancelable_pending_actions_selector';
 import type {
   EndpointRunScriptActionParameters,
   SentinelOneRunScriptActionParameters,
@@ -200,6 +200,7 @@ export const getEndpointConsoleCommands = ({
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
+    responseActionsEndpointCancel,
     responseActionsEndpointMemoryDump,
     responseActionsEndpointRunScript,
   } = featureFlags;
@@ -503,7 +504,7 @@ export const getEndpointConsoleCommands = ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
 
-    runscriptCommand.helpDisabled = false;
+    runscriptCommand.helpDisabled = !doesEndpointSupportCommand('runscript');
     runscriptCommand.mustHaveArgs = true;
     runscriptCommand.exampleUsage = (
       enteredCommand?: Command<
@@ -660,13 +661,14 @@ export const getEndpointConsoleCommands = ({
     }),
   });
 
-  if (microsoftDefenderEndpointCancelEnabled) {
+  if (microsoftDefenderEndpointCancelEnabled || responseActionsEndpointCancel) {
     const isSupported = canCancelForCurrentContext();
+
     consoleCommands.push({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported,
+        isSupported: isSupported && doesEndpointSupportCommand('cancel'),
       }),
       RenderComponent: CancelActionResult,
       meta: commandMeta,
@@ -677,33 +679,35 @@ export const getEndpointConsoleCommands = ({
       ),
       mustHaveArgs: true,
       args: {
-        ...(isSupported
+        action: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+            {
+              defaultMessage:
+                'The response action to cancel (selected from a popup that displays the list of pending actions for this host that can be canceled).',
+            }
+          ),
+          mustHaveValue: 'truthy',
+          SelectorComponent: CancelablePendingActionsSelector,
+        },
+        ...(agentType === 'endpoint'
           ? {
-              action: {
-                required: true,
+              force: {
+                required: false,
                 allowMultiples: false,
-                about: i18n.translate(
-                  'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
-                  {
-                    defaultMessage: 'The response action to cancel',
-                  }
-                ),
-                mustHaveValue: 'truthy',
-                SelectorComponent: PendingActionsSelector,
+                about: CONSOLE_COMMANDS.cancel.forceArgInfo,
+                mustHaveValue: false,
               },
             }
           : {}),
-        comment: {
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled: !isSupported,
+      helpDisabled: !isSupported || !doesEndpointSupportCommand('cancel'),
       helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
     });
@@ -785,7 +789,9 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         process: {
-          about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
+          about:
+            CONSOLE_COMMANDS.memoryDump.processArgAbout +
+            (endpointSupportsProcessDump ? '' : ` ${CONSOLE_COMMANDS.memoryDump.argNotSupported}`),
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
@@ -799,7 +805,9 @@ export const getEndpointConsoleCommands = ({
           },
         },
         kernel: {
-          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          about:
+            CONSOLE_COMMANDS.memoryDump.kernelArgAbout +
+            (endpointSupportsKernelDump ? '' : ` ${CONSOLE_COMMANDS.memoryDump.argNotSupported}`),
           required: false,
           allowMultiples: false,
           mustHaveValue: false,

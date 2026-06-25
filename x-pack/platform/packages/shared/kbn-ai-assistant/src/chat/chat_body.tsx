@@ -34,7 +34,6 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
-  getElasticManagedLlmConnector,
   InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -135,7 +134,7 @@ export function ChatBody({
   refreshConversations,
   updateDisplayedConversation,
   onConversationDuplicate,
-  navigateToConnectorsManagementApp,
+  navigateToModelManagementApp,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
@@ -153,7 +152,7 @@ export function ChatBody({
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
-  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -413,13 +412,12 @@ export function ChatBody({
     conversation.refresh();
   };
 
-  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
   const { conversationCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
-    !!elasticManagedLlm &&
-    connectors.selectedConnector === elasticManagedLlm.id &&
-    !conversationCalloutDismissed;
+    (connectors.connectors || []).some(
+      (connector) => connector.connectorId === connectors.selectedConnector && connector.isEis
+    ) && !conversationCalloutDismissed;
 
   const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled === true &&
@@ -728,8 +726,7 @@ export function ChatBody({
           copyUrl={copyUrl}
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
-          isConversationApp={!showLinkToConversationsApp}
-          navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
+          navigateToModelManagementApp={navigateToModelManagementApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

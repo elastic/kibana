@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
+import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
 import type { GetScopedClients } from '../../../routes/types';
+import type { StreamsServer } from '../../../types';
 import { createStreamsDescriptionGenerationTask } from './description_generation';
-import { createStreamsSystemIdentificationTask } from './system_identification';
-import { createStreamsInsightsDiscoveryTask } from './insights_discovery';
-import { createStreamsSignificantEventsQueriesGenerationTask } from './significant_events_queries_generation';
+import { createStreamsSignificantEventsQueriesGenerationTask } from '../../sig_events/tasks/significant_events_queries_generation';
 import type { EbtTelemetryClient } from '../../telemetry';
 import { createStreamsFeaturesIdentificationTask } from './features_identification';
 import { createStreamsOnboardingTask } from './onboarding';
@@ -20,15 +20,18 @@ export interface TaskContext {
   logger: Logger;
   getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
+  getInternalEsClient: () => ElasticsearchClient;
+  getConversationsClient: (
+    request: KibanaRequest
+  ) => Promise<ReadOnlyConversationClient | undefined>;
+  server: StreamsServer;
 }
 
 export function createTaskDefinitions(taskContext: TaskContext) {
   return {
     ...createStreamsDescriptionGenerationTask(taskContext),
-    ...createStreamsSystemIdentificationTask(taskContext),
     ...createStreamsSignificantEventsQueriesGenerationTask(taskContext),
     ...createStreamsFeaturesIdentificationTask(taskContext),
-    ...createStreamsInsightsDiscoveryTask(taskContext),
     ...createStreamsOnboardingTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }

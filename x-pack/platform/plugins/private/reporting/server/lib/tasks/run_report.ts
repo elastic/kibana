@@ -38,7 +38,7 @@ import {
 
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
@@ -355,21 +355,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     spaceId: string | undefined,
     logger = this.logger
   ): KibanaRequest {
+    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+      logger.info(`Generating request for space: ${spaceId}`);
+    }
     const rawRequest: FakeRawRequest = {
       headers,
-      path: '/',
+      spaceId: spaceId ? asSpaceId(spaceId) : undefined,
     };
-    const fakeRequest = kibanaRequestFactory(rawRequest);
-
-    const setupDeps = this.opts.reporting.getPluginSetupDeps();
-    const spacesService = setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-    return fakeRequest;
+    return kibanaRequestFactory(rawRequest);
   }
 
   protected async performJob({
@@ -403,6 +396,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           taskInstanceFields,
           cancellationToken,
           stream,
+          useInternalUser: task.useInternalUser,
         })
       ).pipe(timeout(this.queueTimeout)) // throw an error if a value is not emitted before timeout
     );
@@ -559,6 +553,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 );
                 eventLog.logExecutionStart();
 
+                // Listen for stream errors so they and reject to prevent unhandled rejections
+                let streamErrorReject: (err: Error) => void;
+                const rejectIfStreamError = new Promise<never>((_, reject) => {
+                  streamErrorReject = reject;
+                  stream.once('error', reject);
+                });
+
                 const output = await Promise.race<TaskRunResult>([
                   this.performJob({
                     task,
@@ -568,7 +569,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                     stream,
                   }),
                   this.throwIfKibanaShutsDown(),
+                  rejectIfStreamError,
                 ]);
+
+                // Removing so errors in _final are handled only by finishedWithNoPendingCallbacks
+                // and don't cause unhandled rejections
+                stream.removeListener('error', streamErrorReject!);
 
                 stream.end();
 

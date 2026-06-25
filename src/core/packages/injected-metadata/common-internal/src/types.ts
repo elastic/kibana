@@ -56,6 +56,7 @@ export interface InjectedMetadata {
   branch: string;
   basePath: string;
   serverBasePath: string;
+  spaceId: string;
   publicBaseUrl?: string;
   assetsHrefBase: string;
   clusterInfo: InjectedMetadataClusterInfo;
@@ -64,6 +65,7 @@ export interface InjectedMetadata {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
     airgapped: boolean;
+    isCoreRenderingInReactConcurrentMode: boolean;
   };
   featureFlags?: {
     overrides: Record<string, unknown>;
@@ -71,7 +73,9 @@ export interface InjectedMetadata {
   };
   anonymousStatusPage: boolean;
   i18n: {
-    translationsUrl: string;
+    /** `null` when the effective locale is English — no fetch is needed. */
+    translationsUrl: string | null;
+    availableLocales: Array<{ id: string; label: string }>;
   };
   theme: InjectedMetadataTheme;
   csp: {
@@ -91,4 +95,7 @@ export interface InjectedMetadata {
     };
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
+  userStorage: {
+    values: Record<string, unknown>;
+  };
 }

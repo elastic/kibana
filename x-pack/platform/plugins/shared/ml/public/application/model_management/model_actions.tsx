@@ -22,19 +22,19 @@ import type {
   DFAModelItem,
   TrainedModelItem,
   TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import {
   isBuiltInModel,
   isDFAModelItem,
   isExistingModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';
@@ -156,7 +156,7 @@ export function useModelActions({
             defaultMessage: 'Training data can be viewed when data frame analytics job exists.',
           }
         ),
-        icon: 'visTable',
+        icon: 'table',
         type: 'icon',
         available: (item) => isDFAModelItem(item) && !!item.metadata?.analytics_config?.id,
         enabled: (item) => isDFAModelItem(item) && item.origin_job_exists === true,
@@ -269,7 +269,7 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowUpdateDeploymentAction',
-        icon: 'documentEdit',
+        icon: 'pencil',
         type: 'icon',
         isPrimary: false,
         available: (item) =>
@@ -399,7 +399,7 @@ export function useModelActions({
           defaultMessage: 'Analyze data drift',
         }),
         'data-test-subj': 'mlModelsAnalyzeDataDriftAction',
-        icon: 'visTagCloud',
+        icon: 'chartTagCloud',
         type: 'icon',
         isPrimary: true,
         available: (item) => {

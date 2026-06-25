@@ -32,7 +32,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
   const items = [
     <EuiContextMenuItem
       key="walkthrough"
-      icon="popout"
+      icon="external"
       href={links.painlessWalkthrough}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
@@ -44,7 +44,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
 
     <EuiContextMenuItem
       key="api"
-      icon="popout"
+      icon="external"
       href={links.painlessAPIReference}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
@@ -56,7 +56,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
 
     <EuiContextMenuItem
       key="languageSpec"
-      icon="popout"
+      icon="external"
       href={links.painlessLangSpec}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
@@ -87,6 +87,9 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
           <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
             <EuiFlexItem grow={false}>
               <EuiPopover
+                aria-label={i18n.translate('xpack.painlessLab.helpPopoverAriaLabel', {
+                  defaultMessage: 'Help menu',
+                })}
                 id="painlessLabHelpContextMenu"
                 button={
                   <EuiButtonEmpty

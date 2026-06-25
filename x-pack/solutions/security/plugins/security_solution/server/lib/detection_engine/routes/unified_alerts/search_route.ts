@@ -6,14 +6,17 @@
  */
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL } from '../../../../../common/constants';
-import { searchAlertsHandler } from '../common/search_alerts_handler';
+import { buildSiemResponse } from '../utils';
+import { searchAlerts } from '../common/operations/search_alerts';
+import { validateSearchAlertsParams } from '../common/validators/validate_search_alerts_params';
+import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const searchUnifiedAlertsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -39,17 +42,16 @@ export const searchUnifiedAlertsRoute = (
         },
       },
       async (context, request, response) => {
-        const getIndexPattern = async () => {
-          const spaceId = (await context.securitySolution).getSpaceId();
-          const alertsIndex = ruleDataClient?.indexNameWithNamespace(spaceId);
-          const indexPattern = [
-            ...(alertsIndex ? [alertsIndex] : []), // Detection alerts
-            `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Attack alerts
-          ];
-          return indexPattern;
-        };
+        const params = request.body;
 
-        return searchAlertsHandler({ context, request, response, getIndexPattern });
+        const validationError = validateSearchAlertsParams(params);
+        if (validationError) {
+          return buildSiemResponse(response).error({ statusCode: 400, body: validationError });
+        }
+
+        const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
+
+        return withSiemErrorHandling(response, () => searchAlerts({ context, index, params }));
       }
     );
 };

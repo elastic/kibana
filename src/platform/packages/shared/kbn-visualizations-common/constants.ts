@@ -10,7 +10,7 @@
 export const VISUALIZE_APP_NAME = 'visualize';
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
-export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+export const VISUALIZE_EMBEDDABLE_TYPE = 'legacy_vis';
 export const VISUALIZE_SAVED_OBJECT_TYPE = 'visualization';
 
 export const STATE_STORAGE_KEY = '_a';

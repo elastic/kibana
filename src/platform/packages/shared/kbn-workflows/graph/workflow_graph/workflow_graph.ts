@@ -13,6 +13,7 @@ import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import type { GraphNodeUnion } from '../types';
+import { isEnterWorkflowTimeoutZone } from '../types/guards';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -32,6 +33,7 @@ export class WorkflowGraph {
   private graph: graphlib.Graph<GraphNodeUnion>;
   private __topologicalOrder: string[] | null = null;
   private stepIdsSet: Set<string> | null = null;
+  private innerStepIdsCache = new Map<string, Set<string>>();
 
   constructor(graph: graphlib.Graph<GraphNodeUnion>) {
     this.graph = graph;
@@ -68,6 +70,8 @@ export class WorkflowGraph {
       '', // Try the exact step ID first
       'enterForeach_',
       'enterCondition_',
+      'enterWhile_',
+      'enterSwitch_',
     ];
 
     for (const prefix of nodePrefixes) {
@@ -172,6 +176,16 @@ export class WorkflowGraph {
     return successors.map((id) => this.graph.node(id));
   }
 
+  /** Workflow settings timeout from the workflow-level enter-timeout-zone node, if present. */
+  public getWorkflowLevelTimeout(): string | undefined {
+    for (const node of this.getAllNodes()) {
+      if (isEnterWorkflowTimeoutZone(node)) {
+        return node.timeout;
+      }
+    }
+    return undefined;
+  }
+
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
@@ -188,5 +202,19 @@ export class WorkflowGraph {
     const directPredecessors = this.graph.predecessors(nodeId) || [];
     directPredecessors.forEach((predId) => collectPredecessors(predId));
     return Array.from(visited).map((id) => this.graph.node(id));
+  }
+
+  /** Inner stepIds for a compound step (excluding that step). Cached. */
+  public getInnerStepIds(compoundStepId: string): Set<string> {
+    const cached = this.innerStepIdsCache.get(compoundStepId);
+    if (cached) {
+      return cached;
+    }
+
+    const subGraph = this.getStepGraph(compoundStepId);
+    const stepIds = new Set(subGraph.getAllNodes().map((n) => n.stepId));
+    stepIds.delete(compoundStepId);
+    this.innerStepIdsCache.set(compoundStepId, stepIds);
+    return stepIds;
   }
 }

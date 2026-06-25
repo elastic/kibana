@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -96,7 +96,7 @@ export const alertsTool = (
         nlQuery: enhancedQuery,
         index: searchIndex,
         esClient: esClient.asCurrentUser,
-        model: await modelProvider.getDefaultModel(),
+        modelProvider,
         events,
         logger,
       });

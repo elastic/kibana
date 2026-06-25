@@ -35,7 +35,7 @@ export function ESQLQueryStats({ queryStats }: { queryStats: ESQLQueryStats }) {
       alignItems="center"
       gutterSize="s"
       responsive={false}
-      css={{ marginRight: euiTheme.size.s }}
+      css={{ marginRight: euiTheme.size.s, paddingLeft: euiTheme.size.s }}
     >
       {queryStats.durationInMs && (
         <EuiFlexItem grow={false}>

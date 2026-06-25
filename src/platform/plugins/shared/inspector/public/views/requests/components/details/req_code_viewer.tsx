@@ -55,7 +55,7 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
                   <EuiButtonEmpty
                     size="xs"
                     flush="right"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     onClick={copy}
                     data-test-subj="inspectorRequestCopyClipboardButton"
                   >
@@ -77,6 +77,7 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
         <CodeEditor
           languageId={XJsonLang.ID}
           value={value}
+          enableFindAction
           options={{
             readOnly: true,
             lineNumbers: 'off',

@@ -18,9 +18,9 @@ export const getDefendInsightsCustomEvaluator = ({
   insightType: DefendInsightType;
 }): EvaluatorT => {
   switch (insightType) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return customIncompatibleAntivirusEvaluator;
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return customPolicyResponseFailureEvaluator;
     default:
       throw new InvalidDefendInsightTypeError();

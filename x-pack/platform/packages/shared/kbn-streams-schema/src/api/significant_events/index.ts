@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import type { ServerSentEventBase } from '@kbn/sse-utils';
-import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamQueryKql } from '../../queries';
+import { z } from '@kbn/zod/v4';
+import {
+  esqlQuerySchema,
+  queryFeatureSchema,
+  queryTypeSchema,
+  type StreamQuery,
+} from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
+import type { Discovery } from '../../sig_events/discoveries';
+import type { Detection } from '../../sig_events/detections';
+import type { SigEvent } from '../../sig_events/events';
 
 /**
  * SignificantEvents Get Response
@@ -36,12 +42,13 @@ interface SignificantEventOccurrence {
   count: number;
 }
 
-type SignificantEventsResponse = StreamQueryKql & {
+type SignificantEventsResponse = StreamQuery & {
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
+  rule_backed: boolean;
 };
 
 interface SignificantEventsGetResponse {
@@ -49,29 +56,18 @@ interface SignificantEventsGetResponse {
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
-type SignificantEventsPreviewResponse = Pick<
-  SignificantEventsResponse,
-  'occurrences' | 'change_points' | 'kql'
->;
+export const generatedSignificantEventQuerySchema = z.object({
+  type: queryTypeSchema,
+  title: z.string(),
+  esql: esqlQuerySchema,
+  severity_score: z.number().min(0).max(100),
+  description: z.string(),
+  evidence: z.array(z.string()).optional(),
+  replaces: z.string().optional(),
+  features: z.array(queryFeatureSchema),
+});
 
-interface GeneratedSignificantEventQuery {
-  title: string;
-  kql: string;
-  feature?: {
-    name: string;
-    filter: Condition;
-    type: 'system';
-  };
-  severity_score: number;
-  evidence?: string[];
-}
-
-type SignificantEventsGenerateResponse = Observable<
-  ServerSentEventBase<
-    'generated_queries',
-    { queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }
-  >
->;
+type GeneratedSignificantEventQuery = z.infer<typeof generatedSignificantEventQuerySchema>;
 
 interface SignificantEventsQueriesGenerationResult {
   queries: GeneratedSignificantEventQuery[];
@@ -95,12 +91,27 @@ type SignificantEventsQueriesGenerationTaskResult =
       status: TaskStatus.Completed | TaskStatus.Acknowledged;
     } & SignificantEventsQueriesGenerationResult);
 
+interface LifecycleDetection {
+  detection_id: string;
+  rule_name?: string;
+  stream_name?: string;
+  change_point_type?: string;
+  kind: Extract<Detection['kind'], 'detection' | 'quiet'>;
+  '@timestamp': string;
+}
+
+interface EventLifecycleResponse {
+  detections: LifecycleDetection[];
+  discoveries: Discovery[];
+  events: SigEvent[];
+}
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
-  SignificantEventsGenerateResponse,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
+  LifecycleDetection,
+  EventLifecycleResponse,
 };

@@ -37,12 +37,14 @@ export interface SingleAgentMenuCallbacks {
   onReassignClick: () => void;
   onUpgradeClick: () => void;
   onViewAgentJsonClick: () => void;
+  onViewAgentPolicyClick: () => void;
   onMigrateAgentClick: () => void;
   onRequestDiagnosticsClick: () => void;
   onChangeAgentPrivilegeLevelClick: () => void;
   onUnenrollClick: () => void;
   onUninstallClick: () => void;
   onRollbackClick: () => void;
+  onRemoveCollectorClick?: () => void;
 }
 
 export interface UseSingleAgentMenuItemsOptions {
@@ -80,6 +82,44 @@ export function useSingleAgentMenuItems({
 
   const menuItems = useMemo(() => {
     const items: MenuItem[] = [];
+
+    const viewAgentJsonMenuItem: MenuItem = {
+      id: 'view-json',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentList.viewAgentDetailsJsonText"
+          defaultMessage="View agent JSON"
+        />
+      ),
+      icon: 'code',
+      onClick: () => {
+        callbacks.onViewAgentJsonClick();
+      },
+      'data-test-subj': 'viewAgentDetailsJsonBtn',
+    };
+
+    if (agent.type === 'OPAMP') {
+      items.push(viewAgentJsonMenuItem);
+      if (hasFleetAllPrivileges && callbacks.onRemoveCollectorClick) {
+        items.push({
+          id: 'remove-collector',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.removeCollectorOneButton"
+              defaultMessage="Remove collector"
+            />
+          ),
+          icon: 'trash',
+          iconColor: 'danger',
+          disabled: !agent.active,
+          onClick: () => {
+            callbacks.onRemoveCollectorClick?.();
+          },
+          'data-test-subj': 'agentRemoveCollectorBtn',
+        });
+      }
+      return items;
+    }
 
     // View agent - only shown when onViewAgentClick is provided (table row context)
     if (callbacks.onViewAgentClick) {
@@ -185,6 +225,7 @@ export function useSingleAgentMenuItems({
                   icon: 'clockCounter',
                   disabled:
                     !agentHasValidRollback ||
+                    isAgentUpgrading(agent) ||
                     !licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK),
                   onClick: () => {
                     callbacks.onRollbackClick();
@@ -208,21 +249,23 @@ export function useSingleAgentMenuItems({
       ),
       panelTitle: 'Maintenance and diagnostics',
       children: [
-        // View agent JSON - always available
+        // View agent policy - available when agent has a policy
         {
-          id: 'view-json',
+          id: 'view-agent-policy',
           name: (
             <FormattedMessage
-              id="xpack.fleet.agentList.viewAgentDetailsJsonText"
-              defaultMessage="View agent JSON"
+              id="xpack.fleet.agentList.viewAgentPolicyText"
+              defaultMessage="View agent policy"
             />
           ),
-          icon: 'code',
+          icon: 'inspect',
+          disabled: !authz.fleet.readAgentPolicies || !agent.policy_id,
           onClick: () => {
-            callbacks.onViewAgentJsonClick();
+            callbacks.onViewAgentPolicyClick();
           },
-          'data-test-subj': 'viewAgentDetailsJsonBtn',
+          'data-test-subj': 'viewAgentPolicyBtn',
         },
+        viewAgentJsonMenuItem,
       ],
     };
 
@@ -326,7 +369,7 @@ export function useSingleAgentMenuItems({
               defaultMessage="Uninstall agent"
             />
           ),
-          icon: 'minusInCircle',
+          icon: 'minusCircle',
           iconColor: 'danger',
           disabled: !agent.active,
           onClick: () => {
@@ -365,6 +408,7 @@ export function useSingleAgentMenuItems({
     agentHasValidRollback,
     licenseService,
     isUnenrolling,
+    authz.fleet.readAgentPolicies,
   ]);
 
   return menuItems;

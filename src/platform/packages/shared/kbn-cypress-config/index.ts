@@ -107,7 +107,10 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
 }
 
 export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
+  const isInteractive = !process.env.CI && !process.argv.includes('--headless');
+
   return defineConfig({
+    numTestsKeptInMemory: isInteractive ? 3 : 0,
     ...options,
     ...getReportingOptionOverrides(options),
     e2e: {
@@ -127,6 +130,19 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
             );
           }
         }
+
+        on('before:browser:launch', (browser, launchOptions) => {
+          if (browser.family === 'chromium') {
+            launchOptions.args.push(
+              '--js-flags=--max-old-space-size=4096 --max-semi-space-size=1024'
+            );
+            launchOptions.args.push('--disable-dev-shm-usage');
+          }
+          if (browser.name === 'chrome' && browser.isHeadless) {
+            launchOptions.args.push('--window-size=1920,1200');
+          }
+          return launchOptions;
+        });
 
         on('file:preprocessor', (file) => {
           const id = uuid();
@@ -151,6 +167,10 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                         presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
                       },
                     },
+                  },
+                  {
+                    test: /\.peggy$/,
+                    use: [require.resolve('@kbn/peggy-loader')],
                   },
                 ],
               },

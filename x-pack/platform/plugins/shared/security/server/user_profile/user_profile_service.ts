@@ -11,7 +11,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 
-import type { IClusterClient, Logger } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type {
   CheckUserProfilesPrivilegesResponse,
   UserProfileBulkGetParams,
@@ -31,6 +33,7 @@ import type {
 } from '../../common';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 import { getPrintableSessionId, type Session } from '../session_management';
 
 const KIBANA_DATA_ROOT = 'kibana';
@@ -41,6 +44,7 @@ const DEFAULT_SUGGESTIONS_COUNT = 10;
 const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
 const BULK_GET_MAX_UIDS_PER_BATCH = 50;
 const BULK_GET_MAX_CONCURRENT_BATCH_REQUESTS = 5;
+const RUNAS_HEADER = 'es-security-runas-user';
 
 export interface UserProfileServiceStartInternal extends UserProfileServiceStart {
   /**
@@ -65,6 +69,7 @@ export interface UserProfileServiceSetupParams {
 export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 function parseUserProfile<D extends UserProfileData>(
@@ -113,10 +118,10 @@ export class UserProfileService {
     this.license = license;
   }
 
-  start({ clusterClient, session }: UserProfileServiceStartParams) {
+  start({ clusterClient, session, getCurrentUser }: UserProfileServiceStartParams) {
     return {
       activate: this.activate.bind(this, clusterClient),
-      getCurrent: this.getCurrent.bind(this, clusterClient, session),
+      getCurrent: this.getCurrent.bind(this, clusterClient, session, getCurrentUser),
       bulkGet: this.bulkGet.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
@@ -136,7 +141,7 @@ export class UserProfileService {
             grant_type: 'access_token',
             access_token: grant.accessToken,
             ...(grant.type === 'uiamAccessToken'
-              ? { client_authentication: { scheme: 'SharedSecret', value: grant.sharedSecret } }
+              ? { client_authentication: grant.clientAuthentication }
               : {}),
           };
 
@@ -149,9 +154,9 @@ export class UserProfileService {
     let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
     do {
       try {
-        const response = await clusterClient.asInternalUser.security.activateUserProfile(
-          activateRequest
-        );
+        const response = await clusterClient.asInternalUser.security.activateUserProfile({
+          ...activateRequest,
+        });
 
         this.logger.debug(`Successfully activated profile for "${response.user.username}".`);
 
@@ -188,13 +193,38 @@ export class UserProfileService {
   }
 
   /**
-   * See {@link UserProfileServiceStart} for documentation.
+   * Determines the type of authorization from the Authorization header.
+   * @param authHeader The Authorization header value
+   * @returns The type of authorization ('basic', 'apikey', or null if neither)
    */
-  private async getCurrent<D extends UserProfileData>(
-    clusterClient: IClusterClient,
+  private getAuthHeaderType(authHeader: string | string[] | undefined): 'basic' | 'apikey' | null {
+    if (!authHeader || typeof authHeader !== 'string') {
+      return null;
+    }
+
+    const normalizedHeader = authHeader.trim().toLowerCase();
+
+    if (normalizedHeader.startsWith('basic ')) {
+      return 'basic';
+    }
+
+    if (normalizedHeader.startsWith('apikey ')) {
+      return 'apikey';
+    }
+
+    return null;
+  }
+
+  /**
+   * Retrieves the current user profile ID from a session-authenticated request.
+   * @param session Session service instance
+   * @param request The HTTP request
+   * @returns The profile ID if found, null otherwise
+   */
+  private async getCurrentUserProfileIdViaSession(
     session: PublicMethodsOf<Session>,
-    { request, dataPath }: UserProfileGetCurrentParams
-  ) {
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<{ profileId?: string; sessionId?: string }> {
     let userSession;
     try {
       userSession = await session.get(request);
@@ -204,7 +234,11 @@ export class UserProfileService {
     }
 
     if (userSession.error) {
-      return null;
+      this.logger.debug(`Retrieved user session has error: ${userSession.error.message}`);
+      return {
+        profileId: undefined,
+        sessionId: undefined,
+      };
     }
 
     if (!userSession.value.userProfileId) {
@@ -213,33 +247,244 @@ export class UserProfileService {
           userSession.value.sid
         )}].`
       );
+    }
+
+    return {
+      profileId: userSession.value.userProfileId ?? undefined,
+      sessionId: userSession.value.sid,
+    };
+  }
+
+  /**
+   * Activates the user profile from a Basic auth authenticated request.
+   * @param clusterClient The cluster client
+   * @param request The HTTP request
+   * @returns The activated profile
+   */
+  private async activateProfileViaBasicAuth(
+    clusterClient: IClusterClient,
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<UserProfileWithSecurity | undefined> {
+    const authHeader = request.headers.authorization as string;
+    const base64Credentials = authHeader.trim().substring('basic '.length);
+    const [username, password] = Buffer.from(base64Credentials, 'base64').toString().split(':');
+    if (!username || !password) {
+      throw new Error(`Malformed basic credentials in Authorization header.`);
+    }
+
+    const activatedProfile = await this.activate(clusterClient, {
+      type: 'password',
+      username,
+      password,
+    });
+
+    return activatedProfile;
+  }
+
+  /**
+   * Retrieves the user profile ID from an API key authenticated request by retrieving the API Key itself.
+   * @param clusterClient The cluster client
+   * @param request The HTTP request
+   * @returns The profile ID if found, undefined otherwise
+   */
+  private async getCurrentUserProfileIdViaApiKey(
+    clusterClient: IClusterClient,
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<string | undefined> {
+    try {
+      const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+      if (!id) {
+        this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+        return undefined;
+      }
+
+      const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
+        with_profile_uid: true,
+        id,
+      });
+
+      if (response.api_keys && response.api_keys.length > 0) {
+        return response.api_keys[0].profile_uid;
+      } else {
+        this.logger.debug(
+          `No API keys were returned from query, cannot retrieve associated profile id.`
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
+      );
+    }
+  }
+
+  private recordGetCurrentSuccess(params: {
+    profileActivationRequired?: boolean;
+    apiKeyRetrievalRequired?: boolean;
+    fakeRequestProfileResolution?: boolean;
+  }) {
+    securityTelemetry.recordGetCurrentProfileInvocation({
+      profileActivationRequired: params.profileActivationRequired,
+      apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      fakeRequestProfileResolution: params.fakeRequestProfileResolution,
+      outcome: 'success',
+    });
+  }
+
+  private recordGetCurrentFailure(params: {
+    profileActivationRequired?: boolean;
+    apiKeyRetrievalRequired?: boolean;
+    fakeRequestProfileResolution?: boolean;
+  }) {
+    securityTelemetry.recordGetCurrentProfileInvocation({
+      profileActivationRequired: params.profileActivationRequired,
+      apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      fakeRequestProfileResolution: params.fakeRequestProfileResolution,
+      outcome: 'failure',
+    });
+  }
+
+  /**
+   * See {@link UserProfileServiceStart} for documentation.
+   */
+  private async getCurrent<D extends UserProfileData>(
+    clusterClient: IClusterClient,
+    session: PublicMethodsOf<Session>,
+    getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null,
+    { request, dataPath }: UserProfileGetCurrentParams
+  ) {
+    if (!this.license?.isEnabled()) {
+      this.logger.debug(
+        'Skipping user profile retrieval: security features are disabled in Elasticsearch.'
+      );
       return null;
     }
+
+    // Fake requests carry a bound `profile_uid` instead of an HTTP auth state,
+    // so the standard `auth.isAuthenticated === false` gate doesn't apply.
+    if (!request.isFakeRequest && request.auth.isAuthenticated === false) {
+      throw new Error('Request to get current user profile is not authenticated.');
+    }
+
+    let profileId: string | undefined;
+    let sessionId: string | undefined;
+    let profileActivationRequired: boolean | undefined;
+    let apiKeyRetrievalRequired: boolean | undefined;
+    let fakeRequestProfileResolution: boolean | undefined;
+
+    if (request.isFakeRequest) {
+      profileId = getCurrentUser(request)?.profile_uid;
+      if (profileId) {
+        fakeRequestProfileResolution = true;
+        this.logger.debug(`Resolving current user profile directly from profile_uid [fake=true].`);
+      }
+    }
+
+    if (!profileId && (await session.getSID(request))) {
+      this.logger.debug(`Request to get current user profile is authenticated via session.`);
+      ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
+    } else if (!profileId && request.headers[RUNAS_HEADER]) {
+      // When a proxy sets `es-security-runas-user`, the Authorization header belongs to the proxy
+      // credential (e.g. `elastic`), not the effective user. Activating a profile from those
+      // credentials would associate the avatar with the proxy account, not the impersonated user.
+      // Return null because a user profile is not applicable in this context.
+      this.logger.debug(
+        `Skipping user profile retrieval for request with 'es-security-runas-user' header.`
+      );
+      return null;
+    } else if (!profileId) {
+      const authType = this.getAuthHeaderType(request.headers.authorization);
+
+      if (authType === 'basic') {
+        profileActivationRequired = true;
+
+        this.logger.debug(
+          `Request to get current user profile is authenticated via Basic credentials [fake=${!!fakeRequestProfileResolution}].`
+        );
+
+        let activatedProfile: UserProfileWithSecurity | undefined;
+        try {
+          activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
+        } catch (error) {
+          this.recordGetCurrentFailure({
+            profileActivationRequired,
+            apiKeyRetrievalRequired,
+            fakeRequestProfileResolution,
+          });
+          this.logger.debug(
+            `Failed to activate profile via basic credentials: ${getDetailedErrorMessage(error)}`
+          );
+          throw error;
+        }
+
+        // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
+        // we will need to re-fetch the profile like in the other cases (session, API key).
+        if (activatedProfile && !dataPath) {
+          this.recordGetCurrentSuccess({
+            profileActivationRequired,
+            apiKeyRetrievalRequired,
+            fakeRequestProfileResolution,
+          });
+          return activatedProfile;
+        }
+        profileId = activatedProfile?.uid;
+      } else if (authType === 'apikey') {
+        apiKeyRetrievalRequired = true;
+        this.logger.debug(
+          `Request to get current user profile is authenticated via API key [fake=${!!fakeRequestProfileResolution}].`
+        );
+        profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+      }
+    }
+
+    if (!profileId) {
+      this.recordGetCurrentFailure({
+        profileActivationRequired,
+        apiKeyRetrievalRequired,
+        fakeRequestProfileResolution,
+      });
+      return null;
+    }
+
+    const requestDescriptor = sessionId
+      ? ` [sid=${getPrintableSessionId(sessionId)}]`
+      : ` [fake=${!!fakeRequestProfileResolution}]`;
 
     let body;
     try {
       body = await clusterClient.asInternalUser.security.getUserProfile({
-        uid: userSession.value.userProfileId,
+        uid: profileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
     } catch (error) {
+      this.recordGetCurrentFailure({
+        profileActivationRequired,
+        apiKeyRetrievalRequired,
+        fakeRequestProfileResolution,
+      });
       this.logger.error(
-        `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
-          userSession.value.sid
-        )}]: ${getDetailedErrorMessage(error)}`
+        `Failed to retrieve user profile for the current user${requestDescriptor}: ${getDetailedErrorMessage(
+          error
+        )}`
       );
       throw error;
     }
 
     if (body.profiles.length === 0) {
-      this.logger.error(
-        `The user profile for the current user [sid=${getPrintableSessionId(
-          userSession.value.sid
-        )}] is not found.`
-      );
+      this.recordGetCurrentFailure({
+        profileActivationRequired,
+        apiKeyRetrievalRequired,
+        fakeRequestProfileResolution,
+      });
+      this.logger.error(`The user profile for the current user${requestDescriptor} is not found.`);
       throw new Error(`User profile is not found.`);
     }
 
+    this.recordGetCurrentSuccess({
+      profileActivationRequired,
+      apiKeyRetrievalRequired,
+      fakeRequestProfileResolution,
+    });
+    this.logger.debug(`Returning current user profile.`);
     return parseUserProfileWithSecurity<D>(body.profiles[0]);
   }
 

@@ -82,7 +82,7 @@
             "label": "component",
             "description": [],
             "signature": [
-              "React.ComponentType<{}> | undefined"
+              "React.ComponentType | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "lineNumber": 50,
@@ -120,6 +120,7 @@
                 "lineNumber": 52,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -181,6 +182,7 @@
                 "lineNumber": 60,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImAType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -235,6 +237,7 @@
                 "lineNumber": 66,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImAType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -349,6 +352,7 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TypeWithGeneric",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -374,6 +378,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ImAType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -409,13 +414,13 @@
         "tags": [],
         "label": "crazyFunction",
         "description": [
-          "\nWho would write such a complicated function?? Ewwww.\n\nAccording to https://jsdoc.app/tags-param.html#parameters-with-properties,\nthis is how destructured arguements should be commented.\n"
+          "\nWho would write such a complicated function?? Ewwww.\n\nAccording to https://jsdoc.app/tags-param.html#parameters-with-properties,\nthis is how destructured arguments should be commented.\nUse a named object and dot-notation properties rather than inline destructuring.\n"
         ],
         "signature": [
-          "(obj: { hi: string; }, { fn1, fn2 }: { fn1: (foo: { param: string; }) => number; fn2: () => void; }, { str }: { str: string; }) => () => () => number"
+          "(obj: { hi: string; }, fns: { fn1: (foo: { param: string; }) => number; fn2: () => void; }, strObj: { str: string; }) => () => () => number"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-        "lineNumber": 64,
+        "lineNumber": 73,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -426,9 +431,11 @@
             "type": "Object",
             "tags": [],
             "label": "obj",
-            "description": [],
+            "description": [
+              "A very crazy parameter that is destructured when passing in."
+            ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-            "lineNumber": 66,
+            "lineNumber": 75,
             "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
@@ -439,9 +446,11 @@
                 "type": "string",
                 "tags": [],
                 "label": "hi",
-                "description": [],
+                "description": [
+                  "Greeting on the obj."
+                ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-                "lineNumber": 66,
+                "lineNumber": 75,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
@@ -453,11 +462,13 @@
             "id": "def-public.crazyFunction.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ fn1, fn2 }",
-            "description": [],
+            "label": "fns",
+            "description": [
+              "A destructured object containing two functions."
+            ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-            "lineNumber": 67,
-            "columnNumber": 19,
+            "lineNumber": 76,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -467,13 +478,15 @@
                 "type": "Function",
                 "tags": [],
                 "label": "fn1",
-                "description": [],
+                "description": [
+                  "The first function."
+                ],
                 "signature": [
                   "(foo: { param: string; }) => number"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-                "lineNumber": 67,
-                "columnNumber": 21,
+                "lineNumber": 76,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -483,10 +496,12 @@
                     "type": "Object",
                     "tags": [],
                     "label": "foo",
-                    "description": [],
+                    "description": [
+                      "A parameter object for fn1."
+                    ],
                     "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-                    "lineNumber": 67,
-                    "columnNumber": 32,
+                    "lineNumber": 76,
+                    "columnNumber": 23,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -496,10 +511,12 @@
                         "type": "string",
                         "tags": [],
                         "label": "param",
-                        "description": [],
+                        "description": [
+                          "A nested parameter for foo."
+                        ],
                         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-                        "lineNumber": 67,
-                        "columnNumber": 34,
+                        "lineNumber": 76,
+                        "columnNumber": 25,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -514,13 +531,15 @@
                 "type": "Function",
                 "tags": [],
                 "label": "fn2",
-                "description": [],
+                "description": [
+                  "The second function."
+                ],
                 "signature": [
                   "() => void"
                 ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-                "lineNumber": 67,
-                "columnNumber": 62,
+                "lineNumber": 76,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -533,11 +552,13 @@
             "id": "def-public.crazyFunction.$3",
             "type": "Object",
             "tags": [],
-            "label": "{ str }",
-            "description": [],
+            "label": "strObj",
+            "description": [
+              "A destructured object containing a string."
+            ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-            "lineNumber": 68,
-            "columnNumber": 14,
+            "lineNumber": 77,
+            "columnNumber": 13,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -547,10 +568,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "str",
-                "description": [],
+                "description": [
+                  "The string property."
+                ],
                 "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-                "lineNumber": 68,
-                "columnNumber": 16,
+                "lineNumber": 77,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -576,7 +599,7 @@
           "ImNotExportedFromIndex"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-        "lineNumber": 74,
+        "lineNumber": 83,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -592,9 +615,10 @@
               "ImNotExportedFromIndex"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-            "lineNumber": 74,
+            "lineNumber": 83,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ImNotExportedFromIndex",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -705,6 +729,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TypeWithGeneric",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -730,6 +755,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ImAType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -755,6 +781,47 @@
         ],
         "returnComment": [
           "something!"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "pluginA",
+        "id": "def-public.overloadedFn",
+        "type": "Function",
+        "tags": [],
+        "label": "overloadedFn",
+        "description": [
+          "\nA variable typed with the overloaded function."
+        ],
+        "signature": [
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.OverloadedFunction",
+            "text": "OverloadedFunction"
+          }
+        ],
+        "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.overloadedFn.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false
+          }
         ],
         "initialIsOpen": false
       }
@@ -980,6 +1047,7 @@
                 "lineNumber": 89,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1095,6 +1163,7 @@
                 "lineNumber": 36,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -1117,6 +1186,7 @@
                 "lineNumber": 36,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "MyProps",
                 "trackAdoption": false
               }
             ]
@@ -1201,6 +1271,7 @@
                 "lineNumber": 28,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
             ]
@@ -1263,7 +1334,7 @@
             "label": "component",
             "description": [],
             "signature": [
-              "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+              "React.ComponentType"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "lineNumber": 117,
@@ -1339,8 +1410,153 @@
                 "lineNumber": 28,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "pluginA",
+        "id": "def-public.OverloadedFunction",
+        "type": "Interface",
+        "tags": [],
+        "label": "OverloadedFunction",
+        "description": [
+          "\nA function type with multiple call signatures (overloads).\nThis demonstrates handling of overloaded function types.\n"
+        ],
+        "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.OverloadedFunction.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\nParse a string and return a number."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.OverloadedFunction.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "A string to parse."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 80,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The parsed number."
+            ]
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.OverloadedFunction.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\nDouble a number."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.OverloadedFunction.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "A number to double."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 86,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The doubled value as a string."
+            ]
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.OverloadedFunction.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\nParse an array of strings."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.OverloadedFunction.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "An array of strings to parse."
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 92,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "An array of parsed numbers."
             ]
           }
         ],
@@ -1512,7 +1728,7 @@
             "section": "def-public.MyProps",
             "text": "MyProps"
           },
-          ", string | React.JSXElementConstructor<any>>"
+          ">"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
         "lineNumber": 65,
@@ -1640,6 +1856,7 @@
             "lineNumber": 36,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           },
           {
@@ -1662,6 +1879,7 @@
             "lineNumber": 36,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "MyProps",
             "trackAdoption": false
           }
         ],
@@ -1710,6 +1928,7 @@
             "lineNumber": 28,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],
@@ -1888,7 +2107,7 @@
           "<string>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/fns.ts",
-        "lineNumber": 76,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1937,6 +2156,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TypeWithGeneric",
             "trackAdoption": false
           },
           {
@@ -1976,6 +2196,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ImAType",
             "trackAdoption": false
           },
           {
@@ -2136,6 +2357,7 @@
                 "lineNumber": 26,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TypeWithGeneric",
                 "trackAdoption": false
               },
               {
@@ -2175,6 +2397,7 @@
                 "lineNumber": 27,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImAType",
                 "trackAdoption": false
               },
               {
@@ -2281,6 +2504,7 @@
                 "lineNumber": 26,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TypeWithGeneric",
                 "trackAdoption": false
               },
               {
@@ -2320,6 +2544,7 @@
                 "lineNumber": 27,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImAType",
                 "trackAdoption": false
               },
               {
@@ -2393,6 +2618,7 @@
                 "lineNumber": 32,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImAType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2498,7 +2724,7 @@
               "tags": [],
               "label": "searchSpec",
               "description": [
-                "Provide the settings neccessary to create a new Search Service"
+                "Provide the settings necessary to create a new Search Service"
               ],
               "signature": [
                 {
@@ -2513,6 +2739,7 @@
               "lineNumber": 102,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "SearchSpec",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2528,7 +2755,15 @@
           "tags": [],
           "label": "getSearchService2",
           "description": [
-            "\nThis uses an inlined object type rather than referencing an exported type, which is discouraged.\nprefer the way {@link getSearchService} is typed.\n"
+            "\nThis uses an inlined object type rather than referencing an exported type, which is discouraged.\nprefer the way ",
+            {
+              "pluginId": "pluginA",
+              "scope": "public",
+              "docId": "kibPluginAPluginApi",
+              "section": "def-public.getSearchService",
+              "text": "getSearchService"
+            },
+            " is typed.\n"
           ],
           "signature": [
             "(searchSpec: { username: string; password: string; }) => string"
@@ -2545,7 +2780,9 @@
               "type": "Object",
               "tags": [],
               "label": "searchSpec",
-              "description": [],
+              "description": [
+                "Provide the settings necessary to create a new Search Service"
+              ],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
               "lineNumber": 110,
               "columnNumber": 35,
@@ -2648,7 +2885,9 @@
               "type": "Object",
               "tags": [],
               "label": "thingThree",
-              "description": [],
+              "description": [
+                "Thing three is an object with a nested var"
+              ],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
               "lineNumber": 123,
               "columnNumber": 64,
@@ -2697,7 +2936,9 @@
               "type": "Object",
               "tags": [],
               "label": "obj",
-              "description": [],
+              "description": [
+                "A funky parameter."
+              ],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
               "lineNumber": 134,
               "columnNumber": 29,
@@ -2810,7 +3051,14 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": [
-            "The currently selected {@link SearchLanguage }"
+            "The currently selected ",
+            {
+              "pluginId": "pluginA",
+              "scope": "public",
+              "docId": "kibPluginAPluginApi",
+              "section": "def-public.SearchLanguage",
+              "text": "SearchLanguage"
+            }
           ]
         }
       ],

@@ -7,12 +7,16 @@
 
 import React, { type FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormAppend, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type NumberValidationResult, numberValidator } from '@kbn/ml-agg-utils';
-import { MAX_SERIES } from '../../embeddables/change_point_chart/const';
+import { CHANGE_POINT_CHART_MAX_SERIES } from '@kbn/aiops-change-point-detection/constants';
 
-const maxSeriesValidator = numberValidator({ min: 1, max: MAX_SERIES, integerOnly: true });
+const maxSeriesValidator = numberValidator({
+  min: 1,
+  max: CHANGE_POINT_CHART_MAX_SERIES,
+  integerOnly: true,
+});
 
 export const MaxSeriesControl: FC<{
   disabled?: boolean;
@@ -36,7 +40,7 @@ export const MaxSeriesControl: FC<{
         <FormattedMessage
           id="xpack.aiops.changePointDetection.maxSeriesToPlotError"
           defaultMessage="Max series value must be between {minValue} and {maxValue}"
-          values={{ minValue: 1, maxValue: MAX_SERIES }}
+          values={{ minValue: 1, maxValue: CHANGE_POINT_CHART_MAX_SERIES }}
         />
       }
       label={inline ? undefined : label}
@@ -46,12 +50,17 @@ export const MaxSeriesControl: FC<{
         disabled={disabled}
         prepend={inline ? label : undefined}
         append={
-          <EuiIconTip
-            content={i18n.translate('xpack.aiops.changePointDetection.maxSeriesToPlotDescription', {
-              defaultMessage: 'The maximum number of change points to visualize.',
-            })}
-            type="question"
-          />
+          <EuiFormAppend>
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.aiops.changePointDetection.maxSeriesToPlotDescription',
+                {
+                  defaultMessage: 'The maximum number of change points to visualize.',
+                }
+              )}
+              type="question"
+            />
+          </EuiFormAppend>
         }
         compressed
         fullWidth
@@ -65,7 +74,7 @@ export const MaxSeriesControl: FC<{
           }
         }}
         min={1}
-        max={MAX_SERIES}
+        max={CHANGE_POINT_CHART_MAX_SERIES}
       />
     </EuiFormRow>
   );

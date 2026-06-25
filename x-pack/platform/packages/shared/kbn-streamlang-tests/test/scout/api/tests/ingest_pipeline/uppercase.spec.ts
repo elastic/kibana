@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { StreamlangDSL, UppercaseProcessor } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Uppercase Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should uppercase a field in place', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-uppercase-basic';
@@ -26,15 +27,15 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'test message 1' }, { message: 'test message 2' }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(2);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'TEST MESSAGE 1');
-      expect(ingestedDocs[1]).toHaveProperty('message', 'TEST MESSAGE 2');
+      expect(ingestedDocs[0]?.message).toBe('TEST MESSAGE 1');
+      expect(ingestedDocs[1]?.message).toBe('TEST MESSAGE 2');
     });
 
     apiTest('should uppercase a field into a target field', async ({ testBed }) => {
@@ -50,15 +51,15 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'test message 1' }, { message: 'test message 2' }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(2);
-      expect(ingestedDocs[0]).toHaveProperty('message_upper', 'TEST MESSAGE 1');
-      expect(ingestedDocs[1]).toHaveProperty('message_upper', 'TEST MESSAGE 2');
+      expect(ingestedDocs[0]?.message_upper).toBe('TEST MESSAGE 1');
+      expect(ingestedDocs[1]?.message_upper).toBe('TEST MESSAGE 2');
     });
 
     apiTest(
@@ -79,7 +80,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { message: 'test message 1', should_uppercase: 'yes' },
@@ -89,8 +90,8 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(2);
-        expect(ingestedDocs[0]).toHaveProperty('message', 'TEST MESSAGE 1');
-        expect(ingestedDocs[1]).toHaveProperty('message', 'test message 2');
+        expect(ingestedDocs[0]?.message).toBe('TEST MESSAGE 1');
+        expect(ingestedDocs[1]?.message).toBe('test message 2');
       }
     );
 
@@ -106,7 +107,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ id: 1234 }];
       const { errors } = await testBed.ingest(indexName, docs, processors);

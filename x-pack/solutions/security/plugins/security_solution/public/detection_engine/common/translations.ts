@@ -36,14 +36,6 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
-  {
-    defaultMessage:
-      'A user with manage cluster privileges must visit the Rules page before you can import value lists.',
-  }
-);
-
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
@@ -52,7 +44,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Detection rules (SIEM)',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(
@@ -713,6 +705,13 @@ export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
   }
 );
 
+export const RULE_CHANGES_HISTORY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleChangesHistoryDescription',
+  {
+    defaultMessage: 'History',
+  }
+);
+
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
@@ -767,6 +766,13 @@ export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunTooltip',
   {
     defaultMessage: 'Manual run available only for enabled rules',
+  }
+);
+
+export const MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunPermissionsTooltip',
+  {
+    defaultMessage: 'You need access to the "Manual rule run" privilege',
   }
 );
 
@@ -879,20 +885,6 @@ export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimesTooltip',
   {
     defaultMessage: 'Total time spent querying source indices during last Rule execution',
-  }
-);
-
-export const COLUMN_GAP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
-  {
-    defaultMessage: 'Last Gap (if any)',
-  }
-);
-
-export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltipSeeDocsDescription',
-  {
-    defaultMessage: 'see documentation',
   }
 );
 
@@ -1012,6 +1004,13 @@ export const GAP_FILL_STATUS_FILLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
   {
     defaultMessage: 'Filled',
+  }
+);
+
+export const GAP_FILL_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.error',
+  {
+    defaultMessage: 'Error',
   }
 );
 
@@ -1199,6 +1198,13 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
   {
     defaultMessage: 'Automatically refresh table',
+  }
+);
+
+export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshPopoverAriaLabel',
+  {
+    defaultMessage: 'Auto refresh settings',
   }
 );
 

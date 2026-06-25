@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const searchSessionName = `Session - ${uuidv4()}`;
 
         await searchSessions.save({ withRefresh: true, isSubmitButton: true });
+        await PageObjects.dashboard.waitForRenderComplete();
         await searchSessions.openFlyout();
         const list = await PageObjects.searchSessionsManagement.getList();
         await list[0].rename(searchSessionName);

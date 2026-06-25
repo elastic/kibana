@@ -6,11 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
-import { TIME_SPAN_UNITS } from '@kbn/esql-language';
+import { TIME_SPAN_UNITS } from '@elastic/esql';
 import { css } from '@emotion/react';
+import { getVariableNamePrefix } from '@kbn/esql-utils';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return TIME_SPAN_UNITS.some((unit) => unit === timeIntervalUnit.toLowerCase());
@@ -168,19 +169,6 @@ export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariable
   }
 
   return variableType;
-};
-
-export const getVariableNamePrefix = (type: ESQLVariableType) => {
-  switch (type) {
-    case ESQLVariableType.FIELDS:
-    case ESQLVariableType.FUNCTIONS:
-      return VariableNamePrefix.IDENTIFIER;
-    case ESQLVariableType.VALUES:
-    case ESQLVariableType.TIME_LITERAL:
-    case ESQLVariableType.MULTI_VALUES:
-    default:
-      return VariableNamePrefix.VALUE;
-  }
 };
 
 export const checkVariableExistence = (

@@ -52,6 +52,10 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
     case 'grok':
       fields.push(processor.from);
       break;
+    case 'uri_parts':
+      fields.push(processor.from);
+      if (processor.to) fields.push(processor.to);
+      break;
     case 'rename':
       fields.push(processor.from, processor.to);
       break;
@@ -66,6 +70,9 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
     case 'replace':
       fields.push(processor.from);
       if (processor.to) fields.push(processor.to);
+      break;
+    case 'redact':
+      fields.push(processor.from);
       break;
     case 'math':
       fields.push(processor.to);
@@ -87,10 +94,46 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
         if (from.type === 'field') fields.push(from.value);
       });
       break;
+    case 'split':
+      fields.push(processor.from);
+      if (processor.to) fields.push(processor.to);
+      break;
+    case 'sort':
+      fields.push(processor.from);
+      if (processor.to) fields.push(processor.to);
+      break;
+    case 'network_direction':
+      fields.push(processor.source_ip, processor.destination_ip);
+      if (processor.target_field) fields.push(processor.target_field);
+      if ('internal_networks_field' in processor && processor.internal_networks_field) {
+        fields.push(processor.internal_networks_field);
+      }
+      break;
+    case 'json_extract':
+      fields.push(processor.field);
+      processor.extractions.forEach((extraction) => {
+        fields.push(extraction.target_field);
+      });
+      break;
+    case 'enrich':
+      fields.push(processor.to);
+      break;
+    case 'user_agent':
+      fields.push(processor.from);
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+    case 'registered_domain':
+      fields.push(processor.expression, processor.prefix);
+      break;
     case 'drop_document':
     case 'manual_ingest_pipeline':
-      // No field names to validate
       break;
+    default: {
+      const _exhaustiveCheck: never = processor;
+      return _exhaustiveCheck;
+    }
   }
 
   return fields;

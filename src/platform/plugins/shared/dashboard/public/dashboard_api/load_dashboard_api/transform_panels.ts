@@ -9,6 +9,9 @@
 
 import { asyncMap } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
+import { transformType } from '@kbn/embeddable-plugin/public';
+import { flow } from 'lodash';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DashboardState, DashboardPanel } from '../../../server';
 import { getReferencesForPanelId, isDashboardSection } from '../../../common';
 import { embeddableService } from '../../services/kibana_services';
@@ -21,7 +24,7 @@ export async function transformPanels(panels: DashboardState['panels'], referenc
   return await asyncMap(panels ?? [], async (panel) => {
     if (isDashboardSection(panel)) {
       const panelsInSection = await asyncMap(panel.panels, async (panelInSection) => {
-        return await transformPanel(panelInSection, filterReferences(panelInSection.uid));
+        return await transformPanel(panelInSection, filterReferences(panelInSection.id));
       });
       return {
         ...panel,
@@ -29,16 +32,26 @@ export async function transformPanels(panels: DashboardState['panels'], referenc
       };
     }
 
-    return await transformPanel(panel, filterReferences(panel.uid));
+    return await transformPanel(panel, filterReferences(panel.id));
   });
 }
 
-async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
-  const transformOut = await embeddableService.getLegacyURLTransform(panel.type);
-  if (!transformOut) return panel;
+const defaultTransform = (config: object): object => {
+  const transformsFlow = flow(transformTitlesOut, transformTimeRangeOut);
+  return transformsFlow(config);
+};
 
+async function transformPanel(legacyPanel: DashboardPanel, references?: Reference[]) {
+  const type = await transformType(legacyPanel.type);
+  const panel = {
+    ...legacyPanel,
+    type,
+  };
+  const transformOut = await embeddableService.getLegacyURLTransform(type);
   try {
-    const transformedPanelConfig = transformOut(panel.config, references);
+    const transformedPanelConfig = transformOut
+      ? transformOut(panel.config, references)
+      : defaultTransform(panel.config);
     return {
       ...panel,
       config: transformedPanelConfig,
@@ -46,7 +59,7 @@ async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
   } catch (transformOutError) {
     // eslint-disable-next-line no-console
     console.warn(
-      `Unable to transform panel state, panelId: ${panel.uid}, error: ${transformOutError}`
+      `Unable to transform panel state, panelId: ${panel.id}, error: ${transformOutError}`
     );
     // do not prevent dashboard render on transform error
     return panel;

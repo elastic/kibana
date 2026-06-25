@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/saved-object-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-object-test-plugin'
+  title: '@kbn/saved-object-test-plugin'
   description: Moon project for @kbn/saved-object-test-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
+  sourceRoot: x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
 dependsOn:
   - '@kbn/core'
 tags:

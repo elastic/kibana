@@ -22,6 +22,12 @@ export const GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID =
 export const GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}ShowEntityDetailsTooltip` as const;
 
+export const GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}ShowEntityRelationships` as const;
+
+export const GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}ShowEntityRelationshipsTooltip` as const;
+
 export const GRAPH_LABEL_EXPAND_POPOVER_TEST_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}GraphLabelExpandPopover` as const;
 export const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID =
@@ -104,9 +110,6 @@ export const GRAPH_TAG_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagText` as cons
 
 export const GRAPH_POPOVER_PREVIEW_PANEL =
   `${GRAPH_INVESTIGATION_TEST_ID}PopoverPreviewPanel` as const;
-
-export const GRAPH_CALLOUT_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}Callout` as const;
-export const GRAPH_CALLOUT_LINK_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}CalloutLink` as const;
 
 // Relationship node test IDs
 export const GRAPH_RELATIONSHIP_NODE_SHAPE_ID =

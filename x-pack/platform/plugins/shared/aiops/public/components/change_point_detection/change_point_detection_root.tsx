@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import { map } from 'rxjs';
+import { EMPTY, map, merge } from 'rxjs';
 import { pick } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
@@ -31,6 +31,7 @@ import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { PageHeader } from '../page_header';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
 import { ChangePointDetectionPage } from './change_point_detection_page';
 import {
@@ -48,7 +49,7 @@ const localStorage = new Storage(window.localStorage);
  */
 export interface ChangePointDetectionAppStateProps {
   /** The data view to analyze. */
-  dataView: DataView;
+  dataView: DataView | undefined;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
   /** App context value */
@@ -77,14 +78,31 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     showFrozenDataTierChoice,
   };
 
+  const reload$ = useMemo<Observable<number>>(
+    () =>
+      merge(
+        mlTimefilterRefresh$.pipe(map((v) => v.lastRefresh)),
+        (appContextValue.cps?.cpsManager?.getProjectRouting$() ?? EMPTY).pipe(map(() => Date.now()))
+      ),
+    [appContextValue.cps?.cpsManager]
+  );
+
+  if (!dataView) {
+    return null;
+  }
+
   const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
 
-  const reload$ = useMemo<Observable<number>>(() => {
-    return mlTimefilterRefresh$.pipe(map((v) => v.lastRefresh));
-  }, []);
-
   if (warning !== null) {
-    return <>{warning}</>;
+    return (
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          <AiopsDataSourcePicker currentDataView={dataView} />
+          <EuiSpacer size="m" />
+          {warning}
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    );
   }
 
   appContextValue.embeddingOrigin = AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS;
@@ -96,7 +114,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     <CasesContext owner={[]} permissions={casesPermissions!}>
       <AiopsAppContext.Provider value={appContextValue}>
         <UrlStateProvider>
-          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
                 <PageHeader />

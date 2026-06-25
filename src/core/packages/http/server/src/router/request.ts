@@ -8,14 +8,17 @@
  */
 
 import type { URL } from 'url';
+import type { Span as OTelSpan } from '@opentelemetry/api';
 import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { Span } from 'elastic-apm-node';
 import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
 import type { RouteMethod, RouteConfigOptions, RouteSecurity, RouteDeprecationInfo } from './route';
 import type { Headers } from './headers';
+import type { RequestTiming, TimingEvent } from './timing';
 
 export type RouteSecurityGetter = (request?: {
   headers: KibanaRequest['headers'];
@@ -35,17 +38,36 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
 }
 
 /**
+ * Internal state for request timing
+ * @internal
+ */
+export interface RequestTimingState {
+  events: TimingEvent[];
+}
+
+/**
  * @public
  */
 export interface KibanaRequestState extends RequestApplicationState {
   requestId: string;
   requestUuid: string;
+  /** The resolved base path for this request, including server base path and any explicit space prefix. */
+  basePath?: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  /** The resolved space ID for this request. Defaults to 'default'. */
+  spaceId?: SpaceId;
+  /** The top HTTP Otel Span for this request. */
+  httpSpan?: OTelSpan;
+  /** The OTel sub-span: used to group the pre-route handlers, the route handler, and the post-route handlers. */
+  otelSubSpan?: OTelSpan;
+  /** The Elastic APM span to group the pre-route handlers, the route handler, and the post-route handlers. */
   span?: Span | null;
   authzResult?: Record<string, boolean>;
-  measureElu?: () => void;
+  measureElu?: (httpSpan?: OTelSpan) => void;
   startTime: number;
+  redactedSessionId?: string;
+  timingState?: RequestTimingState;
 }
 
 /**
@@ -56,7 +78,10 @@ export type KibanaRequestRouteOptions<Method extends RouteMethod> = (Method exte
   | 'get'
   | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
-  : Required<RouteConfigOptions<Method>>) & { security?: RouteSecurity };
+  : Required<RouteConfigOptions<Method>>) & {
+  security?: RouteSecurity;
+  authRequired: boolean | 'optional';
+};
 
 /**
  * Request specific route information exposed to a handler.
@@ -194,7 +219,27 @@ export interface KibanaRequest<
   readonly auth: KibanaRequestAuth;
 
   /**
-   * URL rewritten in onPreRouting request interceptor.
+   * The resolved Kibana space ID for this request.
+   * Always populated; defaults to {@link DEFAULT_SPACE_ID} ('default') when no explicit space is present in the URL.
+   */
+  readonly spaceId: SpaceId;
+
+  /**
+   * The resolved Kibana base path for this request.
+   *
+   * Includes the configured server base path and, when present, the request's
+   * explicit space URL prefix. Defaults to the configured server base path for
+   * canonical default-space URLs.
+   */
+  readonly basePath: string;
+
+  /**
+   * The original request URL, captured before any rewrites by Core's onRequest
+   * handler (basePath strip, space prefix strip) or by `onPreRouting` interceptors
+   * via `toolkit.rewriteUrl`. Undefined when no rewrite occurred.
+   *
+   * Despite the name, this holds the URL as it was received — not the rewritten
+   * URL. The current (post-rewrite) URL is always {@link KibanaRequest.url}.
    */
   readonly rewrittenUrl?: URL;
 
@@ -217,6 +262,14 @@ export interface KibanaRequest<
    * The body payload of this request.
    */
   readonly body: Body;
+
+  /**
+   * API for recording custom timing events during request processing.
+   * These events are automatically included in the Server-Timing response header.
+   *
+   * Only available during development.
+   */
+  readonly serverTiming: RequestTiming;
 }
 
 /**

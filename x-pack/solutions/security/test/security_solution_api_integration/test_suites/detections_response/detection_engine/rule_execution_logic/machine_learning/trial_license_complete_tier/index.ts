@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./machine_learning'));
     loadTestFile(require.resolve('./machine_learning_alert_suppression'));
     loadTestFile(require.resolve('./machine_learning_manual_run'));
+    loadTestFile(require.resolve('./machine_learning_metrics'));
   });
 }

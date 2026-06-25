@@ -28,10 +28,12 @@ describe('Streams Plugin', () => {
           error: jest.fn(),
         }),
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     mockRepositoryClient = {
       fetch: jest.fn(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
     // @ts-expect-error accessing private property for testing
@@ -73,6 +75,7 @@ describe('Streams Plugin', () => {
   });
 
   describe('getWiredStatus', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let getWiredStatus: () => Promise<any>;
 
     beforeEach(() => {
@@ -83,7 +86,9 @@ describe('Streams Plugin', () => {
 
     it('should fetch wired status from API successfully', async () => {
       const mockStatus = {
-        enabled: true,
+        logs: true,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: true,
       };
 
@@ -100,9 +105,11 @@ describe('Streams Plugin', () => {
       expect(result).toEqual(mockStatus);
     });
 
-    it('should return disabled status when API returns enabled: false', async () => {
+    it('should return disabled status when API returns disabled streams', async () => {
       const mockStatus = {
-        enabled: false,
+        logs: false,
+        'logs.otel': false,
+        'logs.ecs': false,
         can_manage: true,
       };
 
@@ -111,7 +118,9 @@ describe('Streams Plugin', () => {
       const result = await getWiredStatus();
 
       expect(result).toEqual({
-        enabled: false,
+        logs: false,
+        'logs.otel': false,
+        'logs.ecs': false,
         can_manage: true,
       });
     });
@@ -122,7 +131,9 @@ describe('Streams Plugin', () => {
       const result = await getWiredStatus();
 
       expect(result).toEqual({
-        enabled: 'unknown',
+        logs: 'unknown',
+        'logs.otel': 'unknown',
+        'logs.ecs': 'unknown',
         can_manage: false,
       });
     });
@@ -136,7 +147,9 @@ describe('Streams Plugin', () => {
       const result = await getWiredStatus();
 
       expect(result).toEqual({
-        enabled: 'unknown',
+        logs: 'unknown',
+        'logs.otel': 'unknown',
+        'logs.ecs': 'unknown',
         can_manage: false,
       });
     });
@@ -150,7 +163,9 @@ describe('Streams Plugin', () => {
       const result = await getWiredStatus();
 
       expect(result).toEqual({
-        enabled: 'unknown',
+        logs: 'unknown',
+        'logs.otel': 'unknown',
+        'logs.ecs': 'unknown',
         can_manage: false,
       });
     });
@@ -160,6 +175,7 @@ describe('Streams Plugin', () => {
       const mockLogger = {
         error: jest.fn(),
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       plugin.logger = mockLogger as any;
 
       mockRepositoryClient.fetch.mockRejectedValue(mockError);
@@ -189,6 +205,7 @@ describe('Streams Plugin', () => {
   });
 
   describe('getClassicStatus', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let getClassicStatus: () => Promise<any>;
 
     beforeEach(() => {
@@ -230,6 +247,7 @@ describe('Streams Plugin', () => {
       const mockLogger = {
         error: jest.fn(),
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       plugin.logger = mockLogger as any;
 
       mockRepositoryClient.fetch.mockRejectedValue(mockError);
@@ -241,6 +259,7 @@ describe('Streams Plugin', () => {
   });
 
   describe('enableWiredMode', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let enableWiredMode: (signal: AbortSignal) => Promise<any>;
 
     beforeEach(() => {
@@ -284,6 +303,7 @@ describe('Streams Plugin', () => {
   });
 
   describe('disableWiredMode', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let disableWiredMode: (signal: AbortSignal) => Promise<any>;
 
     beforeEach(() => {

@@ -24,21 +24,21 @@
 [
   {
     "name": "apm",
-    "version": "9.1.0-preview-1747764883",
+    "version": "9.3.5-preview-1779430085",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
   {
     "name": "elastic_agent",
-    "version": "2.7.0"
+    "version": "2.9.4"
   },
   {
     "name": "endpoint",
-    "version": "9.3.0"
+    "version": "9.4.0"
   },
   {
     "name": "fleet_server",
-    "version": "1.6.0"
+    "version": "1.6.1"
   },
   {
     "name": "profiler_symbolizer",
@@ -52,11 +52,11 @@
   },
   {
     "name": "synthetics",
-    "version": "1.4.2"
+    "version": "1.6.1"
   },
   {
     "name": "security_detection_engine",
-    "version": "9.3.2"
+    "version": "9.4.6"
   },
   {
     "name": "security_ai_prompts",

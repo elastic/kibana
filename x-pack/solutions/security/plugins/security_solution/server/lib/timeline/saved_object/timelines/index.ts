@@ -47,6 +47,7 @@ export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
 type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
+const DELETE_TIMELINE_BATCH_SIZE = 10;
 
 export const getTimeline = async (
   request: FrameworkRequest,
@@ -275,6 +276,131 @@ export const getAllTimeline = async (
     customTemplateTimelineCount: result[4].totalCount,
     favoriteCount: result[5].totalCount,
   });
+};
+
+/**
+ * Sibling of `getAllTimeline` used by the internal `POST /internal/timelines/_by_ids` route
+ * to power the case-attachments timeline tab. Loads the requested saved objects via
+ * `bulkGet`, enriches them with notes/pinned events the same way the find-based path does,
+ * and applies the supplied filters (timeline type, status, only-user-favorite, search)
+ * plus sort/paging in-memory so the response shape matches the public list endpoint.
+ */
+export const getAllTimelineByIds = async (
+  request: FrameworkRequest,
+  ids: string[],
+  {
+    onlyUserFavorite,
+    pageInfo,
+    search,
+    sort,
+    status,
+    timelineType,
+  }: {
+    onlyUserFavorite: boolean | null;
+    pageInfo: PageInfoTimeline;
+    search: string | null;
+    sort: SortTimeline | null;
+    status: TimelineStatus | null;
+    timelineType: TimelineType | null;
+  }
+): Promise<GetTimelinesResponse> => {
+  const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
+
+  const uniqueIds = [...new Set(ids)];
+  const bulkResponse = await savedObjectsClient.bulkGet<SavedObjectTimelineWithoutExternalRefs>(
+    uniqueIds.map((id) => ({ id, type: timelineSavedObjectType }))
+  );
+
+  const enrichedTimelines = await Promise.all(
+    bulkResponse.saved_objects
+      .filter((savedObject) => savedObject.error == null)
+      .map(async (savedObject) => {
+        const migratedSO = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
+        const timelineSavedObject = convertSavedObjectToSavedTimeline(migratedSO);
+        const [notes, pinnedEvents] = await Promise.all([
+          note.getNotesByTimelineId(request, timelineSavedObject.savedObjectId),
+          pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineSavedObject.savedObjectId),
+        ]);
+        return timelineWithReduxProperties(notes, pinnedEvents, timelineSavedObject, userName);
+      })
+  );
+
+  const searchTerm = search?.trim().toLowerCase();
+  const filtered = enrichedTimelines.filter(
+    (t) =>
+      matchesTimelineType(t, timelineType) &&
+      matchesTimelineStatus(t, status) &&
+      matchesUserFavorite(t, onlyUserFavorite) &&
+      matchesSearchTerm(t, searchTerm)
+  );
+
+  const sorted = sort ? [...filtered].sort(compareTimelines(sort)) : filtered;
+
+  // pageIndex is 1-based to match the find path
+  const pageIndex = Math.max(pageInfo.pageIndex, 1);
+  const pageSize = Math.max(pageInfo.pageSize, 1);
+  const start = (pageIndex - 1) * pageSize;
+  const paged = sorted.slice(start, start + pageSize);
+
+  return {
+    totalCount: filtered.length,
+    timeline: paged,
+  };
+};
+
+// Mirrors `getTimelineTypeFilter`'s type clause: `null` accepts everything, `template`
+// requires the explicit value, and any other value matches "not template" (which also
+// catches legacy SOs that have no `timelineType` attribute).
+const matchesTimelineType = (t: TimelineResponse, timelineType: TimelineType | null): boolean => {
+  if (timelineType == null) return true;
+  if (timelineType === TimelineTypeEnum.template) {
+    return t.timelineType === TimelineTypeEnum.template;
+  }
+  return t.timelineType !== TimelineTypeEnum.template;
+};
+
+// Mirrors `getTimelineTypeFilter`'s draft + immutable clauses: drafts are always hidden
+// unless explicitly requested, and immutable is constrained only when `status` is set.
+const matchesTimelineStatus = (t: TimelineResponse, status: TimelineStatus | null): boolean => {
+  const isDraft = t.status === TimelineStatusEnum.draft;
+  if (status === TimelineStatusEnum.draft) return isDraft;
+  if (isDraft) return false;
+  if (status == null) return true;
+  if (status === TimelineStatusEnum.immutable) {
+    return t.status === TimelineStatusEnum.immutable;
+  }
+  return t.status !== TimelineStatusEnum.immutable;
+};
+
+// `timelineWithReduxProperties` already narrows `favorite` to the current user,
+// so a non-empty array means the user has favorited the timeline.
+const matchesUserFavorite = (t: TimelineResponse, onlyUserFavorite: boolean | null): boolean => {
+  if (!onlyUserFavorite) return true;
+  return (t.favorite?.length ?? 0) > 0;
+};
+
+const matchesSearchTerm = (t: TimelineResponse, searchTerm: string | undefined): boolean => {
+  if (!searchTerm) return true;
+  return (
+    (t.title ?? '').toLowerCase().includes(searchTerm) ||
+    (t.description ?? '').toLowerCase().includes(searchTerm)
+  );
+};
+
+const compareTimelines = (sort: SortTimeline) => {
+  const { sortField, sortOrder } = sort;
+  const direction = sortOrder === 'asc' ? 1 : -1;
+  return (a: TimelineResponse, b: TimelineResponse) => {
+    const aValue = (a as unknown as Record<string, unknown>)[sortField];
+    const bValue = (b as unknown as Record<string, unknown>)[sortField];
+    if (aValue == null && bValue == null) return 0;
+    if (aValue == null) return 1;
+    if (bValue == null) return -1;
+    if (aValue < bValue) return -1 * direction;
+    if (aValue > bValue) return direction;
+    return 0;
+  };
 };
 
 export const getDraftTimeline = async (
@@ -564,17 +690,23 @@ export const deleteTimeline = async (
   searchIds?: string[]
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
+  const uniqueTimelineIds = [...new Set(timelineIds)];
 
-  await Promise.all([
-    ...timelineIds.map((timelineId) =>
-      Promise.all([
-        savedObjectsClient.delete(timelineSavedObjectType, timelineId),
-        note.deleteNotesByTimelineId(request, timelineId),
-        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
-      ])
-    ),
-    deleteSearchByTimelineId(request, searchIds),
-  ]);
+  for (let index = 0; index < uniqueTimelineIds.length; index += DELETE_TIMELINE_BATCH_SIZE) {
+    const timelineIdsBatch = uniqueTimelineIds.slice(index, index + DELETE_TIMELINE_BATCH_SIZE);
+
+    await Promise.all(
+      timelineIdsBatch.map((timelineId) =>
+        Promise.all([
+          savedObjectsClient.delete(timelineSavedObjectType, timelineId),
+          note.deleteNotesByTimelineId(request, timelineId),
+          pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+        ])
+      )
+    );
+  }
+
+  await deleteSearchByTimelineId(request, searchIds);
 };
 
 export const copyTimeline = async (

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
@@ -16,7 +17,7 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 // single transform reset
-apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/reset_transforms', { tag: tags.stateful.all }, () => {
   const transformId = 'transform-test-reset';
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {

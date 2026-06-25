@@ -51,7 +51,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
 
   const emptyStatePrompt = (
     <EuiEmptyPrompt
-      iconType="controlsHorizontal"
+      iconType="controls"
       title={
         <h2>
           {i18n.translate('xpack.apm.agentConfig.configTable.emptyPromptTitle', {
@@ -138,6 +138,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
               size="s"
               color="danger"
               data-test-subj="apmAgentConfigurationErrorIcon"
+              aria-hidden={true}
             />
           ) : (
             <EuiHealth color={appliedByAgent ? 'success' : euiTheme.colors.lightShade} />
@@ -193,33 +194,47 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
             width: euiTheme.size.xl,
             name: '',
             render: (config: Config) => (
-              <EuiButtonIcon
-                data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
                   defaultMessage: 'Edit',
                 })}
-                iconType="pencil"
-                href={apmRouter.link('/settings/agent-configuration/edit', {
-                  query: {
-                    name: config.service.name,
-                    environment: config.service.environment,
-                  },
-                })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="apmColumnsButton"
+                  aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+                    defaultMessage: 'Edit',
+                  })}
+                  iconType="pencil"
+                  href={apmRouter.link('/settings/agent-configuration/edit', {
+                    query: {
+                      name: config.service.name,
+                      environment: config.service.environment,
+                    },
+                  })}
+                />
+              </EuiToolTip>
             ),
           },
           {
             width: euiTheme.size.xl,
             name: '',
             render: (config: Config) => (
-              <EuiButtonIcon
-                data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
                   defaultMessage: 'Delete',
                 })}
-                iconType="trash"
-                onClick={() => setConfigToBeDeleted(config)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="apmColumnsButton"
+                  aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
+                    defaultMessage: 'Delete',
+                  })}
+                  iconType="trash"
+                  onClick={() => setConfigToBeDeleted(config)}
+                />
+              </EuiToolTip>
             ),
           },
         ]

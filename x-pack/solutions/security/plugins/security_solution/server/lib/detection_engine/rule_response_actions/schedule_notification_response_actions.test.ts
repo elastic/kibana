@@ -11,7 +11,7 @@ import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { responseActionsClientMock } from '../../../endpoint/services/actions/clients/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 describe('ScheduleNotificationResponseActions', () => {
   const getSignals = () => [
@@ -22,6 +22,7 @@ describe('ScheduleNotificationResponseActions', () => {
       process: {
         pid: 123,
       },
+      host: { os: { type: 'linux' } },
       [ALERT_RULE_UUID]: 'rule-id-1',
       [ALERT_RULE_NAME]: 'rule-name-1',
       [SPACE_IDS]: [DEFAULT_SPACE_ID],
@@ -241,6 +242,7 @@ describe('ScheduleNotificationResponseActions', () => {
       );
     });
   });
+
   describe('Endpoint', () => {
     beforeEach(() => {
       (endpointServiceMock.getInternalResponseActionsClient as jest.Mock).mockClear();
@@ -329,6 +331,104 @@ describe('ScheduleNotificationResponseActions', () => {
       );
     });
 
+    it('should handle endpoint runscript actions', async () => {
+      // @ts-expect-error write to readonly prop is ok
+      endpointServiceMock.experimentalFeatures.responseActionsEndpointAutomatedRunScript = true;
+      const signals = getSignals();
+      const responseActions: RuleResponseAction[] = [
+        {
+          actionTypeId: ResponseActionTypesEnum['.endpoint'],
+          params: {
+            command: 'runscript',
+            comment: 'test process comment',
+            config: {
+              linux: { scriptId: '1-2-3' },
+              macos: {},
+              windows: {},
+            },
+          },
+        },
+      ];
+      const response = await scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions,
+      });
+
+      expect(response).not.toBeUndefined();
+
+      expect(mockedResponseActionsClient.runscript).toHaveBeenCalledWith(
+        {
+          alert_ids: ['alert-id-1'],
+          comment: 'test process comment',
+          endpoint_ids: ['agent-id-1'],
+          parameters: {
+            scriptId: '1-2-3',
+            scriptInput: undefined,
+            timeout: undefined,
+          },
+        },
+        {
+          error: undefined,
+          hosts: { 'agent-id-1': { name: '' } },
+          ruleId: 'rule-id-1',
+          ruleName: 'rule-name-1',
+        }
+      );
+
+      expect(mockedResponseActionsClient.runscript).toHaveBeenCalledWith(
+        {
+          alert_ids: ['alert-id-2'],
+          comment: 'test process comment',
+          endpoint_ids: ['agent-id-2'],
+          parameters: {
+            scriptId: 'error',
+            scriptInput: undefined,
+            timeout: undefined,
+          },
+        },
+        {
+          error: 'Unable to determine host OS type from alert [alert-id-2]',
+          hosts: {
+            'agent-id-2': {
+              name: '',
+            },
+          },
+          ruleId: '',
+          ruleName: '',
+        }
+      );
+    });
+
+    it('should not  process runscript actions if feature flag is disabled', async () => {
+      // @ts-expect-error write to readonly prop is ok
+      endpointServiceMock.experimentalFeatures.responseActionsEndpointAutomatedRunScript = false;
+      const signals = getSignals();
+      const responseActions: RuleResponseAction[] = [
+        {
+          actionTypeId: ResponseActionTypesEnum['.endpoint'],
+          params: {
+            command: 'runscript',
+            comment: 'test process comment',
+            config: {
+              linux: { scriptId: '1-2-3' },
+              macos: {},
+              windows: {},
+            },
+          },
+        },
+      ];
+      const response = await scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions,
+      });
+
+      expect(response).not.toBeUndefined();
+
+      expect(mockedResponseActionsClient.runscript).not.toHaveBeenCalled();
+    });
+
     it('should only attempt to send response actions to alerts from endpoint', async () => {
       const signals = getSignals();
       signals.push({ agent: { id: '123-432', type: 'filebeat' }, _id: '1' });
@@ -382,7 +482,7 @@ describe('ScheduleNotificationResponseActions', () => {
     describe('and when space awareness is enabled', () => {
       it('should initialize a response action client with the alert space id when space awareness is enabled', async () => {
         const signals = getSignals();
-        signals[0][SPACE_IDS] = ['foo'];
+        signals[0][SPACE_IDS] = [asSpaceId('foo')];
         await scheduleNotificationResponseActions({
           signals,
           signalsCount: 2,

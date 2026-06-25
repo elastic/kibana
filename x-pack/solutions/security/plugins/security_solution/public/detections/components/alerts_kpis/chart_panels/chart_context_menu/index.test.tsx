@@ -52,10 +52,10 @@ describe('ChartContextMenu', () => {
     );
 
     const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
-    menuButton.click();
+    fireEvent.click(menuButton);
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByRole('button', { name: INSPECT })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: INSPECT })).toBeInTheDocument();
   });
 
   test('it invokes `setStackBy` and `setStackByField1` when the Reset group by fields menu item selected', async () => {
@@ -75,11 +75,11 @@ describe('ChartContextMenu', () => {
     );
 
     const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
-    menuButton.click();
+    fireEvent.click(menuButton);
     await waitForEuiPopoverOpen();
 
-    const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
-    resetMenuItem.click();
+    const resetMenuItem = screen.getByRole('menuitem', { name: RESET_GROUP_BY_FIELDS });
+    fireEvent.click(resetMenuItem);
 
     expect(setStackBy).toBeCalledWith('kibana.alert.rule.name');
     expect(setStackByField1).toBeCalledWith('host.name');
@@ -105,7 +105,7 @@ describe('ChartContextMenu', () => {
     fireEvent.click(menuButton);
     await waitForEuiPopoverOpen();
 
-    const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
+    const resetMenuItem = screen.getByRole('menuitem', { name: RESET_GROUP_BY_FIELDS });
     fireEvent.click(resetMenuItem);
 
     expect(onReset).toBeCalled();

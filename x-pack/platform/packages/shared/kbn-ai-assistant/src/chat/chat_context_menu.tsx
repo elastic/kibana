@@ -71,7 +71,7 @@ export function ChatContextMenu({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="copyConversationToClipboard"
-      icon="copyClipboard"
+      icon="copy"
       onClick={() => {
         onCopyToClipboardClick();
         setIsPopoverOpen(false);
@@ -127,7 +127,7 @@ export function ChatContextMenu({
           color: ${euiTheme.colors.danger};
           padding: ${euiTheme.size.s};
         `}
-        icon={<EuiIcon type="trash" size="m" color="danger" />}
+        icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
         onClick={() => {
           confirmDeleteCallback().then((confirmed) => {
             if (!confirmed) {
@@ -173,7 +173,7 @@ export function ChatContextMenu({
         anchorPosition="downCenter"
         panelPaddingSize="xs"
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {confirmDeleteElement}
     </>

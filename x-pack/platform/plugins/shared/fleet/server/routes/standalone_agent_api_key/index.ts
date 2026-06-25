@@ -25,6 +25,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
         },
       },
+      summary: 'Create a standalone agent API key',
+      description:
+        'Create an Elasticsearch API key for use by a standalone Elastic Agent. The key is scoped with the minimum privileges required to ship logs, metrics, traces, and synthetics data. Requires `auto_configure` and `create_doc` index privileges on `logs-*-*`, `metrics-*-*`, `traces-*-*`, and `synthetics-*-*`.',
     })
     .addVersion(
       {

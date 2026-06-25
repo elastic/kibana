@@ -12,8 +12,9 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  useEuiTheme,
+  EuiToolTip,
   type CommonProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -61,7 +62,9 @@ const CenterLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.
   defaultMessage: 'Center',
 });
 
-const fitToViewIconFn = () => <EuiIcon type={fitToViewIcon} size="m" color="text" />;
+const fitToViewIconFn = () => (
+  <EuiIcon type={fitToViewIcon} size="m" color="text" aria-hidden={true} />
+);
 
 export const Controls = ({
   showZoom = true,
@@ -127,57 +130,65 @@ export const Controls = ({
       {showZoom && (
         <>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="plusInCircle"
-              aria-label={ZoomInLabel}
-              size="m"
-              color="text"
-              data-test-subj={GRAPH_CONTROLS_ZOOM_IN_ID}
-              disabled={maxZoomReached}
-              css={btnCss}
-              onClick={onZoomInHandler}
-            />
+            <EuiToolTip content={ZoomInLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="plusCircle"
+                aria-label={ZoomInLabel}
+                size="m"
+                color="text"
+                data-test-subj={GRAPH_CONTROLS_ZOOM_IN_ID}
+                disabled={maxZoomReached}
+                css={btnCss}
+                onClick={onZoomInHandler}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="minusInCircle"
-              aria-label={ZoomOutLabel}
-              size="m"
-              color="text"
-              data-test-subj={GRAPH_CONTROLS_ZOOM_OUT_ID}
-              disabled={minZoomReached}
-              css={btnCss}
-              onClick={onZoomOutHandler}
-            />
+            <EuiToolTip content={ZoomOutLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="minusCircle"
+                aria-label={ZoomOutLabel}
+                size="m"
+                color="text"
+                data-test-subj={GRAPH_CONTROLS_ZOOM_OUT_ID}
+                disabled={minZoomReached}
+                css={btnCss}
+                onClick={onZoomOutHandler}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </>
       )}
       {showCenter && (
         <EuiFlexItem grow={false}>
           {showZoom ? <EuiHorizontalRule size="full" margin="none" /> : null}
-          <EuiButtonIcon
-            iconType="bullseye"
-            aria-label={CenterLabel}
-            size="m"
-            color="text"
-            data-test-subj={GRAPH_CONTROLS_CENTER_ID}
-            css={btnCss}
-            onClick={onCenterHandler}
-          />
+          <EuiToolTip content={CenterLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="bullseye"
+              aria-label={CenterLabel}
+              size="m"
+              color="text"
+              data-test-subj={GRAPH_CONTROLS_CENTER_ID}
+              css={btnCss}
+              onClick={onCenterHandler}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {showFitView && (
         <EuiFlexItem grow={false}>
           {showZoom || showCenter ? <EuiHorizontalRule size="full" margin="none" /> : null}
-          <EuiButtonIcon
-            iconType={fitToViewIconFn}
-            aria-label={FitViewLabel}
-            size="m"
-            color="text"
-            data-test-subj={GRAPH_CONTROLS_FIT_VIEW_ID}
-            css={btnCss}
-            onClick={onFitViewHandler}
-          />
+          <EuiToolTip content={FitViewLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={fitToViewIconFn}
+              aria-label={FitViewLabel}
+              size="m"
+              color="text"
+              data-test-subj={GRAPH_CONTROLS_FIT_VIEW_ID}
+              css={btnCss}
+              onClick={onFitViewHandler}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

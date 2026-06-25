@@ -14,13 +14,14 @@ import type {
 } from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
-  Attachment,
+  AttachmentV2,
   AttachmentAttributes,
+  AttachmentAttributesV2,
   Case,
   EventAttachmentPayload,
   User,
@@ -54,10 +55,17 @@ import { dedupAssignees } from '../client/cases/utils';
 import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 import type {
   AttachmentRequest,
-  AttachmentsFindResponse,
+  AttachmentRequestV2,
+  AttachmentsFindResponseV2,
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
+import {
+  isEventAttachmentType,
+  isAlertAttachmentType,
+  getIndexFromMetadata,
+  toStringArray,
+} from '../../common/utils/attachments';
 
 /**
  * Default sort field for querying saved objects.
@@ -129,14 +137,14 @@ export const flattenCaseSavedObject = ({
   totalEvents = 0,
 }: {
   savedObject: CaseSavedObjectTransformed;
-  comments?: Array<SavedObject<AttachmentAttributes>>;
+  comments?: Array<SavedObject<AttachmentAttributesV2>>;
   totalComment?: number;
   totalAlerts?: number;
   totalEvents?: number;
 }): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
-  comments: flattenCommentSavedObjects(comments),
+  comments: flattenAttachmentSavedObjects(comments),
   totalComment,
   totalAlerts,
   totalEvents,
@@ -144,43 +152,58 @@ export const flattenCaseSavedObject = ({
 });
 
 export const transformComments = (
-  comments: SavedObjectsFindResponse<AttachmentAttributes>
-): AttachmentsFindResponse => ({
+  comments: SavedObjectsFindResponse<AttachmentAttributesV2>
+): AttachmentsFindResponseV2 => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,
-  comments: flattenCommentSavedObjects(comments.saved_objects),
+  comments: flattenAttachmentSavedObjects(comments.saved_objects),
 });
 
-export const flattenCommentSavedObjects = (
-  savedObjects: Array<SavedObject<AttachmentAttributes>>
-): Attachment[] =>
-  savedObjects.reduce((acc: Attachment[], savedObject: SavedObject<AttachmentAttributes>) => {
-    acc.push(flattenCommentSavedObject(savedObject));
+export const flattenAttachmentSavedObjects = (
+  savedObjects: Array<SavedObject<AttachmentAttributesV2>>
+): AttachmentV2[] =>
+  savedObjects.reduce((acc: AttachmentV2[], savedObject: SavedObject<AttachmentAttributesV2>) => {
+    acc.push(flattenAttachmentSavedObject(savedObject));
     return acc;
   }, []);
 
-export const flattenCommentSavedObject = (
-  savedObject: SavedObject<AttachmentAttributes>
-): Attachment => ({
+export const flattenAttachmentSavedObject = (
+  savedObject: SavedObject<AttachmentAttributesV2>
+): AttachmentV2 => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload | EventAttachmentPayload
+  comment: AttachmentRequestV2
 ): { ids: string[]; indices: string[] } => {
-  if (comment.type === AttachmentType.alert) {
+  if ('alertId' in comment) {
     return {
       ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
       indices: Array.isArray(comment.index) ? comment.index : [comment.index],
     };
   }
 
+  if ('eventId' in comment) {
+    return {
+      ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
+
+  if ('attachmentId' in comment) {
+    const metadataIndex = getIndexFromMetadata(comment.metadata);
+    return {
+      ids: toStringArray(comment.attachmentId),
+      indices: toStringArray(metadataIndex),
+    };
+  }
+
   return {
-    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
-    indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    ids: [],
+    indices: [],
   };
 };
 
@@ -192,8 +215,8 @@ export const getIDsAndIndicesAsArrays = (
  *
  * To reformat the alert comment request requires a migration and a breaking API change.
  */
-const getAndValidateAlertInfoFromComment = (comment: AttachmentRequest): AlertInfo[] => {
-  if (!isCommentRequestTypeAlert(comment)) {
+const getAndValidateAlertInfoFromComment = (comment: AttachmentRequestV2): AlertInfo[] => {
+  if (!isAlertAttachmentType(comment.type)) {
     return [];
   }
 
@@ -209,14 +232,14 @@ const getAndValidateAlertInfoFromComment = (comment: AttachmentRequest): AlertIn
 /**
  * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
  */
-export const getAlertInfoFromComments = (comments: AttachmentRequest[] = []): AlertInfo[] =>
+export const getAlertInfoFromComments = (comments: AttachmentRequestV2[] = []): AlertInfo[] =>
   comments.reduce((acc: AlertInfo[], comment) => {
     const alertInfo = getAndValidateAlertInfoFromComment(comment);
     acc.push(...alertInfo);
     return acc;
   }, []);
 
-type NewCommentArgs = AttachmentRequest & {
+export type NewCommentArgs = AttachmentRequestV2 & {
   createdDate: string;
   owner: string;
   email?: string | null;
@@ -232,7 +255,7 @@ export const transformNewComment = ({
   username,
   profile_uid: profileUid,
   ...comment
-}: NewCommentArgs): AttachmentAttributes => {
+}: NewCommentArgs): AttachmentAttributesV2 => {
   return {
     ...comment,
     created_at: createdDate,
@@ -242,15 +265,6 @@ export const transformNewComment = ({
     updated_at: null,
     updated_by: null,
   };
-};
-
-/**
- * A type narrowing function for user comments.
- */
-export const isCommentRequestTypeUser = (
-  context: AttachmentRequest
-): context is UserCommentAttachmentPayload => {
-  return context.type === AttachmentType.user;
 };
 
 /**
@@ -309,25 +323,30 @@ export const isFileAttachmentRequest = (
 export function createAlertUpdateStatusRequest({
   comment,
   status,
+  closingReason,
 }: {
-  comment: AttachmentRequest;
+  comment: AttachmentRequestV2;
   status: CaseStatuses;
+  closingReason?: string;
 }): UpdateAlertStatusRequest[] {
-  return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
+  return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status, closingReason }));
 }
 
 /**
  * Counts the total alert IDs within a single comment.
  */
-export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributes>) => {
+export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributesV2>) => {
   let totalAlerts = 0;
-  if (comment.attributes.type === AttachmentType.alert) {
-    if (Array.isArray(comment.attributes.alertId)) {
-      totalAlerts += comment.attributes.alertId.length;
-    } else {
-      totalAlerts++;
-    }
+  const { type } = comment.attributes;
+
+  if (type === AttachmentType.alert && 'alertId' in comment.attributes) {
+    const { alertId } = comment.attributes;
+    totalAlerts += Array.isArray(alertId) ? alertId.length : 1;
+  } else if (isAlertAttachmentType(type) && 'attachmentId' in comment.attributes) {
+    const { attachmentId } = comment.attributes as { attachmentId: string | string[] };
+    totalAlerts += Array.isArray(attachmentId) ? attachmentId.length : 1;
   }
+
   return totalAlerts;
 };
 
@@ -379,10 +398,17 @@ export const countEventsForID = ({
   comments: SavedObjectsFindResponse<AttachmentAttributes>;
 }): number | undefined => {
   return comments.saved_objects.reduce((sum, current) => {
-    if (current.attributes.type === AttachmentType.event) {
-      return sum + [current.attributes.eventId].flat().length;
+    const attrs = current.attributes;
+    if (!isEventAttachmentType(attrs.type)) {
+      return sum;
     }
-
+    if ('attachmentId' in attrs && attrs.attachmentId != null) {
+      const id = attrs.attachmentId;
+      return sum + (Array.isArray(id) ? id.length : 1);
+    }
+    if ('eventId' in attrs && attrs.eventId != null) {
+      return sum + [attrs.eventId].flat().length;
+    }
     return sum;
   }, 0);
 };

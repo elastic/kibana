@@ -9,6 +9,7 @@ import { lastValueFrom } from 'rxjs';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import {
   getActionResultsRequestParamsSchema,
@@ -28,6 +29,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -57,6 +59,11 @@ export const getActionResultsRoute = (
               GetActionResultsRequestParamsSchema
             >(getActionResultsRequestParamsSchema),
           },
+          response: {
+            200: {
+              body: () => actionResultsResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -82,6 +89,10 @@ export const getActionResultsRoute = (
               `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
             );
           }
+
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
 
           const search = await context.search;
 
@@ -115,6 +126,7 @@ export const getActionResultsRoute = (
                 integrationNamespaces: integrationNamespaces[OSQUERY_INTEGRATION_NAME]?.length
                   ? integrationNamespaces[OSQUERY_INTEGRATION_NAME]
                   : undefined,
+                spaceId,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )
@@ -136,7 +148,7 @@ export const getActionResultsRoute = (
           // Return only real responses - placeholders will be generated client-side
           const processedEdges = res.edges;
 
-          const totalPages = Math.ceil(totalAgentCount / pageSize);
+          const totalPages = pageSize > 0 ? Math.ceil(totalAgentCount / pageSize) : 0;
 
           return response.ok({
             body: {

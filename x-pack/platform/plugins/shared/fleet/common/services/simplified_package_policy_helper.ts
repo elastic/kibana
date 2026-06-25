@@ -7,6 +7,7 @@
 import { isEmpty } from 'lodash';
 
 import type {
+  AgentConditionExpression,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
@@ -15,11 +16,11 @@ import type {
   PackageInfo,
   ExperimentalDataStreamFeature,
 } from '../types';
-import { DATASET_VAR_NAME } from '../constants';
+import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
 
 import { PackagePolicyValidationError } from '../errors';
 
-import { packageToPackagePolicy } from '.';
+import { packageToPackagePolicy, getInputEffectiveName } from '.';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 
 export type SimplifiedVars = Record<
@@ -41,6 +42,7 @@ export type SimplifiedPackagePolicyStreams = Record<
   {
     enabled?: undefined | boolean;
     vars?: SimplifiedVars;
+    condition?: AgentConditionExpression | null;
   }
 >;
 
@@ -50,6 +52,7 @@ export type SimplifiedInputs = Record<
     enabled?: boolean | undefined;
     vars?: SimplifiedVars;
     streams?: SimplifiedPackagePolicyStreams;
+    condition?: AgentConditionExpression | null;
   }
 >;
 
@@ -68,6 +71,10 @@ export interface SimplifiedPackagePolicy {
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[] | null;
+  // Only available for agentless integration policies.
+  // On standard package policies this field is rejected by server-side validation.
+  global_data_tags?: Array<{ name: string; value: string | number }> | null;
+  condition?: AgentConditionExpression | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -93,7 +100,9 @@ export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePol
 }
 
 export function generateInputId(input: NewPackagePolicyInput) {
-  return `${input.policy_template ? `${input.policy_template}-` : ''}${input.type}`;
+  return `${input.policy_template ? `${input.policy_template}-` : ''}${getInputEffectiveName(
+    input
+  )}`;
 }
 
 export function formatInputs(
@@ -117,6 +126,7 @@ export function formatInputs(
         : false,
       vars: formatVars(input.vars),
       streams: formatStreams(input.streams),
+      ...(input.condition !== undefined ? { condition: input.condition } : {}),
     };
 
     return acc;
@@ -148,10 +158,22 @@ function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
     acc[stream.data_stream.dataset] = {
       enabled: stream.enabled,
       vars: formatVars(stream.vars),
+      ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
     };
 
     return acc;
   }, {} as SimplifiedPackagePolicyStreams);
+}
+
+export function syncDataStreamTypeFromVar(packagePolicy: NewPackagePolicy): void {
+  for (const input of packagePolicy.inputs) {
+    for (const stream of input.streams) {
+      const typeVal = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+      if (typeof typeVal === 'string' && typeVal && typeVal !== stream.data_stream.type) {
+        stream.data_stream.type = typeVal;
+      }
+    }
+  }
 }
 
 function assignVariables(
@@ -193,6 +215,8 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     supports_cloud_connector: supportsCloudConnector,
     cloud_connector_id: cloudConnectorId,
     additional_datastreams_permissions: additionalDatastreamsPermissions,
+    global_data_tags: globalDataTags,
+    condition: integrationCondition,
   } = data;
   const packagePolicy = {
     ...packageToPackagePolicy(
@@ -208,15 +232,32 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     cloud_connector_id: cloudConnectorId,
     output_id: outputId,
     var_group_selections: varGroupSelections,
+    ...(integrationCondition !== undefined ? { condition: integrationCondition } : {}),
   };
 
   if (additionalDatastreamsPermissions) {
     packagePolicy.additional_datastreams_permissions = additionalDatastreamsPermissions;
   }
 
+  if (globalDataTags) {
+    packagePolicy.global_data_tags = globalDataTags;
+  }
+
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =
       options.experimental_data_stream_features;
+  }
+
+  // Disable agentless-only inputs for non-agentless policies; the reverse is unnecessary as the agentless API always passes an explicit policy_template.
+  if (!supportsAgentless) {
+    packagePolicy.inputs.forEach((input) => {
+      if (!isInputAllowedForDeploymentMode(input, 'default', packageInfo)) {
+        input.enabled = false;
+        input.streams.forEach((stream) => {
+          stream.enabled = false;
+        });
+      }
+    });
   }
 
   // Build a input and streams Map to easily find package policy stream
@@ -234,7 +275,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   }
 
   Object.entries(inputs).forEach(([inputId, val]) => {
-    const { enabled, streams = {}, vars: inputLevelVars } = val;
+    const { enabled, streams = {}, vars: inputLevelVars, condition: inputCondition } = val;
 
     const { input: packagePolicyInput, streams: streamsMap } = inputMap.get(inputId) ?? {};
 
@@ -254,8 +295,16 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       assignVariables(inputLevelVars, packagePolicyInput.vars, `${inputId}`);
     }
 
+    if (inputCondition !== undefined) {
+      packagePolicyInput.condition = inputCondition;
+    }
+
     Object.entries(streams).forEach(([streamId, streamVal]) => {
-      const { enabled: streamEnabled, vars: streamsLevelVars } = streamVal;
+      const {
+        enabled: streamEnabled,
+        vars: streamsLevelVars,
+        condition: streamCondition,
+      } = streamVal;
       const packagePolicyStream = streamsMap.get(streamId);
       if (!packagePolicyStream) {
         throw new PackagePolicyValidationError(`Stream not found ${inputId}: ${streamId}`);
@@ -269,8 +318,14 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       if (streamsLevelVars) {
         assignVariables(streamsLevelVars, packagePolicyStream.vars, `${inputId} ${streamId}`);
       }
+
+      if (streamCondition !== undefined) {
+        packagePolicyStream.condition = streamCondition;
+      }
     });
   });
+
+  syncDataStreamTypeFromVar(packagePolicy);
 
   return packagePolicy;
 }

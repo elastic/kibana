@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EuiIcon, EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import classnames from 'classnames';
 
@@ -37,8 +38,14 @@ export const CompressedInstallationStatus: React.FC<{
       {isActive ? (
         <EuiIcon
           data-test-subj="compressed-active-icon"
-          type="checkInCircleFilled"
+          type="checkCircleFill"
           className={styles.compressedActiveStatusIcon}
+          aria-label={i18n.translate(
+            'xpack.fleet.integrations.compressedInstallationStatus.activeIconLabel',
+            {
+              defaultMessage: 'Active',
+            }
+          )}
         />
       ) : (
         <EuiIconTip
@@ -46,7 +53,7 @@ export const CompressedInstallationStatus: React.FC<{
           position="bottom"
           content={installStatus === 'installed' ? installedTooltip : installFailedTooltip}
           anchorClassName={styles.compressedInstalledStatusIcon}
-          type="warningFilled"
+          type="warningFill"
           iconProps={{
             'data-test-subj': 'compressed-installed-icon',
           }}

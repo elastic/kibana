@@ -115,6 +115,9 @@ export const AgentPolicyBaseSchema = {
           if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
             return 'inputs overrides is not allowed';
           }
+          if (Object.keys(val).some((key) => key.match(/^output_permissions(\.)?/))) {
+            return 'output_permissions overrides is not allowed';
+          }
         },
         meta: {
           description:
@@ -147,7 +150,7 @@ export const AgentPolicyBaseSchema = {
           description:
             'User defined data tags that are added to all of the inputs. The values can be strings or numbers.',
         },
-        maxSize: 10,
+        maxSize: 100,
       }
     )
   ),
@@ -221,6 +224,15 @@ export const AgentPolicyBaseSchema = {
       ),
     ])
   ),
+  is_verifier: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'Indicates this is a short-lived verifier policy used for OTel permission verification.',
+      },
+    })
+  ),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
@@ -285,75 +297,166 @@ export const AgentPolicySchemaV3 = schema
   .object({
     ...AgentPolicyBaseSchema,
   })
-  .extends({
-    has_agent_version_conditions: schema.maybe(schema.boolean()),
-  });
-
-export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
-  supports_agentless: schema.maybe(
-    schema.oneOf([
-      schema.literal(null),
-      schema.boolean({
-        defaultValue: false,
-        meta: {
-          description:
-            'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.',
-          deprecated: true,
-        },
-      }),
-    ])
-  ),
-  force: schema.maybe(schema.boolean()),
-});
-
-export const AgentPolicySchema = AgentPolicySchemaV3.extends({
-  id: schema.string(),
-  is_managed: schema.maybe(schema.boolean()),
-  status: schema.oneOf([
-    schema.literal(agentPolicyStatuses.Active),
-    schema.literal(agentPolicyStatuses.Inactive),
-  ]),
-  package_policies: schema.maybe(
-    schema.oneOf([
-      schema.arrayOf(schema.string(), { maxSize: 1000 }),
-      schema.arrayOf(PackagePolicySchema, { maxSize: 1000 }),
-    ])
-  ),
-  updated_at: schema.string(),
-  updated_by: schema.string(),
-});
-
-export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
-  revision: schema.number(),
-  agents: schema.maybe(schema.number()),
-  unprivileged_agents: schema.maybe(schema.number()),
-  fips_agents: schema.maybe(schema.number()),
-  is_protected: schema.boolean({
-    meta: {
-      description:
-        'Indicates whether the agent policy has tamper protection enabled. Default false.',
+  .extends(
+    {
+      has_agent_version_conditions: schema.maybe(schema.boolean()),
     },
-  }),
-  version: schema.maybe(schema.string()),
-  is_preconfigured: schema.maybe(schema.boolean()),
-  schema_version: schema.maybe(schema.string()),
-  package_policies: schema.maybe(
-    schema.oneOf([
-      schema.arrayOf(schema.string(), { maxSize: 10000 }),
-      schema.arrayOf(PackagePolicyResponseSchema, {
-        meta: {
-          description:
-            'This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter',
-        },
-        maxSize: 10000,
-      }),
-    ])
-  ),
-});
+    { meta: { id: 'agent_policy_v3' } }
+  );
 
-export const GetAgentPolicyResponseSchema = schema.object({
-  item: AgentPolicyResponseSchema,
-});
+export const AgentPolicySchemaV4 = AgentPolicySchemaV3.extends(
+  {
+    min_agent_version: schema.maybe(schema.nullable(schema.string())),
+    package_agent_version_conditions: schema.maybe(
+      schema.nullable(
+        schema.arrayOf(
+          schema.object({
+            name: schema.string(),
+            title: schema.string(),
+            version_condition: schema.string(),
+          }),
+          { maxSize: 1000 }
+        )
+      )
+    ),
+  },
+  { meta: { id: 'agent_policy_v4' } }
+);
+
+export const AgentPolicySchemaV5 = AgentPolicySchemaV4.extends(
+  {
+    is_verifier: schema.maybe(schema.boolean()),
+  },
+  { meta: { id: 'agent_policy_v5' } }
+);
+
+export const AgentPolicySchemaV6 = AgentPolicySchemaV5.extends(
+  {
+    agentless: schema.maybe(
+      schema.object({
+        cloud_connectors: schema.maybe(
+          schema.object({
+            target_csp: schema.maybe(
+              schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')])
+            ),
+            enabled: schema.boolean(),
+          })
+        ),
+        resources: schema.maybe(
+          schema.object({
+            requests: schema.maybe(
+              schema.object({
+                memory: schema.maybe(schema.string({ validate: validateMemory })),
+                cpu: schema.maybe(schema.string({ validate: validateCPU })),
+              })
+            ),
+          })
+        ),
+        cluster_id: schema.maybe(schema.string()),
+      })
+    ),
+  },
+  { meta: { id: 'agent_policy_v6' } }
+);
+
+export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
+  {
+    supports_agentless: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.boolean({
+          defaultValue: false,
+          meta: {
+            description:
+              'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.',
+            deprecated: true,
+          },
+        }),
+      ])
+    ),
+    force: schema.maybe(schema.boolean()),
+  },
+  { meta: { id: 'new_agent_policy' } }
+);
+
+export const AgentPolicySchema = AgentPolicySchemaV6.extends(
+  {
+    id: schema.string(),
+    is_managed: schema.maybe(schema.boolean()),
+    status: schema.oneOf([
+      schema.literal(agentPolicyStatuses.Active),
+      schema.literal(agentPolicyStatuses.Inactive),
+    ]),
+    package_policies: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(schema.string(), { maxSize: 1000 }),
+        schema.arrayOf(PackagePolicySchema, { maxSize: 1000 }),
+      ])
+    ),
+    updated_at: schema.string(),
+    updated_by: schema.string(),
+  },
+  { meta: { id: 'agent_policy' } }
+);
+
+export const AgentPolicyResponseSchema = AgentPolicySchema.extends(
+  {
+    revision: schema.number(),
+    agents: schema.maybe(schema.number()),
+    unprivileged_agents: schema.maybe(schema.number()),
+    fips_agents: schema.maybe(schema.number()),
+    agents_per_version: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          version: schema.string(),
+          count: schema.number(),
+        }),
+        { maxSize: 1000 }
+      )
+    ),
+    is_protected: schema.boolean({
+      meta: {
+        description:
+          'Indicates whether the agent policy has tamper protection enabled. Defaults to `false`.',
+      },
+    }),
+    version: schema.maybe(schema.string()),
+    is_preconfigured: schema.maybe(schema.boolean()),
+    schema_version: schema.maybe(schema.string()),
+    min_agent_version: schema.maybe(schema.nullable(schema.string())),
+    package_agent_version_conditions: schema.maybe(
+      schema.nullable(
+        schema.arrayOf(
+          schema.object({
+            name: schema.string(),
+            title: schema.string(),
+            version_condition: schema.string(),
+          }),
+          { maxSize: 1000 }
+        )
+      )
+    ),
+    created_at: schema.maybe(schema.string()),
+    package_policies: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(schema.string(), { maxSize: 10000 }),
+        schema.arrayOf(PackagePolicyResponseSchema, {
+          meta: {
+            description:
+              'This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the `?full=true` parameter',
+          },
+          maxSize: 10000,
+        }),
+      ])
+    ),
+  },
+  { meta: { id: 'agent_policy_response' } }
+);
+
+export const GetAgentPolicyResponseSchema = schema.object(
+  { item: AgentPolicyResponseSchema },
+  { meta: { id: 'get_agent_policy_response' } }
+);
 
 export const OTelCollectorPipelineIDSchema = schema.oneOf([
   schema.literal('logs'),
@@ -385,212 +488,227 @@ export const OtelCollectorConfigSchema = {
   ),
 };
 
-export const FullAgentPolicyResponseSchema = schema.object({
-  id: schema.string(),
-  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-  outputs: schema
-    .recordOf(
-      schema.string(),
-      schema.object({
-        type: schema.string(),
-        hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-        ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-        proxy_url: schema.maybe(schema.string()),
-        proxy_headers: schema.maybe(ProxyHeadersSchema),
-      })
-    )
-    .extendsDeep({
-      unknowns: 'allow',
-    }),
-  output_permissions: schema.maybe(
-    schema.recordOf(schema.string(), schema.recordOf(schema.string(), schema.any()))
-  ),
-  fleet: schema.maybe(
-    schema.oneOf([
-      schema.object({
-        hosts: schema.arrayOf(schema.string(), { maxSize: 100 }),
-        proxy_url: schema.maybe(schema.string()),
-        proxy_headers: schema.maybe(ProxyHeadersSchema),
-        ssl: schema.maybe(BaseSSLSchema),
-        secrets: schema.maybe(BaseSecretsSchema),
+export const FullAgentPolicyResponseSchema = schema.object(
+  {
+    id: schema.string(),
+    namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    outputs: schema
+      .recordOf(
+        schema.string(),
+        schema.object({
+          type: schema.string(),
+          hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+          ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+          proxy_url: schema.maybe(schema.string()),
+          proxy_headers: schema.maybe(ProxyHeadersSchema),
+        })
+      )
+      .extendsDeep({
+        unknowns: 'allow',
       }),
-      schema.object({
-        kibana: schema.object({
+    output_permissions: schema.maybe(
+      schema.recordOf(schema.string(), schema.recordOf(schema.string(), schema.any()))
+    ),
+    fleet: schema.maybe(
+      schema.oneOf([
+        schema.object({
           hosts: schema.arrayOf(schema.string(), { maxSize: 100 }),
-          protocol: schema.string(),
-          path: schema.maybe(schema.string()),
+          proxy_url: schema.maybe(schema.string()),
+          proxy_headers: schema.maybe(ProxyHeadersSchema),
+          ssl: schema.maybe(BaseSSLSchema),
+          secrets: schema.maybe(BaseSecretsSchema),
         }),
-      }),
-    ])
-  ),
-  inputs: schema.arrayOf(
-    schema
-      .object({
-        id: schema.string(),
-        name: schema.string(),
-        revision: schema.number(),
-        type: schema.string(),
-        data_stream: schema.object({
-          namespace: schema.string(),
+        schema.object({
+          kibana: schema.object({
+            hosts: schema.arrayOf(schema.string(), { maxSize: 100 }),
+            protocol: schema.string(),
+            path: schema.maybe(schema.string()),
+          }),
         }),
-        use_output: schema.string(),
-        package_policy_id: schema.string(),
-        meta: schema.maybe(
-          schema.object({
-            package: schema
-              .maybe(
+      ])
+    ),
+    inputs: schema.arrayOf(
+      schema
+        .object({
+          id: schema.string(),
+          name: schema.string(),
+          revision: schema.number(),
+          type: schema.string(),
+          data_stream: schema.object({
+            namespace: schema.string(),
+          }),
+          use_output: schema.string(),
+          package_policy_id: schema.string(),
+          meta: schema.maybe(
+            schema.object({
+              package: schema
+                .maybe(
+                  schema.object({
+                    name: schema.string(),
+                    version: schema.string(),
+                  })
+                )
+                .extendsDeep({
+                  unknowns: 'allow',
+                }),
+            })
+          ),
+          streams: schema.maybe(
+            schema
+              .arrayOf(
                 schema.object({
-                  name: schema.string(),
-                  version: schema.string(),
-                })
+                  id: schema.string(),
+                  data_stream: schema.object({
+                    dataset: schema.string(),
+                    type: schema.maybe(schema.string()),
+                  }),
+                }),
+                { maxSize: 10000 }
               )
               .extendsDeep({
                 unknowns: 'allow',
-              }),
-          })
-        ),
-        streams: schema.maybe(
-          schema
-            .arrayOf(
+              })
+          ),
+          processors: schema.maybe(
+            schema.arrayOf(
               schema.object({
-                id: schema.string(),
-                data_stream: schema.object({
-                  dataset: schema.string(),
-                  type: schema.maybe(schema.string()),
+                add_fields: schema.object({
+                  target: schema.string(),
+                  fields: schema.recordOf(
+                    schema.string(),
+                    schema.oneOf([schema.string(), schema.number()])
+                  ),
                 }),
               }),
               { maxSize: 10000 }
             )
-            .extendsDeep({
-              unknowns: 'allow',
-            })
-        ),
-        processors: schema.maybe(
-          schema.arrayOf(
+          ),
+        })
+        .extendsDeep({
+          unknowns: 'allow',
+        }),
+      { maxSize: 10000 }
+    ),
+    revision: schema.maybe(schema.number()),
+    agent: schema.maybe(
+      schema.object({
+        monitoring: schema.object({
+          namespace: schema.maybe(schema.string()),
+          use_output: schema.maybe(schema.string()),
+          enabled: schema.boolean(),
+          metrics: schema.boolean(),
+          logs: schema.boolean(),
+          traces: schema.boolean(),
+          apm: schema.maybe(schema.any()),
+          _runtime_experimental: schema.maybe(schema.string()),
+          pprof: schema.maybe(
             schema.object({
-              add_fields: schema.object({
-                target: schema.string(),
-                fields: schema.recordOf(
-                  schema.string(),
-                  schema.oneOf([schema.string(), schema.number()])
-                ),
-              }),
-            }),
-            { maxSize: 10000 }
-          )
-        ),
-      })
-      .extendsDeep({
-        unknowns: 'allow',
-      }),
-    { maxSize: 10000 }
-  ),
-  revision: schema.maybe(schema.number()),
-  agent: schema.maybe(
-    schema.object({
-      monitoring: schema.object({
-        namespace: schema.maybe(schema.string()),
-        use_output: schema.maybe(schema.string()),
-        enabled: schema.boolean(),
-        metrics: schema.boolean(),
-        logs: schema.boolean(),
-        traces: schema.boolean(),
-        apm: schema.maybe(schema.any()),
-        _runtime_experimental: schema.maybe(schema.string()),
-        pprof: schema.maybe(
+              enabled: schema.boolean(),
+            })
+          ),
+          http: schema.maybe(
+            schema.object({
+              enabled: schema.maybe(schema.boolean()),
+              host: schema.maybe(schema.string()),
+              port: schema.maybe(schema.number()),
+            })
+          ),
+          diagnostics: schema.maybe(
+            schema.object({
+              limit: schema.maybe(
+                schema.object({
+                  interval: schema.maybe(schema.string()),
+                  burst: schema.maybe(schema.number()),
+                })
+              ),
+              uploader: schema.maybe(
+                schema.object({
+                  max_retries: schema.maybe(schema.number()),
+                  init_dur: schema.maybe(schema.string()),
+                  max_dur: schema.maybe(schema.string()),
+                })
+              ),
+            })
+          ),
+        }),
+        download: schema.object({
+          sourceURI: schema.string(),
+          ssl: schema.maybe(BaseSSLSchema),
+          auth: schema.maybe(
+            schema.object({
+              username: schema.maybe(schema.string()),
+              password: schema.maybe(schema.string()),
+              api_key: schema.maybe(schema.string()),
+              headers: schema.maybe(
+                schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
+                  maxSize: 100,
+                })
+              ),
+            })
+          ),
+          secrets: schema.maybe(BaseSecretsSchema),
+          timeout: schema.maybe(schema.string()),
+          target_directory: schema.maybe(schema.string()),
+          proxy_url: schema.maybe(schema.string()),
+          proxy_headers: schema.maybe(ProxyHeadersSchema),
+        }),
+        features: schema.recordOf(
+          schema.string(),
           schema.object({
             enabled: schema.boolean(),
           })
         ),
-        http: schema.maybe(
+        protection: schema.maybe(
           schema.object({
-            enabled: schema.maybe(schema.boolean()),
-            host: schema.maybe(schema.string()),
-            port: schema.maybe(schema.number()),
+            enabled: schema.boolean(),
+            uninstall_token_hash: schema.string(),
+            signing_key: schema.string(),
           })
         ),
-        diagnostics: schema.maybe(
+        logging: schema.maybe(
           schema.object({
-            limit: schema.maybe(
+            level: schema.maybe(schema.string()),
+            to_files: schema.maybe(schema.boolean()),
+            files: schema.maybe(
               schema.object({
+                rotateeverybytes: schema.maybe(schema.number()),
+                keepfiles: schema.maybe(schema.number()),
                 interval: schema.maybe(schema.string()),
-                burst: schema.maybe(schema.number()),
               })
             ),
-            uploader: schema.maybe(
+            metrics: schema.maybe(
               schema.object({
-                max_retries: schema.maybe(schema.number()),
-                init_dur: schema.maybe(schema.string()),
-                max_dur: schema.maybe(schema.string()),
+                period: schema.maybe(schema.string()),
               })
             ),
           })
         ),
-      }),
-      download: schema.object({
-        sourceURI: schema.string(),
-        ssl: schema.maybe(BaseSSLSchema),
-        secrets: schema.maybe(BaseSecretsSchema),
-        timeout: schema.maybe(schema.string()),
-        target_directory: schema.maybe(schema.string()),
-        proxy_url: schema.maybe(schema.string()),
-        proxy_headers: schema.maybe(ProxyHeadersSchema),
-      }),
-      features: schema.recordOf(
-        schema.string(),
+        limits: schema.maybe(
+          schema.object({
+            go_max_procs: schema.maybe(schema.number()),
+          })
+        ),
+        internal: schema.maybe(schema.any()),
+      })
+    ),
+    secret_references: schema.maybe(
+      schema.arrayOf(
         schema.object({
-          enabled: schema.boolean(),
-        })
-      ),
-      protection: schema.maybe(
-        schema.object({
-          enabled: schema.boolean(),
-          uninstall_token_hash: schema.string(),
-          signing_key: schema.string(),
-        })
-      ),
-      logging: schema.maybe(
-        schema.object({
-          level: schema.maybe(schema.string()),
-          to_files: schema.maybe(schema.boolean()),
-          files: schema.maybe(
-            schema.object({
-              rotateeverybytes: schema.maybe(schema.number()),
-              keepfiles: schema.maybe(schema.number()),
-              interval: schema.maybe(schema.string()),
-            })
-          ),
-          metrics: schema.maybe(
-            schema.object({
-              period: schema.maybe(schema.string()),
-            })
-          ),
-        })
-      ),
-      limits: schema.maybe(
-        schema.object({
-          go_max_procs: schema.maybe(schema.number()),
-        })
-      ),
-      internal: schema.maybe(schema.any()),
-    })
-  ),
-  secret_references: schema.maybe(
-    schema.arrayOf(
+          id: schema.string(),
+        }),
+        { maxSize: 10000 }
+      )
+    ),
+    signed: schema.maybe(
       schema.object({
-        id: schema.string(),
-      }),
-      { maxSize: 10000 }
-    )
-  ),
-  signed: schema.maybe(
-    schema.object({
-      data: schema.string(),
-      signature: schema.string(),
-    })
-  ),
-  ...OtelCollectorConfigSchema,
-});
+        data: schema.string(),
+        signature: schema.string(),
+      })
+    ),
+    ...OtelCollectorConfigSchema,
+  },
+  { meta: { id: 'full_agent_policy' } }
+);
 const MinimalOutputSchema = schema.object({
   id: schema.string(),
   name: schema.string(),
@@ -617,10 +735,12 @@ const OutputsForAgentPolicySchema = schema.object({
   }),
 });
 
-export const GetAgentPolicyOutputsResponseSchema = schema.object({
-  item: OutputsForAgentPolicySchema,
-});
+export const GetAgentPolicyOutputsResponseSchema = schema.object(
+  { item: OutputsForAgentPolicySchema },
+  { meta: { id: 'get_agent_policy_outputs_response' } }
+);
 
-export const GetListAgentPolicyOutputsResponseSchema = schema.object({
-  items: schema.arrayOf(OutputsForAgentPolicySchema, { maxSize: 10000 }),
-});
+export const GetListAgentPolicyOutputsResponseSchema = schema.object(
+  { items: schema.arrayOf(OutputsForAgentPolicySchema, { maxSize: 10000 }) },
+  { meta: { id: 'get_list_agent_policy_outputs_response' } }
+);

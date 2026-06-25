@@ -8,9 +8,15 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type {
+  BulkActionSkipResult,
+  GapFillStatus,
+  GapReasonType,
+} from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -20,7 +26,7 @@ import {
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
-  RULES_TABLE_MAX_PAGE_SIZE,
+  EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -48,8 +54,13 @@ import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_action
 import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
-// Set a lower limit for bulk edit as the rules client might fail with a "Query
-// contains too many nested clauses" error
+// The alerting layer converts IDs into a KQL "OR" boolean query (one should-clause per ID).
+// ES maxClauseCount defaults to 1024, so all IDs-based paths are capped at 1000 to leave
+// headroom for the authorization filter clauses that are ANDed in.
+// The alerting-layer schemas for bulkDelete/bulkEnable/bulkDisable also enforce maxSize: 1000.
+const MAX_RULES_IDS_FOR_BULK_ACTION = 1000;
+// Edit has a lower cap than query-path limits because the bulk edit operation does
+// heavier per-rule work and the initial edit query is not chunked like the conflict retry is.
 const MAX_RULES_TO_BULK_EDIT = 2000;
 const MAX_ROUTE_CONCURRENCY = 5;
 
@@ -61,9 +72,9 @@ interface ValidationError {
 const validateBulkAction = (
   body: PerformRulesBulkActionRequestBody
 ): ValidationError | undefined => {
-  if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
+  if (body?.ids && body.ids.length > MAX_RULES_IDS_FOR_BULK_ACTION) {
     return {
-      body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+      body: `More than ${MAX_RULES_IDS_FOR_BULK_ACTION} ids sent for bulk action.`,
       statusCode: 400,
     };
   }
@@ -203,6 +214,10 @@ export const performBulkActionRoute = (
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const rulesAuthz = ctx.securitySolution.getRulesAuthz();
+          const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
+          const endpointService = ctx.securitySolution.getEndpointService();
+          const spaceId = ctx.securitySolution.getSpaceId();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -232,6 +247,7 @@ export const performBulkActionRoute = (
                 : MAX_RULES_TO_PROCESS_TOTAL,
             gapRange: gapParams.gapRange,
             gapFillStatuses: gapParams.gapFillStatuses,
+            schedulerId: body.gap_auto_fill_scheduler_id,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
@@ -249,6 +265,7 @@ export const performBulkActionRoute = (
                 rulesClient,
                 action: 'enable',
                 mlAuthz,
+                rulesAuthz,
               });
               errors.push(...bulkActionErrors);
               updated = updatedRules;
@@ -261,33 +278,25 @@ export const performBulkActionRoute = (
                 rulesClient,
                 action: 'disable',
                 mlAuthz,
+                rulesAuthz,
               });
               errors.push(...bulkActionErrors);
               updated = updatedRules;
               break;
             }
             case BulkActionTypeEnum.delete: {
-              const bulkActionOutcome = await initPromisePool({
-                concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-                items: rules,
-                executor: async (rule) => {
-                  // during dry run return early for delete, as no validations needed for this action
-                  if (isDryRun) {
-                    return null;
-                  }
+              // during dry run return early for delete, as no validations needed for this action
+              if (isDryRun) {
+                // Populate `deleted` so the summary reflects the correct count of affected rules
+                deleted = rules;
+                break;
+              }
 
-                  await detectionRulesClient.deleteRule({
-                    ruleId: rule.id,
-                  });
+              const ruleIds = rules.map((rule) => rule.id);
+              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
 
-                  return null;
-                },
-                abortSignal: abortController.signal,
-              });
-              errors.push(...bulkActionOutcome.errors);
-              deleted = bulkActionOutcome.results
-                .map(({ item }) => item)
-                .filter((rule): rule is RuleAlertType => rule !== null);
+              errors.push(...bulkDeleteResult.errors);
+              deleted = bulkDeleteResult.rules;
               break;
             }
             case BulkActionTypeEnum.duplicate: {
@@ -296,6 +305,16 @@ export const performBulkActionRoute = (
                 items: rules,
                 executor: async (rule) => {
                   await validateBulkDuplicateRule({ mlAuthz, rule });
+
+                  await validateRuleResponseActions({
+                    endpointAuthz,
+                    endpointService,
+                    rulePayload: {},
+                    spaceId,
+                    existingRule: rule,
+                    checkOsqueryResponseActionAuthz:
+                      ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
+                  });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                   if (isDryRun) {
@@ -315,7 +334,18 @@ export const performBulkActionRoute = (
 
                   const createdRule = await rulesClient.create({
                     data: duplicateRuleToCreate,
+                    changeTracking: {
+                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                      metadata: {
+                        bulkCount: rules.length,
+                        originalRuleSoId: rule.id,
+                      },
+                    },
                   });
+
+                  if (!shouldDuplicateExceptions) {
+                    return createdRule;
+                  }
 
                   // we try to create exceptions after rule created, and then update rule
                   const exceptions = shouldDuplicateExceptions
@@ -334,6 +364,11 @@ export const performBulkActionRoute = (
                       params: {
                         ...duplicateRuleToCreate.params,
                         exceptionsList: exceptions,
+                      },
+                    },
+                    changeTracking: {
+                      metadata: {
+                        bulkCount: rules.length,
                       },
                     },
                     shouldIncrementRevision: () => false,
@@ -389,6 +424,7 @@ export const performBulkActionRoute = (
                   executor: async (rule) => {
                     await dryRunValidateBulkEditRule({
                       mlAuthz,
+                      rulesAuthz,
                       rule,
                       edit: body.edit,
                       ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
@@ -409,6 +445,7 @@ export const performBulkActionRoute = (
                   prebuiltRuleAssetClient,
                   rules,
                   actions: body.edit,
+                  rulesAuthz,
                   mlAuthz,
                   ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
                 });
@@ -425,6 +462,7 @@ export const performBulkActionRoute = (
                 isDryRun,
                 rulesClient,
                 mlAuthz,
+                rulesAuthz,
                 runPayload: body.run,
               });
               errors.push(...bulkActionErrors);
@@ -433,6 +471,11 @@ export const performBulkActionRoute = (
             }
 
             case BulkActionTypeEnum.fill_gaps: {
+              const uiSettingsClient = ctx.core.uiSettings.client;
+              const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
+                EXCLUDED_GAP_REASONS_KEY
+              );
+
               const {
                 backfilled,
                 errors: bulkActionErrors,
@@ -442,7 +485,9 @@ export const performBulkActionRoute = (
                 isDryRun,
                 rulesClient,
                 mlAuthz,
+                rulesAuthz,
                 fillGapsPayload: body.fill_gaps,
+                excludedReasons,
               });
               errors.push(...bulkActionErrors);
               updated = backfilled;

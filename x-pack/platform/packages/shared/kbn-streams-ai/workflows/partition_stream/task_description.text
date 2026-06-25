@@ -39,7 +39,7 @@ You have access to a `partition_logs(index=string, partitions=Partition[])` tool
 
 When calling `partition_logs`, you need to define the complete set of suggested partitions you want to add and validate. It will cluster logs based on DBScan and Jaccard similarity, **for each suggested partition**, **and the documents that do not match any partition and fall through**. The clustering in a partition give you a *hint* that the documents might need to be partitioned further. Ideally every document falls into a logical partition. If needed, keep adding partitions until all documents have been partitioned and there is a low amount of per-partition clusters. The count in each cluster is based on sampled documents - look at them relatively instead of absolutely.
 
-After calling `complete`, you MUST finalize the process by call the `cluster_logs` tool once more with the finalized partitions.
+After calling `complete`, you MUST finalize the process by calling the `partition_logs` tool once more with the finalized partitions.
 
 /***************************************************************
 *

@@ -22,6 +22,7 @@
     "server/**/*",
     "storybook/**/*",
     "tasks/mocks/*",
+    "test/scout/**/*",
     "types/**/*"
   ],
   "kbn_references": [
@@ -39,7 +40,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/features-plugin",
-    "@kbn/lens-plugin",
     "@kbn/maps-plugin",
     "@kbn/reporting-plugin",
     "@kbn/spaces-plugin",
@@ -67,14 +67,11 @@
     "@kbn/discover-utils",
     "@kbn/content-management-plugin",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/reporting-server",
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/code-editor",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/visualizations-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-error-boundary",
     "@kbn/shared-ux-markdown",
@@ -82,7 +79,12 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
     "@kbn/visualizations-common",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/saved-search-plugin",
+    "@kbn/lens-common",
+    "@kbn/core-http-browser",
+    "@kbn/scout",
+    "@kbn/rison"
   ],
   "exclude": ["target/**/*"]
 }

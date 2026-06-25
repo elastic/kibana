@@ -22,6 +22,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'securitySolution:includedDataStreamNamespacesForRuleExecution': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Data stream namespace(s) to be included in rule execution.' },
+    },
+  },
   'securitySolution:maxUnassociatedNotes': {
     type: 'integer',
     _meta: { description: 'The maximum number of allowed unassociated notes' },
@@ -33,6 +40,17 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:alertTags': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'securitySolution:detectionsCloseReasons': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'securitySolution:excludedGapReasons': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Array of excluded gap reasons.' },
+    },
   },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
@@ -136,25 +154,27 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Allows users to enable/disable querying cold and frozen data tiers in analyzer.',
+    },
   },
-  'securitySolution:enableCcsWarning': {
+  'securitySolution:excludeColdAndFrozenTiersInPrevalence': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableVisualizationsInFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableGraphVisualization': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
+    },
   },
   'securitySolution:enableAssetInventory': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableCloudConnector': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableAlertsAndAttacksAlignment': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -507,10 +527,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'agentBuilder:dashboardTools': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'agentBuilder:navEnabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -519,13 +535,34 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'dataSources:enabled': {
+  'agentBuilder:experimentalFeatures': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'workflows:ui:enabled': {
+  'agentBuilder:bashSupport': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:uiamOAuthClientManagement': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
+    },
+  },
+  'workflows:experimentalFeatures': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether experimental features for Elastic Workflows are enabled.',
+    },
+  },
+  'workflows:ui:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },
+  },
+  'workflows:ui:showManagedWorkflows': {
+    type: 'boolean',
+    _meta: { description: 'Whether managed workflows are visible in workflow experiences.' },
   },
   'banners:placement': {
     type: 'keyword',
@@ -694,6 +731,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Display the incremental id of a case in the relevant pages',
     },
   },
+  'cases:maxOpenCasesPerRuleRun': {
+    type: 'integer',
+    _meta: {
+      description: 'Maximum number of cases the Cases connector can open during a single rule run.',
+    },
+  },
   'observability:streamsEnableSignificantEvents': {
     type: 'boolean',
     _meta: {
@@ -706,16 +749,41 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Significant events discovery in Streams.',
     },
   },
-  'observability:streamsEnableAttachments': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Streams attachments tab.',
-    },
-  },
   'observability:streamsEnableContentPacks': {
     type: 'boolean',
     _meta: {
       description: 'Enable Content packs in Streams',
+    },
+  },
+  'observability:streamsEnableQueryStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Query streams in Streams',
+    },
+  },
+  'observability:streamsEnableWiredStreamViews': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable ES|QL views for wired streams',
+    },
+  },
+  'observability:streamsEnableDraftStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable draft streams with read-time ES|QL views',
+    },
+  },
+  'observability:streamsEnableCanvas': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams Canvas',
+    },
+  },
+  'observability:streamsSigEventsIndexPatterns': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
     },
   },
   'observability:enableDiagnosticMode': {
@@ -736,10 +804,37 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Restrict to default AI connector only',
     },
   },
+  'agentBuilder:prePromptWorkflowIds': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'Pre-prompt workflow IDs',
+      },
+    },
+  },
   'securitySolution:entityStoreEnableV2': {
     type: 'boolean',
     _meta: {
       description: 'Switches the Entity Store Engine to v2',
+    },
+  },
+  'elasticRamen:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'query_activity:minRunningTime': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'genAiSettings:tokenUsageTracking': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable token usage tracking in Kibana',
     },
   },
 };

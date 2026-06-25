@@ -9,7 +9,7 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { strings } from './action_strings';
 import type { FilterItemActionsProps } from './types';
 import { FilterItemActions } from './actions';
@@ -24,16 +24,24 @@ export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) =>
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiButtonIcon
-      iconType="boxesHorizontal"
-      color="text"
-      aria-label={strings.getMoreActionsLabel()}
-      onClick={onMoreActionsButtonClick}
-    />
+    <EuiToolTip content={strings.getMoreActionsLabel()} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        color="text"
+        aria-label={strings.getMoreActionsLabel()}
+        onClick={onMoreActionsButtonClick}
+      />
+    </EuiToolTip>
   );
 
   return (
-    <EuiPopover ownFocus={false} button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      ownFocus={false}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={strings.getMoreActionsLabel()}
+    >
       <FilterItemActions {...props} minimizePaddings={true} />
     </EuiPopover>
   );

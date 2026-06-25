@@ -80,22 +80,12 @@ export const getLifecycleValue = (
   return getRetentionPeriod(activeRetention as string);
 };
 
-export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
-  return (
-    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&
-    dataStream?.indices?.every(
-      (index) => index.managedBy?.toLowerCase() === 'index lifecycle management'
-    )
-  );
+export const isNextGenIlm = (dataStream?: DataStream | null): boolean => {
+  return dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management';
 };
 
-export const isDataStreamFullyManagedByDSL = (dataStream?: DataStream | null) => {
-  return (
-    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle' &&
-    dataStream?.indices?.every(
-      (index) => index.managedBy?.toLowerCase() === 'data stream lifecycle'
-    )
-  );
+export const isNextGenDsl = (dataStream?: DataStream | null): boolean => {
+  return dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle';
 };
 
 export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {

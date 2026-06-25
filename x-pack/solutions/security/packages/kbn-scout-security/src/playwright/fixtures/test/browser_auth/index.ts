@@ -19,6 +19,8 @@ import { roleDescriptorsFixture } from '../../worker';
 
 export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
   loginAsPlatformEngineer: () => Promise<void>;
+  loginAsT1Analyst: () => Promise<void>;
+  loginAsSecurityRole: (roleName: string) => Promise<void>;
 }
 
 export const securityBrowserAuthFixture = mergeTests(
@@ -48,26 +50,30 @@ export const securityBrowserAuthFixture = mergeTests(
       return browserAuth.loginAs(samlAuth.customRoleName);
     };
 
-    const loginAsPlatformEngineer = async () => {
-      const roleName = 'platform_engineer';
+    const loginAsSecurityRole = async (roleName: string) => {
       if (!config.serverless) {
-        const roleDesciptor = roleDescriptors.serverless?.get(
+        const roleDescriptor = roleDescriptors.serverless?.get(
           roleName
         ) as ElasticsearchRoleDescriptor;
-        if (!roleDesciptor) {
+        if (!roleDescriptor) {
           throw new Error(`No role descriptors found for ${roleName}`);
         }
         log.debug(`Using "${roleName}" role to execute the test`);
-        return loginWithCustomRole(roleDesciptor);
+        return loginWithCustomRole(roleDescriptor);
       } else {
         return browserAuth.loginAs(roleName);
       }
     };
 
+    const loginAsPlatformEngineer = () => loginAsSecurityRole('platform_engineer');
+    const loginAsT1Analyst = () => loginAsSecurityRole('t1_analyst');
+
     await use({
       ...browserAuth,
       loginWithCustomRole,
       loginAsPlatformEngineer,
+      loginAsT1Analyst,
+      loginAsSecurityRole,
     });
   },
 });

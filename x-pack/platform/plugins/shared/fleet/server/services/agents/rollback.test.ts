@@ -59,6 +59,8 @@ jest.mock('../spaces/get_current_namespace', () => ({
 
 jest.mock('../spaces/agent_namespaces', () => ({
   agentsKueryNamespaceFilter: jest.fn(),
+  buildFilterWithNamespace: jest.requireActual('../spaces/agent_namespaces')
+    .buildFilterWithNamespace,
 }));
 
 jest.mock('../license', () => ({
@@ -696,8 +698,15 @@ describe('rollback', () => {
         });
 
         expect(result.actionIds).toEqual([mockActionId1]);
-        expect(mockGetAgentsByKuery).toHaveBeenCalledWith(esClient, soClient, {
-          kuery,
+        expect(mockGetAgentsByKuery).toHaveBeenNthCalledWith(1, esClient, soClient, {
+          kuery: `(${kuery})`,
+          showAgentless: undefined,
+          showInactive: false,
+          page: 1,
+          perPage: 0,
+        });
+        expect(mockGetAgentsByKuery).toHaveBeenNthCalledWith(2, esClient, soClient, {
+          kuery: `(${kuery})`,
           showAgentless: undefined,
           showInactive: false,
           page: 1,
@@ -733,11 +742,11 @@ describe('rollback', () => {
 
         expect(result.actionIds).toEqual([mockActionId1, mockActionId2]);
         expect(mockGetAgentsByKuery).toHaveBeenCalledWith(esClient, soClient, {
-          kuery,
+          kuery: `(${kuery})`,
           showAgentless: undefined,
           showInactive: false,
           page: 1,
-          perPage: batchSize,
+          perPage: 0,
         });
         expect(mockOpenPointInTime).toHaveBeenCalledWith(esClient);
         expect(mockRollbackActionRunner).toHaveBeenCalledWith(
@@ -777,7 +786,7 @@ describe('rollback', () => {
           esClient,
           soClient,
           expect.objectContaining({
-            kuery: `${namespaceFilter} AND ${kuery}`,
+            kuery: `(${namespaceFilter}) AND (${kuery})`,
           })
         );
       });

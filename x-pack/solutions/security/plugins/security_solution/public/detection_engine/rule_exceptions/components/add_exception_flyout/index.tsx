@@ -6,12 +6,13 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
 
 import {
   EuiButton,
   EuiCallOut,
+  EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
   EuiHorizontalRule,
@@ -30,11 +31,13 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import {
+  getMalformedMatchesFields,
   hasPartialCodeSignatureEntry,
   hasWrongOperatorWithWildcard,
 } from '@kbn/securitysolution-list-utils';
 
 import {
+  MalformedMatchesValueCallout,
   PartialCodeSignatureCallout,
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
@@ -42,6 +45,7 @@ import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   defaultEndpointExceptionItems,
   getPrepopulatedRuleExceptionWithHighlightFields,
@@ -61,17 +65,18 @@ import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
-import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
-import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import {
+  ArtifactConfirmModal,
+  CONFIRM_WARNING_MODAL_LABELS,
+} from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
 import * as headerI18n from '../flyout_components/header/translations';
 import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
 `;
 
 export interface AddExceptionFlyoutProps {
@@ -94,11 +99,9 @@ export interface AddExceptionFlyoutProps {
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
-  ${() => css`
-    &.builder-section {
-      overflow-y: scroll;
-    }
-  `}
+  &.builder-section {
+    overflow-y: scroll;
+  }
 `;
 
 export const AddExceptionFlyout = memo(function AddExceptionFlyout({
@@ -113,6 +116,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
+  const {
+    docLinks: { links },
+  } = useKibana().services;
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
@@ -164,6 +171,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       expireErrorExists,
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
+      malformedMatchesValueExists,
+      malformedMatchesFields,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -200,6 +209,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
       });
+      const fields = getMalformedMatchesFields(items);
+      dispatch({ type: 'setMalformedMatchesValue', fields });
       dispatch({
         type: 'setExceptionItems',
         items,
@@ -460,12 +471,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ]);
 
   const handleOnSubmit = useCallback(() => {
-    if (wildcardWarningExists) {
+    if (wildcardWarningExists || malformedMatchesValueExists) {
       setShowConfirmModal(true);
     } else {
       return submitException();
     }
-  }, [wildcardWarningExists, submitException]);
+  }, [wildcardWarningExists, malformedMatchesValueExists, submitException]);
 
   const isSubmitButtonDisabled = isSubmitDisabled({
     isSubmitting,
@@ -501,22 +512,24 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, [listType]);
 
   const confirmModal = useMemo(() => {
-    const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
-      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
+    const labels = CONFIRM_WARNING_MODAL_LABELS(
+      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
+      {
+        hasWildcardWithWrongOperator: wildcardWarningExists,
+        hasMalformedMatchesValue: malformedMatchesFields,
+      },
+      links
     );
 
     return (
       <ArtifactConfirmModal
-        title={title}
-        body={body}
-        confirmButton={confirmButton}
-        cancelButton={cancelButton}
+        labels={labels}
         onSuccess={submitException}
         onCancel={() => setShowConfirmModal(false)}
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, submitException]);
+  }, [links, listType, submitException, wildcardWarningExists, malformedMatchesFields]);
 
   return (
     <EuiFlyout
@@ -582,8 +595,15 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        {(wildcardWarningExists ||
+          malformedMatchesValueExists ||
+          partialCodeSignatureWarningExists) && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+            {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+            {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+          </EuiFlexGroup>
+        )}
         {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
           <>
             <EuiHorizontalRule />
@@ -619,7 +639,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             />
           </>
         )}
-        {showAlertCloseOptions && (
+        {hasAlertsUpdate && showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />
             <ExceptionItemsFlyoutAlertsActions

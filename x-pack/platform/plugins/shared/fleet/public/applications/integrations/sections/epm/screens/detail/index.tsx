@@ -30,11 +30,15 @@ import semverLt from 'semver/functions/lt';
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 
 import {
-  getPackageReleaseLabel,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
+import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
+import {
+  getAgentlessRelease,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../common/services/agentless_policy_helper';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
@@ -51,7 +55,7 @@ import {
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
@@ -60,8 +64,9 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { SideBarColumn } from '../../components/side_bar_column';
 import { PermissionsError } from '../../../../layouts';
 
+import { wrapTitleWithDeprecated } from '../../components/utils';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
-import { useIsFirstTimeAgentUserQuery } from './hooks';
 
 import { getInstallPkgRouteOptions } from './utils';
 import {
@@ -72,8 +77,10 @@ import {
   LoadingIconPanel,
   MiniIcon,
   AddIntegrationButton,
+  AddIntegrationButtonDisabledReason,
   EditIntegrationButton,
 } from './components';
+import { ALERTING_ASSET_TYPES, AlertingPage } from './alerting';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -91,6 +98,7 @@ export type DetailViewPanelName =
   | 'overview'
   | 'policies'
   | 'assets'
+  | 'alerting'
   | 'settings'
   | 'custom'
   | 'api-reference'
@@ -132,7 +140,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -158,7 +166,6 @@ export function Detail() {
   const userCanInstallPackages = canInstallPackages && permissionCheck?.success;
 
   const services = useStartServices();
-  const isCloud = !!services?.cloud?.cloudId;
   const agentPolicyIdFromContext = getAgentPolicyId();
   // edit readme state
 
@@ -190,6 +197,31 @@ export function Detail() {
     'installationInfo' in packageInfo &&
     packageInfo.installationInfo?.version &&
     semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
+
+  const isViewingOldPackage =
+    packageInfo && semverLt(packageInfo.version, packageInfo.latestVersion);
+
+  const isViewingDifferentVersion =
+    isInstalled &&
+    packageInfo &&
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
+    packageInfo.version !== packageInfo.installationInfo.version;
+
+  const isViewingUnavailableVersion = Boolean(
+    isViewingDifferentVersion || (!isInstalled && isViewingOldPackage)
+  );
+
+  const addIntegrationDisabledReason: AddIntegrationButtonDisabledReason | undefined =
+    isViewingUnavailableVersion
+      ? isInstalled
+        ? AddIntegrationButtonDisabledReason.VERSION_MISMATCH
+        : AddIntegrationButtonDisabledReason.OUTDATED_VERSION
+      : !userCanInstallPackages
+      ? missingSecurityConfiguration
+        ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
+        : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
+      : undefined;
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -225,38 +257,58 @@ export function Detail() {
     }
   );
 
-  const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
-  const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
+  // The no-version endpoint returns the installed version when the package is installed,
+  // not the latest available. Use packageInfo.latestVersion (always registry-sourced) as
+  // the primary source for both GA and prerelease latest versions.
 
-  // fetch latest GA version (prerelease=false)
-  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(pkgName, '', {
-    prerelease: false,
-  });
+  // When prerelease is disabled, packageInfo.latestVersion is the latest GA.
+  // When prerelease is enabled and a newer prerelease exists, packageInfo.latestVersion
+  // is that prerelease — fall back to the GA query's latestVersion in that case.
+  // Both queries use a specific version (pkgVersion from the URL) so the server returns
+  // registry data rather than the installed version.
+  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    { prerelease: false },
+    { enabled: Boolean(pkgVersion), refetchOnMount: 'always' }
+  );
 
-  useEffect(() => {
-    const pkg = packageInfoLatestGAData?.item;
-    const isGAVersion = pkg && !isPackagePrerelease(pkg.version);
-    if (isGAVersion) {
-      setLatestGAVersion(pkg.version);
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    { prerelease: true },
+    { enabled: Boolean(pkgVersion), refetchOnMount: 'always' }
+  );
+
+  const latestGAVersion = useMemo(() => {
+    if (packageInfo?.latestVersion && !isPackagePrerelease(packageInfo.latestVersion)) {
+      return packageInfo.latestVersion;
     }
-  }, [packageInfoLatestGAData?.item]);
+    // packageInfo.latestVersion is a prerelease (prerelease enabled + newer prerelease exists):
+    // use the GA query's latestVersion as fallback.
+    const ver = packageInfoLatestGAData?.item?.latestVersion;
+    if (ver && !isPackagePrerelease(ver)) {
+      return ver;
+    }
+    return undefined;
+  }, [packageInfo?.latestVersion, packageInfoLatestGAData?.item?.latestVersion]);
 
-  // fetch latest Prerelease version (prerelease=true)
-  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
-    prerelease: true,
-  });
-
-  useEffect(() => {
-    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
-  }, [packageInfoLatestPrereleaseData?.item.version]);
-
-  const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUserQuery();
+  const latestPrereleaseVersion = useMemo(() => {
+    const ver = packageInfoLatestPrereleaseData?.item?.latestVersion;
+    if (ver && isPackagePrerelease(ver)) {
+      return ver;
+    }
+    return undefined;
+  }, [packageInfoLatestPrereleaseData?.item?.latestVersion]);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
 
   useEffect(() => {
+    if (oldPackageInstallStatus === 'installed' && packageInstallStatus === 'not_installed') {
+      setOldPackageStatus(packageInstallStatus);
+      refetchPackageInfo();
+    }
     if (packageInstallStatus === 'not_installed') {
       setOldPackageStatus(packageInstallStatus);
     }
@@ -267,10 +319,7 @@ export function Detail() {
   }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
   const isLoading =
-    packageInfoLoading ||
-    isPermissionCheckLoading ||
-    firstTimeUserLoading ||
-    !packageInfoIsFetchedAfterMount;
+    packageInfoLoading || isPermissionCheckLoading || !packageInfoIsFetchedAfterMount;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
@@ -284,6 +333,20 @@ export function Detail() {
     !HIDDEN_API_REFERENCE_PACKAGES.includes(pkgName) &&
     packageInfo &&
     hasDocumentation({ packageInfo, integration });
+
+  const { enableIntegrationInactivityAlerting } = ExperimentalFeaturesService.get();
+  const hasArchiveAlertingAssets = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
+    (ALERTING_ASSET_TYPES as string[]).includes(type)
+  );
+  const pkgInstallationInfo =
+    packageInfo && 'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+  const hasInstalledAlertingAssets = (pkgInstallationInfo?.installed_kibana ?? []).some((asset) =>
+    (ALERTING_ASSET_TYPES as string[]).includes(asset.type)
+  );
+  const showAlertingTab =
+    hasArchiveAlertingAssets ||
+    hasInstalledAlertingAssets ||
+    (isInstalled && packageInfo?.type === 'integration' && enableIntegrationInactivityAlerting);
 
   // Track install status state
   useEffect(() => {
@@ -333,6 +396,16 @@ export function Detail() {
     [packageInfo]
   );
 
+  const integrationName = integration ?? undefined;
+
+  const releaseLabel = useMemo(() => {
+    if (packageInfo && isOnlyAgentlessIntegration(packageInfo, integrationName)) {
+      const release = getAgentlessRelease(packageInfo, integrationName);
+      if (release !== undefined) return release;
+    }
+    return getPackageReleaseLabel(packageInfo?.version ?? '');
+  }, [packageInfo, integrationName]);
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="headerLeft">
@@ -364,7 +437,7 @@ export function Detail() {
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                      <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                      <h1>{wrapTitleWithDeprecated({ packageInfo, integrationInfo })}</h1>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -386,11 +459,9 @@ export function Detail() {
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
-                      {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                      {releaseLabel !== 'ga' ? (
                         <EuiFlexItem grow={false}>
-                          <HeaderReleaseBadge
-                            release={getPackageReleaseLabel(packageInfo.version)}
-                          />
+                          <HeaderReleaseBadge release={releaseLabel} />
                         </EuiFlexItem>
                       ) : null}
                     </EuiFlexGroup>
@@ -402,7 +473,15 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams, packageInfoError]
+    [
+      integrationInfo,
+      isLoading,
+      packageInfo,
+      fromIntegrationsPath,
+      queryParams,
+      packageInfoError,
+      releaseLabel,
+    ]
   );
 
   const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
@@ -419,16 +498,18 @@ export function Detail() {
         hash,
       });
 
+      const agentlessStatus = getAgentlessStatusForPackage(
+        packageInfo ?? undefined,
+        integration ?? undefined
+      );
+
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
-        isCloud,
-        isFirstTimeAgentUser,
         pkgkey,
         prerelease,
-        isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
-        isAgentlessDefault,
+        isAgentlessIntegration: agentlessStatus.isAgentless,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -459,44 +540,44 @@ export function Detail() {
       hash,
       agentPolicyIdFromContext,
       integration,
-      isCloud,
-      isFirstTimeAgentUser,
       pkgkey,
       prerelease,
-      isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       packageInfo,
-      isAgentlessDefault,
       returnAppId,
       returnPath,
       services.application,
     ]
   );
 
-  const showVersionSelect = useMemo(
-    () =>
-      prereleaseIntegrationsEnabled &&
-      latestGAVersion &&
-      latestPrereleaseVersion &&
-      latestGAVersion !== latestPrereleaseVersion &&
-      (!packageInfo?.version ||
-        packageInfo.version === latestGAVersion ||
-        packageInfo.version === latestPrereleaseVersion),
-    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
-  );
+  const installedVersion =
+    packageInfo && 'installationInfo' in packageInfo
+      ? packageInfo.installationInfo?.version
+      : undefined;
 
-  const versionOptions = useMemo(
-    () => [
-      {
-        value: latestPrereleaseVersion,
-        text: latestPrereleaseVersion,
-      },
-      {
-        value: latestGAVersion,
-        text: latestGAVersion,
-      },
-    ],
-    [latestPrereleaseVersion, latestGAVersion]
-  );
+  const versionOptions = useMemo(() => {
+    const options: Array<{ value: string; text: string }> = [];
+    if (latestPrereleaseVersion && latestPrereleaseVersion !== latestGAVersion) {
+      options.push({ value: latestPrereleaseVersion, text: latestPrereleaseVersion });
+    }
+    if (latestGAVersion) {
+      options.push({ value: latestGAVersion, text: latestGAVersion });
+    }
+    if (
+      installedVersion &&
+      installedVersion !== latestGAVersion &&
+      installedVersion !== latestPrereleaseVersion
+    ) {
+      options.push({ value: installedVersion, text: installedVersion });
+    }
+    // Include the currently viewed version if it isn't already listed (e.g. old pinned URL)
+    if (packageInfo?.version && !options.some((o) => o.value === packageInfo.version)) {
+      options.push({ value: packageInfo.version, text: packageInfo.version });
+    }
+    return options;
+  }, [latestPrereleaseVersion, latestGAVersion, installedVersion, packageInfo?.version]);
+
+  const showVersionSelect = Boolean(latestGAVersion) && versionOptions.length > 1;
 
   const versionLabel = i18n.translate('xpack.fleet.epm.versionLabel', {
     defaultMessage: 'Version',
@@ -522,7 +603,7 @@ export function Detail() {
               {
                 label: showVersionSelect ? undefined : versionLabel,
                 content: (
-                  <EuiFlexGroup gutterSize="s">
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem>
                       {showVersionSelect ? (
                         <EuiSelect
@@ -577,7 +658,7 @@ export function Detail() {
                           )}
                           <EuiFlexItem grow={false}>
                             <AddIntegrationButton
-                              userCanInstallPackages={userCanInstallPackages}
+                              disabledReason={addIntegrationDisabledReason}
                               href={getHref('add_integration_to_policy', {
                                 pkgkey,
                                 ...(integration ? { integration } : {}),
@@ -585,8 +666,10 @@ export function Detail() {
                                   ? { agentPolicyId: agentPolicyIdFromContext }
                                   : {}),
                               })}
-                              missingSecurityConfiguration={missingSecurityConfiguration}
-                              packageName={integrationInfo?.title || packageInfo.title}
+                              packageName={wrapTitleWithDeprecated({
+                                packageInfo,
+                                integrationInfo,
+                              })}
                               onClick={handleAddIntegrationPolicyClick}
                             />
                           </EuiFlexItem>
@@ -613,22 +696,21 @@ export function Detail() {
       ) : undefined,
     [
       packageInfo,
-      updateAvailable,
-      isInstalled,
-      pkgkey,
-      userCanInstallPackages,
-      getHref,
-      integration,
-      agentPolicyIdFromContext,
-      missingSecurityConfiguration,
-      integrationInfo?.title,
-      handleAddIntegrationPolicyClick,
-      onVersionChange,
       showVersionSelect,
       versionLabel,
       versionOptions,
-      handleEditIntegrationClick,
+      updateAvailable,
+      isInstalled,
       isCustomPackage,
+      handleEditIntegrationClick,
+      addIntegrationDisabledReason,
+      getHref,
+      pkgkey,
+      integration,
+      agentPolicyIdFromContext,
+      integrationInfo,
+      handleAddIntegrationPolicyClick,
+      onVersionChange,
     ]
   );
 
@@ -692,6 +774,21 @@ export function Detail() {
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
         href: getHref('integration_details_assets', pathValues),
+      });
+    }
+
+    if (isInstalled && showAlertingTab) {
+      tabs.push({
+        id: 'alerting',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packageAlertingLinkText"
+            defaultMessage="Alerting"
+          />
+        ),
+        isSelected: panel === 'alerting',
+        'data-test-subj': `tab-alerting`,
+        href: getHref('integration_details_alerting', pathValues),
       });
     }
 
@@ -771,6 +868,7 @@ export function Detail() {
     showCustomTab,
     showDocumentationTab,
     numOfDeferredInstallations,
+    showAlertingTab,
   ]);
 
   const securityCallout = missingSecurityConfiguration ? (
@@ -819,7 +917,7 @@ export function Detail() {
       `}
     >
       {integrationInfo || packageInfo ? (
-        <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
+        <Breadcrumbs packageTitle={wrapTitleWithDeprecated({ packageInfo, integrationInfo })} />
       ) : null}
       {packageInfoError ? (
         <EuiFlexGroup alignItems="flexStart">
@@ -853,10 +951,14 @@ export function Detail() {
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
               isCustomPackage={isCustomPackage}
+              integrationInfo={integrationInfo}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_alerting}>
+            <AlertingPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
             <Configs packageInfo={packageInfo} />
@@ -883,7 +985,11 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          integrationName={packageInfo?.title || 'Integration'}
+          integrationName={wrapTitleWithDeprecated({
+            packageInfo,
+            integrationInfo,
+            defaultTitle: 'Integration',
+          })}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}

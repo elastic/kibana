@@ -105,6 +105,24 @@ export interface BulkAgentAction {
 
 export type PostBulkAgentUnenrollResponse = BulkAgentAction;
 
+export interface PostRemoveCollectorRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostRemoveCollectorResponse {}
+
+export interface PostBulkRemoveCollectorsRequest {
+  body: {
+    agents: string[] | string;
+    includeInactive?: boolean;
+  };
+}
+
+export type PostBulkRemoveCollectorsResponse = BulkAgentAction;
+
 export interface PostAgentUpgradeRequest {
   params: {
     agentId: string;
@@ -366,4 +384,20 @@ export interface BulkChangeAgentPrivilegeLevelRequest {
 
 export interface BulkChangeAgentPrivilegeLevelResponse {
   actionId: string;
+}
+
+export interface PostGenerateAgentsReportRequest {
+  body: {
+    agents: string[] | string;
+    fields: string[];
+    timezone?: string;
+    sort?: {
+      field?: string;
+      direction?: 'asc' | 'desc';
+    };
+  };
+}
+
+export interface PostGenerateAgentsReportResponse {
+  url: string;
 }

@@ -22,7 +22,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { StartDependencies } from './plugin';
 import { getConfigOptions } from './utils';
 
@@ -150,9 +150,10 @@ export const LensChart = (props: {
               onClick={() => {
                 props?.setPanelActive?.(props.isESQL ? 1 : 2);
                 if (triggerOptions) {
-                  props.plugins.uiActions
-                    .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
-                    .exec(triggerOptions);
+                  props.plugins.uiActions.executeTriggerActions(
+                    'IN_APP_EMBEDDABLE_EDIT_TRIGGER',
+                    triggerOptions
+                  );
                   props?.setIsinlineEditingVisible?.(true);
                 }
               }}

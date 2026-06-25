@@ -12,6 +12,7 @@ import { type ArtifactsFixtureType } from '../fixtures/artifacts_page';
 import {
   createArtifactList,
   createPerPolicyArtifact,
+  enableEndpointExceptionPerPolicyOptIn,
   removeAllArtifacts,
 } from '../tasks/artifacts';
 import { performUserActions } from '../tasks/perform_user_actions';
@@ -52,6 +53,8 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
     indexEndpointHosts().then((indexEndpoints) => {
       endpointData = indexEndpoints;
     });
+
+    enableEndpointExceptionPerPolicyOptIn();
   });
 
   beforeEach(() => {
@@ -141,9 +144,6 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
             for (const checkResult of testData.create.checkResults) {
               cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
             }
-
-            // Title is shown after adding an item
-            cy.getByTestSubj('header-page-title').contains(testData.title);
           });
         });
 
@@ -160,7 +160,7 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
             () => {
               loginWithReadAccess();
               loadPage(`/app/security/administration/${testData.urlPath}`);
-              cy.getByTestSubj('header-page-title').contains(testData.title);
+              cy.getByTestSubj(`${testData.pagePrefix}-container`).should('be.visible');
               cy.getByTestSubj(`${testData.pagePrefix}-card-header-actions-button`).should(
                 'not.exist'
               );
@@ -176,7 +176,7 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
             () => {
               loginWithReadAccess();
               loadPage(`/app/security/administration/${testData.urlPath}`);
-              cy.getByTestSubj('header-page-title').contains(testData.title);
+              cy.getByTestSubj(`${testData.pagePrefix}-container`).should('be.visible');
               cy.getByTestSubj(`${testData.pagePrefix}-pageAddButton`).should('not.exist');
             }
           );
@@ -196,9 +196,6 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
             for (const checkResult of testData.update.checkResults) {
               cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
             }
-
-            // Title still shown after editing an item
-            cy.getByTestSubj('header-page-title').contains(testData.title);
           });
 
           it(`write - should be able to delete the existing ${testData.title} entry`, () => {

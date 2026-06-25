@@ -39,8 +39,8 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
                 >
                   subscription features
                   <span
-                    class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    class="css-1j75qc1"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
@@ -114,8 +114,8 @@ exports[`StartTrial component when trial is allowed should display for expired e
                 >
                   subscription features
                   <span
-                    class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    class="css-1j75qc1"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
@@ -189,8 +189,8 @@ exports[`StartTrial component when trial is allowed should display for expired p
                 >
                   subscription features
                   <span
-                    class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    class="css-1j75qc1"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
@@ -264,8 +264,8 @@ exports[`StartTrial component when trial is allowed should display for gold lice
                 >
                   subscription features
                   <span
-                    class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    class="css-1j75qc1"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span

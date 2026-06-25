@@ -142,7 +142,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
                   button={
                     <EuiButtonIcon
                       color={'primary'}
-                      iconType={'boxesHorizontal'}
+                      iconType={'boxesVertical'}
                       onClick={toggleOverflowPopover}
                       aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
                     />

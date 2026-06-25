@@ -11,7 +11,6 @@ import {
   dataTypes,
   getEditorAutoCompleteSuggestion,
   keywords,
-  osqueryTableNames,
 } from './osquery_highlight_rules';
 import { flatMap, uniq } from 'lodash';
 
@@ -40,7 +39,7 @@ describe('Osquery Editor', () => {
     const range = { startLineNumber: 2, endLineNumber: 2, startColumn: 2, endColumn: 2 };
 
     // @ts-expect-error TS2339: Property 'suggestions' does not exist on type 'ProviderResult '.
-    const { suggestions } = getEditorAutoCompleteSuggestion(range, value, false);
+    const { suggestions } = getEditorAutoCompleteSuggestion(range, value, false, [], {});
 
     const flatSuggestionLabels = flatMap(suggestions, (obj) => obj.label);
     expect(flatSuggestionLabels).toEqual(suggestionLabels);
@@ -51,7 +50,7 @@ describe('Osquery Editor', () => {
     const range = { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: 1 };
 
     // @ts-expect-error TS2339: Property 'suggestions' does not exist on type 'ProviderResult '.
-    const { suggestions } = getEditorAutoCompleteSuggestion(range, value, false);
+    const { suggestions } = getEditorAutoCompleteSuggestion(range, value, false, [], {});
 
     const flatSuggestionLabels = flatMap(suggestions, (obj) => obj.label);
     expect(flatSuggestionLabels).toEqual(keywordsSuggestionLabels);
@@ -60,9 +59,9 @@ describe('Osquery Editor', () => {
 
 const keywordsSuggestionLabels = keywords.map((kw) => kw.toUpperCase());
 
+// Table names are now loaded dynamically — when no tables are initialized, the list is empty
 const suggestionLabels = uniq([
   ...keywordsSuggestionLabels,
-  ...osqueryTableNames,
   ...builtinConstants,
   ...builtinFunctions,
   ...dataTypes,

@@ -98,7 +98,7 @@ export const IndexSearchPattern: React.FC = () => {
               defaultMessage: 'Use this value as the pattern',
             }
           ),
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           type: 'icon',
           onClick: async (item: { name: string }) => {
             setValue('pattern', item.name, { shouldDirty: true, shouldValidate: true });

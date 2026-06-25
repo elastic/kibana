@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { mockFlagEvaluationCounterAdd } from './feature_flags_service.test.mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import apm from 'elastic-apm-node';
 import { type Client, OpenFeature, type Provider } from '@openfeature/server-sdk';
@@ -51,7 +54,9 @@ describe('FeatureFlagsService Server', () => {
   describe('provider handling', () => {
     test('appends a provider (no async operation)', () => {
       expect.assertions(1);
-      const { setProvider } = featureFlagsService.setup();
+      const { setProvider } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       const spy = jest.spyOn(OpenFeature, 'setProviderAndWait');
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
       setProvider(fakeProvider);
@@ -59,7 +64,9 @@ describe('FeatureFlagsService Server', () => {
     });
 
     test('throws an error if called twice', () => {
-      const { setProvider } = featureFlagsService.setup();
+      const { setProvider } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
       setProvider(fakeProvider);
       expect(() => setProvider(fakeProvider)).toThrowErrorMatchingInlineSnapshot(
@@ -76,20 +83,26 @@ describe('FeatureFlagsService Server', () => {
     });
 
     test('appends context to the provider', () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       appendContext({ kind: 'multi' });
       expect(setContextSpy).toHaveBeenCalledWith({ kind: 'multi' });
     });
 
     test('appends context to the provider (start method)', () => {
-      featureFlagsService.setup();
+      featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       const { appendContext } = featureFlagsService.start();
       appendContext({ kind: 'multi' });
       expect(setContextSpy).toHaveBeenCalledWith({ kind: 'multi' });
     });
 
     test('full multi context pass-through', () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       const context = {
         kind: 'multi' as const,
         kibana: {
@@ -104,7 +117,9 @@ describe('FeatureFlagsService Server', () => {
     });
 
     test('appends to the existing context', () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       const initialContext = {
         kind: 'multi' as const,
         kibana: {
@@ -128,7 +143,9 @@ describe('FeatureFlagsService Server', () => {
     });
 
     test('converts single-contexts to multi-context', () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       appendContext({ kind: 'organization', key: 'organization-1' });
       expect(setContextSpy).toHaveBeenCalledWith({
         kind: 'multi',
@@ -139,7 +156,9 @@ describe('FeatureFlagsService Server', () => {
     });
 
     test('if no `kind` provided, it defaults to the kibana context', () => {
-      const { appendContext } = featureFlagsService.setup();
+      const { appendContext } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       appendContext({ key: 'key-1', has_data: false });
       expect(setContextSpy).toHaveBeenCalledWith({
         kind: 'multi',
@@ -157,8 +176,11 @@ describe('FeatureFlagsService Server', () => {
     let addHandlerSpy: jest.SpyInstance;
 
     beforeEach(() => {
+      mockFlagEvaluationCounterAdd.mockClear();
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
-      featureFlagsService.setup();
+      featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       startContract = featureFlagsService.start();
       apmSpy = jest.spyOn(apm, 'addLabels');
     });
@@ -167,19 +189,31 @@ describe('FeatureFlagsService Server', () => {
     test('get boolean flag', async () => {
       const value = false;
       await expect(startContract.getBooleanValue('my-flag', value)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': `${value}`,
+      });
     });
 
     test('get string flag', async () => {
       const value = 'my-default';
       await expect(startContract.getStringValue('my-flag', value)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': `${value}`,
+      });
     });
 
     test('get number flag', async () => {
       const value = 42;
       await expect(startContract.getNumberValue('my-flag', value)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': `${value}`,
+      });
     });
 
     test('observe a boolean flag', async () => {
@@ -189,7 +223,11 @@ describe('FeatureFlagsService Server', () => {
       flag$.subscribe((v) => observedValues.push(v));
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': `${value}`,
+      });
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed
@@ -215,7 +253,7 @@ describe('FeatureFlagsService Server', () => {
       flag$.subscribe((v) => observedValues.push(v));
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed
@@ -241,7 +279,7 @@ describe('FeatureFlagsService Server', () => {
       flag$.subscribe((v) => observedValues.push(v));
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed
@@ -265,7 +303,11 @@ describe('FeatureFlagsService Server', () => {
       await expect(startContract.getBooleanValue('my-overridden-flag', false)).resolves.toEqual(
         true
       );
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-overridden-flag',
+        'feature_flag.value': `true`,
+      });
       expect(getBooleanValueSpy).not.toHaveBeenCalled();
 
       // Only to prove the spy works
@@ -280,7 +322,11 @@ describe('FeatureFlagsService Server', () => {
       flag$.subscribe((v) => observedValues.push(v));
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(true);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-overridden-flag',
+        'feature_flag.value': `true`,
+      });
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed
@@ -328,7 +374,9 @@ describe('FeatureFlagsService Server', () => {
   });
 
   test('returns overrides', () => {
-    const { getOverrides } = featureFlagsService.setup();
+    const { getOverrides } = featureFlagsService.setup({
+      http: httpServiceMock.createInternalSetupContract(),
+    });
     expect(getOverrides()).toStrictEqual({
       'my-overridden-flag': true,
       'myPlugin.myOverriddenFlag': true,
@@ -336,14 +384,74 @@ describe('FeatureFlagsService Server', () => {
     });
   });
 
+  describe('counter route', () => {
+    beforeEach(() => {
+      mockFlagEvaluationCounterAdd.mockClear();
+    });
+
+    test('registers the counter route on setup', () => {
+      const http = httpServiceMock.createInternalSetupContract();
+      const router = mockRouter.create();
+      http.createRouter.mockReturnValue(router);
+
+      featureFlagsService.setup({ http });
+
+      expect(http.createRouter).toHaveBeenCalledWith('');
+      expect(router.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/internal/feature-flags/{flagName}/counter',
+          options: { access: 'internal' },
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Any authenticated user should have access to the configuration',
+            },
+            authc: {
+              enabled: true,
+            },
+          },
+        }),
+        expect.any(Function)
+      );
+    });
+
+    test('increments the counter via the route handler', () => {
+      const http = httpServiceMock.createInternalSetupContract();
+      const router = mockRouter.create();
+      http.createRouter.mockReturnValue(router);
+
+      featureFlagsService.setup({ http });
+
+      const handler = (router.post as jest.Mock).mock.calls[0][1];
+      const response = mockRouter.createResponseFactory();
+      const request = mockRouter.createKibanaRequest({
+        params: { flagName: 'my-flag' },
+        body: { value: true },
+        method: 'post',
+      });
+
+      handler({}, request, response);
+
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': 'true',
+      });
+      expect(response.accepted).toHaveBeenCalled();
+    });
+  });
+
   describe('bootstrapping helpers', () => {
     test('return empty initial feature flags if no getter registered', async () => {
-      const { getInitialFeatureFlags } = featureFlagsService.setup();
+      const { getInitialFeatureFlags } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       await expect(getInitialFeatureFlags()).resolves.toEqual({});
     });
 
     test('calls the getter when registered', async () => {
-      const { setInitialFeatureFlagsGetter, getInitialFeatureFlags } = featureFlagsService.setup();
+      const { setInitialFeatureFlagsGetter, getInitialFeatureFlags } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
       const mockGetter = jest.fn().mockResolvedValue({ myFlag: true });
       setInitialFeatureFlagsGetter(mockGetter);
       await expect(getInitialFeatureFlags()).resolves.toEqual({ myFlag: true });

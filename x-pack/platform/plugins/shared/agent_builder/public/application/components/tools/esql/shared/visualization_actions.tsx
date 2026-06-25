@@ -6,61 +6,43 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
-import type {
-  InlineEditLensEmbeddableContext,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { EditVisualizationButton, saveButtonLabel } from './edit_visualization_button';
-import { actionsContainer } from './styles';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { ActionButtonType, type ActionButton } from '@kbn/agent-builder-browser/attachments';
+import { actionsContainerStyles, visualizationActionsClassName } from './styles';
 
-interface Props {
-  onSave: () => void;
-  uiActions: UiActionsStart;
-  lensInput: TypedLensByValueInput | undefined;
-  lensLoadEvent: InlineEditLensEmbeddableContext['lensEvent'] | null;
-  setLensInput: (input: TypedLensByValueInput) => void;
-}
-
-export function VisualizationActions({
-  onSave,
-  uiActions,
-  lensInput,
-  lensLoadEvent,
-  setLensInput,
-}: Props) {
-  const { euiTheme } = useEuiTheme();
-
-  if (!lensInput) {
-    return null;
-  }
-
-  const containerCss = css(actionsContainer(euiTheme));
-  const iconCss = css({ marginLeft: '-1px' });
-
-  return (
-    <div
-      className={`visualization-button-actions ${containerCss}`}
-      data-test-subj="visualizationButtonActions"
-    >
-      <EditVisualizationButton
-        uiActions={uiActions}
-        lensInput={lensInput}
-        lensLoadEvent={lensLoadEvent}
-        onAttributesChange={(attrs) => setLensInput({ ...lensInput, attributes: attrs })}
-        onApply={onSave}
-      />
+export const renderActionButton = (button: ActionButton) => {
+  const buttonElement = (
+    <EuiToolTip content={button.label} disableScreenReaderOutput>
       <EuiButtonIcon
         display="base"
         color="text"
         size="s"
-        iconType="save"
-        aria-label={saveButtonLabel}
-        className={iconCss}
-        onClick={onSave}
+        iconType={button.icon ? button.icon : 'pencil'}
+        aria-label={button.label}
+        css={button.type === ActionButtonType.PRIMARY ? css({ marginLeft: '-1px' }) : undefined}
+        isDisabled={button.disabled}
+        onClick={button.handler}
       />
+    </EuiToolTip>
+  );
+  const tooltipContent = button.disabled ? button.disabledReason ?? button.label : button.label;
+
+  return (
+    <EuiToolTip key={button.label} content={tooltipContent} disableScreenReaderOutput>
+      {button.disabled ? <span tabIndex={0}>{buttonElement}</span> : buttonElement}
+    </EuiToolTip>
+  );
+};
+
+export const FallbackVisualizationActions = ({ buttons }: { buttons: ActionButton[] }) => {
+  return (
+    <div
+      css={actionsContainerStyles}
+      className={visualizationActionsClassName}
+      data-test-subj="visualizationButtonActions"
+    >
+      {buttons.map(renderActionButton)}
     </div>
   );
-}
+};

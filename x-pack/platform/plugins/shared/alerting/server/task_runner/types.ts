@@ -8,7 +8,6 @@
 import type {
   Logger,
   KibanaRequest,
-  IBasePath,
   ExecutionContextStart,
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
@@ -81,6 +80,7 @@ export interface RunRuleResult {
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
+  uiamApiKey?: RawRule['uiamApiKey'];
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params>;
   validatedParams: Params;
@@ -158,6 +158,7 @@ export interface RuleTypeRunnerContext {
   ruleRunMetricsStore: RuleRunMetricsStore;
   spaceId: string;
   isServerless: boolean;
+  shouldGrantUiam?: boolean;
 }
 
 export interface RuleRunnerErrorStackTraceLog {
@@ -165,12 +166,16 @@ export interface RuleRunnerErrorStackTraceLog {
   stackTrace?: string;
 }
 
+export enum ApiKeyType {
+  ES = 'es',
+  UIAM = 'uiam',
+}
+
 export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   actionsPlugin: ActionsPluginStartContract;
   alertsService: AlertsService | null;
   backfillClient: BackfillClient;
-  basePathService: IBasePath;
   cancelAlertsOnRuleTimeout: boolean;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   data: DataPluginStart;
@@ -185,6 +190,7 @@ export interface TaskRunnerContext {
   maxAlerts: number;
   ruleTypeRegistry: RuleTypeRegistry;
   rulesSettingsService: RulesSettingsService;
+  apiKeyType: ApiKeyType;
   savedObjects: SavedObjectsServiceStart;
   share: SharePluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
@@ -192,6 +198,7 @@ export interface TaskRunnerContext {
   usageCounter?: UsageCounter;
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
+  shouldGrantUiam?: boolean;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

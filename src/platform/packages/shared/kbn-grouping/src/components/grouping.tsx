@@ -60,7 +60,8 @@ export interface GroupingProps<T> {
   takeActionItems?: (
     groupFilters: Filter[],
     groupNumber: number,
-    groupBucket: GroupingBucket<T>
+    groupBucket: GroupingBucket<T>,
+    closePopover: () => void
   ) => JSX.Element | undefined;
   tracker?: (
     type: UiCounterMetricType,
@@ -153,7 +154,9 @@ const GroupingComponent = <T,>({
               multiValueFields
             );
 
-        const actionItems = takeActionItems?.(groupFilters, groupNumber, groupBucket);
+        const getActionItems: Parameters<typeof GroupStats>[0]['getActionItems'] = ({
+          closePopover,
+        }) => takeActionItems?.(groupFilters, groupNumber, groupBucket, closePopover);
 
         return (
           <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
@@ -165,7 +168,7 @@ const GroupingComponent = <T,>({
                 <GroupStats
                   bucketKey={groupKey}
                   stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
-                  actionItems={actionItems}
+                  getActionItems={getActionItems}
                   additionalActionButtons={
                     getAdditionalActionButtons &&
                     getAdditionalActionButtons(selectedGroup, groupBucket)
@@ -282,9 +285,10 @@ const GroupingComponent = <T,>({
         }
         className="eui-xScroll"
       >
-        {isLoading ? (
+        {isLoading && (
           <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
-        ) : groupCount > 0 ? (
+        )}
+        {groupCount > 0 ? (
           <span data-test-subj={`grouping-level-${groupingLevel}`}>
             {groupPanels}
             {groupCount > 0 && (
@@ -312,7 +316,7 @@ const GroupingComponent = <T,>({
             )}
           </span>
         ) : (
-          emptyComponent
+          !isLoading && emptyComponent
         )}
       </div>
     </div>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 
 import type { RuleSnooze, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -25,6 +25,11 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  GranularRulesFilter,
+  SearchRulesAggregations,
+  SearchRulesResponse,
+  SearchRulesSearchAfterItem,
+  GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
@@ -66,6 +71,7 @@ export interface FetchRulesProps {
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
   signal?: AbortSignal;
+  schedulerId?: string;
 }
 
 // Rule snooze settings map keyed by rule SO's id (not ruleId) and valued by rule snooze settings
@@ -114,8 +120,33 @@ export interface FetchRulesResponse {
   warnings?: WarningSchema[];
 }
 
+export interface FetchSearchRulesProps {
+  pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
+  fields?: string[];
+  filter?: GranularRulesFilter;
+  search?: GranularRulesSearch;
+  sort_field?: z.infer<typeof FindRulesSortField>;
+  sort_order?: z.infer<typeof SortOrder>;
+  aggregations?: SearchRulesAggregations;
+  search_after?: SearchRulesSearchAfterItem[];
+  gap_fill_statuses?: GapFillStatus[];
+  gaps_range_start?: string;
+  gaps_range_end?: string;
+  gap_auto_fill_scheduler_id?: string;
+  signal?: AbortSignal;
+}
+
+export type FetchSearchRulesResponse = SearchRulesResponse;
+
 export interface FetchRuleProps {
   id: string;
+  signal?: AbortSignal;
+}
+
+export interface FetchRuleHistoryProps {
+  ruleId: string;
+  page: number;
+  perPage: number;
   signal?: AbortSignal;
 }
 

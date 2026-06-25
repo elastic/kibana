@@ -6,8 +6,36 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+# All functional/integration test steps run Kibana from the distributable,
+# so dev-mode webpack bundles built during bootstrap are never used.
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
+# Bootstrap and artifact download are independent — run them in parallel.
+# Bootstrap installs node_modules; the download fetches the pre-built Kibana distributable.
+# To keep logs readable, the download runs in the background with its output captured
+# to a file; its log is emitted after bootstrap completes.
+download_log=$(mktemp)
+.buildkite/scripts/download_build_artifacts.sh >"$download_log" 2>&1 &
+download_pid=$!
+
+bootstrap_exit=0
+.buildkite/scripts/bootstrap.sh || bootstrap_exit=$?
+
+download_exit=0
+wait $download_pid || download_exit=$?
+
+cat "$download_log"
+rm -f "$download_log"
+
+if [[ $bootstrap_exit -ne 0 ]]; then
+  echo "Bootstrap failed with exit code $bootstrap_exit"
+  exit $bootstrap_exit
+fi
+
+if [[ $download_exit -ne 0 ]]; then
+  echo "Artifact download failed with exit code $download_exit"
+  exit $download_exit
+fi
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
 is_test_execution_step
@@ -42,4 +70,3 @@ upload_scout_cypress_events() {
     echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
   fi
 }
-

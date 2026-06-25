@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
@@ -13,6 +14,11 @@ import type {
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
+  ConversationAction,
+  AgentExecutionMode,
+  ChatEvent,
+  ExecutionStatus,
+  SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -23,15 +29,21 @@ import type {
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
+  WritableSkillsStore,
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
   SkillsService,
+  PluginsService,
   ToolManager,
+  TodoStateManager,
+  IFilesystemService,
+  IBashService,
 } from '../runner';
-import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
+import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -52,6 +64,49 @@ export interface AgentHandlerReturn {
   result: AgentResponse;
 }
 
+/**
+ * Pre-scoped executor for spawning sub-agent executions.
+ * The `request` is already bound — callers don't need to provide it.
+ */
+export interface SubAgentExecutor {
+  /** Execute a sub-agent and return the execution ID and events observable. */
+  executeSubAgent(params: {
+    agentId: string;
+    connectorId?: string;
+    capabilities?: AgentCapabilities;
+    parentExecutionId: string;
+    prompt: string;
+    abortSignal?: AbortSignal;
+  }): Promise<{
+    executionId: string;
+    events$: Observable<ChatEvent>;
+  }>;
+
+  /** Retrieve a sub-agent execution by ID. Returns undefined if not found. */
+  getExecution(executionId: string): Promise<SubAgentExecution | undefined>;
+}
+
+export interface SubAgentExecution {
+  executionId: string;
+  status: ExecutionStatus;
+  error?: SerializedExecutionError;
+  events: ChatEvent[];
+}
+
+/**
+ * Experimental features configuration for agent builder.
+ */
+export interface ExperimentalFeatures {
+  /** Whether the skills feature is enabled */
+  skills: boolean;
+  /** Whether the sub-agent execution feature is enabled */
+  subagents: boolean;
+  /** Whether the todo list tool and task-management prompt are enabled */
+  todos: boolean;
+  /** Whether the bash tool (and the just-bash runtime) is enabled */
+  bash: boolean;
+}
+
 export interface AgentHandlerContext {
   /**
    * The request that was provided when initiating that tool execution.
@@ -62,6 +117,10 @@ export interface AgentHandlerContext {
    * Id of the space associated with the request
    */
   spaceId: string;
+  /**
+   * The resolved connector ID for this execution, if any.
+   */
+  defaultConnectorId?: string;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
@@ -98,6 +157,10 @@ export interface AgentHandlerContext {
    */
   skills: SkillsService;
   /**
+   * Plugins service to resolve plugin-contributed skill IDs during execution.
+   */
+  plugins: PluginsService;
+  /**
    * Tool manager to manage active tools for the agent.
    */
   toolManager: ToolManager;
@@ -106,9 +169,18 @@ export interface AgentHandlerContext {
    */
   resultStore: WritableToolResultStore;
   /**
+   * Skills store to populate with filtered skills during execution.
+   * Backs the skills volume in the virtual filesystem.
+   */
+  skillsStore: WritableSkillsStore;
+  /**
    * Attachment state manager to manage conversation attachments during execution.
    */
   attachmentStateManager: AttachmentStateManager;
+  /**
+   * Manages the active todo list for this conversation execution.
+   */
+  todoStateManager: TodoStateManager;
   /**
    * Used to manage interruptions.
    */
@@ -126,9 +198,41 @@ export interface AgentHandlerContext {
    */
   logger: Logger;
   /**
-   * File store to access data from the agent's virtual filesystem
+   * Hooks service for agent lifecycle interception.
    */
-  filestore: IFileStore;
+  hooks: AgentBuilderHooks;
+  /**
+   * Unified virtual filesystem service.
+   */
+  filesystemService: IFilesystemService;
+  /**
+   * Bash runtime service. Present only when `experimentalFeatures.bash` is on.
+   */
+  bashService?: IBashService;
+  /**
+   * Experimental features configuration for this agent execution.
+   * Determined by the UI setting at the start of execution.
+   */
+  experimentalFeatures: ExperimentalFeatures;
+  /**
+   * The execution mode for this agent run.
+   * NOTE: atm, when 'standalone', the execution is non-interactive (HITL disabled).
+   */
+  executionMode: AgentExecutionMode;
+  /**
+   * Sub-agent executor for spawning child agent executions.
+   */
+  subAgentExecutor: SubAgentExecutor;
+  /**
+   * Optional analytics surface for emitting agent-runtime events such as
+   * SkillInvoked. Provided by the plugin when telemetry is wired.
+   */
+  analyticsService?: AgentBuilderAnalytics;
+  /**
+   * Optional tracking surface for emitting agent-runtime counters such as
+   * skill-invocation counts. Provided by the plugin when telemetry is wired.
+   */
+  trackingService?: AgentBuilderTracking;
 }
 
 /**
@@ -170,6 +274,14 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
+  /**
+   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
+   */
+  action?: ConversationAction;
+  /**
+   * The execution ID for this run. Used for sub-agent parent tracking.
+   */
+  executionId?: string;
 }
 
 export interface AgentResponse {

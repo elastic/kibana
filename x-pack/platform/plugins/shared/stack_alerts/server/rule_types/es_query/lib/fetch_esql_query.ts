@@ -16,15 +16,14 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
-import { hasStartEndParams } from '@kbn/esql-utils';
-import type { EsqlTable } from '../../../../common';
+import type { EsqlEsqlShardFailure, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { hasStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
-  alertLimit: number | undefined;
+  alertLimit: number;
   params: OnlyEsqlQueryRuleParams;
   spacePrefix: string;
   services: {
@@ -55,13 +54,9 @@ export async function fetchEsqlQuery({
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
-  let response: EsqlTable;
+  let response: EsqlQueryResponse;
   try {
-    response = await esClient.transport.request<EsqlTable>({
-      method: 'POST',
-      path: '/_query',
-      body: query,
-    });
+    response = await esClient.esql.query(query);
   } catch (e) {
     if (e.message?.includes('verification_exception')) {
       throw createTaskRunError(e, TaskErrorSource.USER);
@@ -108,11 +103,11 @@ export async function fetchEsqlQuery({
 
 export const getEsqlQuery = (
   params: OnlyEsqlQueryRuleParams,
-  alertLimit: number | undefined,
+  alertLimit: number,
   dateStart: string,
   dateEnd: string
 ) => {
-  const rangeFilter: unknown[] = [
+  const rangeFilter = [
     {
       range: {
         [params.timeField]: {
@@ -125,7 +120,7 @@ export const getEsqlQuery = (
   ];
 
   const query = {
-    query: alertLimit ? `${params.esqlQuery.esql} | limit ${alertLimit}` : params.esqlQuery.esql,
+    query: appendLimitToQuery(params.esqlQuery.esql, alertLimit),
     filter: {
       bool: {
         filter: rangeFilter,
@@ -158,7 +153,7 @@ export function generateLink(
   return redirectUrl;
 }
 
-function getPartialResultsWarning(response: EsqlTable) {
+function getPartialResultsWarning(response: EsqlQueryResponse) {
   const clusters = response?._clusters?.details ?? {};
   const shardFailures: EsqlEsqlShardFailure[] = [];
   for (const cluster of Object.keys(clusters)) {

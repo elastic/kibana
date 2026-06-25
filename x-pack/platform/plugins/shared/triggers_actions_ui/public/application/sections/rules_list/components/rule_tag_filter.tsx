@@ -81,7 +81,7 @@ const RuleTagFilterPopoverButton = memo(
     return (
       <EuiFilterButton
         data-test-subj={buttonDataTestSubj}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isSelected}
         hasActiveFilters={selectedTags.length > 0}
         numActiveFilters={selectedTags.length}
@@ -282,6 +282,10 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
         data-test-subj={dataTestSubj}
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.ruleTagFilterPopoverAriaLabel',
+          { defaultMessage: 'Filter by tags' }
+        )}
         button={
           <RuleTagFilterPopoverButton
             isSelected={isPopoverOpen}

@@ -7,75 +7,123 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { StoryObj } from '@storybook/react';
+import React, { useState } from 'react';
+import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLEditor } from '../esql_editor';
-import type { ESQLEditorProps } from '../types';
+import type { ESQLEditorProps } from '../esql_editor';
+import { EditorServicesProvider } from './mock_services';
 
-const Template = (args: ESQLEditorProps) => (
-  <KibanaContextProvider
-    services={{
-      settings: { client: { get: () => {} } },
-      uiSettings: { get: () => {} },
-      data: { query: { timefilter: { timefilter: { getTime: () => {} } } } },
-    }}
-  >
-    <ESQLEditor {...args} />
-  </KibanaContextProvider>
-);
+// Controlled story component — maintains query state locally and delegates
+// to the fn() spies in args so changes are visible in the Actions panel.
+const ControlledEditor = (props: ESQLEditorProps) => {
+  const [query, setQuery] = useState(props.query);
 
-export default {
-  title: 'Text based languages editor',
+  return (
+    <EditorServicesProvider>
+      <ESQLEditor
+        {...props}
+        query={query}
+        onTextLangQueryChange={(q: AggregateQuery) => {
+          setQuery(q);
+          props.onTextLangQueryChange(q);
+        }}
+        onTextLangQuerySubmit={props.onTextLangQuerySubmit}
+      />
+    </EditorServicesProvider>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Stories meta
+// ---------------------------------------------------------------------------
+
+const meta: Meta<typeof ESQLEditor> = {
+  title: 'ES|QL Editor',
   component: ESQLEditor,
-};
-
-export const ExpandedMode: StoryObj<typeof ESQLEditor> = {
-  render: Template,
-  name: 'expanded mode',
-
   args: {
-    query: {
-      esql: 'from dataview | keep field1, field2',
-    },
+    onTextLangQueryChange: fn(),
+    onTextLangQuerySubmit: fn(),
   },
-
-  argTypes: {
-    onTextLangQueryChange: {
-      action: 'changed',
-    },
-
-    onTextLangQuerySubmit: {
-      action: 'submitted',
-    },
+  decorators: [
+    (Story) => (
+      <div style={{ padding: '24px' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  parameters: {
+    layout: 'fullscreen',
+    controls: { sort: 'alpha' },
   },
 };
 
-export const WithErrors: StoryObj<typeof ESQLEditor> = {
-  render: Template,
-  name: 'with errors',
+export default meta;
+type Story = StoryObj<typeof ESQLEditor>;
 
+// ---------------------------------------------------------------------------
+// Stories
+// ---------------------------------------------------------------------------
+
+export const Default: Story = {
+  name: 'Default',
+  render: (args) => <ControlledEditor {...args} />,
   args: {
-    query: {
-      esql: 'from dataview | keep field1, field2',
-    },
+    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    hideQueryHistory: false,
+    disableAutoFocus: true,
+  },
+};
 
-    dataTestSubj: 'test-id',
+export const InlineMode: Story = {
+  name: 'Inline mode',
+  render: (args) => <ControlledEditor {...args} />,
+  args: {
+    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    editorIsInline: true,
+    hideQueryHistory: true,
+    disableAutoFocus: true,
+  },
+};
 
+export const WithErrors: Story = {
+  name: 'With errors',
+  render: (args) => <ControlledEditor {...args} />,
+  args: {
+    query: { esql: 'FROM kibana_sample_data_logs | KEEP unknown_field' },
+    hideQueryHistory: true,
+    disableAutoFocus: true,
     errors: [
       new Error(
-        '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+        'verification_exception - Found 1 problem\nline 1:39: Unknown column [unknown_field]'
       ),
     ],
   },
+};
 
-  argTypes: {
-    onTextLangQueryChange: {
-      action: 'changed',
+export const WithWarning: Story = {
+  name: 'With warning',
+  render: (args) => <ControlledEditor {...args} />,
+  args: {
+    query: {
+      esql: 'FROM kibana_sample_data_logs | EVAL ratio = bytes / 0 | KEEP @timestamp, ratio | LIMIT 10',
     },
+    hideQueryHistory: true,
+    disableAutoFocus: true,
+    warning:
+      'Line 1:43: evaluation of [bytes / 0] failed, treating result as null. Only first 20 failures recorded.',
+  },
+};
 
-    onTextLangQuerySubmit: {
-      action: 'submitted',
-    },
+export const WithHistoryOpen: Story = {
+  name: 'With history open',
+  render: (args) => <ControlledEditor {...args} />,
+  args: {
+    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    editorIsInline: true,
+    hideQueryHistory: false,
+    disableAutoFocus: true,
+    initialState: { isHistoryOpen: true },
   },
 };

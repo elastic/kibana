@@ -6,6 +6,7 @@
  */
 
 import type { BaseFeature } from '@kbn/streams-schema';
+import { codeAnalysisGenerator } from './code_analysis';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 import { errorLogsGenerator } from './error_logs';
 import { logPatternsGenerator } from './log_patterns';
@@ -45,6 +46,7 @@ const generators: ComputedFeatureGenerator[] = [
   logSamplesGenerator,
   logPatternsGenerator,
   errorLogsGenerator,
+  codeAnalysisGenerator,
 ];
 
 generators.forEach((generator) => registry.register(generator));
@@ -65,10 +67,12 @@ export function getComputedFeatureInstructions(): string {
  */
 function toComputedFeature(
   generator: ComputedFeatureGenerator,
-  value: Record<string, unknown>
+  value: Record<string, unknown>,
+  streamName: string
 ): BaseFeature {
   return {
     id: generator.type,
+    stream_name: streamName,
     description: generator.description,
     type: generator.type,
     properties: value,
@@ -78,14 +82,22 @@ function toComputedFeature(
 
 /**
  * Generates all computed features by running all registered generators in parallel.
+ *
+ * Generators that return `undefined` (e.g. an externally-backed generator whose
+ * provider is absent or that found no match) are skipped.
  */
 export async function generateAllComputedFeatures(
   options: ComputedFeatureGeneratorOptions
 ): Promise<BaseFeature[]> {
-  return Promise.all(
+  const results = await Promise.all(
     registry.getAll().map(async (generator) => {
       const value = await generator.generate(options);
-      return toComputedFeature(generator, value);
+      if (value === undefined) {
+        return undefined;
+      }
+      return toComputedFeature(generator, value, options.stream.name);
     })
   );
+
+  return results.filter((feature): feature is BaseFeature => feature !== undefined);
 }

@@ -25,8 +25,9 @@ import type {
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
 import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
-import { installationStatuses } from '../../../../../../../common/constants';
+import { dataTypes, installationStatuses } from '../../../../../../../common/constants';
 import type {
+  DeprecationInfo,
   EpmPackageInstallStatus,
   InstallFailedAttempt,
   IntegrationCardReleaseLabel,
@@ -55,6 +56,8 @@ export interface IntegrationCardItem {
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
+  isDeprecated?: boolean;
+  deprecationInfo?: DeprecationInfo;
   maxCardHeight?: number;
   minCardHeight?: number;
   name: string;
@@ -73,6 +76,8 @@ export interface IntegrationCardItem {
   url: string;
   version: string;
   type?: string;
+  supportsAgentless?: boolean;
+  signalTypes?: string[];
 }
 
 export const mapToCard = ({
@@ -98,6 +103,9 @@ export const mapToCard = ({
 
   let isUpdateAvailable = false;
   let isReauthorizationRequired = false;
+  let isDeprecated = false;
+  let deprecationInfo: DeprecationInfo | undefined;
+
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
@@ -109,6 +117,20 @@ export const mapToCard = ({
       isUpdateAvailable = isPackageUpdatable(item);
 
       isReauthorizationRequired = hasDeferredInstallations(item);
+    }
+
+    // Extract deprecation information
+    // officially deprecated items have a `deprecated` field
+    if ('deprecated' in item && item.deprecated) {
+      isDeprecated = true;
+      deprecationInfo = item.deprecated;
+    } else if (
+      // bwc: unofficially deprecated items are marked as such in their title, description or name
+      (item.title && /deprecated/i.test(item.title)) ||
+      (item.description && /deprecated/i.test(item.description)) ||
+      ('name' in item && item.name && /deprecated/i.test(item.name))
+    ) {
+      isDeprecated = true;
     }
 
     const url = getHref('integration_details_overview', {
@@ -142,6 +164,8 @@ export const mapToCard = ({
     isReauthorizationRequired,
     isUnverified,
     isUpdateAvailable,
+    isDeprecated,
+    deprecationInfo,
     extraLabelsBadges,
   };
 
@@ -149,8 +173,35 @@ export const mapToCard = ({
     cardResult.installStatus = item.installationInfo?.install_status;
   }
 
+  if ('supportsAgentless' in item && item.supportsAgentless) {
+    cardResult.supportsAgentless = true;
+  }
+
+  const signalTypes = getSignalTypes(item);
+  if (signalTypes.length > 0) {
+    cardResult.signalTypes = signalTypes;
+  }
+
   return cardResult;
 };
+
+// Derive the signal types (logs/metrics/traces) a card matches so the browse-page
+// signal filter can include it. Integration packages expose their signal types via
+// `data_streams`. Input packages have no concrete data streams, and the EPR search
+// response doesn't carry their policy template `type`/`dynamic_signal_types`, so the
+// signal type isn't knowable from the browse list. Since input packages choose the
+// data stream type at configuration time, match them against every signal filter.
+function getSignalTypes(item: CustomIntegration | PackageListItem): string[] {
+  if ('type' in item && item.type === 'input') {
+    return Object.values(dataTypes);
+  }
+
+  if ('data_streams' in item && Array.isArray(item.data_streams)) {
+    return [...new Set(item.data_streams.map((ds) => ds.type))];
+  }
+
+  return [];
+}
 
 export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
   const extraLabelsBadges: React.ReactNode[] = [];

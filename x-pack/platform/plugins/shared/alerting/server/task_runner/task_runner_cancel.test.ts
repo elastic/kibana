@@ -23,7 +23,6 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
-  httpServiceMock,
   executionContextServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
@@ -58,6 +57,7 @@ import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
@@ -134,7 +134,6 @@ describe('Task Runner Cancel', () => {
     actionsPlugin: actionsMock.createStart(),
     alertsService,
     backfillClient,
-    basePathService: httpServiceMock.createBasePath(),
     cancelAlertsOnRuleTimeout: true,
     connectorAdapterRegistry,
     data: dataPlugin,
@@ -156,6 +155,7 @@ describe('Task Runner Cancel', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: ApiKeyType.ES,
   };
 
   beforeEach(() => {
@@ -277,8 +277,8 @@ describe('Task Runner Cancel', () => {
                   metrics: {
                     duration: 0,
                     gap_duration_s: null,
-                    // TODO: uncomment after intermidiate release
-                    // gap_range: null,
+                    gap_range: null,
+                    gap_reason: null,
                     total_alerts_created: null,
                     total_alerts_detected: null,
                     total_indexing_duration_ms: null,

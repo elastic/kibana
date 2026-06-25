@@ -99,6 +99,9 @@ export {
   DisableAttackDiscoverySchedulesResponse,
   EnableAttackDiscoverySchedulesRequestParams,
   EnableAttackDiscoverySchedulesResponse,
+  BulkActionAttackDiscoverySchedulesError,
+  BulkActionAttackDiscoverySchedulesRequestBody,
+  BulkActionAttackDiscoverySchedulesResponse,
   GetAttackDiscoverySchedulesRequestParams,
   GetAttackDiscoverySchedulesResponse,
   UpdateAttackDiscoverySchedulesRequestParams,
@@ -133,7 +136,7 @@ export * from './conversations/find_conversations_route.gen';
 export * from './actions_connector/post_actions_connector_execute_route.gen';
 
 // Knowledge Base Schemas
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import {
   CreateKnowledgeBaseRequestParams as CreateKnowledgeBaseRequestParamsBase,
   ReadKnowledgeBaseRequestParams as ReadKnowledgeBaseRequestParamsBase,

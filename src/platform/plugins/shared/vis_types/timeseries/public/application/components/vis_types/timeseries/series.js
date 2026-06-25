@@ -62,8 +62,8 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
     defaultMessage: 'Toggle series editor',
   });
 
-  let caretIcon = 'arrowDown';
-  if (!visible) caretIcon = 'arrowRight';
+  let caretIcon = 'chevronSingleDown';
+  if (!visible) caretIcon = 'chevronSingleRight';
 
   let body = null;
   if (visible) {

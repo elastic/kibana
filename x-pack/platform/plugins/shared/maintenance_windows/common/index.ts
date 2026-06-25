@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MaintenanceWindow } from '../server/application/types';
+
 export type {
   MaintenanceWindowModificationMetadata,
   DateRange,
@@ -33,6 +35,8 @@ export {
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
 } from './constants';
 
+export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'>;
+
 export {
   getScopedQueryErrorMessage,
   isScopedQueryError,
@@ -46,6 +50,13 @@ export type { MaintenanceWindowResponse } from '../server/routes/schemas/mainten
 export type { FindMaintenanceWindowsResponse } from '../server/routes/schemas/maintenance_window/internal/request/find';
 export type { CreateMaintenanceWindowRequestBody } from '../server/routes/schemas/maintenance_window/internal/request/create';
 export type { UpdateMaintenanceWindowRequestBody } from '../server/routes/schemas/maintenance_window/internal/request/update';
+
+export type {
+  CreateMaintenanceWindowRequestBody as ExternalCreateMaintenanceWindowRequestBody,
+  CreateMaintenanceWindowResponse as ExternalCreateMaintenanceWindowResponse,
+} from '../server/routes/schemas/maintenance_window/external/request/create';
+export type { MaintenanceWindowResponse as ExternalMaintenanceWindowResponse } from '../server/routes/schemas/maintenance_window/external/response';
+export type { FindMaintenanceWindowsResponse as ExternalFindMaintenanceWindowsResponse } from '../server/routes/schemas/maintenance_window/external/request/find';
 
 // Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;

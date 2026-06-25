@@ -61,7 +61,7 @@ import {
   TIMELINE_CONTEXT_MENU_BTN,
   TOOLTIP,
 } from '../screens/alerts';
-import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
+import { REFRESH_BUTTON } from '../screens/security_header';
 import {
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
@@ -165,6 +165,11 @@ export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).first().should('be.visible');
   // Cypress is flaky on clicking this button despite production not having that issue
   cy.get(EXPAND_ALERT_BTN).first().trigger('click');
+};
+
+export const expandBulkActions = () => {
+  cy.contains(SELECTED_ALERTS, /Selected \d+ alerts/);
+  cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible').click();
 };
 
 export const hideMessageTooltip = () => {
@@ -350,8 +355,8 @@ export const openAlertsFieldBrowser = () => {
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
+  waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
-    waitForAlerts();
     cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
     cy.get('@checkbox').should('be.checked');
   }
@@ -451,7 +456,6 @@ export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 

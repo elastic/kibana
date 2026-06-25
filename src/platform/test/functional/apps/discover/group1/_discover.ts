@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group1/_discover.ts
+
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -15,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
@@ -37,10 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
@@ -252,7 +249,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.awaitKibanaChrome();
         await discover.waitUntilTabIsLoaded();
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.be('~ 15 minutes ago');
+        expect(
+          time.start === '~ 15 minutes ago' ||
+            time.start === 'now-15m' ||
+            time.start === 'now-15m/m'
+        ).to.be(true);
         expect(time.end).to.be('now');
       });
     });
@@ -295,15 +296,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const getRequestTimestamp = async () => {
           // check inspector panel request stats for timestamp
-          await inspector.open();
+          await discover.openInspectorFromTabMenu();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
           );
+          await inspector.close();
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
-          await inspector.close();
           return requestStatsRow[0][1];
         };
 

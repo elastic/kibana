@@ -9,12 +9,13 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-
+import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import type { DurationFieldCandidatesResponse } from './queries/fetch_duration_field_candidates';
@@ -29,6 +30,8 @@ import type { PValuesResponse } from './queries/fetch_p_values';
 import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
+import type { CorrelationsResponse } from '../../../common/correlations/types';
+import { fetchCorrelations } from './queries/fetch_correlations';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
@@ -274,6 +277,7 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
       durationMinOverride: durationMin,
       durationMaxOverride: durationMax,
       fieldValuePairs,
+      entityType: 'transaction',
     });
   },
 });
@@ -334,6 +338,125 @@ const pValuesTransactionsRoute = createApmServerRoute({
       durationMin,
       durationMax,
       fieldCandidates,
+      entityType: 'transaction',
+    });
+  },
+});
+
+const entityTypeRt = t.union([t.literal('transaction'), t.literal('exit_span')]);
+
+const metricRt = t.union([
+  t.literal('latency'),
+  t.literal('failure_rate'),
+  t.literal('throughput'),
+  t.literal('infra_metrics'),
+]);
+
+/**
+ * Unified correlations API
+ *
+ * To run exit span latency correlations, call:
+ *
+ *  - `POST /internal/apm/correlations`
+ *  - with `entityType` set to `'exit_span'`
+ *  - and `metric` set to `'latency'`
+ *
+ * Example request body:
+ *
+ * {
+ *   "entityType": "exit_span",
+ *   "metric": "latency",
+ *   "start": "<from>",
+ *   "end": "<to>",
+ *   "kuery": "<optional KQL>",
+ *   "percentileThreshold": 95,
+ * }
+ *
+ * When `scope` is omitted, the API defaults to transaction-based correlations.
+ */
+const unifiedCorrelationsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/correlations',
+  params: t.type({
+    body: t.intersection([
+      t.type({
+        entityType: entityTypeRt,
+        metric: metricRt,
+      }),
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+        fieldCandidates: t.array(t.string),
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
+        percentileThreshold: toNumberRt,
+        includeHistogram: toBooleanRt,
+        kuery: t.string,
+      }),
+      t.partial(environmentRt.props),
+      rangeRt,
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<CorrelationsResponse> => {
+    const { context } = resources;
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
+    const apmEventClient = await getApmEventClient(resources);
+
+    const {
+      body: {
+        entityType,
+        metric,
+        start,
+        end,
+        kuery = '',
+        serviceName,
+        transactionName,
+        transactionType,
+        fieldCandidates,
+        durationMin,
+        durationMax,
+        percentileThreshold,
+        includeHistogram = false,
+        environment = ENVIRONMENT_ALL_VALUE,
+      },
+    } = resources.params;
+
+    const scope: 'transactions' | 'exitSpans' =
+      entityType === 'exit_span' ? 'exitSpans' : 'transactions';
+
+    const scopeFilter =
+      scope === 'exitSpans' ? [{ exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } }] : [];
+
+    const query = {
+      bool: {
+        filter: [
+          ...scopeFilter,
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(TRANSACTION_TYPE, transactionType),
+          ...termQuery(TRANSACTION_NAME, transactionName),
+        ] as object[],
+      },
+    };
+
+    return fetchCorrelations({
+      apmEventClient,
+      metric,
+      scope,
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+      fieldCandidates,
+      percentileThreshold,
+      durationMin,
+      durationMax,
+      includeHistogram,
     });
   },
 });
@@ -344,4 +467,5 @@ export const correlationsRouteRepository = {
   ...fieldValuePairsTransactionsRoute,
   ...significantCorrelationsTransactionsRoute,
   ...pValuesTransactionsRoute,
+  ...unifiedCorrelationsRoute,
 };

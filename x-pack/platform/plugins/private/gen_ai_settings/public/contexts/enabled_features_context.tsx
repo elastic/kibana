@@ -10,6 +10,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { Space } from '@kbn/spaces-plugin/public';
+import { ANONYMIZATION_FEATURE_ACTIVE } from '@kbn/anonymization-common';
 import { useKibana } from '../hooks/use_kibana';
 import type { GenAiSettingsConfigType } from '../../common/config';
 
@@ -19,6 +20,7 @@ export interface EnabledFeatures {
   showAiBreadcrumb: boolean;
   showAiAssistantsVisibilitySetting: boolean;
   showChatExperienceSetting: boolean;
+  showAnonymizationProfilesSection: boolean;
 }
 
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
@@ -27,6 +29,7 @@ export const EnabledFeaturesContext = createContext<EnabledFeatures>({
   showAiBreadcrumb: true,
   showAiAssistantsVisibilitySetting: true,
   showChatExperienceSetting: true,
+  showAnonymizationProfilesSection: false,
 });
 
 interface Props {
@@ -64,12 +67,15 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
     const showChatExperienceSetting =
       config.showChatExperienceSetting === false ? false : hasAgentAndAnyAssistant;
 
+    const showAnonymizationProfilesSection = ANONYMIZATION_FEATURE_ACTIVE;
+
     return {
       showSpacesIntegration: config.showSpacesIntegration,
       showAiBreadcrumb: config.showAiBreadcrumb,
       isPermissionsBased: isSolutionView,
       showAiAssistantsVisibilitySetting,
       showChatExperienceSetting,
+      showAnonymizationProfilesSection,
     };
   }, [config, activeSpace, capabilities]);
 

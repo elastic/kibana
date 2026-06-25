@@ -54,16 +54,17 @@ describe('GET /spaces/space', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup({
-      basePath: httpService.basePath,
-    });
+    service.setup();
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start(
+      coreStart,
+      featuresPluginMock.createStart(),
+      undefined
+    );
 
     const spacesServiceStart = service.start({
-      basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
 
@@ -121,7 +122,7 @@ describe('GET /spaces/space', () => {
             expect(response.payload).toEqual(spaces);
           } else {
             expect(() => queryParamsValidation.validate(request.query)).toThrowError(
-              '[include_authorized_purposes]: expected value to equal [false]'
+              'include_authorized_purposes can only be false when purpose is specified'
             );
           }
         });

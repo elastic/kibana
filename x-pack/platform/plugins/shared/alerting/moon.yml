@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/alerting-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/alerting-plugin'
+  title: '@kbn/alerting-plugin'
   description: Moon project for @kbn/alerting-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/alerting
+  sourceRoot: x-pack/platform/plugins/shared/alerting
 dependsOn:
   - '@kbn/core'
   - '@kbn/actions-plugin'
@@ -30,6 +29,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-utils-plugin'
+  - '@kbn/uiam-api-keys-provisioning-status'
   - '@kbn/utility-types'
   - '@kbn/config-schema'
   - '@kbn/data-plugin'
@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/safer-lodash-set'
   - '@kbn/alerting-types'
+  - '@kbn/change-history'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/rrule'
@@ -67,6 +68,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-http-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/zod'
   - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-security-server-mocks'
@@ -81,6 +83,16 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
   - '@kbn/expect'
+  - '@kbn/core-feature-flags-server-mocks'
+  - '@kbn/core-feature-flags-server'
+  - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-saved-objects-server-mocks'
+  - '@kbn/scout'
+  - '@kbn/encrypted-saved-objects-shared'
+  - '@kbn/core-analytics-server-mocks'
+  - '@kbn/cps-server-utils'
+  - '@kbn/cps-utils'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
@@ -93,17 +105,8 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

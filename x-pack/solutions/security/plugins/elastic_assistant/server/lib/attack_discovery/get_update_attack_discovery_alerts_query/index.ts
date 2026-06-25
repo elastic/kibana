@@ -15,8 +15,7 @@ import {
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-
-import { ALERT_ATTACK_DISCOVERY_USERS } from '../schedules/fields';
+import { ALERT_ATTACK_DISCOVERY_USERS } from '@kbn/elastic-assistant-common';
 
 export const getUpdateAttackDiscoveryAlertsQuery = ({
   authenticatedUser,

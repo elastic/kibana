@@ -6,22 +6,23 @@
  */
 
 import React from 'react';
-import type { Store, AnyAction } from 'redux';
+import type { AnyAction, Store } from 'redux';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
-import { createMemoryHistory } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
+import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { MockResolver } from './mock_resolver';
-import type { DataAccessLayer, SpyMiddleware, SideEffectSimulator, TimeFilters } from '../../types';
+import type { DataAccessLayer, SideEffectSimulator, SpyMiddleware, TimeFilters } from '../../types';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 import { uiSetting } from '../../mocks/ui_setting';
 import { EMPTY_RESOLVER } from '../../store/helpers';
 import type { State } from '../../../common/store/types';
 import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createResolver } from '../../store/actions';
+
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
  */
@@ -81,8 +82,7 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
-    isSplitPanel,
-    showPanelOnClick,
+    useLegacyExpandableFlyout = false,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -100,11 +100,10 @@ export class Simulator {
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
     databaseDocumentID: string;
-    history?: HistoryPackageHistoryInterface<never>;
+    history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
-    isSplitPanel?: boolean;
-    showPanelOnClick?: () => void;
+    useLegacyExpandableFlyout?: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -133,9 +132,7 @@ export class Simulator {
       [resolverMiddlewareFactory(dataAccessLayer), this.spyMiddleware.middleware]
     );
 
-    // If needed, create a fake 'history' instance.
-    // Resolver will use to read and write query string values.
-    this.history = history ?? createMemoryHistory();
+    this.history = history;
 
     // Used for `KibanaContextProvider`
     const coreStart = coreMock.createStart();
@@ -156,8 +153,8 @@ export class Simulator {
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
-        isSplitPanel={isSplitPanel}
-        showPanelOnClick={showPanelOnClick}
+        useLegacyExpandableFlyout={useLegacyExpandableFlyout}
+        renderCellActions={cellActionRenderer}
       />
     );
   }
@@ -166,6 +163,7 @@ export class Simulator {
    * Unmount the Resolver component. Use this to test what happens when code that uses Resolver unmounts it.
    */
   public unmount(): void {
+    this.unmounted = true;
     this.wrapper.unmount();
   }
 
@@ -230,19 +228,42 @@ export class Simulator {
   }
 
   /**
+   * Whether `unmount()` has been called. Used to guard against setState/update calls on a
+   * detached enzyme wrapper, which throw and would leave the Promise in `map()` permanently
+   * unresolved.
+   */
+  private unmounted = false;
+
+  /**
    * EUI uses a component called `AutoSizer` that won't render its children unless it has sufficient size.
    * This forces any `AutoSizer` instances to have a large size.
    */
   private forceAutoSizerOpen() {
-    this.wrapper
-      .find('AutoSizer')
-      .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+    if (this.unmounted) return;
+    try {
+      this.wrapper
+        .find('AutoSizer')
+        .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+    } catch {
+      // swallow errors on stale/unmounted wrappers
+    }
   }
 
   /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
    * After 10 times, quit.
    * Use this to continually check a value. See `toYieldEqualTo`.
+   *
+   * Each iteration waits for a `setTimeout(0)` callback that calls
+   * `forceAutoSizerOpen()` and `wrapper.update()`. These are wrapped in a
+   * try-catch so that a stale or mid-unmount wrapper cannot leave the
+   * returned Promise unresolved and cause a `beforeEach` hook to time out.
+   *
+   * When the consumer breaks from the iteration early (e.g., `toYieldEqualTo`
+   * finds a match and exits its `for await...of` loop), the generator is
+   * terminated at the `yield` point via `generator.return()`. Because the
+   * termination happens before the code after `yield` runs, no `setTimeout`
+   * is registered and no cleanup is required.
    */
   public async *map<R>(mapper: (() => Promise<R>) | (() => R)): AsyncIterable<R> {
     let timeoutCount = 0;
@@ -251,9 +272,14 @@ export class Simulator {
       yield mapper();
       await new Promise<void>((resolve) => {
         setTimeout(() => {
-          this.forceAutoSizerOpen();
-          this.wrapper.update();
-          resolve();
+          try {
+            if (!this.unmounted) {
+              this.forceAutoSizerOpen();
+              this.wrapper.update();
+            }
+          } finally {
+            resolve();
+          }
         }, 0);
       });
     }

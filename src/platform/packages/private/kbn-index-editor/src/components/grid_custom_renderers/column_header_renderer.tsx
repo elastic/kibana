@@ -54,8 +54,8 @@ export const getColumnHeaderRenderer = (
     displayHeaderCellProps: { [COLUMN_INDEX_PROP]: columnIndex } as HTMLAttributes<HTMLDivElement>,
     actions: {
       showHide: false,
-      showSortAsc: false,
-      showSortDesc: false,
+      showSortAsc: isSavedColumn && !isUnsupportedESQLType,
+      showSortDesc: isSavedColumn && !isUnsupportedESQLType,
       showMoveLeft: false,
       showMoveRight: false,
       additional: !isSavedColumn
@@ -127,7 +127,7 @@ const ColumnHeader = ({
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
     <EuiFlexGroup alignItems="center" gutterSize="xs" wrap={false}>
-      <EuiIcon type="plus" />
+      <EuiIcon type="plus" aria-hidden={true} />
       <FormattedMessage
         id="indexEditor.flyout.grid.columnHeader.add"
         defaultMessage="Add a field…"

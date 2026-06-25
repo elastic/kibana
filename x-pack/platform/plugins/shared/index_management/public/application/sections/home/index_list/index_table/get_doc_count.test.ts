@@ -133,6 +133,42 @@ describe('docCountApi', () => {
     sub.unsubscribe();
   });
 
+  it('replays the latest accumulated map to a late subscriber without issuing a new request', async () => {
+    const httpSetup = {
+      post: jest.fn().mockResolvedValue({ 'index-a': 42 }),
+    } as any;
+
+    const api = docCountApi(httpSetup);
+
+    // Early subscriber triggers the first batch.
+    const earlyEmissions: Array<Record<string, any>> = [];
+    const earlySub = api.getObservable().subscribe((v) => earlyEmissions.push(v));
+
+    api.getByName('index-a');
+    jest.advanceTimersByTime(100);
+    await flushPromises();
+
+    expect(httpSetup.post).toHaveBeenCalledTimes(1);
+    expect(earlyEmissions[earlyEmissions.length - 1]).toEqual({
+      'index-a': { status: RequestResultType.Success, count: 42 },
+    });
+
+    // Late subscriber attaches after the first emission has already occurred.
+    const lateEmissions: Array<Record<string, any>> = [];
+    const lateSub = api.getObservable().subscribe((v) => lateEmissions.push(v));
+
+    // shareReplay must replay the buffered state synchronously — no timers or promises needed.
+    expect(lateEmissions).toEqual([
+      { 'index-a': { status: RequestResultType.Success, count: 42 } },
+    ]);
+
+    // No additional HTTP request should have been made.
+    expect(httpSetup.post).toHaveBeenCalledTimes(1);
+
+    earlySub.unsubscribe();
+    lateSub.unsubscribe();
+  });
+
   it('does not emit error results for an aborted in-flight request', async () => {
     const d = deferred<Record<string, number>>();
     const httpSetup = {

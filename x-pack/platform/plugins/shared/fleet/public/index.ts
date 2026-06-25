@@ -55,8 +55,9 @@ export type {
   PackagePolicyCreateExtension,
   PackagePolicyCreateExtensionComponent,
   PackagePolicyCreateExtensionComponentProps,
-  PackagePolicyCreateMultiStepExtension,
-  PackagePolicyCreateMultiStepExtensionComponent,
+  PackagePolicyCreateBottomExtension,
+  PackagePolicyCreateBottomExtensionComponent,
+  PackagePolicyCreateBottomExtensionComponentProps,
   PackagePolicyEditExtension,
   PackagePolicyEditExtensionComponent,
   PackagePolicyEditExtensionComponentProps,
@@ -124,3 +125,24 @@ export const LazyCloudConnectorSetup = lazy(() =>
   }))
 );
 export type { CloudConnectorSetupProps } from './components/cloud_connector';
+export { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from './components/cloud_connector/constants';
+
+// AWS Connect Setup - auth method picker (Identity Federation + Static keys + Temporary keys) for external plugins
+export const LazyAwsConnectSetup = lazy(() =>
+  import('./components/cloud_connector').then((module) => ({
+    default: module.AwsConnectSetup,
+  }))
+);
+export type {
+  AwsConnectSetupProps,
+  AwsAuthType,
+  AwsStaticKeyCredentials,
+  AwsTemporaryKeyCredentials,
+  CloudSetupForCloudConnector,
+} from './components/cloud_connector';
+export {
+  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
+} from './components/cloud_connector/aws_connect_setup/test_subjects';

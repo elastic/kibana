@@ -14,6 +14,7 @@ import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
+import { registerCasesSteps, registerCasesWorkflowTriggers } from './workflows';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import { useIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
@@ -28,9 +29,10 @@ import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import { registerCaseFileKinds } from './files';
-import { registerInternalAttachments } from './internal_attachments';
-import { registerActions } from './components/visualizations/actions';
+import { registerInternalAttachments } from './components/attachments';
+import { registerActions } from './components/attachments/lens/actions';
 import type {
   CasesPublicSetup,
   CasesPublicStart,
@@ -39,7 +41,6 @@ import type {
 } from './types';
 import { registerSystemActions } from './components/system_actions';
 import { registerAnalytics } from './analytics';
-import { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 
 /**
  * @public
@@ -58,11 +59,13 @@ export class CasesUiPlugin
   private readonly storage = new Storage(localStorage);
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+    this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
   }
 
   public setup(core: CoreSetup, plugins: CasesPublicSetupDependencies): CasesPublicSetup {
@@ -70,11 +73,7 @@ export class CasesUiPlugin
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
-
-    registerInternalAttachments(
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry
-    );
+    const unifiedAttachmentTypeRegistry = this.unifiedAttachmentTypeRegistry;
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
@@ -112,6 +111,7 @@ export class CasesUiPlugin
             kibanaVersion,
             externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry,
+            unifiedAttachmentTypeRegistry,
           });
         },
       });
@@ -121,6 +121,9 @@ export class CasesUiPlugin
 
     registerAnalytics({ analyticsService: core.analytics });
 
+    registerCasesSteps(plugins.workflowsExtensions);
+    registerCasesWorkflowTriggers(plugins.workflowsExtensions);
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -129,12 +132,20 @@ export class CasesUiPlugin
         registerPersistableState: (persistableStateAttachmentType) => {
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
         },
+        registerUnified: (unifiedAttachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
+        },
       },
     };
   }
 
   public start(core: CoreStart, plugins: CasesPublicStartDependencies): CasesPublicStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
+
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry, {
+      hasDashboardPluginEnabled: Boolean(plugins.dashboard),
+      hasMapsPluginEnabled: Boolean(plugins.maps),
+    });
 
     KibanaServices.init({
       ...core,
@@ -150,6 +161,7 @@ export class CasesUiPlugin
     const getCasesContext = getCasesContextLazy({
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
       getFilesClient: plugins.files.filesClientFactory.asScoped,
     });
 
@@ -157,6 +169,7 @@ export class CasesUiPlugin
       {
         externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
         getFilesClient: plugins.files.filesClientFactory.asScoped,
       },
       {
@@ -168,6 +181,15 @@ export class CasesUiPlugin
     );
 
     return {
+      config: {
+        templatesEnabled: config?.templates?.enabled ?? false,
+        attachmentsEnabled: config?.attachments?.enabled ?? false,
+        casesRedesign: {
+          list: config?.casesRedesign?.list ?? false,
+          details: config?.casesRedesign?.details ?? false,
+          settings: config?.casesRedesign?.settings ?? false,
+        },
+      },
       api: createClientAPI({ http: core.http }),
       ui: {
         getCases: (props) =>
@@ -175,6 +197,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
         getCasesContext,
@@ -183,6 +206,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
         // @deprecated Please use the hook useCasesAddToExistingCaseModal
@@ -191,6 +215,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
       },
@@ -204,7 +229,6 @@ export class CasesUiPlugin
         getUICapabilities,
         getRuleIdFromEvent,
         groupAlertsByRule,
-        getObservablesFromEcs,
       },
     };
   }

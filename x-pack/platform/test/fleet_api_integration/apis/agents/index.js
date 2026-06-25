@@ -15,6 +15,8 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./unenroll'));
+    loadTestFile(require.resolve('./remove_collector'));
+    loadTestFile(require.resolve('./collector_groups'));
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./upgrade'));
     loadTestFile(require.resolve('./action_status'));
@@ -31,5 +33,7 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./privilege_level_change'));
     loadTestFile(require.resolve('./last_known_status'));
     loadTestFile(require.resolve('./rollback'));
+    loadTestFile(require.resolve('./reporting_generate'));
+    loadTestFile(require.resolve('./pipeline_config'));
   });
 }

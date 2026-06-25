@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compact } from 'lodash';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
@@ -79,6 +78,12 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
+  /**
+   * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
+   * to opt out and keep the legacy EuiSuperDatePicker. Only takes effect when
+   * the `unifiedSearch.newDateRangePickerEnabled` feature flag is also enabled.
+   */
+  enableDateRangePicker?: boolean;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
   filtersForSuggestions?: Filter[];
@@ -168,6 +173,10 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
+  /**
+   * Enable data source browser suggestion in ES|QL editor.
+   */
+  enableResourceBrowser?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -339,15 +348,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
   componentWillUnmount() {
     this.renderSavedQueryManagement.clear();
-  }
-
-  private shouldRenderFilterBar() {
-    return (
-      this.props.showFilterBar &&
-      this.props.filters &&
-      this.props.indexPatterns &&
-      compact(this.props.indexPatterns).length > 0
-    );
   }
 
   /*
@@ -555,7 +555,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       text: toMountPoint(
         <FormattedMessage
           id="unifiedSearch.search.searchBar.backgroundSearch.toast.text"
-          defaultMessage="{name} is running now. <link>Check its progress here</link>"
+          defaultMessage='"{name}" is running now. Feel free to close the tab. <link>Check its progress here.</link>'
           values={{
             name,
             link: (chunks: React.ReactNode) => (
@@ -616,7 +616,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   };
 
   private shouldShowDatePickerAsBadge() {
-    return this.shouldRenderFilterBar() && !this.props.showQueryInput;
+    return this.props.showFilterBar && !this.props.showQueryInput;
   }
 
   public render() {
@@ -710,12 +710,12 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     ) : undefined;
 
     let filterBar;
-    if (this.shouldRenderFilterBar()) {
+    if (this.props.showFilterBar) {
       filterBar = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
-          filters={this.props.filters!}
+          filters={this.props.filters ?? []}
           onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={this.props.indexPatterns!}
+          indexPatterns={this.props.indexPatterns ?? []}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -725,9 +725,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       ) : (
         <FilterBar
           afterQueryBar
-          filters={this.props.filters!}
+          filters={this.props.filters ?? []}
           onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={this.props.indexPatterns!}
+          indexPatterns={this.props.indexPatterns ?? []}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -784,7 +784,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           nonKqlMode={this.props.nonKqlMode}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
-          filters={this.props.filters!}
+          filters={this.props.filters}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
@@ -807,6 +807,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          enableDateRangePicker={this.props.enableDateRangePicker}
+          enableResourceBrowser={this.props.enableResourceBrowser}
         />
       </div>
     );

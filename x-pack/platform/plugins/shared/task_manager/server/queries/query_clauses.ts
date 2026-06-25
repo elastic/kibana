@@ -35,9 +35,9 @@ export interface ScriptClause {
   };
 }
 
-export type PinnedQuery = Pick<estypes.QueryDslQueryContainer, 'pinned'>;
+export type PinnedQuery = Pick<NonNullable<estypes.QueryDslQueryContainer>, 'pinned'>;
 
-type BoolClause = Pick<estypes.QueryDslQueryContainer, 'bool'>;
+type BoolClause = Pick<NonNullable<estypes.QueryDslQueryContainer>, 'bool'>;
 export function matchesClauses(...clauses: Array<BoolClause | undefined>): BoolClause {
   return {
     bool: Object.assign(

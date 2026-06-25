@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createEsClientForTesting, KbnClient } from '@kbn/test';
+import { readFileSync } from 'fs';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/kbn-client';
+import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { ScoutLogger } from './logger';
 import type { ScoutTestConfig, EsClient } from '../../types';
 
@@ -53,6 +56,34 @@ export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
   return esClientInstance;
 }
 
+let linkedEsClientInstance: EsClient | null = null;
+
+export function getLinkedEsClient(config: ScoutTestConfig, log: ScoutLogger) {
+  if (!linkedEsClientInstance) {
+    const linkedProject = config.linkedProject;
+    if (!linkedProject) {
+      throw new Error('linkedProject is not configured in ScoutTestConfig');
+    }
+
+    const { username, password } = linkedProject.auth;
+    const elasticsearchUrl = createClientUrlWithAuth({
+      serviceName: 'linkedEs',
+      url: linkedProject.hosts.elasticsearch,
+      username,
+      password,
+      log,
+    });
+
+    linkedEsClientInstance = createEsClientForTesting({
+      esUrl: elasticsearchUrl,
+      isCloud: config.isCloud,
+      authOverride: { username, password },
+    });
+  }
+
+  return linkedEsClientInstance;
+}
+
 export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger) {
   if (!kbnClientInstance) {
     const kibanaUrl = createClientUrlWithAuth({
@@ -63,7 +94,11 @@ export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger) {
       log,
     });
 
-    kbnClientInstance = new KbnClient({ log, url: kibanaUrl });
+    kbnClientInstance = new KbnClient({
+      log,
+      url: kibanaUrl,
+      ...(config.http2 ? { certificateAuthorities: [readFileSync(CA_CERT_PATH)] } : {}),
+    });
   }
 
   return kbnClientInstance;

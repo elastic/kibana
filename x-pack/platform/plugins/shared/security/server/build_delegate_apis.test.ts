@@ -6,27 +6,37 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
 import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
+import { getPrintableSessionId } from './session_management';
+import { sessionMock } from './session_management/session.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationServiceMock.createStart>;
   let auditService: ReturnType<typeof auditServiceMock.create>;
+  let session: ReturnType<typeof sessionMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let api: CoreSecurityDelegateContract;
 
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();
     auditService = auditServiceMock.create();
+    session = sessionMock.create();
+    logger = loggingSystemMock.createLogger();
     api = buildSecurityApi({
       getAuthc: () => authc,
+      getSession: () => session,
       audit: auditService,
       config: { uiam: { enabled: false } },
+      logger,
     });
   });
 
@@ -48,6 +58,47 @@ describe('buildSecurityApi', () => {
       const currentUser = api.authc.getCurrentUser(request);
 
       expect(currentUser).toBe(delegateReturn);
+    });
+
+    it('returns the enriched override for fake requests when the enricher has bound a profile', () => {
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      api.fakeRequestEnricher(request, 'u_test_profile_123');
+
+      const user = api.authc.getCurrentUser(request);
+
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
+      expect(user!.profile_uid).toBe('u_test_profile_123');
+    });
+
+    it('falls back to the authentication service for fake requests without an enrichment', () => {
+      const request = httpServerMock.createFakeKibanaRequest({});
+      const delegateReturn = securityMock.createMockAuthenticatedUser();
+      authc.getCurrentUser.mockReturnValue(delegateReturn);
+
+      const user = api.authc.getCurrentUser(request);
+
+      expect(authc.getCurrentUser).toHaveBeenCalledTimes(1);
+      expect(authc.getCurrentUser).toHaveBeenCalledWith(request);
+      expect(user).toBe(delegateReturn);
+    });
+  });
+
+  describe('fakeRequestEnricher', () => {
+    it('binds a profile_uid that is then surfaced via getCurrentUser', () => {
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      api.fakeRequestEnricher(request, 'u_test_profile_123');
+
+      const user = api.authc.getCurrentUser(request);
+      expect(user!.profile_uid).toBe('u_test_profile_123');
+    });
+
+    it('throws when called on a real (non-fake) request', () => {
+      const request = httpServerMock.createKibanaRequest();
+      expect(() => api.fakeRequestEnricher(request, 'u_test_profile_123')).toThrow(
+        /must only be called on a fake request/
+      );
     });
   });
 
@@ -85,15 +136,41 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('authc.getRedactedSessionId', () => {
+    it('properly delegates to session.getSID and redacts the result', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const fullSid = '1234567890abcdefghijklmno';
+      session.getSID.mockResolvedValue(fullSid);
+
+      const result = await api.authc.getRedactedSessionId(request);
+
+      expect(session.getSID).toHaveBeenCalledTimes(1);
+      expect(session.getSID).toHaveBeenCalledWith(request);
+      expect(result).toBe(getPrintableSessionId(fullSid));
+    });
+
+    it('returns undefined when session.getSID resolves to undefined', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      session.getSID.mockResolvedValue(undefined);
+
+      const result = await api.authc.getRedactedSessionId(request);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('config.uiam', () => {
     describe('when uiam is enabled', () => {
       beforeEach(() => {
         authc = authenticationServiceMock.createStart();
         auditService = auditServiceMock.create();
+        session = sessionMock.create();
         api = buildSecurityApi({
           getAuthc: () => authc,
+          getSession: () => session,
           audit: auditService,
           config: { uiam: { enabled: true } },
+          logger,
         });
       });
 
@@ -126,25 +203,19 @@ describe('buildSecurityApi', () => {
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledTimes(1);
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(request, invalidateParams);
       });
-
-      it('should properly delegate getScopedClusterClientWithApiKey to the service', () => {
-        const apiKey = 'test-api-key';
-
-        api.authc.apiKeys.uiam!.getScopedClusterClientWithApiKey(apiKey);
-
-        expect(authc.apiKeys.uiam!.getScopedClusterClientWithApiKey).toHaveBeenCalledTimes(1);
-        expect(authc.apiKeys.uiam!.getScopedClusterClientWithApiKey).toHaveBeenCalledWith(apiKey);
-      });
     });
 
     describe('when uiam is disabled', () => {
       beforeEach(() => {
         authc = authenticationServiceMock.createStart();
         auditService = auditServiceMock.create();
+        session = sessionMock.create();
         api = buildSecurityApi({
           getAuthc: () => authc,
+          getSession: () => session,
           audit: auditService,
           config: { uiam: { enabled: false } },
+          logger,
         });
       });
 
@@ -157,10 +228,13 @@ describe('buildSecurityApi', () => {
       beforeEach(() => {
         authc = authenticationServiceMock.createStart();
         auditService = auditServiceMock.create();
+        session = sessionMock.create();
         api = buildSecurityApi({
           getAuthc: () => authc,
+          getSession: () => session,
           audit: auditService,
           config: {},
+          logger,
         });
       });
 
@@ -238,7 +312,7 @@ describe('buildUserProfileApi', () => {
   describe('update', () => {
     it('properly delegates to the service', async () => {
       const updated = { foo: 'bar' };
-      await api.update('foo', updated);
+      await api.update('foo', updated as unknown as UserProfileData);
 
       expect(userProfile.update).toHaveBeenCalledTimes(1);
       expect(userProfile.update).toHaveBeenCalledWith('foo', updated);

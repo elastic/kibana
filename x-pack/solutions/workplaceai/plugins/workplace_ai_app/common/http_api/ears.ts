@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Supported OAuth providers for EARS
@@ -27,25 +27,40 @@ export const ALL_EARS_OAUTH_PROVIDERS = [
   EarsOAuthProvider.Microsoft,
 ] as const;
 
-export interface StartOAuthRequest {
-  scope: string[];
+// Exchange token
+export interface ExchangeCodeRequest {
+  pkce_verifier: string;
+  code: string;
 }
 
-export const startOAuthResponseSchema = z.object({
-  request_id: z.string(),
-  auth_url: z.string().url(),
+export const exchangeCodeResponseSchema = z.object({
+  access_token: z.string(),
+  refresh_token: z.string().optional(),
 });
 
-export type StartOAuthResponse = z.infer<typeof startOAuthResponseSchema>;
+export type ExchangeCodeResponse = z.infer<typeof exchangeCodeResponseSchema>;
 
-export const fetchSecretsResponseSchema = z.object({
+// Refresh Token
+export interface RefreshTokenRequest {
+  refresh_token: string;
+}
+
+export const refreshTokenResponseSchema = z.object({
   access_token: z.string(),
 });
 
-export type FetchSecretsResponse = z.infer<typeof fetchSecretsResponseSchema>;
+export type RefreshTokenResponse = z.infer<typeof refreshTokenResponseSchema>;
+
+// Revoke Token
+export interface RevokeTokenRequest {
+  token: string;
+}
+
+export const revokeTokenResponseSchema = z.object({});
+
+export type RevokeTokenResponse = z.infer<typeof revokeTokenResponseSchema>;
 
 export interface GoogleUserInfo {
-  name: string;
   picture: string;
   email: string;
 }

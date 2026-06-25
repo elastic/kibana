@@ -31,6 +31,10 @@ spec:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: elastic-agent
+      # The following setting is needed for Universal Profiling to observe all processes on the host
+      # and produce userspace frames.
+      # If you are using the Universal Profiling integration, please uncomment the following line before applying.
+      # hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       # Uncomment if using hints feature
@@ -42,7 +46,7 @@ spec:
       #      - -c
       #      - >-
       #        mkdir -p /etc/elastic-agent/inputs.d &&
-      #        curl -sL https://github.com/elastic/elastic-agent/archive/9.0.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-9.0/deploy/kubernetes/elastic-agent-standalone/templates.d"
+      #        curl -sL https://github.com/elastic/elastic-agent/archive/refs/tags/vVERSION.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-VERSION/deploy/kubernetes/elastic-agent-standalone/templates.d"
       #    volumeMounts:
       #      - name: external-inputs
       #        mountPath: /etc/elastic-agent/inputs.d
@@ -60,6 +64,9 @@ spec:
             # The basic authentication password used to connect to Elasticsearch
             - name: ES_PASSWORD
               value: "changeme"
+            # The fingerprint of a root CA certificate used to sign
+            # Elasticsearch's TLS certificate
+            - name: CA_TRUSTED
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -72,19 +79,29 @@ spec:
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
+            # 'Defend for containers' integration (cloud-defend) uses the HOSTFS_PROC_PATH variable for accessing process information from the node.
+            - name: HOSTFS_PROC_PATH
+              value: "/hostfs/proc"
           securityContext:
             runAsUser: 0
+            # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+            # If you are using this integration, please uncomment these lines before applying.
+            #capabilities:
+            #  add:
+            #    - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+            #    - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+            #    - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for Containers' to modify 'rlimit_memlock'
+            ########################################################################################
             # The following capabilities are needed for Universal Profiling.
             # More fine graded capabilities are only available for newer Linux kernels.
             # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #procMount: "Unmasked"
             #privileged: true
             #capabilities:
             #  add:
             #    - SYS_ADMIN
           resources:
             limits:
-              memory: 1Gi
+              memory: 1200Mi
             requests:
               cpu: 100m
               memory: 500Mi
@@ -113,6 +130,14 @@ spec:
               readOnly: true
             - name: sys-kernel-debug
               mountPath: /sys/kernel/debug
+            - name: boot
+              mountPath: /boot
+              readOnly: true
+            - name: sys-fs-bpf
+              mountPath: /sys/fs/bpf
+            - name: sys-kernel-security
+              mountPath: /sys/kernel/security
+              readOnly: true
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
             # Uncomment if using hints feature
@@ -144,12 +169,23 @@ spec:
         - name: var-lib
           hostPath:
             path: /var/lib
-        # Needed for Universal Profiling
-        # If you are not using this integration, then these volumes and the corresponding
+        # Needed for 'Defend for containers' integration (cloud-defend) and Universal Profiling
+        # If you are not using one of these integrations, then these volumes and the corresponding
         # mounts can be removed.
         - name: sys-kernel-debug
           hostPath:
             path: /sys/kernel/debug
+        # The following three mounts are needed for 'Defend for containers' integration (cloud-defend)
+        # If you are not using cloud-defend, then these volumes and the corresponding mounts can be removed.
+        - name: boot
+          hostPath:
+            path: /boot
+        - name: sys-fs-bpf
+          hostPath:
+            path: /sys/fs/bpf
+        - name: sys-kernel-security
+          hostPath:
+            path: /sys/kernel/security
         # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
         # Update 'kube-system' with the namespace of your agent installation
         - name: elastic-agent-state
@@ -337,6 +373,10 @@ spec:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: elastic-agent
+      # The following setting is needed for Universal Profiling to observe all processes on the host
+      # and produce userspace frames.
+      # If you are using the Universal Profiling integration, please uncomment the following line before applying.
+      # hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
@@ -377,19 +417,29 @@ spec:
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
+            # 'Defend for containers' integration (cloud-defend) uses the HOSTFS_PROC_PATH variable for accessing process information from the node.
+            - name: HOSTFS_PROC_PATH
+              value: "/hostfs/proc"
           securityContext:
             runAsUser: 0
+            # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+            # If you are using this integration, please uncomment these lines before applying.
+            #capabilities:
+            #  add:
+            #    - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+            #    - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+            #    - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for Containers' to modify 'rlimit_memlock'
+            ########################################################################################
             # The following capabilities are needed for Universal Profiling.
             # More fine graded capabilities are only available for newer Linux kernels.
             # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #procMount: "Unmasked"
             #privileged: true
             #capabilities:
             #  add:
             #    - SYS_ADMIN
           resources:
             limits:
-              memory: 1Gi
+              memory: 1200Mi
             requests:
               cpu: 100m
               memory: 500Mi
@@ -417,6 +467,14 @@ spec:
               readOnly: true
             - name: sys-kernel-debug
               mountPath: /sys/kernel/debug
+            - name: boot
+              mountPath: /boot
+              readOnly: true
+            - name: sys-fs-bpf
+              mountPath: /sys/fs/bpf
+            - name: sys-kernel-security
+              mountPath: /sys/kernel/security
+              readOnly: true
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
       volumes:
@@ -447,12 +505,23 @@ spec:
           hostPath:
             path: /etc/machine-id
             type: File
-        # Needed for Universal Profiling
-        # If you are not using this integration, then these volumes and the corresponding
+        # Needed for 'Defend for containers' integration (cloud-defend) and Universal Profiling
+        # If you are not using one of these integrations, then these volumes and the corresponding
         # mounts can be removed.
         - name: sys-kernel-debug
           hostPath:
             path: /sys/kernel/debug
+        # The following three mounts are needed for 'Defend for containers' integration (cloud-defend)
+        # If you are not using cloud-defend, then these volumes and the corresponding mounts can be removed.
+        - name: boot
+          hostPath:
+            path: /boot
+        - name: sys-fs-bpf
+          hostPath:
+            path: /sys/fs/bpf
+        - name: sys-kernel-security
+          hostPath:
+            path: /sys/kernel/security
         # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
         # Update 'kube-system' with the namespace of your agent installation
         - name: elastic-agent-state

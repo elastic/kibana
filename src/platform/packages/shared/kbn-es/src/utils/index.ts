@@ -12,7 +12,6 @@ export { log } from './log';
 export { parseEsLog } from './parse_es_log';
 export { findMostRecentlyChanged } from './find_most_recently_changed';
 export { extractConfigFiles, isFile, copyFileSync } from './extract_config_files';
-// @ts-expect-error not typed yet
 export { NativeRealm, SYSTEM_INDICES_SUPERUSER } from './native_realm';
 export { buildSnapshot } from './build_snapshot';
 export { archiveForPlatform } from './build_snapshot';

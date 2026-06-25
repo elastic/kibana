@@ -7,7 +7,6 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
-import type { DataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
@@ -15,6 +14,7 @@ import type { TransformIdParamSchema } from '../../api_schemas/common';
 import type {
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
+  PutTransformQuerySchema,
 } from '../../api_schemas/transforms';
 import { isLatestTransform } from '../../../../common/types/transform';
 
@@ -27,7 +27,7 @@ export const routeHandlerFactory: (
   routeDependencies: RouteDependencies
 ) => RequestHandler<
   TransformIdParamSchema,
-  DataViewCreateQuerySchema,
+  PutTransformQuerySchema,
   PutTransformsRequestSchema,
   TransformRequestHandlerContext
 > = (routeDependencies) => async (ctx, req, res) => {
@@ -35,7 +35,7 @@ export const routeHandlerFactory: (
   const coreStart = await getCoreStart();
   const dataViews = await getDataViewsStart();
   const { transformId } = req.params;
-  const { createDataView, timeFieldName } = req.query;
+  const { createDataView, timeFieldName, deferValidation } = req.query;
 
   const response: PutTransformsResponseSchema = {
     dataViewsCreated: [],
@@ -51,6 +51,7 @@ export const routeHandlerFactory: (
       // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
       body: req.body,
       transform_id: transformId,
+      ...(deferValidation ? { defer_validation: true } : {}),
     });
 
     if (resp.acknowledged) {

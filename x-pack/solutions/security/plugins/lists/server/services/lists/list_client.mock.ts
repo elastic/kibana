@@ -29,10 +29,16 @@ export class ListClientMock extends ListClient {
   public getList = jest.fn().mockResolvedValue(getListResponseMock());
   public createList = jest.fn().mockResolvedValue(getListResponseMock());
   public createListIfItDoesNotExist = jest.fn().mockResolvedValue(getListResponseMock());
+  public getListDataStreamExists = jest.fn().mockResolvedValue(false);
+  public getListItemDataStreamExists = jest.fn().mockResolvedValue(false);
   public getListIndexExists = jest.fn().mockResolvedValue(true);
   public getListItemIndexExists = jest.fn().mockResolvedValue(true);
   public createListBootStrapIndex = jest.fn().mockResolvedValue({});
   public createListItemBootStrapIndex = jest.fn().mockResolvedValue({});
+  public createListDataStream = jest.fn().mockResolvedValue({});
+  public createListItemDataStream = jest.fn().mockResolvedValue({});
+  public migrateListIndexToDataStream = jest.fn().mockResolvedValue(undefined);
+  public migrateListItemIndexToDataStream = jest.fn().mockResolvedValue(undefined);
   public getListPolicyExists = jest.fn().mockResolvedValue(true);
   public getListItemPolicyExists = jest.fn().mockResolvedValue(true);
   public getListTemplateExists = jest.fn().mockResolvedValue(true);

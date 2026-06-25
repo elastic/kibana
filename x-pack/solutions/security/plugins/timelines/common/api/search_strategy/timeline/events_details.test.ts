@@ -41,13 +41,12 @@ describe('timelineEventsDetailsSchema', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_type\\",
           \\"expected\\": \\"string\\",
-          \\"received\\": \\"number\\",
+          \\"code\\": \\"invalid_type\\",
           \\"path\\": [
             \\"indexName\\"
           ],
-          \\"message\\": \\"Expected string, received number\\"
+          \\"message\\": \\"Invalid input: expected string, received number\\"
         }
       ]"
     `);

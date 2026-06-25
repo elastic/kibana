@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('../endpoint_exceptions.ff_enabled.ts')],
+    testFiles: [require.resolve('../index.endpoint_exceptions_moved_ff.ts')],
     junit: {
       reportName: 'EDR Workflows - Endpoint Exceptions Integration Tests - ESS Env - Trial License',
     },
@@ -43,6 +43,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(
           securitySolutionEnableExperimental
         )}`,
+
+        // Uncomment to enable debug logger to see full eval traces in kibana logs
+        // `--logging.loggers=${JSON.stringify([
+        //   {
+        //     name: 'plugins.securitySolution',
+        //     level: 'debug',
+        //   },
+        // ])}`,
       ],
     },
   };

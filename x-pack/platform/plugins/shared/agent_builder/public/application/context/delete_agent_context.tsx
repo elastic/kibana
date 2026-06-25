@@ -7,7 +7,6 @@
 
 import { createContext, useCallback, useContext, useState } from 'react';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -194,10 +193,6 @@ export const DeleteAgentProvider: React.FC<DeleteAgentProviderProps> = ({
     <DeleteAgentContext.Provider
       value={{
         deleteAgent: ({ agent, forceWithoutConfirmation = false }) => {
-          if (agent.id === agentBuilderDefaultAgentId) {
-            return;
-          }
-
           if (forceWithoutConfirmation) {
             // I don't think it's likely we'll need to use this, we should always show the modal
             deleteAgentMutation.mutate(agent.id);

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/kbn-tp-run-pipeline-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/kbn-tp-run-pipeline-plugin'
+  title: '@kbn/kbn-tp-run-pipeline-plugin'
   description: Moon project for @kbn/kbn-tp-run-pipeline-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
+  sourceRoot: src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
 dependsOn:
   - '@kbn/core'
   - '@kbn/expressions-plugin'

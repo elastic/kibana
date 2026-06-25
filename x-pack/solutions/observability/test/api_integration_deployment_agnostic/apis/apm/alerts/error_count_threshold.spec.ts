@@ -272,6 +272,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             transactionName: alert!['transaction.name'],
             errorGroupingKey: alert!['error.grouping_key'],
             errorGroupingName: alert!['error.grouping_name'],
+            grouping: alert!['kibana.alert.grouping'],
           };
         });
 
@@ -282,6 +283,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             transactionName: 'tx-php',
             errorGroupingKey: '000000000000000000000a php error',
             errorGroupingName: phpErrorMessage,
+            grouping: {
+              service: {
+                name: 'opbeans-php',
+                environment: 'production',
+              },
+              transaction: {
+                name: 'tx-php',
+              },
+              error: {
+                grouping_key: '000000000000000000000a php error',
+                grouping_name: phpErrorMessage,
+              },
+            },
           },
           {
             serviceName: 'opbeans-java',
@@ -289,6 +303,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             transactionName: 'tx-java',
             errorGroupingKey: '00000000000000000000a java error',
             errorGroupingName: javaErrorMessage,
+            grouping: {
+              service: {
+                name: 'opbeans-java',
+                environment: 'production',
+              },
+              transaction: {
+                name: 'tx-java',
+              },
+              error: {
+                grouping_key: '00000000000000000000a java error',
+                grouping_name: javaErrorMessage,
+              },
+            },
           },
         ]);
       });

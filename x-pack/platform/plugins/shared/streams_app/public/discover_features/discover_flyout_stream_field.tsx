@@ -6,18 +6,26 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { HttpStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiLoadingSpinner, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ContentFrameworkSection } from '@kbn/unified-doc-viewer-plugin/public';
 import type { StreamsAppLocator } from '../../common/locators';
-import { useResolvedDefinitionName } from './use_resolved_definition_name';
+import {
+  adaptDocToResolverInputs,
+  useResolvedDefinitionName,
+} from './use_resolved_definition_name';
+import { StreamLinkContent } from './stream_link_content';
+import { useCcsHasRemoteClusters } from './use_ccs_has_remote_clusters';
 
 export interface DiscoverFlyoutStreamFieldProps {
   doc: DataTableRecord;
   streamsRepositoryClient: StreamsRepositoryClient;
   locator: StreamsAppLocator;
+  http: HttpStart;
+  isServerless: boolean;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export function DiscoverFlyoutStreamField(props: DiscoverFlyoutStreamFieldProps) {
@@ -37,19 +45,32 @@ function DiscoverFlyoutStreamFieldContent({
   streamsRepositoryClient,
   doc,
   locator,
+  http,
+  isServerless,
+  cpsHasLinkedProjects,
 }: DiscoverFlyoutStreamFieldProps) {
+  const { index, fallbackStreamName } = adaptDocToResolverInputs(doc);
+  const ccsHasRemoteClusters = useCcsHasRemoteClusters({ http, isServerless });
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
-    doc,
+    index,
+    fallbackStreamName,
+    cpsHasLinkedProjects,
+    ccsHasRemoteClusters,
   });
 
-  if (loading) return <EuiLoadingSpinner size="s" />;
-
-  if (!value || error) return <span>-</span>;
+  const remoteSearchType = cpsHasLinkedProjects ? 'cps' : ccsHasRemoteClusters ? 'ccs' : undefined;
 
   return (
-    <EuiLink href={locator.getRedirectUrl({ name: value })}>
-      <EuiText size="xs">{value}</EuiText>
-    </EuiLink>
+    <StreamLinkContent
+      name={value?.name}
+      existsLocally={value?.existsLocally}
+      loading={loading}
+      error={error}
+      locator={locator}
+      remoteSearchType={remoteSearchType}
+      renderRemoteWarning={!!remoteSearchType && !index && value?.existsLocally}
+      remoteName={value?.remoteProject}
+    />
   );
 }

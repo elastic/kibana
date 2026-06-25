@@ -10,7 +10,7 @@ import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import pMap from 'p-map';
 
 const pbkdf2Async = utils.promisify(crypto.pbkdf2);
@@ -24,6 +24,7 @@ import type {
   NewRemoteElasticsearchOutput,
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
+import { isOtelExporterOutput } from '../../../common/services/output_helpers';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT, ECH_AGENTLESS_OUTPUT_ID } from '../../constants';
 import { outputService } from '../output';
@@ -103,7 +104,7 @@ export async function createOrUpdatePreconfiguredOutputs(
 
     const { id, config, ...outputData } = output;
 
-    const configYaml = config ? dump(config) : undefined;
+    const configYaml = config ? stringify(config) : undefined;
 
     const data: NewOutput = {
       ...outputData,
@@ -149,11 +150,10 @@ export async function createOrUpdatePreconfiguredOutputs(
           secretHashes,
         });
         // Bump revision of all policies using that output
-        if (outputData.is_default || outputData.is_default_monitoring) {
-          await agentPolicyService.bumpAllAgentPolicies(esClient);
-        } else {
-          await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
-        }
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id, {
+          isDefault: outputData.is_default,
+          isDefaultMonitoring: outputData.is_default_monitoring,
+        });
       }
     }
   };
@@ -395,6 +395,16 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       preconfiguredOutput.ca_trusted_fingerprint
     ) ||
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
+    (isOtelExporterOutput(existingOutput) &&
+      isOtelExporterOutput(preconfiguredOutput) &&
+      (isDifferent(
+        existingOutput.otel_exporter_config_yaml,
+        preconfiguredOutput.otel_exporter_config_yaml
+      ) ||
+        isDifferent(
+          existingOutput.otel_disable_beatsauth,
+          preconfiguredOutput.otel_disable_beatsauth
+        ))) ||
     isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
     (preconfiguredOutput.preset &&

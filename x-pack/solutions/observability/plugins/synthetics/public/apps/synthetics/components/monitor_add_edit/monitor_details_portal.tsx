@@ -10,6 +10,8 @@ import { useHistory } from 'react-router-dom';
 import { EuiLink, EuiIcon } from '@elastic/eui';
 import { InPortal } from 'react-reverse-portal';
 import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
+import { useUrlSpaceId } from '../../hooks/use_url_space_id';
+import { buildMonitorParamsSearch } from '../../utils/url_params';
 import { MonitorDetailsLinkPortalNode } from './portals';
 
 interface Props {
@@ -17,9 +19,16 @@ interface Props {
   configId: string;
   locationId?: string;
   updateUrl?: boolean;
+  remoteName?: string;
 }
 
-export const MonitorDetailsLinkPortal = ({ name, configId, locationId, updateUrl }: Props) => {
+export const MonitorDetailsLinkPortal = ({
+  name,
+  configId,
+  locationId,
+  updateUrl,
+  remoteName,
+}: Props) => {
   return (
     <InPortal node={MonitorDetailsLinkPortalNode}>
       {locationId ? (
@@ -28,16 +37,24 @@ export const MonitorDetailsLinkPortal = ({ name, configId, locationId, updateUrl
           configId={configId}
           locationId={locationId}
           updateUrl={updateUrl}
+          remoteName={remoteName}
         />
       ) : (
-        <MonitorDetailsLink name={name} configId={configId} />
+        <MonitorDetailsLink name={name} configId={configId} remoteName={remoteName} />
       )}
     </InPortal>
   );
 };
 
-const MonitorDetailsLinkWithLocation = ({ name, configId, locationId, updateUrl }: Props) => {
+const MonitorDetailsLinkWithLocation = ({
+  name,
+  configId,
+  locationId,
+  updateUrl,
+  remoteName,
+}: Props) => {
   const selectedLocation = useSelectedLocation({ updateUrl });
+  const spaceId = useUrlSpaceId();
 
   let locId = locationId;
 
@@ -47,15 +64,18 @@ const MonitorDetailsLinkWithLocation = ({ name, configId, locationId, updateUrl 
 
   const history = useHistory();
   const href = history.createHref({
-    pathname: locId ? `monitor/${configId}?locationId=${locId}` : `monitor/${configId}`,
+    pathname: `monitor/${configId}`,
+    search: buildMonitorParamsSearch({ locationId: locId, spaceId, remoteName }),
   });
   return <MonitorLink href={href} name={name} />;
 };
 
-const MonitorDetailsLink = ({ name, configId }: Props) => {
+const MonitorDetailsLink = ({ name, configId, remoteName }: Props) => {
+  const spaceId = useUrlSpaceId();
   const history = useHistory();
   const href = history.createHref({
     pathname: `monitor/${configId}`,
+    search: buildMonitorParamsSearch({ spaceId, remoteName }),
   });
   return <MonitorLink href={href} name={name} />;
 };
@@ -63,7 +83,7 @@ const MonitorDetailsLink = ({ name, configId }: Props) => {
 const MonitorLink = ({ href, name }: { href: string; name: string }) => {
   return (
     <EuiLink data-test-subj="syntheticsMonitorDetailsLinkLink" href={href}>
-      <EuiIcon type="arrowLeft" /> {name}
+      <EuiIcon type="chevronSingleLeft" aria-hidden={true} /> {name}
     </EuiLink>
   );
 };

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lens-config-builder-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/lens-config-builder-example-plugin'
+  title: '@kbn/lens-config-builder-example-plugin'
   description: Moon project for @kbn/lens-config-builder-example-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: x-pack/examples/lens_config_builder_example
+  sourceRoot: x-pack/examples/lens_config_builder_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

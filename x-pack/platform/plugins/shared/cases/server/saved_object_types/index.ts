@@ -18,6 +18,7 @@ import { caseIdIncrementerSavedObjectType } from './id_incrementer';
 import { createCaseAttachmentSavedObjectType } from './attachments';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { caseTemplateSavedObjectType } from './templates';
+import { caseFieldDefinitionSavedObjectType } from './field_definitions';
 import type { ConfigType } from '../config';
 
 interface RegisterSavedObjectsArgs {
@@ -47,7 +48,7 @@ export const registerSavedObjects = ({
   core.savedObjects.registerType(caseConfigureSavedObjectType);
   core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
   core.savedObjects.registerType(caseIdIncrementerSavedObjectType);
-  core.savedObjects.registerType(createCaseSavedObjectType(core, logger));
+  core.savedObjects.registerType(createCaseSavedObjectType(core, logger, config));
   core.savedObjects.registerType(
     createCaseUserActionSavedObjectType({
       persistableStateAttachmentTypeRegistry,
@@ -58,9 +59,13 @@ export const registerSavedObjects = ({
   core.savedObjects.registerType(casesRulesSavedObjectType);
 
   if (config.templates?.enabled) {
+    // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
     core.savedObjects.registerType(caseTemplateSavedObjectType);
+    // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- caseFieldDefinitionSavedObjectType is part of the templates feature which is behind a feature flag
+    core.savedObjects.registerType(caseFieldDefinitionSavedObjectType);
   }
   if (config.attachments?.enabled) {
+    // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
     core.savedObjects.registerType(createCaseAttachmentSavedObjectType());
   }
 };

@@ -24,8 +24,16 @@ export {
   getFormatByAccessor,
 } from './accessors';
 export { getColorCategories, getLegacyColorCategories } from './color_categories';
-export { LegendSize, LegendLayout, LegendSizeToPixels, DEFAULT_LEGEND_SIZE } from './legend';
+export {
+  LegendSize,
+  LegendLayout,
+  LegendSizeToPixels,
+  DEFAULT_LEGEND_SIZE,
+  getLegendLayout,
+} from './legend';
 
+export { getComputedColumnWarningForColumns } from './computed_column_warning';
+export { ChartTooltipFooterMessage } from './components/chart_tooltip_footer_message';
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';
 export type { ExpressionValueVisDimension } from './expression_value_dimension';

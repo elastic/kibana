@@ -25,11 +25,13 @@ const getRuleDetailsTabName = (tabName: string): string => {
 };
 
 const isRuleCreatePage = (pathname: string) =>
-  pathname.includes(RULES_PATH) &&
-  ['/create', '/ai_rule_creation'].some((path) => pathname.includes(path));
+  pathname.includes(RULES_PATH) && pathname.includes('/create');
 
 const isRuleEditPage = (pathname: string) =>
   pathname.includes(RULES_PATH) && pathname.includes('/edit');
+
+const isRuleChangesHistoryPage = (pathname: string) =>
+  pathname.includes(RULES_PATH) && pathname.includes('/changes-history');
 
 /**
  * This module should only export this function.
@@ -85,7 +87,22 @@ export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (params, getSecuri
     ];
   }
 
-  if (!isRuleEditPage(params.pathName) && params.state && !params.state.isExistingRule) {
+  if (isRuleChangesHistoryPage(params.pathName) && params.detailName && params.state?.ruleName) {
+    breadcrumb = [
+      ...breadcrumb,
+      {
+        text: i18nRules.RULE_CHANGES_HISTORY,
+        href: '',
+      },
+    ];
+  }
+
+  if (
+    !isRuleEditPage(params.pathName) &&
+    !isRuleChangesHistoryPage(params.pathName) &&
+    params.state &&
+    !params.state.isExistingRule
+  ) {
     breadcrumb = [...breadcrumb, { text: DELETED_RULE, href: '' }];
   }
 

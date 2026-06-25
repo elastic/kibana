@@ -8,3 +8,4 @@
  */
 
 export { registerGetStepDefinitionsRoute } from './get_step_definitions';
+export { registerGetTriggerDefinitionsRoute } from './get_trigger_definitions';

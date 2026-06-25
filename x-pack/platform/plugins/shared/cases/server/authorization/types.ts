@@ -46,6 +46,7 @@ export enum ReadOperations {
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
   GetUserActionUsers = 'getUserActionUsers',
+  GetFieldDefinitions = 'getFieldDefinitions',
 }
 
 /**
@@ -65,6 +66,7 @@ export enum WriteOperations {
   UpdateConfiguration = 'updateConfiguration',
   ReopenCase = 'reopenCase',
   AssignCase = 'assignCase',
+  ManageTemplate = 'manageTemplate',
 }
 
 /**
@@ -127,4 +129,9 @@ export interface AuthFilterHelpers {
    * Utility function for checking that the returned entities are in fact authorized for the user making the request
    */
   ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
+  /**
+   * The list of owner strings the current user is authorized for.
+   * Undefined when security is disabled (all owners are implicitly authorized).
+   */
+  authorizedOwners?: string[];
 }

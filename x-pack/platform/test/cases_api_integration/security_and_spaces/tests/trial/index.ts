@@ -32,13 +32,16 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/post_case'));
     loadTestFile(require.resolve('./cases/patch_case'));
     loadTestFile(require.resolve('./configure'));
-    loadTestFile(require.resolve('./attachments_framework/registered_persistable_state_trial'));
+    loadTestFile(require.resolve('./attachments_framework/registered_unified_trial'));
     // sub privileges are only available with a license above basic
     loadTestFile(require.resolve('./delete_sub_privilege'));
     loadTestFile(require.resolve('./create_comment_sub_privilege.ts'));
+    loadTestFile(require.resolve('./manage_templates_sub_privilege.ts'));
     loadTestFile(require.resolve('./user_profiles/get_current'));
     // case observables are only available with a license above basic
     loadTestFile(require.resolve('./internal/observables'));
+    // end-to-end observable extraction via the attachment bulkCreate side effect
+    loadTestFile(require.resolve('./internal/extract_observables'));
 
     // Internal routes
     loadTestFile(require.resolve('./internal/get_user_action_stats'));
@@ -46,6 +49,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/get_connectors'));
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
+    loadTestFile(require.resolve('./internal/field_definitions'));
+    loadTestFile(require.resolve('./internal/extended_fields_global'));
+    loadTestFile(require.resolve('./internal/required_on_close'));
+    loadTestFile(require.resolve('./internal/search_cases_extended_fields'));
 
     /**
      * Telemetry
@@ -57,8 +64,5 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));
-
-    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
-    loadTestFile(require.resolve('../common/kibana_alerting_cases_index'));
   });
 };

@@ -30,12 +30,49 @@ type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   traceId?: string;
 }>;
 
+interface ExecuteToolParams {
+  toolId: string;
+  toolParams: Record<string, unknown>;
+  connectorId?: string;
+}
+
+interface ExecuteToolResult {
+  results: unknown[];
+  errors: any[];
+}
+
 export class AgentBuilderEvaluationChatClient {
   constructor(
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
   ) {}
+
+  private async executeWithRetry<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
+    return pRetry(fn, {
+      retries: 2,
+      minTimeout: 2000,
+      onFailedAttempt: (error) => {
+        const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+
+        if (isLastAttempt) {
+          this.log.error(
+            new Error(`Failed to call ${operationName} API after ${error.attemptNumber} attempts`, {
+              cause: error,
+            })
+          );
+          throw error;
+        } else {
+          this.log.warning(
+            new Error(
+              `${operationName} API call failed on attempt ${error.attemptNumber}; retrying...`,
+              { cause: error }
+            )
+          );
+        }
+      },
+    });
+  }
 
   converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
     this.log.info('Calling converse');
@@ -85,28 +122,7 @@ export class AgentBuilderEvaluationChatClient {
     };
 
     try {
-      return await pRetry(callConverseApi, {
-        retries: 2,
-        minTimeout: 2000,
-        onFailedAttempt: (error) => {
-          const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
-
-          if (isLastAttempt) {
-            this.log.error(
-              new Error(`Failed to call converse API after ${error.attemptNumber} attempts`, {
-                cause: error,
-              })
-            );
-            throw error;
-          } else {
-            this.log.warning(
-              new Error(`Converse API call failed on attempt ${error.attemptNumber}; retrying...`, {
-                cause: error,
-              })
-            );
-          }
-        },
-      });
+      return await this.executeWithRetry('converse', callConverseApi);
     } catch (error) {
       this.log.error('Error occurred while calling converse API');
       return {
@@ -119,6 +135,50 @@ export class AgentBuilderEvaluationChatClient {
               'This question could not be answered as an internal error occurred. Please try again.',
           },
         ],
+        errors: [
+          {
+            error: {
+              message: error instanceof Error ? error.message : 'Unknown error',
+              stack: error instanceof Error ? error.stack : undefined,
+            },
+            type: 'error',
+          },
+        ],
+      };
+    }
+  };
+
+  executeTool = async ({
+    toolId,
+    toolParams,
+    connectorId,
+  }: ExecuteToolParams): Promise<ExecuteToolResult> => {
+    this.log.info(`Calling executeTool for ${toolId}`);
+
+    const callExecuteToolApi = async (): Promise<ExecuteToolResult> => {
+      const response = await this.fetch('/api/agent_builder/tools/_execute', {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify({
+          tool_id: toolId,
+          tool_params: toolParams,
+          connector_id: connectorId ?? this.connectorId,
+        }),
+      });
+
+      const toolResponse = response as { results: unknown[] };
+      return {
+        results: toolResponse.results,
+        errors: [],
+      };
+    };
+
+    try {
+      return await this.executeWithRetry('executeTool', callExecuteToolApi);
+    } catch (error) {
+      this.log.error('Error occurred while calling executeTool API');
+      return {
+        results: [],
         errors: [
           {
             error: {

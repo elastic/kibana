@@ -17,6 +17,8 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
@@ -25,13 +27,21 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { securityMock } from '../mocks';
+import { securityTelemetry } from '../otel/instrumentation';
 import { sessionMock } from '../session_management/session.mock';
+
+jest.mock('../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordGetCurrentProfileInvocation: jest.fn(),
+  },
+}));
 
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {
   let mockStartParams: {
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
     session: ReturnType<typeof sessionMock.create>;
+    getCurrentUser: jest.Mock;
   };
   let mockAuthz: ReturnType<typeof authorizationMock.create>;
   let userProfileService: UserProfileService;
@@ -39,6 +49,7 @@ describe('UserProfileService', () => {
     mockStartParams = {
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       session: sessionMock.create(),
+      getCurrentUser: jest.fn().mockReturnValue(null),
     };
     mockAuthz = authorizationMock.create();
 
@@ -71,7 +82,9 @@ describe('UserProfileService', () => {
     let mockUserProfile: UserProfileWithSecurity;
     let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
     beforeEach(() => {
-      mockRequest = httpServerMock.createKibanaRequest();
+      mockRequest = httpServerMock.createKibanaRequest({
+        headers: { sid: 'some-cookie' },
+      });
 
       mockUserProfile = userProfileMock.createWithSecurity({
         uid: 'UID',
@@ -89,118 +102,151 @@ describe('UserProfileService', () => {
       } as unknown as SecurityGetUserProfileResponse);
     });
 
-    it('returns `null` if session is not available', async () => {
-      const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
-
-      expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
-      expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
-
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).not.toHaveBeenCalled();
-    });
-
-    it('returns `null` if session available, but not user profile id', async () => {
-      mockStartParams.session.get.mockResolvedValue({
-        error: null,
-        value: sessionMock.createValue({ userProfileId: undefined }),
+    describe(`with session`, () => {
+      beforeEach(() => {
+        mockStartParams.session.getSID.mockResolvedValue('some-session-id');
       });
 
-      const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
-
-      expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
-      expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
-
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).not.toHaveBeenCalled();
-    });
-
-    it('fails if session retrieval fails', async () => {
-      const failureReason = new errors.ResponseError(
-        securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
-      );
-      mockStartParams.session.get.mockRejectedValue(failureReason);
-
-      const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest })).rejects.toBe(failureReason);
-
-      expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
-      expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
-
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).not.toHaveBeenCalled();
-    });
-
-    it('fails if profile retrieval fails', async () => {
-      mockStartParams.session.get.mockResolvedValue({
-        error: null,
-        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      afterEach(() => {
+        mockStartParams.session.getSID.mockReset();
       });
 
-      const failureReason = new errors.ResponseError(
-        securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
-      );
-      mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockRejectedValue(
-        failureReason
-      );
+      it('returns `null` if session is not available', async () => {
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
 
-      const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest })).rejects.toBe(failureReason);
+        expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
 
-      expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
-      expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
 
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).toHaveBeenCalledWith({
-        uid: 'UID',
-      });
-    });
-
-    it('fails if cannot find user profile', async () => {
-      mockStartParams.session.get.mockResolvedValue({
-        error: null,
-        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+        });
       });
 
-      mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
-        profiles: [],
-      } as unknown as SecurityGetUserProfileResponse);
+      it('returns `null` if session available, but not user profile id', async () => {
+        mockStartParams.session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: undefined }),
+        });
 
-      const startContract = userProfileService.start(mockStartParams);
-      await expect(
-        startContract.getCurrent({ request: mockRequest })
-      ).rejects.toMatchInlineSnapshot(`[Error: User profile is not found.]`);
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
 
-      expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
-      expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
+        expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
 
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).toHaveBeenCalledWith({
-        uid: 'UID',
-      });
-    });
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
 
-    it('properly parses returned profile', async () => {
-      mockStartParams.session.get.mockResolvedValue({
-        error: null,
-        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+        });
       });
 
-      const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest })).resolves
-        .toMatchInlineSnapshot(`
+      it('fails if session retrieval fails', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
+        );
+        mockStartParams.session.get.mockRejectedValue(failureReason);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockRequest })).rejects.toBe(
+          failureReason
+        );
+
+        expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+        });
+      });
+
+      it('fails if profile retrieval fails', async () => {
+        mockStartParams.session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        });
+
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
+        );
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockRejectedValue(
+          failureReason
+        );
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockRequest })).rejects.toBe(
+          failureReason
+        );
+
+        expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({
+          uid: 'UID',
+        });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+        });
+      });
+
+      it('fails if cannot find user profile', async () => {
+        mockStartParams.session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        });
+
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+          profiles: [],
+        } as unknown as SecurityGetUserProfileResponse);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: mockRequest })
+        ).rejects.toMatchInlineSnapshot(`[Error: User profile is not found.]`);
+
+        expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({
+          uid: 'UID',
+        });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+        });
+      });
+
+      it('properly parses returned profile', async () => {
+        mockStartParams.session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        });
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockRequest })).resolves
+          .toMatchInlineSnapshot(`
               Object {
                 "data": Object {},
                 "enabled": true,
@@ -219,37 +265,41 @@ describe('UserProfileService', () => {
               }
             `);
 
-      expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
-      expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
+        expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
 
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).toHaveBeenCalledWith({
-        uid: 'UID',
-      });
-    });
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({
+          uid: 'UID',
+        });
 
-    it('should get user profile and application data scoped to Kibana', async () => {
-      mockStartParams.session.get.mockResolvedValue({
-        error: null,
-        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+        });
       });
 
-      mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
-        profiles: [
-          userProfileMock.createWithSecurity({
-            ...mockUserProfile,
-            data: { kibana: { avatar: 'fun.gif' }, other_app: { secret: 'data' } },
-          }),
-        ],
-      } as unknown as SecurityGetUserProfileResponse);
+      it('should get user profile and application data scoped to Kibana', async () => {
+        mockStartParams.session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        });
 
-      const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest, dataPath: 'one,two' })).resolves
-        .toMatchInlineSnapshot(`
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+          profiles: [
+            userProfileMock.createWithSecurity({
+              ...mockUserProfile,
+              data: { kibana: { avatar: 'fun.gif' }, other_app: { secret: 'data' } },
+            }),
+          ],
+        } as unknown as SecurityGetUserProfileResponse);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockRequest, dataPath: 'one,two' }))
+          .resolves.toMatchInlineSnapshot(`
               Object {
                 "data": Object {
                   "avatar": "fun.gif",
@@ -270,17 +320,625 @@ describe('UserProfileService', () => {
               }
             `);
 
-      expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
-      expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
+        expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({
+          uid: 'UID',
+          data: 'kibana.one,kibana.two',
+        });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+        });
+      });
+    });
+
+    describe(`with basic authentication`, () => {
+      const testUsername = 'some-username';
+      const testPassword = 'some-password';
+      let mockBasicRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
+      beforeEach(() => {
+        mockBasicRequest = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `basic ${Buffer.from(`${testUsername}:${testPassword}`).toString(
+              'base64'
+            )}`,
+          },
+        });
+      });
+
+      it('fails if profile cannot be activated', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
+        );
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile.mockRejectedValue(
+          failureReason
+        );
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockBasicRequest })).rejects.toBe(
+          failureReason
+        );
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).toHaveBeenCalledWith({
+          grant_type: 'password',
+          username: testUsername,
+          password: testPassword,
+        });
+
+        expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+          profileActivationRequired: true,
+        });
+      });
+
+      it('should get user profile and application data scoped to Kibana', async () => {
+        const mockedProfile =
+          userProfileMock.createWithSecurity() as unknown as SecurityActivateUserProfileResponse;
+
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile.mockResolvedValue(
+          mockedProfile
+        );
+
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+          profiles: [mockedProfile],
+        } as unknown as SecurityGetUserProfileResponse);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockBasicRequest, dataPath: 'one,two' }))
+          .resolves.toMatchInlineSnapshot(`
+              Object {
+                "data": Object {},
+                "enabled": true,
+                "labels": Object {},
+                "uid": "some-profile-uid",
+                "user": Object {
+                  "email": "some@email",
+                  "full_name": undefined,
+                  "realm_domain": "some-realm-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).toHaveBeenCalledWith({
+          grant_type: 'password',
+          username: testUsername,
+          password: testPassword,
+        });
+
+        expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({
+          uid: mockedProfile.uid,
+          data: 'kibana.one,kibana.two',
+        });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+          profileActivationRequired: true,
+        });
+      });
+
+      it('returns `null` when es-security-runas-user header is present', async () => {
+        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+
+        const runAsRequest = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `basic ${Buffer.from(`${testUsername}:${testPassword}`).toString(
+              'base64'
+            )}`,
+            'es-security-runas-user': 'effective-user',
+          },
+        });
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: runAsRequest })).resolves.toBeNull();
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).not.toHaveBeenCalled();
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('with enriched fake request (profile_uid on authenticated user)', () => {
+      let enrichedFakeRequest: ReturnType<typeof httpServerMock.createFakeKibanaRequest>;
+
+      beforeEach(() => {
+        enrichedFakeRequest = httpServerMock.createFakeKibanaRequest({});
+      });
+
+      afterEach(() => {
+        logger.warn.mockClear();
+      });
+
+      it('resolves the profile directly via profile_uid without session or API key lookup', async () => {
+        const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+          profile_uid: 'enriched-profile-uid',
+        });
+        mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: enrichedFakeRequest })
+        ).resolves.toMatchObject({
+          uid: 'UID',
+        });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({ uid: 'enriched-profile-uid', data: undefined });
+        expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+          fakeRequestProfileResolution: true,
+        });
+      });
+
+      it('passes dataPath when resolving profile via profile_uid', async () => {
+        const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+          profile_uid: 'enriched-profile-uid',
+        });
+        mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: enrichedFakeRequest, dataPath: 'some.path' })
+        ).resolves.toMatchObject({ uid: 'UID' });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({
+          uid: 'enriched-profile-uid',
+          data: 'kibana.some.path',
+        });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+          fakeRequestProfileResolution: true,
+        });
+      });
+
+      it('skips the fast path (without warning) when the fake request has no profile_uid on the current user', async () => {
+        mockStartParams.getCurrentUser.mockReturnValue(
+          securityMock.createMockAuthenticatedUser({ profile_uid: undefined })
+        );
+
+        const authenticatedEnrichedFakeRequest = kibanaRequestFactory({
+          headers: {},
+          path: '/',
+          auth: { isAuthenticated: true },
+        } as FakeRawRequest);
+
+        mockStartParams.session.getSID.mockResolvedValue('some-session-id');
+        mockStartParams.session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+        });
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: authenticatedEnrichedFakeRequest })
+        ).resolves.toMatchObject({ uid: 'UID' });
+
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(mockStartParams.session.getSID).toHaveBeenCalled();
+      });
+
+      it('surfaces the error when the enriched profile_uid is not found in Elasticsearch', async () => {
+        const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+          profile_uid: 'missing-uid',
+        });
+        mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+          profiles: [],
+        } as unknown as SecurityGetUserProfileResponse);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: enrichedFakeRequest })
+        ).rejects.toThrowError(/User profile is not found/);
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({ uid: 'missing-uid', data: undefined });
+        expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[fake=true]'));
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+          fakeRequestProfileResolution: true,
+        });
+      });
+
+      it('surfaces the error when the cluster getUserProfile call rejects on a fake-request lookup', async () => {
+        const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+          profile_uid: 'enriched-profile-uid',
+        });
+        mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockRejectedValueOnce(
+          new Error('boom')
+        );
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: enrichedFakeRequest })
+        ).rejects.toThrowError(/boom/);
+
+        expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[fake=true]'));
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+          fakeRequestProfileResolution: true,
+        });
+      });
+    });
+
+    it('does not use the profile_uid fast path for real requests (uses session / API key resolution instead)', async () => {
+      const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+        profile_uid: 'enriched-profile-uid',
+      });
+      mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+      mockStartParams.session.getSID.mockResolvedValue('some-session-id');
+      mockStartParams.session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: mockUserProfile.uid }),
+      });
+
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(startContract.getCurrent({ request: mockRequest })).resolves.toMatchObject({
+        uid: 'UID',
+      });
 
       expect(
         mockStartParams.clusterClient.asInternalUser.security.getUserProfile
       ).toHaveBeenCalledTimes(1);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.getUserProfile
-      ).toHaveBeenCalledWith({
-        uid: 'UID',
-        data: 'kibana.one,kibana.two',
+      ).toHaveBeenCalledWith({ uid: 'UID', data: undefined });
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).not.toHaveBeenCalledWith(expect.objectContaining({ uid: 'enriched-profile-uid' }));
+
+      expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+        outcome: 'success',
+      });
+    });
+
+    describe(`with api key`, () => {
+      const testApiKeyValue = 'some-api-key-value';
+      const testApiKeyId = 'some-api-key-id';
+      const testEncodedApiKey = Buffer.from(`${testApiKeyId}:${testApiKeyValue}`).toString(
+        'base64'
+      );
+      let mockApiKeyRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
+      beforeEach(() => {
+        mockApiKeyRequest = httpServerMock.createKibanaRequest({
+          headers: { authorization: `apikey ${testEncodedApiKey}` },
+        });
+      });
+
+      it('returns `null` if api key retrieval fails (e.g. forbidden)', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
+        );
+        mockStartParams.clusterClient
+          .asScoped()
+          .asCurrentUser.security.getApiKey.mockRejectedValue(failureReason);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockApiKeyRequest })).resolves.toBeNull();
+
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledWith({
+          with_profile_uid: true,
+          id: testApiKeyId,
+        });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).not.toHaveBeenCalled();
+        expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+          apiKeyRetrievalRequired: true,
+        });
+      });
+
+      it('returns `null` if api key is not found', async () => {
+        mockStartParams.clusterClient
+          .asScoped()
+          .asCurrentUser.security.getApiKey.mockResolvedValue({
+            api_keys: [], // no API keys in response
+          } as any);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockApiKeyRequest })).resolves.toBeNull();
+
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalled();
+        expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledWith({
+          with_profile_uid: true,
+          id: testApiKeyId,
+        });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).not.toHaveBeenCalled();
+        expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+          apiKeyRetrievalRequired: true,
+        });
+      });
+
+      it('returns `null` if api key is found, but has no associated user profile id', async () => {
+        mockStartParams.clusterClient
+          .asScoped()
+          .asCurrentUser.security.getApiKey.mockResolvedValue({
+            api_keys: [
+              {
+                profile_uid: undefined, // no profile ID in response
+              },
+            ],
+          } as any);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockApiKeyRequest })).resolves.toBeNull();
+
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalled();
+        expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledWith({
+          with_profile_uid: true,
+          id: testApiKeyId,
+        });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).not.toHaveBeenCalled();
+        expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+          apiKeyRetrievalRequired: true,
+        });
+      });
+
+      it('returns `null` when es-security-runas-user header is present', async () => {
+        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+
+        const runAsRequest = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `apikey ${testEncodedApiKey}`,
+            'es-security-runas-user': 'effective-user',
+          },
+        });
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: runAsRequest })).resolves.toBeNull();
+
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).not.toHaveBeenCalled();
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
+      });
+
+      it('should get user profile and application data scoped to Kibana', async () => {
+        mockStartParams.clusterClient
+          .asScoped()
+          .asCurrentUser.security.getApiKey.mockResolvedValue({
+            api_keys: [
+              {
+                profile_uid: 'UID',
+              },
+            ],
+          } as any);
+
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+          profiles: [
+            userProfileMock.createWithSecurity({
+              ...mockUserProfile,
+              data: { kibana: { avatar: 'fun.gif' }, other_app: { secret: 'data' } },
+            }),
+          ],
+        } as unknown as SecurityGetUserProfileResponse);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockApiKeyRequest, dataPath: 'one,two' }))
+          .resolves.toMatchInlineSnapshot(`
+              Object {
+                "data": Object {
+                  "avatar": "fun.gif",
+                },
+                "enabled": true,
+                "labels": Object {},
+                "uid": "UID",
+                "user": Object {
+                  "email": undefined,
+                  "full_name": "full-name-1",
+                  "realm_domain": "some-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [
+                    "role-1",
+                  ],
+                  "username": "user-1",
+                },
+              }
+            `);
+
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledTimes(1);
+        expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalled();
+        expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledWith({
+          with_profile_uid: true,
+          id: testApiKeyId,
+        });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({
+          uid: 'UID',
+          data: 'kibana.one,kibana.two',
+        });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).not.toHaveBeenCalled();
+        expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+          apiKeyRetrievalRequired: true,
+        });
+      });
+    });
+
+    describe(`when security is disabled`, () => {
+      beforeEach(() => {
+        userProfileService = new UserProfileService(logger);
+        const license = licenseMock.create({ allowUserProfileCollaboration: true });
+        license.isEnabled.mockReturnValue(false);
+        userProfileService.setup({ authz: mockAuthz, license });
+      });
+
+      it('returns `null` for basic auth requests without calling any ES APIs or recording telemetry', async () => {
+        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `basic ${Buffer.from('user:pass').toString('base64')}`,
+          },
+        });
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request })).resolves.toBeNull();
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).not.toHaveBeenCalled();
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
+      });
+
+      it('returns `null` for API key requests without calling any ES APIs or recording telemetry', async () => {
+        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+
+        const testApiKeyId = 'some-api-key-id';
+        const testApiKeyValue = 'some-api-key-value';
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `apikey ${Buffer.from(`${testApiKeyId}:${testApiKeyValue}`).toString(
+              'base64'
+            )}`,
+          },
+        });
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request })).resolves.toBeNull();
+
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).not.toHaveBeenCalled();
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
+      });
+
+      it('returns `null` for session-authenticated requests without calling any ES APIs or recording telemetry', async () => {
+        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+        mockStartParams.session.getSID.mockResolvedValue('some-session-id');
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
+
+        expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
+        expect(mockStartParams.session.get).not.toHaveBeenCalled();
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
+      });
+
+      it('returns `null` for requests with runas header without calling any ES APIs or recording telemetry', async () => {
+        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+
+        const request = httpServerMock.createKibanaRequest({
+          headers: { 'es-security-runas-user': 'some-user' },
+        });
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request })).resolves.toBeNull();
+
+        expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        ).not.toHaveBeenCalled();
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).not.toHaveBeenCalled();
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
       });
     });
   });
@@ -289,7 +947,9 @@ describe('UserProfileService', () => {
     it('should update application data scoped to Kibana', async () => {
       const startContract = userProfileService.start(mockStartParams);
       await startContract.update('UID', {
-        avatar: 'boring.png',
+        avatar: {
+          imageUrl: 'boring.png',
+        },
       });
       expect(
         mockStartParams.clusterClient.asInternalUser.security.updateUserProfileData
@@ -297,7 +957,9 @@ describe('UserProfileService', () => {
         uid: 'UID',
         data: {
           kibana: {
-            avatar: 'boring.png',
+            avatar: {
+              imageUrl: 'boring.png',
+            },
           },
         },
       });
@@ -310,7 +972,9 @@ describe('UserProfileService', () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(
         startContract.update('UID', {
-          avatar: 'boring.png',
+          avatar: {
+            imageUrl: 'boring.png',
+          },
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
       expect(logger.error).toHaveBeenCalled();
@@ -393,7 +1057,7 @@ describe('UserProfileService', () => {
         startContract.activate({
           type: 'uiamAccessToken',
           accessToken: 'some-token',
-          sharedSecret: 'some-shared-secret',
+          clientAuthentication: { scheme: 'SharedSecret', value: 'some-shared-secret' },
         })
       ).resolves.toMatchInlineSnapshot(`
         Object {

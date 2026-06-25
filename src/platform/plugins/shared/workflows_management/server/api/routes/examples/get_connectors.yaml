@@ -1,0 +1,46 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getConnectorsResponseExample:
+            description: 'Example response with available connector types and their instances'
+            value:
+              connectorTypes:
+                .slack_api:
+                  actionTypeId: .slack_api
+                  displayName: Slack
+                  instances:
+                    - id: slack-connector-1
+                      name: Team Notifications
+                      isPreconfigured: false
+                      isDeprecated: false
+                  enabled: true
+                  enabledInConfig: true
+                  enabledInLicense: true
+                  minimumLicenseRequired: gold
+                  subActions:
+                    - name: postMessage
+                      displayName: Post Message
+                .email:
+                  actionTypeId: .email
+                  displayName: Email
+                  instances: []
+                  enabled: true
+                  enabledInConfig: true
+                  enabledInLicense: true
+                  minimumLicenseRequired: gold
+                  subActions:
+                    - name: send
+                      displayName: Send
+              totalConnectors: 1
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/connectors" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/connectors

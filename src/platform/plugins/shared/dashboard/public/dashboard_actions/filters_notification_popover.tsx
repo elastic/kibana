@@ -19,12 +19,13 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiPopoverFooter,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
-import { ACTION_EDIT_PANEL } from '@kbn/presentation-panel-plugin/public';
+import { ACTION_EDIT_PANEL } from '@kbn/embeddable-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
@@ -32,8 +33,8 @@ import {
   getViewModeSubject,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { type ActionExecutionMeta, triggers } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { uiActionsService } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
@@ -47,18 +48,26 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
   const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
 
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+    if (apiCanLockHoverActions(api)) {
+      api.lockHoverActions(false);
+    }
+  }, [api]);
+
   const executeEditAction = useCallback(async () => {
     try {
       const action = await uiActionsService.getAction(ACTION_EDIT_PANEL);
       action.execute({
         embeddable: api,
-        trigger: { id: CONTEXT_MENU_TRIGGER },
+        trigger: triggers[ON_OPEN_PANEL_MENU],
       } as EmbeddableApiContext & ActionExecutionMeta);
+      closePopover();
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('Unable to execute edit action, Error: ', error.message);
     }
-  }, [api]);
+  }, [api, closePopover]);
 
   const { queryString, queryLanguage } = useMemo(() => {
     const query = api.query$?.value;
@@ -89,27 +98,25 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          color="text"
-          iconType={'filter'}
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-            if (apiCanLockHoverActions(api)) {
-              api?.lockHoverActions(!api.hasLockedHoverActions$.value);
-            }
-          }}
-          data-test-subj={`embeddablePanelNotification-${api.uuid}`}
-          aria-label={displayName}
-        />
+        <EuiToolTip content={displayName} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color="text"
+            iconType={'filter'}
+            onClick={() => {
+              setIsPopoverOpen(!isPopoverOpen);
+              if (apiCanLockHoverActions(api)) {
+                api?.lockHoverActions(!api.hasLockedHoverActions$.value);
+              }
+            }}
+            data-test-subj={`embeddablePanelNotification-${api.uuid}`}
+            aria-label={displayName}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-        if (apiCanLockHoverActions(api)) {
-          api.lockHoverActions(false);
-        }
-      }}
+      closePopover={closePopover}
       anchorPosition="upCenter"
+      aria-label={displayName}
     >
       <EuiForm
         component="div"

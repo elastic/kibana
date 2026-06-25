@@ -6,14 +6,18 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { TimeRange } from '@kbn/agent-builder-common';
+import { EffortLevels } from '@kbn/agent-builder-common';
+import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
+import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
+import { loadDocumentation } from './documentation';
 
 export interface GenerateEsqlResponse {
   /**
@@ -35,12 +39,19 @@ export interface GenerateEsqlResponse {
   error?: string;
 }
 
-export interface GenerateEsqlDeps {
-  model: ScopedModel;
+/**
+ * Model input for {@link generateEsql}.
+ * Either a `modelProvider` (allowing model selection) or an already-resolved `model` (legacy path).
+ */
+export type GenerateEsqlModelDeps =
+  | { modelProvider: ModelProvider; model?: never }
+  | { model: ScopedModel; modelProvider?: never };
+
+export type GenerateEsqlDeps = GenerateEsqlModelDeps & {
   esClient: ElasticsearchClient;
   logger: Logger;
-  events: ToolEventEmitter;
-}
+  events?: ToolEventEmitter;
+};
 
 export interface GenerateEsqlOptions {
   /**
@@ -65,8 +76,8 @@ export interface GenerateEsqlOptions {
    */
   executeQuery?: boolean;
   /**
-   * Maximum number of retries to attempt if the query fails to execute.
-   * Note: this is only relevant if `executeQuery` is `true`
+   * Maximum number of retries if the query fails (execute or AST validation).
+   * When `executeQuery` is true: retries after execution errors; when false: retries after AST validation errors.
    * Defaults to `3`
    * */
   maxRetries?: number;
@@ -74,6 +85,17 @@ export interface GenerateEsqlOptions {
    * Maximum row limit to use in generated ES|QL queries.
    */
   rowLimit?: number;
+  /**
+   * Time range used to supply named parameters (?_tstart, ?_tend)
+   * when executing the generated query for validation.
+   * Defaults to last 24 hours if not provided.
+   */
+  timeRange?: TimeRange;
+  /**
+   * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
+   * for time range filtering in generated queries.
+   */
+  disableNamedParams?: boolean;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -86,23 +108,32 @@ export const generateEsql = async ({
   additionalContext,
   maxRetries = 3,
   rowLimit,
-  model,
+  timeRange: inputTimeRange,
+  disableNamedParams,
+  model: inputModel,
+  modelProvider,
   esClient,
   logger,
-  events,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  // Resolve a single ScopedModel once. When a modelProvider is given, use the low-effort model
+  const model = modelProvider
+    ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
+    : inputModel!;
+  const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
+  const documentation = await loadDocumentation();
+  const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
 
   const graph = createNlToEsqlGraph({
     model,
     esClient,
-    logger,
     docBase,
-    events,
+    documentation,
+    esqlCallbacks,
   });
 
   return withActiveInferenceSpan(
-    'GenerateEsqlGraph',
+    'generate_esql',
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
@@ -110,14 +141,19 @@ export const generateEsql = async ({
     },
     async () => {
       try {
-        // Discover index if not provided
+        // Discover index if not provided (`indexExplorer` takes one string; append `additionalContext`
+        // when set so resource selection can use editor notes or any other hints, not only `nlQuery`.)
+        const nlQueryWithContext = additionalContext?.trim()
+          ? `${nlQuery.trim()}\n\n${additionalContext.trim()}`
+          : nlQuery.trim();
+
         let selectedTarget = index;
         if (!selectedTarget) {
           logger?.debug('No index provided, discovering target index using indexExplorer');
           const {
             resources: [selectedResource],
           } = await indexExplorer({
-            nlQuery,
+            nlQuery: nlQueryWithContext,
             esClient,
             limit: 1,
             model,
@@ -141,6 +177,8 @@ export const generateEsql = async ({
             additionalInstructions,
             additionalContext,
             rowLimit,
+            disableNamedParams,
+            timeRange,
           },
           {
             recursionLimit: 25,

@@ -15,6 +15,7 @@ import {
   EuiLink,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,19 +40,35 @@ export const Label: React.FC<{ learnMoreUrl?: string }> = ({ learnMoreUrl }) => 
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPopover
+          aria-label={i18n.translate(
+            'cloud.connectionDetails.tab.endpoints.cloudIdField.helpPopoverAriaLabel',
+            {
+              defaultMessage: 'Cloud ID help',
+            }
+          )}
           button={
-            <EuiButtonIcon
-              iconType="question"
-              onClick={() => {
-                setIsPopoverOpen((x) => !x);
-              }}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'cloud.connectionDetails.tab.endpoints.cloudIdField.helpButtonAriaLabel',
                 {
                   defaultMessage: 'Cloud ID help',
                 }
               )}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="question"
+                onClick={() => {
+                  setIsPopoverOpen((x) => !x);
+                }}
+                aria-label={i18n.translate(
+                  'cloud.connectionDetails.tab.endpoints.cloudIdField.helpButtonAriaLabel',
+                  {
+                    defaultMessage: 'Cloud ID help',
+                  }
+                )}
+              />
+            </EuiToolTip>
           }
           isOpen={isPopoverOpen}
           closePopover={() => {

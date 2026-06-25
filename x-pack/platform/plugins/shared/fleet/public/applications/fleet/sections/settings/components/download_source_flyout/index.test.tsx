@@ -26,7 +26,7 @@ function renderFlyout(downloadSource?: DownloadSource) {
 
   return { comp };
 }
-describe('EditOutputFlyout', () => {
+describe('EditDownloadSourceFlyout', () => {
   it('should render the flyout if there is no download source provided', async () => {
     const { comp } = renderFlyout();
     expect(comp.queryByLabelText('Name')).not.toBeNull();

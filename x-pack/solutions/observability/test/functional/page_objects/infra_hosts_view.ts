@@ -9,12 +9,25 @@ import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+const HOSTS_VIEW_KPI_TILE_SUBJECTS = [
+  'hostsViewKPI-hostsCount',
+  'hostsViewKPI-cpuUsage',
+  'hostsViewKPI-normalizedLoad1m',
+  'hostsViewKPI-memoryUsage',
+  'hostsViewKPI-diskUsage',
+] as const;
+
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   return {
     async clickTableOpenFlyoutButton() {
-      return testSubjects.click('hostsView-flyout-button');
+      await retry.tryForTime(15000, async () => {
+        await testSubjects.click('hostsView-flyout-button');
+      });
+      await testSubjects.existOrFail('infraAssetDetailsFlyout', { timeout: 10000 });
     },
 
     async clickHostCheckbox(id: string, os: string) {
@@ -122,7 +135,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitMetricsTab() {
       const metricsTab = await this.getMetricsTab();
-      return metricsTab.click();
+      await metricsTab.scrollIntoViewIfNecessary();
+      await browser.execute('arguments[0].click();', metricsTab);
     },
 
     async getAllMetricsCharts() {
@@ -145,9 +159,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     // KPIs
     async isKPIChartsLoaded() {
-      return !(await testSubjects.exists(
-        '[data-test-subj=hostsView-metricsTrend] .echChartStatus[data-ech-render-complete=true]'
-      ));
+      const loadedKpiTiles = await Promise.all(
+        HOSTS_VIEW_KPI_TILE_SUBJECTS.map((testSubject) => testSubjects.exists(testSubject))
+      );
+      return loadedKpiTiles.every(Boolean);
     },
 
     async getAllKPITiles() {
@@ -169,7 +184,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitLogsTab() {
       const logsTab = await this.getLogsTab();
-      await logsTab.click();
+      await logsTab.scrollIntoViewIfNecessary();
+      await browser.execute('arguments[0].click();', logsTab);
     },
 
     async getLogEntries() {
@@ -201,10 +217,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitAlertTab() {
       const alertsTab = await this.getAlertsTab();
-      await alertsTab.click();
+      await alertsTab.scrollIntoViewIfNecessary();
+      await browser.execute('arguments[0].click();', alertsTab);
     },
 
-    setAlertStatusFilter(alertStatus?: PublicAlertStatus) {
+    async setAlertStatusFilter(alertStatus?: PublicAlertStatus) {
       const buttons: Record<PublicAlertStatus | 'all', string> = {
         active: 'hostsView-alert-status-filter-active-button',
         recovered: 'hostsView-alert-status-filter-recovered-button',
@@ -214,7 +231,13 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
       const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
 
-      return testSubjects.click(buttonSubject);
+      // Use a scrollIntoView + JS click to bypass overlap detection: the alerts
+      // tab renders the filter button group above an async AlertSummaryWidget,
+      // and the sticky hosts filter header can also sit above the button once
+      // scrolled into view. Mirrors the pattern used by `visitAlertTab`.
+      const button = await testSubjects.find(buttonSubject);
+      await button.scrollIntoViewIfNecessary();
+      await browser.execute('arguments[0].click();', button);
     },
 
     // Query Bar

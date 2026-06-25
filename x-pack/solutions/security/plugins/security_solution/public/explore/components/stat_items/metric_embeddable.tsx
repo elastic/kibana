@@ -9,10 +9,11 @@ import React from 'react';
 import { PageScope } from '../../../data_view_manager/constants';
 import { FlexItem, StatValue } from './utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import type { ExtraOptions } from '../../../common/components/visualization_actions/types';
 import type { FieldConfigs } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface MetricEmbeddableProps {
+  extraOptions?: ExtraOptions;
   fields: FieldConfigs[];
   id: string;
   inspectTitle?: string;
@@ -22,56 +23,55 @@ export interface MetricEmbeddableProps {
 const CHART_HEIGHT = 36;
 
 const MetricEmbeddableComponent = ({
+  extraOptions,
   fields,
   id,
   inspectTitle,
   timerange,
-}: MetricEmbeddableProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+}: MetricEmbeddableProps) => (
+  <EuiFlexGroup gutterSize="none" className="metricEmbeddable">
+    {fields.map((field) => (
+      <FlexItem key={`stat-items-field-${field.key}`}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+          {field.icon && (
+            <FlexItem grow={false}>
+              <EuiIcon
+                type={field.icon}
+                color={field.color}
+                size="l"
+                data-test-subj="stat-icon"
+                aria-hidden={true}
+              />
+            </FlexItem>
+          )}
 
-  return (
-    <EuiFlexGroup gutterSize="none" className="metricEmbeddable">
-      {fields.map((field) => (
-        <FlexItem key={`stat-items-field-${field.key}`}>
-          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-            {field.icon && (
-              <FlexItem grow={false}>
-                <EuiIcon
-                  type={field.icon}
-                  color={field.color}
-                  size="l"
-                  data-test-subj="stat-icon"
+          <EuiFlexItem>
+            {field.lensAttributes && (
+              <div data-test-subj="stat-title">
+                <VisualizationEmbeddable
+                  data-test-subj="embeddable-metric"
+                  extraOptions={extraOptions}
+                  height={CHART_HEIGHT}
+                  id={`${id}-${field.key}-metric-embeddable`}
+                  lensAttributes={field.lensAttributes}
+                  timerange={timerange}
+                  inspectTitle={inspectTitle}
+                  scopeId={PageScope.explore}
                 />
-              </FlexItem>
+              </div>
             )}
-
-            <EuiFlexItem>
-              {field.lensAttributes && (
-                <div data-test-subj="stat-title">
-                  <VisualizationEmbeddable
-                    data-test-subj="embeddable-metric"
-                    height={CHART_HEIGHT}
-                    id={`${id}-${field.key}-metric-embeddable`}
-                    lensAttributes={field.lensAttributes}
-                    timerange={timerange}
-                    inspectTitle={inspectTitle}
-                    scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
-                  />
-                </div>
-              )}
-            </EuiFlexItem>
-            {field.description != null && (
-              <FlexItem>
-                <StatValue>
-                  <p data-test-subj="stat-title">{field.description}</p>
-                </StatValue>
-              </FlexItem>
-            )}
-          </EuiFlexGroup>
-        </FlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-};
+          </EuiFlexItem>
+          {field.description != null && (
+            <FlexItem>
+              <StatValue>
+                <p data-test-subj="stat-title">{field.description}</p>
+              </StatValue>
+            </FlexItem>
+          )}
+        </EuiFlexGroup>
+      </FlexItem>
+    ))}
+  </EuiFlexGroup>
+);
 
 export const MetricEmbeddable = React.memo(MetricEmbeddableComponent);

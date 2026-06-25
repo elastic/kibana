@@ -20,7 +20,7 @@ import type {
   DatatableColumnMeta,
   DatatableColumnType,
 } from '@kbn/expressions-plugin/common';
-import { groupBy, times, zipObject } from 'lodash';
+import { groupBy, isEqual, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
   type Observable,
@@ -47,11 +47,12 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
-import { esql } from '@kbn/esql-language';
-import type { ESQLOrderExpression } from '@kbn/esql-language/src/types';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { esql } from '@elastic/esql';
+import type { ESQLOrderExpression } from '@elastic/esql/types';
+import { convertQueryToESQLExpression, getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import type { Query } from '@kbn/es-query';
 import {
   LOOKUP_INDEX_CREATE_ROUTE,
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
@@ -71,6 +72,7 @@ import { IndexEditorErrors } from '../types';
 import { parsePrimitive } from '../utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from '../constants';
 import type { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
+import { reportIndexEditorError } from '../report_error';
 import { RowsVirtualIndexes } from './rows_virtual_indexes';
 import { bulkUpdate, type BulkUpdateOperations } from './bulk_update_service';
 
@@ -134,10 +136,10 @@ export class IndexUpdateService {
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
   /** User input query */
-  private readonly _qstr$ = new BehaviorSubject<string>('');
-  public readonly qstr$: Observable<string> = this._qstr$.asObservable();
-  public setQstr(queryString: string) {
-    this._qstr$.next(queryString);
+  private readonly _filterQuery$ = new BehaviorSubject<Query>({ query: '', language: 'kuery' });
+  public readonly filterQuery$: Observable<Query> = this._filterQuery$.asObservable();
+  public setFilterQuery(filterQuery: Query) {
+    this._filterQuery$.next(filterQuery);
   }
 
   /** User sort */
@@ -213,16 +215,16 @@ export class IndexUpdateService {
   public readonly esqlQuery$: Observable<string> = combineLatest([
     this._indexCreated$,
     this._indexName$,
-    this._qstr$,
+    this._filterQuery$,
     this._sortOrder$,
   ]).pipe(
     skipWhile(([indexCreated, indexName]) => {
       return !indexCreated || !indexName;
     }),
-    map(([indexCreated, indexName, qstr, sortOrder]) => {
+    map(([indexCreated, indexName, filterQuery, sortOrder]) => {
       return this._buildESQLQuery({
         indexName: indexName!,
-        qstr,
+        filterQuery,
         includeMetadata: true,
         sortOrder,
       });
@@ -232,24 +234,24 @@ export class IndexUpdateService {
   // ESQL query used to build the link to Discover, it does not include metadata fields
   public readonly esqlDiscoverQuery$: Observable<string | undefined> = combineLatest([
     this._indexName$,
-    this._qstr$,
+    this._filterQuery$,
     this._sortOrder$,
   ]).pipe(
-    map(([indexName, qstr, sortOrder]) => {
+    map(([indexName, filterQuery, sortOrder]) => {
       if (indexName) {
-        return this._buildESQLQuery({ indexName, qstr, includeMetadata: false, sortOrder });
+        return this._buildESQLQuery({ indexName, filterQuery, includeMetadata: false, sortOrder });
       }
     })
   );
 
   private _buildESQLQuery({
     indexName,
-    qstr,
+    filterQuery,
     includeMetadata,
     sortOrder,
   }: {
     indexName: string;
-    qstr: string | null;
+    filterQuery: Query;
     includeMetadata: boolean;
     sortOrder?: SortOrder[];
   }): string {
@@ -257,8 +259,9 @@ export class IndexUpdateService {
       ? esql`FROM ${indexName} METADATA _id, _source`
       : esql`FROM ${indexName}`;
 
-    if (qstr) {
-      query.pipe`WHERE qstr(${`*${qstr}* OR ${qstr}`})`;
+    const filterExpression = convertQueryToESQLExpression(filterQuery);
+    if (filterExpression) {
+      query.where(filterExpression);
     }
 
     query.pipe`LIMIT ${DOCS_PER_FETCH}`;
@@ -357,8 +360,14 @@ export class IndexUpdateService {
   }
 
   /** Doc updates/additions/deletions that are pending to be saved */
-  private readonly _savingDocs$: Observable<PendingSave> = this.bufferState$.pipe(
-    map((updates) => {
+  private readonly _savingDocs$: Observable<PendingSave> = combineLatest([
+    this.bufferState$,
+    this._docs$,
+  ]).pipe(
+    map(([updates, docs]) => {
+      // Index the fetched documents to compare edited values against their original ones
+      const originalDocsById = new Map(docs.map((doc) => [doc.id, doc]));
+
       // First group all changes by id
       const deletedDocs: Set<string> = new Set(
         updates.filter(isDocDelete).flatMap((v) => v.payload.ids)
@@ -385,13 +394,52 @@ export class IndexUpdateService {
         result.set(docId, { type: 'delete-doc' });
       });
       mergedUpdates.forEach(([docId, docUpdate]) => {
-        result.set(docId, { type: 'add-doc', update: docUpdate });
+        const originalDoc = originalDocsById.get(docId);
+        const effectiveUpdate = this.stripUnchangedFields(docUpdate, originalDoc);
+
+        // Drop edits to existing docs that no longer differ from the stored values.
+        // New rows have no original document, so they are always kept.
+        if (originalDoc && Object.keys(effectiveUpdate).length === 0) {
+          return;
+        }
+
+        result.set(docId, { type: 'add-doc', update: effectiveUpdate });
       });
       return result;
     }),
     startWith(new Map() as PendingSave),
     shareReplay({ bufferSize: 1, refCount: true })
   );
+
+  /**
+   * Returns the subset of `update` fields whose values differ from the original document.
+   * When there is no original document (a newly added row) the update is returned unchanged.
+   */
+  private stripUnchangedFields(
+    update: Record<string, any>,
+    originalDoc: DataTableRecord | undefined
+  ): Record<string, any> {
+    if (!originalDoc) {
+      return update;
+    }
+    return Object.fromEntries(
+      Object.entries(update).filter(
+        ([field, value]) => !isEqual(value, originalDoc.flattened[field])
+      )
+    );
+  }
+
+  /** Latest snapshot of the pending docs, kept for synchronous per-row lookups */
+  private readonly _latestSavingDocs$ = new BehaviorSubject<PendingSave>(new Map());
+
+  /**
+   * Whether a row has unsaved content: a new row with values, or an edit that still differs from
+   * the stored value. Reverted edits and empty new rows are not considered dirty.
+   */
+  public isDirtyRow(rowId: string): boolean {
+    const pendingUpdate = this._latestSavingDocs$.getValue().get(rowId);
+    return pendingUpdate?.type === 'add-doc' && Object.keys(pendingUpdate.update).length > 0;
+  }
 
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
@@ -476,16 +524,17 @@ export class IndexUpdateService {
   }
 
   private listenForUpdates() {
+    this._subscription.add(this._savingDocs$.subscribe(this._latestSavingDocs$));
     this._subscription.add(
-      combineLatest([this.bufferState$, this._pendingColumnsToBeSaved$])
+      combineLatest([this._savingDocs$, this._pendingColumnsToBeSaved$])
         .pipe(
-          map(([bufferState, pendingColumnsToBeSaved]) => {
-            const hasCellEditions = bufferState.some((action) => {
-              if (action.type === 'add-doc') {
-                // Only consider rows with at least one value
-                return Object.keys(action.payload.value).length > 0;
+          map(([savingDocs, pendingColumnsToBeSaved]) => {
+            const hasCellEditions = Array.from(savingDocs.values()).some((pendingUpdate) => {
+              if (pendingUpdate.type === 'add-doc') {
+                // Only consider rows with at least one (effective) value
+                return Object.keys(pendingUpdate.update).length > 0;
               }
-              return action.type === 'delete-doc';
+              return pendingUpdate.type === 'delete-doc';
             });
             const hasColumnAdditions =
               pendingColumnsToBeSaved.filter((col) => !isPlaceholderColumn(col.name)).length > 0;
@@ -713,7 +762,8 @@ export class IndexUpdateService {
               updates: updates.filter(isDocUpdate).map((update) => update.payload),
             });
           },
-          error: () => {
+          error: (error) => {
+            reportIndexEditorError(error, { errorType: 'BulkSave' });
             this.setError(
               IndexEditorErrors.GENERIC_SAVING_ERROR,
               i18n.translate('indexEditor.indexUpdateService.savingGenericErrorMessageDetail', {
@@ -754,11 +804,17 @@ export class IndexUpdateService {
                 },
                 {
                   strategy: 'esql_async',
-                  retrieveResults: true,
+                  returnIntermediateResults: true,
                 }
               )
               .pipe(
                 catchError((e) => {
+                  reportIndexEditorError(e, { errorType: 'DocsFetch' });
+                  this.notifications.toasts.addError(e, {
+                    title: i18n.translate('indexEditor.indexUpdateService.fetchErrorTitle', {
+                      defaultMessage: 'Error fetching documents',
+                    }),
+                  });
                   // query might be invalid, so we return an empty response
                   return of({
                     rawResponse: {
@@ -1009,6 +1065,10 @@ export class IndexUpdateService {
         }
       );
     } catch (error) {
+      reportIndexEditorError(error, {
+        errorType: 'UpdateMappings',
+        labels: { index_name: indexName },
+      });
       this.notifications.toasts.addError(error, {
         title: i18n.translate('indexEditor.indexManagement.updateMappingErrorTitle', {
           defaultMessage: 'Error updating index mapping',
@@ -1072,7 +1132,7 @@ export class IndexUpdateService {
     this._actions$.complete();
     this._pendingColumnsToBeSaved$.complete();
     this._indexCreated$.complete();
-    this._qstr$.complete();
+    this._filterQuery$.complete();
     this._refreshSubject$.complete();
     this._exitAttemptWithUnsavedChanges$.complete();
     this.data.dataViews.clearCache();

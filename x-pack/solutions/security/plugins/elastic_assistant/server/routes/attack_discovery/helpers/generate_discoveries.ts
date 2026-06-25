@@ -8,6 +8,7 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { AttackDiscoveryGenerationConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { InferenceClient } from '@kbn/inference-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
@@ -21,6 +22,7 @@ export interface GenerateAttackDiscoveriesParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   config: AttackDiscoveryGenerationConfig;
   esClient: ElasticsearchClient;
+  inferenceClient?: InferenceClient;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
 }
@@ -29,6 +31,7 @@ export const generateAttackDiscoveries = async ({
   actionsClient,
   config,
   esClient,
+  inferenceClient,
   logger,
   savedObjectsClient,
 }: GenerateAttackDiscoveriesParams) => {
@@ -61,6 +64,7 @@ export const generateAttackDiscoveries = async ({
     end,
     esClient,
     filter,
+    inferenceClient,
     langSmithProject,
     langSmithApiKey,
     latestReplacements,

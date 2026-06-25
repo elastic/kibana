@@ -172,8 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.toggleFilterPinned('geo.src');
       await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'LS' });
 
-      await dashboardAddPanel.clickCreateNewLink();
-      await header.waitUntilLoadingHasFinished();
+      await dashboardAddPanel.clickAddLensPanel();
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
       expect(hasGeoDestFilter).to.be(false);
       const hasGeoSrcFilter = await filterBar.hasFilter('geo.src', 'US', true, true);
@@ -199,8 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show all data from all layers in the inspector', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickCreateNewLink();
-      await header.waitUntilLoadingHasFinished();
+      await dashboardAddPanel.clickAddLensPanel();
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -260,8 +258,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
 
-      await dashboardAddPanel.clickCreateNewLink();
-      await header.waitUntilLoadingHasFinished();
+      await dashboardAddPanel.clickAddLensPanel();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -347,7 +344,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // add a drilldown to the pie chart
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
-      await testSubjects.click('actionFactoryItem-OPEN_IN_DISCOVER_DRILLDOWN');
+      await testSubjects.click('drilldownFactoryItem-discover_drilldown');
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.closeFlyout();
       await header.waitUntilLoadingHasFinished();
@@ -355,7 +352,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check that the drilldown is working now
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
       expect(
-        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-D_ACTION"]')
+        await find.existsByCssSelector(
+          '[data-test-subj^="embeddablePanelAction-discover_drilldown"]'
+        )
       ).to.be(true);
 
       // save the dashboard
@@ -367,7 +366,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
       expect(
-        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-D_ACTION"]')
+        await find.existsByCssSelector(
+          '[data-test-subj^="embeddablePanelAction-discover_drilldown"]'
+        )
       ).to.be(true);
     });
   });

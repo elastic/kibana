@@ -5,46 +5,104 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
 import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
-import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { EntityType } from '../../../../common/search_strategy';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
-import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
+import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
+import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
+import { ResolutionGroupTab } from '../entity_resolution/resolution_group_tab';
+import { RESOLUTION_GROUP_TAB_TEST_ID } from '../entity_resolution/test_ids';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;
 export const FIELDS_TABLE_TAB_TEST_ID = `${PREFIX}FieldsTableTab` as const;
 
-export const getRiskInputTab = <T extends EntityType>({
+interface RiskInputsTabWithAlertPreviewProps {
+  entityType: EntityType;
+  entityName: string;
+  entityId?: string;
+  scopeId: string;
+}
+
+/** Wires the legacy expandable-flyout alert preview into {@link RiskInputsTab}. */
+const RiskInputsTabWithAlertPreview = ({
+  entityType,
+  entityName,
+  entityId,
+  scopeId,
+}: RiskInputsTabWithAlertPreviewProps) => {
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const onShowAlert = useCallback(
+    (id: string, indexName: string) =>
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id,
+          indexName,
+          scopeId,
+          isPreviewMode: true,
+          banner: ALERT_PREVIEW_BANNER,
+        },
+      }),
+    [openPreviewPanel, scopeId]
+  );
+
+  return (
+    <RiskInputsTab
+      entityType={entityType}
+      entityName={entityName}
+      entityId={entityId}
+      onShowAlert={onShowAlert}
+    />
+  );
+};
+
+export const getRiskInputTab = ({
   entityType,
   entityName,
   scopeId,
-}: RiskInputsTabProps<T>) => ({
+  entityId,
+}: RiskInputsTabWithAlertPreviewProps) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
   name: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.entityDetails.userDetails.riskInputs.tabLabel"
-      defaultMessage="Risk contributions"
+      defaultMessage="Risk score"
     />
   ),
-  content: <RiskInputsTab entityType={entityType} entityName={entityName} scopeId={scopeId} />,
+  content: (
+    <RiskInputsTabWithAlertPreview
+      entityType={entityType}
+      entityName={entityName}
+      scopeId={scopeId}
+      entityId={entityId}
+    />
+  ),
 });
 
 export const getInsightsInputTab = ({
-  name,
-  fieldName,
+  field,
+  value,
+  entityId,
   scopeId,
+  entityType,
 }: {
-  name: string;
-  fieldName: CloudPostureEntityIdentifier;
+  field: string;
+  value: string;
+  entityId?: string;
   scopeId: string;
+  entityType?: string;
 }) => {
   return {
     id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
@@ -55,7 +113,15 @@ export const getInsightsInputTab = ({
         defaultMessage="Insights"
       />
     ),
-    content: <InsightsTabCsp value={name} field={fieldName} scopeId={scopeId} />,
+    content: (
+      <InsightsTabCsp
+        value={value}
+        field={field as CloudPostureEntityIdentifier}
+        scopeId={scopeId}
+        entityId={entityId}
+        entityType={entityType}
+      />
+    ),
   };
 };
 
@@ -72,3 +138,23 @@ export const getFieldsTableTab = ({ document, tableStorageKey }: FieldsTableProp
     'data-test-subj': FIELDS_TABLE_TAB_TEST_ID,
   };
 };
+
+export const getResolutionGroupTab = ({
+  entityId,
+  entityType,
+  scopeId,
+}: {
+  entityId: string;
+  entityType: EntityStoreEntityType;
+  scopeId: string;
+}) => ({
+  id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
+  'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.resolutionGroupTab.tabLabel"
+      defaultMessage="Resolution"
+    />
+  ),
+  content: <ResolutionGroupTab entityId={entityId} entityType={entityType} scopeId={scopeId} />,
+});

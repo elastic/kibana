@@ -45,7 +45,7 @@ const ERROR_DETAILS_MAPPINGS: Record<ErrorPromptType, ErrorDetails> = {
           "The conversation ID in the URL doesn't exist. Browse your previous conversations or start a new one.",
       }
     ),
-    icon: 'search',
+    icon: 'magnify',
   },
   MISSING_PRIVILEGES: {
     title: i18n.translate('xpack.agentBuilder.access.prompt.noPrivilege.title', {

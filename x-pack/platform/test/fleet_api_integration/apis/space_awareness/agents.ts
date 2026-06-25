@@ -13,6 +13,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import {
   cleanFleetActionIndices,
+  cleanFleetAgentPolicies,
   cleanFleetAgents,
   cleanFleetIndices,
   createFleetAgent,
@@ -118,6 +119,7 @@ export default function (providerContext: FtrProviderContext) {
 
     beforeEach(async () => {
       await cleanFleetActionIndices(esClient);
+      await cleanFleetAgentPolicies(esClient);
     });
 
     async function verifyNoAgentActions(spaceId?: string) {

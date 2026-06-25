@@ -196,7 +196,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
                 schema.oneOf([schema.literal('desc'), schema.literal('asc')])
               ),
               filter: schema.maybe(schema.string()),
-              searchFields: schema.maybe(schema.arrayOf(schema.string())),
+              searchFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
               search: schema.maybe(schema.string()),
             }),
           },
@@ -412,7 +412,10 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         validate: {
           request: {
             body: schema.object({
-              sessionIds: schema.arrayOf(schema.string()),
+              // When a search is sent to the background the client starts polling for its status. All the searches that
+              // are in progress are sent to the server to get their updated status until they are in a completed status.
+              // For this endpoint the assumption is that the client won't have more than 100 searches in progress at the same time.
+              sessionIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
             }),
           },
           response: {

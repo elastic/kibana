@@ -11,11 +11,11 @@ import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
+import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
-import { MCP_SERVER_PATH } from '../../common/mcp';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
@@ -62,9 +62,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       summary: 'MCP server',
       description: `> warn
 > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.
-To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).`,
+To learn more about the Agent Builder MCP server, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).`,
       options: {
-        tags: ['mcp', 'oas-tag:agent builder'],
+        tags: ['mcp', 'oas-tag:agent builder', 'security:acceptUiamOAuth'],
         xsrfRequired: false,
         availability: {
           since: '9.2.0',
@@ -184,4 +184,29 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
         }
       })
     );
+
+  // MCP Streamable HTTP clients open a standalone GET "listening stream" on the MCP
+  // endpoint to receive server-initiated messages. Kibana doesn't register a GET here,
+  // so the request falls through to the SPA catch-all (`GET /{path*}`), which still
+  // authenticates and rejects the UIAM OAuth token with a 401. Clients treat a 401 on
+  // that stream as an auth failure and retry the OAuth flow instead of issuing POST
+  // requests. A 405, by contrast, is ignored. Shadow the catch-all with an
+  // unauthenticated 405 so clients fall back to POST. (Kibana intentionally does not
+  // support server-initiated SSE -- see KibanaMcpHttpTransport.)
+  //
+  // Non-versioned and excluded from the OAS: this is a protocol-level stub, not a
+  // documented API.
+  router.get(
+    {
+      path: MCP_SERVER_PATH,
+      security: {
+        authz: { enabled: false, reason: 'Returns a static 405; nothing to authorize.' },
+        authc: { enabled: false, reason: 'Returns a static 405; no identity required.' },
+      },
+      options: { access: 'public', excludeFromOAS: true },
+      validate: false,
+    },
+    async (ctx, request, response) =>
+      response.customError({ statusCode: 405, body: { message: 'Method Not Allowed' } })
+  );
 }

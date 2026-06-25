@@ -6,7 +6,7 @@
  */
 
 import type { ModelProvider } from '@kbn/agent-builder-server';
-import type { ModelProviderFactoryFn } from '../services/runner/model_provider';
+import type { ModelProviderFactoryFn } from '../services/execution/runner/model_provider';
 import type { ChangeReturnType } from './common';
 
 export type ModelProviderMock = jest.Mocked<ModelProvider>;
@@ -15,10 +15,12 @@ export type ModelProviderFactoryMock = jest.MockedFn<
 >;
 
 export const createModelProviderMock = (): ModelProviderMock => {
+  const chatModel = { getConnector: jest.fn().mockReturnValue({ connectorId: 'mock-connector' }) };
   return {
-    getDefaultModel: jest.fn(),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn(),
+    getDefaultModel: jest.fn().mockResolvedValue({ chatModel }),
+    selectModel: jest.fn(),
+    getModelById: jest.fn(),
+    getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
   };
 };
 

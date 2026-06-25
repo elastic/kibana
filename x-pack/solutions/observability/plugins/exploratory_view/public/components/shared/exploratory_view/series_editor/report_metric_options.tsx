@@ -105,10 +105,13 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     <>
       {!series.selectedMetricField && (
         <EuiPopover
+          aria-label={i18n.translate('xpack.exploratoryView.reportMetricOptions.popoverAriaLabel', {
+            defaultMessage: 'Select report metric',
+          })}
           button={
             <EuiButton
               data-test-subj="o11yReportMetricOptionsButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
@@ -137,6 +140,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         (dataView ? (
           <EuiToolTip position="top" content={REPORT_METRIC_TOOLTIP}>
             <EuiBadge
+              data-test-subj="o11yReportMetricBadge"
               iconType="cross"
               iconSide="right"
               iconOnClick={() => onChange(undefined)}

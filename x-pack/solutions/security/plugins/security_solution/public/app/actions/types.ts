@@ -9,7 +9,7 @@ import type { CellAction, CellActionExecutionContext, CellActionFactory } from '
 import type { RefObject } from 'react';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import type { QueryOperator } from '../../../common/types';
-export { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
+export { EsqlInTimelineAction } from './constants';
 export interface AndFilter {
   field: string;
   value: string | string[];
@@ -51,6 +51,12 @@ export interface SecurityCellActionMetadata extends Record<string, unknown> {
   andFilters?: AndFilter[];
 
   dataViewId?: string;
+
+  /**
+   * When true the filter action includes documents where the field is null/missing,
+   * in addition to documents that match the cell value exactly.
+   */
+  includeNullValues?: boolean;
 
   /**
    * Ref to the currently visible alerts table

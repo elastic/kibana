@@ -4,19 +4,19 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-src'
-type: unknown
+layer: unknown
 owners: {}
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-src'
+  title: '@kbn/test-suites-src'
   description: Moon project for @kbn/test-suites-src
   channel: ''
-  metadata:
-    sourceRoot: src/platform/test
+  sourceRoot: src/platform/test
 dependsOn:
   - '@kbn/core'
+  - '@kbn/content-list-common'
   - '@kbn/dashboard-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/saved-objects-management-plugin'
@@ -62,7 +62,6 @@ dependsOn:
   - '@kbn/core-deprecations-common'
   - '@kbn/data-grid-in-table-search'
   - '@kbn/scout-info'
-  - '@kbn/esql-utils'
   - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
   - '@kbn/controls-constants'
@@ -71,8 +70,10 @@ dependsOn:
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/setup-node-env'
   - '@kbn/visualizations-common'
-  - '@kbn/unified-data-table'
   - '@kbn/session-notifications-plugin'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/unified-tabs'
 tags:
   - test-helper
   - package
@@ -82,8 +83,6 @@ tags:
 fileGroups:
   src:
     - '**/*'
-    - api_integration/apis/logstash/pipeline/fixtures/*.json
-    - api_integration/apis/logstash/pipelines/fixtures/*.json
     - api_integration/apis/telemetry/fixtures/*.json
     - api_integration/apis/telemetry/fixtures/*.json
     - '!target/**/*'

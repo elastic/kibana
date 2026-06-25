@@ -1,0 +1,67 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getWorkflowStepExecutionsResponseExample:
+            description: >-
+              Example response returning step execution records for a
+              workflow. The second entry shows a Human-In-The-Loop
+              `wait_for_input` step that has been responded to: the
+              `hitl` envelope is populated synchronously by the inbox
+              respond path so every reader (Kibana Inbox UI, Slack,
+              Agent Builder, raw API/MCP) sees a single canonical
+              responder for the step.
+            value:
+              results:
+                - id: step-exec-001
+                  spaceId: default
+                  stepId: hello_world_step
+                  stepType: console
+                  workflowRunId: exec-001
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  status: completed
+                  isTestRun: false
+                  startedAt: '2025-11-20T12:00:01.000Z'
+                  finishedAt: '2025-11-20T12:00:02.000Z'
+                  executionTimeMs: 1000
+                  topologicalIndex: 0
+                  globalExecutionIndex: 0
+                  stepExecutionIndex: 0
+                  scopeStack: []
+                  input:
+                    message: 'hello world'
+                - id: step-exec-002
+                  spaceId: default
+                  stepId: approve_change
+                  stepType: wait_for_input
+                  workflowRunId: exec-001
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  status: completed
+                  isTestRun: false
+                  startedAt: '2025-11-20T12:00:02.000Z'
+                  finishedAt: '2025-11-20T12:05:31.000Z'
+                  executionTimeMs: 329000
+                  topologicalIndex: 1
+                  globalExecutionIndex: 1
+                  stepExecutionIndex: 0
+                  scopeStack: []
+                  input:
+                    message: 'Approve change to production?'
+                  output:
+                    approved: true
+                  hitl:
+                    respondedBy: alice
+                    respondedAt: '2025-11-20T12:05:29.000Z'
+                    channel: kibana-ui
+              total: 2
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/steps?includeInput=true" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/workflow/{workflowId}/executions/steps?includeInput=true

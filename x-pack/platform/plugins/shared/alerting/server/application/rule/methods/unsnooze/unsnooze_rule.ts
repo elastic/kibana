@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -14,8 +15,9 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../../../author
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { getUnsnoozeAttributes } from '../../../../rules_client/common';
-import { updateRuleSo } from '../../../../data/rule';
+import { updateRuleSo, getDecryptedRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { unsnoozeRuleParamsSchema } from './schemas';
 
 export interface UnsnoozeParams {
@@ -55,10 +57,6 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
       operation: WriteOperations.Unsnooze,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -80,15 +78,52 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
   const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
+  const username = await context.getUserName();
 
-  await updateRuleSo({
+  const unsnoozeRuleTimestamp = Date.now();
+  const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },
     id,
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,
-      updatedBy: await context.getUserName(),
+      updatedBy: username,
       updatedAt: new Date().toISOString(),
     }),
+  });
+
+  let decryptedApiKey: string | null | undefined;
+  let decryptedUiamApiKey: string | null | undefined;
+  try {
+    const decryptedRule = await getDecryptedRuleSo({
+      encryptedSavedObjectsClient: context.encryptedSavedObjectsClient,
+      id,
+      savedObjectsGetOptions: { namespace: context.namespace },
+    });
+    decryptedApiKey = decryptedRule.attributes.apiKey;
+    decryptedUiamApiKey = decryptedRule.attributes.uiamApiKey ?? null;
+  } catch (e) {
+    context.logger.debug(
+      `unsnoozeRule(): could not load decrypted API key for rule "${id}": ${e.message}`
+    );
+  }
+
+  await logRuleChanges({
+    ruleSOs: [
+      {
+        ...updatedRuleRaw,
+        attributes: { ...attributes, ...updatedRuleRaw.attributes },
+        references: updatedRuleRaw.references ?? [],
+      },
+    ],
+    encryptedFieldsMap:
+      decryptedApiKey !== undefined
+        ? new Map([[id, { apiKey: decryptedApiKey, uiamApiKey: decryptedUiamApiKey ?? null }]])
+        : undefined,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleUnsnooze,
+      timestamp: unsnoozeRuleTimestamp,
+    },
   });
 }

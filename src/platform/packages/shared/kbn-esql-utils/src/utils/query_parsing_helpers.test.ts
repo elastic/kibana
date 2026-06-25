@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { monaco } from '@kbn/monaco';
-import type { ESQLColumn } from '@kbn/esql-language';
-import { Parser, walk } from '@kbn/esql-language';
+import type { monaco } from '@kbn/code-editor';
+import type { ESQLColumn } from '@elastic/esql/types';
+import { Parser, walk } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getRemoteClustersFromESQLQuery,
@@ -25,14 +25,16 @@ import {
   fixESQLQueryWithVariables,
   getCategorizeColumns,
   getArgsFromRenameFunction,
+  replaceColumnNamesIfRenamed,
   getCategorizeField,
-  findClosestColumn,
+  findClosestField,
   getKqlSearchQueries,
   convertTimeseriesCommandToFrom,
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
-  hasDateBreakdown,
   hasOnlySourceCommand,
+  hasTimeseriesInfoCommand,
+  getSparklineColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -228,6 +230,21 @@ describe('esql query helpers', () => {
       );
       expect(code).toEqual(
         'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
+      );
+    });
+
+    it('should respect custom lineWidth when provided', function () {
+      const query =
+        'FROM kibana_sample_data_logs | STATS count = COUNT(*), avg = AVG(bytes), p95 = PERCENTILE(bytes, 95), ext = VALUES(tags.keyword) BY ip | EVAL newField = CASE(count < 100, "groupA", count > 100 AND count < 500, "groupB", "Other") | KEEP newField';
+      const codeWithNarrowWidth = prettifyQuery(query, 40);
+      const codeWithWideWidth = prettifyQuery(query, 120);
+      const maxLineLength = (code: string) =>
+        Math.max(...code.split('\n').map((line) => line.length));
+      expect(maxLineLength(codeWithNarrowWidth)).toBeLessThanOrEqual(40);
+      expect(maxLineLength(codeWithWideWidth)).toBeLessThanOrEqual(120);
+      // Wider width should allow longer lines (fewer wraps)
+      expect(maxLineLength(codeWithWideWidth)).toBeGreaterThanOrEqual(
+        maxLineLength(codeWithNarrowWidth)
       );
     });
   });
@@ -566,7 +583,7 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('findClosestColumn', () => {
+  describe('findClosestField', () => {
     const mockColumns: ESQLColumn[] = [
       {
         args: [],
@@ -612,50 +629,50 @@ describe('esql query helpers', () => {
 
     it('should return undefined if the columns array is empty', () => {
       const cursor = { lineNumber: 1, column: 5 } as monaco.Position;
-      expect(findClosestColumn([], cursor)).toBeUndefined();
+      expect(findClosestField([], cursor)).toBeUndefined();
     });
 
     it('should return the column if the cursor is exactly at its min boundary', () => {
       const cursor = { lineNumber: 1, column: 10 } as monaco.Position;
-      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+      expect(findClosestField(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
     });
 
     it('should return the column if the cursor is exactly at its max boundary', () => {
       const cursor = { lineNumber: 1, column: 15 } as monaco.Position;
-      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+      expect(findClosestField(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
     });
 
     it('should return the column if the cursor is inside its range', () => {
       const cursor = { lineNumber: 1, column: 12 } as monaco.Position;
-      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+      expect(findClosestField(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
 
       const cursor2 = { lineNumber: 1, column: 35 } as monaco.Position;
-      expect(findClosestColumn(mockColumns, cursor2)).toEqual(mockColumns[2]); // col3.sub
+      expect(findClosestField(mockColumns, cursor2)).toEqual(mockColumns[2]); // col3.sub
     });
 
     it('should return the closest column when cursor is between two columns (closer to the first)', () => {
       const cursor = { lineNumber: 1, column: 17 } as monaco.Position; // 2 units from col1.max, 3 units from col2.min
-      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+      expect(findClosestField(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
     });
 
     it('should return the closest column when cursor is between two columns (closer to the second)', () => {
       const cursor = { lineNumber: 1, column: 18 } as monaco.Position; // 3 units from col1.max, 2 units from col2.min
-      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[1]); // col2
+      expect(findClosestField(mockColumns, cursor)).toEqual(mockColumns[1]); // col2
     });
 
     it('should return the closest column when cursor is far to the left of all columns', () => {
       const cursor = { lineNumber: 1, column: 5 } as monaco.Position;
-      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+      expect(findClosestField(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
     });
 
     it('should return the closest column when cursor is far to the right of all columns', () => {
       const cursor = { lineNumber: 1, column: 70 } as monaco.Position;
-      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[3]); // clientip
+      expect(findClosestField(mockColumns, cursor)).toEqual(mockColumns[3]); // clientip
     });
 
     it('should correctly identify column when cursor is just outside max of previous column', () => {
       const cursor = { lineNumber: 1, column: 26 } as monaco.Position; // Just past col2.max (25)
-      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[1]); // col2 (closest boundary is 25)
+      expect(findClosestField(mockColumns, cursor)).toEqual(mockColumns[1]); // col2 (closest boundary is 25)
     });
 
     it('should prioritize the first found if distances are exactly equal (edge case for between columns)', () => {
@@ -664,7 +681,7 @@ describe('esql query helpers', () => {
         { ...mockColumns[1], location: { min: 14, max: 16 } },
       ];
       const cursor = { lineNumber: 1, column: 13 } as monaco.Position; // 1 unit from col1.max, 1 unit from col2.min
-      expect(findClosestColumn(equidistantColumns, cursor)).toEqual(equidistantColumns[0]);
+      expect(findClosestField(equidistantColumns, cursor)).toEqual(equidistantColumns[0]);
     });
   });
   describe('getValuesFromQueryField', () => {
@@ -751,6 +768,48 @@ describe('esql query helpers', () => {
         column: 52,
       } as monaco.Position);
       expect(values).toEqual(undefined);
+    });
+
+    describe('PromQL label matchers', () => {
+      const cursorAfter = (queryString: string, matcherPrefix: string) =>
+        ({
+          lineNumber: 1,
+          column: queryString.indexOf(matcherPrefix) + matcherPrefix.length + 1,
+        } as monaco.Position);
+
+      it('should return the label name after a matcher operator', () => {
+        const queryString = 'PROMQL index=metrics sum(bytes{agent= })';
+        expect(getValuesFromQueryField(queryString, cursorAfter(queryString, 'agent='))).toEqual(
+          'agent'
+        );
+      });
+
+      it('should return the label name for an already-closed empty matcher', () => {
+        const queryString = 'PROMQL index=metrics sum(bytes{agent=})';
+        expect(getValuesFromQueryField(queryString, cursorAfter(queryString, 'agent='))).toEqual(
+          'agent'
+        );
+      });
+
+      it('should return the label under the cursor with multiple matchers', () => {
+        const queryString = 'PROMQL index=metrics sum(bytes{foo="x", agent=})';
+        expect(getValuesFromQueryField(queryString, cursorAfter(queryString, 'agent='))).toEqual(
+          'agent'
+        );
+      });
+
+      it('should return the label name inside a nested function', () => {
+        const queryString = 'PROMQL index=metrics sum(rate(http{label=}))';
+        expect(getValuesFromQueryField(queryString, cursorAfter(queryString, 'label='))).toEqual(
+          'label'
+        );
+      });
+
+      it('should return undefined for an empty PROMQL query', () => {
+        expect(
+          getValuesFromQueryField('PROMQL ', { lineNumber: 1, column: 8 } as monaco.Position)
+        ).toEqual(undefined);
+      });
     });
   });
 
@@ -906,6 +965,23 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('replaceColumnNameIfRenamed', () => {
+    it('returns column names unchanged when there is no RENAME', () => {
+      const { root } = Parser.parse('FROM index | KEEP col');
+      expect(replaceColumnNamesIfRenamed(root, ['col'])).toEqual(['col']);
+    });
+
+    it('replaces matching column names using RENAME', () => {
+      const { root } = Parser.parse('FROM index | RENAME old AS new');
+      expect(replaceColumnNamesIfRenamed(root, ['old', 'other'])).toEqual(['new', 'other']);
+    });
+
+    it('applies multiple RENAME commands in order', () => {
+      const { root } = Parser.parse('FROM index | RENAME a AS b | RENAME b AS c');
+      expect(replaceColumnNamesIfRenamed(root, ['a'])).toEqual(['c']);
+    });
+  });
+
   describe('getArgsFromRenameFunction', () => {
     it('should return the args from an = rename function', () => {
       const esql = 'FROM index | RENAME renamed = original';
@@ -972,6 +1048,92 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeField(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getSparklineColumns', () => {
+    it('should return sparkline alias and not inner column refs (patterns-style query)', () => {
+      const esql =
+        'FROM kibana_sample_data_logs | STATS Count = COUNT(*), Sparkline=SPARKLINE(Count(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(message) | SORT Count DESC';
+      expect(getSparklineColumns(esql)).toEqual(['Sparkline']);
+    });
+
+    it('should return bare SPARKLINE expression as column id using source text', () => {
+      const esql =
+        'FROM index | STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([
+        'SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)',
+      ]);
+    });
+
+    it('should not treat unrelated stats columns as sparklines based on name text', () => {
+      const esql = 'FROM index | STATS my_sparkline_metric = COUNT(*) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([]);
+    });
+
+    it('should apply every RENAME command in pipeline order', () => {
+      const esql =
+        'FROM index | STATS Sparkline=SPARKLINE(COUNT(*), @ts, 5, ?_a, ?_b) BY Pattern=CATEGORIZE(m) | RENAME Sparkline AS S1 | RENAME S1 AS S2';
+      expect(getSparklineColumns(esql)).toEqual(['S2']);
+    });
+
+    it('should return sparkline alias from INLINE STATS', () => {
+      const esql =
+        'FROM index | INLINE STATS my_spark = SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)';
+      expect(getSparklineColumns(esql)).toEqual(['my_spark']);
+    });
+
+    it('should return bare SPARKLINE expression from INLINE STATS as column id using source text', () => {
+      const esql =
+        'FROM index | INLINE STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)';
+      expect(getSparklineColumns(esql)).toEqual([
+        'SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)',
+      ]);
+    });
+
+    it('should collect sparkline columns from both STATS and INLINE STATS in the same query', () => {
+      const esql =
+        'FROM index | STATS stats_spark = SPARKLINE(bytes) BY host | INLINE STATS inline_spark = SPARKLINE(requests)';
+      expect(getSparklineColumns(esql)).toEqual(['stats_spark', 'inline_spark']);
+    });
+
+    it('should apply RENAME to INLINE STATS sparkline columns', () => {
+      const esql =
+        'FROM index | INLINE STATS Spark = SPARKLINE(COUNT(*), @ts, 5, ?_a, ?_b) | RENAME Spark AS MySpark';
+      expect(getSparklineColumns(esql)).toEqual(['MySpark']);
+    });
+
+    it('should return source text for bare SPARKLINE alongside an aliased SPARKLINE in the same STATS', () => {
+      const esql =
+        'FROM logs | STATS sparkline = SPARKLINE(AVG(bytes), timestamp, 50, ?_tstart, ?_tend), SPARKLINE(COUNT(*), timestamp, 50, ?_tstart, ?_tend), Count = COUNT(*) BY clientip';
+      expect(getSparklineColumns(esql)).toEqual([
+        'sparkline',
+        'SPARKLINE(COUNT(*), timestamp, 50, ?_tstart, ?_tend)',
+      ]);
+    });
+
+    it('should handle SPARKLINE with an aggregate inline WHERE filter', () => {
+      const esql =
+        'FROM employees | STATS sparkline = SPARKLINE(COUNT(*), hire_date, 20, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z") WHERE gender == "M"';
+      expect(getSparklineColumns(esql)).toEqual(['sparkline']);
+    });
+
+    it('should collect sparkline columns from multiple consecutive STATS commands', () => {
+      const esql =
+        'FROM employees | STATS s1 = SPARKLINE(MAX(salary), hire_date, 20, "1985-01-01T00:00:00Z", "1986-12-31T00:00:00Z") BY bucket_date = BUCKET(hire_date, 1year) | STATS s2 = SPARKLINE(SUM(salary), bucket_date, 12, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z")';
+      expect(getSparklineColumns(esql)).toEqual(['s1', 's2']);
+    });
+
+    it('should not include non-sparkline aggregates from mixed STATS', () => {
+      const esql =
+        'FROM employees | STATS s = SPARKLINE(COUNT(*), hire_date, 20, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z"), c = COUNT(*), m = MAX(salary)';
+      expect(getSparklineColumns(esql)).toEqual(['s']);
+    });
+
+    it('should detect sparkline in STATS after INLINE STATS that has no sparkline', () => {
+      const esql =
+        'FROM employees | INLINE STATS avg_height = AVG(height) BY gender | STATS s1 = SPARKLINE(AVG(salary), hire_date, 20, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z")';
+      expect(getSparklineColumns(esql)).toEqual(['s1']);
     });
   });
 
@@ -1067,139 +1229,6 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('hasDateBreakdown', () => {
-    const countColumn = {
-      id: 'COUNT()',
-      isNull: false,
-      meta: { type: 'number', esType: 'long' },
-      name: 'COUNT()',
-    } as DatatableColumn;
-
-    const mockDateFieldColumn = {
-      id: '@timestamp',
-      isNull: false,
-      meta: { type: 'date', esType: 'date' },
-      name: '@timestamp',
-    } as DatatableColumn;
-
-    const mockBucketColumn = {
-      id: 'BUCKET(@timestamp, 1h)',
-      isNull: false,
-      meta: { type: 'date', esType: 'date' },
-      name: 'BUCKET(@timestamp, 1h)',
-    } as DatatableColumn;
-
-    it('should return false if the query is empty', () => {
-      expect(hasDateBreakdown('')).toBe(false);
-    });
-    it('should return false if date column cannot be identified', () => {
-      expect(hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h)')).toBe(false);
-    });
-    it('should return false if it is not a TS command', () => {
-      expect(hasDateBreakdown('FROM index | STATS COUNT() BY BUCKET(@timestamp, 1h)')).toBe(false);
-    });
-    it('should return false if the STATS BY command does not use a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY agent.name', [
-          countColumn,
-          {
-            id: 'agent.name',
-            isNull: false,
-            meta: { type: 'string', esType: 'keyword' },
-            name: 'agent.name',
-          },
-        ] as DatatableColumn[])
-      ).toBe(false);
-    });
-    it('should return false if the last STATS BY command does use a date column', () => {
-      expect(
-        hasDateBreakdown(
-          `TS index 
-            | STATS count=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
-            | STATS sample = SAMPLE(count, 10) BY category`,
-          [
-            {
-              id: 'count',
-              isNull: false,
-              meta: { type: 'number', esType: 'long' },
-              name: 'count',
-            },
-            {
-              id: 'category',
-              isNull: false,
-              meta: { type: 'string', esType: 'keyword' },
-              name: 'category',
-            },
-            mockDateFieldColumn,
-          ]
-        )
-      ).toBe(false);
-    });
-    it('should return true if the query bucket aggregation, case insensitive and ignoring spaces', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY bucket(@timestamp,    1h)', [
-          countColumn,
-          mockBucketColumn,
-        ])
-      ).toBe(true);
-    });
-    it('should return true if STATS BY command uses a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY @timestamp', [
-          countColumn,
-          mockDateFieldColumn,
-        ])
-      ).toBe(true);
-    });
-    it('should return true if the query contains a STATS BY command with multiple breakdowns, one of which is a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h), agent.name', [
-          countColumn,
-          mockDateFieldColumn,
-          {
-            id: 'agent.name',
-            isNull: false,
-            meta: { type: 'string', esType: 'keyword' },
-            name: 'agent.name',
-          },
-        ])
-      ).toBe(true);
-    });
-    it('should return true if the query contains a STATS BY command with an aliased breakdown field that is a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY t=BUCKET(@timestamp, 1h)', [
-          countColumn,
-          {
-            id: 't',
-            isNull: false,
-            meta: { type: 'date', esType: 'date' },
-            name: 't',
-          },
-        ])
-      ).toBe(true);
-    });
-    it('should return true if the query contains a STATS BY a function that uses a date column', () => {
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h)', [
-          countColumn,
-          mockBucketColumn,
-        ])
-      ).toBe(true);
-
-      expect(
-        hasDateBreakdown('TS index | STATS COUNT() BY DATE_TRUNC(1h, @timestamp)', [
-          countColumn,
-          {
-            id: 'DATE_TRUNC(1h, @timestamp)',
-            isNull: false,
-            meta: { type: 'date', esType: 'date' },
-            name: 'DATE_TRUNC(1h, @timestamp)',
-          },
-        ])
-      ).toBe(true);
-    });
-  });
-
   describe('hasOnlySourceCommand', () => {
     it('should return true for queries with only FROM command', () => {
       expect(hasOnlySourceCommand('FROM index')).toBe(true);
@@ -1227,6 +1256,28 @@ describe('esql query helpers', () => {
           'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
         )
       ).toBe(false);
+    });
+  });
+
+  describe('hasInfoCommand', () => {
+    it('should return true when query contains METRICS_INFO command', () => {
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO')).toBe(true);
+    });
+
+    it('should return true when query contains TS_INFO command', () => {
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO')).toBe(true);
+    });
+
+    it('should return true when METRICS_INFO appears with other commands', () => {
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO | LIMIT 10')).toBe(true);
+    });
+
+    it('should return true when TS_INFO appears with other commands', () => {
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO | LIMIT 10')).toBe(true);
+    });
+
+    it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
+      expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
     });
   });
 });

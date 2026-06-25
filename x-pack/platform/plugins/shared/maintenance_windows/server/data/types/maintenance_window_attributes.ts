@@ -7,6 +7,7 @@
 
 import type { RRuleAttributes } from './r_rule_attributes';
 import type { AlertsFilterQueryAttributes } from './alerts_filter_query_attributes';
+import type { Schedule } from '../../application/types';
 
 export const maintenanceWindowCategoryIdTypes = {
   OBSERVABILITY: 'observability',
@@ -35,4 +36,8 @@ export interface MaintenanceWindowAttributes {
   updatedAt: string;
   categoryIds?: MaintenanceWindowCategoryIdTypes[] | null;
   scopedQuery?: AlertsFilterQueryAttributes | null;
+  schedule: { custom: Schedule };
+  scope?: {
+    alerting: AlertsFilterQueryAttributes | null;
+  };
 }

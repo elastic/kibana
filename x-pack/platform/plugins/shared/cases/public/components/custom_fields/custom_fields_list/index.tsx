@@ -7,14 +7,15 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiPanel,
+  EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiButtonIcon,
+  EuiToolTip,
   useEuiTheme,
-  EuiBadge,
 } from '@elastic/eui';
 import * as i18n from '../translations';
 
@@ -84,22 +85,32 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj={`${customField.key}-custom-field-edit`}
-                          aria-label={`${customField.key}-custom-field-edit`}
-                          iconType="pencil"
-                          color="primary"
-                          onClick={() => onEditCustomField(customField.key)}
-                        />
+                        <EuiToolTip
+                          content={`${customField.key}-custom-field-edit`}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj={`${customField.key}-custom-field-edit`}
+                            aria-label={`${customField.key}-custom-field-edit`}
+                            iconType="pencil"
+                            color="primary"
+                            onClick={() => onEditCustomField(customField.key)}
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj={`${customField.key}-custom-field-delete`}
-                          aria-label={`${customField.key}-custom-field-delete`}
-                          iconType="minusInCircle"
-                          color="danger"
-                          onClick={() => setSelectedItem(customField)}
-                        />
+                        <EuiToolTip
+                          content={`${customField.key}-custom-field-delete`}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj={`${customField.key}-custom-field-delete`}
+                            aria-label={`${customField.key}-custom-field-delete`}
+                            iconType="minusCircle"
+                            color="danger"
+                            onClick={() => setSelectedItem(customField)}
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

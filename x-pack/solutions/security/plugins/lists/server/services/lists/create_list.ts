@@ -9,13 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
-  DeserializerOrUndefined,
   IdOrUndefined,
   Immutable,
   ListSchema,
   MetaOrUndefined,
   Name,
-  SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
@@ -25,8 +23,6 @@ import type { IndexEsListSchema } from '../../schemas/elastic_query';
 
 export interface CreateListOptions {
   id: IdOrUndefined;
-  deserializer: DeserializerOrUndefined;
-  serializer: SerializerOrUndefined;
   type: Type;
   name: Name;
   description: Description;
@@ -42,8 +38,6 @@ export interface CreateListOptions {
 
 export const createList = async ({
   id,
-  deserializer,
-  serializer,
   name,
   type,
   description,
@@ -62,11 +56,9 @@ export const createList = async ({
     created_at: createdAt,
     created_by: user,
     description,
-    deserializer,
     immutable,
     meta,
     name,
-    serializer,
     tie_breaker_id: tieBreaker ?? uuidv4(),
     type,
     updated_at: createdAt,

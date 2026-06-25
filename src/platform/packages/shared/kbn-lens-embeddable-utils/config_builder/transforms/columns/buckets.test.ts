@@ -54,7 +54,7 @@ describe('Buckets Transforms', () => {
     it('should transform filters API to lens state', () => {
       const input: LensApiFiltersOperation = {
         operation: 'filters',
-        filters: [{ filter: { language: 'kuery', query: 'status:active' }, label: 'Active' }],
+        filters: [{ filter: { language: 'kql', expression: 'status:active' }, label: 'Active' }],
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
       if (!isLensStateColumnOfType<FiltersIndexPatternColumn>('filters', result)) {
@@ -100,7 +100,7 @@ describe('Buckets Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
+        limit: 5,
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
       if (!isLensStateColumnOfType<TermsIndexPatternColumn>('terms', result)) {
@@ -115,6 +115,79 @@ describe('Buckets Transforms', () => {
       expect(() =>
         fromBucketLensApiToLensState({ operation: 'unsupported', field: 'value' } as any, [])
       ).toThrowError('Unsupported bucket operation');
+    });
+
+    describe('terms rank_by metric_index with reference metrics', () => {
+      const counterRateMetric = (
+        label: string
+      ): { column: AnyMetricLensStateColumn; id: string } => ({
+        column: {
+          operationType: 'counter_rate',
+          label,
+          dataType: 'number',
+          isBucketed: false,
+          references: [],
+        },
+        id: label,
+      });
+
+      const maxReferenceMetric = (
+        label: string
+      ): { column: AnyMetricLensStateColumn; id: string } => ({
+        column: {
+          operationType: 'max',
+          sourceField: 'bytes',
+          label,
+          dataType: 'number',
+          isBucketed: false,
+        },
+        id: label,
+      });
+
+      const visibleMetricColumns = [counterRateMetric('metric_0'), counterRateMetric('metric_1')];
+      const referenceColumns = [
+        maxReferenceMetric('metric_ref_0'),
+        maxReferenceMetric('metric_ref_1'),
+      ];
+      const interleavedMetricColumns = [
+        visibleMetricColumns[0],
+        referenceColumns[0],
+        visibleMetricColumns[1],
+        referenceColumns[1],
+      ];
+
+      const termsWithSecondMetricRank: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['host.name'],
+        limit: 10,
+        rank_by: { type: 'metric', metric_index: 1, direction: 'desc' },
+      };
+
+      it('resolves metric_index against visible API metrics only', () => {
+        const result = fromBucketLensApiToLensState(
+          termsWithSecondMetricRank,
+          visibleMetricColumns
+        );
+        if (!isLensStateColumnOfType<TermsIndexPatternColumn>('terms', result)) {
+          fail();
+        }
+
+        expect(result.params.orderBy).toEqual({ type: 'column', columnId: 'metric_1' });
+      });
+
+      it('resolves metric_index incorrectly when metrics and refs are interleaved', () => {
+        const result = fromBucketLensApiToLensState(
+          termsWithSecondMetricRank,
+          interleavedMetricColumns
+        );
+        if (!isLensStateColumnOfType<TermsIndexPatternColumn>('terms', result)) {
+          fail();
+        }
+
+        // Documents the old accidental layout: index 1 pointed at a hidden ref, not metric_1.
+        expect(result.params.orderBy).toEqual({ type: 'column', columnId: 'metric_ref_0' });
+        expect(result.params.orderBy).not.toEqual({ type: 'column', columnId: 'metric_1' });
+      });
     });
   });
 
@@ -238,7 +311,7 @@ describe('Buckets Transforms', () => {
       }
       expect(result.operation).toBe('terms');
       expect(result.fields).toEqual(['status']);
-      expect(result.size).toBe(5);
+      expect(result.limit).toBe(5);
     });
 
     it('should throw for unsupported operation', () => {

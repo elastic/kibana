@@ -34,6 +34,12 @@ export interface CloudBasicUrls {
    */
   deploymentUrl?: string;
   /**
+   * This is the path to the Cloud deployment creation page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/deployments/create`
+   */
+  createDeploymentUrl?: string;
+  /**
    * The full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud.
    */
   profileUrl?: string;
@@ -46,13 +52,15 @@ export interface CloudBasicUrls {
    */
   performanceUrl?: string;
   /**
-   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  usersAndRolesUrl?: string;
-  /**
    * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
    */
   projectsUrl?: string;
+  /**
+   * This is the path to the Cloud project creation page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/projects/create`
+   */
+  createProjectUrl?: string;
   /**
    * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
    *
@@ -69,6 +77,11 @@ export interface CloudPrivilegedUrls {
    * The full URL to the billing page on Elastic Cloud.
    */
   billingUrl?: string;
+  /**
+   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud,
+   * or if the user does not have the `manage_security` cluster privilege.
+   */
+  usersAndRolesUrl?: string;
 }
 
 export type CloudUrls = CloudBasicUrls & CloudPrivilegedUrls;
@@ -91,6 +104,16 @@ export interface CloudStart extends CloudBasicUrls {
    */
   fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
   /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
+  /**
    * Method to retrieve privileged URLs for the Cloud plugin.
    */
   getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
@@ -102,6 +125,11 @@ export interface CloudStart extends CloudBasicUrls {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
@@ -183,6 +211,12 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   isCloudEnabled: boolean;
   /**
+   * `true` when running on ECE (Elastic Cloud Enterprise).
+   * When `isSaasContainer` is missing, cloud-enabled non-serverless deployments are assumed to
+   * be ECE. Self-managed and serverless deployments remain `undefined` unless explicitly set.
+   */
+  isEce?: boolean;
+  /**
    * The end date for the Elastic Cloud trial. Only available on Elastic Cloud.
    *
    * @example `2020-10-14T10:40:22Z`
@@ -198,6 +232,16 @@ export interface CloudSetup extends CloudBasicUrls {
    * @param contextProvider The React component from the Service Provider.
    */
   registerCloudService: (contextProvider: FC) => void;
+  /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
   /**
    * Onboarding configuration
    */
@@ -252,6 +296,11 @@ export interface CloudSetup extends CloudBasicUrls {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 export interface PublicElasticsearchConfigType {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor, Logger, DocLinksServiceSetup } from '@kbn/core/server';
+import type { DocLinksServiceSetup, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { registerTrialCompanionRoutes } from '../lib/trial_companion/register_routes';
@@ -59,6 +59,9 @@ import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
+import { registerInitializationRoutes } from '../lib/initialization';
+import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/register_alert_analysis_routes';
+import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -99,7 +102,7 @@ export const initRoutes = (
     isServerless
   );
 
-  registerResolverRoutes(router, getStartServices, config);
+  registerResolverRoutes(router, getStartServices);
 
   registerTimelineRoutes(router, config, getStartServices);
 
@@ -136,14 +139,28 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled, publicAttacksApiEnabled } = config.experimentalFeatures;
+
+  // If publicAttacksApiEnabled is enabled, register the attacks routes.
+  if (publicAttacksApiEnabled) {
+    registerAttacksRoutes(router);
+  }
 
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger, telemetrySender, ml });
+  registerEntityAnalyticsRoutes({
+    router,
+    config,
+    docLinks,
+    getStartServices,
+    logger,
+    telemetrySender,
+    ml,
+    hasEncryptionKey,
+  });
   registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations
@@ -153,9 +170,12 @@ export const initRoutes = (
 
   registerAssetInventoryRoutes({ router, logger });
 
-  registerSiemReadinessRoutes({ router, logger });
+  registerSiemReadinessRoutes({ router, logger, isServerless });
 
   registerTrialCompanionRoutes(trialCompanionDeps);
+
+  registerInitializationRoutes({ router, logger });
+  registerAlertAnalysisRoutes(router, logger);
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

@@ -54,10 +54,7 @@
     "@kbn/event-annotation-common",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-containers",
-    "@kbn/kql",
+    "@kbn/kql"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

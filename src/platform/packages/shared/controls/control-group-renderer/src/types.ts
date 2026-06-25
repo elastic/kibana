@@ -73,6 +73,7 @@ export interface HasEditorConfig {
 export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
   hideAdditionalSettings?: boolean;
+  hideValuesSourceSelector?: boolean;
   defaultDataViewId?: string;
   fieldFilterPredicate?: FieldFilterPredicate;
   controlStateTransform?: ControlStateTransform;
@@ -99,7 +100,7 @@ export interface ControlGroupRuntimeState<State extends {} = {}> {
 }
 
 export interface ControlGroupCreationOptions {
-  initialState?: Partial<ControlGroupRuntimeState>;
+  initialState?: ControlGroupRuntimeState;
   getEditorConfig?: () => Omit<ControlGroupEditorConfig, 'controlStateTransform'> | undefined;
 }
 

@@ -9,6 +9,7 @@ import type { ActionTypeRegistry } from '../../../action_type_registry';
 import type { InMemoryConnector } from '../../../types';
 import type { Connector } from '../types';
 import { isConnectorDeprecated } from './is_connector_deprecated';
+import { getAuthMode } from './get_auth_mode';
 
 export function connectorFromInMemoryConnector({
   id,
@@ -27,6 +28,7 @@ export function connectorFromInMemoryConnector({
     isSystemAction: inMemoryConnector.isSystemAction,
     isDeprecated: isConnectorDeprecated(inMemoryConnector),
     isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(inMemoryConnector.actionTypeId),
+    authMode: getAuthMode(inMemoryConnector.authMode),
   };
 
   if (inMemoryConnector.exposeConfig) {

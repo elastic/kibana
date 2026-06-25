@@ -8,7 +8,7 @@
 require('@kbn/setup-node-env');
 
 const swaggerJsdoc = require('swagger-jsdoc');
-const { zodToJsonSchema } = require('zod-to-json-schema');
+const { z } = require('@kbn/zod/v4');
 
 const {
   createEntityDefinitionQuerySchema,
@@ -21,9 +21,13 @@ const {
   entityHistorySchema,
 } = require('..');
 
-const schemaOptions = {
-  target: 'openApi3',
-  $refStrategy: 'none',
+const toOpenApiSchema = (schema) => {
+  // eslint-disable-next-line no-unused-vars
+  const { $schema, ...jsonSchema } = z.toJSONSchema(schema, {
+    unrepresentable: 'any',
+    io: 'input',
+  });
+  return jsonSchema;
 };
 
 export const generateOAS = (options) =>
@@ -36,29 +40,14 @@ export const generateOAS = (options) =>
       },
       components: {
         schemas: {
-          createEntityDefinitionQuerySchema: zodToJsonSchema(
-            createEntityDefinitionQuerySchema,
-            schemaOptions
-          ),
-          getEntityDefinitionQuerySchema: zodToJsonSchema(
-            getEntityDefinitionQuerySchema,
-            schemaOptions
-          ),
-          resetEntityDefinitionParamsSchema: zodToJsonSchema(
-            resetEntityDefinitionParamsSchema,
-            schemaOptions
-          ),
-          deleteEntityDefinitionParamsSchema: zodToJsonSchema(
-            deleteEntityDefinitionParamsSchema,
-            schemaOptions
-          ),
-          deleteEntityDefinitionQuerySchema: zodToJsonSchema(
-            deleteEntityDefinitionQuerySchema,
-            schemaOptions
-          ),
-          entityDefinitionSchema: zodToJsonSchema(entityDefinitionSchema, schemaOptions),
-          entitySummarySchema: zodToJsonSchema(entityLatestSchema, schemaOptions),
-          entityHistorySchema: zodToJsonSchema(entityHistorySchema, schemaOptions),
+          createEntityDefinitionQuerySchema: toOpenApiSchema(createEntityDefinitionQuerySchema),
+          getEntityDefinitionQuerySchema: toOpenApiSchema(getEntityDefinitionQuerySchema),
+          resetEntityDefinitionParamsSchema: toOpenApiSchema(resetEntityDefinitionParamsSchema),
+          deleteEntityDefinitionParamsSchema: toOpenApiSchema(deleteEntityDefinitionParamsSchema),
+          deleteEntityDefinitionQuerySchema: toOpenApiSchema(deleteEntityDefinitionQuerySchema),
+          entityDefinitionSchema: toOpenApiSchema(entityDefinitionSchema),
+          entitySummarySchema: toOpenApiSchema(entityLatestSchema),
+          entityHistorySchema: toOpenApiSchema(entityHistorySchema),
         },
       },
     },

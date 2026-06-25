@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
@@ -16,11 +17,12 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { FETCH_STATUS, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../../common/get_synthetics_indices';
 import { useCreateSLO } from '../../hooks/use_create_slo';
 import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
@@ -39,7 +41,12 @@ import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locato
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
-import { selectOverviewState } from '../../../../state';
+import { selectOverviewView } from '../../../../state';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import {
+  createRemoteMonitorCloneUrl,
+  createRemoteMonitorEditUrl,
+} from '../../../../utils/remote/remote_monitor_urls';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -75,7 +82,48 @@ interface Props {
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
   locationId: string;
+  renderButton?: (onClick: () => void) => NonNullable<React.ReactNode>;
+  kibanaUrl?: string;
 }
+
+/**
+ * `top_metrics` can't aggregate text-mapped `kibanaUrl`, so row metadata may
+ * omit it. Fall back to the latest ping over CCS, gated on `enabled` so the
+ * cost only happens when the user opens the menu, never per row at render.
+ */
+const useRemoteKibanaUrlFallback = ({
+  enabled,
+  configId,
+  remoteName,
+}: {
+  enabled: boolean;
+  configId: string;
+  remoteName?: string;
+}): string | undefined => {
+  const index = enabled && remoteName ? getSyntheticsCcsIndex(remoteName) : '';
+
+  const { data } = useEsSearch<
+    { kibanaUrl?: string; remote?: { kibanaUrl?: string } },
+    SearchRequest
+  >(
+    {
+      index,
+      size: 1,
+      query: {
+        bool: {
+          filter: [{ term: { config_id: configId } }],
+        },
+      },
+      sort: [{ '@timestamp': 'desc' as const }],
+      _source: ['kibanaUrl', 'remote.kibanaUrl'],
+    },
+    [enabled, configId, remoteName],
+    { name: 'getOverviewActionsPopoverRemoteKibanaUrl' }
+  );
+
+  const ping = data?.hits?.hits?.[0]?._source;
+  return ping?.remote?.kibanaUrl ?? ping?.kibanaUrl;
+};
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
   ${(props) => props.shadow}
@@ -107,17 +155,32 @@ export function ActionsPopover({
   iconHasPanel = true,
   iconSize = 's',
   locationId,
+  renderButton,
+  kibanaUrl: kibanaUrlProp,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const locationName = useLocationName(monitor);
+  const isRemote = Boolean(monitor.remote);
+  const { space } = useKibanaSpace();
+
+  // Precedence mirrors the flyout: prop → overview metadata → lazy CCS fetch.
+  const monitorRemoteKibanaUrl = monitor.remote?.kibanaUrl;
+  const fallbackKibanaUrl = useRemoteKibanaUrlFallback({
+    enabled: isPopoverOpen && isRemote && !kibanaUrlProp && !monitorRemoteKibanaUrl,
+    configId: monitor.configId,
+    remoteName: monitor.remote?.remoteName,
+  });
+  const remoteKibanaUrl = kibanaUrlProp ?? monitorRemoteKibanaUrl ?? fallbackKibanaUrl;
 
   const { http } = useKibana().services;
+  const locationLabel = monitor.locations[0]?.label ?? '';
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId ?? monitor.locationId,
+    locationId: locationId || monitor.locations[0]?.id || '',
     spaces: monitor.spaces,
+    remoteName: monitor.remote?.remoteName,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
 
@@ -154,7 +217,7 @@ export function ActionsPopover({
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
@@ -173,10 +236,10 @@ export function ActionsPopover({
       if (locationName) {
         dispatch(
           setFlyoutConfig({
+            locationId,
             configId: monitor.configId,
             location: locationName,
             id: monitor.configId,
-            locationId: monitor.locationId,
           })
         );
         setIsPopoverOpen(false);
@@ -188,22 +251,39 @@ export function ActionsPopover({
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
     embeddableInput: {
       filters: {
-        monitorIds: [{ label: monitor.name, value: monitor.configId }],
+        monitor_ids: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
-        locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
-        monitorTypes: [],
+        locations: [{ label: locationLabel, value: locationId }],
+        monitor_types: [],
         projects: [],
       },
       view,
     },
-    documentTitle: `${monitor.name} - ${monitor.locationLabel}`,
+    documentTitle: `${monitor.name} - ${locationLabel}`,
     objectType: i18n.translate('xpack.synthetics.overview.actions.addToDashboard.objectTypeLabel', {
       defaultMessage: 'Monitor Overview',
     }),
   });
 
+  const remoteEditUrl = useMemo(
+    () =>
+      isRemote
+        ? createRemoteMonitorEditUrl({ monitor, spaceId: space?.id, kibanaUrl: remoteKibanaUrl })
+        : undefined,
+    [isRemote, monitor, space?.id, remoteKibanaUrl]
+  );
+
+  const remoteCloneUrl = useMemo(
+    () =>
+      isRemote
+        ? createRemoteMonitorCloneUrl({ monitor, spaceId: space?.id, kibanaUrl: remoteKibanaUrl })
+        : undefined,
+    [isRemote, monitor, space?.id, remoteKibanaUrl]
+  );
+
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
-  let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
+
+  const popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: actionsMenuGoToMonitorName,
       icon: 'sortRight',
@@ -212,7 +292,9 @@ export function ActionsPopover({
     },
     quickInspectPopoverItem,
     {
-      name: testInProgress ? (
+      name: isRemote ? (
+        runTestManually
+      ) : testInProgress ? (
         <EuiToolTip content={TEST_SCHEDULED_LABEL}>
           <span tabIndex={0}>{runTestManually}</span>
         </EuiToolTip>
@@ -224,52 +306,75 @@ export function ActionsPopover({
           {runTestManually}
         </NoPermissionsTooltip>
       ),
-      icon: 'beaker',
-      disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
-      onClick: () => {
-        dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
-        dispatch(setFlyoutConfig(null));
-        setIsPopoverOpen(false);
-      },
+      icon: 'flask',
+      disabled: isRemote || testInProgress || !canUsePublicLocations || !isServiceAllowed,
+      toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
+      onClick: isRemote
+        ? undefined
+        : () => {
+            dispatch(
+              manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name })
+            );
+            dispatch(setFlyoutConfig(null));
+            setIsPopoverOpen(false);
+          },
+      'data-test-subj': 'syntheticsActionsPopoverRunTestManually',
     },
     {
-      name: (
+      name: isRemote ? (
+        actionsMenuEditMonitorName
+      ) : (
         <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           {actionsMenuEditMonitorName}
         </NoPermissionsTooltip>
       ),
       icon: 'pencil',
-      disabled: !canEditSynthetics || !isServiceAllowed,
-      href: editUrl,
+      disabled: isRemote ? !remoteEditUrl : !canEditSynthetics || !isServiceAllowed,
+      href: isRemote ? remoteEditUrl : editUrl,
+      target: isRemote ? '_blank' : undefined,
+      toolTipContent: getRemoteActionTooltip(isRemote, remoteEditUrl, canEditSynthetics),
       'data-test-subj': 'editMonitorLink',
     },
     {
-      name: (
+      name: isRemote ? (
+        actionsMenuCloneMonitorName
+      ) : (
         <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           {actionsMenuCloneMonitorName}
         </NoPermissionsTooltip>
       ),
       icon: 'copy',
-      disabled: !canEditSynthetics || !isServiceAllowed,
-      href: http?.basePath.prepend(`synthetics/add-monitor?cloneId=${monitor.configId}`),
+      disabled: isRemote ? !remoteCloneUrl : !canEditSynthetics || !isServiceAllowed,
+      href: isRemote
+        ? remoteCloneUrl
+        : http?.basePath.prepend(`synthetics/add-monitor?cloneId=${monitor.configId}`),
+      target: isRemote ? '_blank' : undefined,
+      toolTipContent: getRemoteActionTooltip(isRemote, remoteCloneUrl, canEditSynthetics),
       'data-test-subj': 'cloneMonitorLink',
     },
     {
-      name: (
+      name: isRemote ? (
+        CREATE_SLO
+      ) : (
         <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           {CREATE_SLO}
         </NoPermissionsTooltip>
       ),
-      icon: 'visGauge',
-      disabled: !canEditSynthetics || !isServiceAllowed,
-      onClick: () => {
-        setIsPopoverOpen(false);
-        setIsSLOFlyoutOpen(true);
-      },
+      icon: 'chartGauge',
+      disabled: isRemote || !canEditSynthetics || !isServiceAllowed,
+      toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
+      onClick: isRemote
+        ? undefined
+        : () => {
+            setIsPopoverOpen(false);
+            setIsSLOFlyoutOpen(true);
+          },
       'data-test-subj': 'createSLOBtn',
     },
     {
-      name: (
+      name: isRemote ? (
+        enableLabel
+      ) : (
         <NoPermissionsTooltip
           canEditSynthetics={canEditSynthetics}
           canUsePublicLocations={canUsePublicLocations}
@@ -277,16 +382,26 @@ export function ActionsPopover({
           {enableLabel}
         </NoPermissionsTooltip>
       ),
-      icon: 'invert',
-      disabled: !canEditSynthetics || !canUsePublicLocations,
-      onClick: () => {
-        if (status !== FETCH_STATUS.LOADING) {
-          updateMonitorEnabledState(!monitor.isEnabled);
-        }
-      },
+      icon: 'contrast',
+      disabled: isRemote || !canEditSynthetics || !canUsePublicLocations,
+      toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
+      onClick: isRemote
+        ? undefined
+        : () => {
+            if (status !== FETCH_STATUS.LOADING) {
+              updateMonitorEnabledState(!monitor.isEnabled);
+            }
+          },
+      'data-test-subj': 'syntheticsActionsPopoverEnableMonitor',
     },
     {
-      name: (
+      name: isRemote ? (
+        monitor.isStatusAlertEnabled ? (
+          disableAlertLabel
+        ) : (
+          enableMonitorAlertLabel
+        )
+      ) : (
         <NoPermissionsTooltip
           canEditSynthetics={canEditSynthetics}
           canUsePublicLocations={canUsePublicLocations}
@@ -294,7 +409,8 @@ export function ActionsPopover({
           {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
         </NoPermissionsTooltip>
       ),
-      disabled: !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed,
+      disabled: isRemote || !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed,
+      toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
       ) : monitor.isStatusAlertEnabled ? (
@@ -302,56 +418,74 @@ export function ActionsPopover({
       ) : (
         'bell'
       ),
-      onClick: () => {
-        if (!alertLoading) {
-          updateAlertEnabledState({
-            monitor: {
-              [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
-                status: {
-                  enabled: monitor.isStatusAlertEnabled,
+      onClick: isRemote
+        ? undefined
+        : () => {
+            if (!alertLoading) {
+              updateAlertEnabledState({
+                monitor: {
+                  [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
+                    status: {
+                      enabled: monitor.isStatusAlertEnabled,
+                    },
+                  }),
                 },
-              }),
-            },
-            configId: monitor.configId,
-            name: monitor.name,
-          });
-        }
-      },
+                configId: monitor.configId,
+                name: monitor.name,
+              });
+            }
+          },
     },
     {
       name: addMonitorToDashboardLabel,
       icon: 'dashboardApp',
-      onClick: () => {
-        setIsPopoverOpen(false);
-        setDashboardAttachmentReady(true);
-      },
+      disabled: isRemote,
+      toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
+      onClick: isRemote
+        ? undefined
+        : () => {
+            setIsPopoverOpen(false);
+            setDashboardAttachmentReady(true);
+          },
+      'data-test-subj': 'syntheticsActionsPopoverAddToDashboard',
     },
   ];
-  if (isInspectView) popoverItems = popoverItems.filter((i) => i !== quickInspectPopoverItem);
+
+  const visiblePopoverItems = isInspectView
+    ? popoverItems.filter((i) => i !== quickInspectPopoverItem)
+    : popoverItems;
 
   return (
     <>
       <Container boxShadow={euiShadow} position={position}>
         <EuiPopover
           button={
-            <IconPanel hasPanel={iconHasPanel}>
-              <EuiButtonIcon
-                data-test-subj="syntheticsActionsPopoverButton"
-                aria-label={openActionsMenuAria}
-                iconType="boxesHorizontal"
-                color="primary"
-                size={iconSize}
-                display="empty"
-                onClick={() => setIsPopoverOpen((b: boolean) => !b)}
-                title={openActionsMenuAria}
-              />
-            </IconPanel>
+            renderButton ? (
+              renderButton(() => setIsPopoverOpen((b: boolean) => !b))
+            ) : (
+              <IconPanel hasPanel={iconHasPanel}>
+                <EuiToolTip content={openActionsMenuAria} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="syntheticsActionsPopoverButton"
+                    aria-label={openActionsMenuAria}
+                    iconType="boxesVertical"
+                    color="primary"
+                    size={iconSize}
+                    display="empty"
+                    onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+                  />
+                </EuiToolTip>
+              </IconPanel>
+            )
           }
           color="lightestShade"
           isOpen={isPopoverOpen}
           closePopover={() => setIsPopoverOpen(false)}
           anchorPosition="rightUp"
           panelPaddingSize="none"
+          aria-label={i18n.translate('xpack.synthetics.actionsPopover.popoverAriaLabel', {
+            defaultMessage: 'Actions menu',
+          })}
         >
           <EuiContextMenu
             initialPanelId={0}
@@ -359,7 +493,7 @@ export function ActionsPopover({
               {
                 id: '0',
                 title: actionsMenuTitle,
-                items: popoverItems,
+                items: visiblePopoverItems,
               },
             ]}
           />
@@ -481,3 +615,34 @@ export const enabledFailLabel = (name: string) =>
     defaultMessage: 'Unable to update monitor "{name}".',
     values: { name },
   });
+
+const NOT_AVAILABLE_FOR_REMOTE_MONITORS = i18n.translate(
+  'xpack.synthetics.overview.actions.notAvailableForRemote',
+  {
+    defaultMessage: 'This action is not available for remote monitors',
+  }
+);
+
+const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
+  'xpack.synthetics.overview.actions.remoteKibanaUrlUndefined',
+  {
+    defaultMessage: 'This action is not available for remote monitors with undefined kibanaUrl',
+  }
+);
+
+const PERMISSIONS_ON_ORIGIN_CLUSTER = i18n.translate(
+  'xpack.synthetics.overview.actions.permissionsOnOriginCluster',
+  {
+    defaultMessage: 'Permissions are enforced on the origin cluster.',
+  }
+);
+
+const getRemoteActionTooltip = (
+  isRemote: boolean,
+  remoteUrl: string | undefined,
+  canEditSynthetics: boolean
+) => {
+  if (!isRemote) return undefined;
+  if (!remoteUrl) return NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL;
+  return canEditSynthetics ? undefined : PERMISSIONS_ON_ORIGIN_CLUSTER;
+};

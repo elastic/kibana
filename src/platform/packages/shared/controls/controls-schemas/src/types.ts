@@ -8,11 +8,12 @@
  */
 
 import type React from 'react';
+import type { BehaviorSubject } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { controlSchema, dataControlSchema } from './control_schema';
+import type { controlTitleSchema, dataControlSchema } from './control_schema';
 import type {
-  controlsGroupSchema,
+  getControlsGroupSchema,
   controlWidthSchema,
   pinnedControlSchema,
 } from './controls_group_schema';
@@ -27,20 +28,38 @@ import type {
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 import type { timeSliderControlSchema } from './time_slider_schema';
 
-export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
+/**
+ * Collect every key from each branch of a discriminated union, then build a
+ * single object type where each key is optional and typed as the union of its
+ * non-`never` types across the variants.
+ */
+type AllKeysOfUnion<T> = T extends unknown ? keyof T : never;
+type LooseUnion<T> = {
+  [K in AllKeysOfUnion<T>]?: T extends unknown
+    ? K extends keyof T
+      ? [T[K]] extends [never]
+        ? never
+        : T[K]
+      : never
+    : never;
+};
+
+export type ControlsGroupState = TypeOf<ReturnType<typeof getControlsGroupSchema>>;
 export type PinnedControlState = ControlsGroupState[number];
 export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema> & {
   order: number;
-  type: PinnedControlState['type'];
+  type: string;
 };
-export type ControlWidth = TypeOf<typeof controlWidthSchema>;
-export type ControlState = TypeOf<typeof controlSchema>;
 
-export type DataControlState = TypeOf<typeof dataControlSchema>;
+export type ControlWidth = TypeOf<typeof controlWidthSchema>;
+export type ControlState = TypeOf<typeof controlTitleSchema>;
+
+export type StrictDataControlState = TypeOf<typeof dataControlSchema>;
+export type DataControlState = LooseUnion<StrictDataControlState>;
 
 export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySettingsSchema>;
 
-export type OptionsListDSLControlState = TypeOf<typeof optionsListDSLControlSchema>;
+export type OptionsListDSLControlState = LooseUnion<TypeOf<typeof optionsListDSLControlSchema>>;
 export type OptionsListESQLControlState = TypeOf<typeof optionsListESQLControlSchema>;
 export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
 
@@ -48,7 +67,7 @@ export type OptionsListSearchTechnique = TypeOf<typeof optionsListSearchTechniqu
 export type OptionsListSelection = TypeOf<typeof optionsListSelectionSchema>;
 export type OptionsListSortingType = TypeOf<typeof optionsListSortSchema>;
 
-export type RangeSliderControlState = TypeOf<typeof rangeSliderControlSchema>;
+export type RangeSliderControlState = LooseUnion<TypeOf<typeof rangeSliderControlSchema>>;
 export type RangeSliderValue = TypeOf<typeof rangeValueSchema>;
 
 export type TimeSlice = [number, number];
@@ -57,11 +76,9 @@ export type TimeSliderControlState = TypeOf<typeof timeSliderControlSchema>;
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
 }
-
-// This value only exists for control saved objects prior to version 9.4
-export interface LegacyIgnoreParentSettings {
-  ignoreFilters?: boolean;
-  ignoreQuery?: boolean;
-  ignoreTimerange?: boolean;
-  ignoreValidations?: boolean;
+export interface PublishesTooltipLabel {
+  tooltipLabel$: BehaviorSubject<string>;
 }
+
+export const apiPublishesTooltipLabel = (api: unknown): api is PublishesTooltipLabel =>
+  Boolean((api as PublishesTooltipLabel)?.tooltipLabel$);

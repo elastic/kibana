@@ -6,16 +6,18 @@
  */
 
 import {
+  type AuthenticatedUser,
   type ElasticsearchClient,
   type KibanaRequest,
   type Logger,
   type RequestHandlerContext,
   type SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { AgentlessPolicy, CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 
@@ -28,6 +30,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
+import { FleetNotFoundError } from '../../errors';
 
 import type { PackageInfo } from '../../types';
 import {
@@ -126,21 +129,15 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // Build agentless config with cloud connectors if provided
       let agentlessConfig = baseAgentlessConfig;
       if (data.cloud_connector?.enabled) {
-        const inputsArray = data.inputs ? Object.entries(data.inputs) : [];
-        const input = inputsArray.find(([, pinput]) => pinput.enabled !== false);
-        const targetCsp = input?.[0].match(/aws|azure|gcp/)?.[0] as
-          | 'aws'
-          | 'azure'
-          | 'gcp'
-          | undefined;
-
         this.logger.debug(
-          `Configuring cloud connectors for cloud provider: ${targetCsp} from cloud_connector object`
+          `Configuring cloud connectors for cloud provider: ${
+            data.cloud_connector.target_csp || 'undefined'
+          } from cloud_connector object`
         );
         agentlessConfig = {
           ...baseAgentlessConfig,
           cloud_connectors: {
-            target_csp: targetCsp,
+            target_csp: data.cloud_connector.target_csp,
             enabled: true,
           },
         };
@@ -201,6 +198,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
+        policyTemplate,
       });
 
       newPackagePolicy = updatedPackagePolicy;
@@ -279,7 +277,18 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
 
-    const agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+    let agentPolicy;
+    try {
+      agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+    } catch (e) {
+      if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.logger.warn(`Agent policy ${policyId} not found, cleaning up orphaned resources`);
+        await this.deleteOrphanedAgentlessResources(policyId, user);
+        return;
+      }
+      throw e;
+    }
+
     if (!agentPolicy?.supports_agentless) {
       throw new Error(`Policy ${policyId} is not an agentless policy`);
     }
@@ -289,5 +298,29 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       force: options?.force,
       user,
     });
+  }
+
+  private async deleteOrphanedAgentlessResources(policyId: string, user?: AuthenticatedUser) {
+    const packagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
+      this.soClient,
+      policyId
+    );
+
+    if (packagePolicies.length > 0) {
+      await this.packagePolicyService.delete(
+        this.soClient,
+        this.esClient,
+        packagePolicies.map((pp) => pp.id),
+        { force: true, user: user ?? undefined, skipUnassignFromAgentPolicies: true }
+      );
+    }
+
+    try {
+      await agentlessAgentService.deleteAgentlessAgent(policyId);
+    } catch (e) {
+      this.logger.warn(
+        `Failed to delete agentless deployment for orphaned policy ${policyId}: ${e.message}`
+      );
+    }
   }
 }

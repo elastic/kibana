@@ -6,7 +6,7 @@
  */
 
 import { decryptSecurityLabsContent } from '@kbn/ai-security-labs-content';
-import { TextLoader } from 'langchain/document_loaders/fs/text';
+import { TextLoader } from '@langchain/classic/document_loaders/fs/text';
 
 export class EncodedSecurityLabsContentLoader extends TextLoader {
   protected parse(raw: string): Promise<string[]> {

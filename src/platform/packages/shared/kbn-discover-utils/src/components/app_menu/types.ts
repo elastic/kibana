@@ -12,9 +12,8 @@ import type {
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
-  AppMenuSecondaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 
 export enum AppMenuActionId {
   new = 'new',
@@ -23,6 +22,7 @@ export enum AppMenuActionId {
   export = 'export',
   alerts = 'alerts',
   inspect = 'inspect',
+  switchLanguageMode = 'switchLanguageMode',
   createRule = 'createRule',
   backgroundsearch = 'backgroundSearch',
   manageRulesAndConnectors = 'manageRulesAndConnectors',
@@ -33,7 +33,6 @@ export enum AppMenuActionId {
  */
 export interface DiscoverAppMenuContext extends Record<string, unknown> {
   onFinishAction: () => void;
-  parentTestId?: string;
 }
 
 /**
@@ -48,36 +47,58 @@ export interface DiscoverAppMenuRunActionParams extends AppMenuRunActionParams {
  */
 export type DiscoverAppMenuRunAction = (
   params: DiscoverAppMenuRunActionParams
-) => ReactElement | void | null | ReactNode | Promise<ReactElement | void | null | ReactNode>;
+) => void | Promise<void>;
 
 /**
- * Discover-specific popover item with typed run action
+ * Discover-specific render action that returns content mounted by Discover.
  */
-export type DiscoverAppMenuPopoverItem = Omit<AppMenuPopoverItem, 'run'> & {
-  run?: DiscoverAppMenuRunAction;
-};
+export type DiscoverAppMenuRenderAction = (
+  params: DiscoverAppMenuRunActionParams
+) => ReactElement | null;
+
+/**
+ * Replaces the core action/submenu union with Discover-specific action params.
+ * The `never` fields keep `run`, `render`, and `items` mutually exclusive.
+ */
+type DiscoverAppMenuActionOrSubmenu =
+  | {
+      run: DiscoverAppMenuRunAction;
+      render?: never;
+      items?: never;
+    }
+  | {
+      render: DiscoverAppMenuRenderAction;
+      run?: never;
+      items?: never;
+    }
+  | {
+      run?: never;
+      render?: never;
+      items?: never;
+    }
+  | {
+      items: DiscoverAppMenuPopoverItem[];
+      run?: never;
+      render?: never;
+    };
+
+type WithDiscoverAppMenuAction<BaseItem> = Omit<BaseItem, 'run' | 'items'> &
+  DiscoverAppMenuActionOrSubmenu;
+
+/**
+ * Discover-specific popover item with typed run action and nested items
+ */
+export type DiscoverAppMenuPopoverItem = WithDiscoverAppMenuAction<AppMenuPopoverItem>;
 
 /**
  * Discover-specific menu item type with typed run action and items
  */
-export type DiscoverAppMenuItemType = Omit<AppMenuItemType, 'run' | 'items'> & {
-  run?: DiscoverAppMenuRunAction;
-  items?: DiscoverAppMenuPopoverItem[];
-};
+export type DiscoverAppMenuItemType = WithDiscoverAppMenuAction<AppMenuItemType>;
 
 /**
  * Discover-specific primary action item with typed run action
  */
-export type DiscoverAppMenuPrimaryActionItem = Omit<AppMenuPrimaryActionItem, 'run'> & {
-  run?: DiscoverAppMenuRunAction;
-};
-
-/**
- * Discover-specific secondary action item with typed run action
- */
-export type DiscoverAppMenuSecondaryActionItem = Omit<AppMenuSecondaryActionItem, 'run'> & {
-  run?: DiscoverAppMenuRunAction;
-};
+export type DiscoverAppMenuPrimaryActionItem = WithDiscoverAppMenuAction<AppMenuPrimaryActionItem>;
 
 /**
  * Discover-specific app menu config with typed menu items
@@ -85,5 +106,4 @@ export type DiscoverAppMenuSecondaryActionItem = Omit<AppMenuSecondaryActionItem
 export interface DiscoverAppMenuConfig {
   items?: DiscoverAppMenuItemType[];
   primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
-  secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
 }

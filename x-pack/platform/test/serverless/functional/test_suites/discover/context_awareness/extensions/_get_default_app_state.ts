@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/discover/context_awareness/extensions/_get_default_app_state.ts
+
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'svlCommonPage',
@@ -21,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const queryBar = getService('queryBar');
   const monacoEditor = getService('monacoEditor');
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
@@ -116,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.changeRowHeightValue('Auto');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Auto');
-        await testSubjects.click('discoverNewButton');
+        await PageObjects.appMenu.clickMenuItem('discoverNewButton');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();
@@ -199,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.changeRowHeightValue('Auto');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Auto');
-        await testSubjects.click('discoverNewButton');
+        await PageObjects.appMenu.clickMenuItem('discoverNewButton');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();

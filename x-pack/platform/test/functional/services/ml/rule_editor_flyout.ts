@@ -45,5 +45,21 @@ export function MachineLearningRuleEditorFlyoutProvider({ getService }: FtrProvi
         await testSubjects.missingOrFail('mlRuleEditorFlyout');
       }
     },
+
+    async selectFilter(scopeFieldName: string) {
+      await testSubjects.click(`mlScopeCheckbox_${scopeFieldName}`);
+    },
+
+    async deleteRule() {
+      await testSubjects.click('deleteRuleModalLink');
+    },
+
+    async confirmModalConfirmButton() {
+      await testSubjects.click('confirmModalConfirmButton');
+    },
+
+    async assertEditRulesTitleIsVisible() {
+      await testSubjects.existOrFail('mlRuleEditorEditRulesTitle');
+    },
   };
 }

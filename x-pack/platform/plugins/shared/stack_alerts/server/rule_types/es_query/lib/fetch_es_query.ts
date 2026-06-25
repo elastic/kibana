@@ -35,7 +35,7 @@ export interface FetchEsQueryOpts {
     logger: Logger;
     ruleResultService?: PublicRuleResultService;
   };
-  alertLimit?: number;
+  alertLimit: number;
   dateStart: string;
   dateEnd: string;
   sourceFields: EsQuerySourceFields;

@@ -9,6 +9,7 @@ import type { RenameFieldsAndRemoveAction } from '../utils';
 import type {
   GrokProcessor,
   DissectProcessor,
+  UriPartsProcessor,
   DateProcessor,
   RenameProcessor,
   SetProcessor,
@@ -20,11 +21,19 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  RedactProcessor,
   UppercaseProcessor,
   TrimProcessor,
   LowercaseProcessor,
   JoinProcessor,
+  SplitProcessor,
+  SortProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
+  JsonExtractProcessor,
+  EnrichProcessor,
+  UserAgentProcessor,
+  RegisteredDomainProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -40,6 +49,12 @@ export type IngestPipelineGrokProcessor = RenameFieldsAndRemoveAction<
 export type IngestPipelineDissectProcessor = RenameFieldsAndRemoveAction<
   DissectProcessor,
   { from: 'field'; where: 'if' }
+>;
+
+// URI parts
+export type IngestPipelineUriPartsProcessor = RenameFieldsAndRemoveAction<
+  UriPartsProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
 // Date
@@ -98,6 +113,12 @@ export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Redact
+export type IngestPipelineRedactProcessor = RenameFieldsAndRemoveAction<
+  RedactProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
 // Math (uses script processor internally)
 export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
   MathProcessor,
@@ -134,6 +155,48 @@ export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
   { to: 'field'; where: 'if' }
 >;
 
+// Split
+export type IngestPipelineSplitProcessor = RenameFieldsAndRemoveAction<
+  SplitProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Sort
+export type IngestPipelineSortProcessor = RenameFieldsAndRemoveAction<
+  SortProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Network Direction
+export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveAction<
+  NetworkDirectionProcessor,
+  { where: 'if' }
+>;
+
+// JsonExtract (uses script processor internally)
+export type IngestPipelineJsonExtractProcessor = RenameFieldsAndRemoveAction<
+  JsonExtractProcessor,
+  { where: 'if' }
+>;
+
+// Enrich
+export type IngestPipelineEnrichProcessor = RenameFieldsAndRemoveAction<
+  EnrichProcessor,
+  { to: 'target_field'; where: 'if' }
+>;
+
+// User Agent
+export type IngestPipelineUserAgentProcessor = RenameFieldsAndRemoveAction<
+  UserAgentProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Registered Domain
+export type IngestPipelineRegisteredDomainProcessor = RenameFieldsAndRemoveAction<
+  RegisteredDomainProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -143,6 +206,7 @@ export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveA
 export type IngestPipelineProcessor =
   | IngestPipelineGrokProcessor
   | IngestPipelineDissectProcessor
+  | IngestPipelineUriPartsProcessor
   | IngestPipelineDateProcessor
   | IngestPipelineDropProcessor
   | IngestPipelineMathProcessor
@@ -153,9 +217,17 @@ export type IngestPipelineProcessor =
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
   | IngestPipelineReplaceProcessor
+  | IngestPipelineRedactProcessor
   | IngestPipelineUppercaseProcessor
   | IngestPipelineLowercaseProcessor
   | IngestPipelineTrimProcessor
   | IngestPipelineJoinProcessor
+  | IngestPipelineSplitProcessor
+  | IngestPipelineSortProcessor
   | IngestPipelineConcatProcessor
+  | IngestPipelineNetworkDirectionProcessor
+  | IngestPipelineJsonExtractProcessor
+  | IngestPipelineEnrichProcessor
+  | IngestPipelineUserAgentProcessor
+  | IngestPipelineRegisteredDomainProcessor
   | IngestPipelineManualIngestPipelineProcessor;

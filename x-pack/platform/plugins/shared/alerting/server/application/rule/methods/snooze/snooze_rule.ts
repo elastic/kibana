@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -21,10 +22,11 @@ import {
   getSnoozeAttributes,
   verifySnoozeAttributeScheduleLimit,
 } from '../../../../rules_client/common';
-import { updateRuleSo } from '../../../../data/rule';
+import { updateRuleSo, getDecryptedRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRule, transformRuleAttributesToRuleDomain } from '../../transforms';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { snoozeRuleParamsSchema } from './schemas';
 import type { SnoozeRuleOptions } from './types';
 
@@ -69,10 +71,6 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
       operation: WriteOperations.Snooze,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -102,15 +100,54 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     throw Boom.badRequest(error.message);
   }
 
+  const username = await context.getUserName();
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+
+  const snoozeRuleTimestamp = Date.now();
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },
     id,
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,
-      updatedBy: await context.getUserName(),
+      updatedBy: username,
       updatedAt: new Date().toISOString(),
     }),
+  });
+
+  let decryptedApiKey: string | null | undefined;
+  let decryptedUiamApiKey: string | null | undefined;
+  try {
+    const decryptedRule = await getDecryptedRuleSo({
+      encryptedSavedObjectsClient: context.encryptedSavedObjectsClient,
+      id,
+      savedObjectsGetOptions: { namespace: context.namespace },
+    });
+    decryptedApiKey = decryptedRule.attributes.apiKey;
+    decryptedUiamApiKey = decryptedRule.attributes.uiamApiKey ?? null;
+  } catch (e) {
+    context.logger.debug(
+      `snoozeRule(): could not load decrypted API key for rule "${id}": ${e.message}`
+    );
+  }
+
+  await logRuleChanges({
+    ruleSOs: [
+      {
+        ...updatedRuleRaw,
+        attributes: { ...attributes, ...updatedRuleRaw.attributes },
+        references: updatedRuleRaw.references ?? [],
+      },
+    ],
+    encryptedFieldsMap:
+      decryptedApiKey !== undefined
+        ? new Map([[id, { apiKey: decryptedApiKey, uiamApiKey: decryptedUiamApiKey ?? null }]])
+        : undefined,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleSnooze,
+      timestamp: snoozeRuleTimestamp,
+    },
   });
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
@@ -118,7 +155,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     {
       id: updatedRuleRaw.id,
       logger: context.logger,
-      ruleType: context.ruleTypeRegistry.get(attributes.alertTypeId!),
+      ruleType,
       references: updatedRuleRaw.references,
     },
     context.isSystemAction

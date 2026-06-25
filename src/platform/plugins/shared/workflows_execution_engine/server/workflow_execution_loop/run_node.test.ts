@@ -16,10 +16,12 @@ import * as handleExecutionDelayModule from './handle_execution_delay';
 import { runNode } from './run_node';
 import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
-import type { NodeImplementation } from '../step/node_implementation';
+import type { CancellableNode, NodeImplementation } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
+import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
+import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 jest.mock('./run_stack_monitor/run_stack_monitor');
 jest.mock('./catch_error');
@@ -78,6 +80,10 @@ describe('runNode', () => {
       node: mockNode,
       scopeStack,
       abortController: new AbortController(),
+      flushEventLogs: jest.fn().mockResolvedValue(undefined),
+      contextManager: {
+        ensureContextReady: jest.fn().mockResolvedValue(undefined),
+      },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockNodeImplementation = {
@@ -103,6 +109,14 @@ describe('runNode', () => {
       workflowExecutionState: {
         getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
       } as unknown as jest.Mocked<WorkflowExecutionState>,
+      workflowLogger: createMockWorkflowEventLogger(),
+      workflowExecutionRepository: {
+        getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+      },
+      stepIoService: {
+        releaseTransientlyRehydratedOutputs: jest.fn(),
+      },
+      taskAbortController: new AbortController(),
     } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
   });
 
@@ -146,23 +160,142 @@ describe('runNode', () => {
       await runNode(mockParams);
 
       expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
+    });
+
+    it('should pass the task abort signal when Task Manager aborts during step execution', async () => {
+      mockNodeImplementation.run.mockImplementation(async () => {
+        mockParams.taskAbortController.abort(new WorkflowTaskManagerAbortError());
+      });
+
+      await runNode(mockParams);
+
+      expect(mockHandleExecutionDelay).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledWith({
+        signal: mockParams.taskAbortController.signal,
+      });
+      expect(mockParams.workflowRuntime.enterScope).toHaveBeenCalled();
     });
   });
 
   describe('when workflow is cancelled before step starts', () => {
+    it('should apply cancel from memory and skip step when cancelRequested is true', async () => {
+      workflowExecution.cancelRequested = true;
+      workflowExecution.status = ExecutionStatus.RUNNING;
+
+      const workflowLogger = createMockWorkflowEventLogger();
+      const workflowExecutionRepository = {
+        getWorkflowExecutionById: jest.fn(),
+      };
+
+      (mockParams as unknown as WorkflowExecutionLoopParams).workflowLogger = workflowLogger;
+      (mockParams as unknown as WorkflowExecutionLoopParams).workflowExecutionRepository =
+        workflowExecutionRepository as unknown as WorkflowExecutionLoopParams['workflowExecutionRepository'];
+
+      const upsertStep = jest.fn();
+      const updateWorkflowExecution = jest.fn((patch: Partial<EsWorkflowExecution>) => {
+        Object.assign(workflowExecution, patch);
+      });
+      mockParams.workflowExecutionState = {
+        ...mockParams.workflowExecutionState,
+        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
+        getStepExecution: jest.fn().mockReturnValue(undefined),
+        upsertStep,
+        updateWorkflowExecution,
+      } as unknown as jest.Mocked<WorkflowExecutionState>;
+
+      await runNode(mockParams);
+
+      expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(mockNodeImplementation.run).not.toHaveBeenCalled();
+      expect(workflowExecution.status).toBe(ExecutionStatus.CANCELLED);
+    });
+
+    it('should call onCancel on a cancellable node when cancelRequested short-circuits run()', async () => {
+      workflowExecution.cancelRequested = true;
+      workflowExecution.status = ExecutionStatus.RUNNING;
+
+      mockParams.workflowExecutionState = {
+        ...mockParams.workflowExecutionState,
+        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
+        getStepExecution: jest.fn().mockReturnValue(undefined),
+        upsertStep: jest.fn(),
+        updateWorkflowExecution: jest.fn((patch: Partial<EsWorkflowExecution>) => {
+          Object.assign(workflowExecution, patch);
+        }),
+      } as unknown as jest.Mocked<WorkflowExecutionState>;
+
+      const cancellableNodeImpl: NodeImplementation & CancellableNode = {
+        run: jest.fn().mockResolvedValue(undefined),
+        onCancel: jest.fn().mockResolvedValue(undefined),
+      };
+      (mockParams.nodesFactory.create as jest.Mock).mockReturnValue(cancellableNodeImpl);
+
+      await runNode(mockParams);
+
+      expect(cancellableNodeImpl.run).not.toHaveBeenCalled();
+      expect(cancellableNodeImpl.onCancel).toHaveBeenCalledTimes(1);
+      expect(workflowExecution.status).toBe(ExecutionStatus.CANCELLED);
+    });
+
+    it('should not call onCancel on a non-cancellable node when cancelRequested short-circuits run()', async () => {
+      workflowExecution.cancelRequested = true;
+      workflowExecution.status = ExecutionStatus.RUNNING;
+
+      mockParams.workflowExecutionState = {
+        ...mockParams.workflowExecutionState,
+        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
+        getStepExecution: jest.fn().mockReturnValue(undefined),
+        upsertStep: jest.fn(),
+        updateWorkflowExecution: jest.fn((patch: Partial<EsWorkflowExecution>) => {
+          Object.assign(workflowExecution, patch);
+        }),
+      } as unknown as jest.Mocked<WorkflowExecutionState>;
+
+      await runNode(mockParams);
+
+      expect(mockNodeImplementation.run).not.toHaveBeenCalled();
+      expect(workflowExecution.status).toBe(ExecutionStatus.CANCELLED);
+    });
+
+    it('should log and swallow errors from onCancel during cancelRequested short-circuit', async () => {
+      workflowExecution.cancelRequested = true;
+      workflowExecution.status = ExecutionStatus.RUNNING;
+
+      mockParams.workflowExecutionState = {
+        ...mockParams.workflowExecutionState,
+        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
+        getStepExecution: jest.fn().mockReturnValue(undefined),
+        upsertStep: jest.fn(),
+        updateWorkflowExecution: jest.fn((patch: Partial<EsWorkflowExecution>) => {
+          Object.assign(workflowExecution, patch);
+        }),
+      } as unknown as jest.Mocked<WorkflowExecutionState>;
+
+      const onCancelError = new Error('onCancel failed');
+      const cancellableNodeImpl: NodeImplementation & CancellableNode = {
+        run: jest.fn().mockResolvedValue(undefined),
+        onCancel: jest.fn().mockRejectedValue(onCancelError),
+      };
+      (mockParams.nodesFactory.create as jest.Mock).mockReturnValue(cancellableNodeImpl);
+
+      await runNode(mockParams);
+
+      expect(cancellableNodeImpl.onCancel).toHaveBeenCalledTimes(1);
+      expect(mockParams.workflowLogger.logError).toHaveBeenCalledWith(
+        'Failed to execute onCancel hook - continuing execution',
+        onCancelError
+      );
+      expect(workflowExecution.status).toBe(ExecutionStatus.CANCELLED);
+    });
+
     it('should skip step execution if workflow status is not RUNNING', async () => {
-      // Set workflow status to CANCELLED
       workflowExecution.status = ExecutionStatus.CANCELLED;
 
       await runNode(mockParams);
 
-      // Verify step execution was skipped
       expect(mockNodeImplementation.run).not.toHaveBeenCalled();
-
-      // Verify in-memory check was performed
       expect(mockParams.workflowRuntime.getWorkflowExecution).toHaveBeenCalled();
-
-      // Verify state was still saved
       expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
     });
 
@@ -203,6 +336,7 @@ describe('runNode', () => {
 
       expect(mockParams.workflowRuntime.setWorkflowError).toHaveBeenCalledWith(error);
       expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
 
     it('should call catchError when error occurs', async () => {
@@ -240,6 +374,102 @@ describe('runNode', () => {
 
       // Step should still be created but may not run depending on timing
       expect(mockParams.stepExecutionRuntimeFactory.createStepExecutionRuntime).toHaveBeenCalled();
+    });
+  });
+
+  describe('onCancel lifecycle hook', () => {
+    const setupCancellableNode = (onCancel: jest.Mock) => {
+      const cancellableNodeImpl: NodeImplementation & CancellableNode = {
+        run: jest.fn().mockResolvedValue(undefined),
+        onCancel,
+      };
+      (mockParams.nodesFactory.create as jest.Mock).mockReturnValue(cancellableNodeImpl);
+      return cancellableNodeImpl;
+    };
+
+    const simulateAbortDuringRun = () => {
+      mockRunStackMonitor.mockImplementation(async () => {
+        await new Promise<void>((resolve) => process.nextTick(resolve));
+        mockStepExecutionRuntime.abortController.abort();
+      });
+    };
+
+    it('should call onCancel after run() when abort signal was triggered', async () => {
+      const mockOnCancel = jest.fn().mockResolvedValue(undefined);
+      const cancellableNode = setupCancellableNode(mockOnCancel);
+      cancellableNode.run = jest.fn(async () => {
+        await new Promise<void>((resolve) => process.nextTick(resolve));
+      });
+      simulateAbortDuringRun();
+
+      await runNode(mockParams);
+
+      expect(cancellableNode.run).toHaveBeenCalled();
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call onCancel when abort signal was not triggered', async () => {
+      const mockOnCancel = jest.fn();
+      setupCancellableNode(mockOnCancel);
+
+      await runNode(mockParams);
+
+      expect(mockOnCancel).not.toHaveBeenCalled();
+    });
+
+    it('should not call onCancel on a non-CancellableNode even if aborted', async () => {
+      mockNodeImplementation.run = jest.fn(async () => {
+        await new Promise<void>((resolve) => process.nextTick(resolve));
+      });
+      simulateAbortDuringRun();
+
+      await runNode(mockParams);
+
+      expect(mockNodeImplementation.run).toHaveBeenCalled();
+      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+    });
+
+    it('should handle onCancel errors gracefully without throwing', async () => {
+      const onCancelError = new Error('onCancel failed');
+      const mockOnCancel = jest.fn().mockRejectedValue(onCancelError);
+      const cancellableNode = setupCancellableNode(mockOnCancel);
+      cancellableNode.run = jest.fn(async () => {
+        await new Promise<void>((resolve) => process.nextTick(resolve));
+      });
+      simulateAbortDuringRun();
+
+      const workflowLogger = createMockWorkflowEventLogger();
+      (mockParams as unknown as Record<string, unknown>).workflowLogger = workflowLogger;
+
+      await runNode(mockParams);
+
+      expect(mockOnCancel).toHaveBeenCalled();
+      expect(workflowLogger.logError).toHaveBeenCalledWith(
+        'Failed to execute onCancel hook - continuing execution',
+        onCancelError
+      );
+    });
+
+    it('should handle synchronous onCancel that throws', async () => {
+      const syncError = new Error('sync onCancel error');
+      const mockOnCancel = jest.fn().mockImplementation(() => {
+        throw syncError;
+      });
+      const cancellableNode = setupCancellableNode(mockOnCancel);
+      cancellableNode.run = jest.fn(async () => {
+        await new Promise<void>((resolve) => process.nextTick(resolve));
+      });
+      simulateAbortDuringRun();
+
+      const workflowLogger = createMockWorkflowEventLogger();
+      (mockParams as unknown as Record<string, unknown>).workflowLogger = workflowLogger;
+
+      await runNode(mockParams);
+
+      expect(workflowLogger.logError).toHaveBeenCalledWith(
+        'Failed to execute onCancel hook - continuing execution',
+        syncError
+      );
     });
   });
 });

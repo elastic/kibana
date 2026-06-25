@@ -14,16 +14,14 @@ import type { EpmPackageResponse } from './api';
  * TODO: Return the package name from the fleet API: https://github.com/elastic/kibana/issues/185932
  */
 export const getIntegrationNameFromResponse = (response: EpmPackageResponse) => {
-  // First try to get the name from the _meta field
   if (response?._meta?.name) {
     return response._meta.name;
   }
 
-  // Fall back to parsing from ingest pipeline name (legacy behavior)
   return (
     response?.items
       ?.find((item) => item.type === 'ingest_pipeline')
-      ?.id?.match(/^.*-([a-z\d_]+)\..*-([\d\.]+)\-*([a-z]*)$/)
+      ?.id?.match(/^.*-([a-z\d_]+)\..*-([\d.]+)\-*([a-z]*)$/)
       ?.slice(1, 3)
       ?.join('-') ?? ''
   );

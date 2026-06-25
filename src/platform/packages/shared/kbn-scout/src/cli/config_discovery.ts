@@ -13,6 +13,11 @@ import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
 import {
+  filterModulesByAffectedConfigs,
+  markModulesAffectedStatusFromSet,
+} from '../tests_discovery/affected_modules';
+import { readScoutTestingScope } from '../tests_discovery/testing_scope';
+import {
   filterModulesByScoutCiConfig,
   getScoutCiExcludedConfigs,
 } from '../tests_discovery/search_configs';
@@ -47,7 +52,7 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
         (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
       );
 
-      const usesParallelWorkers = config.path.includes('parallel.playwright.config.ts');
+      const usesParallelWorkers = config.type === 'parallel';
       const allTags = collectUniqueTags(config.manifest.tests);
 
       return {
@@ -149,7 +154,7 @@ const logFlattenedConfigs = (flattenedConfigs: FlattenedConfigGroup[], log: Tool
   log.info(`Found ${flattenedConfigs.length} flattened config group(s):`);
   flattenedConfigs.forEach((group) => {
     log.info(
-      `- ${group.mode} / ${group.group} / ${group.scoutCommand}: ${group.configs.length} config(s)`
+      `- ${group.testTarget.arch} / ${group.group} / ${group.scoutCommand}: ${group.configs.length} config(s)`
     );
   });
 };
@@ -174,60 +179,22 @@ const handleFlattenedOutput = (
   logFlattenedConfigs(flattenedConfigs, log);
 };
 
-// Splits 'streams_app' module by 'serverRunFlags' to have a better control over
-// test execution: streams_app-stateful, streams_app-serverless-default
-const splitStreamsTestsByServerRunFlags = (
-  modules: ModuleDiscoveryInfo[]
-): ModuleDiscoveryInfo[] => {
-  return modules.flatMap((module) => {
-    // It is a temp workaround. Only split modules that include 'streams_app' in their name
-    if (!module.name.includes('streams_app')) {
-      return [module];
-    }
-
-    const allServerRunFlags = new Set<string>();
-    module.configs.forEach((config) => {
-      config.serverRunFlags.forEach((flag) => allServerRunFlags.add(flag));
-    });
-
-    return Array.from(allServerRunFlags).map((flag) => {
-      // transform: --stateful -> stateful, --serverless=default -> serverless-default
-      const flagSuffix = flag.replace(/^--/, '').replace(/=/g, '-');
-      const newModuleName = `${module.name}-${flagSuffix}`;
-
-      const filteredConfigs = module.configs
-        .filter((config) => config.serverRunFlags.includes(flag))
-        .map((config) => ({
-          ...config,
-          // Keep only the matching 'serverRunFlag' for this split module
-          serverRunFlags: [flag],
-        }));
-
-      return {
-        ...module,
-        name: newModuleName,
-        configs: filteredConfigs,
-      };
-    });
-  });
-};
-
 const handleNonFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
-  log: ToolingLog
+  log: ToolingLog,
+  isSelective: boolean
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
-    // 'streams_app' tests are quite time consuming, let's split run by 'serverRunFlags' before saving
-    const splitModules = splitStreamsTestsByServerRunFlags(filteredForCiModules);
-    saveModuleDiscoveryInfo(splitModules, log);
+    saveModuleDiscoveryInfo(filteredForCiModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
-      countModulesByType(splitModules);
+      countModulesByType(filteredForCiModules);
 
+    const runScope = isSelective ? 'selective' : 'full suite';
     log.info(
-      `Scout configs were filtered for CI. Saved ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
+      `Scout configs saved for CI (${runScope}): ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) written to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
     );
     return;
   }
@@ -246,11 +213,51 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const targetTags = getTestTagsForTarget(target);
   const flatten = flagsReader.boolean('flatten');
   const includeCustomServers = flagsReader.boolean('include-custom-servers');
+  const testingScopePath = flagsReader.string('testing-scope');
 
-  // Build initial module discovery info
+  // Read the resolved scope produced upstream by `scout resolve-testing-scope`.
+  // The CLI is intentionally a pure consumer: it never re-derives the scope
+  // from raw code-changes, so the decision is computed exactly once per build.
+  const scope = testingScopePath ? readScoutTestingScope(testingScopePath) : null;
+  const isSelective = scope ? scope.kind !== 'full' : false;
+
+  // Build initial module discovery info.
   const modulesWithTests = buildModuleDiscoveryInfo();
+
+  // Annotate every module with isAffected so CI step labels can carry an
+  // "affected " prefix even on full-suite runs that have a scope artifact.
+  // Marking is independent of the testing scope's `kind`.
+  const modulesAfterMark = scope
+    ? markModulesAffectedStatusFromSet(modulesWithTests, new Set(scope.affectedModules), log)
+    : modulesWithTests;
+
+  // Translate the scope into a concrete module list for the target-tag step.
+  let modulesForTargetTags: ModuleDiscoveryInfo[];
+  if (!scope || scope.kind === 'full') {
+    modulesForTargetTags = modulesAfterMark;
+    if (!scope) {
+      log.info(
+        `Full suite run: all ${modulesAfterMark.length} discovered module(s) will be included (no testing-scope provided)`
+      );
+    }
+  } else if (scope.kind === 'tests-only') {
+    modulesForTargetTags = filterModulesByAffectedConfigs(
+      modulesAfterMark,
+      new Set(scope.affectedConfigs ?? [])
+    );
+    log.info(
+      `Selective testing: Scout discovery limited to affected configs (${modulesForTargetTags.length} module(s))`
+    );
+  } else {
+    // 'dependency-tree'
+    modulesForTargetTags = modulesAfterMark.filter((m) => m.isAffected === true);
+    log.info(
+      `Selective testing: Scout discovery limited to affected modules (${modulesForTargetTags.length} of ${modulesAfterMark.length})`
+    );
+  }
+
   // Filter modules by target tags and compute server run flags
-  const filteredModulesByTags = filterModulesByTargetTags(modulesWithTests, targetTags);
+  const filteredModulesByTags = filterModulesByTargetTags(modulesForTargetTags, targetTags);
   const filteredModules = filterModulesByCustomServerPaths(
     filteredModulesByTags,
     includeCustomServers
@@ -262,7 +269,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   if (flatten) {
     handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   } else {
-    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
+    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log, isSelective);
   }
 };
 
@@ -273,14 +280,26 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  * Scout tests, filters them based on deployment target tags, and optionally saves
  * or validates the results.
  *
- * The command supports three deployment targets:
+ * The command supports five deployment targets:
  * - 'all': Finds configs with deployment-agnostic tags
- * - 'mki': Finds configs with serverless-only tags
- * - 'ech': Finds configs with stateful-only tag
+ * - 'local': Finds configs with @local-* tags (local stateful + local serverless)
+ * - 'local-stateful-only': Finds configs with @local-stateful-* tags only
+ * - 'mki': Finds configs with @cloud-serverless-* tags
+ * - 'ech': Finds configs with @cloud-stateful-* tags
  *
  * Output formats:
  * - Standard: Lists modules grouped by plugin/package with their configs and tags
  * - Flattened: Groups configs by deployment mode (stateful/serverless), group, and run mode
+ *
+ * Selective testing (PR pipelines):
+ * - The selective-testing decision (full / tests-only / dependency-tree) is made
+ *   upstream by `scout resolve-testing-scope`, which writes a `testing_scope.json`
+ *   hand-off artifact. Pass it via --testing-scope <file>.
+ *   - kind: 'full'             -> no filtering, run every module
+ *   - kind: 'tests-only'       -> filter to the Playwright configs owning the diff
+ *   - kind: 'dependency-tree'  -> filter to modules in scope.affectedModules
+ *   In all cases, scope.affectedModules is used to mark each module's `isAffected`
+ *   flag so CI step labels can carry an "affected " prefix.
  */
 export const discoverPlaywrightConfigsCmd: Command<void> = {
   name: 'discover-playwright-configs',
@@ -294,8 +313,16 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   Options:
     --target <target>         Filter configs by deployment target:
                               - 'all': deployment-agnostic tags (default)
-                              - 'mki': serverless-only tags
-                              - 'ech': stateful-only tags
+                              - 'local': @local-* tags (local stateful + local serverless)
+                              - 'local-stateful-only': @local-stateful-* tags only
+                              - 'mki': @cloud-serverless-* tags
+                              - 'ech': @cloud-stateful-* tags
+    --testing-scope <file>    Path to a 'testing_scope.json' file produced upstream
+                              by 'scout resolve-testing-scope'. Drives both filtering
+                              (per kind: full / tests-only / dependency-tree) and
+                              isAffected marking (from scope.affectedModules).
+                              When omitted, the command runs in full-suite mode
+                              with no isAffected marking.
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
@@ -306,23 +333,21 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     # Discover all deployment-agnostic configs
     node scripts/scout discover-playwright-configs
 
-    # Discover serverless-only configs
-    node scripts/scout discover-playwright-configs --target mki
-
-    # Discover local custom-server configs only
-    node scripts/scout discover-playwright-configs --include-custom-servers
-
-    # Validate discovered configs against CI configuration
-    node scripts/scout discover-playwright-configs --validate
+    # Discover configs for local targets (@local-*)
+    node scripts/scout discover-playwright-configs --target local
 
     # Save filtered configs for CI use
     node scripts/scout discover-playwright-configs --save
+
+    # PR pipeline: selective testing driven by the upstream scope artifact
+    node scripts/scout discover-playwright-configs \\
+      --testing-scope .scout/testing_scope.json --save
 
     # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
   `,
   flags: {
-    string: ['target'],
+    string: ['target', 'testing-scope'],
     boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
     default: {
       target: 'all',

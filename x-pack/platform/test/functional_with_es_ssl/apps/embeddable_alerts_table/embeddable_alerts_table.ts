@@ -46,7 +46,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const sampleData = getService('sampleData');
   const rules = getService('rules');
 
-  describe('Embeddable alerts panel', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/258426
+  describe.skip('Embeddable alerts panel', function () {
     this.tags('skipFIPS');
 
     before(async () => {
@@ -75,7 +76,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await objectRemover.removeAll();
     });
 
-    describe('Config editor', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/258426
+    describe.skip('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
         await dashboardAddPanel.openAddPanelFlyout();
@@ -116,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await toasts.dismissIfExists();
           await dashboardAddPanel.openAddPanelFlyout();
           await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
-          await retry.try(() => testSubjects.exists(FILTERS_FORM_SUBJ));
+          await testSubjects.existOrFail(FILTERS_FORM_SUBJ);
           if (solution === 'stack' || solution === 'observability') {
             await testSubjects.missingOrFail(SOLUTION_SELECTOR_SUBJ);
           }
@@ -131,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Dashboard warnings may appear above the save button
           await toasts.dismissIfExists();
           await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
-          await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
+          await testSubjects.existOrFail(DASHBOARD_PANEL_TEST_SUBJ);
           await pageObjects.dashboard.verifyNoRenderErrors();
           const tagsCells = await find.allByCssSelector(
             '[data-gridcell-column-id="kibana.alert.rule.tags"] [data-test-subj="dataGridRowCell"]'
@@ -154,7 +156,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
       await find.clickByCssSelector(`button#observability`);
       await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
-      await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
+      await testSubjects.existOrFail(DASHBOARD_PANEL_TEST_SUBJ);
       const featureCells = await find.allByCssSelector(
         '[data-gridcell-column-id="kibana.alert.rule.consumer"] [data-test-subj="dataGridRowCell"]'
       );

@@ -12,9 +12,7 @@ xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.5'
-xpack.fleet.agentless.backgroundSync.enabled: true
-xpack.fleet.agentless.backgroundSync.interval: '10m'
+xpack.fleet.internal.registry.spec.max: '3.6'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -119,6 +117,12 @@ migrations.batchSize: 250
 
 migrations.zdt:
   metaPickupSyncDelaySec: 5
+
+# Buffer migration progress logs and only emit them on failure to keep startup logs quiet.
+# Serverless can apply temporary overrides if a migration needs detailed logs, and its frequent
+# releases would otherwise pile up these logs. ECH/on-premise keep the default (continuous logging)
+# for better visibility into stuck or failing migrations.
+migrations.useCumulativeLogger: true
 
 # Management team plugins
 xpack.upgrade_assistant.enabled: false

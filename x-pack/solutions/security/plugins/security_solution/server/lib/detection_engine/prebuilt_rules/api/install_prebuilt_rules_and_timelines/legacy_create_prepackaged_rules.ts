@@ -44,6 +44,7 @@ export const legacyCreatePrepackagedRules = async (
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const detectionRulesClient = context.getDetectionRulesClient();
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  const mlAuthz = context.getMlAuthz();
 
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
@@ -54,21 +55,32 @@ export const legacyCreatePrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(
-    ruleAssetsClient,
-    context,
-    logger
-  );
+  await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
 
+  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   const installedPrebuiltRules = rulesToMap(
     await getExistingPrepackagedRules({ rulesClient, logger })
   );
-  const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
-  const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
+  const rulesToInstall = await getRulesToInstall(
+    latestPrebuiltRules,
+    installedPrebuiltRules,
+    mlAuthz
+  );
+  const rulesToUpdate = await getRulesToUpdate(
+    latestPrebuiltRules,
+    installedPrebuiltRules,
+    mlAuthz
+  );
 
+  const installChangeTracking = {
+    metadata: {
+      bulkCount: rulesToInstall.length,
+    },
+  };
   const ruleCreationResult = await createPrebuiltRules(
     detectionRulesClient,
     rulesToInstall,
+    installChangeTracking,
     logger
   );
 
@@ -78,7 +90,12 @@ export const legacyCreatePrepackagedRules = async (
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, logger);
+  const upgradeChangeTracking = {
+    metadata: {
+      bulkCount: rulesToUpdate.length,
+    },
+  };
+  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, upgradeChangeTracking, logger);
 
   return {
     rules_installed: rulesToInstall.length,

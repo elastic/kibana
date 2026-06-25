@@ -40,7 +40,6 @@ export const registerCustomScriptsRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

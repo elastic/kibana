@@ -13,13 +13,13 @@ import type {
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { StreamsAppLocatorDefinitionParams } from '../../common/locators/streams_locator';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
 } from '../util/url_state_storage_service';
 import { useKibana } from './use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
-import type { StreamsAppLocatorParams } from '../../common/locators/streams_locator';
 import { useTimeRange } from './use_time_range';
 import { useTimeRangeUpdate } from './use_time_range_update';
 
@@ -47,7 +47,7 @@ export const useDatasetQualityController = (
   const { updateTimeRange } = useTimeRangeUpdate();
 
   const streamsUrls = useMemo(() => {
-    const streamsLocator = locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
+    const streamsLocator = locators.get<StreamsAppLocatorDefinitionParams>(STREAMS_APP_LOCATOR_ID);
     if (!streamsLocator) {
       return undefined;
     }
@@ -57,16 +57,20 @@ export const useDatasetQualityController = (
       processingUrl: streamsLocator.getRedirectUrl({
         name: streamName,
         managementTab: 'processing',
-      } as StreamsAppLocatorParams),
+      } as StreamsAppLocatorDefinitionParams),
       schemaUrl: streamsLocator.getRedirectUrl({
         name: streamName,
         managementTab: 'schema',
-      } as StreamsAppLocatorParams),
+      } as StreamsAppLocatorDefinitionParams),
     };
   }, [locators, definition.stream.name]);
 
   useEffect(() => {
-    async function getDatasetQualityDetailsController() {
+    let cleanupController: DatasetQualityDetailsController | undefined;
+    let cleanupSubscription: { unsubscribe: () => void } | undefined;
+    let isCancelled = false;
+
+    async function initController() {
       let initialState = getDatasetQualityDetailsStateFromUrl({
         urlStateStorageContainer,
         toastsService: toasts,
@@ -122,33 +126,34 @@ export const useDatasetQualityController = (
           streamsRepositoryClient,
           refreshDefinition,
         });
-      datasetQualityDetailsController.service.start();
 
-      setController(datasetQualityDetailsController);
-
-      if (!saveStateInUrl) {
-        return () => {
-          datasetQualityDetailsController.service.stop();
-        };
+      if (isCancelled) {
+        datasetQualityDetailsController.service.stop();
+        return;
       }
 
-      const datasetQualityStateSubscription = datasetQualityDetailsController.state$.subscribe(
-        (state) => {
+      cleanupController = datasetQualityDetailsController;
+      datasetQualityDetailsController.service.start();
+      setController(datasetQualityDetailsController);
+
+      if (saveStateInUrl) {
+        cleanupSubscription = datasetQualityDetailsController.state$.subscribe((state) => {
           updateUrlFromDatasetQualityDetailsState({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
             setTime: updateTimeRange,
           });
-        }
-      );
-
-      return () => {
-        datasetQualityDetailsController.service.stop();
-        datasetQualityStateSubscription.unsubscribe();
-      };
+        });
+      }
     }
 
-    getDatasetQualityDetailsController();
+    initController();
+
+    return () => {
+      isCancelled = true;
+      cleanupSubscription?.unsubscribe();
+      cleanupController?.service.stop();
+    };
   }, [
     datasetQuality,
     toasts,

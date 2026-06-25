@@ -8,53 +8,60 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-containers';
-import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  type EmbeddableApiContext,
+  apiCanAddNewPanel,
+  apiCanPinPanels,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import type { ESQLControlState } from '@kbn/esql-types';
 import {
   ControlTriggerSource,
   ESQLVariableType,
   EsqlControlType,
   apiPublishesESQLVariables,
 } from '@kbn/esql-types';
-import { ACTION_CREATE_ESQL_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import {
+  ACTION_CREATE_ESQL_CONTROL,
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  ESQL_CONTROL,
+} from '@kbn/controls-constants';
 import { ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';
 
-export const createESQLControlAction = (): ActionDefinition<
-  EmbeddableApiContext & { isPinned: boolean }
-> => ({
+export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_ESQL_CONTROL,
   order: 1,
   grouping: [ADD_PANEL_CONTROL_GROUP],
-  getIconType: () => 'controlsHorizontal',
+  getIconType: () => 'controls',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable, isPinned }) => {
+  execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const variablesInParent = apiPublishesESQLVariables(embeddable)
       ? embeddable.esqlVariables$.value
       : [];
 
     try {
-      await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+      await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
         queryString: '',
         variableType: ESQLVariableType.VALUES,
         controlType: EsqlControlType.VALUES_FROM_QUERY,
         esqlVariables: variablesInParent,
-        onSaveControl: async (controlState: ESQLControlState) => {
+        onSaveControl: async (controlState: OptionsListESQLControlState) => {
           const newControl = {
-            panelType: 'esqlControl',
+            panelType: ESQL_CONTROL,
             serializedState: {
+              ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
               ...controlState,
             },
           };
 
-          // add a new control as either pinned or not depending on provided context
-          (isPinned && apiCanPinPanels(embeddable)
-            ? embeddable.addPinnedPanel
-            : embeddable.addNewPanel)(newControl, { displaySuccessMessage: true });
+          // add a new control as either pinned or not depending on whether the parent allows it
+          (apiCanPinPanels(embeddable) ? embeddable.addPinnedPanel : embeddable.addNewPanel)(
+            newControl,
+            { displaySuccessMessage: true }
+          );
         },
         triggerSource: ControlTriggerSource.ADD_CONTROL_BTN,
       });

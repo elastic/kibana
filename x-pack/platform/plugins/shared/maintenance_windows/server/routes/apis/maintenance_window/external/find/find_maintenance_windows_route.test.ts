@@ -66,6 +66,7 @@ describe('findMaintenanceWindowsRoute', () => {
           "since": "9.2.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Search for a maintenance window.",
         "tags": Array [
           "oas-tag:maintenance-window",
@@ -127,6 +128,7 @@ describe('findMaintenanceWindowsRoute', () => {
           "since": "9.2.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Search for a maintenance window.",
         "tags": Array [
           "oas-tag:maintenance-window",

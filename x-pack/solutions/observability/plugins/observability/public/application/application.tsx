@@ -10,7 +10,6 @@ import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -36,7 +35,7 @@ export function App() {
     <>
       <Routes enableExecutionContextTracking={true}>
         {Object.keys(allRoutes).map((key) => {
-          const path = key as keyof typeof allRoutes;
+          const path = key;
           const { handler, exact } = allRoutes[path];
           const Wrapper = () => {
             return handler();
@@ -78,13 +77,6 @@ export const renderApp = ({
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const isDarkMode = core.theme.getTheme().darkMode;
-
-  core.chrome.setHelpExtension({
-    appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
-      defaultMessage: 'Observability',
-    }),
-    links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
-  });
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);

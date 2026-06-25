@@ -15,6 +15,7 @@
       "_license"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-license-get",
     "availability": {
       "stack": true,
       "serverless": true

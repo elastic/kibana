@@ -7,7 +7,6 @@
 
 export * from './execution_event.gen';
 export * from './execution_metrics.gen';
-export * from './execution_result.gen';
 export * from './execution_settings';
 export * from './execution_status.gen';
 export * from './execution_summary.gen';

@@ -22,8 +22,9 @@ export type {
   HeatmapExpressionFunctionDefinition,
   HeatmapLegendExpressionFunctionDefinition,
   HeatmapGridExpressionFunctionDefinition,
+  HeatmapScaleType,
 } from './types';
 
 export { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from './expression_functions';
 
-export { EXPRESSION_HEATMAP_NAME } from './constants';
+export { EXPRESSION_HEATMAP_NAME, HeatmapScaleTypes } from './constants';

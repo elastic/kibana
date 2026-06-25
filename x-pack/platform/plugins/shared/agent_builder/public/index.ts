@@ -6,6 +6,7 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -14,12 +15,21 @@ import type {
   ConfigSchema,
 } from './types';
 import { AgentBuilderPlugin } from './plugin';
-import { RobotIcon } from './application/components/common/icons/robot';
-import { AGENTBUILDER_FEATURE_ID } from '../common/features';
+import { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges } from '../common/features';
+import { type CreateSkillResponse, SKILLS_API_PATH } from '../common/http_api/skills';
 
-export type { AgentBuilderPluginSetup, AgentBuilderPluginStart };
-export { RobotIcon as agentBuilderIconType };
-export { AGENTBUILDER_FEATURE_ID };
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
+} from './types';
+export type { EmbeddableConversationProps } from './embeddable/types';
+export { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges, MCP_SERVER_PATH };
+export { type CreateSkillResponse, SKILLS_API_PATH };
+export { ConversationInputShell } from '@kbn/agent-builder-browser';
+export type { ConversationInputShellProps } from '@kbn/agent-builder-browser';
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

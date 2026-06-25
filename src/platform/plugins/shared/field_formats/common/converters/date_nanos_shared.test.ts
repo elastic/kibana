@@ -10,9 +10,11 @@
 import moment from 'moment-timezone';
 import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos_shared';
 import type { FieldFormatsGetConfigFn } from '../types';
+import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
 describe('Date Nanos Format', () => {
   let convert: Function;
+  let date: DateNanosFormat;
   let mockConfig: {
     dateNanosFormat: string;
     'dateFormat:tz': string;
@@ -26,9 +28,9 @@ describe('Date Nanos Format', () => {
     };
 
     const getConfig: FieldFormatsGetConfigFn = (key: string) => mockConfig[key];
-    const date = new DateNanosFormat({}, getConfig);
+    date = new DateNanosFormat({}, getConfig);
 
-    convert = date.convert.bind(date);
+    convert = date.convertToText.bind(date);
   });
 
   test('should inject fractional seconds into formatted timestamp', () => {
@@ -71,9 +73,11 @@ describe('Date Nanos Format', () => {
     });
   });
 
-  test('decoding an undefined or null date should return an empty string', () => {
-    expect(convert(null)).toBe('-');
-    expect(convert(undefined)).toBe('-');
+  test('decoding a missing value', () => {
+    expect(convert(null)).toBe('(null)');
+    expect(convert(undefined)).toBe('(null)');
+    expectReactElementWithNull(date.convertToReact(null));
+    expectReactElementWithNull(date.convertToReact(undefined));
   });
 
   test('should clear the memoization cache after changing the date', () => {
@@ -97,6 +101,74 @@ describe('Date Nanos Format', () => {
   test('should return the value itself when it cannot successfully be formatted', () => {
     const dateMath = 'now+1M/d';
     expect(convert(dateMath)).toBe(dateMath);
+    expect(date.convertToReact(dateMath)).toBe(dateMath);
+  });
+
+  test('returns a plain string for a valid date', () => {
+    const getConfig: FieldFormatsGetConfigFn = (key: string) =>
+      ({
+        dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+        'dateFormat:tz': 'UTC',
+      }[key] as string);
+    const formatter = new DateNanosFormat({}, getConfig);
+
+    expect(formatter.convertToText('2019-05-20T14:04:56.357001234Z')).toMatchInlineSnapshot(
+      `"May 20, 2019 @ 07:04:56.357001234"`
+    );
+    expect(formatter.convertToReact('2019-05-20T14:04:56.357001234Z')).toBe(
+      'May 20, 2019 @ 07:04:56.357001234'
+    );
+  });
+
+  test('wraps a multi-value array with bracket notation', () => {
+    const getConfig: FieldFormatsGetConfigFn = (key: string) =>
+      ({
+        dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+        'dateFormat:tz': 'UTC',
+      }[key] as string);
+    const formatter = new DateNanosFormat({}, getConfig);
+
+    expect(
+      formatter.convertToText(['2019-05-20T14:04:56.357001234Z', '2020-01-01T00:00:00.000000000Z'])
+    ).toMatchInlineSnapshot(
+      `"[\\"May 20, 2019 @ 07:04:56.357001234\\",\\"Dec 31, 2019 @ 17:00:00.000000000\\"]"`
+    );
+    expectReactElementAsArray(
+      formatter.convertToReact([
+        '2019-05-20T14:04:56.357001234Z',
+        '2020-01-01T00:00:00.000000000Z',
+      ]),
+      ['May 20, 2019 @ 07:04:56.357001234', 'Dec 31, 2019 @ 17:00:00.000000000']
+    );
+  });
+
+  test('returns the single element without brackets for a one-element array', () => {
+    const getConfig: FieldFormatsGetConfigFn = (key: string) =>
+      ({
+        dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+        'dateFormat:tz': 'UTC',
+      }[key] as string);
+    const formatter = new DateNanosFormat({}, getConfig);
+
+    expect(formatter.convertToText(['2019-05-20T14:04:56.357001234Z'])).toMatchInlineSnapshot(
+      `"[\\"May 20, 2019 @ 07:04:56.357001234\\"]"`
+    );
+    expect(formatter.convertToReact(['2019-05-20T14:04:56.357001234Z'])).toBe(
+      'May 20, 2019 @ 07:04:56.357001234'
+    );
+  });
+
+  test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {
+    const dateNanos = new DateNanosFormat(
+      {
+        pattern: 'MMM D, YYYY @ HH:mm:ss.SSS',
+        timezone: 'UTC',
+      },
+      jest.fn()
+    );
+    expect(dateNanos.convertToReact('<script>alert("test")</script>')).toBe(
+      '<script>alert("test")</script>'
+    );
   });
 });
 
@@ -114,12 +186,12 @@ describe('analysePatternForFract', () => {
 
   test('analysePatternForFract using timestamp format without fractional seconds', () => {
     expect(analysePatternForFract('MMM, YYYY @ HH:mm:ss')).toMatchInlineSnapshot(`
-    Object {
-      "length": 0,
-      "pattern": "MMM, YYYY @ HH:mm:ss",
-      "patternEscaped": "",
-      "patternNanos": "",
-    }
-  `);
+          Object {
+            "length": 0,
+            "pattern": "MMM, YYYY @ HH:mm:ss",
+            "patternEscaped": "",
+            "patternNanos": "",
+          }
+      `);
   });
 });

@@ -13,12 +13,14 @@ import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintena
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TimeBuckets } from '@kbn/data-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { BehaviorSubject } from 'rxjs';
 import * as dataContext from '../../hooks/use_has_data';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import type { ObservabilityPublicPluginsStart } from '../../plugin';
@@ -26,7 +28,6 @@ import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_availa
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
-import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -34,6 +35,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+const license$ = new BehaviorSubject(
+  licensingMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum' },
+  })
+);
+mockUseKibanaReturnValue.services.licensing.license$ = license$;
 mockUseKibanaReturnValue.services.application.capabilities = {
   ...mockUseKibanaReturnValue.services.application.capabilities,
   [MAINTENANCE_WINDOW_FEATURE_ID]: {
@@ -73,8 +80,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/create_use_rules_link', () => ({
-  createUseRulesLink: jest.fn((unifiedRulesPage: boolean) => () => ({
-    href: unifiedRulesPage ? '/app/rules' : '/app/observability/alerts/rules',
+  createUseRulesLink: jest.fn(() => () => ({
+    href: '/app/rules',
     onClick: jest.fn(),
   })),
 }));
@@ -201,6 +208,11 @@ describe('AlertsPage with all capabilities', () => {
 
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockClear();
+    license$.next(
+      licensingMock.createLicense({
+        license: { type: 'platinum', mode: 'platinum' },
+      })
+    );
     useTimeBuckets.mockReturnValue(timeBuckets);
     useLocationMock.mockReturnValue({ pathname: '/alerts', search: '', state: '', hash: '' });
   });
@@ -227,10 +239,22 @@ describe('AlertsPage with all capabilities', () => {
     });
   });
 
-  describe('Manage rules link', () => {
-    it('should direct to unified rules page when the experimental feature is enabled', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  it('does not fetch maintenance windows on a basic license', async () => {
+    license$.next(
+      licensingMock.createLicense({
+        license: { type: 'basic', mode: 'basic' },
+      })
+    );
 
+    await setup();
+
+    await waitFor(() => {
+      expect(fetchActiveMaintenanceWindowsMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Manage rules link', () => {
+    it('should direct to unified rules page', async () => {
       let wrapper;
       await act(async () => {
         wrapper = await setup();
@@ -240,21 +264,6 @@ describe('AlertsPage with all capabilities', () => {
         const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
         expect(manageRulesLink).toBeInTheDocument();
         expect(manageRulesLink.getAttribute('href')).toBe('/app/rules');
-      });
-    });
-
-    it('should direct to oblt rules page when the experimental feature is disabled', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-
-      let wrapper;
-      await act(async () => {
-        wrapper = await setup();
-      });
-
-      await waitFor(() => {
-        const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
-        expect(manageRulesLink).toBeInTheDocument();
-        expect(manageRulesLink.getAttribute('href')).toBe('/app/observability/alerts/rules');
       });
     });
   });

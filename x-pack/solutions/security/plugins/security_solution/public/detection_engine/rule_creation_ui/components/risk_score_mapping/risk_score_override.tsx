@@ -75,6 +75,7 @@ export function RiskScoreOverride({
               id="risk_score-mapping-override"
               checked={isMappingChecked}
               onChange={onToggleMappingChecked}
+              disabled={isDisabled}
             />
           </EuiFlexItem>
           <EuiFlexItem>{i18n.RISK_SCORE_MAPPING}</EuiFlexItem>
@@ -131,7 +132,7 @@ export function RiskScoreOverride({
                   />
                 </EuiFlexItemComboBoxColumn>
                 <EuiFlexItemIconColumn grow={false}>
-                  <EuiIcon type="sortRight" />
+                  <EuiIcon type="sortRight" aria-hidden={true} />
                 </EuiFlexItemIconColumn>
                 <EuiFlexItemRiskScoreColumn grow={false}>
                   <EuiText size="s">{i18n.RISK_SCORE_FIELD}</EuiText>

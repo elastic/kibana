@@ -14,6 +14,7 @@ import moment from 'moment';
 import type {
   CoreSetup,
   CoreStart,
+  IClusterClient,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
@@ -27,12 +28,14 @@ import type {
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchGeneric,
 } from '@kbn/search-types';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
@@ -83,6 +86,7 @@ import {
   SQL_SEARCH_STRATEGY,
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
+  SearchMethodsService,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
@@ -92,16 +96,18 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import type { ConfigSchema } from '../config';
 import { SearchSessionService } from './session';
-import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
+import {
+  enhancedEsSearchStrategyProvider,
+  INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
+} from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
-import { CachedUiSettingsClient } from './services';
 import { sqlSearchStrategyProvider } from './strategies/sql_search';
 import { searchSessionSavedObjectType } from './saved_objects';
 import { esqlSearchStrategyProvider } from './strategies/esql_search';
 import { esqlAsyncSearchStrategyProvider } from './strategies/esql_async_search';
 
-type StrategyMap = Record<string, ISearchStrategy<any, any>>;
+type StrategyMap = Map<string | symbol, ISearchStrategy<any, any>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -124,7 +130,7 @@ export interface SearchRouteDependencies {
 export class SearchService {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
-  private searchStrategies: StrategyMap = {};
+  private searchStrategies: StrategyMap = new Map();
   private sessionService: SearchSessionService;
   private asScoped!: ISearchStart['asScoped'];
   private searchAsInternalUser!: ISearchStrategy;
@@ -189,10 +195,6 @@ export class SearchService {
       esqlAsyncSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
     );
 
-    // We don't want to register this because we don't want the client to be able to access this
-    // strategy, but we do want to expose it to other server-side plugins
-    // see x-pack/solutions/security/plugins/security_solution/server/search_strategy/timeline/index.ts
-    // for example use case
     this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
       this.initializerContext.config.legacy.globalConfig$,
       this.initializerContext.config.get().search,
@@ -200,6 +202,7 @@ export class SearchService {
       usage,
       true
     );
+    this.registerSearchStrategy(INTERNAL_ENHANCED_ES_SEARCH_STRATEGY, this.searchAsInternalUser);
 
     this.registerSearchStrategy(
       EQL_SEARCH_STRATEGY,
@@ -289,8 +292,13 @@ export class SearchService {
       getSearchStrategy: this.getSearchStrategy,
       asScoped: this.asScoped,
       searchSource: {
-        asScoped: async (request: KibanaRequest) => {
-          const esClient = elasticsearch.client.asScoped(request);
+        asScoped: async (request: KibanaRequest, opts?: AsScopedOptions) => {
+          const esClient = this.createScopedEsClient({
+            client: elasticsearch.client,
+            request,
+            opts,
+          });
+
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.dataViewsServiceFactory(
             savedObjectsClient,
@@ -308,7 +316,7 @@ export class SearchService {
           const searchSourceDependencies: SearchSourceDependencies = {
             aggs: aggsStart,
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
-            search: this.asScoped(request).search,
+            search: this.asScoped(request, opts).search,
             onResponse: (req, res) => res,
             dataViews: scopedIndexPatterns,
             scriptedFieldsEnabled: true,
@@ -328,23 +336,23 @@ export class SearchService {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse<any> = IEsSearchResponse
   >(
-    name: string,
+    name: string | symbol,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => {
-    this.logger.debug(`Register strategy ${name}`);
-    this.searchStrategies[name] = strategy;
+    this.logger.debug(`Register strategy ${String(name)}`);
+    this.searchStrategies.set(name, strategy);
   };
 
   private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    name: string = ENHANCED_ES_SEARCH_STRATEGY
+    name: string | symbol = ENHANCED_ES_SEARCH_STRATEGY
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
-    this.logger.debug(`Get strategy ${name}`);
-    const strategy = this.searchStrategies[name];
+    this.logger.debug(`Get strategy ${String(name)}`);
+    const strategy = this.searchStrategies.get(name);
     if (!strategy) {
-      throw new KbnServerError(`Search strategy ${name} not found`, 404);
+      throw new KbnServerError(`Search strategy ${String(name)} not found`, 404);
     }
     return strategy;
   };
@@ -367,7 +375,12 @@ export class SearchService {
           return request;
         } else {
           try {
-            const id = await deps.searchSessionsClient.getId(request, options);
+            const id = await deps.searchSessionsClient.getId(
+              request,
+              options,
+              // The search route uses minimal auth for performance, which doesn't include realm information.
+              true
+            );
             this.logger.debug(`Found search session id for request ${id}`);
             return {
               ...request,
@@ -410,7 +423,14 @@ export class SearchService {
                     isStored: true,
                   });
                 } else {
-                  return from(deps.searchSessionsClient.trackId(response.id, options)).pipe(
+                  return from(
+                    deps.searchSessionsClient.trackId(
+                      response.id,
+                      options,
+                      // The search route uses minimal auth for performance, which doesn't include realm information.
+                      true
+                    )
+                  ).pipe(
                     tap(() => {
                       isInternalSearchStored = true;
                     }),
@@ -444,7 +464,7 @@ export class SearchService {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
       throw new KbnServerError(
-        `Search strategy ${options.strategy} doesn't support cancellations`,
+        `Search strategy ${String(options.strategy)} doesn't support cancellations`,
         400
       );
     }
@@ -459,7 +479,10 @@ export class SearchService {
   ) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.extend) {
-      throw new KbnServerError(`Search strategy ${options.strategy} does not support extend`, 400);
+      throw new KbnServerError(
+        `Search strategy ${String(options.strategy)} does not support extend`,
+        400
+      );
     }
     return strategy.extend(id, keepAlive, options, deps);
   };
@@ -530,28 +553,35 @@ export class SearchService {
   private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
-    return (request: KibanaRequest): IScopedSearchClient => {
+    return (request: KibanaRequest, opts?: AsScopedOptions): IScopedSearchClient => {
       const savedObjectsClient = savedObjects.getScopedClient(request);
       const searchSessionsClient = getSessionAsScoped(request);
       const deps = {
         searchSessionsClient,
         savedObjectsClient,
-        esClient: elasticsearch.client.asScoped(request),
-        uiSettingsClient: new CachedUiSettingsClient(
-          uiSettings.asScopedToClient(savedObjectsClient)
-        ),
+        esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
+        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+
         request,
         rollupsEnabled,
       };
+      const search = <
+        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+      >(
+        searchRequest: SearchStrategyRequest,
+        options: ISearchOptions = {}
+      ) => this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options);
+
+      const searchMethodsService = new SearchMethodsService(search as ISearchGeneric);
+
       return {
-        search: <
-          SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-          SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-        >(
-          searchRequest: SearchStrategyRequest,
-          options: ISearchOptions = {}
-        ) =>
-          this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options),
+        search,
+        dsl: (params, options) => searchMethodsService.dsl(params, options),
+        dslPaginated: (params, options) => searchMethodsService.dslPaginated(params, options),
+        esql: (params, options) => searchMethodsService.esql(params, options),
+        eql: (params, options) => searchMethodsService.eql(params, options),
+        sql: (params, options) => searchMethodsService.sql(params, options),
         cancel: this.cancel.bind(this, deps),
         extend: this.extend.bind(this, deps),
         saveSession: searchSessionsClient.save,
@@ -565,5 +595,17 @@ export class SearchService {
         getSessionStatus: searchSessionsClient.status,
       };
     };
+  };
+
+  private createScopedEsClient = ({
+    client,
+    request,
+    opts,
+  }: {
+    client: IClusterClient;
+    request: KibanaRequest;
+    opts?: AsScopedOptions;
+  }) => {
+    return opts ? client.asScoped(request, opts) : client.asScoped(request);
   };
 }

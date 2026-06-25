@@ -19,7 +19,7 @@ import rison from '@kbn/rison';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useMonitorAlertEnable } from '../../../hooks/use_monitor_alert_enable';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { ConfigKey, isRemoteSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import {
   DISABLE_STATUS_ALERT,
@@ -48,6 +48,12 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
     return <EuiSkeletonText lines={1} />;
   }
 
+  // Alert config lives on the local saved object; remote monitors can only be
+  // managed from the source cluster, so hide the actions menu here entirely.
+  if (isRemoteSyntheticsMonitor(monitor)) {
+    return null;
+  }
+
   const onToggleAlertClick = () => {
     updateAlertEnabledState({
       monitor: {
@@ -71,7 +77,7 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
       {isAlertEnabled ? DISABLE_STATUS_ALERT : ENABLE_STATUS_ALERT}{' '}
       {isLoading && <EuiLoadingSpinner />}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="share" icon="list" href={alertsUrl}>
+    <EuiContextMenuItem key="share" icon="listBullet" href={alertsUrl}>
       {VIEW_ALERTS_LABEL}
     </EuiContextMenuItem>,
   ];
@@ -79,7 +85,7 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
   const button = (
     <EuiButtonEmpty
       data-test-subj="syntheticsAlertActionsButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >
@@ -95,8 +101,11 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
       closePopover={() => setPopover(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('xpack.synthetics.alertActions.popoverAriaLabel', {
+        defaultMessage: 'Alert actions menu',
+      })}
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

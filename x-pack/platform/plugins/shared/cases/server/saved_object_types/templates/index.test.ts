@@ -20,22 +20,74 @@ describe('caseTemplateSavedObjectType', () => {
       Object {
         "dynamic": false,
         "properties": Object {
+          "author": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
           "definition": Object {
             "type": "text",
           },
           "deletedAt": Object {
             "type": "date",
           },
+          "description": Object {
+            "type": "text",
+          },
+          "fieldCount": Object {
+            "type": "integer",
+          },
+          "fieldNames": Object {
+            "properties": Object {
+              "control": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "label": Object {
+                "type": "text",
+              },
+              "name": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+              "type": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
+            "type": "nested",
+          },
+          "isDefault": Object {
+            "type": "boolean",
+          },
+          "isEnabled": Object {
+            "type": "boolean",
+          },
+          "isLatest": Object {
+            "type": "boolean",
+          },
+          "lastUsedAt": Object {
+            "type": "date",
+          },
           "name": Object {
+            "ignore_above": 1024,
             "type": "keyword",
           },
           "owner": Object {
+            "ignore_above": 1024,
+            "type": "keyword",
+          },
+          "tags": Object {
+            "ignore_above": 1024,
             "type": "keyword",
           },
           "templateId": Object {
+            "ignore_above": 1024,
             "type": "keyword",
           },
           "templateVersion": Object {
+            "type": "integer",
+          },
+          "usageCount": Object {
             "type": "integer",
           },
         },

@@ -7,7 +7,6 @@
 
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type {
   GetStateType,
   LensInternalApi,
@@ -28,6 +27,7 @@ import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   merge,
   pipe,
@@ -35,15 +35,27 @@ import {
   tap,
   type Subscription,
 } from 'rxjs';
+import { apm } from '@elastic/apm-rum';
 import { getEditPath } from '../../common/constants';
 import { prepareCallbacks } from './expressions/callbacks';
 import { getExpressionRendererParams } from './expressions/expression_params';
 import { getMergedSearchContext } from './expressions/merged_search_context';
 import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
-import { getParentContext, getRenderMode } from './helper';
+import {
+  getParentContext,
+  getRenderMode,
+  hasAnnotationGroupReference,
+  updateAttributesWithAnnotation,
+} from './helper';
 import { addLog } from './logger';
-import { apiHasLensComponentCallbacks } from './type_guards';
+import {
+  apiHasLensComponentCallbacks,
+  apiHasUserMessages,
+  hasTablesAdapter,
+  isPartialInspectorAdapters,
+  type OnDataCallback,
+} from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
 import { buildUserMessagesHelpers } from './user_messages/api';
 
@@ -55,7 +67,7 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
-  | 'savedObjectId'
+  | 'refId'
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
@@ -105,6 +117,9 @@ export function loadEmbeddableData(
     ? parentApi
     : ({} as LensPublicCallbacks);
 
+  const getConsumerMessages = () =>
+    apiHasUserMessages(parentApi) ? parentApi.userMessages ?? [] : [];
+
   // Some convenience api for the user messaging
   const {
     getUserMessages,
@@ -114,7 +129,14 @@ export function loadEmbeddableData(
     updateWarnings,
     resetMessages,
     updateMessages,
-  } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
+  } = buildUserMessagesHelpers(
+    api,
+    internalApi,
+    services,
+    onBeforeBadgesRender,
+    metaInfo,
+    getConsumerMessages
+  );
 
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
@@ -166,7 +188,7 @@ export function loadEmbeddableData(
           id: uuid || 'new',
           description: lastState.attributes.title || lastState.title || '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.savedObjectId
+            lastState.ref_id
           )}`,
         };
 
@@ -179,16 +201,22 @@ export function loadEmbeddableData(
       }
     };
 
-    const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+    // _data (expression result) is unused — Lens only needs the inspector adapters.
+    // The signature OnDataCallback is used for consistency with the expressions plugin.
+    const onDataCallback: OnDataCallback = (_data, adapters) => {
       internalApi.updateVisualizationContext({
-        activeData: adapters?.tables?.tables,
+        activeData: hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined,
       });
 
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading$);
+      onLoad?.(
+        false,
+        isPartialInspectorAdapters(adapters) ? adapters : undefined,
+        api.dataLoading$
+      );
 
       api.loadViewUnderlyingData();
 
@@ -292,7 +320,7 @@ export function loadEmbeddableData(
     ),
     api.savedObjectId$.pipe(
       waitUntilChanged(),
-      map(() => 'savedObjectId' as ReloadReason)
+      map(() => 'refId' as ReloadReason)
     ),
     internalApi.overrides$.pipe(
       waitUntilChanged(),
@@ -310,13 +338,54 @@ export function loadEmbeddableData(
       .pipe(debounceTime(0))
       .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
+    // Capture blocking errors in APM for observability
+    internalApi.blockingError$
+      .pipe(filter((error): error is Error => error != null))
+      .subscribe((error) => {
+        const currentState = getState();
+        const parentContext = getParentContext(parentApi);
+        const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
+        const transaction = apm.getCurrentTransaction();
+        if (transaction) {
+          const span = transaction.startSpan('lens-chart-error', 'lens-embeddable');
+
+          if (span) {
+            span.addLabels({
+              kibana_meta_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+              kibana_meta_profile_id: meta?.profile_id ?? 'unknown',
+              kibana_meta_metric_id: meta?.metric_id ?? 'unknown',
+            });
+            apm.captureError(error);
+            // @ts-expect-error RUM types don't include outcome
+            span.outcome = 'failure';
+            span.end();
+          }
+        }
+      }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
-      if (getState().enhancements?.dynamicActions?.events.length) {
+      if (getState().drilldowns?.length) {
         reload('viewMode');
       }
     }),
+    // When a library annotation group is updated, fetch the latest data and push it
+    // into attributes$ so the chart re-renders.
+    services.eventAnnotationService.annotationGroupUpdated$
+      .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
+      .subscribe(async (updatedGroupId) => {
+        try {
+          const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
+            updatedGroupId
+          );
+          const updated = updateAttributesWithAnnotation(getState(), updatedGroupId, libraryGroup);
+          if (updated) {
+            internalApi.updateAttributes(updated.attributes);
+          }
+        } catch (err) {
+          addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);
+        }
+      }),
   ];
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation

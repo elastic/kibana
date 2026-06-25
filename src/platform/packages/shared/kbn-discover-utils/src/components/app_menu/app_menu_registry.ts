@@ -12,7 +12,6 @@ import type {
   DiscoverAppMenuItemType,
   DiscoverAppMenuPopoverItem,
   DiscoverAppMenuPrimaryActionItem,
-  DiscoverAppMenuSecondaryActionItem,
 } from '../../types';
 
 /**
@@ -23,7 +22,6 @@ export class AppMenuRegistry {
   static CUSTOM_ITEMS_LIMIT = 2;
   private items: Map<string, DiscoverAppMenuItemType & { isCustom?: boolean }> = new Map();
   private primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
-  private secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
 
   /**
    * Register a custom menu item.
@@ -31,21 +29,6 @@ export class AppMenuRegistry {
    */
   public registerCustomItem(item: DiscoverAppMenuItemType) {
     this.items.set(item.id, { ...item, isCustom: true });
-  }
-
-  /**
-   * Register a custom popover item under a parent menu item.
-   * @param parentId The ID of the parent menu item
-   * @param popoverItem The popover item to register
-   */
-  public registerCustomPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
-    const parent = this.items.get(parentId);
-    if (parent) {
-      this.items.set(parentId, {
-        ...parent,
-        items: [...(parent.items || []), popoverItem],
-      });
-    }
   }
 
   /**
@@ -73,14 +56,6 @@ export class AppMenuRegistry {
   }
 
   /**
-   * Set the secondary action item for the app menu.
-   * @param item The secondary action item
-   */
-  public setSecondaryActionItem(item: DiscoverAppMenuSecondaryActionItem) {
-    this.secondaryActionItem = item;
-  }
-
-  /**
    * Register a popover item for a specific parent menu item.
    * @param parentId The ID of the parent menu item
    * @param popoverItem The popover item to register
@@ -88,11 +63,37 @@ export class AppMenuRegistry {
   public registerPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
     const parent = this.items.get(parentId);
     if (parent) {
+      const { href, render, run, target, ...parentSubmenuItem } = parent;
+
       this.items.set(parentId, {
-        ...parent,
+        ...parentSubmenuItem,
         items: [...(parent.items || []), popoverItem],
       });
     }
+  }
+
+  /**
+   * Get popover items registered under a parent menu item.
+   * Returns a copy so callers cannot mutate registry state.
+   * @param parentId The ID of the parent menu item
+   */
+  public getPopoverItems(parentId: string): DiscoverAppMenuPopoverItem[] {
+    return [...(this.items.get(parentId)?.items ?? [])];
+  }
+
+  /**
+   * Get a registered menu item by ID.
+   * Returns a copy of nested popover items so callers cannot mutate registry state.
+   * @param id The ID of the menu item
+   */
+  public getItem(id: string): DiscoverAppMenuItemType | undefined {
+    const item = this.items.get(id);
+    if (!item) {
+      return undefined;
+    }
+
+    const { isCustom, ...menuItem } = item;
+    return menuItem.items ? { ...menuItem, items: [...menuItem.items] } : menuItem;
   }
 
   /**
@@ -111,7 +112,6 @@ export class AppMenuRegistry {
     return {
       items: cleanItems,
       primaryActionItem: this.primaryActionItem,
-      secondaryActionItem: this.secondaryActionItem,
     };
   }
 }

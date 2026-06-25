@@ -6,17 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
+import { isColumn } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
-import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import {
-  columnExists,
-  getLastNonWhitespaceChar,
-  handleFragment,
-} from '../../definitions/utils/autocomplete/helpers';
-import { isColumn } from '../../../ast/is';
+  newLineCompleteItem,
+  pipeCompleteItem,
+  newLineAndPipeCompleteItems,
+  commaCompleteItem,
+} from '../complete_items';
+import { getLastNonWhitespaceChar } from '../../definitions/utils/autocomplete/helpers';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -27,45 +29,49 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   if (
-    /\s/.test(innerText[innerText.length - 1]) &&
+    endsWithWhitespace(innerText) &&
     getLastNonWhitespaceChar(innerText) !== ',' &&
     !/keep\s+\S*$/i.test(innerText)
   ) {
-    return [pipeCompleteItem, commaCompleteItem];
+    return [...newLineAndPipeCompleteItems, commaCompleteItem];
   }
 
   const alreadyDeclaredFields = (command as ESQLCommand).args
     .filter(isColumn)
     .map((arg) => arg.parts.join('.'));
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
-
-  return handleFragment(
-    innerText,
-    (fragment) => columnExists(fragment, context),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      // KEEP fie<suggest>
-      return fieldSuggestions.map((suggestion) => {
-        return withAutoSuggest({
-          ...suggestion,
-          text: suggestion.text,
-
-          rangeToReplace,
-        });
-      });
+  const completionSuggestions: ISuggestionItem[] = [
+    {
+      ...newLineCompleteItem,
+      preserveTypedPrefix: true,
+      requiresExistingColumnMatch: true,
     },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
-      // KEEP field<suggest>
-      const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
-      if (fieldSuggestions.length > 0) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+    {
+      ...pipeCompleteItem,
+      text: ' | ',
+      preserveTypedPrefix: true,
+      requiresExistingColumnMatch: true,
+    },
+  ];
 
-      return finalSuggestions.map<ISuggestionItem>((s) =>
-        withAutoSuggest({
-          ...s,
-          filterText: fragment,
-          text: fragment + s.text,
-          rangeToReplace,
-        })
-      );
-    }
-  );
+  if (fieldSuggestions.length > 0) {
+    completionSuggestions.push(
+      withAutoSuggest({
+        ...commaCompleteItem,
+        text: ', ',
+        preserveTypedPrefix: true,
+        requiresExistingColumnMatch: true,
+      })
+    );
+  }
+
+  return [
+    ...completionSuggestions,
+    ...fieldSuggestions.map((suggestion) =>
+      withAutoSuggest({
+        ...suggestion,
+        text: suggestion.text,
+      })
+    ),
+  ];
 }

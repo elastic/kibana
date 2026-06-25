@@ -72,6 +72,7 @@ export {
 export type {
   SavedObjectsType,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
+  SavedObjectTypeVersionGuesser,
 } from './src/saved_objects_type';
 export type {
   ISavedObjectsSerializer,
@@ -167,4 +168,7 @@ export type {
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsRawDocSource,
+  SavedObjectErrorResult,
+  SavedObjectBulkResult,
 } from '@kbn/core-saved-objects-api-server';
+export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';

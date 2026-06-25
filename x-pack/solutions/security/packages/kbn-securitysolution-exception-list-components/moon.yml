@@ -4,24 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/securitysolution-exception-list-components'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/security-detection-engine'
-toolchain:
+  defaultOwner: '@elastic/security-detection-engineering'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-exception-list-components'
+  title: '@kbn/securitysolution-exception-list-components'
   description: Moon project for @kbn/securitysolution-exception-list-components
   channel: ''
-  owner: '@elastic/security-detection-engine'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components
+  owner: '@elastic/security-detection-engineering'
+  sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components
 dependsOn:
   - '@kbn/securitysolution-io-ts-list-types'
   - '@kbn/securitysolution-autocomplete'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/securitysolution-list-utils'
 tags:
   - shared-browser
   - package
@@ -35,16 +36,6 @@ fileGroups:
     - '**/*.tsx'
     - '**/*.d.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

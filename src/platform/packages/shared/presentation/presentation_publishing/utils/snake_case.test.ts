@@ -23,6 +23,7 @@ describe('snake case', () => {
 
   test('deeply nested object', () => {
     const deeplyNestedCamelCasedObject = {
+      theseAreFruits: true,
       fruitColours: {
         someApples: 'red',
         banana: 'yellow',
@@ -32,8 +33,10 @@ describe('snake case', () => {
           cherryTomatoes: 'red',
         },
       },
+      empty: {},
     };
     expect(convertCamelCasedKeysToSnakeCase(deeplyNestedCamelCasedObject)).toEqual({
+      these_are_fruits: true,
       fruit_colours: {
         some_apples: 'red',
         banana: 'yellow',
@@ -43,6 +46,7 @@ describe('snake case', () => {
           cherry_tomatoes: 'red',
         },
       },
+      empty: {},
     });
   });
 
@@ -51,7 +55,15 @@ describe('snake case', () => {
       one: 1,
       two: {
         twoPointThree: 2.3,
-        countToTwo: [1, 2],
+        countToTwo: [
+          {
+            someValue: 1,
+          },
+          {
+            someValue: 2,
+          },
+        ],
+        empty: [],
       },
       countToTen: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     };
@@ -59,7 +71,15 @@ describe('snake case', () => {
       one: 1,
       two: {
         two_point_three: 2.3,
-        count_to_two: [1, 2],
+        count_to_two: [
+          {
+            some_value: 1,
+          },
+          {
+            some_value: 2,
+          },
+        ],
+        empty: [],
       },
       count_to_ten: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     });
@@ -86,6 +106,23 @@ describe('snake case', () => {
     expect(convertCamelCasedKeysToSnakeCase(camelCasedObjectWithArray)).toEqual({
       i_am_camel_cased: true,
       i_am_snake_cased: 'true',
+    });
+  });
+
+  test('object with matching key in snake case should prioritize snake case regardless of order', () => {
+    const matchingKeys = {
+      weMatch: true,
+      we_match: 'true',
+    };
+    expect(convertCamelCasedKeysToSnakeCase(matchingKeys)).toEqual({
+      we_match: 'true',
+    });
+    const matchingKeysReverseOrder = {
+      we_match: 'true',
+      weMatch: true,
+    };
+    expect(convertCamelCasedKeysToSnakeCase(matchingKeysReverseOrder)).toEqual({
+      we_match: 'true',
     });
   });
 });

@@ -19,7 +19,13 @@ export const validateNewTypes: Task = (ctx, task) => {
       task: (_, checkNew) => {
         const checkNewTasks: ListrTask<TaskContext>[] = newTypes.map((name) => ({
           title: `Checking '${name}'`,
-          task: () => validateChangesNewType({ to: ctx.to?.typeDefinitions[name]! }),
+          task: () => {
+            const registeredType = ctx.registeredTypes!.find((t) => t.name === name)!;
+            return validateChangesNewType({
+              to: ctx.to?.typeDefinitions[name]!,
+              registeredType,
+            });
+          },
         }));
 
         return checkNew.newListr<TaskContext>(checkNewTasks, {

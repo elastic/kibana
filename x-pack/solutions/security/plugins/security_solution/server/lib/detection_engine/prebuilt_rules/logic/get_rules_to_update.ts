@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { MlAuthz } from '../../../machine_learning/authz';
 import type { RuleAlertType } from '../../rule_schema';
 import type { PrebuiltRuleAsset } from '../model/rule_assets/prebuilt_rule_asset';
+import { excludeLicenseRestrictedRules } from './utils';
 
 /**
  * Returns the rules to update by doing a compare to the rules from the file system against
@@ -15,13 +17,15 @@ import type { PrebuiltRuleAsset } from '../model/rule_assets/prebuilt_rule_asset
  * @param latestPrebuiltRules The latest rules to check against installed
  * @param installedRules The installed rules
  */
-export const getRulesToUpdate = (
+export const getRulesToUpdate = async (
   latestPrebuiltRules: PrebuiltRuleAsset[],
-  installedRules: Map<string, RuleAlertType>
+  installedRules: Map<string, RuleAlertType>,
+  mlAuthz: MlAuthz
 ) => {
-  return latestPrebuiltRules.filter((latestRule) =>
+  const rulesToUpdate = latestPrebuiltRules.filter((latestRule) =>
     filterInstalledRules(latestRule, installedRules)
   );
+  return excludeLicenseRestrictedRules(rulesToUpdate, mlAuthz);
 };
 
 /**

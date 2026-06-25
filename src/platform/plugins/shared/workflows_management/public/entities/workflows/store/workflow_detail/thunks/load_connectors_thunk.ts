@@ -9,7 +9,9 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { addDynamicConnectorsToCache, getWorkflowZodSchema } from '../../../../../../common/schema';
+import { triggerSchemas } from '../../../../../trigger_schemas';
 import type { WorkflowsServices } from '../../../../../types';
 import type { ConnectorsResponse } from '../../../../connectors/model/types';
 import type { RootState } from '../../types';
@@ -26,11 +28,11 @@ export const loadConnectorsThunk = createAsyncThunk<
   'detail/loadConnectorsThunk',
   async (_, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
+    const api = new WorkflowApi(http);
     const state = getState();
     const lastConnectorTypes = state.detail.connectors?.connectorTypes;
     try {
-      // Not caching to avoid missing newly created connectors. We can think of caching if this becomes a bottleneck.
-      const response = await http.get<ConnectorsResponse>('/api/workflows/connectors');
+      const response = await api.getConnectors();
       dispatch(setConnectors(response)); // Set connectors response first
 
       const currentConnectorTypes = response.connectorTypes;
@@ -43,7 +45,10 @@ export const loadConnectorsThunk = createAsyncThunk<
       if (hasChanged) {
         addDynamicConnectorsToCache(currentConnectorTypes);
 
-        const schema = getWorkflowZodSchema(currentConnectorTypes);
+        const schema = getWorkflowZodSchema(
+          currentConnectorTypes,
+          triggerSchemas.getRegisteredIds()
+        );
         dispatch(_setGeneratedSchemaInternal(schema));
       }
 

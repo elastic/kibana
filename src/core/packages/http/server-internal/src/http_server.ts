@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { context, trace, type Span as OTelSpan } from '@opentelemetry/api';
 import type { Request, Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
@@ -16,11 +17,14 @@ import type { Duration } from 'moment';
 import type { Observable, Subscription } from 'rxjs';
 import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
+import { addSpanLabels, addTransactionLabels } from '@kbn/apm-utils';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
   AuthenticationHandler,
   HttpAuth,
@@ -28,26 +32,28 @@ import type {
   HttpServiceSetup,
   IAuthHeadersStorage,
   IRouter,
+  KibanaRequest,
   KibanaRequestState,
   KibanaRouteOptions,
   OnPostAuthHandler,
   OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreRoutingHandler,
-  RouteConfigOptions,
   RouteMethod,
   RouterDeprecatedApiDetails,
   RouterRoute,
   SessionStorageCookieOptions,
+  TimingEvent,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
-import { isBoom } from '@hapi/boom';
+import Boom, { isBoom } from '@hapi/boom';
 import { identity, isNil, isObject, omitBy } from 'lodash';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -82,12 +88,18 @@ function startEluMeasurement<T>(
   return function stopEluMeasurement() {
     const { active, utilization } = performance.eventLoopUtilization(startUtilization);
 
-    apm.currentTransaction?.addLabels(
+    addTransactionLabels(
       {
         event_loop_utilization: utilization,
         event_loop_active: active,
       },
-      false
+      {
+        isString: false,
+        otelAttributes: {
+          'nodejs.eventloop.utilization': utilization,
+          'nodejs.eventloop.active': active,
+        },
+      }
     );
 
     const duration = performance.now() - start;
@@ -119,6 +131,28 @@ function startEluMeasurement<T>(
       );
     }
   };
+}
+
+/**
+ * Strips `config.basePath` from the request URL when `rewriteBasePath` is
+ * enabled. Returns false when the URL doesn't match the configured basePath,
+ * signalling the caller to respond with 404.
+ */
+function stripConfiguredBasePath(
+  request: Request,
+  config: HttpConfig,
+  basePathService: BasePath
+): boolean {
+  if (config.basePath === undefined || !config.rewriteBasePath) {
+    return true;
+  }
+  const oldUrl = request.url.pathname + request.url.search;
+  const newUrl = basePathService.remove(oldUrl);
+  if (newUrl === oldUrl) {
+    return false;
+  }
+  request.setUrl(newUrl);
+  return true;
 }
 
 /** @internal */
@@ -170,6 +204,7 @@ export type LifecycleRegistrar = Pick<
 export interface HttpServerSetupOptions {
   config$: Observable<HttpConfig>;
   executionContext?: InternalExecutionContextSetup;
+  userActivity?: InternalUserActivityServiceSetup;
 }
 
 /** @internal */
@@ -194,6 +229,7 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
   private readonly env: Env;
+  private redactedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -211,6 +247,13 @@ export class HttpServer {
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
+  }
+
+  /** @internal */
+  public setRedactedSessionIdGetter(
+    getter: (request: KibanaRequest) => Promise<string | undefined>
+  ) {
+    this.redactedSessionIdGetter = getter;
   }
 
   private registerRouter(router: IRouter) {
@@ -235,6 +278,7 @@ export class HttpServer {
   public async setup({
     config$,
     executionContext,
+    userActivity,
   }: HttpServerSetupOptions): Promise<HttpServerSetup> {
     const config = await firstValueFrom(config$);
     this.config = config;
@@ -275,11 +319,10 @@ export class HttpServer {
       this.subscriptions.push(configSubscription);
     }
 
+    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
-    this.setupRequestStateAssignment(config, executionContext);
-    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
-    this.setupBasePathRewrite(config, basePathService);
+    this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
@@ -382,11 +425,12 @@ export class HttpServer {
   }
 
   private getAuthOption(
-    authRequired: RouteConfigOptions<any>['authRequired'] = true
+    authRequired: boolean | 'optional' | 'minimal' = true
   ): undefined | false | { mode: 'required' | 'try' } {
     if (this.authRegistered === false) return undefined;
 
-    if (authRequired === true) {
+    // Minimal authentication still should go through the authentication handler.
+    if (authRequired === true || authRequired === 'minimal') {
       return { mode: 'required' };
     }
     if (authRequired === 'optional') {
@@ -459,22 +503,6 @@ export class HttpServer {
     });
   }
 
-  private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
-    if (config.basePath === undefined || !config.rewriteBasePath) {
-      return;
-    }
-
-    this.registerOnPreRouting((request, response, toolkit) => {
-      const oldUrl = request.url.pathname + request.url.search;
-      const newURL = basePathService.remove(oldUrl);
-      const shouldRedirect = newURL !== oldUrl;
-      if (shouldRedirect) {
-        return toolkit.rewriteUrl(newURL);
-      }
-      return response.notFound();
-    });
-  }
-
   private setupConditionalCompression(config: HttpConfig) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -525,22 +553,69 @@ export class HttpServer {
     this.server.events.on('response', this.handleServerResponseEvent);
   }
 
+  private formatServerTimingHeader(
+    totalTime: number,
+    customEvents: readonly TimingEvent[]
+  ): string {
+    const timingMetrics = [
+      `app-total;dur=${totalTime.toFixed(2)};desc="Application Server Processing Time (Total)"`,
+    ];
+
+    // Limit to 20 events, sanitize names, escape descriptions
+    for (const event of customEvents.slice(0, 20)) {
+      const safeName = event.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+      let metric = `${safeName};dur=${event.duration.toFixed(2)}`;
+      if (event.description) {
+        const safeDesc = event.description
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\"')
+          .slice(0, 100);
+        metric += `;desc="${safeDesc}"`;
+      }
+      timingMetrics.push(metric);
+    }
+
+    return timingMetrics.join(', ');
+  }
+
   private setupRequestStateAssignment(
     config: HttpConfig,
-    executionContext?: InternalExecutionContextSetup
+    basePathService: BasePath,
+    executionContext?: InternalExecutionContextSetup,
+    userActivity?: InternalUserActivityServiceSetup
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
-      const stop = (request.app as KibanaRequestState).measureElu;
+      const app = request.app as KibanaRequestState;
+      app.httpSpan?.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+
+      const stop = app.measureElu;
 
       if (!stop) {
         return responseToolkit.continue;
       }
 
+      // Only add Server-Timing header if enabled in config (dev mode by default)
+      if (this.config?.serverTiming) {
+        const appState = request.app as KibanaRequestState;
+        const startTime = appState.startTime;
+        const totalTime = performance.now() - startTime;
+        const customEvents = appState.timingState?.events ?? [];
+        const serverTimingValue = this.formatServerTimingHeader(totalTime, customEvents);
+
+        if (isBoom(request.response)) {
+          request.response.output.headers['Server-Timing'] = serverTimingValue;
+        } else {
+          request.response.header('Server-Timing', serverTimingValue);
+        }
+      }
+
       if (isBoom(request.response)) {
         stop();
+        app.otelSubSpan?.end();
       } else {
         request.response.events.once('finish', () => {
           stop();
+          app.otelSubSpan?.end();
         });
       }
 
@@ -548,40 +623,153 @@ export class HttpServer {
     });
 
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      // Capture the original URL before any rewrites — must precede stripConfiguredBasePath
+      // so app.rewrittenUrl preserves the full pre-strip URL for audit/observability consumers.
+      const originalUrl = request.url;
+
+      if (!stripConfiguredBasePath(request, config, basePathService)) {
+        throw Boom.notFound();
+      }
+
       const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
-
       const requestId = getRequestId(request, config.requestId);
-
       const parentContext = executionContext?.getParentContextFrom(request.headers);
+
+      const {
+        spaceId,
+        pathname: pathnameWithoutSpacePrefix,
+        hasExplicitSpaceIdentifier,
+      } = getSpaceIdFromPath(request.url.pathname);
+      // Preserve the `/s/<spaceId>` prefix from the URL as the request basePath so links
+      // rendered in the response point back at the same space the client used. An implicit
+      // default space (no `/s/...` prefix) leaves the basePath without a space segment.
+      const spaceBasePath = hasExplicitSpaceIdentifier ? `/s/${spaceId}` : '';
+      if (hasExplicitSpaceIdentifier) {
+        request.setUrl(`${pathnameWithoutSpacePrefix}${request.url.search}`);
+      }
+
+      const app: KibanaRequestState = request.app as KibanaRequestState;
+
+      userActivity?.setInjectedContext({
+        kibana: { space: { id: spaceId } },
+      });
 
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
-        apm.addLabels(executionContext.getAsLabels());
+        const labels = executionContext.getAsLabels();
+        const { name, id, page } = labels;
+        addSpanLabels(labels, {
+          otelAttributes: omitBy(
+            {
+              'kibana.execution_context.name': name,
+              'kibana.execution_context.id': id,
+              'kibana.execution_context.page': page,
+            },
+            isNil
+          ) as Record<string, string>,
+        });
       }
 
       executionContext?.setRequestId(requestId);
 
-      const app: KibanaRequestState = request.app as KibanaRequestState;
+      // NOTE: We store per-request Kibana state on Hapi's `request.app` bag.
+      // This couples our Request representation to a specific HTTP framework (Hapi).
+      // A Core-owned per-request state container (e.g. a WeakMap or a symbol-keyed
+      // field that doesn't depend on Hapi conventions) would let us swap or layer
+      // alternative HTTP backends without rewriting every reader.
       app.startTime = performance.now();
       app.requestId = requestId;
       app.requestUuid = uuidv4();
+      app.spaceId = spaceId;
+      const serverBasePath = config.basePath ?? '';
+      app.basePath = `${serverBasePath}${spaceBasePath}`;
+      app.rewrittenUrl = request.url !== originalUrl ? originalUrl : undefined;
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-      app.traceId = apm.currentTraceIds['trace.id'];
+      app.traceId = apm.currentTraceIds['trace.id'] ?? trace.getActiveSpan()?.spanContext().traceId;
       app.span = apm.startSpan('pre-route handler middlewares');
+      app.httpSpan = trace.getActiveSpan();
+      app.otelSubSpan = this.createSubspan('pre-route handler middlewares');
 
       return responseToolkit.continue;
     });
 
+    this.server!.ext('onPostAuth', async (request, responseToolkit) => {
+      if (this.redactedSessionIdGetter) {
+        // Store the redacted session ID on the request state so the user
+        // activity service can read it later. We cannot call the service
+        // directly here because this handler is async and would use its
+        // own user-activity
+        try {
+          const kibanaRequest = CoreKibanaRequest.from(request);
+          const redactedSessionId = await this.redactedSessionIdGetter(kibanaRequest);
+          (request.app as KibanaRequestState).redactedSessionId = redactedSessionId;
+        } catch {
+          // just leave the session id as undefined
+        }
+      }
+      return responseToolkit.continue;
+    });
+
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
-      (request.app as KibanaRequestState).span?.end();
-      (request.app as KibanaRequestState).span = null;
+      const app = request.app as KibanaRequestState;
+      app.span?.end();
+      app.otelSubSpan?.end();
+      // Clear the sub-spans for the handler because it is created when actually calling the handler
+      // in src/core/packages/http/router-server-internal/src/router.ts
+      app.span = null;
+      app.otelSubSpan = undefined;
+
+      const user = this.authState.get<AuthenticatedUser>(request).state ?? null;
+      const { redactedSessionId } = request.app as KibanaRequestState;
+      const remoteAddress = request.info.remoteAddress;
+      userActivity?.setInjectedContext({
+        client: remoteAddress
+          ? {
+              ip: remoteAddress,
+              address: remoteAddress,
+            }
+          : undefined,
+        user: user
+          ? {
+              id: user.profile_uid,
+              name: user.username,
+              email: user.email,
+              roles: user.roles ? [...user.roles] : undefined,
+            }
+          : undefined,
+        session: {
+          id: redactedSessionId,
+        },
+        http: {
+          request: {
+            referrer: request.info.referrer,
+          },
+        },
+      });
+
+      return responseToolkit.continue;
+    });
+
+    this.server!.ext('onPostHandler', (request, responseToolkit) => {
+      const app = request.app as KibanaRequestState;
+      app.otelSubSpan?.end();
+      app.otelSubSpan = this.createSubspan('post-route handler middlewares');
 
       return responseToolkit.continue;
     });
 
     this.instrumentMetrics();
+  }
+
+  private createSubspan(name: string): OTelSpan {
+    const span = trace.getTracer('kibana.http').startSpan(name);
+    context.with(context.active(), () => {
+      // Hold the active context until the otelSubSpan ends
+      context.bind(context.active(), span);
+    });
+    return span;
   }
 
   private instrumentMetrics() {
@@ -873,7 +1061,7 @@ export class HttpServer {
     const { tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
-    const authRequired = this.getSecurity(route)?.authc?.enabled ?? route.options.authRequired;
+    const authRequired = this.getSecurity(route)?.authc?.enabled;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
@@ -913,6 +1101,12 @@ export class HttpServer {
               parse,
               timeout: timeout?.payload,
               multipart: true,
+              compression: maxBytes
+                ? {
+                    gzip: { maxOutputLength: maxBytes },
+                    deflate: { maxOutputLength: maxBytes },
+                  }
+                : undefined,
             }
           : undefined,
         timeout: {

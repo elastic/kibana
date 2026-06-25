@@ -5,7 +5,8 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "refresh": "__flag__"
+      "refresh": "__flag__",
+      "append": "__flag__"
     },
     "methods": [
       "PUT"
@@ -14,6 +15,7 @@
       "_synonyms/{id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-put-synonym",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-synonyms-put-synonym",
     "availability": {
       "stack": true,
       "serverless": true
