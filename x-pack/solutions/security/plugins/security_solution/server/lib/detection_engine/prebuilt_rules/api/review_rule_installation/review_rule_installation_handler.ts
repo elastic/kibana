@@ -26,7 +26,7 @@ import {
   getInstallableRulesForReview,
   getInstallableRuleVersions,
 } from '../../logic/get_installable_rules_for_review';
-import { fetchInstalledRuleVersionsMap } from '../../logic/fetch_installed_rule_versions_map';
+import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 
 const PREBUILT_RULE_INSTALLATION_FACET_AGG_SIZE = 200;
 
@@ -72,7 +72,15 @@ export const reviewRuleInstallationHandler = async (
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
-    const installedRuleVersionsMap = await fetchInstalledRuleVersionsMap(rulesClient);
+    const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+
+    const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+    logger.debug(
+      `reviewRuleInstallationHandler: Found ${installedRuleVersions.length} currently installed prebuilt rules`
+    );
+    const installedRuleVersionsMap = new Map(
+      installedRuleVersions.map((version) => [version.rule_id, version])
+    );
 
     const combinedKql = buildPrebuiltRuleInstallationKql({
       filter,
