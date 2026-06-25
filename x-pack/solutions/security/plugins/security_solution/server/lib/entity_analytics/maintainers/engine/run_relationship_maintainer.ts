@@ -17,12 +17,22 @@ import type {
   CompositeBucket,
   EntityRelationshipRecord,
 } from './types';
-import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
+import {
+  buildActorDiscoveryQuery,
+  buildActorPageFilter,
+  buildLookbackFilter,
+} from './build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
-import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
+import { MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
+import type {
+  RelationshipMaintainerSourceResult,
+  RelationshipMaintainerTelemetryCollector,
+} from '../types';
+
+export type { RelationshipMaintainerSourceResult, RelationshipMaintainerTelemetryCollector };
 
 interface CompositeAggregations {
   users: {
@@ -103,10 +113,7 @@ async function fetchTargetsForActors(
 ): Promise<EsqlQueryResult | null> {
   const esqlFilter = {
     bool: {
-      filter: [
-        { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
-        buildActorPageFilter(config, buckets),
-      ],
+      filter: [...buildLookbackFilter(config), buildActorPageFilter(config, buckets)],
     },
   };
   try {
@@ -125,6 +132,7 @@ async function fetchTargetsForActors(
       );
       return null;
     }
+
     return { columns: typed.columns, values: typed.values };
   } catch (err) {
     if (abortController?.signal.aborted) {
@@ -159,68 +167,122 @@ async function runIntegration(
   namespace: string,
   crudClient: EntityUpdateClient,
   abortController: AbortController | undefined
-): Promise<{ buckets: number; recordsCount: number; write: WriteEntityIdsResult }> {
+): Promise<{
+  buckets: number;
+  recordsCount: number;
+  write: WriteEntityIdsResult;
+  outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+  iterations: number;
+  truncated: boolean;
+}> {
   let afterKey: CompositeAfterKey | undefined;
   let iterations = 0;
+  let truncated = false;
   let totalBuckets = 0;
   const records: EntityRelationshipRecord[] = [];
   const transportOpts = abortController ? { signal: abortController.signal } : undefined;
+  let outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error' = 'producing';
 
-  do {
-    if (abortController?.signal.aborted) {
-      logger.info(`[${config.id}] Aborted during pagination`);
-      break;
-    }
-    iterations++;
-    if (iterations > MAX_ITERATIONS) {
-      logger.warn(`[${config.id}] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
-      break;
-    }
+  try {
+    do {
+      if (abortController?.signal.aborted) {
+        logger.info(`[${config.id}] Aborted during pagination`);
+        outcome = totalBuckets === 0 ? 'empty' : 'partial';
+        break;
+      }
+      iterations++;
+      if (iterations > MAX_ITERATIONS) {
+        logger.warn(`[${config.id}] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
+        outcome = 'partial';
+        truncated = true;
+        break;
+      }
 
-    const actorPage = await fetchActorPage(
-      config,
-      esClient,
+      const actorPage = await fetchActorPage(
+        config,
+        esClient,
+        logger,
+        namespace,
+        afterKey,
+        transportOpts,
+        abortController
+      );
+      if (actorPage === null) {
+        outcome = abortController?.signal.aborted
+          ? totalBuckets === 0
+            ? 'empty'
+            : 'partial'
+          : 'index_missing';
+        break;
+      }
+
+      const { buckets, newAfterKey } = actorPage;
+      logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
+      totalBuckets += buckets.length;
+      if (buckets.length === 0) {
+        if (iterations === 1) outcome = 'empty';
+        break;
+      }
+
+      const esqlResult = await fetchTargetsForActors(
+        config,
+        esClient,
+        logger,
+        namespace,
+        buckets,
+        transportOpts,
+        abortController
+      );
+      if (esqlResult === null) {
+        outcome = 'partial';
+        break;
+      }
+
+      const { columns, values } = esqlResult;
+      const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
+      records.push(...pageRecords);
+      logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
+
+      // Composite agg's documented termination contract is "stop when after_key
+      // is absent." Trust newAfterKey directly rather than inferring termination
+      // from a partial-page heuristic — composite aggs can return a partial last
+      // page with after_key still set in some edge cases (e.g. sub-aggregation
+      // filters that drop bucket candidates).
+      afterKey = newAfterKey;
+    } while (afterKey);
+
+    // Stream per-integration: write this integration's records before
+    // returning so memory does not accumulate across the outer loop.
+    const write = await writeEntityIds(
+      crudClient,
       logger,
-      namespace,
-      afterKey,
-      transportOpts,
-      abortController
-    );
-    if (actorPage === null) break;
-
-    const { buckets, newAfterKey } = actorPage;
-    logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
-    totalBuckets += buckets.length;
-    if (buckets.length === 0) break;
-
-    const esqlResult = await fetchTargetsForActors(
-      config,
+      records,
       esClient,
-      logger,
       namespace,
-      buckets,
-      transportOpts,
-      abortController
+      config.validateTargetIds
     );
-    if (esqlResult === null) break;
-
-    const { columns, values } = esqlResult;
-    const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
-    records.push(...pageRecords);
-    logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
-
-    // Composite agg's documented termination contract is "stop when after_key
-    // is absent." Trust newAfterKey directly rather than inferring termination
-    // from a partial-page heuristic — composite aggs can return a partial last
-    // page with after_key still set in some edge cases (e.g. sub-aggregation
-    // filters that drop bucket candidates).
-    afterKey = newAfterKey;
-  } while (afterKey);
-
-  // Stream per-integration: write this integration's records before
-  // returning so memory does not accumulate across the outer loop.
-  const write = await writeEntityIds(crudClient, logger, records);
-  return { buckets: totalBuckets, recordsCount: records.length, write };
+    // When truncated, the final loop pass incremented `iterations` before breaking
+    // without fetching a page — clamp to the actual number of pages completed.
+    const completedIterations = truncated ? MAX_ITERATIONS : iterations;
+    return {
+      buckets: totalBuckets,
+      recordsCount: records.length,
+      write,
+      outcome,
+      iterations: completedIterations,
+      truncated,
+    };
+  } catch (err) {
+    logger.error(`[${config.id}] Integration failed: ${errMsg(err)}`);
+    return {
+      buckets: totalBuckets,
+      recordsCount: records.length,
+      write: { updated: 0, notFound: 0, errors: 0, droppedTargets: 0, relationshipTypeApplied: {} },
+      outcome: 'error',
+      iterations,
+      truncated: false,
+    };
+  }
 }
 
 /**
@@ -240,18 +302,27 @@ async function runIntegration(
  */
 export const runRelationshipMaintainer = async ({
   esClient,
+  cpsEsClient,
   logger,
   namespace,
   crudClient,
   integrations,
   abortController,
+  telemetryCollector,
 }: {
   esClient: ElasticsearchClient;
+  cpsEsClient?: ElasticsearchClient;
   logger: Logger;
   namespace: string;
   crudClient: EntityUpdateClient;
   integrations: RelationshipIntegrationConfig[];
   abortController?: AbortController;
+  /**
+   * Optional. Engine populates one entry per integration into `sources` and
+   * accumulates per-rel-type applied counts in `relationshipTypeApplied` for callers
+   * that want full-fidelity run telemetry.
+   */
+  telemetryCollector?: RelationshipMaintainerTelemetryCollector;
 }): Promise<{
   totalBuckets: number;
   totalRecords: number;
@@ -266,6 +337,12 @@ export const runRelationshipMaintainer = async ({
   totalNotFound: number;
   /** Count of non-404 errors returned by `bulkUpdateEntity` (5xx, etc.). */
   totalWriteErrors: number;
+  /** Count of target EUIDs pruned because they don't exist in the entity store. */
+  totalDroppedTargets: number;
+  /** Total composite-agg pagination passes across all integrations. */
+  totalIterations: number;
+  /** True if any integration hit MAX_ITERATIONS and stopped early. */
+  truncated: boolean;
   lastRunTimestamp: string;
 }> => {
   // Defense-in-depth: namespace flows raw into eight `indexPattern(namespace)`
@@ -273,11 +350,21 @@ export const runRelationshipMaintainer = async ({
   // is cheaper and stronger than trusting all callers.
   assertValidNamespace(namespace);
 
+  // Capture run-start time as the watermark. Using end-of-run would exclude any
+  // entity whose last_seen advanced between query execution and run completion —
+  // a silent permanent gap on busy stores with long paginated runs.
+  const runStartTimestamp = new Date().toISOString();
+
+  const readClient = cpsEsClient ?? esClient;
+
   let totalBuckets = 0;
   let totalRecords = 0;
   let totalWritten = 0;
   let totalNotFound = 0;
   let totalWriteErrors = 0;
+  let totalDroppedTargets = 0;
+  let totalIterations = 0;
+  let truncated = false;
 
   for (const config of integrations) {
     if (abortController?.signal.aborted) {
@@ -285,19 +372,41 @@ export const runRelationshipMaintainer = async ({
       break;
     }
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
-    const { buckets, recordsCount, write } = await runIntegration(
-      config,
-      esClient,
-      logger,
-      namespace,
-      crudClient,
-      abortController
-    );
-    totalBuckets += buckets;
-    totalRecords += recordsCount;
-    totalWritten += write.updated;
-    totalNotFound += write.notFound;
-    totalWriteErrors += write.errors;
+    const {
+      buckets,
+      recordsCount,
+      write,
+      outcome,
+      iterations,
+      truncated: integrationTruncated,
+    } = await runIntegration(config, readClient, logger, namespace, crudClient, abortController);
+
+    totalIterations += iterations;
+    if (integrationTruncated) truncated = true;
+
+    if (outcome === 'error') {
+      logger.warn(`[${config.id}] Integration failed; skipping totals accumulation for this run`);
+    } else {
+      totalBuckets += buckets;
+      totalRecords += recordsCount;
+      totalWritten += write.updated;
+      totalNotFound += write.notFound;
+      totalWriteErrors += write.errors;
+      totalDroppedTargets += write.droppedTargets;
+    }
+
+    if (telemetryCollector) {
+      telemetryCollector.sources.push({
+        id: config.id,
+        scanned: buckets,
+        qualified: recordsCount,
+        outcome,
+      });
+      for (const [relType, count] of Object.entries(write.relationshipTypeApplied)) {
+        telemetryCollector.relationshipTypeApplied[relType] =
+          (telemetryCollector.relationshipTypeApplied[relType] ?? 0) + count;
+      }
+    }
   }
 
   return {
@@ -306,6 +415,9 @@ export const runRelationshipMaintainer = async ({
     totalWritten,
     totalNotFound,
     totalWriteErrors,
-    lastRunTimestamp: new Date().toISOString(),
+    totalDroppedTargets,
+    totalIterations,
+    truncated,
+    lastRunTimestamp: runStartTimestamp,
   };
 };

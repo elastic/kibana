@@ -72,6 +72,7 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
 
 const mockIndexer = {
   indexAttachment: jest.fn().mockResolvedValue(undefined),
+  deleteAttachment: jest.fn().mockResolvedValue(undefined),
   deleteChunks: jest.fn().mockResolvedValue(undefined),
 };
 
@@ -315,7 +316,7 @@ describe('SmlCrawlerImpl', () => {
         )
       );
       expect(stateWriteCalls.length).toBe(0);
-      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('no state changes needed'));
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('no state changes needed'));
     });
   });
 
@@ -511,10 +512,10 @@ describe('SmlCrawlerImpl', () => {
         })
         .mockResolvedValue({ hits: { hits: [] } });
 
-      // findManualOriginIds returns one of the candidates as manual
+      // findManualOriginUris returns one of the candidates as manual
       (esClient.search as jest.Mock).mockResolvedValue({
         hits: {
-          hits: [{ _source: { origin_id: 'manual-origin' } }],
+          hits: [{ _source: { origin: { uri: 'test-type://manual-origin' } } }],
         },
       });
 
@@ -761,7 +762,7 @@ describe('SmlCrawlerImpl', () => {
       );
       expect(stateWriteCalls.length).toBe(2);
 
-      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('enumerated 2 item(s)'));
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('enumerated 2 item(s)'));
     });
   });
 });

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import type { SearchMode } from '../../../common/queries';
 
 /**
  * A memory page as stored in the main memory index.
@@ -35,6 +36,8 @@ export interface MemoryEntry {
   updated_at: string;
   created_by: string;
   updated_by: string;
+  /** Present and true for soft-deleted tombstone documents */
+  is_deleted?: boolean;
 }
 
 /**
@@ -47,6 +50,8 @@ export interface MemoryVersionRecord {
   name: string;
   title: string;
   content: string;
+  tags: string[];
+  categories: string[];
   change_type: MemoryChangeType;
   change_summary: string;
   created_at: string;
@@ -115,6 +120,7 @@ export interface SearchMemoryParams {
   categories?: string[];
   references?: string[];
   size?: number;
+  mode?: SearchMode;
 }
 
 /** Dependencies for the memory service */
@@ -141,7 +147,10 @@ export interface MemoryService {
   addCategory(params: { id: string; category: string; user: string }): Promise<MemoryEntry>;
   removeCategory(params: { id: string; category: string; user: string }): Promise<MemoryEntry>;
   listCategories(): Promise<string[]>;
-  getCategoryTree(): Promise<MemoryCategoryNode[]>;
+  getCategoryTree(): Promise<{
+    tree: MemoryCategoryNode[];
+    uncategorized: Array<{ id: string; name: string; title: string }>;
+  }>;
 
   // References
   getBacklinks(params: { id: string }): Promise<MemoryEntry[]>;

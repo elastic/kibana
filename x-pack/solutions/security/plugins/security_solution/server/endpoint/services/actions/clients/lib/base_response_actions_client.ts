@@ -416,10 +416,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       {
         type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
         attachmentId: actionId,
+        data: { content: comment || EMPTY_COMMENT },
         metadata: {
           targets,
           command,
-          comment: comment || EMPTY_COMMENT,
         },
         owner: APP_ID,
       },
@@ -957,7 +957,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           responseActions: {
             actionId: response.EndpointActions.action_id,
             agentType: this.agentType,
-            actionStatus: response.error ? 'failed' : 'successful',
+            actionStatus: response.EndpointActions.data?.output?.content.canceled_by
+              ? 'canceled'
+              : response.error
+              ? 'failed'
+              : 'successful',
             command: response.EndpointActions.data.command,
           },
         });

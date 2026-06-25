@@ -15,7 +15,7 @@ Object {
   "elasticsearchUrl": undefined,
   "instanceSizeMb": undefined,
   "isCloudEnabled": true,
-  "isEce": undefined,
+  "isEce": true,
   "isElasticStaffOwned": undefined,
   "isInTrial": [Function],
   "isServerlessEnabled": false,
@@ -28,6 +28,7 @@ Object {
   },
   "organizationId": undefined,
   "projectsUrl": "https://cloud.elastic.co/projects/",
+  "region": undefined,
   "serverless": Object {
     "orchestratorTarget": undefined,
     "organizationInTrial": undefined,

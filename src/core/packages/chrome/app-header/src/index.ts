@@ -15,6 +15,9 @@ export type {
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderTab,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
+  AppHeaderEditableTitle,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,
@@ -23,4 +26,6 @@ export type {
   AppHeaderMenu,
   AppHeaderPadding,
   AppHeaderConfig,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
 } from './types';

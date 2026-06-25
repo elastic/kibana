@@ -36,6 +36,9 @@ export const ALERTING_V2_API_PRIVILEGES = {
     read: 'read-alerting-v2-action-policies',
     write: 'write-alerting-v2-action-policies',
   },
+  executionHistory: {
+    read: 'read-alerting-v2-execution-history',
+  },
 } as const;
 
 /**
@@ -57,6 +60,10 @@ export const ALERTING_V2_UI_CAPABILITIES = {
     all: 'all',
     read: 'read',
   },
+  executionHistory: {
+    all: 'all',
+    read: 'read',
+  },
 } as const;
 
 /**
@@ -68,6 +75,7 @@ export const ALERTING_V2_SUB_FEATURE_UI_CAPABILITIES = {
   rules: {},
   alerts: {},
   actionPolicies: {},
+  executionHistory: {},
 } as const satisfies Record<string, Record<string, string>>;
 
 type AlertingV2ApiPrivilege = NestedValueOf<typeof ALERTING_V2_API_PRIVILEGES>;
@@ -77,7 +85,10 @@ type AlertingV2SubFeatureUICapability = NestedValueOf<
 >;
 type AlertingV2UICapability = AlertingV2TopLevelUICapability | AlertingV2SubFeatureUICapability;
 
-type AlertingV2FeaturePrivilege = Pick<FeatureKibanaPrivileges, 'api' | 'ui' | 'savedObject'> & {
+type AlertingV2FeaturePrivilege = Pick<
+  FeatureKibanaPrivileges,
+  'api' | 'ui' | 'savedObject' | 'alerts'
+> & {
   readonly api: readonly AlertingV2ApiPrivilege[];
   readonly ui: readonly AlertingV2TopLevelUICapability[];
   readonly savedObject: {
@@ -144,6 +155,7 @@ export const ALERTING_V2_FEATURES = {
     name: 'Alerts',
     privileges: {
       all: {
+        alerts: { read: true },
         api: [ALERTING_V2_API_PRIVILEGES.alerts.read, ALERTING_V2_API_PRIVILEGES.alerts.write],
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.all, ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
@@ -152,6 +164,7 @@ export const ALERTING_V2_FEATURES = {
         },
       },
       read: {
+        alerts: { read: true },
         api: [ALERTING_V2_API_PRIVILEGES.alerts.read],
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
@@ -187,6 +200,29 @@ export const ALERTING_V2_FEATURES = {
           all: [],
           read: [ACTION_POLICY_SAVED_OBJECT_TYPE],
         },
+      },
+    },
+    subFeatures: [] as const,
+  },
+  executionHistory: {
+    id: 'alerting_v2_execution_history',
+    name: 'Execution history',
+    privileges: {
+      all: {
+        api: [ALERTING_V2_API_PRIVILEGES.executionHistory.read],
+        ui: [
+          ALERTING_V2_UI_CAPABILITIES.executionHistory.all,
+          ALERTING_V2_UI_CAPABILITIES.executionHistory.read,
+        ],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+      },
+      read: {
+        api: [ALERTING_V2_API_PRIVILEGES.executionHistory.read],
+        ui: [ALERTING_V2_UI_CAPABILITIES.executionHistory.read],
+        savedObject: { all: [], read: [] },
       },
     },
     subFeatures: [] as const,

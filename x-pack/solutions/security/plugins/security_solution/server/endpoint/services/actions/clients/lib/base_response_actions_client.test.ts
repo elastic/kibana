@@ -47,7 +47,7 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { resetCcsCache } from '../../../../utils/ccs_utils';
 
 jest.mock('../../action_details_by_id', () => {
@@ -246,9 +246,9 @@ describe('ResponseActionsClientImpl base class', () => {
           {
             type: 'security.endpoint',
             attachmentId: 'action-123',
+            data: { content: 'this is a case comment' },
             metadata: {
               command: 'isolate',
-              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
