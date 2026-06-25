@@ -92,6 +92,11 @@ describe('registerUpsertRoute', () => {
 
   it('passes action=update and created=false when origin already exists in caller space', async () => {
     mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([sampleDocument]);
+    // The route now privilege-checks existing chunks before overwriting
+    // them — see the "returns 404 when caller lacks read access" test
+    // for the rationale. This test focuses on the happy path, so we
+    // explicitly authorize the chunk read.
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
     mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
 
@@ -129,6 +134,48 @@ describe('registerUpsertRoute', () => {
       body: { message: "SML origin 'viz-1' not found" },
     });
     expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 (and does not overwrite) when caller lacks read access to existing chunks', async () => {
+    // Privilege escalation guard: a caller with `agentContextLayer:write`
+    // but lacking the underlying object privilege (e.g.
+    // `saved_object:dashboard/get`) must not be able to overwrite a
+    // permission-gated origin. The route's content-mode write would
+    // otherwise delete the existing chunks and replace them with the
+    // caller's input — content injection on a resource they cannot read.
+    // This mirrors the DELETE route's `checkItemsAccess` gate.
+    const gatedDoc = { ...sampleDocument, id: 'chunk-1', spaces: ['test-space'] };
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([gatedDoc]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
+
+    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+
+    expect(mockSmlService.checkItemsAccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ids: ['chunk-1'],
+        spaceId: 'test-space',
+      })
+    );
+    expect(response.notFound).toHaveBeenCalledWith({
+      body: { message: "SML origin 'viz-1' not found" },
+    });
+    // The whole point of the gate — no write must happen on the
+    // unauthorized branch.
+    expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
+  });
+
+  it('skips checkItemsAccess for a fresh create (no existing chunks)', async () => {
+    // A brand-new origin has nothing to read-gate — the privilege check
+    // would have to short-circuit anyway. Asserting it isn't called
+    // both avoids a wasted ES round-trip and documents the contract.
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+
+    await callHandler({ params: { originId: 'viz-new' }, body: validBody });
+
+    expect(mockSmlService.checkItemsAccess).not.toHaveBeenCalled();
+    expect(mockSmlService.indexAttachment).toHaveBeenCalled();
   });
 
   it('accepts an unregistered type and writes it through the indexer (which stamps empty permissions)', async () => {

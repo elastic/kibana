@@ -64,6 +64,14 @@ export interface SmlIndexer {
    *   dedicated SML type; register a real `SmlTypeDefinition` if the
    *   content should be gated.
    *
+   * **`getPermissions` failures fail-closed.** When the registered type's
+   * `getPermissions` hook throws, the call is aborted *before* any
+   * mutation (existing chunks remain intact) and the throw is propagated
+   * to the caller. The previous "log + stamp empty permissions" handling
+   * was actually fail-OPEN given the read-path filter's
+   * `kbnPrivs.length === 0 → public` semantic. See
+   * `resolvePermissionsForOrigin` for the full rationale.
+   *
    * For `action: 'delete'`, only chunks with `ingestion_method: 'crawled'` are
    * removed — manual entries for the same `origin_id` are preserved. This keeps
    * curated content around even when the upstream object goes away (e.g.
@@ -220,30 +228,49 @@ class SmlIndexerImpl implements SmlIndexer {
       }', content length: ${smlData.chunks[0]?.content?.length ?? 0}`
     );
 
+    // Resolve permissions BEFORE `deleteChunks` so a hook throw doesn't
+    // leave the origin in a wiped state. `getPermissions(originId, ctx)`
+    // is a per-origin computation (it doesn't take a chunk), so one call
+    // is correct and also avoids N hook invocations when getSmlData
+    // returns multiple chunks for the same origin.
+    let resolvedPermissions: SmlPermissions;
+    try {
+      resolvedPermissions = await this.resolvePermissionsForOrigin({
+        definition,
+        originId,
+        context,
+      });
+    } catch (error) {
+      // Fail-closed: log with origin/type framing and propagate. The
+      // existing chunks for the origin remain intact (we haven't called
+      // `deleteChunks` yet). See `resolvePermissionsForOrigin` JSDoc.
+      this.logger.warn(
+        `SML indexer: type '${
+          definition.id
+        }' getPermissions threw for origin '${originId}' — aborting origin-mode write to avoid producing un-gated chunks: ${
+          (error as Error).message
+        }`
+      );
+      throw error;
+    }
+
     await this.deleteChunks({ originUri, esClient });
 
-    const bulkOps = await Promise.all(
-      smlData.chunks.map(async (chunk) => {
-        // Use a bare UUID for `_id` (and the document's `id` field) so the chunk
-        // identifier is bounded at 36 bytes regardless of `attachmentType` /
-        // `originId` length. ES `_id` is capped at 512 bytes and `originId`
-        // can be caller-supplied (e.g. via the workflow step's `with: originId`),
-        // so an embed-the-inputs scheme was unbounded by construction. Lookups
-        // happen via the `origin_id` and `type` document fields, not by parsing
-        // `_id`, so dropping the prefix is purely an internal change.
-        const resolvedPermissions = await this.resolvePermissionsForChunk({
-          definition,
-          originId,
-          context,
-        });
-        return this.buildIndexOp({
-          chunkId: uuidv4(),
-          chunk,
-          originId,
-          spaces,
-          ingestionMethod: 'crawled',
-          resolvedPermissions,
-        });
+    const bulkOps = smlData.chunks.map((chunk) =>
+      // Use a bare UUID for `_id` (and the document's `id` field) so the chunk
+      // identifier is bounded at 36 bytes regardless of `attachmentType` /
+      // `originId` length. ES `_id` is capped at 512 bytes and `originId`
+      // can be caller-supplied (e.g. via the workflow step's `with: originId`),
+      // so an embed-the-inputs scheme was unbounded by construction. Lookups
+      // happen via the `origin_id` and `type` document fields, not by parsing
+      // `_id`, so dropping the prefix is purely an internal change.
+      this.buildIndexOp({
+        chunkId: uuidv4(),
+        chunk,
+        originId,
+        spaces,
+        ingestionMethod: 'crawled',
+        resolvedPermissions,
       })
     );
 
@@ -343,35 +370,50 @@ class SmlIndexerImpl implements SmlIndexer {
       );
     }
 
-    await this.deleteChunks({ originUri, esClient });
-
     const context: SmlContext = {
       esClient,
       savedObjectsClient: savedObjectsClient as SavedObjectsClientContract,
       logger: contextLogger,
     };
 
-    const bulkOps = await Promise.all(
-      chunks.map(async (chunk) => {
-        // Use a bare UUID for `_id`. The previous `${attachmentType}:${originId}:manual:${index}`
-        // scheme was unbounded (the inputs can be caller-controlled) and the
-        // determinism it advertised was redundant — `deleteChunks` above already
-        // wipes every chunk for the `origin_id`, so re-runs cannot accumulate
-        // stale rows. The `manual` literal was decoration; the document carries
-        // `ingestion_method: 'manual'` for that semantic.
-        const resolvedPermissions = await this.resolvePermissionsForChunk({
-          definition,
-          originId,
-          context,
-        });
-        return this.buildIndexOp({
-          chunkId: uuidv4(),
-          chunk,
-          originId,
-          spaces,
-          ingestionMethod: 'manual',
-          resolvedPermissions,
-        });
+    // Resolve permissions BEFORE `deleteChunks` so a hook throw doesn't
+    // leave the origin in a wiped state. Per-origin computation; see the
+    // origin-mode write path for the rationale on hoisting this out of
+    // the chunk loop.
+    let resolvedPermissions: SmlPermissions;
+    try {
+      resolvedPermissions = await this.resolvePermissionsForOrigin({
+        definition,
+        originId,
+        context,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `SML indexer: type '${
+          definition?.id ?? attachmentType
+        }' getPermissions threw for origin '${originId}' — aborting content-mode write to avoid producing un-gated chunks: ${
+          (error as Error).message
+        }`
+      );
+      throw error;
+    }
+
+    await this.deleteChunks({ originUri, esClient });
+
+    const bulkOps = chunks.map((chunk) =>
+      // Use a bare UUID for `_id`. The previous `${attachmentType}:${originId}:manual:${index}`
+      // scheme was unbounded (the inputs can be caller-controlled) and the
+      // determinism it advertised was redundant — `deleteChunks` above already
+      // wipes every chunk for the `origin_id`, so re-runs cannot accumulate
+      // stale rows. The `manual` literal was decoration; the document carries
+      // `ingestion_method: 'manual'` for that semantic.
+      this.buildIndexOp({
+        chunkId: uuidv4(),
+        chunk,
+        originId,
+        spaces,
+        ingestionMethod: 'manual',
+        resolvedPermissions,
       })
     );
 
@@ -379,30 +421,46 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   /**
-   * Resolve the {@link SmlPermissions} to stamp on a chunk.
+   * Resolve the {@link SmlPermissions} to stamp on every chunk for an
+   * origin. Called **once per origin** before any ES mutation, so a hook
+   * failure can abort the write without leaving the origin in a
+   * half-deleted state.
    *
    * - Registered type with `getPermissions` → the hook's result is used
    *   (with arrays defensively defaulted to `[]` so the stored document
-   *   always has fully-shaped inner arrays).
+   *   always has fully-shaped inner arrays). **A throw is propagated**
+   *   to the caller — see below.
    * - Registered type without `getPermissions` → empty `SmlPermissions`.
+   *   This is an explicit opt-in by the SML type author signalling that
+   *   the data is space-readable.
    * - Unregistered type (`definition === undefined`) → empty
-   *   `SmlPermissions`. Only reachable via content-mode writes; origin-mode
-   *   rejects unregistered types upstream via
+   *   `SmlPermissions`. Only reachable via content-mode writes;
+   *   origin-mode rejects unregistered types upstream via
    *   {@link SmlUnregisteredTypeError}. The warn line announcing the
    *   namespace is emitted by `indexManualChunks` once per process per
    *   type so this helper can stay quiet on the hot path.
    *
-   * Empty privileges are treated by the read-path filter as "no
-   * privileges required" — appropriate only for types that intentionally
-   * make their data publicly readable within the space. SML types
-   * backing sensitive resources MUST implement the hook.
+   * **Fail-closed on `getPermissions` throw.** The previous implementation
+   * caught the throw, logged a warning, and stamped empty permissions.
+   * That was actually fail-OPEN: the read-path filter treats
+   * `kbnPrivs.length === 0 && esIdx.length === 0` as "no privileges
+   * required" and returns the chunk to anyone in the space (see
+   * `sml_service.ts: permsOk = kbnPrivs.length === 0 || …`). A transient
+   * blip during a crawl of sensitive resources would have indexed those
+   * chunks with no gate until the next successful crawl overwrote them.
    *
-   * A `getPermissions` throw is treated as a hard failure-closed: the
-   * indexer logs a warning and stamps empty permissions. The alternative
-   * — using caller-supplied permissions — is the spoofing surface this
-   * design removes, so we intentionally fail closed instead.
+   * We now propagate the throw instead. Callers see this:
+   *
+   * - Origin-mode crawler: the task runner logs and reschedules on the
+   *   next crawl tick. The origin keeps its previous chunks intact (the
+   *   throw lands before `deleteChunks` runs — see `indexAttachment`).
+   * - Workflow step: surfaced as a step `error` result.
+   * - HTTP upsert route: bubbles to a 500.
+   *
+   * The trade-off is intentional: a transient blip becomes a visible
+   * write failure rather than an invisible privilege escalation.
    */
-  private async resolvePermissionsForChunk({
+  private async resolvePermissionsForOrigin({
     definition,
     originId,
     context,
@@ -414,22 +472,14 @@ class SmlIndexerImpl implements SmlIndexer {
     if (!definition || !definition.getPermissions) {
       return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
     }
-    try {
-      const result = await definition.getPermissions(originId, context);
-      return {
-        kibana: { privileges: result.kibana?.privileges ?? [] },
-        elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
-      };
-    } catch (error) {
-      this.logger.warn(
-        `SML indexer: type '${
-          definition.id
-        }' getPermissions threw for origin '${originId}' — stamping empty permissions: ${
-          (error as Error).message
-        }`
-      );
-      return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
-    }
+    // Intentionally NOT wrapped in try/catch — see fail-closed note in
+    // the JSDoc. Logging here is the caller's job (so origin-mode and
+    // content-mode can frame the failure with their own context).
+    const result = await definition.getPermissions(originId, context);
+    return {
+      kibana: { privileges: result.kibana?.privileges ?? [] },
+      elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
+    };
   }
 
   private buildIndexOp({

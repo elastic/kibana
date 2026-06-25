@@ -712,9 +712,15 @@ describe('createSmlIndexer', () => {
         );
 
         expect(getSmlData).not.toHaveBeenCalled();
-        // getPermissions IS called per chunk — the workflow step cannot
-        // bypass the type's gating by writing in content mode.
-        expect(getPermissions).toHaveBeenCalledTimes(2);
+        // getPermissions is called exactly once per `indexAttachment`
+        // call — its result only depends on `originId` (not on the chunk),
+        // so calling it per chunk would be wasted work and would also
+        // make fail-closed atomicity hard to reason about (a per-chunk
+        // throw on chunk N would leave the origin half-written). The
+        // workflow step still cannot bypass the type's gating by
+        // writing in content mode: the one call applies to every chunk
+        // produced in the batch.
+        expect(getPermissions).toHaveBeenCalledTimes(1);
         expect(getPermissions).toHaveBeenCalledWith(
           'att-manual',
           expect.objectContaining({ esClient })
@@ -746,6 +752,43 @@ describe('createSmlIndexer', () => {
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
           elasticsearch: { indices: [] },
         });
+      });
+
+      it('content-mode getPermissions throw: propagates the throw and leaves existing chunks intact', async () => {
+        // Same fail-closed contract as origin mode, repeated here so the
+        // content-mode framing in the warn line ('aborting content-mode
+        // write') can't silently drift away from the origin-mode framing.
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getPermissions = jest.fn().mockImplementation(() => {
+          throw new Error('upstream lookup failed');
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment(
+            createContentIndexerParams({
+              originId: 'att-content-throws',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+              content: [{ type: 'lens', title: 'T', content: 'c' }],
+            })
+          )
+        ).rejects.toThrow('upstream lookup failed');
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('aborting content-mode write')
+        );
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
       });
 
       it('stamps empty permissions when content-mode type has no getPermissions hook', async () => {
@@ -1035,12 +1078,23 @@ describe('createSmlIndexer', () => {
         });
       });
 
-      it('getPermissions throw: logs warning and stamps empty permissions (fail-closed)', async () => {
-        // A throwing hook is a hard failure — we do NOT fall back to caller-
-        // supplied data (there is none any more), and we do NOT swallow the
-        // chunk silently. The chunk is stamped with empty permissions
-        // (effectively unreachable to non-superuser space members) and a
-        // warning is logged.
+      it('getPermissions throw: propagates the throw and leaves existing chunks intact (fail-closed)', async () => {
+        // The previous implementation caught the throw, logged a warning,
+        // and stamped empty SmlPermissions on the chunk. That was actually
+        // FAIL-OPEN: the read-path filter treats `kbnPrivs.length === 0
+        // && esIdx.length === 0` as "no privileges required" and returns
+        // the chunk to any authenticated user in the space (see
+        // sml_service.ts `permsOk` computation). A transient blip during
+        // a crawl of sensitive resources would have silently de-gated
+        // those chunks until the next successful crawl overwrote them.
+        //
+        // The current behaviour propagates the throw BEFORE any ES
+        // mutation: the existing chunks for the origin remain intact,
+        // the task runner sees a typed error and reschedules, and no
+        // un-gated chunk is ever produced. We assert all three:
+        //  - the throw bubbles out
+        //  - deleteByQuery is never called (origin not wiped)
+        //  - bulk is never called (no new chunk written)
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -1059,23 +1113,77 @@ describe('createSmlIndexer', () => {
         const esClient = createMockEsClient();
         const indexer = createSmlIndexer({ registry, logger });
 
+        await expect(
+          indexer.indexAttachment(
+            createIndexerParams({
+              originId: 'att-throws',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+            })
+          )
+        ).rejects.toThrow('upstream lookup failed');
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining("type 'lens' getPermissions threw for origin 'att-throws'")
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('aborting origin-mode write')
+        );
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('getPermissions is called once per origin (not once per chunk)', async () => {
+        // `getPermissions(originId, ctx)` doesn't take a chunk — its
+        // result is identical for every chunk produced by the same
+        // origin's `getSmlData`. The implementation now hoists the call
+        // out of the per-chunk loop both as a perf optimisation and as
+        // a precondition for fail-closed semantics (we need a single
+        // resolution point so a throw can abort the write atomically
+        // before any ES mutation).
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [
+            { type: 'lens', title: 'A', content: 'a' },
+            { type: 'lens', title: 'B', content: 'b' },
+            { type: 'lens', title: 'C', content: 'c' },
+          ],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const getPermissions = jest.fn().mockResolvedValue({
+          kibana: { privileges: [{ name: 'p1' }] },
+          elasticsearch: { indices: [] },
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData, getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
         await indexer.indexAttachment(
           createIndexerParams({
-            originId: 'att-throws',
+            originId: 'att-multi',
             attachmentType: 'lens',
             action: 'create',
             esClient,
           })
         );
 
-        expect(logger.warn).toHaveBeenCalledWith(
-          expect.stringContaining("type 'lens' getPermissions threw for origin 'att-throws'")
-        );
-        const bulkCall = bulkMock.mock.calls[0][0];
-        expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: [] },
-          elasticsearch: { indices: [] },
-        });
+        expect(getPermissions).toHaveBeenCalledTimes(1);
+        // …and every chunk still got the same permissions stamped.
+        const ops = bulkMock.mock.calls[0][0].operations;
+        expect(ops).toHaveLength(3);
+        for (const op of ops) {
+          expect(op.index.document.permissions).toEqual({
+            kibana: { privileges: [{ name: 'p1' }] },
+            elasticsearch: { indices: [] },
+          });
+        }
       });
     });
   });

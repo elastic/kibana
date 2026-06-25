@@ -39,6 +39,19 @@ import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
  * origin up across all spaces and rejects requests from a space that
  * cannot see it (404) so a caller in space A cannot stomp on chunks
  * in space B.
+ *
+ * Per-chunk privilege guard: when the origin already has chunks in the
+ * caller's space, the route also runs `checkItemsAccess` to confirm the
+ * caller has the Kibana privileges those chunks were gated with. Without
+ * this gate, a user holding `agentContextLayer:write` but lacking the
+ * underlying object privileges (e.g. `saved_object:dashboard/get`)
+ * could PUT new content over a dashboard origin — the indexer would
+ * dutifully delete the existing permission-gated chunks and write the
+ * caller's chunks in their place, achieving content injection on a
+ * resource the caller cannot read. Mirroring the DELETE route's gate
+ * (and returning 404 rather than 403) keeps the surface symmetric and
+ * avoids disclosing the existence of gated chunks the caller cannot
+ * see.
  */
 export const registerUpsertRoute = ({
   router,
@@ -142,6 +155,29 @@ export const registerUpsertRoute = ({
           return response.notFound({
             body: { message: `SML origin '${originId}' not found` },
           });
+        }
+
+        // Per-chunk privilege gate — same shape as the DELETE route's
+        // gate. Writing under an existing origin overwrites every chunk
+        // already there, so the caller must be able to read every chunk
+        // they're about to replace; otherwise a caller with
+        // `agentContextLayer:write` but no `saved_object:dashboard/get`
+        // could overwrite a permission-gated dashboard chunk with
+        // attacker-controlled content. Empty `existing` is a fresh
+        // create — no existing privileges to check.
+        if (existing.length > 0) {
+          const accessMap = await sml.checkItemsAccess({
+            ids: existing.map((d) => d.id),
+            spaceId,
+            esClient,
+            request,
+          });
+          const unauthorized = existing.filter((d) => accessMap.get(d.id) !== true);
+          if (unauthorized.length > 0) {
+            return response.notFound({
+              body: { message: `SML origin '${originId}' not found` },
+            });
+          }
         }
 
         const created = existing.length === 0;
