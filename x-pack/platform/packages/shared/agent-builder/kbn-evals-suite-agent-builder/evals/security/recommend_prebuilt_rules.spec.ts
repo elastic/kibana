@@ -41,6 +41,10 @@ const GET_CATALOG_OVERVIEW_TOOL_ID = 'security.get_installable_catalog_overview'
 // otherwise look green. A real bundled catalog has far more than this for TA0005.
 const MIN_EXPECTED_RULES = 3;
 
+// Integration used for the recommendation-scoping test. Okta is the skill's own worked example,
+// is identity-domain, and has many installable rules carrying `okta` in their related_integrations.
+const INTEGRATION_PACKAGE = 'okta';
+
 // Install the real bundled `security_detection_engine` package via the Fleet EPM
 // API. It is bundled with Kibana, so this works offline. Installing the *package*
 // only creates `security-rule` *asset* saved objects (the installable catalog) —
@@ -53,13 +57,14 @@ const FLEET_BULK_INSTALL_PATH = '/api/fleet/epm/packages/_bulk';
 interface ToolCallStep {
   type?: string;
   tool_id?: string;
-  params?: { filter?: { mitreTactic?: unknown; tags?: unknown } };
+  params?: { filter?: { mitreTactic?: unknown; tags?: unknown; relatedIntegrations?: unknown } };
   results?: unknown[];
 }
 
-interface TacticRule {
+interface CatalogRule {
   name?: string;
   threat?: Array<{ tactic?: { id?: string; name?: string } }>;
+  related_integrations?: Array<{ package?: string }>;
 }
 
 const getFindPrebuiltRulesCalls = (steps: ToolCallStep[]): ToolCallStep[] =>
@@ -79,11 +84,11 @@ const routedToTactic = (step: ToolCallStep): boolean => {
 
 // The tool result is `[{ type, data: { total, rules } }]`. Pull the rules array
 // out without assuming more about the wrapper than `data.rules`.
-const rulesFromStep = (step: ToolCallStep): TacticRule[] => {
+const rulesFromStep = (step: ToolCallStep): CatalogRule[] => {
   const results = Array.isArray(step?.results) ? step.results : [];
   for (const result of results) {
     const rules = (result as { data?: { rules?: unknown } })?.data?.rules;
-    if (Array.isArray(rules)) return rules as TacticRule[];
+    if (Array.isArray(rules)) return rules as CatalogRule[];
   }
   return [];
 };
@@ -91,7 +96,7 @@ const rulesFromStep = (step: ToolCallStep): TacticRule[] => {
 // A rule covers the tactic if any of its MITRE threat entries names it. Rules are
 // multi-tactic, so this is "includes the tactic", not "sole tactic". Works on both
 // the triage shape (`threat: [{ tactic: { id, name } }]`) and the full threat shape.
-const coversTactic = (rule: TacticRule): boolean =>
+const coversTactic = (rule: CatalogRule): boolean =>
   Array.isArray(rule?.threat) &&
   rule.threat.some(
     (entry) => entry?.tactic?.id === TACTIC_ID || entry?.tactic?.name === TACTIC_NAME
@@ -161,6 +166,19 @@ const tacticsFromFilter = (step: ToolCallStep): string[] => {
     ? mitreTactic.filter((value): value is string => typeof value === 'string')
     : [];
 };
+
+// Integration package names the agent passed to a `find_prebuilt_rules` `relatedIntegrations` filter.
+const relatedIntegrationsFromFilter = (step: ToolCallStep): string[] => {
+  const relatedIntegrations = step?.params?.filter?.relatedIntegrations;
+  return Array.isArray(relatedIntegrations)
+    ? relatedIntegrations.filter((value): value is string => typeof value === 'string')
+    : [];
+};
+
+// A rule relates to the integration if any of its related_integrations names that package.
+const relatesToIntegration = (rule: CatalogRule, pkg: string): boolean =>
+  Array.isArray(rule?.related_integrations) &&
+  rule.related_integrations.some((integration) => integration?.package === pkg);
 
 evaluate.describe(
   'Security Skills - Recommend Prebuilt Rules',
@@ -275,6 +293,40 @@ evaluate.describe(
         // Anti-hallucination: every tactic used must be one of the canonical MITRE tactics.
         const nonCanonical = usedTactics.filter((tactic) => !isCanonicalTactic(tactic));
         expect(nonCanonical).toEqual([]);
+      }
+    );
+
+    evaluate(
+      'an integration recommendation returns only rules related to that integration',
+      async ({ chatClient }) => {
+        const response = await chatClient.converse({
+          messages: [
+            {
+              message: `Recommend prebuilt detection rules to install for my ${INTEGRATION_PACKAGE} integration.`,
+            },
+          ],
+        });
+
+        expect(response.errors).toEqual([]);
+
+        const steps = (response.steps ?? []) as ToolCallStep[];
+
+        // The recommendation must scope its catalog search to the integration via
+        // `relatedIntegrations`, rather than doing a generic catalog search.
+        const integrationCalls = getFindPrebuiltRulesCalls(steps).filter((step) =>
+          relatedIntegrationsFromFilter(step).includes(INTEGRATION_PACKAGE)
+        );
+        expect(integrationCalls.length).toBeGreaterThan(0);
+
+        // Every rule returned by those scoped searches must actually relate to the integration —
+        // no unrelated rules. (Also catches a broken `relatedIntegrations` filter.)
+        const returnedRules = integrationCalls.flatMap(rulesFromStep);
+        expect(returnedRules.length).toBeGreaterThan(0);
+
+        const unrelated = returnedRules
+          .filter((rule) => !relatesToIntegration(rule, INTEGRATION_PACKAGE))
+          .map((rule) => rule?.name ?? '<unknown>');
+        expect(unrelated).toEqual([]);
       }
     );
   }
