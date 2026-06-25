@@ -8,16 +8,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
 
 const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
 export const DescriptionField = () => {
-  const { control, watch } = useFormContext<FormValues>();
+  const { control } = useFormContext<FormValues>();
   const { layout } = useRuleFormMeta();
-  const descriptionValue = watch('metadata.description');
+  const descriptionValue = useWatch({ control, name: 'metadata.description' });
 
   // Show the input if there's already a description value
   const [isInputVisible, setIsInputVisible] = useState(() => Boolean(descriptionValue));

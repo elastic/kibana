@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { ActionForm, createInitialActionFormValue, isActionValid } from '../../../actions_form';
@@ -26,8 +26,8 @@ const notificationsSubtext = i18n.translate(
 );
 
 export const NotificationsStep = () => {
-  const { watch, setValue } = useFormContext<ComposeFormValues>();
-  const notifications = watch('notifications');
+  const { setValue, control } = useFormContext<ComposeFormValues>();
+  const notifications = useWatch({ control, name: 'notifications' });
   const [touched, setTouched] = useState(false);
 
   const defaultWorkflows = useMemo(() => createInitialActionFormValue(), []);
