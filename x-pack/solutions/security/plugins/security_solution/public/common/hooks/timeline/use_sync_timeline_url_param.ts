@@ -37,7 +37,9 @@ export const useSyncTimelineUrlParam = () => {
         kind: kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
         expression: kqlQuery?.filterQuery?.kuery?.expression ?? '',
       },
-      ...(isSuperTimeline && superTimelineSourceIds?.length ? { superTimelineSourceIds } : {}),
+      ...(isSuperTimeline && show && superTimelineSourceIds?.length
+        ? { superTimelineSourceIds }
+        : {}),
     };
     updateUrlParam(params);
   }, [
