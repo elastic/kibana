@@ -403,7 +403,8 @@ const buildEsqlQuery = ({
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
-  const query = `SET unmapped_fields="LOAD";
+  // TODO: TEMPORARY USING NULLIFY INSTEAD OF LOAD - https://github.com/elastic/elasticsearch/issues/150667
+  const query = `SET unmapped_fields="NULLIFY";
 FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
