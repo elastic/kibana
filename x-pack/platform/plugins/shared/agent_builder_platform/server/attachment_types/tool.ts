@@ -12,20 +12,6 @@ import { TOOL_ATTACHMENT_TYPE, type ToolAttachmentData } from '../../common/atta
 
 /**
  * Server-side definition for the `tool` attachment type.
- *
- * Notes:
- * - `validate` performs a shape-only check; per-type config semantics
- *   (ES|QL syntax, parameter binding, default-value typing) are validated
- *   by the propose/patch handlers via the ES|QL type's `validateConfig`
- *   before the attachment is ever created. Keeping this gate cheap lets
- *   `attachments.update` accept partial intermediate states the LLM may
- *   emit during iteration; the deeper checks live next to the schema they
- *   protect.
- * - `format` returns a compact text representation so the LLM can
- *   self-correct on subsequent turns without re-fetching the full payload.
- * - There is no `resolve()`: by-value is the only mode. Once persisted,
- *   the UI calls `updateOrigin(toolId)` so the card flips to the
- *   "Created" state; we don't re-resolve from origin.
  */
 export const createToolAttachmentType = (): AttachmentTypeDefinition<
   typeof TOOL_ATTACHMENT_TYPE,

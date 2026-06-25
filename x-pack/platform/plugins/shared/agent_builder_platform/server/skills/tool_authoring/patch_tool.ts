@@ -104,19 +104,6 @@ const applySearchReplace = (
 
 /**
  * Inline tool that refines an existing `tool` attachment.
- *
- * Strategy:
- * - Pull the latest version of the attachment from the conversation state.
- * - Apply optional metadata changes (description/tags).
- * - Apply `query` full-replacement first, then `query_patches` search-replace.
- *   Patches that fail to match exactly once cause the entire call to fail
- *   without mutating state.
- * - Apply param add/update/remove operations. Collisions and missing names
- *   are reported as errors before any mutation lands.
- * - Re-validate the merged config via `validateEsqlConfigForChat` so syntax
- *   errors and orphaned params surface here, not at "Create tool" time.
- * - Call `attachments.update`, which auto-bumps the version when the content
- *   hash changes.
  */
 export const createPatchToolTool = (): BuiltinSkillBoundedTool<typeof patchToolSchema> => ({
   id: 'patch_tool',
