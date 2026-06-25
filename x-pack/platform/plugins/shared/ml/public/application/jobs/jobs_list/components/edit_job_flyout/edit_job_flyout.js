@@ -77,6 +77,7 @@ export class EditJobFlyoutUI extends Component {
       isValidJobDetails: true,
       isValidJobCustomUrls: true,
       modelMemoryEstimation: undefined,
+      saving: false,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -100,7 +101,7 @@ export class EditJobFlyoutUI extends Component {
       return;
     }
     this.setState({ isConfirmationModalVisible: false });
-    this.setState({ isFlyoutVisible: false });
+    this.setState({ isFlyoutVisible: false, saving: false });
   };
 
   /**
@@ -137,6 +138,7 @@ export class EditJobFlyoutUI extends Component {
         this.setState({
           job,
           isFlyoutVisible: true,
+          saving: false,
         });
       })
       .catch((error) => {
@@ -303,7 +305,10 @@ export class EditJobFlyoutUI extends Component {
       customUrls: this.state.jobCustomUrls,
     };
 
-    if (newJobData.datafeedProjectRouting !== this._initialJobFormState.datafeedProjectRouting) {
+    if (
+      this._initialJobFormState.datafeedProjectRouting !== undefined &&
+      newJobData.datafeedProjectRouting !== this._initialJobFormState.datafeedProjectRouting
+    ) {
       const { overlays, ...startServices } = this.props.kibana.services;
       try {
         await showUpdateConfirmationModal({
@@ -320,31 +325,33 @@ export class EditJobFlyoutUI extends Component {
     const { toasts } = this.props.kibana.services.notifications;
     const toastNotificationService = toastNotificationServiceProvider(toasts);
 
-    saveJob(mlApi, this.state.job, newJobData)
-      .then(() => {
-        toasts.addSuccess(
-          i18n.translate('xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage', {
-            defaultMessage: 'Changes to {jobId} saved',
-            values: {
-              jobId: this.state.job.job_id,
-            },
-          })
-        );
-        this.refreshJobs();
-        this.closeFlyout(true);
-      })
-      .catch((error) => {
-        console.error(error);
-        toastNotificationService.displayErrorToast(
-          error,
-          i18n.translate('xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage', {
-            defaultMessage: 'Could not save changes to {jobId}',
-            values: {
-              jobId: this.state.job.job_id,
-            },
-          })
-        );
-      });
+    this.setState({ saving: true });
+    try {
+      await saveJob(mlApi, this.state.job, newJobData);
+      toasts.addSuccess(
+        i18n.translate('xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage', {
+          defaultMessage: 'Changes to {jobId} saved',
+          values: {
+            jobId: this.state.job.job_id,
+          },
+        })
+      );
+      this.refreshJobs();
+      this.closeFlyout(true);
+    } catch (error) {
+      console.error(error);
+      toastNotificationService.displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage', {
+          defaultMessage: 'Could not save changes to {jobId}',
+          values: {
+            jobId: this.state.job.job_id,
+          },
+        })
+      );
+    } finally {
+      this.setState({ saving: false });
+    }
   };
 
   async estimateModelMemoryLimit(payload) {
@@ -402,6 +409,7 @@ export class EditJobFlyoutUI extends Component {
         jobClosed,
         modelMemoryEstimation,
         hasDatafeed,
+        saving,
       } = this.state;
 
       const tabs = [
@@ -528,6 +536,7 @@ export class EditJobFlyoutUI extends Component {
                     this.closeFlyout();
                   }}
                   flush="left"
+                  isDisabled={saving}
                   data-test-subj="mlEditJobFlyoutCloseButton"
                 >
                   <FormattedMessage
@@ -540,7 +549,10 @@ export class EditJobFlyoutUI extends Component {
                 <EuiButton
                   onClick={this.save}
                   fill
-                  isDisabled={isValidJobDetails === false || isValidJobCustomUrls === false}
+                  isLoading={saving}
+                  isDisabled={
+                    saving || isValidJobDetails === false || isValidJobCustomUrls === false
+                  }
                   data-test-subj="mlEditJobFlyoutSaveButton"
                 >
                   <FormattedMessage

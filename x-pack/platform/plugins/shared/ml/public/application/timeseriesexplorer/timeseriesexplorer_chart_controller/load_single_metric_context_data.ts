@@ -13,6 +13,7 @@ import type { CriteriaField } from '@kbn/ml-common-types/results';
 
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
@@ -115,7 +116,8 @@ export interface LoadSingleMetricContextDataDeps {
       detectorIndex: number,
       entityFields: LoadSingleMetricContextDataEntityControl[],
       earliestMs: number,
-      latestMs: number
+      latestMs: number,
+      metricFunctionDescription?: ES_AGGREGATION
     ) => Promise<{ success: boolean; results: SmvChartDetails }>;
   };
   mlResultsService: {
