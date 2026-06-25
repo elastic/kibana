@@ -109,6 +109,22 @@ describe('WHERE Autocomplete', () => {
       }
     );
 
+    test('after a field name inside parens', async () => {
+      await whereExpectSuggestions('from a | where (keywordField ', [
+        '!= $0',
+        '< $0',
+        '<= $0',
+        '== $0',
+        '> $0',
+        '>= $0',
+        ...getOperatorSuggestions([
+          ...patternMatchOperators,
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
+      ]);
+    });
+
     test('suggests dates after a comparison with a date', async () => {
       const expectedFields = getFieldNamesByType(['date', 'date_nanos']);
       mockFieldsWithTypes(mockCallbacks, expectedFields);
@@ -343,6 +359,14 @@ describe('WHERE Autocomplete', () => {
       );
       await whereExpectSuggestions(
         'from index | WHERE doubleField in ( textField, ',
+        [
+          ...getFieldNamesByType('double'),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
+        ],
+        mockCallbacks
+      );
+      await whereExpectSuggestions(
+        'from index | WHERE (doubleField) in ( textField, ',
         [
           ...getFieldNamesByType('double'),
           ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
