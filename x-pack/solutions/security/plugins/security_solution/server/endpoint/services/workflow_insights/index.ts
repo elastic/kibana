@@ -141,10 +141,16 @@ class SecurityWorkflowInsightsService {
 
     const insightToCreate = cloneDeep(insight);
 
+    const ccsEnabled = await hasConnectedRemoteClusters(
+      this.esClient,
+      this.endpointContext.experimentalFeatures.defendRemoteOutputCcs
+    );
+
     const remediationExists = await checkIfRemediationExists({
       insight: insightToCreate,
       exceptionListsClient: this.endpointContext.getExceptionListsClient(),
       endpointMetadataClient: this.endpointContext.getEndpointMetadataService(spaceId),
+      ccsEnabled,
     });
 
     if (remediationExists) {

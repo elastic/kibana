@@ -225,17 +225,19 @@ export const checkIfRemediationExists = async ({
   insight,
   exceptionListsClient,
   endpointMetadataClient,
+  ccsEnabled = false,
 }: {
   insight: SecurityWorkflowInsight;
   exceptionListsClient: ExceptionListClient;
   endpointMetadataClient: EndpointMetadataService;
+  ccsEnabled?: boolean;
 }): Promise<boolean> => {
   if (insight.type !== WorkflowInsightType.enum.incompatible_antivirus) {
     return false;
   }
 
   // One endpoint only for incompatible antivirus insights
-  const hostMetadata = await endpointMetadataClient.getHostMetadata(insight.target.ids[0]);
+  const hostMetadata = await endpointMetadataClient.getHostMetadata(insight.target.ids[0], ccsEnabled);
 
   const filter = generateTrustedAppsFilter(insight, hostMetadata.Endpoint.policy.applied.id);
 
