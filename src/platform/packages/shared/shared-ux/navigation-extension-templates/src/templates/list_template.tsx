@@ -38,6 +38,8 @@ interface NormalizedRow {
   iconType?: IconType;
 }
 
+type MappedRow = Omit<NormalizedRow, 'index'>;
+
 interface ListTemplateSearchConfig {
   enabled: boolean;
   placeholder?: string;
@@ -54,7 +56,7 @@ export type ListTemplateConfig<Data = SerializableRecord> = {
    * If provided, the function will be called for each data item and the result will be used to render the list.
    * If not provided, the expectation is that the data is already in the {@link NormalizedRow} row format.
    */
-  mapData?: (data: Data) => NormalizedRow;
+  mapData?: (data: Data) => MappedRow;
   /** Optional section-level actions. */
   actions?: NavTemplateActionConfig<Data>[];
   /** Message shown when the data source emits no rows. */
@@ -94,7 +96,7 @@ function normalizeRows<Data extends NormalizedRow | SerializableRecord>(
 
   return (mapData ? data.map(mapData) : data).reduce(
     (acc, { id, label, href, iconType }, index) => {
-      if (!id || !label || !href || (typeof max === 'number' && index >= max)) {
+      if (!id || !label || !href || (typeof max === 'number' && acc.size >= max)) {
         return acc;
       }
 
@@ -196,139 +198,146 @@ export function ListTemplate<Data extends SerializableRecord = SerializableRecor
     ) : null;
   }, [context.extensionId, context.slotId, listConfig?.actions, popoverRowData]);
 
+  if (!rows.size) {
+    return null;
+  }
+
   return (
-    <>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="m"
+      data-test-subj={`nav-extension-${context.slotId}-list-template`}
+    >
       {renderRowActionPopover()}
-      <EuiFlexGroup direction="column" gutterSize="m">
-        {listConfig.heading && (
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem
-                css={listTemplateStyles.topBarLeftContainer}
-                data-search-text-field-open={searchTextFieldOpen}
-              >
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem
-                    grow={!searchTextFieldOpen}
-                    css={listTemplateStyles.headingContainerModifier}
-                  >
-                    <EuiText size="s" color="subdued">
-                      <h4>{listConfig.heading}</h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                  {listConfig.search?.enabled && (
-                    <EuiFlexItem grow={searchTextFieldOpen}>
-                      {searchTextFieldOpen ? (
-                        <EuiFieldSearch
-                          placeholder={listConfig.search.placeholder}
-                          value={query}
-                          onChange={(event) => setQuery(event.target.value)}
-                          data-test-subj={`nav-extension-${context.slotId}-search`}
-                          compressed
-                          fullWidth
-                          isClearable
-                          inputRef={setSearchInputRef}
-                          append={
-                            <EuiToolTip
-                              content={i18n.translate(
-                                'sharedUXPackages.navigationExtensionTemplates.listTemplate.clearSearchTooltip',
-                                { defaultMessage: 'Close search bar' }
-                              )}
-                              id="close-search-bar-btn"
-                            >
-                              <EuiButtonIcon
-                                color="text"
-                                iconType="cross"
-                                onClick={setSearchTextFieldOpen.bind(null, false)}
-                                aria-hidden={true}
-                                aria-labelledby="close-search-bar-btn"
-                              />
-                            </EuiToolTip>
-                          }
-                        />
-                      ) : (
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'sharedUXPackages.navigationExtensionTemplates.listTemplate.toggleSearchFieldTooltip',
-                            { defaultMessage: 'Toggle search field' }
-                          )}
-                          id="toggle-search-field-button"
-                        >
-                          <EuiButtonIcon
-                            color="text"
-                            iconType="search"
-                            aria-labelledby="toggle-search-field-button"
-                            onClick={setSearchTextFieldOpen.bind(null, true)}
-                            disabled={data?.length === 0}
-                          />
-                        </EuiToolTip>
-                      )}
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {listConfig.supportAddItem?.enabled && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'sharedUXPackages.navigationExtensionTemplates.listTemplate.addItemButtonTooltip',
-                      { defaultMessage: 'Add item' }
-                    )}
-                    id="add-item-button"
-                  >
-                    <EuiButtonIcon
-                      color="text"
-                      iconType="plus"
-                      aria-labelledby="add-item-button"
-                      onClick={listConfig.supportAddItem.onClick}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
+      {listConfig.heading && (
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiListGroup maxWidth={false}>
-              {rows.size === 0 ? (
-                <EuiListGroupItem
-                  data-test-subj={`nav-extension-${context.slotId}-empty`}
-                  label={listConfig.emptyMessage}
-                />
-              ) : (
-                filteredRows.map((row) => (
-                  <EuiListGroupItem
-                    key={row.id}
-                    label={row.label}
-                    href={row.href}
-                    iconType={row.iconType}
-                    extraAction={
-                      (listConfig?.actions?.length ?? 0) > 0
-                        ? {
-                            iconType: 'boxesVertical',
-                            onClick: (evt) => {
-                              evt.preventDefault();
-                              popoverRef.current = evt.currentTarget;
-                              setPopoverRowData(data[row.index]);
-                            },
-                            ['data-test-subj']: `nav-extension-${context.slotId}-action-menu-${row.id}`,
-                            ['aria-label']: i18n.translate(
-                              'sharedUXPackages.navigationExtensionTemplates.listTemplate.actionButtonAriaLabel',
-                              {
-                                defaultMessage: 'Open actions menu',
-                              }
-                            ),
-                          }
-                        : undefined
-                    }
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem
+              css={listTemplateStyles.topBarLeftContainer}
+              data-search-text-field-open={searchTextFieldOpen}
+            >
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem
+                  grow={!searchTextFieldOpen}
+                  css={listTemplateStyles.headingContainerModifier}
+                >
+                  <EuiText size="s" color="subdued">
+                    <h4>{listConfig.heading}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                {listConfig.search?.enabled && (
+                  <EuiFlexItem grow={searchTextFieldOpen}>
+                    {searchTextFieldOpen ? (
+                      <EuiFieldSearch
+                        placeholder={listConfig.search.placeholder}
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        data-test-subj={`nav-extension-${context.slotId}-search`}
+                        compressed
+                        fullWidth
+                        isClearable
+                        inputRef={setSearchInputRef}
+                        append={
+                          <EuiToolTip
+                            content={i18n.translate(
+                              'sharedUXPackages.navigationExtensionTemplates.listTemplate.clearSearchTooltip',
+                              { defaultMessage: 'Close search bar' }
+                            )}
+                            id={`nav-extension-${context.slotId}-close-search-bar-tooltip`}
+                          >
+                            <EuiButtonIcon
+                              color="text"
+                              iconType="cross"
+                              onClick={setSearchTextFieldOpen.bind(null, false)}
+                              aria-labelledby={`nav-extension-${context.slotId}-close-search-bar-tooltip`}
+                            />
+                          </EuiToolTip>
+                        }
+                      />
+                    ) : (
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'sharedUXPackages.navigationExtensionTemplates.listTemplate.toggleSearchFieldTooltip',
+                          { defaultMessage: 'Toggle search field' }
+                        )}
+                        id={`nav-extension-${context.slotId}-toggle-search-field-tooltip`}
+                      >
+                        <EuiButtonIcon
+                          color="text"
+                          iconType="search"
+                          data-test-subj={`nav-extension-${context.slotId}-toggle-search-field-button`}
+                          aria-labelledby={`nav-extension-${context.slotId}-toggle-search-field-tooltip`}
+                          onClick={setSearchTextFieldOpen.bind(null, true)}
+                          disabled={data?.length === 0}
+                        />
+                      </EuiToolTip>
+                    )}
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {listConfig.supportAddItem?.enabled && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'sharedUXPackages.navigationExtensionTemplates.listTemplate.addItemButtonTooltip',
+                    { defaultMessage: 'Add item' }
+                  )}
+                  id={`nav-extension-${context.slotId}-add-item-tooltip`}
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="plus"
+                    aria-labelledby={`nav-extension-${context.slotId}-add-item-tooltip`}
+                    onClick={listConfig.supportAddItem.onClick}
+                    data-test-subj={`nav-extension-${context.slotId}-add-item-button`}
                   />
-                ))
-              )}
-            </EuiListGroup>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+      )}
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiListGroup maxWidth={false}>
+            {filteredRows.length === 0 ? (
+              <EuiListGroupItem
+                data-test-subj={`nav-extension-${context.slotId}-empty`}
+                label={listConfig.emptyMessage}
+              />
+            ) : (
+              filteredRows.map((row) => (
+                <EuiListGroupItem
+                  key={row.id}
+                  label={row.label}
+                  href={row.href}
+                  iconType={row.iconType}
+                  extraAction={
+                    (listConfig?.actions?.length ?? 0) > 0
+                      ? {
+                          iconType: 'boxesVertical',
+                          onClick: (evt) => {
+                            evt.preventDefault();
+                            popoverRef.current = evt.currentTarget;
+                            setPopoverRowData(data[row.index]);
+                          },
+                          ['data-test-subj']: `nav-extension-${context.slotId}-action-menu-${row.id}`,
+                          ['aria-label']: i18n.translate(
+                            'sharedUXPackages.navigationExtensionTemplates.listTemplate.actionButtonAriaLabel',
+                            {
+                              defaultMessage: 'Open actions menu',
+                            }
+                          ),
+                        }
+                      : undefined
+                  }
+                />
+              ))
+            )}
+          </EuiListGroup>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

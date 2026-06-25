@@ -9,7 +9,8 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import type { SerializableRecord } from '@kbn/utility-types';
 
@@ -22,6 +23,13 @@ interface TestRow extends SerializableRecord {
   label: string;
   href: string;
   iconType?: string;
+}
+
+interface RawDashboard extends SerializableRecord {
+  dashboardId: string;
+  title: string;
+  url: string;
+  icon?: string;
 }
 
 const SLOT_ID = 'recent-dashboards';
@@ -41,18 +49,6 @@ const testRows: TestRow[] = [
   { id: '2', label: 'Beta dashboard', href: '/app/dashboards#/view/2' },
   { id: '3', label: 'Gamma dashboard', href: '/app/dashboards#/view/3' },
 ];
-
-const clickIconButton = (iconType: string) => {
-  const button = screen
-    .getAllByRole('button')
-    .find((candidate) => candidate.querySelector(`[data-euiicon-type="${iconType}"]`));
-
-  if (!button) {
-    throw new Error(`Unable to find button with icon type "${iconType}"`);
-  }
-
-  fireEvent.click(button);
-};
 
 const renderListTemplate = ({
   data = testRows,
@@ -104,18 +100,12 @@ describe('ListTemplate', () => {
     expect(screen.queryByRole('link', { name: 'Missing href' })).not.toBeInTheDocument();
   });
 
-  it('renders the empty message when configured', () => {
+  it('does not render the template when there are no rows', () => {
     renderListTemplate({
       data: [],
-      config: {
-        ...defaultConfig,
-        emptyMessage: 'No dashboards yet',
-      },
     });
 
-    expect(screen.getByTestId(`nav-extension-${SLOT_ID}-empty`)).toHaveTextContent(
-      'No dashboards yet'
-    );
+    expect(screen.queryByTestId(`nav-extension-${SLOT_ID}-list-template`)).not.toBeInTheDocument();
   });
 
   it('renders the heading when configured', () => {
@@ -130,6 +120,7 @@ describe('ListTemplate', () => {
   });
 
   it('filters rows client-side when search is enabled', async () => {
+    const user = userEvent.setup();
     renderListTemplate({
       config: {
         ...defaultConfig,
@@ -138,10 +129,10 @@ describe('ListTemplate', () => {
       },
     });
 
-    clickIconButton('search');
+    await user.click(screen.getByTestId(`nav-extension-${SLOT_ID}-toggle-search-field-button`));
 
     const searchInput = await screen.findByTestId(`nav-extension-${SLOT_ID}-search`);
-    fireEvent.change(searchInput, { target: { value: 'beta' } });
+    await user.type(searchInput, 'beta');
 
     await waitFor(() => {
       expect(screen.getByRole('link', { name: 'Beta dashboard' })).toBeInTheDocument();
@@ -150,7 +141,31 @@ describe('ListTemplate', () => {
     });
   });
 
-  it('invokes onAction with add when the add-item button is clicked', () => {
+  it('renders the empty message when searching yields no results', async () => {
+    const user = userEvent.setup();
+
+    renderListTemplate({
+      config: {
+        ...defaultConfig,
+        heading: 'Recently viewed',
+        search: { enabled: true, placeholder: 'Search dashboards' },
+        emptyMessage: 'No matching dashboards for query',
+      },
+    });
+
+    await user.click(screen.getByTestId(`nav-extension-${SLOT_ID}-toggle-search-field-button`));
+
+    const searchInput = await screen.findByTestId(`nav-extension-${SLOT_ID}-search`);
+
+    await user.type(searchInput, 'kibanana');
+
+    expect(screen.getByTestId(`nav-extension-${SLOT_ID}-empty`)).toHaveTextContent(
+      'No matching dashboards for query'
+    );
+  });
+
+  it('invokes onAction with add when the add-item button is clicked', async () => {
+    const user = userEvent.setup();
     const onAddItemHandler = jest.fn();
 
     renderListTemplate({
@@ -162,12 +177,13 @@ describe('ListTemplate', () => {
       },
     });
 
-    clickIconButton('plus');
+    await user.click(screen.getByTestId(`nav-extension-${SLOT_ID}-add-item-button`));
 
     expect(onAddItemHandler).toHaveBeenCalledTimes(1);
   });
 
   it('invokes onAction when a row action is selected from the menu', async () => {
+    const user = userEvent.setup();
     const onAction = jest.fn();
 
     renderListTemplate({
@@ -181,10 +197,10 @@ describe('ListTemplate', () => {
       },
     });
 
-    fireEvent.click(screen.getByTestId(`nav-extension-${SLOT_ID}-action-menu-1`));
+    await user.click(screen.getByTestId(`nav-extension-${SLOT_ID}-action-menu-1`));
 
     const deleteAction = await screen.findByTestId(`nav-extension-${EXTENSION_ID}-action-delete`);
-    fireEvent.click(deleteAction);
+    await user.click(deleteAction);
 
     await waitFor(() => {
       expect(onAction).toHaveBeenCalledTimes(1);
@@ -195,6 +211,76 @@ describe('ListTemplate', () => {
     renderListTemplate();
 
     expect(screen.queryByTestId(`nav-extension-${SLOT_ID}-action-menu-1`)).not.toBeInTheDocument();
+  });
+
+  it('renders list items from mapped data when mapData is configured', () => {
+    const rawDashboards: RawDashboard[] = [
+      {
+        dashboardId: 'dash-1',
+        title: 'Sales overview',
+        url: '/app/dashboards#/view/dash-1',
+        icon: 'dashboardApp',
+      },
+      { dashboardId: 'dash-2', title: 'Ops metrics', url: '/app/dashboards#/view/dash-2' },
+    ];
+
+    renderWithEuiTheme(
+      <ListTemplate<RawDashboard>
+        data={rawDashboards}
+        config={{
+          emptyMessage: 'No dashboards yet',
+          mapData: ({ dashboardId, title, url, icon }) => ({
+            id: dashboardId,
+            label: title,
+            href: url,
+            iconType: icon,
+          }),
+        }}
+        context={defaultContext}
+      />
+    );
+
+    const salesLink = screen.getByRole('link', { name: 'Sales overview' });
+    const opsLink = screen.getByRole('link', { name: 'Ops metrics' });
+
+    expect(salesLink).toHaveAttribute('href', '/app/dashboards#/view/dash-1');
+    expect(opsLink).toHaveAttribute('href', '/app/dashboards#/view/dash-2');
+    expect(salesLink.querySelector('[data-euiicon-type="dashboardApp"]')).toBeInTheDocument();
+  });
+
+  it('passes original data to row actions when mapData is configured', async () => {
+    const user = userEvent.setup();
+    const onAction = jest.fn();
+
+    const rawDashboards: RawDashboard[] = [
+      { dashboardId: 'dash-1', title: 'Sales overview', url: '/app/dashboards#/view/dash-1' },
+    ];
+
+    renderWithEuiTheme(
+      <ListTemplate<RawDashboard>
+        data={rawDashboards}
+        config={{
+          emptyMessage: 'No dashboards yet',
+          heading: 'Recently viewed',
+          mapData: ({ dashboardId, title, url }) => ({
+            id: dashboardId,
+            label: title,
+            href: url,
+          }),
+          actions: [{ id: 'delete', label: 'Delete', icon: 'trash', onClick: onAction }],
+        }}
+        context={defaultContext}
+      />
+    );
+
+    await user.click(screen.getByTestId(`nav-extension-${SLOT_ID}-action-menu-dash-1`));
+
+    const deleteAction = await screen.findByTestId(`nav-extension-${EXTENSION_ID}-action-delete`);
+    await user.click(deleteAction);
+
+    await waitFor(() => {
+      expect(onAction).toHaveBeenCalledWith(SLOT_ID, rawDashboards[0], expect.any(Object));
+    });
   });
 
   it('renders icons when iconField is configured', () => {
