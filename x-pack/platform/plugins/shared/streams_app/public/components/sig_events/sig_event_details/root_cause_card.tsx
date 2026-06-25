@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiPanel,
   EuiText,
@@ -33,11 +34,15 @@ const EVIDENCE_TRAIL_LABEL = i18n.translate(
 );
 
 const NO_ROOT_CAUSE_LABEL = i18n.translate('xpack.streams.sigEvent.rootCauseCard.noRootCause', {
-  defaultMessage: 'No working theory was generated for this event.',
+  defaultMessage: 'No root cause correction was issued for this event.',
 });
 
-const VERDICT_LABEL = i18n.translate('xpack.streams.sigEvent.rootCauseCard.verdictLabel', {
-  defaultMessage: 'Verdict',
+const EVIDENCE_LABEL = i18n.translate('xpack.streams.sigEvent.rootCauseCard.evidenceLabel', {
+  defaultMessage: 'Evidence',
+});
+
+const ASSESSMENT_LABEL = i18n.translate('xpack.streams.sigEvent.rootCauseCard.assessmentLabel', {
+  defaultMessage: 'Assessment',
 });
 
 const EVIDENCE_RESULT_LABELS = {
@@ -90,16 +95,19 @@ export const RootCauseCard = ({ event }: RootCauseCardProps) => {
   const evidences = event.evidences ?? [];
   const hasEvidences = evidences.length > 0;
   const hasRootCause = Boolean(event.root_cause);
+  const hasAssessmentNote = Boolean(event.assessment_note);
 
-  if (!hasRootCause && !hasEvidences) {
+  if (!hasRootCause && !hasEvidences && !hasAssessmentNote) {
     return null;
   }
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="none">
       <RootCauseHeader event={event} />
-      {hasEvidences && (
-        <div
+      {(hasAssessmentNote || hasEvidences) && (
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
           css={css`
             padding: ${euiTheme.size.s} ${euiTheme.size.base};
             background-color: ${euiTheme.colors.backgroundBaseSubdued};
@@ -107,14 +115,69 @@ export const RootCauseCard = ({ event }: RootCauseCardProps) => {
             border-bottom-right-radius: ${euiTheme.border.radius.medium};
           `}
         >
-          <EvidenceTrail evidences={evidences} />
-        </div>
+          {hasAssessmentNote && event.assessment_note && (
+            <EuiFlexItem grow={false}>
+              <AssessmentAccordion note={event.assessment_note} />
+            </EuiFlexItem>
+          )}
+          {hasAssessmentNote && hasEvidences && (
+            <EuiFlexItem grow={false}>
+              <EuiHorizontalRule
+                size="full"
+                margin="none"
+                css={css`
+                  border-color: ${euiTheme.border.color};
+                `}
+              />
+            </EuiFlexItem>
+          )}
+          {hasEvidences && (
+            <EuiFlexItem grow={false}>
+              <EvidenceTrail evidences={evidences} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       )}
     </EuiPanel>
   );
 };
 
+const AssessmentAccordion = ({ note }: { note: string }) => {
+  const { euiTheme } = useEuiTheme();
+  const assessmentId = useGeneratedHtmlId({ prefix: 'assessment' });
+
+  return (
+    <EuiAccordion
+      id={assessmentId}
+      arrowDisplay="left"
+      paddingSize="s"
+      buttonContent={
+        <EuiText size="xs">
+          <strong>{ASSESSMENT_LABEL}</strong>
+        </EuiText>
+      }
+    >
+      <EuiPanel
+        color="plain"
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="m"
+        css={css`
+          margin-top: ${euiTheme.size.s};
+          margin-left: ${euiTheme.size.l};
+        `}
+      >
+        <EuiText size="s">
+          <p>{note}</p>
+        </EuiText>
+      </EuiPanel>
+    </EuiAccordion>
+  );
+};
+
 const RootCauseHeader = ({ event }: { event: SigEvent }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiPanel
       color="transparent"
@@ -133,7 +196,10 @@ const RootCauseHeader = ({ event }: { event: SigEvent }) => {
           return (
             <EuiFlexItem grow={false}>
               <EuiBadge color={confidenceBadgeColor(confidence)}>
-                {`${Math.round(confidence)}%`}
+                {i18n.translate('xpack.streams.sigEvent.rootCauseCard.confidenceBadgeLabel', {
+                  defaultMessage: 'Confidence {value}%',
+                  values: { value: Math.round(confidence) },
+                })}
               </EuiBadge>
             </EuiFlexItem>
           );
@@ -144,7 +210,7 @@ const RootCauseHeader = ({ event }: { event: SigEvent }) => {
         <EuiTitle size="xxs">
           <h6
             css={css`
-              margin-top: 12px;
+              margin-top: ${euiTheme.size.m};
             `}
           >
             {event.title}
@@ -156,7 +222,7 @@ const RootCauseHeader = ({ event }: { event: SigEvent }) => {
         size="xs"
         color={event.root_cause ? 'default' : 'subdued'}
         css={css`
-          margin-top: 8px;
+          margin-top: ${euiTheme.size.s};
         `}
       >
         <p>{event.root_cause || NO_ROOT_CAUSE_LABEL}</p>
@@ -267,18 +333,18 @@ const EvidenceBody = ({ evidence }: { evidence: Evidence }) => {
       hasShadow={false}
       paddingSize="m"
       css={css`
-        margin-top: 8px;
-        margin-left: 24px;
+        margin-top: ${euiTheme.size.s};
+        margin-left: ${euiTheme.size.l};
       `}
     >
       <EuiText size="xs">
-        <strong>{VERDICT_LABEL}</strong>
+        <strong>{EVIDENCE_LABEL}</strong>
       </EuiText>
       {evidence.description && (
         <EuiText
           size="s"
           css={css`
-            margin-top: 8px;
+            margin-top: ${euiTheme.size.s};
             font-family: ${euiTheme.font.familyCode};
           `}
         >
