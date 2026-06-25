@@ -51,12 +51,6 @@ interface AgentBuilderConverseApiResponse {
 const RETRIES = 2;
 const MIN_TIMEOUT_MS = 2000;
 
-/**
- * Client over the synchronous Agent Builder converse API (`POST /api/agent_builder/converse`). The
- * agent analogue of the `inferenceClient` fixture: it invokes a **real** Agent Builder agent by id
- * (its instructions, tools, and runtime) on the model-under-test connector. Agent id is passed per
- * call so a suite can drive multiple agents.
- */
 export interface AgentBuilderClient {
   converse(params: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse>;
 }
