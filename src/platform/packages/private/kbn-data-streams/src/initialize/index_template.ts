@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import invariant from 'node:assert';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
 import type { AnyDataStreamDefinition } from '../types';
 import { applyDefaults } from './defaults';
+import { buildIndexTemplateBody } from './template_body';
 
 /**
  * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
@@ -25,12 +25,14 @@ export async function initializeIndexTemplate({
   dataStream,
   elasticsearchClient,
   existingIndexTemplate,
+  deployedVersion,
   skipCreation = true,
 }: {
   logger: Logger;
   dataStream: AnyDataStreamDefinition;
   elasticsearchClient: ElasticsearchClient;
   existingIndexTemplate: api.IndicesGetIndexTemplateIndexTemplateItem | undefined;
+  deployedVersion: number | undefined;
   skipCreation?: boolean;
 }): Promise<{ uptoDate: boolean }> {
   const version = dataStream.version;
@@ -48,13 +50,8 @@ export async function initializeIndexTemplate({
   }
 
   // index template exists so we always update it.
-  if (existingIndexTemplate) {
+  if (existingIndexTemplate && deployedVersion !== undefined) {
     logger.debug(`Index template already exists: ${dataStream.name}, updating it.`);
-    const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
-    invariant(
-      typeof deployedVersion === 'number' && deployedVersion > 0,
-      `Datastream ${dataStream.name} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
-    );
 
     if (deployedVersion >= version) {
       // index already applied and updated.
@@ -73,23 +70,7 @@ export async function initializeIndexTemplate({
     () =>
       elasticsearchClient.indices.putIndexTemplate({
         name: dataStream.name,
-        priority: dataStream.template.priority,
-        index_patterns: [`${dataStream.name}*`],
-        composed_of: dataStream.template.composedOf,
-        data_stream: {
-          hidden: dataStream.hidden,
-        },
-        template: {
-          aliases: dataStream.template.aliases,
-          mappings: dataStream.template.mappings,
-          lifecycle: dataStream.template.lifecycle,
-          settings: dataStream.template.settings,
-        },
-        _meta: {
-          ...dataStream.template._meta,
-          version,
-          previousVersions,
-        },
+        ...buildIndexTemplateBody(dataStream, previousVersions),
       }),
     { logger, dataStreamName: dataStream.name }
   );

@@ -25,6 +25,7 @@ import { initialize } from './initialize';
 import { initializeIndexTemplate } from './initialize/index_template';
 import { initializeDataStream } from './initialize/data_stream';
 import { getExistingDataStream, getExistingIndexTemplate } from './initialize/exists_checks';
+import { assertDeployedVersion } from './initialize/assert_deployed_version';
 import { validateClientArgs } from './validate_client_args';
 import {
   generateSpacePrefixedId,
@@ -113,26 +114,34 @@ export class DataStreamClient<
       getExistingIndexTemplate(elasticsearchClient, dataStream.name, logger),
     ]);
 
+    // Validate `_meta.version` once at the boundary; downstream steps trust the typed value.
+    const deployedVersion = existingIndexTemplate
+      ? assertDeployedVersion(existingIndexTemplate, dataStream.name)
+      : undefined;
+
+    // Install / update the index template first. Any rollover that occurs after this point
+    // will pick up the new mappings from the updated template.
     await initializeIndexTemplate({
       logger,
       dataStream,
       elasticsearchClient,
       existingIndexTemplate,
+      deployedVersion,
       skipCreation: false,
     });
 
-    // Apply mapping migrations to the existing write index when present. The pre-update
-    // `existingIndexTemplate` reference is intentional: it lets `initializeDataStream` detect
-    // a version bump and run `simulateIndexTemplate` + `putMapping` against the write index.
-    // When no data stream exists yet, this is a no-op thanks to the `skipCreation` guard.
-    await initializeDataStream({
-      logger,
-      dataStream,
-      elasticsearchClient,
-      existingDataStream,
-      existingIndexTemplate,
-      skipCreation: true,
-    });
+    // Apply mappings to the existing write index. Runs unconditionally (no version
+    // short-circuit) so a putMapping failure on a previous boot is always retried.
+    // When no data stream exists yet, this is a no-op.
+    if (existingDataStream) {
+      await initializeDataStream({
+        logger,
+        dataStream,
+        elasticsearchClient,
+        existingDataStream,
+        existingIndexTemplate,
+      });
+    }
   }
 
   /**
