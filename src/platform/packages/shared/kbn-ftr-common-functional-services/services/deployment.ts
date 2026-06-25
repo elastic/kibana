@@ -8,7 +8,8 @@
  */
 
 import { get } from 'lodash';
-import { Agent, type Dispatcher } from 'undici';
+import { Agent } from 'https';
+import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
 
 import { FtrService } from './ftr_provider_context';
@@ -36,13 +37,11 @@ export class DeploymentService extends FtrService {
     const password = this.config.get('servers.kibana.password');
     const protocol = this.config.get('servers.kibana.protocol');
 
-    let dispatcher: Dispatcher | undefined;
+    let agent: Agent | undefined;
     if (protocol === 'https') {
-      dispatcher = new Agent({
-        connect: {
-          // required for self-signed certificates used for HTTPS FTR testing
-          rejectUnauthorized: false,
-        },
+      agent = new Agent({
+        // required for self-signed certificates used for HTTPS FTR testing
+        rejectUnauthorized: false,
       });
     }
 
@@ -52,7 +51,7 @@ export class DeploymentService extends FtrService {
         'Content-Type': 'application/json',
         Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
       },
-      ...(dispatcher ? { dispatcher } : {}),
+      agent,
     });
     const data = await response.json();
     return get(data, 'usage.cloud.is_cloud_enabled', false);
