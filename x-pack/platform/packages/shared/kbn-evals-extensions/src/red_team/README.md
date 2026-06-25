@@ -20,7 +20,7 @@ node scripts/evals ext red-team --suite agent-builder --judge eis-gpt-4.1 --skip
 node scripts/evals ext red-team --suite agent-builder --modules prompt_injection,jailbreaking --count 5
 ```
 
-Red-team flags (in addition to eval orchestration flags from `evals start`):
+Red-team flags (in addition to the eval orchestration flags from [`evals start`](../../../kbn-evals/CLI.md#start----start-stack-and-run-a-suite), e.g. `--suite`, `--judge`, `--model`, `--profile`, `--grep`, `--repetitions`, `--skip-server`, `--dry-run`):
 
 | Flag                     | Description                                                                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
