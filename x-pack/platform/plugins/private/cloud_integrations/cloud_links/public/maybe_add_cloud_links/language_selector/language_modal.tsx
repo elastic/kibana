@@ -115,9 +115,13 @@ export const LanguageModal: FC<Props> = ({ closeModal, analytics }) => {
 
         <EuiButton
           data-test-subj="languageModalSaveButton"
-          onClick={() => {
+          onClick={async () => {
             if (locale !== initialLocaleValue) {
-              onChange(locale, true);
+              try {
+                await onChange(locale, true);
+              } catch (_) {
+                return;
+              }
               const preferredLocale = getBrowserPreferredLocale();
               analytics.reportEvent('display_language_changed', {
                 from: initialLocaleValue,

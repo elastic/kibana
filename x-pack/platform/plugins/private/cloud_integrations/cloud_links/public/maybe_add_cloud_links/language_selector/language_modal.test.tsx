@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import React, { type FC, type PropsWithChildren } from 'react';
 
 import { EuiProvider } from '@elastic/eui';
@@ -41,7 +41,7 @@ describe('LanguageModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    onChangeMock = jest.fn();
+    onChangeMock = jest.fn().mockResolvedValue(undefined);
     reportEventMock = jest.fn();
 
     (useLanguage as jest.Mock).mockReturnValue({
@@ -65,7 +65,7 @@ describe('LanguageModal', () => {
     expect(select.options).toHaveLength(3);
   });
 
-  it('saves and reports display_language_changed event when locale changed', () => {
+  it('saves and reports display_language_changed event when locale changed', async () => {
     (useLanguage as jest.Mock).mockReturnValue({
       value: 'fr-FR',
       initialValue: 'en',
@@ -76,7 +76,9 @@ describe('LanguageModal', () => {
 
     const { getByTestId } = renderModal({ reportEvent: reportEventMock });
 
-    fireEvent.click(getByTestId('languageModalSaveButton'));
+    await act(async () => {
+      fireEvent.click(getByTestId('languageModalSaveButton'));
+    });
 
     expect(onChangeMock).toHaveBeenCalledWith('fr-FR', true);
     expect(reportEventMock).toHaveBeenCalledWith('display_language_changed', {
@@ -87,7 +89,7 @@ describe('LanguageModal', () => {
     expect(closeModal).toHaveBeenCalled();
   });
 
-  it('omits preferred_language_kibana_locale when the browser preference is unservable', () => {
+  it('omits preferred_language_kibana_locale when the browser preference is unservable', async () => {
     (getBrowserPreferredLocale as jest.Mock).mockReturnValueOnce(undefined);
     (useLanguage as jest.Mock).mockReturnValue({
       value: 'fr-FR',
@@ -99,12 +101,35 @@ describe('LanguageModal', () => {
 
     const { getByTestId } = renderModal({ reportEvent: reportEventMock });
 
-    fireEvent.click(getByTestId('languageModalSaveButton'));
+    await act(async () => {
+      fireEvent.click(getByTestId('languageModalSaveButton'));
+    });
 
     expect(reportEventMock).toHaveBeenCalledWith('display_language_changed', {
       from: 'en',
       to: 'fr-FR',
     });
+  });
+
+  it('does not report event or close modal when save fails', async () => {
+    onChangeMock.mockRejectedValue(new Error('save failed'));
+    (useLanguage as jest.Mock).mockReturnValue({
+      value: 'fr-FR',
+      initialValue: 'en',
+      isLoading: false,
+      isVisible: true,
+      onChange: onChangeMock,
+    });
+
+    const { getByTestId } = renderModal({ reportEvent: reportEventMock });
+
+    await act(async () => {
+      fireEvent.click(getByTestId('languageModalSaveButton'));
+    });
+
+    expect(onChangeMock).toHaveBeenCalledWith('fr-FR', true);
+    expect(reportEventMock).not.toHaveBeenCalled();
+    expect(closeModal).not.toHaveBeenCalled();
   });
 
   it('does not report event when locale is unchanged', () => {
