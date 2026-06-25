@@ -138,7 +138,7 @@ export class PackagePolicyService {
       this.server.fleet.packagePolicyService.bulkUpdate(
         client,
         this.getInternalEsClient(),
-        policies as UpdatePackagePolicyWithId[],
+        policies,
         {
           force: true,
           asyncDeploy: true,
@@ -184,16 +184,16 @@ export class PackagePolicyService {
 
   // The agent policies can be in the default space or the spaceId
   // This function returns the package policies that are in the spaceId and the default space and the correct saved objects client to fetch the package policies
-  private async getDefaultAndSpacePackagePolicies({
+  private async getDefaultAndSpacePackagePolicies<T extends NewPackagePolicyWithId>({
     policies,
     spaceId,
   }: {
-    policies: NewPackagePolicyWithId[];
+    policies: T[];
     spaceId: string;
   }): Promise<
     {
       client: SavedObjectsClientContract;
-      policies: NewPackagePolicyWithId[];
+      policies: T[];
     }[]
   > {
     const agentPolicyIds = new Set(policies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
@@ -218,8 +218,8 @@ export class PackagePolicyService {
     ).flat();
 
     const agentPolicyById = new Map(agentPolicies.map((ap) => [ap.id, ap]));
-    const defaultSpacePackagePolicies: NewPackagePolicyWithId[] = [];
-    const spacePackagePolicies: NewPackagePolicyWithId[] = [];
+    const defaultSpacePackagePolicies: T[] = [];
+    const spacePackagePolicies: T[] = [];
 
     for (const pkgPolicy of policies) {
       if (pkgPolicy.policy_ids) {
@@ -241,7 +241,7 @@ export class PackagePolicyService {
 
     const res: {
       client: SavedObjectsClientContract;
-      policies: NewPackagePolicyWithId[];
+      policies: T[];
     }[] = [];
 
     if (defaultSpacePackagePolicies.length > 0) {
