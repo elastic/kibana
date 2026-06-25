@@ -80,13 +80,17 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         index: LATEST_ALIAS,
         id: hashEuid('host:host-123'),
         refresh: 'wait_for',
-        doc: { entity: { behaviors: { rule_names: ['rule-a', 'rule-b'], anomaly_job_ids: ['job-1'] } } },
+        doc: {
+          entity: { behaviors: { rule_names: ['rule-a', 'rule-b'], anomaly_job_ids: ['job-1'] } },
+        },
       });
       await esClient.update({
         index: LATEST_ALIAS,
         id: hashEuid('host:server-01'),
         refresh: 'wait_for',
-        doc: { entity: { behaviors: { rule_names: ['rule-c'], anomaly_job_ids: ['job-2', 'job-3'] } } },
+        doc: {
+          entity: { behaviors: { rule_names: ['rule-c'], anomaly_job_ids: ['job-2', 'job-3'] } },
+        },
       });
 
       const snapshotResponse = await apiClient.post(
