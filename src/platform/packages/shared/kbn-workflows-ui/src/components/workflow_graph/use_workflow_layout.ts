@@ -79,7 +79,7 @@ export function useWorkflowLayout({
 
   const transformed = useMemo(() => {
     if (transformedProp) return transformedProp;
-    if (!workflow) return { nodes: [], edges: [], foreachGroups: [] };
+    if (!workflow) return { nodes: [], edges: [], foreachGroups: [], bypassLaneNodes: [] };
     const t0 = performance.now();
     const next = transformWorkflowToGraph(workflow);
     onPerfMark?.('transform_ms', performance.now() - t0);
@@ -99,21 +99,37 @@ export function useWorkflowLayout({
       };
     }
     try {
-      const { nodes, edges, foreachGroups } = transformedRef.current;
+      const { nodes, edges, foreachGroups, bypassLaneNodes } = transformedRef.current;
 
-      const dagNodes = nodes.map((n) => ({
-        id: n.id,
-        width: n.style.width,
-        height: n.style.height,
-      }));
-      const dagEdges = edges.map((e) => ({ id: e.id, source: e.source, target: e.target }));
-      const dagGroups = foreachGroups.map((g) => ({
-        id: g.id,
-        innerNodes: g.innerNodes.map((n) => ({
+      const dagNodes = [
+        ...nodes.map((n) => ({
           id: n.id,
           width: n.style.width,
           height: n.style.height,
         })),
+        // Bypass lane nodes live outside domain `nodes` — add them here so dagre
+        // sees them and allocates lanes for unbalanced if/switch branches.
+        ...bypassLaneNodes.map((n) => ({
+          id: n.id,
+          width: n.style.width,
+          height: n.style.height,
+        })),
+      ];
+      const dagEdges = edges.map((e) => ({ id: e.id, source: e.source, target: e.target }));
+      const dagGroups = foreachGroups.map((g) => ({
+        id: g.id,
+        innerNodes: [
+          ...g.innerNodes.map((n) => ({
+            id: n.id,
+            width: n.style.width,
+            height: n.style.height,
+          })),
+          ...g.bypassLaneNodes.map((n) => ({
+            id: n.id,
+            width: n.style.width,
+            height: n.style.height,
+          })),
+        ],
         innerEdges: g.innerEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
       }));
 
@@ -172,12 +188,19 @@ export function useWorkflowLayout({
     const targetPosition = HANDLE_SIDE_TO_POSITION[isHorizontal ? 'left' : 'top'];
     const sourcePosition = HANDLE_SIDE_TO_POSITION[isHorizontal ? 'right' : 'bottom'];
 
-    const allNodes = [
+    const allDomainNodes = [
       ...transformed.nodes,
       ...transformed.foreachGroups.flatMap((g) => g.innerNodes),
     ] as const;
 
-    return allNodes.map((n) => {
+    // Collect all bypass lane node ids so we can render them as 'bypassLane'
+    // type nodes (structural only — no selection, no click target).
+    const allBypassLaneIds = new Set([
+      ...transformed.bypassLaneNodes.map((n) => n.id),
+      ...transformed.foreachGroups.flatMap((g) => g.bypassLaneNodes.map((n) => n.id)),
+    ]);
+
+    const domainNodes = allDomainNodes.map((n) => {
       const pos = positionedById.get(n.id);
       if (!pos) {
         return { id: n.id, type: n.type, position: { x: 0, y: 0 }, data: n.data };
@@ -203,8 +226,6 @@ export function useWorkflowLayout({
       const exec =
         explicitExec ?? (n.type === 'trigger' ? syntheticTriggerExecution ?? undefined : undefined);
 
-      const isPlaceholder = n.type === 'placeholder';
-
       return {
         id: n.id,
         type: n.type,
@@ -213,15 +234,6 @@ export function useWorkflowLayout({
         extent: parentId ? ('parent' as const) : undefined,
         width: pos.width,
         height: pos.height,
-        // Placeholder nodes are structural only — no selection ring, no click target.
-        selectable: isPlaceholder ? false : undefined,
-        style: {
-          width: pos.width,
-          height: pos.height,
-          // Let clicks pass through the placeholder wrapper so the canvas
-          // doesn't fire onNodeClick / onStepSelect for a phantom step id.
-          ...(isPlaceholder ? { pointerEvents: 'none' as const } : undefined),
-        },
         targetPosition,
         sourcePosition,
         data: {
@@ -230,10 +242,51 @@ export function useWorkflowLayout({
         },
       };
     });
+
+    // Bypass lane nodes: structural only — invisible pass-through nodes that
+    // give dagre a lane to route through for unbalanced if/switch branches.
+    const bypassLaneReactNodes: Node[] = [...allBypassLaneIds].map((id) => {
+      const pos = positionedById.get(id);
+      const parentId = innerNodeToGroupId.get(id);
+      let position: { x: number; y: number };
+      if (pos) {
+        if (parentId) {
+          const parentPos = positionedById.get(parentId);
+          position = parentPos
+            ? { x: pos.x - parentPos.x, y: pos.y - parentPos.y }
+            : { x: pos.x, y: pos.y };
+        } else {
+          position = { x: pos.x, y: pos.y };
+        }
+      } else {
+        position = { x: 0, y: 0 };
+      }
+      return {
+        id,
+        type: 'bypassLane',
+        position,
+        parentId,
+        extent: parentId ? ('parent' as const) : undefined,
+        width: pos?.width ?? 1,
+        height: pos?.height ?? 1,
+        selectable: false,
+        style: {
+          width: pos?.width ?? 1,
+          height: pos?.height ?? 1,
+          pointerEvents: 'none' as const,
+        },
+        targetPosition,
+        sourcePosition,
+        data: {},
+      };
+    });
+
+    return [...domainNodes, ...bypassLaneReactNodes];
   }, [
     layoutSnapshot.nodes,
     stepExecutionMap,
     syntheticTriggerExecution,
+    transformed.bypassLaneNodes,
     transformed.foreachGroups,
     transformed.nodes,
     direction,
@@ -241,21 +294,47 @@ export function useWorkflowLayout({
 
   const derivedEdges = useMemo<Edge[]>(() => {
     const layoutEdgeById = new Map(layoutSnapshot.edges.map((e) => [e.id, e]));
-    const allNodes = [
+    const allDomainNodes = [
       ...transformed.nodes,
       ...transformed.foreachGroups.flatMap((g) => g.innerNodes),
     ] as const;
-    const nodeById = new Map(allNodes.map((n) => [n.id, n]));
+    const nodeById = new Map(allDomainNodes.map((n) => [n.id, n]));
     const getExec = (nodeId: string): WorkflowStepExecutionDto | undefined => {
       const nodeData = nodeById.get(nodeId)?.data as Record<string, unknown> | undefined;
       const label = typeof nodeData?.label === 'string' ? nodeData.label : undefined;
       return (label ? stepExecutionMap?.[label] : undefined) ?? stepExecutionMap?.[nodeId];
     };
 
+    // Bypass lane node ids — edges whose target is a bypass lane node suppress
+    // the arrowhead (hideEndMarker) since the lane is a visual pass-through.
+    const allBypassLaneIds = new Set([
+      ...transformed.bypassLaneNodes.map((n) => n.id),
+      ...transformed.foreachGroups.flatMap((g) => g.bypassLaneNodes.map((n) => n.id)),
+    ]);
+
     const allEdges = [
       ...transformed.edges,
       ...transformed.foreachGroups.flatMap((g) => g.innerEdges),
     ] as const;
+
+    // A node is a "merge" node when it has >1 incoming edge and at least one of
+    // those sources is a bypass lane node (unbalanced if/switch fan-in).  Every
+    // fan-in edge of such a node must route on the merge bus so all legs share
+    // the same target bus + trunk — the symmetric inverse of the fork bus.
+    // Keying by target (rather than by source) replicates the original transform
+    // semantics: sources.length > 1 && sources.some(s => isBypass(s)).
+    const incomingByTarget = new Map<string, string[]>();
+    for (const e of allEdges) {
+      const arr = incomingByTarget.get(e.target);
+      if (arr) arr.push(e.source);
+      else incomingByTarget.set(e.target, [e.source]);
+    }
+    const mergeNodeIds = new Set<string>();
+    for (const [target, sources] of incomingByTarget) {
+      if (sources.length > 1 && sources.some((s) => allBypassLaneIds.has(s))) {
+        mergeNodeIds.add(target);
+      }
+    }
 
     return allEdges.map((e) => {
       const laid = layoutEdgeById.get(e.id);
@@ -273,14 +352,15 @@ export function useWorkflowLayout({
           traversedStatus,
           points: laid?.points,
           branchType: e.branchType,
-          isMerge: e.isMerge,
-          hideEndMarker: nodeById.get(e.target)?.type === 'placeholder',
+          isMerge: mergeNodeIds.has(e.target),
+          hideEndMarker: allBypassLaneIds.has(e.target),
         },
       };
     });
   }, [
     layoutSnapshot.edges,
     stepExecutionMap,
+    transformed.bypassLaneNodes,
     transformed.edges,
     transformed.foreachGroups,
     transformed.nodes,

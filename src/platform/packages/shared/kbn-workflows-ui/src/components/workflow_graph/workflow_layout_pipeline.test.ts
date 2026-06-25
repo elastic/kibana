@@ -38,16 +38,22 @@ const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
   } as unknown as WorkflowYaml);
 
 const runLayout = (yaml: WorkflowYaml, direction: 'TB' | 'LR' = 'TB') => {
-  const { nodes, edges, foreachGroups } = transformWorkflowToGraph(yaml);
-  const dagNodes = nodes.map((n) => ({ id: n.id, width: n.style.width, height: n.style.height }));
+  const { nodes, edges, foreachGroups, bypassLaneNodes } = transformWorkflowToGraph(yaml);
+  const dagNodes = [
+    ...nodes.map((n) => ({ id: n.id, width: n.style.width, height: n.style.height })),
+    ...bypassLaneNodes.map((n) => ({ id: n.id, width: n.style.width, height: n.style.height })),
+  ];
   const dagEdges = edges.map((e) => ({ id: e.id, source: e.source, target: e.target }));
   const dagGroups = foreachGroups.map((g) => ({
     id: g.id,
-    innerNodes: g.innerNodes.map((n) => ({
-      id: n.id,
-      width: n.style.width,
-      height: n.style.height,
-    })),
+    innerNodes: [
+      ...g.innerNodes.map((n) => ({ id: n.id, width: n.style.width, height: n.style.height })),
+      ...g.bypassLaneNodes.map((n) => ({
+        id: n.id,
+        width: n.style.width,
+        height: n.style.height,
+      })),
+    ],
     innerEdges: g.innerEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
   }));
   return {

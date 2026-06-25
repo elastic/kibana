@@ -33,7 +33,7 @@ import '@xyflow/react/dist/style.css';
 import { findGraphFocusNode } from './find_graph_focus_node';
 import { useWorkflowLayout } from './use_workflow_layout';
 import { type RenderStepIcon, WorkflowGraphActionsContext } from './workflow_graph_actions_context';
-import { WorkflowGraphBranchPlaceholderNode } from './workflow_graph_branch_placeholder_node';
+import { WorkflowGraphBypassLaneNode } from './workflow_graph_bypass_lane_node';
 import { WorkflowGraphEdge } from './workflow_graph_edge';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 import { WorkflowGraphNode } from './workflow_graph_node';
@@ -79,7 +79,7 @@ const NODE_TYPES: NodeTypes = {
   step: WorkflowGraphNode,
   trigger: WorkflowGraphNode,
   foreachGroup: WorkflowGraphForeachGroupNode,
-  placeholder: WorkflowGraphBranchPlaceholderNode,
+  bypassLane: WorkflowGraphBypassLaneNode,
 };
 
 const EDGE_TYPES: EdgeTypes = {
@@ -487,7 +487,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     (n: { type?: string; data?: unknown }) => {
       // Placeholder nodes for empty `if` branches are invisible — hide them in
       // the minimap too so they don't appear as spurious coloured dots.
-      if (n.type === 'placeholder') return 'transparent';
+      if (n.type === 'bypassLane') return 'transparent';
       const status = (n.data as { stepExecution?: { status?: string } } | undefined)?.stepExecution
         ?.status;
       return status === 'failed' ? euiTheme.colors.danger : '#0b64dd';

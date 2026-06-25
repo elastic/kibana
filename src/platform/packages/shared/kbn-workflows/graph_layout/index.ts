@@ -19,6 +19,7 @@ export {
   type LayoutDirection,
   type NodeRef,
   type NodeStyle,
+  type PreLayoutBypassLaneNode,
   type PreLayoutNode,
   type PreLayoutStepNode,
   type PreLayoutTriggerNode,

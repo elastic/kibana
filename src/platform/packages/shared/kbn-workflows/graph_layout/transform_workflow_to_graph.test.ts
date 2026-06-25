@@ -121,7 +121,7 @@ describe('transformWorkflowToGraph', () => {
     expect(sourcesIntoAfter).toEqual(['e2', 't2']);
   });
 
-  it('renders a placeholder lane for the missing else when only the then branch is present', () => {
+  it('renders a bypass lane for the missing else when only the then branch is present', () => {
     const r = transformWorkflowToGraph(
       minimal({
         steps: [
@@ -136,36 +136,36 @@ describe('transformWorkflowToGraph', () => {
       })
     );
 
-    // A synthetic placeholder node should exist for the missing else lane.
-    const placeholder = r.nodes.find((n) => n.type === 'placeholder');
-    expect(placeholder).toBeDefined();
-    expect((placeholder?.data as { branch?: string })?.branch).toBe('else');
+    // A bypass lane node should exist for the missing else lane (not in domain nodes).
+    expect(r.bypassLaneNodes).toHaveLength(1);
+    const bypassId = r.bypassLaneNodes[0].id;
+    expect(r.nodes.find((n) => n.id === bypassId)).toBeUndefined();
 
-    // Gate fans out to both the then-branch (t1) and the placeholder via bus edges.
+    // Gate fans out to both the then-branch (t1) and the bypass lane via bus edges.
     expect(r.edges).toContainEqual(
       expect.objectContaining({ source: 'gate', target: 't1', branchType: 'then', label: 'true' })
     );
     expect(r.edges).toContainEqual(
       expect.objectContaining({
         source: 'gate',
-        target: placeholder?.id,
+        target: bypassId,
         branchType: 'else',
         label: 'false',
       })
     );
 
-    // Both the then-leaf (t1) and the placeholder fan-in to 'after'.
+    // Both the then-leaf (t1) and the bypass lane fan-in to 'after'.
     const sourcesIntoAfter = r.edges
       .filter((e) => e.target === 'after')
       .map((e) => e.source)
       .sort();
-    expect(sourcesIntoAfter).toEqual([placeholder?.id, 't1'].sort());
+    expect(sourcesIntoAfter).toEqual([bypassId, 't1'].sort());
 
     // The gate itself no longer connects directly to 'after'.
     expect(r.edges.find((e) => e.source === 'gate' && e.target === 'after')).toBeUndefined();
   });
 
-  it('renders a placeholder lane for the missing then when only the else branch is present', () => {
+  it('renders a bypass lane for the missing then when only the else branch is present', () => {
     const r = transformWorkflowToGraph(
       minimal({
         steps: [
@@ -180,16 +180,16 @@ describe('transformWorkflowToGraph', () => {
       })
     );
 
-    // A synthetic placeholder node should exist for the missing then lane.
-    const placeholder = r.nodes.find((n) => n.type === 'placeholder');
-    expect(placeholder).toBeDefined();
-    expect((placeholder?.data as { branch?: string })?.branch).toBe('then');
+    // A bypass lane node should exist for the missing then lane (not in domain nodes).
+    expect(r.bypassLaneNodes).toHaveLength(1);
+    const bypassId = r.bypassLaneNodes[0].id;
+    expect(r.nodes.find((n) => n.id === bypassId)).toBeUndefined();
 
-    // Gate fans out to both the placeholder (true) and else-branch (e1) via bus edges.
+    // Gate fans out to both the bypass lane (true) and else-branch (e1) via bus edges.
     expect(r.edges).toContainEqual(
       expect.objectContaining({
         source: 'gate',
-        target: placeholder?.id,
+        target: bypassId,
         branchType: 'then',
         label: 'true',
       })
@@ -198,12 +198,12 @@ describe('transformWorkflowToGraph', () => {
       expect.objectContaining({ source: 'gate', target: 'e1', branchType: 'else', label: 'false' })
     );
 
-    // Both the placeholder and the else-leaf (e1) fan-in to 'after'.
+    // Both the bypass lane and the else-leaf (e1) fan-in to 'after'.
     const sourcesIntoAfter = r.edges
       .filter((e) => e.target === 'after')
       .map((e) => e.source)
       .sort();
-    expect(sourcesIntoAfter).toEqual([placeholder?.id, 'e1'].sort());
+    expect(sourcesIntoAfter).toEqual([bypassId, 'e1'].sort());
 
     // The gate itself no longer connects directly to 'after'.
     expect(r.edges.find((e) => e.source === 'gate' && e.target === 'after')).toBeUndefined();
@@ -361,7 +361,7 @@ describe('transformWorkflowToGraph', () => {
     );
   });
 
-  it('synthesizes a labeled default placeholder lane when no explicit default (Rule 3)', () => {
+  it('synthesizes a labeled default bypass lane when no explicit default (Rule 3)', () => {
     const r = transformWorkflowToGraph(
       minimal({
         steps: [
@@ -376,16 +376,16 @@ describe('transformWorkflowToGraph', () => {
       })
     );
 
-    // A placeholder node should exist for the missing default lane.
-    const placeholder = r.nodes.find((n) => n.type === 'placeholder');
-    expect(placeholder).toBeDefined();
-    expect((placeholder?.data as { branch?: string })?.branch).toBe('default');
+    // A bypass lane node should exist for the missing default lane (not in domain nodes).
+    expect(r.bypassLaneNodes).toHaveLength(1);
+    const bypassId = r.bypassLaneNodes[0].id;
+    expect(r.nodes.find((n) => n.id === bypassId)).toBeUndefined();
 
-    // Gate fans out to the placeholder via a labeled switch-bus edge.
+    // Gate fans out to the bypass lane via a labeled switch-bus edge.
     expect(r.edges).toContainEqual(
       expect.objectContaining({
         source: 'sw',
-        target: placeholder?.id,
+        target: bypassId,
         branchType: 'switch',
         label: 'default',
       })
@@ -394,12 +394,12 @@ describe('transformWorkflowToGraph', () => {
     // No bare fall-through edge from the gate directly to 'after'.
     expect(r.edges.find((e) => e.source === 'sw' && e.target === 'after')).toBeUndefined();
 
-    // Both the case leaf ('on-a') and the placeholder fan-in to 'after'.
+    // Both the case leaf ('on-a') and the bypass lane fan-in to 'after'.
     const sourcesIntoAfter = r.edges
       .filter((e) => e.target === 'after')
       .map((e) => e.source)
       .sort();
-    expect(sourcesIntoAfter).toEqual(['on-a', placeholder?.id].sort());
+    expect(sourcesIntoAfter).toEqual(['on-a', bypassId].sort());
 
     // The labeled case edge is unaffected.
     expect(r.edges).toContainEqual(
@@ -730,10 +730,10 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
       })
     );
     // Collect all node ids from nodes + foreachGroup inner nodes.
-    // Exclude `placeholder` nodes — they are synthetic lane fillers for empty
-    // `if` branches and are intentionally absent from nodeRefs.
+    // Bypass lane nodes live in r.bypassLaneNodes (not r.nodes) and are
+    // intentionally absent from nodeRefs.
     const allIds = [
-      ...r.nodes.filter((n) => n.type !== 'placeholder').map((n) => n.id),
+      ...r.nodes.map((n) => n.id),
       ...r.foreachGroups.flatMap((g) => g.innerNodes.map((n) => n.id)),
     ];
     for (const id of allIds) {
@@ -741,10 +741,8 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
     }
   });
 
-  describe('isMerge edge tagging (placeholder-lane fan-in)', () => {
-    it('tags both fan-in edges isMerge:true for a then-only if (placeholder on else lane)', () => {
-      // if_only topology: if(then=bye, no else) → switch_no_default
-      // Both `bye → switch` and `else-placeholder → switch` must carry isMerge:true.
+  describe('bypass lane fan-in structure', () => {
+    it('bypass lane id appears as a fan-in edge source for a then-only if', () => {
       const r = transformWorkflowToGraph(
         minimal({
           steps: [
@@ -758,13 +756,15 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
+      expect(r.bypassLaneNodes).toHaveLength(1);
+      const bypassId = r.bypassLaneNodes[0].id;
       const fanInEdges = r.edges.filter((e) => e.target === 'next');
       expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.every((e) => e.isMerge === true)).toBe(true);
+      expect(fanInEdges.some((e) => e.source === bypassId)).toBe(true);
+      expect(fanInEdges.some((e) => e.source === 'bye')).toBe(true);
     });
 
-    it('tags both fan-in edges isMerge:true for an else-only if (placeholder on then lane)', () => {
-      // if(no then, else=bye) → next: same tagging on the other side
+    it('bypass lane id appears as a fan-in edge source for an else-only if', () => {
       const r = transformWorkflowToGraph(
         minimal({
           steps: [
@@ -779,12 +779,15 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
+      expect(r.bypassLaneNodes).toHaveLength(1);
+      const bypassId = r.bypassLaneNodes[0].id;
       const fanInEdges = r.edges.filter((e) => e.target === 'next');
       expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.every((e) => e.isMerge === true)).toBe(true);
+      expect(fanInEdges.some((e) => e.source === bypassId)).toBe(true);
+      expect(fanInEdges.some((e) => e.source === 'bye')).toBe(true);
     });
 
-    it('does NOT tag a plain sequential edge as isMerge', () => {
+    it('produces no bypass lane nodes for a plain sequential workflow', () => {
       const r = transformWorkflowToGraph(
         minimal({
           steps: [
@@ -793,13 +796,10 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
-      const edge = r.edges.find((e) => e.source === 'a' && e.target === 'b');
-      expect(edge).toBeDefined();
-      expect(edge?.isMerge).toBeUndefined();
+      expect(r.bypassLaneNodes).toHaveLength(0);
     });
 
-    it('does NOT tag a real if/else join as isMerge (no placeholder involved)', () => {
-      // Both branches present → no placeholder → fan-in edges stay untagged.
+    it('produces no bypass lane nodes when both if branches are present', () => {
       const r = transformWorkflowToGraph(
         minimal({
           steps: [
@@ -814,12 +814,10 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
-      const fanInEdges = r.edges.filter((e) => e.target === 'next');
-      expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.every((e) => e.isMerge === undefined)).toBe(true);
+      expect(r.bypassLaneNodes).toHaveLength(0);
     });
 
-    it('does NOT tag a parallel join as isMerge (no placeholder involved)', () => {
+    it('produces no bypass lane nodes for a balanced parallel join', () => {
       const r = transformWorkflowToGraph(
         minimal({
           steps: [
@@ -835,9 +833,7 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
-      const fanInEdges = r.edges.filter((e) => e.target === 'next');
-      expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.every((e) => e.isMerge === undefined)).toBe(true);
+      expect(r.bypassLaneNodes).toHaveLength(0);
     });
   });
 });
