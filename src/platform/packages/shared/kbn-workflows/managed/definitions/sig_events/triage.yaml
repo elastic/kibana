@@ -313,3 +313,40 @@ steps:
             infra_components: "${{ steps.resolve_discovery.output.discovery.infra_components | default: [] }}"
         on-failure:
           continue: true
+
+      # Fire-and-forget a root-cause investigation for each newly-promoted event.
+      # Async so triage (30m) never blocks on the investigation (60m).
+      # concurrency_key per slug ensures a re-promotion cancels the prior in-progress
+      # investigation rather than queuing alongside it (cancel-in-progress / max:1 in the
+      # investigation workflow).
+      - name: trigger_investigation
+        type: workflow.executeAsync
+        if: >-
+          ${{ steps.compute_write_gate.output.should_write
+          and steps.write_event_doc.error == null
+          and foreach.item.status == 'promoted' }}
+        with:
+          workflow-id: "system-streams-investigation"
+          inputs:
+            concurrency_key: "{{ foreach.item.discovery_slug }}"
+            stream_names: "${{ steps.resolve_discovery.output.discovery.stream_names | default: [] }}"
+            message: |
+              {{ steps.resolve_discovery.output.discovery.title }}
+
+              {{ foreach.item.summary | default: steps.resolve_discovery.output.discovery.summary }}
+
+              Probable cause: {{ foreach.item.root_cause | default: steps.resolve_discovery.output.discovery.root_cause }}
+            context:
+              event_id: "{{ steps.compute_write_gate.output.event_id }}"
+              discovery_id: "{{ foreach.item.discovery_id }}"
+              discovery_slug: "{{ foreach.item.discovery_slug }}"
+              criticality: "${{ foreach.item.criticality }}"
+              confidence: "${{ foreach.item.confidence }}"
+              root_cause: "{{ foreach.item.root_cause | default: steps.resolve_discovery.output.discovery.root_cause }}"
+              cause_kis: "${{ steps.resolve_discovery.output.discovery.cause_kis | default: [] }}"
+              dependency_edges: "${{ steps.resolve_discovery.output.discovery.dependency_edges | default: [] }}"
+              infra_components: "${{ steps.resolve_discovery.output.discovery.infra_components | default: [] }}"
+              evidences: "${{ steps.resolve_discovery.output.discovery.evidences | default: [] }}"
+              recommendations: "${{ foreach.item.recommendations | default: [] }}"
+        on-failure:
+          continue: true

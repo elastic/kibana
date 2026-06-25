@@ -54,7 +54,7 @@ export const SIGEVENTS_ORCHESTRATOR_WORKFLOW = {
 export const SIGEVENTS_TRIAGE_WORKFLOW = {
   id: SIGEVENTS_TRIAGE_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 3,
+  version: 4,
   yaml: TRIAGE_YAML,
   management: SIGEVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
