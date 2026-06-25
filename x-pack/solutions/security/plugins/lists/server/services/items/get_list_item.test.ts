@@ -5,18 +5,15 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
+import { LIST_INDEX, LIST_ITEM_ID } from '../../../common/constants.mock';
 import {
-  DATE_NOW,
-  LIST_ID,
-  LIST_INDEX,
-  META,
-  TIE_BREAKER,
-  USER,
-} from '../../../common/constants.mock';
-import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
+  getSearchEsListItemMock,
+  getSearchEsListItemsAsAllUndefinedMock,
+} from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import { getListItem } from './get_list_item';
 
@@ -30,61 +27,57 @@ describe('get_list_item', () => {
   });
 
   test('it returns a list item as expected if the list item is found', async () => {
-    const data = getSearchListItemMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockResponse(data);
-    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
+    esClient.get.mockResolvedValue({
+      _id: LIST_ITEM_ID,
+      _index: LIST_INDEX,
+      _source: getSearchEsListItemMock(),
+      found: true,
+    });
+    const list = await getListItem({ esClient, id: LIST_ITEM_ID, listItemIndex: LIST_INDEX });
     const expected = getListItemResponseMock();
     expect(list).toEqual(expected);
   });
 
-  test('it returns null if the search is empty', async () => {
-    const data = getSearchListItemMock();
-    data.hits.hits = [];
+  test('it returns null if the document is not found (404)', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockResponse(data);
-    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
+    esClient.get.mockRejectedValue(
+      new errors.ResponseError({
+        body: { error: { type: 'not_found' } },
+        headers: {},
+        meta: {} as never,
+        statusCode: 404,
+        warnings: [],
+      })
+    );
+    const list = await getListItem({ esClient, id: LIST_ITEM_ID, listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
 
   test('it returns null if all the values underneath the source type is undefined', async () => {
-    const data = getSearchListItemMock();
-    data.hits.hits[0]._source = {
-      '@timestamp': DATE_NOW,
-      binary: undefined,
-      boolean: undefined,
-      byte: undefined,
-      created_at: DATE_NOW,
-      created_by: USER,
-      date: undefined,
-      date_nanos: undefined,
-      date_range: undefined,
-      double: undefined,
-      double_range: undefined,
-      float: undefined,
-      float_range: undefined,
-      geo_point: undefined,
-      geo_shape: undefined,
-      half_float: undefined,
-      integer: undefined,
-      integer_range: undefined,
-      ip: undefined,
-      ip_range: undefined,
-      keyword: undefined,
-      list_id: LIST_ID,
-      long: undefined,
-      long_range: undefined,
-      meta: META,
-      shape: undefined,
-      short: undefined,
-      text: undefined,
-      tie_breaker_id: TIE_BREAKER,
-      updated_at: DATE_NOW,
-      updated_by: USER,
-    };
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockResponse(data);
-    const list = await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
+    esClient.get.mockResolvedValue({
+      _id: LIST_ITEM_ID,
+      _index: LIST_INDEX,
+      _source: getSearchEsListItemsAsAllUndefinedMock(),
+      found: true,
+    });
+    const list = await getListItem({ esClient, id: LIST_ITEM_ID, listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
+  });
+
+  test('it re-throws non-404 errors', async () => {
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    const serverError = new errors.ResponseError({
+      body: { error: { type: 'internal_server_error' } },
+      headers: {},
+      meta: {} as never,
+      statusCode: 500,
+      warnings: [],
+    });
+    esClient.get.mockRejectedValue(serverError);
+    await expect(
+      getListItem({ esClient, id: LIST_ITEM_ID, listItemIndex: LIST_INDEX })
+    ).rejects.toThrow(serverError);
   });
 });
