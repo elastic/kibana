@@ -2793,7 +2793,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.dll_hijack_detection',
       {
         defaultMessage:
-          'Set to false to disable DLL search order hijacking detection. Default: true.',
+          'Enable DLL search order hijacking detection. Default: true.',
       }
     ),
   },
