@@ -21,6 +21,14 @@ Do not run this check on backport PRs (they usually have `backport` label and/or
 
 Follow `.claude/skills/scout-best-practices-reviewer/SKILL.md` for the checklist, reuse rules, and migration parity. Ignore any output formatting in that file — use the format below. Use the GitHub tools and local file inspection to explore as needed.
 
+### Solution-specific checklists
+
+The general skill instructs you to check for and apply a solution-specific extension when one exists. For Security Solution Scout files (`x-pack/solutions/security/plugins/security_solution/test/scout/` or `x-pack/solutions/security/packages/kbn-scout-security/`), that extension is at:
+
+`x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer/SKILL.md`
+
+Skill invocation is disabled in this environment — read the file directly with the file tool. Apply its Security-specific checks **after completing the general skill's full checklist**, once, and only to files under those paths. Ignore any output format instructions and the `## Skill improvement` section — use the workflow's collapsible inline-comment format defined in this file.
+
 On PR updates, review only the new changes and stay high-signal — not nitpicky.
 
 ## Non-negotiable checks
