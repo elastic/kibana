@@ -49,7 +49,7 @@ export interface GetInstallableRulesForReviewResult {
  * `installation/_review` HTTP handler; it is now callable directly (e.g. from Agent
  * Builder tools) without going through HTTP.
  */
-export const getInstallableRulesForReview = async ({
+export async function getInstallableRulesForReview({
   ruleAssetsClient,
   logger,
   mlAuthz,
@@ -60,7 +60,7 @@ export const getInstallableRulesForReview = async ({
   perPage,
   aggs,
   fields,
-}: GetInstallableRulesForReviewParams): Promise<GetInstallableRulesForReviewResult> => {
+}: GetInstallableRulesForReviewParams): Promise<GetInstallableRulesForReviewResult> {
   const installableVersions = await getInstallableRuleVersions(
     ruleAssetsClient,
     logger,
@@ -96,7 +96,7 @@ export const getInstallableRulesForReview = async ({
     total: installableVersions.length,
     aggregations: installableRuleAssetsPage.aggregations,
   };
-};
+}
 
 export async function getInstallableRuleVersions(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
