@@ -105,10 +105,6 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
             type: WORKFLOW_SML_TYPE,
             title,
             content: buildSearchContent(source),
-            permissions: {
-              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
@@ -119,6 +115,18 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
       return undefined;
     }
   },
+
+  /**
+   * Workflow chunks are gated by the Workflows Management read API privilege —
+   * the same gate the workflows API checks when surfacing or running a
+   * workflow. Hand-rolled rather than going through `kibanaSavedObjectPermissions`
+   * because workflows are stored in a dedicated Elasticsearch index, not as
+   * Kibana saved objects.
+   */
+  getPermissions: () => ({
+    kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
+    elasticsearch: { indices: [] },
+  }),
 
   toAttachment: async (item, context) => {
     const workflow = await api.getWorkflow(item.origin_id ?? '', context.spaceId);

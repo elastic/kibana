@@ -43,3 +43,20 @@ export class SmlAuthzEnumerationIncompleteError extends SmlError {}
  * universe.
  */
 export class SmlCorpusTooLargeError extends SmlError {}
+
+/**
+ * Thrown when a write call (`indexAttachment` for `action: 'create'` /
+ * `'update'`, in either origin or content mode) targets an
+ * `attachmentType` that has no entry in the SML type registry.
+ *
+ * Centralised here so every write path produces the same error class
+ * regardless of which surface the call arrived through — the HTTP PUT
+ * route translates it to 400, the workflow step handler surfaces it as
+ * a step `error` result, and direct internal callers see a typed throw
+ * rather than a no-op silently dropping their write.
+ *
+ * `delete` paths intentionally do **not** raise this — cleanup must keep
+ * working even when the plugin that originally registered the type is
+ * disabled, or stale chunks become unreachable from every write path.
+ */
+export class SmlUnregisteredTypeError extends SmlError {}

@@ -73,10 +73,6 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
               type: CONNECTOR_SML_TYPE,
               title: name,
               content: contentParts.join('\n'),
-              permissions: {
-                kibana: { privileges: [{ name: 'action:execute' }] },
-                elasticsearch: { indices: [] },
-              },
             },
           ],
         };
@@ -87,6 +83,19 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         return undefined;
       }
     },
+
+    /**
+     * Connector chunks are gated by the cluster-level `action:execute` Kibana
+     * privilege rather than a saved-object `get` privilege — agents need
+     * permission to *execute* a connector for it to be useful context. This
+     * is the same gate the connectors API checks before invoking the
+     * connector, so chunks surface only to users who could actually use the
+     * referenced connector.
+     */
+    getPermissions: () => ({
+      kibana: { privileges: [{ name: 'action:execute' }] },
+      elasticsearch: { indices: [] },
+    }),
 
     toAttachment: async (item, context) => {
       try {

@@ -98,8 +98,11 @@ export interface SmlChunk {
   user_id?: string;
   /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
   references?: Array<{ uri: string }>;
-  /** Permissions required to access the underlying element. */
-  permissions: SmlPermissions;
+  // permissions: intentionally absent. The {@link SmlTypeDefinition.getPermissions}
+  // hook is the single source of truth for the permissions stamped on the
+  // indexed document — neither `getSmlData` nor content-mode callers (the
+  // `sml.index` workflow step, event-driven content-mode indexAttachment)
+  // can override it.
 }
 
 /**
@@ -170,6 +173,35 @@ export interface SmlTypeDefinition {
     item: SmlDocument,
     context: SmlToAttachmentContext
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
+
+  /**
+   * Compute the {@link SmlPermissions} that gate access to chunks for the
+   * given `originId`. Called by the indexer for every chunk it stamps,
+   * regardless of which mode (crawler/origin vs. workflow/content) wrote
+   * the chunk — so a workflow step's content-mode write inherits the same
+   * gating as a crawler-driven write.
+   *
+   * Authoritative when defined. Callers (workflow step, `getSmlData`) cannot
+   * override or bypass it — `SmlChunk` does not carry a `permissions`
+   * field. Types that need permission shapes the built-in helpers do not
+   * cover should still implement this directly (returning a fully-shaped
+   * {@link SmlPermissions}).
+   *
+   * Omit when the type wraps a resource that is intentionally public within
+   * the space (e.g. taxonomy entries, public schema docs). The indexer then
+   * stamps an empty `SmlPermissions`, which the read-path security filter
+   * treats as "no privileges required". A type that wraps a sensitive
+   * resource MUST implement this hook — there is no other way to attach an
+   * access-control gate to its chunks.
+   *
+   * For Kibana saved-object-backed types, prefer the
+   * `kibanaSavedObjectPermissions` helper over hand-writing the privilege
+   * string.
+   */
+  getPermissions?: (
+    originId: string,
+    context: SmlContext
+  ) => Promise<SmlPermissions> | SmlPermissions;
 
   /**
    * Optional: custom crawl interval for the crawler.
@@ -338,37 +370,35 @@ export interface SmlCrawler {
 }
 
 /**
- * Input fields for upserting an SML document.
+ * Input fields for upserting an SML origin via the HTTP PUT route.
  *
- * `created_at` / `updated_at` are managed server-side; `id` is the URL path id;
- * `spaces` is derived from the caller's space (on create) or preserved from the
- * existing document (on update) - callers cannot specify it directly.
+ * `origin_id` is the URL path parameter (the route uses it as the
+ * `originId` passed to `indexAttachment` content-mode). `spaces` is
+ * derived from the caller's request space; `created_at` / `updated_at`
+ * are managed by the indexer.
+ *
+ * The HTTP route hands this to {@link SmlService.indexAttachment} as a
+ * single-chunk content-mode write — same code path the workflow step
+ * uses — so permissions, type-registration enforcement, and storage
+ * shape stay consistent across every write path.
  */
 export interface SmlDocumentInput {
   type: string;
   title: string;
-  origin_id: string;
   content: string;
   /**
-   * Free-form labels for filtering and retrieval. Optional — when absent
-   * on an update, the existing document's tags are preserved.
+   * Free-form labels for filtering and retrieval. Forwarded as the
+   * chunk's `tags`; empty array when omitted (the indexer wipes-then-
+   * writes, so there is no existing-tags preservation step like the
+   * old _id-based upsert had).
    */
   tags?: string[];
-  /**
-   * Permissions required to access the underlying element. Optional on
-   * input — when omitted, the upsert handler normalizes to an empty
-   * `{ kibana: { privileges: [] }, elasticsearch: { indices: [] } }`.
-   */
-  permissions?: SmlPermissions;
-}
-
-/**
- * Result of an upsert operation.
- */
-export interface SmlUpsertResult {
-  document: SmlDocument;
-  /** Whether the document was newly created (vs. updated in place). */
-  created: boolean;
+  // permissions: intentionally absent. The indexer derives them from
+  // the SML type registered as `type` (via its `getPermissions` hook),
+  // so callers cannot stamp arbitrary access-control on a document.
+  // An unregistered `type` is rejected as
+  // {@link SmlUnregisteredTypeError}, surfaced as HTTP 400 by the
+  // upsert route.
 }
 
 /**
@@ -582,31 +612,40 @@ export interface SmlService {
   }) => Promise<{ total: number; results: SmlDocument[] }>;
 
   /**
-   * Upsert an SML document by id, scoped to a space.
+   * Fetch every chunk written under `originId` that is visible in `spaceId`.
    *
-   * On create the new document's `spaces` is `[spaceId]`. On update the
-   * existing document's `spaces` is preserved.
+   * Used by the HTTP GET route and other origin-scoped reads. A workflow
+   * step writing in content mode (or `getSmlData` in origin mode) may
+   * produce multiple chunks per origin — all are returned.
    *
-   * Resolves to `null` when a document with this id exists but is not
-   * visible from `spaceId` (caller cannot clobber across spaces).
+   * Resolves to an empty array when no visible chunks exist; callers that
+   * need the "exists in another space" distinction (for cross-space
+   * write guards) should use {@link SmlService.findByOriginIdAcrossSpaces}.
+   *
+   * **Does NOT perform per-user permission checks.** The caller is
+   * expected to have already authorized the user against the space.
+   * Direct callers from request-handling contexts should layer their own
+   * `checkItemsAccess` filter on top — or wait for the route helper that
+   * does this for them.
    */
-  upsertDocument: (params: {
-    id: string;
+  findByOriginId: (params: {
+    originId: string;
     spaceId: string;
-    document: SmlDocumentInput;
     esClient: IScopedClusterClient;
-  }) => Promise<SmlUpsertResult | null>;
+  }) => Promise<SmlDocument[]>;
 
   /**
-   * Delete an SML document by id, scoped to a space.
-   * Resolves to `true` when a document was deleted, `false` when no
-   * matching document was found.
+   * Fetch every chunk written under `originId` regardless of space.
+   *
+   * Used exclusively for the HTTP route's cross-space-overwrite guard:
+   * a write request from space A must be blocked when the origin is
+   * already owned by space B. Callers MUST NOT use this for read paths
+   * that surface data to users — it bypasses space isolation.
    */
-  deleteDocument: (params: {
-    id: string;
-    spaceId: string;
+  findByOriginIdAcrossSpaces: (params: {
+    originId: string;
     esClient: IScopedClusterClient;
-  }) => Promise<boolean>;
+  }) => Promise<SmlDocument[]>;
 
   /** Get a type definition by ID */
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;

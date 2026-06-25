@@ -8,11 +8,32 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlUpsertHttpResponse } from '../../common/http_api/sml';
-import { smlByIdPath } from '../../common/constants';
-import type { SmlDocumentInput, SmlService } from '../services/sml/types';
+import { smlByOriginIdPath } from '../../common/constants';
+import type { SmlChunk, SmlService } from '../services/sml/types';
+import { isVisibleInSpace } from '../services/sml/sml_service';
+import { SmlUnregisteredTypeError } from '../services/sml/sml_errors';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 
+/**
+ * `PUT /internal/agent_context_layer/sml/{originId}`
+ *
+ * Writes a single manual chunk under the origin via
+ * {@link SmlService.indexAttachment} content-mode — the same code path
+ * the workflow step's `sml.index` action uses. Permissions are stamped
+ * by the registered type's `getPermissions` hook; the request body
+ * cannot influence them.
+ *
+ * The indexer's content-mode write wipes every existing chunk for the
+ * origin (regardless of `ingestion_method`), so this route is the
+ * "claim the origin" semantic — any crawler-written chunks for that
+ * `origin_id` are replaced.
+ *
+ * Cross-space guard: before calling the indexer the route looks the
+ * origin up across all spaces and rejects requests from a space that
+ * cannot see it (404) so a caller in space A cannot stomp on chunks
+ * in space B.
+ */
 export const registerUpsertRoute = ({
   router,
   coreSetup,
@@ -26,17 +47,26 @@ export const registerUpsertRoute = ({
 }) => {
   router.put(
     {
-      path: smlByIdPath,
+      path: smlByOriginIdPath,
       validate: {
         params: schema.object({
-          id: schema.string({ minLength: 1 }),
+          originId: schema.string({ minLength: 1 }),
         }),
-        // TODO: Add maxLength bounds to string fields (type, title, origin_id, content) to
+        // TODO: Add maxLength bounds to string fields (type, title, content) to
         // prevent abuse with excessively long values.
+        //
+        // Neither `permissions` nor `origin_id` appear in this body:
+        // - `permissions` are derived by the indexer from the registered SML
+        //   type's `getPermissions` hook (same source of truth as the
+        //   crawler, the workflow step, and event-driven writes); the old
+        //   caller-supplied `permissions` field was a spoofing surface that
+        //   let an HTTP client set the access-control gate independently of
+        //   the type it was stamping.
+        // - `origin_id` is the URL path parameter; duplicating it in the
+        //   body invites caller/path mismatch with no consistency check.
         body: schema.object({
           type: schema.string({ minLength: 1 }),
           title: schema.string({ minLength: 1 }),
-          origin_id: schema.string({ minLength: 1 }),
           content: schema.string(),
           tags: schema.maybe(
             schema.arrayOf(
@@ -60,26 +90,6 @@ export const registerUpsertRoute = ({
               }
             )
           ),
-          permissions: schema.maybe(
-            schema.object({
-              kibana: schema.maybe(
-                schema.object({
-                  privileges: schema.arrayOf(
-                    schema.object({ name: schema.string({ minLength: 1, maxLength: 255 }) }),
-                    { maxSize: 100 }
-                  ),
-                })
-              ),
-              elasticsearch: schema.maybe(
-                schema.object({
-                  indices: schema.arrayOf(
-                    schema.object({ name: schema.string({ minLength: 1, maxLength: 255 }) }),
-                    { maxSize: 100 }
-                  ),
-                })
-              ),
-            })
-          ),
         }),
       },
       options: { access: 'internal' },
@@ -88,30 +98,68 @@ export const registerUpsertRoute = ({
     withSmlFeatureFlag(async (ctx, request, response) => {
       try {
         const sml = getSmlService();
-        const { id } = request.params as { id: string };
+        const { originId } = request.params as { originId: string };
+        const body = request.body as {
+          type: string;
+          title: string;
+          content: string;
+          tags?: string[];
+        };
         const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
+        const savedObjectsClient = coreContext.savedObjects.client;
 
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
-        const result = await sml.upsertDocument({
-          id,
-          spaceId,
-          document: request.body as SmlDocumentInput,
-          esClient,
-        });
-        if (!result) {
-          return response.notFound({ body: { message: `SML document '${id}' not found` } });
+        // Cross-space guard: an origin already owned by a different space
+        // is opaque to the caller — return 404 rather than 403 to avoid
+        // disclosing the existence of resources in other spaces.
+        const existing = await sml.findByOriginIdAcrossSpaces({ originId, esClient });
+        const visibleInCallerSpace =
+          existing.length === 0 || existing.some((doc) => isVisibleInSpace(doc.spaces, spaceId));
+        if (!visibleInCallerSpace) {
+          return response.notFound({
+            body: { message: `SML origin '${originId}' not found` },
+          });
         }
 
-        const body: SmlUpsertHttpResponse = {
-          item: toSmlHttpItem(result.document),
-          created: result.created,
+        const created = existing.length === 0;
+        const action = created ? 'create' : 'update';
+        const chunk: SmlChunk = {
+          type: body.type,
+          title: body.title,
+          content: body.content,
+          ...(body.tags !== undefined ? { tags: body.tags } : {}),
         };
 
-        return response.ok({ body });
+        await sml.indexAttachment({
+          originId,
+          attachmentType: body.type,
+          action,
+          spaces: [spaceId],
+          esClient: esClient.asInternalUser,
+          savedObjectsClient,
+          logger,
+          content: [chunk],
+        });
+
+        // Re-read so the response reflects what the indexer actually
+        // persisted (chunk `_id`, server-assigned `created_at`,
+        // stamped `permissions`, etc.). The content-mode write wipes
+        // all prior chunks for the origin so the post-state is the
+        // chunks just written.
+        const persisted = await sml.findByOriginId({ originId, spaceId, esClient });
+
+        const responseBody: SmlUpsertHttpResponse = {
+          items: persisted.map(toSmlHttpItem),
+          created,
+        };
+        return response.ok({ body: responseBody });
       } catch (error) {
+        if (error instanceof SmlUnregisteredTypeError) {
+          return response.badRequest({ body: { message: (error as Error).message } });
+        }
         logger.error(`SML upsert route error: ${(error as Error).message}`);
         throw error;
       }

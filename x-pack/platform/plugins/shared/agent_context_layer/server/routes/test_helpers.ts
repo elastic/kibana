@@ -12,13 +12,14 @@ import type { SmlDocument } from '../services/sml/types';
 
 export const createMockSmlService = () => ({
   search: jest.fn(),
+  autocomplete: jest.fn(),
   checkItemsAccess: jest.fn(),
   indexAttachment: jest.fn(),
   deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
   listDocuments: jest.fn(),
-  upsertDocument: jest.fn(),
-  deleteDocument: jest.fn(),
+  findByOriginId: jest.fn(),
+  findByOriginIdAcrossSpaces: jest.fn(),
   getTypeDefinition: jest.fn(),
   listTypeDefinitions: jest.fn(),
   getCrawler: jest.fn(),
@@ -53,6 +54,7 @@ export const buildMockContext = (uiSettingsEnabled = true) => ({
   core: Promise.resolve({
     uiSettings: { client: createMockUiSettingsClient(uiSettingsEnabled) },
     elasticsearch: { client: { asInternalUser: {}, asCurrentUser: {} } },
+    savedObjects: { client: {} },
   }),
 });
 

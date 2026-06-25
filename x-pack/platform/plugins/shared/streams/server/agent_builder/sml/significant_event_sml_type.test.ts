@@ -106,15 +106,27 @@ describe('createSignificantEventSmlType', () => {
         expect.objectContaining({
           type: SIGNIFICANT_EVENT_SML_TYPE,
           title: 'Payment outage',
-          permissions: {
-            kibana: { privileges: [{ name: 'api:read_stream' }] },
-            elasticsearch: { indices: [] },
-          },
         }),
       ],
     });
+    expect(result?.chunks[0]).not.toHaveProperty('permissions');
     expect(result?.chunks[0].content).toContain('Payment gateway timeout.');
     expect(findByDiscoverySlug).toHaveBeenCalledWith('payment-outage');
+  });
+
+  it('getPermissions returns the streams read API privilege', () => {
+    const smlType = createSignificantEventSmlType({
+      getScopedClients: createGetScopedClients([]),
+    });
+    const permissions = smlType.getPermissions!('payment-outage', {
+      esClient: {} as never,
+      savedObjectsClient: {} as never,
+      logger: loggingSystemMock.createLogger(),
+    });
+    expect(permissions).toEqual({
+      kibana: { privileges: [{ name: 'api:read_stream' }] },
+      elasticsearch: { indices: [] },
+    });
   });
 
   it('converts an SML document into an attachment', async () => {

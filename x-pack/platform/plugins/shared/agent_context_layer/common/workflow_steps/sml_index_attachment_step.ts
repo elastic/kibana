@@ -38,58 +38,59 @@ const MAX_SML_TITLE_LENGTH = 1024;
 const MAX_SML_DESCRIPTION_LENGTH = 8192;
 const MAX_SML_CONTENT_LENGTH = 50_000;
 const MAX_SML_REFERENCES = 100;
-const MAX_SML_PERMISSIONS = 100;
 const MAX_SML_TAGS = 100;
 const MAX_SML_TAG_LENGTH = 100;
 
-const ChunkSchema = z.object({
-  type: z
-    .string()
-    .min(1)
-    .max(MAX_SML_IDENTIFIER_LENGTH)
-    .describe('Chunk type (e.g., "visualization", "dashboard").'),
-  title: z.string().min(1).max(MAX_SML_TITLE_LENGTH).describe('Display title for the chunk.'),
-  content: z
-    .string()
-    .min(1)
-    .max(MAX_SML_CONTENT_LENGTH)
-    .describe('Searchable content (indexed as semantic_text).'),
-  description: z
-    .string()
-    .max(MAX_SML_DESCRIPTION_LENGTH)
-    .optional()
-    .describe('Optional longer summary indexed as semantic_text.'),
-  user_id: z
-    .string()
-    .max(MAX_SML_IDENTIFIER_LENGTH)
-    .optional()
-    .describe('Optional owner/last-modifier user id.'),
-  references: z
-    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
-    .max(MAX_SML_REFERENCES)
-    .optional()
-    .describe('Optional list of referenced SML chunk ids.'),
-  permissions: z
-    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
-    .max(MAX_SML_PERMISSIONS)
-    .optional()
-    .describe('Optional Kibana privilege strings required to view the chunk later.'),
-  tags: z
-    .array(
-      z
-        .string()
-        .max(MAX_SML_TAG_LENGTH)
-        .regex(
-          /^[a-z0-9][a-z0-9_-]*$/,
-          'Tag must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "otel", "my-tag", "v2_data").'
-        )
-    )
-    .max(MAX_SML_TAGS)
-    .optional()
-    .describe(
-      'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
-    ),
-});
+const ChunkSchema = z
+  .object({
+    type: z
+      .string()
+      .min(1)
+      .max(MAX_SML_IDENTIFIER_LENGTH)
+      .describe('Chunk type (e.g., "visualization", "dashboard").'),
+    title: z.string().min(1).max(MAX_SML_TITLE_LENGTH).describe('Display title for the chunk.'),
+    content: z
+      .string()
+      .min(1)
+      .max(MAX_SML_CONTENT_LENGTH)
+      .describe('Searchable content (indexed as semantic_text).'),
+    description: z
+      .string()
+      .max(MAX_SML_DESCRIPTION_LENGTH)
+      .optional()
+      .describe('Optional longer summary indexed as semantic_text.'),
+    user_id: z
+      .string()
+      .max(MAX_SML_IDENTIFIER_LENGTH)
+      .optional()
+      .describe('Optional owner/last-modifier user id.'),
+    references: z
+      .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
+      .max(MAX_SML_REFERENCES)
+      .optional()
+      .describe('Optional list of referenced SML chunk ids.'),
+    tags: z
+      .array(
+        z
+          .string()
+          .max(MAX_SML_TAG_LENGTH)
+          .regex(
+            /^[a-z0-9][a-z0-9_-]*$/,
+            'Tag must be lowercase alphanumeric and may contain hyphens or underscores (e.g. "otel", "my-tag", "v2_data").'
+          )
+      )
+      .max(MAX_SML_TAGS)
+      .optional()
+      .describe(
+        'Optional tags for grouping and retrieval. Must be lowercase alphanumeric; hyphens and underscores are allowed (e.g. ["otel", "my-tag"]). Tags are matched with OR semantics on the list endpoint.'
+      ),
+  })
+  // strict() rejects the legacy `permissions` field outright instead of
+  // silently dropping it. Permissions are derived from the registered SML
+  // type's `getPermissions` hook now — accepting a workflow-supplied
+  // `permissions` field would let workflow authors think they were
+  // controlling chunk visibility when they were not.
+  .strict();
 
 /**
  * Step input.
@@ -97,6 +98,18 @@ const ChunkSchema = z.object({
  * Workflow-driven writes always go through the content-mode path on the SML
  * start contract — caller-supplied chunks are written as
  * `ingestion_method: 'manual'`.
+ *
+ * Caller-supplied permissions are **not** part of the contract: chunks are
+ * gated by the {@link SmlTypeDefinition.getPermissions} hook of the type
+ * named by `attachmentType`, so workflow writes inherit the same access
+ * control as a crawler-driven write. The chunk schema is `strict()` and
+ * rejects an extraneous `permissions` field so authors do not assume they
+ * can override that gate. To use the visualization/dashboard/connector/etc.
+ * gate, set `attachmentType` to the matching SML type id. To write a chunk
+ * that should be readable by anyone in the space, set `attachmentType` to a
+ * type with no `getPermissions` hook (or an unregistered one — chunks are
+ * then stamped with empty permissions and are publicly readable within the
+ * space).
  *
  * - `upsert` requires `chunks` and always performs a full replace: every
  *   prior chunk for the `origin_id` is removed and the supplied chunks are

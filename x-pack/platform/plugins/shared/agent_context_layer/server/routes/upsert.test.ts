@@ -16,11 +16,11 @@ import {
   sampleDocument,
 } from './test_helpers';
 import { registerUpsertRoute } from './upsert';
+import { SmlUnregisteredTypeError } from '../services/sml/sml_errors';
 
 const validBody = {
   type: 'visualization',
   title: 'Test Viz',
-  origin_id: 'viz-1',
   content: 'some content',
 };
 
@@ -56,78 +56,92 @@ describe('registerUpsertRoute', () => {
   };
 
   it('returns 404 when feature flag is disabled', async () => {
-    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody }, false);
+    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody }, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockSmlService.upsertDocument).not.toHaveBeenCalled();
+    expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
   });
 
-  it('returns 200 with the new document when created', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
-    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
-    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
-      id: 'chunk-1',
-      spaceId: 'test-space',
-      document: validBody,
-      esClient: expect.any(Object),
-    });
+  it('creates a new origin via indexAttachment content-mode when no chunks exist', async () => {
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+
+    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        originId: 'viz-1',
+        attachmentType: 'visualization',
+        action: 'create',
+        spaces: ['test-space'],
+        content: [
+          expect.objectContaining({
+            type: 'visualization',
+            title: 'Test Viz',
+            content: 'some content',
+          }),
+        ],
+      })
+    );
     expect(response.ok).toHaveBeenCalledWith({
       body: {
-        item: expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin }),
+        items: [expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin })],
         created: true,
       },
     });
   });
 
-  it('forwards permissions to sml.upsertDocument when provided', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
-    const bodyWithPermissions = {
-      ...validBody,
-      permissions: {
-        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-        elasticsearch: {
-          indices: [{ name: 'logs-app-*' }, { name: 'metrics-prod' }],
-        },
-      },
-    };
-    await callHandler({ params: { id: 'chunk-1' }, body: bodyWithPermissions });
-    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
-      id: 'chunk-1',
-      spaceId: 'test-space',
-      document: bodyWithPermissions,
-      esClient: expect.any(Object),
-    });
-  });
+  it('passes action=update and created=false when origin already exists in caller space', async () => {
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
 
-  it('forwards tags to sml.upsertDocument when provided', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
-    const bodyWithTags = {
-      ...validBody,
-      tags: ['otel', 'claude-code'],
-    };
-    await callHandler({ params: { id: 'chunk-1' }, body: bodyWithTags });
-    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
-      id: 'chunk-1',
-      spaceId: 'test-space',
-      document: expect.objectContaining({ tags: ['otel', 'claude-code'] }),
-      esClient: expect.any(Object),
-    });
-  });
+    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
 
-  it('returns 200 with created=false when the document already existed', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: false });
-    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'update' })
+    );
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     expect(body.created).toBe(false);
-    expect(body.item).toEqual(
-      expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin })
+  });
+
+  it('forwards tags to the indexer when provided', async () => {
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+    const bodyWithTags = { ...validBody, tags: ['otel', 'claude-code'] };
+
+    await callHandler({ params: { originId: 'viz-1' }, body: bodyWithTags });
+
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: [expect.objectContaining({ tags: ['otel', 'claude-code'] })],
+      })
     );
   });
 
-  it('returns 404 when the document exists in another space', async () => {
-    mockSmlService.upsertDocument.mockResolvedValue(null);
-    const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
+  it('returns 404 when origin is owned by another space', async () => {
+    const otherSpaceDoc = { ...sampleDocument, spaces: ['other-space'] };
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
+
+    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML document 'chunk-1' not found" },
+      body: { message: "SML origin 'viz-1' not found" },
+    });
+    expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when the SML type is not registered', async () => {
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockRejectedValue(
+      new SmlUnregisteredTypeError("type 'wat' not registered")
+    );
+
+    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: "type 'wat' not registered" },
     });
   });
 
@@ -142,21 +156,27 @@ describe('registerUpsertRoute', () => {
 
     const [, localHandler] = localRouter.put.mock.calls[0];
     const request = httpServerMock.createKibanaRequest({
-      params: { id: 'chunk-1' },
+      params: { originId: 'viz-1' },
       body: validBody,
     });
     const response = httpServerMock.createResponseFactory();
 
-    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+
     await localHandler(buildMockContext(true), request, response);
-    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'default' })
+
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ spaces: ['default'] })
     );
   });
 
-  it('propagates errors from sml.upsertDocument', async () => {
-    mockSmlService.upsertDocument.mockRejectedValue(new Error('write failed'));
-    await expect(callHandler({ params: { id: 'chunk-1' }, body: validBody })).rejects.toThrow(
+  it('propagates unexpected errors from sml.indexAttachment', async () => {
+    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.indexAttachment.mockRejectedValue(new Error('write failed'));
+
+    await expect(callHandler({ params: { originId: 'viz-1' }, body: validBody })).rejects.toThrow(
       'write failed'
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('write failed'));

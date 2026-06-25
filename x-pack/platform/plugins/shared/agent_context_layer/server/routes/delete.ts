@@ -8,11 +8,29 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlDeleteHttpResponse } from '../../common/http_api/sml';
-import { smlByIdPath } from '../../common/constants';
+import { smlByOriginIdPath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
+import { isVisibleInSpace } from '../services/sml/sml_service';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { WRITE_SECURITY, withSmlFeatureFlag } from './common';
 
+/**
+ * `DELETE /internal/agent_context_layer/sml/{originId}`
+ *
+ * Removes every chunk written under the origin (manual + crawled) via
+ * {@link SmlService.deleteAttachment} with `ingestionMethod: 'all'`,
+ * mirroring the PUT route's "claim the origin" semantic in reverse.
+ *
+ * `attachmentType` is not part of the URL — the route discovers it by
+ * looking up the existing chunks first. This relies on the system-wide
+ * convention that `origin_id` is globally unique (same one the PUT
+ * route assumes). If multiple types share an `origin_id`, every type
+ * found is dispatched a separate delete so cleanup is total.
+ *
+ * Cross-space guard: an origin owned by another space is reported as
+ * 404 (same shape as the GET route) so a caller in space A cannot
+ * even probe for origins in space B.
+ */
 export const registerDeleteRoute = ({
   router,
   coreSetup,
@@ -26,10 +44,10 @@ export const registerDeleteRoute = ({
 }) => {
   router.delete(
     {
-      path: smlByIdPath,
+      path: smlByOriginIdPath,
       validate: {
         params: schema.object({
-          id: schema.string({ minLength: 1 }),
+          originId: schema.string({ minLength: 1 }),
         }),
       },
       options: { access: 'internal' },
@@ -38,24 +56,62 @@ export const registerDeleteRoute = ({
     withSmlFeatureFlag(async (ctx, request, response) => {
       try {
         const sml = getSmlService();
-        const { id } = request.params as { id: string };
+        const { originId } = request.params as { originId: string };
         const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
+        const savedObjectsClient = coreContext.savedObjects.client;
 
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
-        const accessMap = await sml.checkItemsAccess({ ids: [id], spaceId, esClient, request });
-        if (!accessMap.get(id)) {
-          return response.notFound({ body: { message: `SML document '${id}' not found` } });
+        const existing = await sml.findByOriginIdAcrossSpaces({ originId, esClient });
+        if (existing.length === 0) {
+          return response.notFound({
+            body: { message: `SML origin '${originId}' not found` },
+          });
         }
 
-        const deleted = await sml.deleteDocument({ id, spaceId, esClient });
-        if (!deleted) {
-          return response.notFound({ body: { message: `SML document '${id}' not found` } });
+        const visibleInCallerSpace = existing.some((doc) => isVisibleInSpace(doc.spaces, spaceId));
+        if (!visibleInCallerSpace) {
+          return response.notFound({
+            body: { message: `SML origin '${originId}' not found` },
+          });
         }
 
-        const body: SmlDeleteHttpResponse = { id, deleted: true };
+        // Per-chunk permission check before deleting — same gate the
+        // GET route applies. A caller who cannot read every chunk
+        // for the origin should not be allowed to delete the lot.
+        const accessMap = await sml.checkItemsAccess({
+          ids: existing.map((d) => d.id),
+          spaceId,
+          esClient,
+          request,
+        });
+        const unauthorized = existing.filter((d) => accessMap.get(d.id) !== true);
+        if (unauthorized.length > 0) {
+          return response.notFound({
+            body: { message: `SML origin '${originId}' not found` },
+          });
+        }
+
+        // Origin id is conventionally globally unique, but a producer
+        // could in theory reuse the same id under two types — dispatch
+        // a delete per distinct type so cleanup is exhaustive instead
+        // of leaving the second type's chunks dangling.
+        const types = new Set(existing.map((d) => d.type));
+        for (const attachmentType of types) {
+          await sml.deleteAttachment({
+            originId,
+            attachmentType,
+            spaces: [spaceId],
+            esClient: esClient.asInternalUser,
+            savedObjectsClient,
+            logger,
+            ingestionMethod: 'all',
+          });
+        }
+
+        const body: SmlDeleteHttpResponse = { origin_id: originId, deleted: true };
         return response.ok({ body });
       } catch (error) {
         logger.error(`SML delete route error: ${(error as Error).message}`);

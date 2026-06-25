@@ -16,9 +16,7 @@ import type {
   SmlSearchResult,
   SmlAutocompleteResult,
   SmlDocument,
-  SmlDocumentInput,
   SmlTypeDefinition,
-  SmlUpsertResult,
   SmlSearchFilters,
   SmlSearchConstraints,
   MatchedDiscoveryLabel,
@@ -28,7 +26,7 @@ import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
-import { smlIndexName, createSmlStorage } from './sml_storage';
+import { smlIndexName } from './sml_storage';
 import {
   SmlResultWindowExceededError,
   SmlAuthzEnumerationIncompleteError,
@@ -38,8 +36,9 @@ import {
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
 //   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
-// - Write operations (upsert, delete) use `createSmlStorage` / `smlClient` so that
-//   StorageIndexAdapter auto-creates the index on first write.
+// - Every write path (origin-mode crawler, content-mode workflow step, HTTP PUT/DELETE) goes
+//   through `SmlIndexer` so type-registration enforcement, permission derivation, and storage
+//   shape stay consistent. There are no document-write paths in this file.
 
 export interface SmlServiceSetup {
   /**
@@ -178,11 +177,11 @@ class SmlServiceImpl implements SmlServiceInstance {
           tags,
         });
       },
-      upsertDocument: async ({ id, spaceId, document, esClient }) => {
-        return upsertDocument({ id, spaceId, document, esClient, logger });
+      findByOriginId: async ({ originId, spaceId, esClient }) => {
+        return findByOriginId({ originId, spaceId, esClient, logger });
       },
-      deleteDocument: async ({ id, spaceId, esClient }) => {
-        return deleteDocument({ id, spaceId, esClient, logger });
+      findByOriginIdAcrossSpaces: async ({ originId, esClient }) => {
+        return findByOriginIdAcrossSpaces({ originId, esClient, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
@@ -207,8 +206,7 @@ export const isNotFoundError = (error: unknown): boolean => {
 
 /**
  * Empty-but-fully-shaped permissions object. Used as a fallback when
- * `_source.permissions` is somehow missing (legacy / test docs) and as
- * the input default in `upsertDocument`.
+ * `_source.permissions` is somehow missing (legacy / test docs).
  */
 const emptyPermissions = (): SmlDocument['permissions'] => ({
   kibana: { privileges: [] },
@@ -1355,39 +1353,7 @@ const getDocumentsByIds = async ({
 
     for (const hit of response.hits.hits) {
       if (!hit._source) continue;
-      const source = hit._source;
-      const originUri = source.origin?.uri ?? '';
-      const doc: SmlDocument = {
-        id: source.id ?? '',
-        type: source.type ?? '',
-        title: source.title ?? '',
-        origin_id: originUri.split('://')[1] ?? '',
-        origin: { uri: originUri },
-        content: source.content ?? '',
-        created_at: source.created_at ?? '',
-        updated_at: source.updated_at ?? '',
-        spaces: source.spaces ?? [],
-        permissions: source.permissions ?? emptyPermissions(),
-        ingestion_method: source.ingestion_method ?? 'crawled',
-      };
-      if (source.description !== undefined) {
-        doc.description = source.description;
-      }
-      if (source.tags !== undefined) {
-        doc.tags = source.tags;
-      }
-      if (source.discovery_labels !== undefined) {
-        doc.discovery_labels = source.discovery_labels;
-      }
-      if (source.extended_attrs !== undefined) {
-        doc.extended_attrs = source.extended_attrs;
-      }
-      if (source.user_id !== undefined) {
-        doc.user_id = source.user_id;
-      }
-      if (source.references !== undefined) {
-        doc.references = source.references;
-      }
+      const doc = hydrateDocument(hit._source);
       docMap.set(doc.id, doc);
     }
   } catch (error) {
@@ -1400,30 +1366,38 @@ const getDocumentsByIds = async ({
 };
 
 /**
- * Fetch a single SML document by id, scoped to a space.
- * Returns `undefined` when the document does not exist or is not in the space.
+ * Fetch every chunk written under `originId` that is visible in `spaceId`.
+ *
+ * Multiple chunks per origin are expected: the workflow step's content
+ * mode and `getSmlData` in origin mode can both produce >1 chunk per
+ * origin. Ordering is unspecified.
+ *
+ * Lookups happen via the `origin_id` keyword field (not `origin.uri`)
+ * because callers carry the bare id, not the typed URI, and we treat
+ * `origin_id` as globally unique by convention (the HTTP routes
+ * deliberately omit `type` from the URL).
  */
-const getDocumentById = async ({
-  id,
+const findByOriginId = async ({
+  originId,
   spaceId,
   esClient,
   logger,
 }: {
-  id: string;
+  originId: string;
   spaceId: string;
   esClient: IScopedClusterClient;
   logger: Logger;
-}): Promise<SmlDocument | undefined> => {
+}): Promise<SmlDocument[]> => {
   try {
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
-      size: 1,
+      size: 1000,
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
         bool: {
           filter: [
-            { term: { id } },
+            { term: { origin_id: originId } },
             {
               bool: {
                 should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
@@ -1435,30 +1409,104 @@ const getDocumentById = async ({
       },
     });
 
-    const hit = response.hits.hits[0];
-    if (!hit?._source) return undefined;
-
-    const source = hit._source;
-    return {
-      id: source.id ?? '',
-      type: source.type ?? '',
-      title: source.title ?? '',
-      origin_id: (source.origin?.uri ?? '').split('://')[1] ?? '',
-      origin: { uri: source.origin?.uri ?? '' },
-      content: source.content ?? '',
-      created_at: source.created_at ?? '',
-      updated_at: source.updated_at ?? '',
-      spaces: source.spaces ?? [],
-      permissions: source.permissions ?? emptyPermissions(),
-      ingestion_method: source.ingestion_method ?? 'crawled',
-    };
+    return response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => hydrateDocument(hit._source!));
   } catch (error) {
     if (isNotFoundError(error)) {
-      return undefined;
+      return [];
     }
-    logger.warn(`SML getDocument failed: ${(error as Error).message}`);
+    logger.warn(`SML findByOriginId failed: ${(error as Error).message}`);
     throw error;
   }
+};
+
+/**
+ * Fetch every chunk written under `originId` regardless of space.
+ *
+ * Used by the HTTP routes' cross-space-overwrite guard — never for
+ * read paths that surface data to users. The route compares the result
+ * against the caller's space to decide between proceeding, 404, and
+ * (later) 409 semantics.
+ *
+ * Returns an empty array on `index_not_found` rather than throwing —
+ * "no SML index yet" is a normal first-write state.
+ */
+const findByOriginIdAcrossSpaces = async ({
+  originId,
+  esClient,
+  logger,
+}: {
+  originId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<SmlDocument[]> => {
+  try {
+    const response = await esClient.asInternalUser.search<SmlDocument>({
+      index: smlIndexName,
+      size: 1000,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [{ term: { origin_id: originId } }],
+        },
+      },
+    });
+
+    return response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => hydrateDocument(hit._source!));
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return [];
+    }
+    logger.warn(`SML findByOriginIdAcrossSpaces failed: ${(error as Error).message}`);
+    throw error;
+  }
+};
+
+/**
+ * Project an ES `_source` payload into the canonical `SmlDocument`
+ * shape used everywhere downstream. Centralised because three readers
+ * (getDocumentsByIds, findByOriginId, findByOriginIdAcrossSpaces)
+ * apply the same mapping — keeping them in sync by-hand is a
+ * footgun.
+ */
+const hydrateDocument = (source: SmlDocument): SmlDocument => {
+  const originUri = source.origin?.uri ?? '';
+  const doc: SmlDocument = {
+    id: source.id ?? '',
+    type: source.type ?? '',
+    title: source.title ?? '',
+    origin_id: source.origin_id ?? originUri.split('://')[1] ?? '',
+    origin: { uri: originUri },
+    content: source.content ?? '',
+    created_at: source.created_at ?? '',
+    updated_at: source.updated_at ?? '',
+    spaces: source.spaces ?? [],
+    permissions: source.permissions ?? emptyPermissions(),
+    ingestion_method: source.ingestion_method ?? 'crawled',
+  };
+  if (source.description !== undefined) doc.description = source.description;
+  if (source.tags !== undefined) doc.tags = source.tags;
+  if (source.discovery_labels !== undefined) doc.discovery_labels = source.discovery_labels;
+  if (source.extended_attrs !== undefined) doc.extended_attrs = source.extended_attrs;
+  if (source.user_id !== undefined) doc.user_id = source.user_id;
+  if (source.references !== undefined) doc.references = source.references;
+  return doc;
+};
+
+/**
+ * True when a document with the given `spaces` field is visible from
+ * `spaceId`. Wildcard (`'*'`) entries are treated as global.
+ *
+ * Exported so route helpers (HTTP upsert/delete cross-space guard) can
+ * apply the same predicate used internally by `findByOriginId`.
+ */
+export const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
+  if (!spaces || spaces.length === 0) return false;
+  return spaces.includes(spaceId) || spaces.includes('*');
 };
 
 /**
@@ -1527,24 +1575,7 @@ const listDocuments = async ({
 
     const results: SmlDocument[] = response.hits.hits
       .filter((hit) => hit._source != null)
-      .map((hit) => {
-        const source = hit._source!;
-        const uri = source.origin?.uri ?? '';
-        return {
-          id: source.id ?? '',
-          type: source.type ?? '',
-          title: source.title ?? '',
-          origin_id: uri.split('://')[1] ?? '',
-          origin: { uri },
-          content: source.content ?? '',
-          created_at: source.created_at ?? '',
-          updated_at: source.updated_at ?? '',
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? emptyPermissions(),
-          ingestion_method: source.ingestion_method ?? 'crawled',
-          ...(source.tags !== undefined ? { tags: source.tags } : {}),
-        };
-      });
+      .map((hit) => hydrateDocument(hit._source!));
 
     return { total, results };
   } catch (error) {
@@ -1561,131 +1592,6 @@ const listDocuments = async ({
       throw new SmlResultWindowExceededError(reason);
     }
     logger.warn(`SML listDocuments failed: ${(error as Error).message}`);
-    throw error;
-  }
-};
-
-/**
- * Upsert an SML document by id, scoped to a space.
- *
- * On create, `spaces` is set to `[spaceId]`. On update, `created_at` and the
- * existing `spaces` are preserved (callers cannot widen or narrow space
- * membership through this endpoint), and `updated_at` is refreshed.
- *
- * Returns `null` when a document with this id exists but is not visible from
- * `spaceId` — callers cannot clobber documents in other spaces.
- */
-const upsertDocument = async ({
-  id,
-  spaceId,
-  document,
-  esClient,
-  logger,
-}: {
-  id: string;
-  spaceId: string;
-  document: SmlDocumentInput;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<SmlUpsertResult | null> => {
-  // TODO: Implement optimistic concurrency using _seq_no/_primary_term to prevent lost-update
-  // races. The current get-then-index pattern allows two concurrent upserts to silently overwrite
-  // each other. A fix should use esClient.asInternalUser.get() (which reliably returns
-  // _seq_no/_primary_term) and pass if_seq_no/if_primary_term to the index call.
-  // Note: StorageIndexAdapter.get() uses search internally and does not request
-  // seq_no_primary_term, so _seq_no is unreliable via that path.
-
-  // We use smlClient.get() rather than the space-aware getDocumentById() here intentionally:
-  // we need to detect documents that exist in another space (to block cross-space overwrites).
-  // getDocumentById() would return undefined for those, causing us to silently overwrite them.
-  const internalEsClient = esClient.asInternalUser;
-  const storage = createSmlStorage({ logger, esClient: internalEsClient });
-  const smlClient = storage.getClient();
-
-  let existing: SmlDocument | undefined;
-  try {
-    const existingResponse = await smlClient.get({ id });
-    if (existingResponse?.found && existingResponse._source) {
-      existing = existingResponse._source;
-    }
-  } catch (error) {
-    if (!isNotFoundError(error)) {
-      logger.warn(`SML upsertDocument lookup failed: ${(error as Error).message}`);
-      throw error;
-    }
-  }
-
-  if (existing && !isVisibleInSpace(existing.spaces, spaceId)) {
-    return null;
-  }
-
-  const now = new Date().toISOString();
-  const created = !existing;
-  const fullDocument: SmlDocument = {
-    id,
-    type: document.type,
-    title: document.title,
-    origin: { uri: `${document.type}://${document.origin_id}` },
-    content: document.content,
-    created_at: existing?.created_at ?? now,
-    updated_at: now,
-    spaces: existing?.spaces ?? [spaceId],
-    permissions: {
-      kibana: { privileges: document.permissions?.kibana?.privileges ?? [] },
-      elasticsearch: { indices: document.permissions?.elasticsearch?.indices ?? [] },
-    },
-    // On create: default to []. On update: preserve existing tags if caller omits the field.
-    tags: document.tags ?? existing?.tags ?? [],
-    // HTTP upserts are by definition manual writes; tagging here lets the crawler
-    // (and origin-mode indexAttachment) skip these entries to avoid clobbering them.
-    ingestion_method: 'manual',
-  };
-
-  await smlClient.index({ id, document: fullDocument });
-
-  return { document: fullDocument, created };
-};
-
-const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
-  if (!spaces || spaces.length === 0) return false;
-  return spaces.includes(spaceId) || spaces.includes('*');
-};
-
-/**
- * Delete an SML document by id, scoped to a space.
- *
- * The space scope is enforced via a lookup before the delete: documents
- * that exist but are not visible in `spaceId` are reported as not found.
- * Returns `true` when a document was deleted, `false` otherwise.
- */
-const deleteDocument = async ({
-  id,
-  spaceId,
-  esClient,
-  logger,
-}: {
-  id: string;
-  spaceId: string;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<boolean> => {
-  const existing = await getDocumentById({ id, spaceId, esClient, logger });
-  if (!existing) {
-    return false;
-  }
-
-  const internalEsClient = esClient.asInternalUser;
-  const storage = createSmlStorage({ logger, esClient: internalEsClient });
-  const smlClient = storage.getClient();
-
-  try {
-    const response = await smlClient.delete({ id });
-    return response.result === 'deleted';
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      return false;
-    }
-    logger.warn(`SML deleteDocument failed: ${(error as Error).message}`);
     throw error;
   }
 };

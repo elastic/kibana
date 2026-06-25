@@ -6,6 +6,7 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-context-layer-plugin/server';
 import {
   LensConfigBuilder,
   type LensApiConfig,
@@ -13,6 +14,7 @@ import {
 } from '@kbn/lens-embeddable-utils';
 
 const VISUALIZATION_SML_TYPE = 'visualization';
+const VISUALIZATION_SAVED_OBJECT_TYPE = 'lens';
 
 const extractEsql = (attributes: LensAttributes): string => {
   try {
@@ -88,10 +90,6 @@ export const visualizationSmlType: SmlTypeDefinition = {
             type: VISUALIZATION_SML_TYPE,
             title,
             content: contentParts.join('\n'),
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
@@ -102,6 +100,9 @@ export const visualizationSmlType: SmlTypeDefinition = {
       return undefined;
     }
   },
+
+  getPermissions: () =>
+    kibanaSavedObjectPermissions({ savedObjectType: VISUALIZATION_SAVED_OBJECT_TYPE }),
 
   toAttachment: async (item, context) => {
     const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id ?? '');

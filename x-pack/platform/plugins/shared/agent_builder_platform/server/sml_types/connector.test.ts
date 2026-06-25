@@ -92,13 +92,10 @@ describe('connectorSmlType', () => {
             type: 'connector',
             title: 'My MCP Connector',
             content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-            permissions: {
-              kibana: { privileges: [{ name: 'action:execute' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       });
+      expect(result!.chunks[0]).not.toHaveProperty('permissions');
     });
 
     it('returns undefined on error and logs warning', async () => {
@@ -192,10 +189,16 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        permissions: {
-          kibana: { privileges: [{ name: 'action:execute' }] },
-          elasticsearch: { indices: [] },
-        },
+      });
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the action:execute Kibana privilege (gates on execute, not get)', () => {
+      const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: 'action:execute' }] },
+        elasticsearch: { indices: [] },
       });
     });
   });
