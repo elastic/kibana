@@ -35,6 +35,7 @@ apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgn
   apiTest('creates a data view when the id does not exist', async ({ apiClient }) => {
     const id = `dv-put-create-${Date.now()}-${Math.random()}`;
     const indexPattern = `put-create-${Date.now()}-*`;
+    const createdName = `Created with put ${Date.now()}-${Math.random()}`;
 
     const response = await apiClient.put(`${BASE_PATH}/${id}`, {
       headers: {
@@ -43,7 +44,7 @@ apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgn
       },
       body: {
         index_pattern: indexPattern,
-        name: 'Created with put',
+        name: createdName,
       },
       responseType: 'json',
     });
@@ -54,7 +55,7 @@ apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgn
     expect(response.body.id).toBe(id);
     expect(response.body.data).toMatchObject({
       index_pattern: indexPattern,
-      name: 'Created with put',
+      name: createdName,
     });
     expect(response.body.meta.version).toBeDefined();
   });
@@ -187,6 +188,38 @@ apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgn
       });
 
       expect(response).toHaveStatusCode(403);
+    }
+  );
+
+  apiTest(
+    'returns 409 when creating via PUT with a duplicate name',
+    async ({ apiClient, apiServices }) => {
+      const sharedName = `Put Duplicate Name ${Date.now()}-${Math.random()}`;
+      const existingId = `dv-put-409-name-existing-${Date.now()}-${Math.random()}`;
+      const newId = `dv-put-409-name-new-${Date.now()}-${Math.random()}`;
+
+      await apiServices.dataViews.create({
+        id: existingId,
+        title: `put-409-name-existing-${Date.now()}-*`,
+        name: sharedName,
+      });
+      createdIds.push(existingId);
+
+      const response = await apiClient.put(`${BASE_PATH}/${newId}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        body: {
+          index_pattern: `put-409-name-new-${Date.now()}-*`,
+          name: sharedName,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.message).toContain('Duplicate data view');
+      expect(response.body.message).toContain(sharedName);
     }
   );
 });
