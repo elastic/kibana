@@ -310,17 +310,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     if (!savedPackagePolicy || !packageInfo) {
       return;
     }
-    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.id) {
+    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.policy.id) {
       return;
     }
-    namespaceCustomizationAppliedRef.current = savedPackagePolicy.id;
+    namespaceCustomizationAppliedRef.current = savedPackagePolicy.policy.id;
     // Capture and reset the toggle value so stale state doesn't carry over if the form is reused.
     const wasEnabled = namespaceCustomizationEnabledRef.current;
     namespaceCustomizationEnabledRef.current = false;
     void applyNamespaceCustomizationChange(
       packageInfo.name,
       packageInfo.version,
-      savedPackagePolicy.namespace,
+      savedPackagePolicy.policy.namespace,
       wasEnabled,
       installedNamespaceCustomizationEnabledFor,
       notifications,
@@ -852,30 +852,30 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               )}
             {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallAzureArmTemplateModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
             {formState === 'SUBMITTED_CLOUD_FORMATION' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallCloudFormationModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
             {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy?.type === 'packagePolicy' && (
                 <PostInstallGoogleCloudShellModal
                   agentPolicy={agentPolicies[0]}
-                  packagePolicy={savedPackagePolicy}
+                  packagePolicy={savedPackagePolicy.policy}
                   onConfirm={() => navigateAddAgent(savedPackagePolicy)}
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
