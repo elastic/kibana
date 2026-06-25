@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { IconType } from '@elastic/eui';
+import type { ButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
   AttachmentVersion,
@@ -85,20 +85,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
 }
 
-/**
- * EUI button color values, mirrored here to avoid a direct @elastic/eui dependency
- * in this shared-common package.
- */
-export type ActionButtonColor =
-  | 'text'
-  | 'accent'
-  | 'accentSecondary'
-  | 'primary'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'neutral'
-  | 'risk';
+/** Re-export so consumers don't need a direct @elastic/eui import for button colors. */
+export type ActionButtonColor = ButtonColor;
 
 /**
  * Action button definition for inline-rendered attachments.
