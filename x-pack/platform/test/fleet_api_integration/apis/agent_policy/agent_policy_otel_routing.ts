@@ -181,7 +181,9 @@ export default function (providerContext: FtrProviderContext) {
 
           // Must set signal type, dataset, and namespace in routing transforms.
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
-          expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
+          expect(statements.some((s) => s === expectedNamespaceOttlStatement('default'))).to.be(
+            true
+          );
           // dataset is now set from the package manifest default (generic).
           expect(statements.some((s) => s === expectedDatasetOttlStatement('generic'))).to.be(true);
         }
@@ -278,7 +280,9 @@ export default function (providerContext: FtrProviderContext) {
           const statements = collectStatements(processor);
 
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
-          expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
+          expect(statements.some((s) => s === expectedNamespaceOttlStatement('default'))).to.be(
+            true
+          );
           // Receiver-specific packages must retain the policy_template-based dataset.
           expect(
             statements.some((s) => s === expectedDatasetOttlStatement('mysqld_exporter'))
@@ -331,7 +335,9 @@ export default function (providerContext: FtrProviderContext) {
           const statements = collectStatements(processor);
 
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
-          expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
+          expect(statements.some((s) => s === expectedNamespaceOttlStatement('default'))).to.be(
+            true
+          );
           expect(statements.some((s) => s === expectedDatasetOttlStatement(overrideDataset))).to.be(
             true
           );
