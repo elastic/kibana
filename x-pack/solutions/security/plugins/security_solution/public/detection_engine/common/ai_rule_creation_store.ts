@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, Subject, distinctUntilChanged } from 'rxjs';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 
 export interface AiRuleCreationSession {
@@ -15,11 +15,31 @@ export interface AiRuleCreationSession {
   applyCount: number;
 }
 
+/**
+ * Links the attachment to its saved rule via `origin` and invalidates the conversation so the
+ * card reflects the saved state in-session. Supplied by the inline attachment's framework
+ * callback; the save handler calls it once the rule is persisted.
+ */
+export type UpdateAttachmentOriginFn = (origin: string) => Promise<unknown>;
+
+export interface SaveRuleRequest {
+  rule: RuleResponse;
+  attachmentId?: string;
+  updateOrigin?: UpdateAttachmentOriginFn;
+}
+
 export class AiRuleCreationService {
+  private readonly saveRuleSubject = new Subject<SaveRuleRequest>();
+  private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
+  // `null` = form idle (no active bind). Released when a brand-new rule card is minted.
+  // Plain field, not a subject: every consumer reads it imperatively via `getBoundAttachmentId`.
+  private boundAttachmentId: string | null = null;
   private session: AiRuleCreationSession | null = null;
 
+  public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
+  public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
 
@@ -42,8 +62,46 @@ export class AiRuleCreationService {
     }
   };
 
-  public setAiCreatedRule = (rule: RuleResponse): void => {
+  public requestSaveRule = (
+    rule: RuleResponse,
+    options?: {
+      attachmentId?: string;
+      updateOrigin?: UpdateAttachmentOriginFn;
+    }
+  ): void => {
+    this.savingSubject.next(true);
+    this.saveRuleSubject.next({
+      rule,
+      attachmentId: options?.attachmentId,
+      updateOrigin: options?.updateOrigin,
+    });
+  };
+
+  public clearSaving = (): void => {
+    this.savingSubject.next(false);
+  };
+
+  public getIsSaving = (): boolean => {
+    return this.savingSubject.getValue();
+  };
+
+  public setAiCreatedRule = (rule: RuleResponse, attachmentId?: string): void => {
     this.aiRuleSubject.next(rule);
+    if (attachmentId !== undefined) {
+      this.boundAttachmentId = attachmentId;
+    }
+  };
+
+  public setBoundAttachment = (attachmentId: string): void => {
+    this.boundAttachmentId = attachmentId;
+  };
+
+  public releaseBind = (): void => {
+    this.boundAttachmentId = null;
+  };
+
+  public getBoundAttachmentId = (): string | null => {
+    return this.boundAttachmentId;
   };
 
   public clearAiCreatedRule = (): void => {
@@ -54,13 +112,19 @@ export class AiRuleCreationService {
     this.formSyncSubject.next(true);
   };
 
+  public deactivateFormSync = (): void => {
+    this.formSyncSubject.next(false);
+  };
+
   public clearSession = (): void => {
     this.session = null;
   };
 
   public reset = (): void => {
+    this.savingSubject.next(false);
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);
+    this.boundAttachmentId = null;
     this.session = null;
   };
 }
