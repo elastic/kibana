@@ -36,6 +36,7 @@ pageLoadAssetSize:
   dashboard: 20000
   dashboardMarkdown: 8661
   data: 496646
+  dataFederation: 6232
   dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8743
@@ -72,7 +73,6 @@ pageLoadAssetSize:
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
-  federatedData: 6232
   feedback: 7642
   fieldFormats: 64634
   fieldsMetadata: 4901
