@@ -67,6 +67,7 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]osquery[\/\\]cypress[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]rule_registry[\/\\]scripts[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]streams[\/\\]scripts[\/\\]/,
+  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]integration_assistant[\/\\]server[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]test[\/\\]cases_api_integration[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]observability[\/\\]packages[\/\\]synthetics-test-data[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]apm[\/\\]scripts[\/\\]/,
