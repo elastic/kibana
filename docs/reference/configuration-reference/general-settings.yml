@@ -1490,13 +1490,16 @@ groups:
       - setting: server.xsrf.allowBearerTokens
         id: settings-xsrf-allowbearertokens
         description: |
-          When `true`, requests authenticated via `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check. Only `apikey` and `bearer` schemes are exempt; `Basic` and other schemes still require the header.
+          When `true`, requests authenticated using `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check. Only `apikey` and `bearer` schemes are exempt; `Basic` and other schemes still require the header.
 
           It is not recommended to enable this setting unless API clients cannot set custom headers on cross-origin requests.
+        note: |
+          :applies_to: serverless: ga
+          In Serverless environments, requests authenticated using `Authorization: ApiKey` or `Authorization: Bearer` headers bypass the `kbn-xsrf` check by default.
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: ga 9.5
           ech: ga
           self: ga
 
