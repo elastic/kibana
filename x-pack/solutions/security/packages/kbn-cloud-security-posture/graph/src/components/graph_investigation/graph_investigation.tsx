@@ -653,6 +653,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   onInvestigateInTimeline={onInvestigateInTimelineCallback}
                   filtersState={graphFilters}
                   onFiltersChange={setGraphFilters}
+                  nodes={nodes}
                 />
               </Panel>
             </Graph>

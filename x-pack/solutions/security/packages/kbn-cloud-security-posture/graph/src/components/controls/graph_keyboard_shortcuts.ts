@@ -7,6 +7,7 @@
 
 export const SELECT_TOOL_SHORTCUT = 'V';
 export const PAN_TOOL_SHORTCUT = 'Space';
+export const SEARCH_TOOL_SHORTCUT = 'S';
 export const DISPLAY_SHORTCUT = 'D';
 export const ZOOM_IN_SHORTCUT = '+';
 export const ZOOM_OUT_SHORTCUT = '-';
@@ -42,10 +43,7 @@ export const hasModifierKeys = (event: KeyboardEvent): boolean =>
 
 export const isZoomInKey = (event: KeyboardEvent): boolean =>
   !hasModifierKeys(event) &&
-  (event.key === '+' ||
-    event.key === '=' ||
-    event.code === 'NumpadAdd' ||
-    event.code === 'Equal');
+  (event.key === '+' || event.key === '=' || event.code === 'NumpadAdd' || event.code === 'Equal');
 
 export const isZoomOutKey = (event: KeyboardEvent): boolean =>
   !hasModifierKeys(event) &&

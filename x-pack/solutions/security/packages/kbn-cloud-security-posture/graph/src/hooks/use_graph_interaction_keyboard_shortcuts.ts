@@ -16,6 +16,8 @@ interface UseGraphInteractionKeyboardShortcutsArgs {
   onSelectTool: () => void;
   onPanTool: () => void;
   onToggleApplyFiltersPanel: () => void;
+  onToggleSearchPanel?: () => void;
+  onFocusSearchInput?: () => void;
 }
 
 export const useGraphInteractionKeyboardShortcuts = ({
@@ -23,14 +25,20 @@ export const useGraphInteractionKeyboardShortcuts = ({
   onSelectTool,
   onPanTool,
   onToggleApplyFiltersPanel,
+  onToggleSearchPanel,
+  onFocusSearchInput,
 }: UseGraphInteractionKeyboardShortcutsArgs): void => {
   const onSelectToolRef = useRef(onSelectTool);
   const onPanToolRef = useRef(onPanTool);
   const onToggleApplyFiltersPanelRef = useRef(onToggleApplyFiltersPanel);
+  const onToggleSearchPanelRef = useRef(onToggleSearchPanel);
+  const onFocusSearchInputRef = useRef(onFocusSearchInput);
 
   onSelectToolRef.current = onSelectTool;
   onPanToolRef.current = onPanTool;
   onToggleApplyFiltersPanelRef.current = onToggleApplyFiltersPanel;
+  onToggleSearchPanelRef.current = onToggleSearchPanel;
+  onFocusSearchInputRef.current = onFocusSearchInput;
 
   useEffect(() => {
     if (!enabled) {
@@ -39,6 +47,12 @@ export const useGraphInteractionKeyboardShortcuts = ({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isEditableKeyboardTarget(event.target)) {
+        return;
+      }
+
+      if ((event.metaKey || event.ctrlKey) && event.code === 'KeyK') {
+        event.preventDefault();
+        onFocusSearchInputRef.current?.();
         return;
       }
 
@@ -51,6 +65,12 @@ export const useGraphInteractionKeyboardShortcuts = ({
       if ((event.code === 'Space' || event.key === ' ') && !hasModifierKeys(event)) {
         event.preventDefault();
         onPanToolRef.current();
+        return;
+      }
+
+      if (event.code === 'KeyS' && !hasModifierKeys(event)) {
+        event.preventDefault();
+        onToggleSearchPanelRef.current?.();
         return;
       }
 

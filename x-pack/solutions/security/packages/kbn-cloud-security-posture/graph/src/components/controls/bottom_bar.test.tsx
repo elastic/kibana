@@ -12,40 +12,53 @@ import { ReactFlow } from '@xyflow/react';
 import { BottomBar } from './bottom_bar';
 import { DEFAULT_GRAPH_FILTERS } from './apply_filters_popover';
 import { GraphInteractionToolContext } from './graph_interaction_tool_context';
+import { GraphSearchProvider } from './graph_search_context';
 import {
   GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID,
+  GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID,
   GRAPH_BOTTOM_BAR_PAN_TOOL_ID,
+  GRAPH_BOTTOM_BAR_SEARCH_ID,
   GRAPH_BOTTOM_BAR_SELECT_TOOL_ID,
 } from '../test_ids';
 
 const renderBottomBar = (
   interactionTool: 'select' | 'pan' = 'select',
   setInteractionTool = jest.fn(),
-  registerApplyFiltersToggle = jest.fn()
+  registerApplyFiltersToggle = jest.fn(),
+  registerSearchPanelToggle = jest.fn(),
+  registerFocusSearchInput = jest.fn()
 ) =>
   render(
     <ReactFlow>
-      <GraphInteractionToolContext.Provider
-        value={{ interactionTool, setInteractionTool, registerApplyFiltersToggle }}
-      >
-        <BottomBar filtersState={DEFAULT_GRAPH_FILTERS} onFiltersChange={jest.fn()} />
-      </GraphInteractionToolContext.Provider>
+      <GraphSearchProvider>
+        <GraphInteractionToolContext.Provider
+          value={{
+            interactionTool,
+            setInteractionTool,
+            registerApplyFiltersToggle,
+            registerSearchPanelToggle,
+            registerFocusSearchInput,
+          }}
+        >
+          <BottomBar filtersState={DEFAULT_GRAPH_FILTERS} onFiltersChange={jest.fn()} nodes={[]} />
+        </GraphInteractionToolContext.Provider>
+      </GraphSearchProvider>
     </ReactFlow>
   );
 
 describe('BottomBar', () => {
-  it('renders select and pan tools grouped before apply filters with a divider', () => {
+  it('renders keyboard shortcuts, tools, search, and display controls', () => {
     renderBottomBar();
 
-    const selectButton = screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID);
-    const panButton = screen.getByTestId(GRAPH_BOTTOM_BAR_PAN_TOOL_ID);
-    const applyFiltersButton = screen.getByTestId(GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID);
-
-    expect(selectButton).toBeInTheDocument();
-    expect(panButton).toBeInTheDocument();
-    expect(applyFiltersButton).toBeInTheDocument();
-    expect(selectButton).toHaveAttribute('aria-checked', 'true');
-    expect(panButton).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_PAN_TOOL_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SEARCH_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SELECT_TOOL_ID)).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
   });
 
   it('switches to pan tool when pan button is clicked', async () => {
@@ -68,16 +81,30 @@ describe('BottomBar', () => {
       'aria-label',
       'Pan   Space'
     );
+    expect(screen.getByTestId(GRAPH_BOTTOM_BAR_SEARCH_ID)).toHaveAttribute(
+      'aria-label',
+      'Search   S'
+    );
     expect(screen.getByTestId(GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID)).toHaveAttribute(
       'aria-label',
       'Display   D'
     );
   });
 
-  it('registers the apply filters toggle with the graph context', () => {
+  it('registers panel toggles with the graph context', () => {
     const registerApplyFiltersToggle = jest.fn();
-    renderBottomBar('select', jest.fn(), registerApplyFiltersToggle);
+    const registerSearchPanelToggle = jest.fn();
+    const registerFocusSearchInput = jest.fn();
+    renderBottomBar(
+      'select',
+      jest.fn(),
+      registerApplyFiltersToggle,
+      registerSearchPanelToggle,
+      registerFocusSearchInput
+    );
 
     expect(registerApplyFiltersToggle).toHaveBeenCalledWith(expect.any(Function));
+    expect(registerSearchPanelToggle).toHaveBeenCalledWith(expect.any(Function));
+    expect(registerFocusSearchInput).toHaveBeenCalledWith(expect.any(Function));
   });
 });

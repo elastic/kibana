@@ -9,16 +9,20 @@ import { renderHook } from '@testing-library/react';
 import { useGraphInteractionKeyboardShortcuts } from './use_graph_interaction_keyboard_shortcuts';
 
 describe('useGraphInteractionKeyboardShortcuts', () => {
-  it('invokes callbacks for select, pan, and display shortcuts', () => {
+  it('invokes callbacks for select, pan, search, and display shortcuts', () => {
     const onSelectTool = jest.fn();
     const onPanTool = jest.fn();
     const onToggleApplyFiltersPanel = jest.fn();
+    const onToggleSearchPanel = jest.fn();
+    const onFocusSearchInput = jest.fn();
 
     renderHook(() =>
       useGraphInteractionKeyboardShortcuts({
         onSelectTool,
         onPanTool,
         onToggleApplyFiltersPanel,
+        onToggleSearchPanel,
+        onFocusSearchInput,
       })
     );
 
@@ -26,11 +30,17 @@ describe('useGraphInteractionKeyboardShortcuts', () => {
     document.dispatchEvent(
       new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true })
     );
+    document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyS', key: 's', bubbles: true }));
     document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyD', key: 'd', bubbles: true }));
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { code: 'KeyK', key: 'k', metaKey: true, bubbles: true })
+    );
 
     expect(onSelectTool).toHaveBeenCalledTimes(1);
     expect(onPanTool).toHaveBeenCalledTimes(1);
+    expect(onToggleSearchPanel).toHaveBeenCalledTimes(1);
     expect(onToggleApplyFiltersPanel).toHaveBeenCalledTimes(1);
+    expect(onFocusSearchInput).toHaveBeenCalledTimes(1);
   });
 
   it('ignores shortcuts while typing in an input', () => {

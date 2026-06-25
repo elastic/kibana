@@ -74,6 +74,10 @@ const CARD_INTERACTIVE_TRANSITION = '0.2s ease';
 
 const CARD_BORDER_RADIUS = 10;
 const ICON_SIZE = 40;
+/** Simplified (zoomed-out) entity icon square — 8px larger than the full-card icon box. */
+const SIMPLIFIED_ICON_SIZE = 48;
+const SIMPLIFIED_EXPAND_BUTTON_SIZE = 32;
+const SIMPLIFIED_BADGE_SIZE = 24;
 const SIMPLIFIED_LABEL_GAP = 4;
 const SIMPLIFIED_LABEL_MAX_WIDTH = CARD_NODE_WIDTH;
 const SIMPLIFIED_LABEL_TRUNCATE_LENGTH = 27;
@@ -83,7 +87,7 @@ const GROUP_STACK_PADDING_X = 16;
 
 const simplifiedCardHandleStyle: React.CSSProperties = {
   ...HandleStyleOverride,
-  top: ICON_SIZE / 2,
+  top: SIMPLIFIED_ICON_SIZE / 2,
 };
 
 type CriticalityLevel = 'extreme' | 'high' | 'medium' | 'low';
@@ -173,8 +177,8 @@ const IconCountBadge = styled.div`
 
 const SimplifiedIconCountBadge = styled.div`
   position: absolute;
-  top: -4px;
-  left: -4px;
+  top: -6px;
+  left: -6px;
   z-index: 1;
 `;
 
@@ -198,8 +202,8 @@ const EntityGroupCountBadge = ({
   const simplifiedBadgeCss = css`
     ${metadataTextCss}
     font-weight: ${euiTheme.font.weight.medium};
-    height: ${CARD_METADATA_LINE_HEIGHT}px;
-    min-width: ${CARD_METADATA_LINE_HEIGHT}px;
+    height: ${SIMPLIFIED_BADGE_SIZE}px;
+    min-width: ${SIMPLIFIED_BADGE_SIZE}px;
     padding-inline: 4px;
   `;
 
@@ -279,8 +283,8 @@ const GroupStackTab = styled.div<{ borderColor: string; bgColor: string }>`
 
 const SimplifiedIconShell = styled.div`
   position: relative;
-  width: ${ICON_SIZE}px;
-  height: ${ICON_SIZE}px;
+  width: ${SIMPLIFIED_ICON_SIZE}px;
+  height: ${SIMPLIFIED_ICON_SIZE}px;
   flex-shrink: 0;
 `;
 
@@ -397,9 +401,14 @@ const CriticalityCountsGrid = ({
 interface CardExpandButtonProps {
   onClick?: (e: React.MouseEvent<HTMLElement>, unToggleCallback: () => void) => void;
   containerRef?: React.RefObject<HTMLDivElement | null>;
+  buttonSize?: number;
 }
 
-const CardExpandButton = ({ onClick, containerRef }: CardExpandButtonProps) => {
+const CardExpandButton = ({
+  onClick,
+  containerRef,
+  buttonSize = EXPAND_BUTTON_SIZE,
+}: CardExpandButtonProps) => {
   const { euiTheme } = useEuiTheme();
   const expandShadow = useEuiShadow('m');
   const [isToggled, setIsToggled] = React.useState(false);
@@ -458,9 +467,9 @@ const CardExpandButton = ({ onClick, containerRef }: CardExpandButtonProps) => {
         size="s"
         onClick={onClickHandler}
         css={css`
-          width: ${EXPAND_BUTTON_SIZE}px;
-          height: ${EXPAND_BUTTON_SIZE}px;
-          min-width: ${EXPAND_BUTTON_SIZE}px;
+          width: ${buttonSize}px;
+          height: ${buttonSize}px;
+          min-width: ${buttonSize}px;
           border-radius: 50%;
           background-color: ${euiTheme.colors.primary};
           box-shadow: ${expandShadow};
@@ -566,11 +575,12 @@ const SimplifiedCard = ({
               <EntityGroupCountBadge count={count} isDanger={isDanger} isSimplified={true} />
             </SimplifiedIconCountBadge>
           )}
-          <EuiIcon type={resolvedIcon} size="l" color={iconColor} aria-hidden={true} />
+          <EuiIcon type={resolvedIcon} size="xl" color={iconColor} aria-hidden={true} />
         </SimplifiedIconBox>
 
         {interactive && showExpandButton && (
           <CardExpandButton
+            buttonSize={SIMPLIFIED_EXPAND_BUTTON_SIZE}
             onClick={(e, unToggleCallback) => expandButtonClick?.(e, nodeProps, unToggleCallback)}
           />
         )}
@@ -578,8 +588,8 @@ const SimplifiedCard = ({
         {interactive && (
           <NodeButton
             onClick={(e) => nodeClick?.(e, nodeProps)}
-            width={ICON_SIZE}
-            height={ICON_SIZE}
+            width={SIMPLIFIED_ICON_SIZE}
+            height={SIMPLIFIED_ICON_SIZE}
             css={css`
               position: absolute;
               inset: 0;

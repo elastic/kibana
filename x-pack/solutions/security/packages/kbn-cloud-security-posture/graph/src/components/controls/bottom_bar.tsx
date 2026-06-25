@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -23,14 +23,24 @@ import {
   DISPLAY_SHORTCUT,
   formatToolShortcutAriaLabel,
   PAN_TOOL_SHORTCUT,
+  SEARCH_TOOL_SHORTCUT,
   SELECT_TOOL_SHORTCUT,
 } from './graph_keyboard_shortcuts';
 import { ToolShortcutTooltip } from './tool_shortcut_tooltip';
 import { GraphControlTooltip } from './graph_control_tooltip';
+import { GraphKeyboardShortcutsPanel } from './graph_keyboard_shortcuts_panel';
+import { GraphSearchPanel } from './graph_search_panel';
+import { focusGraphFindInPageInput } from './graph_find_in_page';
 import { SelectCursorIcon } from '../../assets/icons/select_cursor_icon';
+import type { NodeViewModel } from '../types';
+import { hasActiveEntityFilters } from './graph_entity_filters';
+import { useGraphSearchContext } from './graph_search_context';
+import { GraphNotificationBadge } from '../graph_notification_badge';
 import {
   GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID,
+  GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID,
   GRAPH_BOTTOM_BAR_PAN_TOOL_ID,
+  GRAPH_BOTTOM_BAR_SEARCH_ID,
   GRAPH_BOTTOM_BAR_SELECT_TOOL_ID,
 } from '../test_ids';
 
@@ -39,10 +49,19 @@ const investigateInTimelineLabel = i18n.translate(
   { defaultMessage: 'Investigate in Timeline' }
 );
 
+const keyboardShortcutsLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.controls.bottomBar.keyboardShortcuts',
+  { defaultMessage: 'Keyboard shortcuts' }
+);
+
 const displayLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.bottomBar.display',
   { defaultMessage: 'Display' }
 );
+
+const searchLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.bottomBar.search', {
+  defaultMessage: 'Search',
+});
 
 const selectToolLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.bottomBar.selectTool',
@@ -56,6 +75,7 @@ const panToolLabel = i18n.translate(
 
 const selectToolAriaLabel = formatToolShortcutAriaLabel(selectToolLabel, SELECT_TOOL_SHORTCUT);
 const panToolAriaLabel = formatToolShortcutAriaLabel(panToolLabel, PAN_TOOL_SHORTCUT);
+const searchAriaLabel = formatToolShortcutAriaLabel(searchLabel, SEARCH_TOOL_SHORTCUT);
 const displayAriaLabel = formatToolShortcutAriaLabel(displayLabel, DISPLAY_SHORTCUT);
 
 const interactionToolsLegend = i18n.translate(
@@ -123,6 +143,7 @@ export interface BottomBarProps extends CommonProps {
   onInvestigateInTimeline?: () => void;
   filtersState: GraphFiltersState;
   onFiltersChange: (next: GraphFiltersState) => void;
+  nodes: NodeViewModel[];
 }
 
 export const BottomBar = ({
@@ -130,16 +151,49 @@ export const BottomBar = ({
   onInvestigateInTimeline,
   filtersState,
   onFiltersChange,
+  nodes,
   ...props
 }: BottomBarProps) => {
   const { euiTheme } = useEuiTheme();
+  const { entityFilters, setEntityFilters } = useGraphSearchContext();
   const barShadow = useEuiShadow(BOTTOM_BAR_SHADOW);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const { interactionTool, setInteractionTool, registerApplyFiltersToggle } =
-    useGraphInteractionTool();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false);
+  const {
+    interactionTool,
+    setInteractionTool,
+    registerApplyFiltersToggle,
+    registerSearchPanelToggle,
+    registerFocusSearchInput,
+  } = useGraphInteractionTool();
 
   const toggleApplyFiltersPanel = useCallback(() => {
     setIsFiltersOpen((isOpen) => !isOpen);
+  }, []);
+
+  const toggleSearchPanel = useCallback(() => {
+    setIsSearchOpen((isOpen) => {
+      const next = !isOpen;
+      if (next) {
+        setIsKeyboardShortcutsOpen(false);
+        setIsFiltersOpen(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const closeSearchPanel = useCallback(() => {
+    setIsSearchOpen(false);
+  }, []);
+
+  const focusSearchInput = useCallback(() => {
+    setIsSearchOpen(true);
+    setIsKeyboardShortcutsOpen(false);
+    setIsFiltersOpen(false);
+    requestAnimationFrame(() => {
+      focusGraphFindInPageInput();
+    });
   }, []);
 
   useEffect(() => {
@@ -150,11 +204,41 @@ export const BottomBar = ({
     };
   }, [registerApplyFiltersToggle, toggleApplyFiltersPanel]);
 
+  useEffect(() => {
+    registerSearchPanelToggle(toggleSearchPanel);
+
+    return () => {
+      registerSearchPanelToggle(null);
+    };
+  }, [registerSearchPanelToggle, toggleSearchPanel]);
+
+  useEffect(() => {
+    registerFocusSearchInput(focusSearchInput);
+
+    return () => {
+      registerFocusSearchInput(null);
+    };
+  }, [registerFocusSearchInput, focusSearchInput]);
+
   const handleInteractionToolSelect = (tool: 'select' | 'pan') => {
     if (interactionTool !== tool) {
       setInteractionTool(tool);
     }
   };
+
+  const entityFilterCount = useMemo(() => {
+    let count = 0;
+    if (entityFilters.riskScoreMin !== null) {
+      count += 1;
+    }
+    if (entityFilters.assetCriticality.length > 0) {
+      count += 1;
+    }
+    if (entityFilters.newEntitiesWindow !== null) {
+      count += 1;
+    }
+    return count;
+  }, [entityFilters]);
 
   const barShellCss = css`
     height: ${BOTTOM_BAR_HEIGHT}px;
@@ -177,6 +261,11 @@ export const BottomBar = ({
       height: ${BOTTOM_BAR_BUTTON_SIZE}px;
       min-width: ${BOTTOM_BAR_BUTTON_SIZE}px;
       border-radius: ${BOTTOM_BAR_BUTTON_RADIUS}px;
+
+      &:hover:not(:disabled),
+      &:focus-visible:not(:disabled) {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
+      }
     }
   `;
 
@@ -209,10 +298,47 @@ export const BottomBar = ({
     handleInteractionToolSelect('pan');
   };
 
+  const handleKeyboardShortcutsClick = () => {
+    setIsKeyboardShortcutsOpen((isOpen) => {
+      const next = !isOpen;
+      if (next) {
+        setIsSearchOpen(false);
+        setIsFiltersOpen(false);
+      }
+      return next;
+    });
+  };
+
   return (
     <div css={barShellCss} {...props}>
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center" css={barLayoutCss}>
-        {/* Select / Pan tools — exactly one is always active */}
+        <EuiFlexItem grow={false}>
+          <GraphKeyboardShortcutsPanel
+            isOpen={isKeyboardShortcutsOpen}
+            onClose={() => setIsKeyboardShortcutsOpen(false)}
+          >
+            <GraphControlTooltip
+              content={keyboardShortcutsLabel}
+              position="top"
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="keyboard"
+                aria-label={keyboardShortcutsLabel}
+                size="m"
+                color={isKeyboardShortcutsOpen ? 'primary' : 'text'}
+                css={controlButtonCss}
+                data-test-subj={GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID}
+                onClick={handleKeyboardShortcutsClick}
+              />
+            </GraphControlTooltip>
+          </GraphKeyboardShortcutsPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <div css={verticalDividerCss} aria-hidden={true} />
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <div css={interactionToolGroupCss} role="radiogroup" aria-label={interactionToolsLegend}>
             <InteractionToolButton
@@ -244,7 +370,55 @@ export const BottomBar = ({
           <div css={verticalDividerCss} aria-hidden={true} />
         </EuiFlexItem>
 
-        {/* Display */}
+        <EuiFlexItem grow={false}>
+          <GraphSearchPanel
+            isOpen={isSearchOpen}
+            onClose={closeSearchPanel}
+            nodes={nodes}
+            entityFilters={entityFilters}
+            onEntityFiltersChange={setEntityFilters}
+          >
+            <GraphControlTooltip
+              content={<ToolShortcutTooltip label={searchLabel} shortcut={SEARCH_TOOL_SHORTCUT} />}
+              position="top"
+              disableScreenReaderOutput
+            >
+              <div
+                css={css`
+                  position: relative;
+                  display: inline-flex;
+                `}
+              >
+                <EuiButtonIcon
+                  iconType="search"
+                  aria-label={searchAriaLabel}
+                  size="m"
+                  color={isSearchOpen || hasActiveEntityFilters(entityFilters) ? 'primary' : 'text'}
+                  css={controlButtonCss}
+                  data-test-subj={GRAPH_BOTTOM_BAR_SEARCH_ID}
+                  onClick={toggleSearchPanel}
+                />
+                {entityFilterCount > 0 && (
+                  <GraphNotificationBadge
+                    css={css`
+                      position: absolute;
+                      right: -4px;
+                      bottom: -4px;
+                      pointer-events: none;
+                    `}
+                  >
+                    {entityFilterCount > 99 ? '99+' : entityFilterCount}
+                  </GraphNotificationBadge>
+                )}
+              </div>
+            </GraphControlTooltip>
+          </GraphSearchPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <div css={verticalDividerCss} aria-hidden={true} />
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <ApplyFiltersPopover
             isOpen={isFiltersOpen}
@@ -253,9 +427,7 @@ export const BottomBar = ({
             onFiltersChange={onFiltersChange}
           >
             <GraphControlTooltip
-              content={
-                <ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />
-              }
+              content={<ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />}
               position="top"
               disableScreenReaderOutput
             >
@@ -272,7 +444,6 @@ export const BottomBar = ({
           </ApplyFiltersPopover>
         </EuiFlexItem>
 
-        {/* Investigate in Timeline */}
         {showInvestigateInTimeline && (
           <>
             <EuiFlexItem grow={false}>

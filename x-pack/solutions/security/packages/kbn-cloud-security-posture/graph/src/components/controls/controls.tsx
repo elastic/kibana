@@ -250,84 +250,84 @@ export const Controls = ({
   return (
     <div css={panelShellCss} {...props}>
       <EuiFlexGroup direction="column" gutterSize="none" css={panelLayoutCss}>
-      {(showZoom || showCenter) && (
-        <EuiFlexItem grow={false} css={zoomGroupCss}>
-          {showZoom && (
-            <>
-              <ControlButton
-                iconType="plusCircle"
-                tooltipContent={
-                  <ToolShortcutTooltip label={ZoomInLabel} shortcut={ZOOM_IN_SHORTCUT} />
-                }
-                ariaLabel={zoomInAriaLabel}
-                testSubj={GRAPH_CONTROLS_ZOOM_IN_ID}
-                disabled={maxZoomReached}
-                controlButtonCss={controlButtonCss}
-                onClick={onZoomInHandler}
-              />
-              <ControlButton
-                iconType="minusCircle"
-                tooltipContent={
-                  <ToolShortcutTooltip label={ZoomOutLabel} shortcut={ZOOM_OUT_SHORTCUT} />
-                }
-                ariaLabel={zoomOutAriaLabel}
-                testSubj={GRAPH_CONTROLS_ZOOM_OUT_ID}
-                disabled={minZoomReached}
-                controlButtonCss={controlButtonCss}
-                onClick={onZoomOutHandler}
-              />
-            </>
-          )}
-          {showCenter && (
-            <ControlButton
-              iconType="bullseye"
-              tooltipContent={
-                <ToolShortcutTooltip label={CenterLabel} shortcut={CENTER_SHORTCUT} />
-              }
-              ariaLabel={centerAriaLabel}
-              testSubj={GRAPH_CONTROLS_CENTER_ID}
-              controlButtonCss={controlButtonCss}
-              onClick={onCenterHandler}
-            />
-          )}
-        </EuiFlexItem>
-      )}
-      {showSectionDivider && (
-        <EuiFlexItem grow={false} css={sectionDividerCss}>
-          <EuiHorizontalRule size="full" margin="none" />
-        </EuiFlexItem>
-      )}
-      {showViewSection && (
-        <EuiFlexItem grow={false} css={viewGroupCss}>
-          {showFitView && (
-            <ControlButton
-              iconType={fitToViewIconFn}
-              tooltipContent={
-                <ToolShortcutTooltip label={FitToScreenLabel} shortcut={FIT_TO_SCREEN_SHORTCUT} />
-              }
-              ariaLabel={fitToScreenAriaLabel}
-              testSubj={GRAPH_CONTROLS_FIT_VIEW_ID}
-              controlButtonCss={controlButtonCss}
-              onClick={onFitViewHandler}
-            />
-          )}
-          {showFullScreenButton && (
-            <ControlButton
-              iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
-              tooltipContent={
-                <ToolShortcutTooltip
-                  label={isFullScreen ? ExitFullScreenLabel : FullScreenLabel}
-                  shortcut={FULL_SCREEN_SHORTCUT}
+        {(showZoom || showCenter) && (
+          <EuiFlexItem grow={false} css={zoomGroupCss}>
+            {showZoom && (
+              <>
+                <ControlButton
+                  iconType="plusCircle"
+                  tooltipContent={
+                    <ToolShortcutTooltip label={ZoomInLabel} shortcut={ZOOM_IN_SHORTCUT} />
+                  }
+                  ariaLabel={zoomInAriaLabel}
+                  testSubj={GRAPH_CONTROLS_ZOOM_IN_ID}
+                  disabled={maxZoomReached}
+                  controlButtonCss={controlButtonCss}
+                  onClick={onZoomInHandler}
                 />
-              }
-              ariaLabel={isFullScreen ? exitFullScreenAriaLabel : fullScreenAriaLabel}
-              testSubj={GRAPH_CONTROLS_FULL_SCREEN_ID}
-              controlButtonCss={controlButtonCss}
-              onClick={onToggleFullScreen}
-            />
-          )}
-        </EuiFlexItem>
-      )}
+                <ControlButton
+                  iconType="minusCircle"
+                  tooltipContent={
+                    <ToolShortcutTooltip label={ZoomOutLabel} shortcut={ZOOM_OUT_SHORTCUT} />
+                  }
+                  ariaLabel={zoomOutAriaLabel}
+                  testSubj={GRAPH_CONTROLS_ZOOM_OUT_ID}
+                  disabled={minZoomReached}
+                  controlButtonCss={controlButtonCss}
+                  onClick={onZoomOutHandler}
+                />
+              </>
+            )}
+            {showCenter && (
+              <ControlButton
+                iconType="bullseye"
+                tooltipContent={
+                  <ToolShortcutTooltip label={CenterLabel} shortcut={CENTER_SHORTCUT} />
+                }
+                ariaLabel={centerAriaLabel}
+                testSubj={GRAPH_CONTROLS_CENTER_ID}
+                controlButtonCss={controlButtonCss}
+                onClick={onCenterHandler}
+              />
+            )}
+          </EuiFlexItem>
+        )}
+        {showSectionDivider && (
+          <EuiFlexItem grow={false} css={sectionDividerCss}>
+            <EuiHorizontalRule size="full" margin="none" />
+          </EuiFlexItem>
+        )}
+        {showViewSection && (
+          <EuiFlexItem grow={false} css={viewGroupCss}>
+            {showFitView && (
+              <ControlButton
+                iconType={fitToViewIconFn}
+                tooltipContent={
+                  <ToolShortcutTooltip label={FitToScreenLabel} shortcut={FIT_TO_SCREEN_SHORTCUT} />
+                }
+                ariaLabel={fitToScreenAriaLabel}
+                testSubj={GRAPH_CONTROLS_FIT_VIEW_ID}
+                controlButtonCss={controlButtonCss}
+                onClick={onFitViewHandler}
+              />
+            )}
+            {showFullScreenButton && (
+              <ControlButton
+                iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
+                tooltipContent={
+                  <ToolShortcutTooltip
+                    label={isFullScreen ? ExitFullScreenLabel : FullScreenLabel}
+                    shortcut={FULL_SCREEN_SHORTCUT}
+                  />
+                }
+                ariaLabel={isFullScreen ? exitFullScreenAriaLabel : fullScreenAriaLabel}
+                testSubj={GRAPH_CONTROLS_FULL_SCREEN_ID}
+                controlButtonCss={controlButtonCss}
+                onClick={onToggleFullScreen}
+              />
+            )}
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );
