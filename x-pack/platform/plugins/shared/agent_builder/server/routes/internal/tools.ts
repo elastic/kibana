@@ -794,10 +794,7 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_execute_draft`,
       validate: {
         body: schema.object({
-          type: schema.oneOf(
-            // @ts-expect-error TS2769: editableToolTypes is a const array of literals
-            editableToolTypes.map((type) => schema.literal(type))
-          ),
+          type: schema.literal(ToolType.esql),
           configuration: schema.recordOf(schema.string(), schema.any()),
           tool_params: schema.recordOf(schema.string(), schema.any()),
           connector_id: schema.maybe(schema.string()),
