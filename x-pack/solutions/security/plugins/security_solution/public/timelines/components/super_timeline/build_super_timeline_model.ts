@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@kbn/datemath';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { EsQueryConfig } from '@kbn/es-query';
 import { buildCombinedFilter, BooleanRelation, FilterStateStore } from '@kbn/es-query';
@@ -175,12 +176,22 @@ export const buildSuperTimelineModel = (
       : [];
 
   // ── Date range: earliest start → latest end ──────────────────────────────────
+  // dateRange strings can be relative (e.g. "now-7d") or absolute ISO. Parse to
+  // milliseconds before comparing so relative strings sort correctly.
   const dateRange = timelines.reduce(
-    (acc, timeline) => ({
-      start:
-        !acc.start || timeline.dateRange.start < acc.start ? timeline.dateRange.start : acc.start,
-      end: !acc.end || timeline.dateRange.end > acc.end ? timeline.dateRange.end : acc.end,
-    }),
+    (acc, timeline) => {
+      const startMs = dateMath.parse(timeline.dateRange.start)?.valueOf() ?? Infinity;
+      const endMs =
+        dateMath.parse(timeline.dateRange.end, { roundUp: true })?.valueOf() ?? -Infinity;
+      const accStartMs = acc.start ? dateMath.parse(acc.start)?.valueOf() ?? Infinity : Infinity;
+      const accEndMs = acc.end
+        ? dateMath.parse(acc.end, { roundUp: true })?.valueOf() ?? -Infinity
+        : -Infinity;
+      return {
+        start: startMs < accStartMs ? timeline.dateRange.start : acc.start,
+        end: endMs > accEndMs ? timeline.dateRange.end : acc.end,
+      };
+    },
     { start: '', end: '' }
   );
 
