@@ -44,6 +44,7 @@ describe('InsightClient', () => {
       clean: jest.fn(),
       existsIndex: jest.fn(),
       esql: jest.fn().mockResolvedValue({ columns: [], values: [] }),
+      reconcileMappings: jest.fn(),
     } as jest.Mocked<IStorageClient<InsightStorageSettings, Insight>>);
 
   const defaultGeneratedAt = '2024-01-15T12:00:00.000Z';
