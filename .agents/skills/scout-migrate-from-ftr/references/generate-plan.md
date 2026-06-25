@@ -51,7 +51,12 @@ Also read thoroughly:
 
 For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`pick-correct-test-type.md`](pick-correct-test-type.md). For each decision, write a one-line justification.
 
-**File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs (one role + one flow per file). List the proposed splits.
+**File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs. List the proposed splits.
+
+Two useful dimensions for deciding how to split:
+
+- **By role**: one spec per distinct role exercised (viewer flow, editor flow, admin-only checks).
+- **By concern**: separate access-control assertions (403 / 400 / permission-gated responses) from behavioral assertions (CRUD, cross-user isolation, telemetry), and separate type-variant behavior (same endpoints, different resource type with distinct schema) into its own spec. This axis is especially common in API test migrations where a single FTR file mixes error-code checks with happy-path flows.
 
 ### 3. Complexity estimation
 
@@ -91,6 +96,8 @@ For each archive, data fixture, or setup pattern found:
 4. **Recommend a target Scout role**: for each role, recommend the least-privileged Cloud-compatible built-in role (`viewer` → privileged/`editor` → `admin`) unless the test specifically validates permission-scoped behavior (e.g. a user limited to index X can see Y but not Z) that no built-in role expresses — only then keep a custom role. Many FTR suites scoped custom roles needlessly; flag those as candidates for a default role rather than a 1:1 custom-role port.
 5. **Flag roles used widely** (≥3 files): these warrant a shared auth helper rather than inline definitions
 6. **Flag special auth patterns**: `run_as`, API-key-based auth, certificate auth, or any non-standard FTR auth
+7. **Flag multi-user isolation patterns**: when a FTR suite creates two or more user sessions to verify that user A's state is invisible to user B, audit each session's operations independently. For each "second user" session, list the HTTP methods and endpoints it calls. If all operations are read or viewer-level writes, note that `viewer` is sufficient — provisioning a higher-privilege role (e.g. `admin`) as the second user adds no signal and violates the minimal-permissions principle.
+8. **Note serverless role name divergence**: if the tests are (or should be) deployment-agnostic, flag any use of `editor` as a role name. The `editor` role does not exist in serverless ES projects; `developer` is its equivalent. The plan should note this and the executor will apply the guard pattern (`config.serverless && config.projectType === 'es' ? 'developer' : 'editor'`).
 
 The execution step picks the specific Scout auth method (`loginAsViewer`, `loginWithCustomRole`, etc.); the plan provides the role inventory, privilege definitions, usage context, and the default-vs-custom recommendation.
 
@@ -136,21 +143,23 @@ For each test group, answer all four:
 
 Scan every test file for patterns that need attention during migration:
 
-| Smell | What to flag |
-|-------|-------------|
-| **try/catch swallowing errors** | `try { ... } catch { }` or catch blocks that don't rethrow |
-| **Conditional test logic** | `if/else` inside `it()` blocks that change assertions based on runtime state |
-| **Global loading indicator waits** | `waitForSelector('globalLoadingIndicator')` or similar global spinners |
-| **Hardcoded timeouts** | `await new Promise(r => setTimeout(r, ...))`, `browser.sleep(...)` |
-| **Shared mutable state** | Variables mutated across `it()` blocks relying on execution order |
-| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state) |
-| **Duplicate test cases** | Multiple `it()` blocks testing the same behavior with minor variations |
-| **Missing cleanup** | Setup in `before`/`beforeEach` without corresponding teardown |
-| **Retry wrappers** | `retry.try(...)`, `retry.waitFor(...)` around assertions |
-| **UI-based setup/teardown** | `before`/`after` hooks that navigate pages or click through UI to create/delete test data instead of using APIs |
-| **Onboarding/tour dismissals** | `browser.setLocalStorageItem(...)`, manual tour-dismiss clicks, getting-started bypasses |
-| **Brittle CSS selectors** | `find.byCssSelector(...)`, `find.byClassName(...)`, text-based lookups without `data-test-subj` |
-| **Over-privileged execution** | Tests running as `superuser` that don't need elevated privileges |
+| Smell                                          | What to flag                                                                                                                                                                                                                                                         |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **try/catch swallowing errors**                | `try { ... } catch { }` or catch blocks that don't rethrow                                                                                                                                                                                                           |
+| **Conditional test logic**                     | `if/else` inside `it()` blocks that change assertions based on runtime state                                                                                                                                                                                         |
+| **Global loading indicator waits**             | `waitForSelector('globalLoadingIndicator')` or similar global spinners                                                                                                                                                                                               |
+| **Hardcoded timeouts**                         | `await new Promise(r => setTimeout(r, ...))`, `browser.sleep(...)`                                                                                                                                                                                                   |
+| **Shared mutable state**                       | Variables mutated across `it()` blocks relying on execution order                                                                                                                                                                                                    |
+| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state)                                                                                                                                                                                        |
+| **Duplicate test cases**                       | Multiple `it()` blocks testing the same behavior with minor variations                                                                                                                                                                                               |
+| **Missing cleanup**                            | Setup in `before`/`beforeEach` without corresponding teardown                                                                                                                                                                                                        |
+| **Retry wrappers**                             | `retry.try(...)`, `retry.waitFor(...)` around assertions                                                                                                                                                                                                             |
+| **UI-based setup/teardown**                    | `before`/`after` hooks that navigate pages or click through UI to create/delete test data instead of using APIs                                                                                                                                                      |
+| **Onboarding/tour dismissals**                 | `browser.setLocalStorageItem(...)`, manual tour-dismiss clicks, getting-started bypasses                                                                                                                                                                             |
+| **Brittle CSS selectors**                      | `find.byCssSelector(...)`, `find.byClassName(...)`, text-based lookups without `data-test-subj`                                                                                                                                                                      |
+| **Over-privileged execution**                  | Tests running as `superuser` that don't need elevated privileges                                                                                                                                                                                                     |
+| **State-dependent telemetry**                  | Telemetry / stats assertions using absolute counts (`total: 3`) that only hold if prior tests ran and left exactly that state; flag for delta-based rewrite in Scout                                                                                                 |
+| **Over-privileged second-user session**        | A second SAML user provisioned as `admin` (or similar high-privilege role) purely to obtain a distinct identity for cross-user isolation, when its actual operations are viewer-level — flag the specific operations performed and the minimum role that covers them |
 
 For each smell, note the file and relevant context.
 
