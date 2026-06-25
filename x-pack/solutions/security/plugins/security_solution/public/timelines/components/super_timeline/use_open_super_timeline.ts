@@ -134,7 +134,7 @@ export const useOpenSuperTimeline = () => {
           timeline: {
             ...model,
             show: true,
-            activeTab: TimelineTabs.pinned,
+            activeTab: TimelineTabs.query,
           },
           preventSettingQuery: true,
         });

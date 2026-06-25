@@ -244,7 +244,7 @@ describe('useOpenSuperTimeline', () => {
       expect(call.id).toBe(TimelineId.active);
       expect(call.timeline.show).toBe(true);
       expect(call.timeline.isSuperTimeline).toBe(true);
-      expect(call.timeline.activeTab).toBe(TimelineTabs.pinned);
+      expect(call.timeline.activeTab).toBe(TimelineTabs.query);
       expect(call.duplicate).toBe(false);
       expect(call.preventSettingQuery).toBe(true);
     });
