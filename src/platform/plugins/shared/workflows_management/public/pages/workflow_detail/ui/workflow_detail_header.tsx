@@ -34,12 +34,12 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { PLUGIN_ID } from '../../../../common';
+import { WorkflowDetailActionsMenu } from './workflow_detail_actions_menu';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
@@ -62,6 +62,10 @@ import {
   getTestRunTooltipContent,
   ManagedWorkflowBadge,
 } from '../../../shared/ui';
+import {
+  navigateToWorkflowsList,
+  type WorkflowDetailRouteState,
+} from '../../../shared/utils/workflow_navigation';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 const executionsTabReadExecutionDisabledTooltip = i18n.translate(
@@ -156,6 +160,7 @@ export const WorkflowDetailHeader = React.memo(
   ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
     const { application } = useKibana().services;
+    const location = useLocation<WorkflowDetailRouteState | undefined>();
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
     const {
@@ -307,7 +312,7 @@ export const WorkflowDetailHeader = React.memo(
                 size="xs"
                 flush="left"
                 onClick={() => {
-                  application.navigateToApp(PLUGIN_ID);
+                  void navigateToWorkflowsList(application, location.state);
                 }}
                 aria-label={Translations.backLink}
               >
@@ -408,7 +413,6 @@ export const WorkflowDetailHeader = React.memo(
                     })}
                   />
                 </EuiToolTip>
-                <EuiFlexItem grow={false} css={styles.separator} />
                 <EuiToolTip content={runWorkflowTooltipContent}>
                   <EuiButtonIcon
                     color="success"
@@ -444,6 +448,11 @@ export const WorkflowDetailHeader = React.memo(
                     />
                   </EuiButton>
                 </EuiToolTip>
+                {workflowId && !isExecutionsTab ? (
+                  <EuiFlexItem grow={false}>
+                    <WorkflowDetailActionsMenu />
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </EuiPageHeaderSection>
           </EuiPageTemplate.Header>
@@ -531,13 +540,6 @@ const componentStyles = {
     whiteSpace: 'nowrap',
     width: '100%',
   }),
-  separator: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '1px',
-      margin: '4px 0',
-      backgroundColor: euiTheme.colors.borderBasePlain,
-      alignSelf: 'stretch',
-    }),
   runConfirmationFooter: css({
     alignItems: 'center',
     justifyContent: 'space-between',
