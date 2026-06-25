@@ -458,9 +458,30 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
       expect(domainValues(r)).not.toContain('ie.com');
     });
 
+    test('drops ie.com when preceded by block-glyph redaction (a██ie.com)', () => {
+      const r = extractIocs({ text: 'victim domain a██ie.com redacted in table' });
+      expect(domainValues(r)).not.toContain('ie.com');
+    });
+
     test('keeps ie.com when NOT preceded by a masking glyph', () => {
       const r = extractIocs({ text: 'TLD ccTLD for Ireland is ie.com example' });
       expect(domainValues(r)).toContain('ie.com');
+    });
+
+    test('keeps evil.com when wrapped in markdown bold (**evil.com**)', () => {
+      // Bold emphasis: glyph run is at start of token, not glued to an alnum label.
+      const r = extractIocs({ text: 'C2 callback to **evil.com** per the report' });
+      expect(domainValues(r)).toContain('evil.com');
+    });
+
+    test('keeps bad.org when wrapped in markdown italic (*bad.org*)', () => {
+      const r = extractIocs({ text: 'dropper contacts *bad.org* for staging' });
+      expect(domainValues(r)).toContain('bad.org');
+    });
+
+    test('keeps evil.com when preceded by a bullet (* evil.com with space)', () => {
+      const r = extractIocs({ text: '* evil.com\n* other.net' });
+      expect(domainValues(r)).toContain('evil.com');
     });
   });
 

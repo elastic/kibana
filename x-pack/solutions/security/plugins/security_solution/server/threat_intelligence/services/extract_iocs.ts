@@ -438,10 +438,16 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   const candidateDomains: string[] = Array.from(refangedText.matchAll(domainPattern))
     .filter((match) => {
       const raw = match[0].toLowerCase();
-      // Step a — redaction-adjacency: drop tokens immediately preceded by a masking glyph.
-      // Catches victim-domain redaction fragments (e.g. aad****ie.com → 'ie.com' token).
-      const redactionPreceded =
-        match.index > 0 && REDACTION_GLYPHS.has(refangedText[match.index - 1]);
+      // Step a — redaction-adjacency: drop tokens immediately preceded by a masking glyph
+      // that is glued to a preceding alphanumeric label (aad****ie.com → drop 'ie.com').
+      // Must NOT drop markdown emphasis (**evil.com**, *bad.org*) or bullets (* evil.com)
+      // where the glyph run starts at the beginning or after whitespace, not an alnum label.
+      let redactionPreceded = false;
+      if (match.index > 0 && REDACTION_GLYPHS.has(refangedText[match.index - 1])) {
+        let g = match.index - 1;
+        while (g >= 0 && REDACTION_GLYPHS.has(refangedText[g])) g--;
+        redactionPreceded = g >= 0 && /[a-z0-9]/i.test(refangedText[g]);
+      }
       // Steps b–e delegated to isDomainKept.
       return !redactionPreceded && isDomainKept(raw, defangedDomains, urlHosts);
     })
