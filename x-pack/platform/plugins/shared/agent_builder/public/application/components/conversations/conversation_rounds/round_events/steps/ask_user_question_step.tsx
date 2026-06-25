@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useBoolean } from '@kbn/react-hooks';
 import type { AskUserQuestionStep } from '@kbn/agent-builder-common/chat/conversation';
 import { StepLayout } from '../step_layout';
 import { AskUserQuestionFlyout } from '../flyouts/ask_user_question_flyout';
@@ -17,9 +18,7 @@ interface AskUserQuestionStepEventProps {
 }
 
 export const AskUserQuestionStepEvent: React.FC<AskUserQuestionStepEventProps> = ({ step }) => {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
-  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+  const [isFlyoutOpen, { on: openFlyout, off: closeFlyout }] = useBoolean();
 
   if (!step.answers) return null;
 

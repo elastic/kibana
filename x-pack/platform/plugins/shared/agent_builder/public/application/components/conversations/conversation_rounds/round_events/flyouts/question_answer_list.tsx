@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiText, EuiTextColor, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiTextColor, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AskUserQuestionItem, AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents';
 
@@ -23,48 +23,51 @@ interface QuestionAnswerListProps {
   answers: AskUserQuestionAnswer[];
 }
 
-export const QuestionAnswerList: React.FC<QuestionAnswerListProps> = ({ questions, answers }) => (
-  <>
-    {questions.map((q, i) => {
-      const a = answers[i] ?? {};
-      const isSkipped = !!a.skipped;
-      const choiceText = (a.choice ?? []).map((idx) => q.options[idx].label).join(', ');
-      const hasChoice = choiceText.length > 0;
-      const hasCustom = !!a.custom;
-      const isLast = i === questions.length - 1;
+export const QuestionAnswerList: React.FC<QuestionAnswerListProps> = ({ questions, answers }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <>
+      {questions.map((q, i) => {
+        const a = answers[i] ?? {};
+        const isSkipped = !!a.skipped;
+        const choiceText = (a.choice ?? []).map((idx) => q.options[idx].label).join(', ');
+        const hasChoice = choiceText.length > 0;
+        const hasCustom = !!a.custom;
+        const isLast = i === questions.length - 1;
 
-      const primaryText = hasChoice ? choiceText : a.custom ?? '';
+        const primaryText = hasChoice ? choiceText : a.custom ?? '';
 
-      return (
-        <Fragment key={i}>
-          <EuiText size="s">
-            <p>
-              <strong>{q.question}</strong>
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          {isSkipped ? (
-            <EuiText size="s" color="subdued">
-              <p>
-                <em>{skippedLabel}</em>
-              </p>
-            </EuiText>
-          ) : (
+        return (
+          <Fragment key={i}>
             <EuiText size="s">
               <p>
-                {primaryText}
-                {hasCustom && (
-                  <EuiTextColor color="subdued">
-                    {' • '}
-                    {customLabel}
-                  </EuiTextColor>
-                )}
+                <strong>{q.question}</strong>
               </p>
             </EuiText>
-          )}
-          {!isLast && <EuiSpacer size={isSkipped ? 'm' : 'l'} />}
-        </Fragment>
-      );
-    })}
-  </>
-);
+            <EuiSpacer size="s" />
+            {isSkipped ? (
+              <EuiText size="s" color="subdued">
+                <p>
+                  <em>{skippedLabel}</em>
+                </p>
+              </EuiText>
+            ) : (
+              <EuiText size="s">
+                <p>
+                  {primaryText}
+                  {hasCustom && (
+                    <EuiTextColor color={euiTheme.colors.textDisabled}>
+                      {' • '}
+                      {customLabel}
+                    </EuiTextColor>
+                  )}
+                </p>
+              </EuiText>
+            )}
+            {!isLast && <EuiSpacer size={isSkipped ? 'm' : 'l'} />}
+          </Fragment>
+        );
+      })}
+    </>
+  );
+};
