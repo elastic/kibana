@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
+import type { ConverseStep, EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { Discovery, SigEvent } from '@kbn/streams-schema';
-import type { DiscoveryInvestigatorToolUsage, JudgeToolUsage } from '../../agents/types';
 
 export interface InvestigatorOutput {
   discoveries: Discovery[];
-  toolUsage: DiscoveryInvestigatorToolUsage;
+  /** Raw converse steps — the trajectory and grounding evaluators read tool calls from these. */
+  steps: ConverseStep[];
   traceId?: string | null;
 }
 
@@ -20,6 +20,13 @@ export interface InvestigatorEvaluationExample {
   output: {
     expected_kind?: string;
     expected_min_evidence_count?: number;
+    /**
+     * Canonical expected discoveries (detections + evidences + cause_kis) — the grouping check
+     * derives its expected groups from these discoveries' `detections[].rule_name`s.
+     */
+    expected_discoveries?: Array<Partial<Discovery>>;
+    /** Tool ids the agent is expected to call; defaults to the discovery tool set when omitted. */
+    expectedTools?: string[];
     criteria?: EvaluationCriterion[];
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
@@ -33,7 +40,8 @@ export type InvestigatorEvaluator = Evaluator<InvestigatorEvaluationExample, Inv
 
 export interface JudgeOutput {
   significantEvents: SigEvent[];
-  toolUsage: JudgeToolUsage;
+  /** Raw converse steps — the trajectory and grounding evaluators read tool calls from these. */
+  steps: ConverseStep[];
   inputDiscoveries: Discovery[];
   traceId?: string | null;
 }
@@ -43,16 +51,14 @@ export interface JudgeEvaluationExample {
   output: {
     expected_status?: string;
     expect_assessment_note?: boolean;
+    /** Tool ids the agent is expected to call; defaults to the discovery tool set when omitted. */
+    expectedTools?: string[];
     criteria?: EvaluationCriterion[];
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
 
 export type JudgeEvaluator = Evaluator<JudgeEvaluationExample, JudgeOutput>;
-
-// ---------------------------------------------------------------------------
-// Scenario criteria config type (shared by investigator and judge factories)
-// ---------------------------------------------------------------------------
 
 export interface ScenarioCriteriaConfig {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;

@@ -6,12 +6,178 @@
  */
 
 import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/significant_events_tuning_config';
+import type { Discovery } from '@kbn/streams-schema';
 import {
   BANK_OF_ANTHOS_GCS_BASE_PATH_PREFIX,
   BANK_OF_ANTHOS_NAMESPACE,
   GCS_BUCKET,
 } from '../constants';
 import type { DatasetConfig } from './types';
+
+// ---------------------------------------------------------------------------
+// Canonical discoveries for the `ledger-db-disconnect` snapshot.
+//
+// These are the full Discovery docs (detections + evidences + cause_kis) the investigator is
+// expected to produce — the exact shape the judge consumes as input (discovery.yaml output ===
+// triage.yaml input). Defined once and shared: the investigator scenario uses them as
+// `output.expected_discoveries` (the grouping gold derives from their detections), and the judge
+// scenario feeds the cascade discovery in as `input.discoveries`, so the two stages can't drift.
+//
+// rule_name + rule_uuid match the snapshot's detection KIs verbatim; rule_uuid is the join key the
+// agents use to resolve a detection to its query KI (→ ES|QL), so it must stay exact.
+// ---------------------------------------------------------------------------
+
+/** The transactionhistory↔ledger-db SQL-connectivity failure cascade (active, user-facing). */
+const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
+  kind: 'discovery',
+  discovery_slug: 'transactionhistory__frontend-transactionhistory-read-timeout',
+  title:
+    'transactionhistory — DB and cache layer: connection failures cascading to frontend timeouts',
+  summary:
+    'transactionhistory read requests are failing: the service cannot obtain SQL connections to ledger-db (SQLState 08001), HikariCP pools are failing to initialize, and cache errors plus a frontend→transactionhistory read timeout are surfacing to callers.',
+  root_cause:
+    'transactionhistory cannot establish SQL connections to the ledger-db PostgreSQL backend (SQLState 08001), failing HikariCP pool initialization and causing cache errors and frontend read timeouts downstream.',
+  criticality: 80,
+  confidence: 70,
+  detections: [
+    {
+      kind: 'detection',
+      rule_name: 'Transaction history SQL connection failure',
+      rule_uuid: '52ad96d3-5d06-5baa-b2de-cd654fbe33f6',
+      stream_name: 'logs',
+    },
+    {
+      kind: 'detection',
+      rule_name: 'HikariCP connection pool initialization',
+      rule_uuid: 'f0816e40-c465-563f-91fc-280e23a4ef4e',
+      stream_name: 'logs',
+    },
+    {
+      kind: 'detection',
+      rule_name: 'Transaction history cache errors',
+      rule_uuid: 'e2b04e1f-44ed-582f-8e4f-9f62e4706141',
+      stream_name: 'logs',
+    },
+    {
+      kind: 'detection',
+      rule_name: 'Balance reader cache errors',
+      rule_uuid: '5961763e-fabc-5bdc-a5fc-aa2c5c4af768',
+      stream_name: 'logs',
+    },
+    {
+      kind: 'detection',
+      rule_name: 'Frontend → transactionhistory read timeout',
+      rule_uuid: '1432a71f-0833-55c7-93f4-ac40261e47df',
+      stream_name: 'logs',
+    },
+  ],
+  cause_kis: [
+    { name: 'transactionhistory', stream_name: 'logs' },
+    { name: 'ledger-db', stream_name: 'logs' },
+  ],
+  evidences: [
+    {
+      rule_name: 'Transaction history SQL connection failure',
+      rule_uuid: '52ad96d3-5d06-5baa-b2de-cd654fbe33f6',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description: 'transactionhistory logging SQL Error 0, SQLState: 08001 (connection refused).',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "transactionhistory" AND body.text LIKE "*SQLState: 08001*" | STATS count = COUNT(*)',
+    },
+    {
+      rule_name: 'HikariCP connection pool initialization',
+      rule_uuid: 'f0816e40-c465-563f-91fc-280e23a4ef4e',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description: 'HikariCP pool (HikariPool-1) repeatedly re-initializing on the JDBC path.',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "transactionhistory" AND body.text LIKE "*HikariPool-1 - Starting*" | STATS count = COUNT(*)',
+    },
+    {
+      rule_name: 'Transaction history cache errors',
+      rule_uuid: 'e2b04e1f-44ed-582f-8e4f-9f62e4706141',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description: 'transactionhistory emitting "getTransactions | Cache error".',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "transactionhistory" AND body.text LIKE "*getTransactions | Cache error*" | STATS count = COUNT(*)',
+    },
+    {
+      rule_name: 'Balance reader cache errors',
+      rule_uuid: '5961763e-fabc-5bdc-a5fc-aa2c5c4af768',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description: 'balancereader emitting "getBalance | Cache error" from the same DB outage.',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "balancereader" AND body.text LIKE "*getBalance | Cache error*" | STATS count = COUNT(*)',
+    },
+    {
+      rule_name: 'Frontend → transactionhistory read timeout',
+      rule_uuid: '1432a71f-0833-55c7-93f4-ac40261e47df',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description:
+        'frontend read timeouts to transactionhistory:8080 (HTTPConnectionPool ... Read timed out).',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "frontend" AND body.text LIKE "*host=\'transactionhistory\'*Read timed out*" | STATS count = COUNT(*)',
+    },
+  ],
+};
+
+/** Benign authentication activity spike — must stay a SEPARATE discovery from the failure cascade. */
+const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
+  kind: 'discovery',
+  discovery_slug: 'userservice__successful-user-login',
+  title: 'userservice — auth endpoints: successful login and signup activity spike',
+  summary:
+    'Elevated but fully successful authentication activity on userservice: successful logins and new account creation, with no errors — benign traffic, not an incident.',
+  root_cause: 'Normal load-driven spike in login/signup traffic; all operations succeeded.',
+  criticality: 10,
+  confidence: 80,
+  detections: [
+    {
+      kind: 'detection',
+      rule_name: 'Successful user login',
+      rule_uuid: 'cbfedad7-d40c-5dde-a84f-d1cba23084b3',
+      stream_name: 'logs',
+    },
+    {
+      kind: 'detection',
+      rule_name: 'New user account created',
+      rule_uuid: 'd60afc3c-dac9-51b5-b55d-bfd6c522b269',
+      stream_name: 'logs',
+    },
+  ],
+  cause_kis: [{ name: 'userservice', stream_name: 'logs' }],
+  evidences: [
+    {
+      rule_name: 'Successful user login',
+      rule_uuid: 'cbfedad7-d40c-5dde-a84f-d1cba23084b3',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description: 'userservice successful login events — no auth failures observed.',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "userservice" AND body.text LIKE "*login*" | STATS count = COUNT(*)',
+    },
+    {
+      rule_name: 'New user account created',
+      rule_uuid: 'd60afc3c-dac9-51b5-b55d-bfd6c522b269',
+      stream_name: 'logs',
+      result: 'found',
+      row_count: 1,
+      description: 'userservice "create_user | Successfully created user" events.',
+      esql_query:
+        'FROM logs | WHERE resource.attributes.app == "userservice" AND body.text LIKE "*Successfully created user*" | STATS count = COUNT(*)',
+    },
+  ],
+};
 
 export const bankOfAnthosDataset: DatasetConfig = {
   id: BANK_OF_ANTHOS_NAMESPACE,
@@ -477,8 +643,138 @@ export const bankOfAnthosDataset: DatasetConfig = {
       },
     },
   ],
-  discoveryInvestigator: [],
-  discoveryJudge: [],
+  discoveryInvestigator: [
+    {
+      // Mixed batch from the ledger-db-disconnect snapshot: a transactionhistory↔ledger-db SQL
+      // connection failure (SQLState 08001) cascading through HikariCP pool init, cache-layer
+      // errors, and a frontend→transactionhistory read timeout — alongside BENIGN auth activity
+      // (successful logins / new accounts). The investigator must collapse the cascade into one
+      // discovery while keeping the benign auth spike as its own separate discovery.
+      input: {
+        scenario_id: 'ledger-db-disconnect',
+        stream_name: 'logs',
+        // Terse ground truth — canonicalDetectionsFromGroundTruth stamps the boilerplate.
+        // rule_name + rule_uuid match the snapshot's detection KIs verbatim so the investigator
+        // resolves them and the rule_name-keyed grouping check lines up across canonical/snapshot.
+        detections: [
+          {
+            kind: 'detection',
+            rule_name: 'Transaction history SQL connection failure',
+            rule_uuid: '52ad96d3-5d06-5baa-b2de-cd654fbe33f6',
+            stream_name: 'logs',
+            detection_evidence: { change_point_type: 'spike', p_value: 0.0001 },
+          },
+          {
+            kind: 'detection',
+            rule_name: 'HikariCP connection pool initialization',
+            rule_uuid: 'f0816e40-c465-563f-91fc-280e23a4ef4e',
+            stream_name: 'logs',
+            detection_evidence: { change_point_type: 'spike', p_value: 0.0001 },
+          },
+          {
+            kind: 'detection',
+            rule_name: 'Transaction history cache errors',
+            rule_uuid: 'e2b04e1f-44ed-582f-8e4f-9f62e4706141',
+            stream_name: 'logs',
+            detection_evidence: { change_point_type: 'spike', p_value: 0.0001 },
+          },
+          {
+            kind: 'detection',
+            rule_name: 'Balance reader cache errors',
+            rule_uuid: '5961763e-fabc-5bdc-a5fc-aa2c5c4af768',
+            stream_name: 'logs',
+            detection_evidence: { change_point_type: 'spike', p_value: 0.0001 },
+          },
+          {
+            kind: 'detection',
+            rule_name: 'Frontend → transactionhistory read timeout',
+            rule_uuid: '1432a71f-0833-55c7-93f4-ac40261e47df',
+            stream_name: 'logs',
+            detection_evidence: { change_point_type: 'spike', p_value: 0.0001 },
+          },
+          {
+            kind: 'detection',
+            rule_name: 'Successful user login',
+            rule_uuid: 'cbfedad7-d40c-5dde-a84f-d1cba23084b3',
+            stream_name: 'logs',
+            detection_evidence: { change_point_type: 'spike', p_value: 0.0001 },
+          },
+          {
+            kind: 'detection',
+            rule_name: 'New user account created',
+            rule_uuid: 'd60afc3c-dac9-51b5-b55d-bfd6c522b269',
+            stream_name: 'logs',
+            detection_evidence: { change_point_type: 'spike', p_value: 0.0001 },
+          },
+        ],
+      },
+      output: {
+        expected_kind: 'discovery',
+        // Canonical expected output: the DB-connectivity cascade (all five failure rules share the
+        // transactionhistory↔ledger-db root cause) plus the benign auth spike kept separate. Full
+        // Discovery shape (detections + evidences + cause_kis) — the same docs the judge consumes.
+        // grouping_correctness derives its expected groups from these discoveries' detections.
+        expected_discoveries: [LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY],
+        criteria: [
+          {
+            id: 'root-cause-sql-connection',
+            text: 'Identifies the transactionhistory↔ledger-db SQL connection failure (SQLState 08001 / failed JDBC connections, HikariCP pool init) as the root cause of the failure cascade.',
+            score: 3,
+          },
+          {
+            id: 'cascade-grouping',
+            text: 'Collapses the SQL connection failure, HikariCP pool init, cache-layer errors (transaction history + balance reader), and the frontend→transactionhistory read timeout into a single cascading discovery rather than separate unrelated incidents.',
+            score: 2,
+          },
+          {
+            id: 'separate-benign-auth',
+            text: 'Keeps the benign authentication activity (successful logins, new account creation) as its own discovery, separate from the failure cascade — does not lump it into the database incident.',
+            score: 2,
+          },
+          {
+            id: 'dependency-chain',
+            text: 'Names the dependency from transactionhistory to ledger-db (via HikariCP/JDBC) and the downstream impact on the frontend read path.',
+            score: 1,
+          },
+          {
+            id: 'error-signatures',
+            text: 'Cites observed error signatures (SQLState 08001, cache error, read timeout) rather than generic phrasing.',
+            score: 1,
+          },
+        ],
+      },
+      metadata: { difficulty: 'medium', failure_domain: 'ledger-db', failure_mode: 'cascade' },
+    },
+  ],
+  discoveryJudge: [
+    {
+      // Same cascade, from the judge's side: the investigator's open cascade discovery (the shared
+      // canonical doc, carrying detections + evidences + cause_kis — exactly what triage.yaml feeds
+      // the judge). The judge should re-verify via search_knowledge_indicators → execute_esql,
+      // stamp `confirmed` on the evidences it re-runs, and promote.
+      input: {
+        scenario_id: 'ledger-db-disconnect',
+        discoveries: [LEDGER_DB_CASCADE_DISCOVERY],
+      },
+      output: {
+        expected_status: 'promoted',
+        expect_assessment_note: true,
+        criteria: [
+          {
+            id: 'promote-active-cascade',
+            text: 'Promotes the discovery: active database-connectivity failures cascading to user-facing transactionhistory read timeouts warrant immediate on-call action.',
+            score: 3,
+          },
+          {
+            id: 'independent-verification',
+            text: 'Independently verifies via execute_esql (resolving the detections to query KIs through search_knowledge_indicators) before deciding — does not trust the discovery without running its own queries.',
+            score: 2,
+          },
+        ],
+      },
+      metadata: { difficulty: 'medium', failure_domain: 'ledger-db', failure_mode: 'cascade' },
+    },
+  ],
   kiQueryGeneration: [
     {
       input: {

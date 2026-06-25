@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SIGEVENTS_INVESTIGATOR_INSTRUCTIONS } from '@kbn/streams-plugin/server';
+import { SIGEVENTS_INVESTIGATOR_AGENT_ID } from '@kbn/streams-plugin/server';
 import { tags } from '@kbn/scout';
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
+import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection } from '@kbn/streams-schema';
 
 import type { GcsConfig } from '../../src/data_generators/replay';
@@ -19,9 +19,10 @@ import {
   cleanSignificantEventsDataStreams,
   ensureStreamsEnabled,
   deleteTemporaryReplayIndices,
-  loadKIFeaturesFromSnapshot,
+  canonicalDetectionsFromGroundTruth,
 } from '../../src/data_generators/replay';
-import { loadDetectionsFromSnapshot } from '../../src/data_generators/load_detections_from_snapshot';
+import { loadDetectionsFromSnapshot } from '../../src/data_generators/load_from_snapshot';
+import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
@@ -31,134 +32,25 @@ import {
   snapshotSourceKey,
 } from '../../src/datasets';
 import type { DiscoveryInvestigatorScenario } from '../../src/datasets';
-import { runDiscoveryInvestigator } from '../../src/agents';
 import { createInvestigatorEvaluators } from '../../src/evaluators/discovery';
-
-// ---------------------------------------------------------------------------
-// Output schema (copied from discovery.yaml run_investigator_agent step)
-// ---------------------------------------------------------------------------
-const OUTPUT_SCHEMA = {
-  type: 'object',
-  properties: {
-    discoveries: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          title: { type: 'string' },
-          summary: { type: 'string' },
-          root_cause: { type: 'string' },
-          criticality: { type: 'integer', minimum: 0, maximum: 100 },
-          confidence: { type: 'integer', minimum: 0, maximum: 100 },
-          kind: {
-            type: 'string',
-            enum: ['discovery', 'clearance'],
-          },
-          parent_discovery_id: { type: 'string' },
-          detections: {
-            type: 'array',
-            minItems: 1,
-            items: {
-              type: 'object',
-              required: ['detection_id', 'rule_name', 'rule_uuid'],
-              properties: {
-                detection_id: { type: 'string' },
-                kind: { type: 'string', enum: ['detection', 'quiet', 'handled'] },
-                rule_name: { type: 'string' },
-                rule_uuid: { type: 'string' },
-                stream_name: { type: 'string' },
-                change_point_type: { type: 'string' },
-                p_value: { type: 'number' },
-                alert_count: { type: 'integer' },
-              },
-            },
-          },
-          dependency_edges: {
-            type: 'array',
-            items: {
-              type: 'object',
-              required: ['source', 'target'],
-              properties: {
-                source: { type: 'string' },
-                target: { type: 'string' },
-                protocol: { type: 'string' },
-                exposure: { type: 'string', enum: ['exposed', 'not_exposed'] },
-              },
-            },
-          },
-          infra_components: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                workloads: { type: 'array', items: { type: 'string' } },
-                exposure: { type: 'string', enum: ['exposed', 'not_exposed'] },
-              },
-            },
-          },
-          cause_kis: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: { name: { type: 'string' }, stream_name: { type: 'string' } },
-            },
-          },
-          evidences: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                rule_name: { anyOf: [{ type: 'string' }, { type: 'null' }] },
-                result: { type: 'string', enum: ['found', 'empty', 'error'] },
-                description: { type: 'string' },
-                stream_name: { type: 'string' },
-                row_count: { type: 'integer' },
-                collected_at: { type: 'string' },
-                esql_query: { anyOf: [{ type: 'string' }, { type: 'null' }] },
-              },
-            },
-          },
-          discovery_slug: {
-            type: 'string',
-            pattern: '^[a-z0-9-]+__[a-z0-9-]+$',
-          },
-        },
-        required: [
-          'kind',
-          'title',
-          'summary',
-          'criticality',
-          'confidence',
-          'detections',
-          'cause_kis',
-          'discovery_slug',
-          'dependency_edges',
-          'infra_components',
-          'evidences',
-        ],
-      },
-    },
-  },
-  required: ['discoveries'],
-};
+import { parseDiscoveries } from '../../src/evaluators/discovery/utils/parse_agent_output';
+import { buildInvestigatorInput } from '../../src/evaluators/discovery/investigator/build_agent_input';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
-const INVESTIGATOR_SYSTEM_PROMPT = SIGEVENTS_INVESTIGATOR_INSTRUCTIONS;
-
-// ---------------------------------------------------------------------------
-// Eval spec
-// ---------------------------------------------------------------------------
-
 evaluate.describe(
-  'sigevents: investigator agent',
+  'Significant Events Discovery',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+      // The discovery agents gate availability on the significant-events UI setting; enable it
+      // before any converse call (agent availability is cached per space).
+      await kbnClient.uiSettings.update({ 'observability:streamsEnableSignificantEvents': true });
+      log.info('Enabled significant events UI setting');
+
       const uniqueCatalogSources = new Map<string, GcsConfig>();
       for (const dataset of activeDatasets) {
         for (const scenario of dataset.discoveryInvestigator) {
@@ -217,13 +109,17 @@ evaluate.describe(
               let detections: Detection[];
 
               if (source === 'canonical') {
-                detections = scenario.input.detections as Detection[];
+                detections = canonicalDetectionsFromGroundTruth({
+                  streamName: scenario.input.stream_name,
+                  rules: scenario.input.detections,
+                });
               } else {
                 detections = await loadDetectionsFromSnapshot(
                   esClient,
                   log,
                   snapshotSource.snapshotName,
-                  snapshotSource.gcs
+                  snapshotSource.gcs,
+                  { kinds: ['detection', 'quiet'] }
                 );
                 if (detections.length === 0) {
                   log.info(
@@ -271,22 +167,15 @@ evaluate.describe(
           });
 
           evaluate(
-            'investigator agent',
+            'Discovery investigator',
             async ({
               executorClient,
               evaluators,
               esClient,
-              inferenceClient,
-              evaluationConnector,
-              logger,
+              agentBuilderClient,
               apiServices,
-              traceEsClient,
               log,
             }) => {
-              const boundInferenceClient = inferenceClient.bindTo({
-                connectorId: evaluationConnector.id,
-              });
-
               let lastReplayedSnapshotKey: string | undefined;
 
               const detectionsByScenario = new Map(
@@ -300,7 +189,7 @@ evaluate.describe(
                 {
                   datasets: [
                     {
-                      name: `sigevents: investigator agent (${dataset.id}) (${source})`,
+                      name: `sigevents: Discovery investigator (${dataset.id}) (${source})`,
                       description: `[${dataset.id}] investigator agent across scenarios (${source})`,
                       examples: collectedExamples.map(({ scenario }) => ({
                         id: scenario.input.scenario_id,
@@ -353,31 +242,40 @@ evaluate.describe(
                       lastReplayedSnapshotKey = snapshotKey;
                     }
 
-                    // Load KI features from snapshot for in-memory resolution
-                    const knowledgeIndicators = await loadKIFeaturesFromSnapshot(
+                    // Replay the captured knowledge indicators (features + queries) into the LIVE KI
+                    // data stream so the real search_knowledge_indicators tool resolves them when we
+                    // invoke the agent over /converse.
+                    await replayKnowledgeIndicatorsSnapshot(
                       esClient,
                       log,
                       snapshotSource.snapshotName,
-                      snapshotSource.gcs,
-                      input.stream_name
+                      snapshotSource.gcs
                     );
 
-                    const { discoveries, toolUsage } = await runDiscoveryInvestigator({
-                      systemPrompt: INVESTIGATOR_SYSTEM_PROMPT,
-                      outputSchema: OUTPUT_SCHEMA,
+                    // Build the investigator's user message (same shape as the production batch).
+                    const agentInput = buildInvestigatorInput({
+                      episodeSuffix: Date.now().toString(36).slice(-8),
                       detections,
-                      continuationCandidates:
-                        (input.continuation_candidates as
-                          | import('@kbn/streams-schema').Discovery[]
-                          | undefined) ?? [],
-                      knowledgeIndicators,
-                      inferenceClient: boundInferenceClient,
-                      esClient,
-                      logger,
-                      signal: new AbortController().signal,
+                      continuationCandidates: input.continuation_candidates ?? [],
                     });
 
-                    return { discoveries, toolUsage, traceId: getCurrentTraceId() };
+                    // Invoke the REAL investigator agent (its instructions, tools, runtime).
+                    const converseResult = await agentBuilderClient.converse({
+                      agentId: SIGEVENTS_INVESTIGATOR_AGENT_ID,
+                      input: agentInput,
+                    });
+
+                    return {
+                      // The agent returns its result as JSON in the final message (no emit tool /
+                      // structured_output on the public converse API); parse it for the evaluators.
+                      discoveries: parseDiscoveries(converseResult.message),
+                      // Raw converse steps — the trajectory and grounding evaluators read tool calls.
+                      steps: converseResult.steps,
+                      // The agent runs inline (local execution), so its gen_ai spans nest under the
+                      // eval's trace — tag with that id, like the inferenceClient-based evals. This
+                      // keeps trace metrics correlatable against the default cluster (no TRACING_ES_URL).
+                      traceId: getCurrentTraceId(),
+                    };
                   },
                 },
                 [
@@ -388,7 +286,7 @@ evaluate.describe(
                   evaluators.traceBasedEvaluators.outputTokens,
                   evaluators.traceBasedEvaluators.cachedTokens,
                   evaluators.traceBasedEvaluators.toolCalls,
-                  createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+                  evaluators.traceBasedEvaluators.latency,
                 ]
               );
             }

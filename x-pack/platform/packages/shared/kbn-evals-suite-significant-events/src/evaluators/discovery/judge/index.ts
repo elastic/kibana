@@ -14,12 +14,17 @@ import type {
   JudgeOutput,
   ScenarioCriteriaConfig,
 } from '../types';
-import { schemaValidityJudgeEvaluator } from './schema_validity';
-import { executeEsqlCoverageEvaluator } from './execute_esql_coverage';
-import { confirmedConsistencyEvaluator } from './confirmed_consistency';
-import { assessmentNotePresenceEvaluator } from './assessment_note_presence';
-import { createStatusCorrectnessEvaluator } from './status_correctness';
-import { createFalsePositiveResistanceEvaluator } from './false_positive_resistance';
+import {
+  createToolTrajectoryEvaluator,
+  createExecuteEsqlGroundingEvaluator,
+} from '../common/tool_usage/tool_usage_validation';
+import {
+  createCriticalityCalibrationEvaluator,
+  createConfidenceCalibrationEvaluator,
+} from '../calibration';
+import { schemaValidityJudgeEvaluator } from './schema/schema_validity';
+import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
+import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 export type { ScenarioCriteriaConfig } from '../types';
 
@@ -31,9 +36,9 @@ export const createJudgeEvaluators = (
 ): Array<Evaluator<JudgeEvaluationExample, JudgeOutput>> => {
   const codeEvaluators: JudgeEvaluator[] = [
     schemaValidityJudgeEvaluator,
-    executeEsqlCoverageEvaluator,
-    confirmedConsistencyEvaluator,
-    assessmentNotePresenceEvaluator,
+    createToolTrajectoryEvaluator() as JudgeEvaluator,
+    createExecuteEsqlGroundingEvaluator() as JudgeEvaluator,
+    confirmedEvidencesEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);
@@ -43,14 +48,25 @@ export const createJudgeEvaluators = (
   }
 
   const { criteriaFn, criteria } = scenarioCriteria;
+  const toCriteria = (c: Parameters<typeof criteriaFn>[0]) =>
+    criteriaFn(c) as Evaluator<JudgeEvaluationExample, JudgeOutput>;
+  // Drop the bulky `steps` before the calibration judge sees the output.
+  const withoutSteps = (output: JudgeOutput): JudgeOutput => ({ ...output, steps: [] });
 
   return [
     ...base,
     createStatusCorrectnessEvaluator(criteriaFn),
-    createFalsePositiveResistanceEvaluator(criteriaFn),
     createScenarioCriteriaLlmEvaluator<JudgeEvaluationExample, JudgeOutput>({
-      criteriaFn: (c) => criteriaFn(c) as Evaluator<JudgeEvaluationExample, JudgeOutput>,
+      criteriaFn: toCriteria,
       criteria,
+    }),
+    createCriticalityCalibrationEvaluator<JudgeEvaluationExample, JudgeOutput>({
+      criteriaFn,
+      transformOutput: withoutSteps,
+    }),
+    createConfidenceCalibrationEvaluator<JudgeEvaluationExample, JudgeOutput>({
+      criteriaFn,
+      transformOutput: withoutSteps,
     }),
   ];
 };
