@@ -33,9 +33,11 @@ export const tlsRuleParamsSchema = schema.object(
     // filter in the UI; `browserResourceTypes` filters by the requested
     // resource's mime category. `issuers` filters by signing CA and applies to
     // both lightweight and browser certificates.
-    certOrigin: schema.maybe(schema.arrayOf(schema.string())),
-    browserResourceTypes: schema.maybe(schema.arrayOf(schema.string())),
-    issuers: schema.maybe(schema.arrayOf(schema.string())),
+    certOrigin: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })),
+    browserResourceTypes: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 })
+    ),
+    issuers: schema.maybe(schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 1000 })),
   },
   {
     meta: {
