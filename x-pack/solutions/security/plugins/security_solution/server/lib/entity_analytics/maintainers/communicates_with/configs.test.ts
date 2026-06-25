@@ -36,9 +36,7 @@ describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     for (const config of COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS) {
       expect(config.kind).toBe('standard');
     }
-    expect(standardConfigs.length).toBe(
-      COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.length
-    );
+    expect(standardConfigs.length).toBe(COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.length);
   });
 
   it.each(COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS)(
