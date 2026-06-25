@@ -30,7 +30,10 @@ export const QuestionAnswerList: React.FC<QuestionAnswerListProps> = ({ question
       {questions.map((q, i) => {
         const a = answers[i] ?? {};
         const isSkipped = !!a.skipped;
-        const choiceText = (a.choice ?? []).map((idx) => q.options[idx].label).join(', ');
+        const choiceText = (a.choice ?? [])
+          .map((idx) => q.options[idx]?.label ?? '')
+          .filter(Boolean)
+          .join(', ');
         const hasChoice = choiceText.length > 0;
         const hasCustom = !!a.custom;
         const isLast = i === questions.length - 1;
