@@ -4,6 +4,11 @@ required:
   - from
 type: object
 properties:
+  allowHtml:
+    description: >
+      Specifies whether this connector can send user-authored HTML email bodies.
+      This option is not available when `service` is `elastic_cloud`.
+    type: boolean
   clientId:
     description: >
       The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format.

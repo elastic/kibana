@@ -232,7 +232,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           const { status, message } = resp.body;
           expect(status).to.eql('error');
-          expect(message).to.eql('HTML email can only be sent via notifications');
+          expect(message).to.eql(
+            'HTML email can only be sent when the connector is configured to allow HTML'
+          );
         });
     });
 
@@ -680,8 +682,27 @@ export default function emailTest({ getService }: FtrProviderContext) {
     it('should trim large messageHTML parameters', async () => {
       const longLength = EmailMaximumBodyLength * 2;
       const longString = ''.padEnd(longLength, 'x');
+      const { body: createdHtmlAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action with HTML opt-in',
+          connector_type_id: '.email',
+          config: {
+            service: '__json',
+            from: 'bob@example.com',
+            hasAuth: true,
+            allowHtml: true,
+          },
+          secrets: {
+            user: 'bob',
+            password: 'supersecret',
+          },
+        })
+        .expect(200);
+
       await supertest
-        .post(`/api/alerts_fixture/${createdActionId}/_execute_connector_as_notification`)
+        .post(`/api/actions/connector/${createdHtmlAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

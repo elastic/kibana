@@ -95,7 +95,9 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
         .then((resp: any) => {
           const { status: runStatus, message } = resp.body;
           expect(runStatus).to.eql('error');
-          expect(message).to.eql('HTML email can only be sent via notifications');
+          expect(message).to.eql(
+            'HTML email can only be sent when the connector is configured to allow HTML'
+          );
         });
     });
 
@@ -155,7 +157,9 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
 
       const event = events[0];
       expect(event?.event?.outcome).to.be('failure');
-      expect(event?.error?.message).to.be('HTML email can only be sent via notifications');
+      expect(event?.error?.message).to.be(
+        'HTML email can only be sent when the connector is configured to allow HTML'
+      );
     });
   });
 }

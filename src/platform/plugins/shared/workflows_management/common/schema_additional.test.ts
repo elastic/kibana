@@ -28,7 +28,7 @@ import { EmailParamsSchema } from './stack_connectors_schema/email';
 import { stepSchemas } from './step_schemas';
 
 describe('schema - additional coverage', () => {
-  describe('EmailParamsSchema attachments', () => {
+  describe('EmailParamsSchema email body and attachments', () => {
     const baseEmailParams = {
       to: ['ops@example.com'],
       subject: 'Daily CSV report',
@@ -74,6 +74,15 @@ describe('schema - additional coverage', () => {
       ).not.toThrow();
     });
 
+    it('accepts email params with an HTML message body', () => {
+      expect(() =>
+        EmailParamsSchema.parse({
+          ...baseEmailParams,
+          messageHTML: '<p>Attached is the generated report.</p>',
+        })
+      ).not.toThrow();
+    });
+
     it('keeps filename and content in JSON Schema required for attachment items (Monaco YAML templates)', () => {
       const jsonSchema = getWorkflowJsonSchema(createWorkflowEmailSchema());
       expect(jsonSchema).not.toBeNull();
@@ -102,6 +111,26 @@ describe('schema - additional coverage', () => {
 
     it('accepts a workflow YAML email step with attachments', () => {
       expect(() => createWorkflowEmailSchema().parse(createWorkflowWithEmailStep())).not.toThrow();
+    });
+
+    it('accepts a workflow YAML email step with an HTML message body', () => {
+      expect(() =>
+        createWorkflowEmailSchema().parse({
+          name: 'email html workflow',
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'send-report',
+              type: 'email',
+              'connector-id': 'stakeholder-email',
+              with: {
+                ...baseEmailParams,
+                messageHTML: '<p>Attached is the generated report.</p>',
+              },
+            },
+          ],
+        })
+      ).not.toThrow();
     });
 
     it('rejects attachments missing required filename', () => {
