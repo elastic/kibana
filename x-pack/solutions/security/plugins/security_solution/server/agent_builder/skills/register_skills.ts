@@ -60,7 +60,7 @@ export const registerSkills = async ({
   await agentBuilder.skills.register(
     createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
   );
-  
+
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
   );
