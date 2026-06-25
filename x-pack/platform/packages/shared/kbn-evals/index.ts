@@ -30,6 +30,13 @@ import './src/setup_dot_text';
 export * as cli from './src/cli';
 
 export { evaluate } from './src/evaluate';
+export { createAgentBuilderClient } from './src/utils/agent_builder_client';
+export type {
+  AgentBuilderClient,
+  AgentBuilderConverseParams,
+  AgentBuilderClientResponse,
+  ConverseStep,
+} from './src/utils/agent_builder_client';
 export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
@@ -105,6 +112,7 @@ export {
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
   createToolCallsEvaluator,
+  createCachedReadInputTokensEvaluator,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 

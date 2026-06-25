@@ -21,10 +21,12 @@ import { getGitMetadata } from './utils/git_metadata';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
+import { createAgentBuilderClient } from './utils/agent_builder_client';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
+  createCachedReadInputTokensEvaluator,
   createInputTokensEvaluator,
   createLatencyEvaluator,
   createOutputTokensEvaluator,
@@ -173,6 +175,21 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       log.serviceLoaded?.('inferenceClient');
 
       await use(wrappedInferenceClient);
+    },
+    { scope: 'worker' },
+  ],
+
+  agentBuilderClient: [
+    async ({ fetch, log, connector }, use) => {
+      const agentBuilderClient = createAgentBuilderClient({
+        fetch,
+        log,
+        connectorId: connector.id,
+      });
+
+      log.serviceLoaded?.('agentBuilderClient');
+
+      await use(agentBuilderClient);
     },
     { scope: 'worker' },
   ],
@@ -394,6 +411,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             log,
           }),
           cachedTokens: createCachedTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          cachedReadInputTokens: createCachedReadInputTokensEvaluator({
             traceEsClient,
             log,
           }),

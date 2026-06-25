@@ -10,6 +10,7 @@ export {
   createInputTokensEvaluator,
   createOutputTokensEvaluator,
   createCachedTokensEvaluator,
+  createCachedReadInputTokensEvaluator,
 } from './tokens';
 export { createLatencyEvaluator, createSpanLatencyEvaluator } from './latency';
 export { createToolCallsEvaluator } from './tool_calls';
