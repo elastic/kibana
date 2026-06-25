@@ -135,7 +135,7 @@ function replaceProperties(obj: object, replacement: object): void {
 /**
  * Unwraps expression-only parentheses from the AST, mutating the provided root in place.
  */
-export function unwrapExpressionParens<T extends ESQLAstQueryExpression>(root: T): T {
+export function unwrapExpressionParens(root: ESQLAstQueryExpression) {
   const parensNodes = Walker.findAll(root, (node) => isParens(node) && !isSubQuery(node), {
     visitCommand: (node, _parent, walker) => {
       if (node.name === 'promql') {
