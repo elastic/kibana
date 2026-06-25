@@ -59,6 +59,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
     services: {
       notifications: { toasts: toastNotifications },
       uiActions,
+      cps,
     },
   } = useMlKibana();
   const mlApi = useMlApi();
@@ -79,6 +80,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
 
   const canStartStopDatafeed = canStartStopDatafeedCap && mlNodesAvailable();
   const canCloseJob = canCloseJobCap && mlNodesAvailable();
+  const canUpdateProjectRouting = cps?.cpsManager && canUpdateDatafeed;
 
   const onButtonClick = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -135,7 +137,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
     </EuiContextMenuItem>,
   ];
 
-  if (canUpdateDatafeed) {
+  if (canUpdateProjectRouting) {
     items.push(
       <EuiContextMenuItem
         key="update project routing"

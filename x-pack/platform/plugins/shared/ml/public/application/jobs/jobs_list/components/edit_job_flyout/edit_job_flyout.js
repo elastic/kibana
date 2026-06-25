@@ -218,6 +218,7 @@ export class EditJobFlyoutUI extends Component {
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
       ...(datafeedRunning === false &&
+      this.props.kibana.services.cps?.cpsManager &&
       !this._initialJobFormState.datafeedProjectRouting &&
       defaultProjectRouting
         ? { datafeedProjectRouting: defaultProjectRouting }
