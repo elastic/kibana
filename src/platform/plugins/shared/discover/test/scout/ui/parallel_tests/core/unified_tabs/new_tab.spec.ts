@@ -149,6 +149,8 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       for (let i = 0; i < newTabCount; i++) {
         await unifiedTabs.clickNewTabButton();
       }
+
+      await unifiedTabs.hideTabPreview();
       await discover.waitUntilTabIsLoaded();
 
       // The initial tab plus every rapidly-opened tab should be present.
@@ -156,9 +158,9 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
 
       // selectTab asserts each tab becomes active and finishes loading.
       for (let i = newTabCount - 1; i > 0; i--) {
+        await unifiedTabs.hideTabPreview();
         await unifiedTabs.selectTab(i);
         await discover.waitUntilTabIsLoaded();
-        await unifiedTabs.hideTabPreview();
       }
     });
   });
