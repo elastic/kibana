@@ -47,13 +47,20 @@ import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } 
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
-const SCOUT_READY_TIMEOUT_MS = 180_000;
+const SCOUT_READY_DEFAULT_TIMEOUT_MS = 600_000;
+const SCOUT_READY_TIMEOUT_MS =
+  Number(process.env.SCOUT_READY_TIMEOUT_MS) || SCOUT_READY_DEFAULT_TIMEOUT_MS;
 
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
   const startTime = Date.now();
+  const timeoutSec = Math.round(SCOUT_READY_TIMEOUT_MS / 1000);
   let esUrl: string | undefined;
   let kbnUrl: string | undefined;
+  let lastLogAt = 0;
+  let esReady = false;
+
+  log.info(`Waiting up to ${timeoutSec}s for Scout (ES + Kibana) to become ready...`);
 
   while (Date.now() - startTime < SCOUT_READY_TIMEOUT_MS) {
     if (!esUrl && Fs.existsSync(configPath)) {
@@ -72,15 +79,37 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
         probeHttp(esUrl),
         probeHttp(`${kbnUrl}/api/status`),
       ]);
+
+      if (!esReady && esOk) {
+        esReady = true;
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        log.info(`  ES ready (${elapsed}s). Waiting for Kibana...`);
+      }
+
       if (esOk && kbnOk) {
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        log.info(`  Both services ready (${elapsed}s).`);
         return;
       }
+    }
+
+    const elapsed = Date.now() - startTime;
+    if (elapsed - lastLogAt >= 30_000) {
+      const elapsedSec = Math.round(elapsed / 1000);
+      const pending = !esUrl ? 'config' : !esReady ? 'ES + Kibana' : 'Kibana';
+      log.info(`  Still waiting for ${pending}... (${elapsedSec}s / ${timeoutSec}s)`);
+      lastLogAt = elapsed;
     }
 
     await new Promise((r) => setTimeout(r, SCOUT_READY_POLL_INTERVAL_MS));
   }
 
-  throw new Error(`Scout did not become ready within ${SCOUT_READY_TIMEOUT_MS / 1000}s`);
+  const pending = !esUrl ? 'Scout config' : !esReady ? 'ES + Kibana' : 'Kibana';
+  throw new Error(
+    `Scout did not become ready within ${timeoutSec}s (waiting for: ${pending}). ` +
+      'If Kibana is building bundles, set SCOUT_READY_TIMEOUT_MS to a higher value ' +
+      '(e.g. SCOUT_READY_TIMEOUT_MS=900000 for 15 minutes).'
+  );
 };
 
 /**
