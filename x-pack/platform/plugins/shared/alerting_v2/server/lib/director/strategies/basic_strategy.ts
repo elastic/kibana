@@ -19,6 +19,8 @@ import type { ITransitionStrategy, StateTransitionContext, StateTransitionResult
 export class BasicTransitionStrategy implements ITransitionStrategy {
   readonly name: string = 'basic';
 
+  // Deterministic state machine transitions using current episode status and alert event status.
+  // `no_data` events are not in this table. Their outcome also depends on `rule.no_data_strategy`, and is resolved in getNextStatusForNoData below
   protected readonly stateMachine: Partial<
     Record<AlertEpisodeStatus, Partial<Record<AlertEventStatus, AlertEpisodeStatus>>>
   > = {

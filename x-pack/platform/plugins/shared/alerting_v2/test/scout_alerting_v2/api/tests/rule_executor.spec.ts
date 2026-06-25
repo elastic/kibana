@@ -1718,25 +1718,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
-  /**
-   * No-data behavior — see `lib/rule_executor/steps/create_no_data_events_step.ts`
-   * and the rule-execution matrix doc.
-   *
-   * The matrix has three scenarios for a previously active group:
-   *   - Scenario A: `avg_cpu = 78%` — recovery condition met, host present.
-   *   - Scenario B: `avg_cpu = 85%` — limbo, host present (not breaching, not recovering).
-   *   - Scenario C: host absent — no data.
-   *
-   * The executor unit tests in `create_no_data_events_step.test.ts` walk
-   * every (`no_data_strategy` × scenario × `recovery_strategy`) cell.
-   * The scout tests below cover **Scenario C only** (one wiring proof per
-   * `no_data_strategy`) since that is the only scenario that exercises the
-   * data-presence query end-to-end and produces a `no_data` rule event.
-   *
-   * In each test the rule's `no_data` query mirrors the breach query
-   * without the threshold predicate, so deleting the host's documents drops
-   * the group out of both queries.
-   */
   apiTest("no_data_strategy 'emit' writes a no_data rule event", async ({ apiServices }) => {
     const HOST = 'host-no-data-emit';
 

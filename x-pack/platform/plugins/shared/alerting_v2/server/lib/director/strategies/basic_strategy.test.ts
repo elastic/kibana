@@ -164,6 +164,7 @@ describe('BasicTransitionStrategy', () => {
 
   describe('no_data event branching on rule.no_data_strategy', () => {
     it.each<[AlertEpisodeStatus]>([
+      [alertEpisodeStatus.inactive],
       [alertEpisodeStatus.pending],
       [alertEpisodeStatus.active],
       [alertEpisodeStatus.recovering],

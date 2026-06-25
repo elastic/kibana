@@ -5,28 +5,6 @@
  * 2.0.
  */
 
-/**
- * Tests for the no-data executor step.
- *
- * Hybrid layout:
- *   - Outer groups: `no_data_strategy` (the rule's primary configuration knob).
- *   - Inner groups: the three scenarios from the rule-execution matrix doc,
- *     for a previously active group `host.name = abc` that does not appear
- *     in the breach batch this run.
- *
- * | Scenario | avg_cpu | breach query  | recovery query (avg_cpu < 80) | data presence |
- * | -------- | ------- | ------------- | ----------------------------- | ------------- |
- * | A        | 78%     | not breaching | matches                       | present       |
- * | B        | 85%     | not breaching | does NOT match                | present       |
- * | C        | absent  | not breaching | absent                        | absent        |
- *
- * Each scenario is exercised against the three `recovery_strategy` columns
- * (`no_breach`, `query`, `none`). Scenarios A and B share outcomes across
- * the no_data_strategy values that opt into the no-data check (data is
- * present, so the no-data partition is empty); Scenario C is where each
- * no_data_strategy diverges.
- */
-
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -72,9 +50,6 @@ describe('CreateNoDataEventsStep', () => {
     return { step, internalEsClient: internal.mockEsClient, scopedEsClient: scoped.mockEsClient };
   }
 
-  // The `host.name = abc` group was previously active and is the subject of
-  // every scenario. The active-groups query the step runs only projects
-  // `group_hash`, so we mock that single column.
   function mockActiveAbcGroup(internalEsClient: ReturnType<typeof createStep>['internalEsClient']) {
     internalEsClient.esql.query.mockResolvedValue(
       createEsqlResponse([{ name: 'group_hash', type: 'keyword' }], [[hostHash]])
@@ -130,301 +105,139 @@ describe('CreateNoDataEventsStep', () => {
     return Object.fromEntries(events.map((e) => [e.group_hash, e.status]));
   }
 
-  // ──────────────────────────────────────────────────────────────────────
-  // no_data_strategy: emit
-  //
-  // Emit a `no_data` rule event for active-but-absent groups. Replaces any
-  // upstream `recovered` event for those same groups so the FSM sees the
-  // most-specific outcome. Data-present groups are handled by recovery.
-  // ──────────────────────────────────────────────────────────────────────
-  describe("no_data_strategy: 'emit'", () => {
-    describe('Scenario A — avg_cpu = 78% (recovery condition met, host present)', () => {
-      it('recovery_strategy: no_breach — passes through the upstream recovered event', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+  describe.each([['emit'], ['last_known_status']] as const)(
+    "no_data_strategy: '%s'",
+    (no_data_strategy) => {
+      describe('Scenario: avg_cpu = 85%, recovery and breach queries are not met, host present', () => {
+        it('recovery_strategy: no_breach — passes through the recovered event', async () => {
+          const { step, internalEsClient, scopedEsClient } = createStep();
 
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
+          mockActiveAbcGroup(internalEsClient);
+          mockNoDataQueryHasHost(scopedEsClient, true);
 
-        const incoming = recoveredEvent();
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
-          incomingEvents: [incoming],
+          const incoming = recoveredEvent();
+          const { result } = await runStep({
+            step,
+            rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy }),
+            incomingEvents: [incoming],
+          });
+
+          expect(result.state.alertEventsBatch).toEqual([incoming]);
         });
 
-        expect(result.state.alertEventsBatch).toEqual([incoming]);
-      });
+        it('recovery_strategy: query — emits a breached event', async () => {
+          const { step, internalEsClient, scopedEsClient } = createStep();
 
-      it('recovery_strategy: query — passes through the recovery-query-matched event', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+          mockActiveAbcGroup(internalEsClient);
+          mockNoDataQueryHasHost(scopedEsClient, true);
 
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
+          const { result } = await runStep({
+            step,
+            rule: buildRule({ recovery_strategy: 'query', no_data_strategy }),
+            incomingEvents: [],
+          });
 
-        const incoming = recoveredEvent();
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'query', no_data_strategy: 'emit' }),
-          incomingEvents: [incoming],
+          const events = result.state.alertEventsBatch!;
+          expect(events).toHaveLength(1);
+          expect(events[0]).toMatchObject({
+            group_hash: hostHash,
+            status: 'breached',
+            source: 'internal',
+            data: { 'host.name': HOST },
+          });
         });
 
-        expect(result.state.alertEventsBatch).toEqual([incoming]);
-      });
+        it('recovery_strategy: none — writes no event', async () => {
+          const { step, internalEsClient, scopedEsClient } = createStep();
 
-      it('recovery_strategy: none — UNKNOWN_E: writes no event (recovery is opted out)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+          mockActiveAbcGroup(internalEsClient);
+          mockNoDataQueryHasHost(scopedEsClient, true);
 
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
+          const { result, initialState } = await runStep({
+            step,
+            rule: buildRule({ recovery_strategy: 'none', no_data_strategy }),
+            incomingEvents: [],
+          });
 
-        const { result, initialState } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'none', no_data_strategy: 'emit' }),
-          incomingEvents: [],
-        });
-
-        expect(result.state.alertEventsBatch).toEqual(initialState.alertEventsBatch);
-      });
-    });
-
-    describe('Scenario B — avg_cpu = 85% (limbo, host present)', () => {
-      it('recovery_strategy: no_breach — passes through the upstream recovered event (no_breach ignores cpu)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
-
-        const incoming = recoveredEvent();
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
-          incomingEvents: [incoming],
-        });
-
-        expect(result.state.alertEventsBatch).toEqual([incoming]);
-      });
-
-      it('recovery_strategy: query — UNKNOWN_D: re-asserts breached so the episode stays alive', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
-
-        // 85% does not match the recovery condition (< 80), so no recovered
-        // event is emitted upstream — the data-present partition fills the gap.
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'query', no_data_strategy: 'emit' }),
-          incomingEvents: [],
-        });
-
-        const events = result.state.alertEventsBatch!;
-        expect(events).toHaveLength(1);
-        expect(events[0]).toMatchObject({
-          group_hash: hostHash,
-          status: 'breached',
-          source: 'internal',
-          data: { 'host.name': HOST },
+          expect(result.state.alertEventsBatch).toEqual(initialState.alertEventsBatch);
         });
       });
 
-      it('recovery_strategy: none — UNKNOWN_E: writes no event (recovery is opted out)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+      describe('Scenario: host absent, no-data path', () => {
+        it('recovery_strategy: no_breach — replaces the upstream recovered event with a no_data event', async () => {
+          const { step, internalEsClient, scopedEsClient } = createStep();
 
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
+          mockActiveAbcGroup(internalEsClient);
+          mockNoDataQueryHasHost(scopedEsClient, false);
 
-        const { result, initialState } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'none', no_data_strategy: 'emit' }),
-          incomingEvents: [],
+          const { result } = await runStep({
+            step,
+            rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy }),
+            incomingEvents: [recoveredEvent()],
+          });
+
+          expect(statusesByGroup(result.state.alertEventsBatch!)).toEqual({
+            [hostHash]: 'no_data',
+          });
         });
 
-        expect(result.state.alertEventsBatch).toEqual(initialState.alertEventsBatch);
-      });
-    });
+        it('recovery_strategy: query — emits a no_data event', async () => {
+          const { step, internalEsClient, scopedEsClient } = createStep();
 
-    describe('Scenario C — host absent (no-data path)', () => {
-      it('recovery_strategy: no_breach — replaces the upstream recovered event with a no_data event', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+          mockActiveAbcGroup(internalEsClient);
+          mockNoDataQueryHasHost(scopedEsClient, false);
 
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, false);
+          const { result } = await runStep({
+            step,
+            rule: buildRule({ recovery_strategy: 'query', no_data_strategy }),
+            incomingEvents: [],
+          });
 
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
-          incomingEvents: [recoveredEvent()],
+          expect(statusesByGroup(result.state.alertEventsBatch!)).toEqual({
+            [hostHash]: 'no_data',
+          });
         });
 
-        expect(statusesByGroup(result.state.alertEventsBatch!)).toEqual({ [hostHash]: 'no_data' });
-      });
+        it('recovery_strategy: none — emits a no_data event', async () => {
+          const { step, internalEsClient, scopedEsClient } = createStep();
 
-      it('recovery_strategy: query — emits a no_data event (recovery query cannot match an absent host)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+          mockActiveAbcGroup(internalEsClient);
+          mockNoDataQueryHasHost(scopedEsClient, false);
 
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, false);
+          const { result } = await runStep({
+            step,
+            rule: buildRule({ recovery_strategy: 'none', no_data_strategy }),
+            incomingEvents: [],
+          });
 
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'query', no_data_strategy: 'emit' }),
-          incomingEvents: [],
+          expect(statusesByGroup(result.state.alertEventsBatch!)).toEqual({
+            [hostHash]: 'no_data',
+          });
         });
-
-        expect(statusesByGroup(result.state.alertEventsBatch!)).toEqual({ [hostHash]: 'no_data' });
       });
+    }
+  );
 
-      it('recovery_strategy: none — emits a no_data event even though recovery is disabled', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, false);
-
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'none', no_data_strategy: 'emit' }),
-          incomingEvents: [],
-        });
-
-        expect(statusesByGroup(result.state.alertEventsBatch!)).toEqual({ [hostHash]: 'no_data' });
-      });
-    });
-  });
-
-  // ──────────────────────────────────────────────────────────────────────
-  // no_data_strategy: last_known_status
-  //
-  // Emits the same `no_data` rule event as `emit`. The director branches on
-  // `rule.no_data_strategy` when computing the next episode status: `'emit'`
-  // advances to a `'no_data'` episode status; `'last_known_status'` preserves
-  // the prior status. See `BasicTransitionStrategy.getNextStatusForNoData`
-  // and `director.test.ts` for the FSM-side coverage. Tested only under
-  // Scenario C because Scenarios A/B don't produce no-data outcomes.
-  // ──────────────────────────────────────────────────────────────────────
-  describe("no_data_strategy: 'last_known_status'", () => {
-    describe('Scenario C — host absent', () => {
-      it.each([['no_breach'], ['query'], ['none']] as const)(
-        'recovery_strategy: %s — emits a no_data event (FSM preserves the prior episode status)',
+  describe("no_data_strategy: 'recover'", () => {
+    describe('Scenario: host absent, no-data path', () => {
+      it.each([['no_breach'], ['query']] as const)(
+        'recovery_strategy: %s — passes through the recovered event',
         async (recovery_strategy) => {
           const { step, internalEsClient, scopedEsClient } = createStep();
 
           mockActiveAbcGroup(internalEsClient);
           mockNoDataQueryHasHost(scopedEsClient, false);
 
-          const incomingEvents = recovery_strategy === 'no_breach' ? [recoveredEvent()] : [];
-
+          const incoming = recoveredEvent();
           const { result } = await runStep({
             step,
-            rule: buildRule({ recovery_strategy, no_data_strategy: 'last_known_status' }),
-            incomingEvents,
+            rule: buildRule({ recovery_strategy, no_data_strategy: 'recover' }),
+            incomingEvents: [incoming],
           });
 
-          expect(statusesByGroup(result.state.alertEventsBatch!)).toEqual({
-            [hostHash]: 'no_data',
-          });
+          expect(result.state.alertEventsBatch).toEqual([incoming]);
         }
       );
-    });
-  });
-
-  // ──────────────────────────────────────────────────────────────────────
-  // no_data_strategy: recover
-  //
-  // Treat absence as recovery. When recovery has already been emitted
-  // upstream we leave it alone (idempotent); when recovery is disabled we
-  // emit the recovered event ourselves.
-  // ──────────────────────────────────────────────────────────────────────
-  describe("no_data_strategy: 'recover'", () => {
-    describe('Scenario A — avg_cpu = 78% (recovery condition met, host present)', () => {
-      it('recovery_strategy: no_breach — passes through the upstream recovered event', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
-
-        const incoming = recoveredEvent();
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'recover' }),
-          incomingEvents: [incoming],
-        });
-
-        expect(result.state.alertEventsBatch).toEqual([incoming]);
-      });
-
-      it('recovery_strategy: query — passes through the recovery-query-matched event', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
-
-        const incoming = recoveredEvent();
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'query', no_data_strategy: 'recover' }),
-          incomingEvents: [incoming],
-        });
-
-        expect(result.state.alertEventsBatch).toEqual([incoming]);
-      });
-
-      it('recovery_strategy: none — UNKNOWN_E: writes no event (data is present, no-data path is not taken)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
-
-        const { result, initialState } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'none', no_data_strategy: 'recover' }),
-          incomingEvents: [],
-        });
-
-        expect(result.state.alertEventsBatch).toEqual(initialState.alertEventsBatch);
-      });
-    });
-
-    describe('Scenario B — avg_cpu = 85% (limbo, host present)', () => {
-      it('recovery_strategy: query — UNKNOWN_D: re-asserts breached (data is present, no-data path is not taken)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, true);
-
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'query', no_data_strategy: 'recover' }),
-          incomingEvents: [],
-        });
-
-        const events = result.state.alertEventsBatch!;
-        expect(events).toHaveLength(1);
-        expect(events[0]).toMatchObject({
-          group_hash: hostHash,
-          status: 'breached',
-          source: 'internal',
-          data: { 'host.name': HOST },
-        });
-      });
-    });
-
-    describe('Scenario C — host absent', () => {
-      it('recovery_strategy: no_breach — leaves the upstream recovered event in place (idempotent)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        mockNoDataQueryHasHost(scopedEsClient, false);
-
-        const incoming = recoveredEvent();
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'recover' }),
-          incomingEvents: [incoming],
-        });
-
-        expect(result.state.alertEventsBatch).toEqual([incoming]);
-      });
 
       it('recovery_strategy: none — emits a recovered event because no upstream step did', async () => {
         const { step, internalEsClient, scopedEsClient } = createStep();
@@ -445,33 +258,9 @@ describe('CreateNoDataEventsStep', () => {
     });
   });
 
-  // ──────────────────────────────────────────────────────────────────────
-  // no_data_strategy: 'none' (or omitted)
-  //
-  // No-data handling is opted out entirely. The step short-circuits before
-  // running the no-data query; recovery events from the upstream step are
-  // the final outcome.
-  // ──────────────────────────────────────────────────────────────────────
   describe("no_data_strategy: 'none'", () => {
-    describe('Scenario A — avg_cpu = 78% (recovery condition met, host present)', () => {
-      it('recovery_strategy: no_breach — short-circuits and passes through the upstream recovered event', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        const incoming = recoveredEvent();
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'none' }),
-          incomingEvents: [incoming],
-        });
-
-        expect(internalEsClient.esql.query).not.toHaveBeenCalled();
-        expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
-        expect(result.state.alertEventsBatch).toEqual([incoming]);
-      });
-    });
-
-    describe('Scenario C — host absent', () => {
-      it('recovery_strategy: none — UNKNOWN_E: writes no event (both strategies are off)', async () => {
+    describe('Scenario: host absent, no-data path', () => {
+      it('recovery_strategy: none — writes no event', async () => {
         const { step, internalEsClient, scopedEsClient } = createStep();
 
         const { result, initialState } = await runStep({
@@ -486,7 +275,7 @@ describe('CreateNoDataEventsStep', () => {
       });
     });
 
-    it("treats an omitted no_data_strategy the same as 'none' (short-circuits)", async () => {
+    it("treats an omitted no_data_strategy the same as 'none'", async () => {
       const { step, internalEsClient, scopedEsClient } = createStep();
 
       const incoming = recoveredEvent();
@@ -502,16 +291,11 @@ describe('CreateNoDataEventsStep', () => {
     });
   });
 
-  // ──────────────────────────────────────────────────────────────────────
-  // Composed format: `base` is the data-presence query.
-  // Replays Scenario C under composed format to confirm parity.
-  // ──────────────────────────────────────────────────────────────────────
   describe('composed format', () => {
-    it("Scenario C — uses `base` as the data-presence query and emits no_data when the group isn't in the result", async () => {
+    it("Scenario: host absent, no-data path — uses base query and emits no_data when the group isn't in the result", async () => {
       const { step, internalEsClient, scopedEsClient } = createStep();
 
       mockActiveAbcGroup(internalEsClient);
-      // Absent from `base` ⇒ no data.
       scopedEsClient.esql.query.mockResolvedValue(createEsqlResponse([], []));
 
       const baseQuery = 'FROM metrics-* | STATS AVG(cpu) BY host.name';
@@ -541,176 +325,156 @@ describe('CreateNoDataEventsStep', () => {
     });
   });
 
-  // ──────────────────────────────────────────────────────────────────────
-  // Step plumbing: short-circuits, defensive guards, ES errors, abort, state.
-  // These aren't part of the matrix but are required of every executor step.
-  // ──────────────────────────────────────────────────────────────────────
-  describe('step plumbing', () => {
-    describe('short-circuits', () => {
-      it('skips for non-alert rules (signal rules have no episode lifecycle)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+  it('skips for non-alert rules (signal rules have no episode lifecycle)', async () => {
+    const { step, internalEsClient, scopedEsClient } = createStep();
 
-        const { result, initialState } = await runStep({
-          step,
-          rule: createRuleResponse({ kind: 'signal', no_data_strategy: 'emit' }),
-          incomingEvents: [createAlertEvent()],
-        });
-
-        expect(internalEsClient.esql.query).not.toHaveBeenCalled();
-        expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
-        expect(result.state.alertEventsBatch).toEqual(initialState.alertEventsBatch);
-      });
-
-      it('does not query the no-data ES|QL when there are no active groups for the rule', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        internalEsClient.esql.query.mockResolvedValue(
-          createEsqlResponse([{ name: 'group_hash', type: 'keyword' }], [])
-        );
-
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
-          incomingEvents: [],
-        });
-
-        expect(internalEsClient.esql.query).toHaveBeenCalledTimes(1);
-        expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
-        expect(result.state.alertEventsBatch).toEqual([]);
-      });
-
-      it('skips when every active group is still breaching (no candidates left for the no-data check)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-
-        const breached = createAlertEvent({ group_hash: hostHash, status: 'breached' });
-        const { result } = await runStep({
-          step,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
-          incomingEvents: [breached],
-        });
-
-        expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
-        expect(result.state.alertEventsBatch).toEqual([breached]);
-      });
+    const { result, initialState } = await runStep({
+      step,
+      rule: createRuleResponse({ kind: 'signal', no_data_strategy: 'emit' }),
+      incomingEvents: [createAlertEvent()],
     });
 
-    describe('defensive guards', () => {
-      it('skips no-data handling when a standalone rule omits the `query.no_data` block (stale saved object)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+    expect(internalEsClient.esql.query).not.toHaveBeenCalled();
+    expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
+    expect(result.state.alertEventsBatch).toEqual(initialState.alertEventsBatch);
+  });
 
-        mockActiveAbcGroup(internalEsClient);
+  it('does not query the no-data ES|QL when there are no active groups for the rule', async () => {
+    const { step, internalEsClient, scopedEsClient } = createStep();
 
-        const incoming = recoveredEvent();
-        const ruleWithoutNoData = createRuleResponse({
-          kind: 'alert',
-          recovery_strategy: 'no_breach',
-          no_data_strategy: 'emit',
-          grouping: { fields: groupingFields },
-          query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
-        });
+    internalEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'group_hash', type: 'keyword' }], [])
+    );
 
-        const { result } = await runStep({
-          step,
-          rule: ruleWithoutNoData,
-          incomingEvents: [incoming],
-        });
-
-        expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
-        expect(result.state.alertEventsBatch).toEqual([incoming]);
-      });
+    const { result } = await runStep({
+      step,
+      rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
+      incomingEvents: [],
     });
 
-    describe('error handling', () => {
-      it('surfaces ES|QL 4xx errors from the no-data query as TaskErrorSource.USER', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
+    expect(internalEsClient.esql.query).toHaveBeenCalledTimes(1);
+    expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
+    expect(result.state.alertEventsBatch).toEqual([]);
+  });
 
-        mockActiveAbcGroup(internalEsClient);
-        scopedEsClient.esql.query.mockRejectedValue(
-          // @ts-expect-error: Not all params are needed for the test.
-          new errors.ResponseError({ statusCode: 400 })
-        );
+  it('skips when every active group is still breaching (no candidates left for the no-data check)', async () => {
+    const { step, internalEsClient, scopedEsClient } = createStep();
 
-        const state = createRulePipelineState({
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
-          alertEventsBatch: [],
-        });
+    mockActiveAbcGroup(internalEsClient);
 
-        const error = await getStepError(step, state);
-
-        expect(error).toBeInstanceOf(Error);
-        expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      });
-
-      it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {
-        const { step, internalEsClient, scopedEsClient } = createStep();
-
-        mockActiveAbcGroup(internalEsClient);
-        scopedEsClient.esql.query.mockRejectedValue(
-          new errors.ResponseError({ statusCode: 503 } as DiagnosticResult)
-        );
-
-        const state = createRulePipelineState({
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
-          alertEventsBatch: [],
-        });
-
-        const error = await getStepError(step, state);
-
-        expect(error).toBeInstanceOf(Error);
-        expect(getErrorSource(error!)).toBeUndefined();
-      });
+    const breached = createAlertEvent({ group_hash: hostHash, status: 'breached' });
+    const { result } = await runStep({
+      step,
+      rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
+      incomingEvents: [breached],
     });
 
-    describe('cancellation', () => {
-      it('forwards the executionContext abort signal to the active-groups ES|QL call', async () => {
-        const { step, internalEsClient } = createStep();
+    expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
+    expect(result.state.alertEventsBatch).toEqual([breached]);
+  });
 
-        internalEsClient.esql.query.mockResolvedValue(
-          createEsqlResponse([{ name: 'group_hash', type: 'keyword' }], [])
-        );
+  it('skips no-data handling when a standalone rule omits the `query.no_data` block (stale saved object)', async () => {
+    const { step, internalEsClient, scopedEsClient } = createStep();
 
-        const abortController = new AbortController();
-        const input = createRuleExecutionInput({ abortSignal: abortController.signal });
+    mockActiveAbcGroup(internalEsClient);
 
-        const state = createRulePipelineState({
-          input,
-          rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
-          alertEventsBatch: [createAlertEvent()],
-        });
-
-        await collectStreamResults(step.executeStream(createPipelineStream([state])));
-
-        expect(internalEsClient.esql.query).toHaveBeenCalledWith(
-          expect.any(Object),
-          expect.objectContaining({ signal: abortController.signal })
-        );
-      });
+    const incoming = recoveredEvent();
+    const ruleWithoutNoData = createRuleResponse({
+      kind: 'alert',
+      recovery_strategy: 'no_breach',
+      no_data_strategy: 'emit',
+      grouping: { fields: groupingFields },
+      query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
     });
 
-    describe('state guards', () => {
-      it('halts with state_not_ready when `rule` is missing from pipeline state', async () => {
-        const { step } = createStep();
-
-        const state = createRulePipelineState({ alertEventsBatch: [createAlertEvent()] });
-        const [result] = await collectStreamResults(
-          step.executeStream(createPipelineStream([state]))
-        );
-
-        expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
-      });
-
-      it('halts with state_not_ready when `alertEventsBatch` is missing from pipeline state', async () => {
-        const { step } = createStep();
-
-        const state = createRulePipelineState({ rule: createRuleResponse() });
-        const [result] = await collectStreamResults(
-          step.executeStream(createPipelineStream([state]))
-        );
-
-        expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
-      });
+    const { result } = await runStep({
+      step,
+      rule: ruleWithoutNoData,
+      incomingEvents: [incoming],
     });
+
+    expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
+    expect(result.state.alertEventsBatch).toEqual([incoming]);
+  });
+
+  it('surfaces ES|QL 4xx errors from the no-data query as TaskErrorSource.USER', async () => {
+    const { step, internalEsClient, scopedEsClient } = createStep();
+
+    mockActiveAbcGroup(internalEsClient);
+    scopedEsClient.esql.query.mockRejectedValue(
+      // @ts-expect-error: Not all params are needed for the test.
+      new errors.ResponseError({ statusCode: 400 })
+    );
+
+    const state = createRulePipelineState({
+      rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
+      alertEventsBatch: [],
+    });
+
+    const error = await getStepError(step, state);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+  });
+
+  it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {
+    const { step, internalEsClient, scopedEsClient } = createStep();
+
+    mockActiveAbcGroup(internalEsClient);
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.ResponseError({ statusCode: 503 } as DiagnosticResult)
+    );
+
+    const state = createRulePipelineState({
+      rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
+      alertEventsBatch: [],
+    });
+
+    const error = await getStepError(step, state);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBeUndefined();
+  });
+
+  it('forwards the executionContext abort signal to the active-groups ES|QL call', async () => {
+    const { step, internalEsClient } = createStep();
+
+    internalEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'group_hash', type: 'keyword' }], [])
+    );
+
+    const abortController = new AbortController();
+    const input = createRuleExecutionInput({ abortSignal: abortController.signal });
+
+    const state = createRulePipelineState({
+      input,
+      rule: buildRule({ recovery_strategy: 'no_breach', no_data_strategy: 'emit' }),
+      alertEventsBatch: [createAlertEvent()],
+    });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(internalEsClient.esql.query).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ signal: abortController.signal })
+    );
+  });
+
+  it('halts with state_not_ready when `rule` is missing from pipeline state', async () => {
+    const { step } = createStep();
+
+    const state = createRulePipelineState({ alertEventsBatch: [createAlertEvent()] });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
+  });
+
+  it('halts with state_not_ready when `alertEventsBatch` is missing from pipeline state', async () => {
+    const { step } = createStep();
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });
 });

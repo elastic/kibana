@@ -467,6 +467,12 @@ describe('CountTimeframeStrategy', () => {
         alertEventStatus.recovered,
         alertEpisodeStatus.inactive,
       ],
+      [
+        'inactive',
+        alertEpisodeStatus.inactive,
+        alertEventStatus.no_data,
+        alertEpisodeStatus.inactive,
+      ],
     ])('stays %s', (_label, from, on, to) => {
       expectTransition({ from, on, to, stateTransition });
     });
@@ -479,6 +485,7 @@ describe('CountTimeframeStrategy', () => {
     };
 
     it.each<[AlertEpisodeStatus]>([
+      [alertEpisodeStatus.inactive],
       [alertEpisodeStatus.pending],
       [alertEpisodeStatus.active],
       [alertEpisodeStatus.recovering],

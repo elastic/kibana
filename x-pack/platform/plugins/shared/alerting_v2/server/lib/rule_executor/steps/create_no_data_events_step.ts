@@ -20,6 +20,7 @@ import {
   rowToDocument,
 } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
+import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -29,11 +30,9 @@ import {
   QueryServiceScopedToken,
 } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
-import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from '../queries';
 import { guardedExpandStep } from '../stream_utils';
 import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
-import type { ExecutionContext } from '../../execution_context';
 
 /**
  * Post-processes the alert events batch produced by {@link CreateAlertEventsStep}
@@ -75,7 +74,6 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
       const noDataDisabled = rule.no_data_strategy == null || rule.no_data_strategy === 'none';
       const recoveryDisabled = rule.recovery_strategy == null || rule.recovery_strategy === 'none';
 
-      // Both strategies opted out: there is nothing for this step to do.
       if (noDataDisabled && recoveryDisabled) {
         step.logger.debug({
           message: `[${step.name}] No-data and recovery both disabled for rule ${input.ruleId}`,
@@ -84,8 +82,6 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
         return;
       }
 
-      // No-data is the only thing this step writes new events for. If it's
-      // disabled, recovery has already produced the final batch.
       if (noDataDisabled) {
         step.logger.debug({
           message: `[${step.name}] No-data disabled for rule ${input.ruleId}`,
@@ -94,7 +90,11 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
         return;
       }
 
-      const activeGroups = await step.fetchActiveAlertGroups(rule.id, input.executionContext);
+      const activeGroups = await fetchActiveAlertGroupHashes(
+        step.internalQueryService,
+        rule.id,
+        input.executionContext
+      );
 
       if (activeGroups.length === 0) {
         step.logger.debug({
@@ -126,11 +126,6 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
         return;
       }
 
-      // For standalone rules this is the configured `no_data` query; for
-      // composed rules it's the `base` query (which is the data-presence
-      // query — `breach.segment` filters it down to breaching rows).
-      // The API schema guarantees a query is available here, but we keep
-      // a defensive skip for older saved objects or non-API write paths.
       const noDataQuery = getNoDataEsqlQuery(rule.query, rule.no_data_strategy);
 
       if (!noDataQuery) {
@@ -175,18 +170,17 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
         eventsToAppend,
       });
 
-      const filteredBatch =
-        groupsToReplace.size === 0
-          ? alertEventsBatch
-          : alertEventsBatch.filter(
-              (event) => !(event.status === 'recovered' && groupsToReplace.has(event.group_hash))
-            );
+      let filteredBatch = alertEventsBatch;
+      if (groupsToReplace.size !== 0) {
+        filteredBatch = alertEventsBatch.filter(
+          (event) => !(event.status === 'recovered' && groupsToReplace.has(event.group_hash))
+        );
+        step.logger.debug({
+          message: `[${step.name}] Rewrote ${groupsToReplace.size} recovery events and appended ${eventsToAppend.length} events for rule ${input.ruleId}`,
+        });
+      }
 
       const nextBatch = [...filteredBatch, ...eventsToAppend];
-
-      step.logger.debug({
-        message: `[${step.name}] Rewrote ${groupsToReplace.size} recovery events and appended ${eventsToAppend.length} events for rule ${input.ruleId}`,
-      });
 
       yield {
         type: 'continue',
@@ -195,11 +189,6 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
     });
   }
 
-  /**
-   * Handles the no-data partition: groups that are absent from breach AND
-   * absent from the no-data query result (or composed-format rules where
-   * absence-from-breach is the only signal we have).
-   */
   private applyNoDataStrategy({
     rule,
     noDataGroupHashes,
@@ -220,13 +209,9 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
     if (noDataGroupHashes.length === 0) return;
 
     const strategy = rule.no_data_strategy;
-
-    // 'emit' and 'last_known_status' both emit the same `no_data` rule event.
-    // The director branches on `rule.no_data_strategy` when computing the next
-    // episode status: 'emit' sets the episode to 'active'; 'last_known_status'
-    // preserves the prior episode status. See `BasicTransitionStrategy`.
     if (strategy === 'emit' || strategy === 'last_known_status') {
       for (const groupHash of noDataGroupHashes) {
+        // replace previously reported recovered event groups with no_data events
         if (recoveredEventsByGroup.has(groupHash)) {
           groupsToReplace.add(groupHash);
         }
@@ -240,10 +225,7 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
           scheduledTimestamp,
         })
       );
-      return;
-    }
-
-    if (strategy === 'recover') {
+    } else if (strategy === 'recover') {
       const groupsMissingRecovery = noDataGroupHashes.filter(
         (groupHash) => !recoveredEventsByGroup.has(groupHash)
       );
@@ -260,24 +242,13 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
           scheduledTimestamp,
         })
       );
-      return;
     }
-
-    // strategy === 'none' (or unrecognised) is a no-op: leave whatever
-    // recovery emitted in place. UNKNOWN_E (no recovery, no no_data) results
-    // in no event being written for these groups.
   }
 
   /**
-   * Handles the data-present partition: groups that are absent from breach
-   * but present in the no-data query result (so data exists, just not
-   * breaching).
-   *
-   * Resolves UNKNOWN_D when `recovery_strategy: 'query'`: a group with data
+   * When `recovery_strategy: 'query'`: a group with data
    * that didn't match either the breach or recovery query gets a re-asserted
-   * `breached` event so the episode stays alive. The event reuses the row
-   * the no-data query returned for the group so the payload (`data`,
-   * `severity`) matches what the breach path would produce.
+   * `breached` event.
    */
   private applyDataPresentStrategy({
     rule,
@@ -302,11 +273,9 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
     for (const groupHash of dataPresentGroupHashes) {
       if (recoveredEventsByGroup.has(groupHash)) continue;
       const row = rowsByGroupHash.get(groupHash);
-      // By construction every data-present group came from a row in the
-      // no-data response, so this lookup should always succeed. Skip
-      // defensively if it ever doesn't.
-      if (!row) continue;
-      reassertRows.push(row);
+      if (row) {
+        reassertRows.push(row);
+      }
     }
 
     if (reassertRows.length === 0) return;
@@ -367,49 +336,12 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
       throw error;
     }
   }
-
-  private async fetchActiveAlertGroups(
-    ruleId: string,
-    executionContext: ExecutionContext
-  ): Promise<ActiveAlertGroupHash[]> {
-    const request = getActiveAlertGroupHashesQuery({ ruleId }).toRequest();
-    return this.internalQueryService.executeQueryRows<ActiveAlertGroupHash>({
-      query: request.query,
-      // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
-      params: request.params,
-      // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
-      filter: request.filter,
-      abortSignal: executionContext.signal,
-    });
-  }
 }
 
-/**
- * Output of {@link CreateNoDataEventsStep.executeNoDataQuery}.
- *
- * `groupHashes` is the set of active groups the no-data query observed; the
- * step uses it to partition active-but-absent groups into "data present" vs.
- * "no data". `rowsByGroupHash` keeps the first matching row per hash so the
- * data-present partition can synthesize re-asserted breach events with the
- * same payload shape as a real breach event.
- */
 interface NoDataQueryResult {
   groupHashes: Set<string>;
   rowsByGroupHash: Map<string, Record<string, unknown>>;
 }
-
-/**
- * Walks the no-data query response, computes the group hash for each row
- * using the rule's grouping fields, and returns the set of present hashes
- * along with the first row observed per hash.
- *
- * Hashes are computed with the same `buildGroupHash` helper the breach path
- * uses, so a row from the no-data query can stand in as the source row for a
- * synthetic breach event without a hash mismatch — provided the no-data
- * query carries the rule's grouping columns. When it doesn't, the hash falls
- * back to the seed and won't match any active group, so the row is naturally
- * ignored downstream.
- */
 function collectRowsFromNoDataQueryResponse({
   rule,
   esqlResponse,
