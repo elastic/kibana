@@ -15,8 +15,6 @@ import { startEs, startKibana, stopGracefully } from './utils';
 export default async (): Promise<BenchmarkRunnable> => {
   let esPort: number | undefined = 9200;
 
-  const kbnPort = await getPort({ port: 5701 });
-
   let esProc: ExecaChildProcess | undefined;
   let kbnProc: ExecaChildProcess | undefined;
 
@@ -34,6 +32,8 @@ export default async (): Promise<BenchmarkRunnable> => {
       esProc = proc;
     },
     async run({ workspace, log }) {
+      const kbnPort = await getPort({ port: 5701 });
+
       const { proc } = await startKibana({
         cwd: workspace.getDir(),
         log,

@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-ftr-benchmarks
 dependsOn:
   - '@kbn/bench'
-  - '@kbn/repo-info'
 tags:
   - shared-server
   - package

@@ -13,9 +13,8 @@ import { startEs, startKibana, stopGracefully } from './utils';
 
 // eslint-disable-next-line import/no-default-export
 export default async (): Promise<BenchmarkRunnable> => {
-  const kbnPort = await getPort({ port: 5701 });
-
   let esPort: number | undefined;
+  let kbnPort: number | undefined;
   let esProc: ExecaChildProcess | undefined;
   let kbnProc: ExecaChildProcess | undefined;
 
@@ -30,6 +29,7 @@ export default async (): Promise<BenchmarkRunnable> => {
 
       esProc = proc;
       esPort = port;
+      kbnPort = await getPort({ port: 5701 });
 
       const firstKbnProc = await startKibana({
         cwd: workspace.getDir(),
@@ -41,6 +41,10 @@ export default async (): Promise<BenchmarkRunnable> => {
       await stopGracefully(firstKbnProc.proc, { log, name: 'kibana' });
     },
     async run({ workspace, log }) {
+      if (!kbnPort) {
+        throw new Error('Kibana port has not been initialized');
+      }
+
       const { proc } = await startKibana({
         cwd: workspace.getDir(),
         log,
