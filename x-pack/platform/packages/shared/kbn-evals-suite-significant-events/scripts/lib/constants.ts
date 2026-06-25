@@ -15,6 +15,11 @@ export {
   OTEL_DEMO_GCS_BASE_PATH_PREFIX,
 } from '../../src/constants';
 
+import {
+  SIGEVENTS_DISCOVERIES_DATA_STREAM,
+  SIGEVENTS_DETECTIONS_DATA_STREAM,
+  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+} from '../../src/data_generators/sigevents_snapshot_indices';
 export const DEFAULT_ENV_SNAPSHOT_LOGS_INDEX = 'logs.otel';
 
 // Wait times
@@ -23,9 +28,24 @@ export const FAILURE_WAIT_MS = 5 * 60 * 1000;
 export const KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
 export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 15 * 60 * 1000;
 
+// The discovery workflow runs the full detection → investigator pipeline space-wide,
+// so it can take longer than feature extraction.
+export const DISCOVERY_POLL_INTERVAL_MS = 10_000;
+export const DISCOVERY_TIMEOUT_MS = 30 * 60 * 1000;
+
+// Time to let data accumulate after KI feature extraction before triggering discovery,
+// so the detection step has enough signal to analyze.
+export const DISCOVERY_WAIT_MS = 5 * 60 * 1000;
+
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
 
-export const KNOWLEDGE_INDICATORS_DATA_STREAM = '.significant_events-knowledge_indicators';
+// SigEvents data streams captured/restored faithfully (reindex → snapshot-*, restore as
+// data stream) by the env snapshot tooling — not the plain-index path used for eval data.
+export const SIGEVENTS_DATA_STREAMS = [
+  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+  SIGEVENTS_DISCOVERIES_DATA_STREAM,
+  SIGEVENTS_DETECTIONS_DATA_STREAM,
+] as const;
 
 export const VALID_SYSTEM_INDICES = ['.kibana_streams_tasks-*'] as const;
 

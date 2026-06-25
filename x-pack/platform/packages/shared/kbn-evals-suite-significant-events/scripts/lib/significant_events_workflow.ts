@@ -6,25 +6,65 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Feature } from '@kbn/streams-schema';
+import type { Discovery, Feature } from '@kbn/streams-schema';
 import {
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  StreamsKIsOnboardingStep,
 } from '@kbn/streams-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
+import { withTempSuperuser } from './user_utils';
 import {
   KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS,
   KI_FEATURE_EXTRACTION_TIMEOUT_MS,
+  DISCOVERY_POLL_INTERVAL_MS,
+  DISCOVERY_TIMEOUT_MS,
   DEFAULT_LOGS_INDEX,
-  KNOWLEDGE_INDICATORS_DATA_STREAM,
 } from './constants';
 import {
   getSigeventsSnapshotKIFeaturesIndex,
-  SIGEVENTS_FEATURES_INDEX_PATTERN,
-} from '../../src/data_generators/sigevents_ki_features_index';
+  getSigeventsSnapshotDiscoveriesIndex,
+  getSigeventsSnapshotDetectionsIndex,
+  getSigeventsSnapshotKnowledgeIndicatorsIndex,
+  SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+  SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN,
+  SIGEVENTS_DISCOVERIES_TEMP_INDEX_PATTERN,
+  SIGEVENTS_DETECTIONS_TEMP_INDEX_PATTERN,
+  SIGEVENTS_DISCOVERIES_DATA_STREAM,
+  SIGEVENTS_DETECTIONS_DATA_STREAM,
+  SIGEVENTS_EVENTS_DATA_STREAM,
+  SIGEVENTS_KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
+} from '../../src/data_generators/sigevents_snapshot_indices';
+
+const RAW_DATA_STREAM_SEARCH_LIMIT = 1000;
+
+/**
+ * Features snapshot mapping. `dynamic: false` with `properties`/`meta` as `enabled: false` keeps
+ * the index lean and prevents mapping explosions from those free-form objects; `stream_name` is a
+ * keyword for per-stream filtering. Not reused from `knowledgeIndicatorsMappings` because features
+ * arrive flattened from the features API, not in the raw KI shape that mapping describes.
+ */
+const FEATURES_SNAPSHOT_MAPPING: MappingTypeMapping = {
+  dynamic: false,
+  properties: {
+    id: { type: 'keyword' },
+    stream_name: { type: 'keyword' },
+    type: { type: 'keyword' },
+    subtype: { type: 'keyword' },
+    title: { type: 'keyword' },
+    description: { type: 'text' },
+    properties: { type: 'object', enabled: false },
+    confidence: { type: 'float' },
+    evidence: { type: 'keyword' },
+    tags: { type: 'keyword' },
+    meta: { type: 'object', enabled: false },
+    expires_at: { type: 'date' },
+  },
+};
 
 export async function enableSignificantEvents(
   config: ConnectionConfig,
@@ -88,12 +128,13 @@ export async function configureModelSelectionSettings(
 
   throw new Error(`Failed to configure inference settings: ${status} ${JSON.stringify(data)}`);
 }
-export async function triggerSigEventsKIFeatureExtraction(
+export async function triggerSigEventsKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
-  streamName: string = DEFAULT_LOGS_INDEX
+  streamName: string = DEFAULT_LOGS_INDEX,
+  steps: StreamsKIsOnboardingStep[] = [StreamsKIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
-  log.info(`Triggering feature extraction on stream ${streamName}...`);
+  log.info(`Triggering KI onboarding (${steps.join(', ')}) on stream ${streamName}...`);
 
   const now = Date.now();
   const { status, data } = await kibanaRequest(
@@ -104,25 +145,25 @@ export async function triggerSigEventsKIFeatureExtraction(
       action: 'schedule',
       from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
       to: new Date(now).toISOString(),
-      steps: ['features_identification'],
+      steps,
     }
   );
 
   if (status >= 200 && status < 300) {
-    log.info('Scheduled the onboarding workflow for feature extraction successfully');
+    log.info('Scheduled the onboarding workflow successfully');
     return;
   }
 
-  throw new Error(`Failed to trigger KI feature extraction: ${status} ${JSON.stringify(data)}`);
+  throw new Error(`Failed to trigger KI onboarding: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function waitForSigEventsKIFeatureExtraction(
+export async function waitForSigEventsKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string = DEFAULT_LOGS_INDEX,
   timeoutMs: number = KI_FEATURE_EXTRACTION_TIMEOUT_MS
 ): Promise<void> {
-  log.info(`Polling onboarding status for feature extraction (timeout ${timeoutMs / 1000}s)...`);
+  log.info(`Polling onboarding status for KI extraction (timeout ${timeoutMs / 1000}s)...`);
   const start = Date.now();
   const deadline = start + timeoutMs;
 
@@ -142,17 +183,17 @@ export async function waitForSigEventsKIFeatureExtraction(
 
     if (taskStatus === 'failed') {
       throw new Error(
-        `Feature extraction failed: ${JSON.stringify((data as Record<string, unknown>)?.error)}`
+        `KI extraction failed: ${JSON.stringify((data as Record<string, unknown>)?.error)}`
       );
     }
 
     const elapsed = Math.round((Date.now() - start) / 1000);
-    log.info(`  feature extraction status: ${taskStatus} (${elapsed}s elapsed)`);
+    log.info(`  KI extraction status: ${taskStatus} (${elapsed}s elapsed)`);
     await new Promise((resolve) => setTimeout(resolve, KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS));
   }
 
   throw new Error(
-    `KI feature extraction did not complete within ${timeoutMs / 1000}s. ` +
+    `KI extraction did not complete within ${timeoutMs / 1000}s. ` +
       `Increase --extraction-timeout if the model/data volume needs longer.`
   );
 }
@@ -162,14 +203,14 @@ export async function logSigEventsExtractedKIFeatures(
   log: ToolingLog,
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
-  const kis = await fetchSigEventsExtractedKIs(config, log, streamName);
+  const kis = await fetchSigEventsFeatures(config, log, streamName);
   log.info(`Extracted ${kis.length} KIs:`);
   for (const f of kis) {
     log.info(`  - ${f.title || f.description} (${f.type})`);
   }
 }
 
-async function fetchSigEventsExtractedKIs(
+async function fetchSigEventsFeatures(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string
@@ -182,59 +223,120 @@ async function fetchSigEventsExtractedKIs(
   return features.filter(Boolean) as Feature[];
 }
 
-export async function persistSigEventsExtractedKIsForSnapshot(
+export async function persistSigEventsFeaturesForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<{ index: string; count: number }> {
-  const kis = await fetchSigEventsExtractedKIs(config, log, streamName);
-  const index = getSigeventsSnapshotKIFeaturesIndex(snapshotName);
-
-  await esClient.indices.delete({ index, ignore_unavailable: true });
-  await esClient.indices.create({
-    index,
-    mappings: {
-      dynamic: false,
-      properties: {
-        id: { type: 'keyword' },
-        stream_name: { type: 'keyword' },
-        type: { type: 'keyword' },
-        subtype: { type: 'keyword' },
-        title: { type: 'keyword' },
-        description: { type: 'text' },
-        properties: { type: 'object', enabled: false },
-        confidence: { type: 'float' },
-        evidence: { type: 'keyword' },
-        tags: { type: 'keyword' },
-        meta: { type: 'object', enabled: false },
-        expires_at: { type: 'date' },
-      },
-    },
-  });
-
-  if (kis.length > 0) {
-    const operations = kis.flatMap((ki) => [{ index: { _index: index, _id: ki.id } }, ki]);
-
-    await esClient.bulk({ refresh: true, operations });
-  } else {
-    try {
-      await esClient.indices.refresh({ index });
-    } catch (error) {
-      throw new Error(
-        `Failed to refresh features index "${index}" before snapshotting: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
-  }
-
-  log.info(`Persisted ${kis.length} KIs to "${index}" for snapshotting`);
-  return { index, count: kis.length };
+  const features = await fetchSigEventsFeatures(config, log, streamName);
+  return persistDocsForSnapshot(
+    esClient,
+    log,
+    getSigeventsSnapshotKIFeaturesIndex(snapshotName),
+    features as unknown as Array<Record<string, unknown>>,
+    'id',
+    'feature KI(s)',
+    FEATURES_SNAPSHOT_MAPPING
+  );
 }
 
-export async function cleanupSigEventsExtractedKIsData(
+/**
+ * Captures detections by reading the raw `.significant_events-detections` data stream (superuser).
+ *
+ * Why raw, not an API: the detections read API resolves the latest revision and drops
+ * `kind:handled`, but the eval consumers need *every* revision — the investigator wants the
+ * active (`detection`/`quiet`) revision, the judge the post-triage (`handled`) one. A `match_all`
+ * raw read preserves them all; consumers filter by `kind` at load time.
+ */
+export async function persistSigEventsDetectionsForSnapshot(
+  config: ConnectionConfig,
+  esClient: Client,
+  log: ToolingLog,
+  snapshotName: string
+): Promise<{ index: string; count: number }> {
+  const detectionDocs = await withTempSuperuser(esClient, log, config, async (sysClient) => {
+    const result = await sysClient.search<Record<string, unknown>>({
+      index: SIGEVENTS_DETECTIONS_DATA_STREAM,
+      size: RAW_DATA_STREAM_SEARCH_LIMIT,
+      query: { match_all: {} },
+    });
+    return result.hits.hits.map((hit) => hit._source).filter(Boolean) as Array<
+      Record<string, unknown>
+    >;
+  });
+
+  return persistDocsForSnapshot(
+    esClient,
+    log,
+    getSigeventsSnapshotDetectionsIndex(snapshotName),
+    detectionDocs,
+    undefined,
+    'detection(s)'
+  );
+}
+
+/**
+ * Captures the knowledge-indicators set for one stream by reading the raw
+ * `.significant_events-knowledge_indicators` data stream (superuser), scoped by `stream.name` —
+ * features and queries together, in KI data-stream doc shape. Replaces the queries-only capture:
+ * replaying this index into the live data stream gives the agents' real `search_knowledge_indicators`
+ * both feature and query KIs. `search_embedding` is carried in `_source` but stripped at replay time
+ * (see `replayKnowledgeIndicatorsSnapshot`).
+ */
+export async function persistSigEventsKnowledgeIndicatorsForSnapshot(
+  config: ConnectionConfig,
+  esClient: Client,
+  log: ToolingLog,
+  snapshotName: string,
+  streamName: string = DEFAULT_LOGS_INDEX
+): Promise<{ index: string; count: number }> {
+  const kiDocs = await withTempSuperuser(esClient, log, config, async (sysClient) => {
+    const result = await sysClient.search<Record<string, unknown>>({
+      index: SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+      size: RAW_DATA_STREAM_SEARCH_LIMIT,
+      // Scoped to the scenario's stream (KI docs carry `stream.name`), mirroring the
+      // per-stream feature capture — avoids pulling KIs from unrelated streams.
+      query: { term: { 'stream.name': streamName } },
+    });
+    return result.hits.hits.map((hit) => hit._source).filter(Boolean) as Array<
+      Record<string, unknown>
+    >;
+  });
+
+  return persistDocsForSnapshot(
+    esClient,
+    log,
+    getSigeventsSnapshotKnowledgeIndicatorsIndex(snapshotName),
+    kiDocs,
+    'id',
+    'knowledge indicator(s)'
+  );
+}
+
+export async function persistSigEventsDiscoveriesForSnapshot(
+  config: ConnectionConfig,
+  esClient: Client,
+  log: ToolingLog,
+  snapshotName: string
+): Promise<{ index: string; count: number }> {
+  const discoveries = await fetchAllPaginated<Discovery>(
+    config,
+    '/internal/sig_events/discoveries',
+    'discoveries'
+  );
+  return persistDocsForSnapshot(
+    esClient,
+    log,
+    getSigeventsSnapshotDiscoveriesIndex(snapshotName),
+    discoveries as unknown as Array<Record<string, unknown>>,
+    'discovery_id',
+    'discovery(s)'
+  );
+}
+
+export async function cleanupSigEventsExtractedData(
   esClient: Client,
   log: ToolingLog
 ): Promise<void> {
@@ -242,8 +344,14 @@ export async function cleanupSigEventsExtractedKIsData(
 
   for (const target of [
     'logs*',
-    KNOWLEDGE_INDICATORS_DATA_STREAM,
-    SIGEVENTS_FEATURES_INDEX_PATTERN,
+    SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
+    SIGEVENTS_DISCOVERIES_DATA_STREAM,
+    SIGEVENTS_DETECTIONS_DATA_STREAM,
+    SIGEVENTS_EVENTS_DATA_STREAM,
+    SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN,
+    SIGEVENTS_DISCOVERIES_TEMP_INDEX_PATTERN,
+    SIGEVENTS_DETECTIONS_TEMP_INDEX_PATTERN,
+    SIGEVENTS_KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
   ]) {
     try {
       await esClient.indices.deleteDataStream({ name: target });
@@ -299,7 +407,7 @@ export async function promoteQueries(config: ConnectionConfig): Promise<void> {
 
 export async function resetQueriesPromotion({ esClient }: { esClient: Client }): Promise<void> {
   await esClient.updateByQuery({
-    index: KNOWLEDGE_INDICATORS_DATA_STREAM,
+    index: SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
     conflicts: 'proceed',
     refresh: true,
     query: { term: { type: 'query' } },
@@ -308,4 +416,139 @@ export async function resetQueriesPromotion({ esClient }: { esClient: Client }):
       source: `if (ctx._source.query != null) { ctx._source.query.rule_backed = false; }`,
     },
   });
+}
+
+/**
+ * Triggers the server-side significant events discovery workflow. It runs the full
+ * detection → investigator pipeline space-wide using the connector configured via
+ * {@link configureModelSelectionSettings}, persisting results to the plugin's
+ * `.significant_events-discoveries` / `.significant_events-detections` data streams.
+ */
+export async function triggerSigEventsDiscovery(
+  config: ConnectionConfig,
+  log: ToolingLog
+): Promise<void> {
+  log.info('Triggering significant events discovery...');
+  const { status, data } = await kibanaRequest(
+    config,
+    'POST',
+    '/internal/streams/significant_events/discovery/_execute',
+    { action: 'trigger' }
+  );
+
+  if (status >= 200 && status < 300) {
+    log.info('Discovery workflow triggered');
+    return;
+  }
+
+  throw new Error(`Failed to trigger discovery: ${status} ${JSON.stringify(data)}`);
+}
+
+export async function waitForSigEventsDiscovery(
+  config: ConnectionConfig,
+  log: ToolingLog,
+  timeoutMs: number = DISCOVERY_TIMEOUT_MS
+): Promise<void> {
+  log.info(`Polling discovery workflow status (timeout ${timeoutMs / 1000}s)...`);
+  const start = Date.now();
+  const deadline = start + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const { data } = await kibanaRequest(
+      config,
+      'GET',
+      '/internal/streams/significant_events/discovery/_status'
+    );
+
+    // SigEventsWorkflowStatus: not_started | running | failed | completed
+    const taskStatus = (data as Record<string, unknown>)?.status;
+
+    if (taskStatus === 'completed') {
+      log.info('Discovery workflow completed successfully');
+      return;
+    }
+
+    if (taskStatus === 'failed') {
+      throw new Error(
+        `Discovery workflow failed: ${JSON.stringify((data as Record<string, unknown>)?.error)}`
+      );
+    }
+
+    const elapsed = Math.round((Date.now() - start) / 1000);
+    log.info(`  discovery status: ${taskStatus} (${elapsed}s elapsed)`);
+    await new Promise((resolve) => setTimeout(resolve, DISCOVERY_POLL_INTERVAL_MS));
+  }
+
+  throw new Error(`Discovery workflow did not complete within ${timeoutMs / 1000}s`);
+}
+
+const PAGINATED_FETCH_PER_PAGE = 1000;
+
+/**
+ * Pages through a `GET` route returning a `PaginatedResponse<T>` (`{ hits, total }`)
+ * and returns all hits. Used to read the latest discoveries/detections from their
+ * read APIs, mirroring how features are fetched before snapshotting.
+ */
+async function fetchAllPaginated<T>(
+  config: ConnectionConfig,
+  path: string,
+  label: string
+): Promise<T[]> {
+  const all: T[] = [];
+  let page = 1;
+
+  while (true) {
+    const sep = path.includes('?') ? '&' : '?';
+    const { status, data } = await kibanaRequest(
+      config,
+      'GET',
+      `${path}${sep}page=${page}&perPage=${PAGINATED_FETCH_PER_PAGE}`
+    );
+
+    if (status < 200 || status >= 300) {
+      throw new Error(`Failed to fetch ${label}: ${status} ${JSON.stringify(data)}`);
+    }
+
+    const hits = (data as { hits?: T[] })?.hits;
+    if (!Array.isArray(hits)) {
+      throw new Error(`Expected "hits" array fetching ${label}, got: ${JSON.stringify(data)}`);
+    }
+
+    all.push(...hits);
+
+    if (hits.length < PAGINATED_FETCH_PER_PAGE) {
+      break;
+    }
+    page += 1;
+  }
+
+  return all;
+}
+
+async function persistDocsForSnapshot(
+  esClient: Client,
+  log: ToolingLog,
+  index: string,
+  docs: Array<Record<string, unknown>>,
+  idField: string | undefined,
+  label: string,
+  mappings: MappingTypeMapping = { dynamic: true }
+): Promise<{ index: string; count: number }> {
+  await esClient.indices.delete({ index, ignore_unavailable: true });
+  await esClient.indices.create({ index, mappings });
+
+  if (docs.length > 0) {
+    const operations = docs.flatMap((doc) => [
+      {
+        index: { _index: index, ...(idField && doc[idField] ? { _id: String(doc[idField]) } : {}) },
+      },
+      doc,
+    ]);
+    await esClient.bulk({ refresh: true, operations });
+  } else {
+    await esClient.indices.refresh({ index });
+  }
+
+  log.info(`Persisted ${docs.length} ${label} to "${index}" for snapshotting`);
+  return { index, count: docs.length };
 }

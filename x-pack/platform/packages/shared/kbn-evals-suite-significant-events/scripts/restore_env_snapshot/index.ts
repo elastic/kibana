@@ -11,7 +11,7 @@ import {
   DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
   VALID_ALERT_INDICES,
   VALID_SYSTEM_INDICES,
-  KNOWLEDGE_INDICATORS_DATA_STREAM,
+  SIGEVENTS_DATA_STREAMS,
   GCS_BUCKET,
 } from '../lib/constants';
 
@@ -23,8 +23,8 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       1.  Restore plain system indices with rename: snapshot-* → .* (.kibana_streams_tasks)
       2.  Ensure system-index aliases (.kibana_streams_tasks)
       3.  Enable streams via Kibana API
-      4.  Restore the KI data stream (.significant_events-knowledge_indicators) by
-          reindexing into the data stream so it is not left as a plain index
+      4.  Restore the SigEvents data streams (knowledge_indicators, discoveries, detections)
+          by reindexing into each data stream so they are not left as plain indices
       5.  Replay data indices with timestamp transformation
       6.  Ensure alert-index alias (.alerts-streams.alerts-default)
       7.  Repromote queries (resets rule_backed, then re-creates rules after restore)
@@ -62,7 +62,7 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       --clean                 Delete pre-existing (${[
         ...VALID_ALERT_INDICES,
         ...VALID_SYSTEM_INDICES,
-        KNOWLEDGE_INDICATORS_DATA_STREAM,
+        ...SIGEVENTS_DATA_STREAMS,
       ].join(
         ', '
       )}) indices before restoring without prompting. Without this flag the script will prompt interactively (or fail in non-TTY environments).
