@@ -127,6 +127,7 @@ export const findLiveQueryRoute = (
               const resultCountsMap = await getResultCountsForActions(
                 esClient,
                 allActionIds,
+                spaceId,
                 integrationNamespaces ?? [spaceId],
                 ccsEnabled
               );

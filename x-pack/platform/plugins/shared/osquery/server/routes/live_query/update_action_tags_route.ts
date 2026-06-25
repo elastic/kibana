@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import {
   API_VERSIONS,
@@ -20,6 +20,8 @@ import {
 } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
+import { updateActionTagsResponseSchema } from './response_schemas';
 
 const updateActionTagsRequestParamsSchema = t.type({
   id: t.string,
@@ -62,6 +64,11 @@ export const updateActionTagsRoute = (
               UpdateActionTagsRequestBodySchema
             >(updateActionTagsRequestBodySchema),
           },
+          response: {
+            200: {
+              body: () => updateActionTagsResponseSchema,
+            },
+          },
         },
       },
       async (_, request, response) => {
@@ -96,17 +103,7 @@ export const updateActionTagsRoute = (
 
           const index = actionsIndexExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX;
 
-          const spaceFilter =
-            spaceId === 'default'
-              ? {
-                  bool: {
-                    should: [
-                      { term: { space_id: 'default' } },
-                      { bool: { must_not: { exists: { field: 'space_id' } } } },
-                    ],
-                  },
-                }
-              : { term: { space_id: spaceId } };
+          const spaceFilter = buildSpaceIdFilter(spaceId);
 
           const searchResult = await esClient.search({
             index,
@@ -132,7 +129,7 @@ export const updateActionTagsRoute = (
               size: 0,
               query: {
                 bool: {
-                  filter: [{ term: { schedule_id: request.params.id } }],
+                  filter: [{ term: { schedule_id: request.params.id } }, spaceFilter],
                 },
               },
             });
