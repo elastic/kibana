@@ -2336,10 +2336,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@116.2.0":
-  version "116.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.2.0.tgz#53971013b96ebd10798f73e1430cde9f019d1fe8"
-  integrity sha512-yGyAbRhAp/35Mvk2ael228h9BVEfKTEgvSdDerfKUMUCnw9cSebPS1c8wK9dLnRt6DV1OMbgGyCObRR1sXToYQ==
+"@elastic/eui@116.3.1":
+  version "116.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.3.1.tgz#cf695035027b14af41c332145cfc254ae9675c05"
+  integrity sha512-ebTqz2p2iv4MmKjwPPA7fBAMzk8ZgC2mWjmY8O7wJEjxRn+gh5XsYjd/yutZgdhG9pAdVFrlVQwcOBubR2/8pg==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -5125,6 +5125,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-common@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-list-docs@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs":
   version "0.0.0"
   uid ""
@@ -5146,6 +5150,10 @@
   uid ""
 
 "@kbn/content-list-provider@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-scout@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-scout":
   version "0.0.0"
   uid ""
 
@@ -7138,10 +7146,6 @@
   uid ""
 
 "@kbn/fec-alerts-test-plugin@link:x-pack/platform/test/functional_execution_context/plugins/alerts":
-  version "0.0.0"
-  uid ""
-
-"@kbn/feedback-components@link:src/platform/packages/shared/feedback-components":
   version "0.0.0"
   uid ""
 
@@ -9753,6 +9757,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-feedback@link:src/platform/kbn-ui/feedback":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-settings-plugin@link:src/platform/test/plugin_functional/plugins/ui_settings_plugin":
   version "0.0.0"
   uid ""
@@ -9766,6 +9774,10 @@
   uid ""
 
 "@kbn/ui-side-navigation@link:src/platform/kbn-ui/side-navigation":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-storybook-config@link:src/platform/kbn-ui/storybook-config":
   version "0.0.0"
   uid ""
 
@@ -26884,10 +26896,10 @@ lines-and-columns@^1.1.6:
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.2.4.tgz#eca284f75d2965079309dc0ad9255abb2ebc1632"
   integrity sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==
 
-linkify-it@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-5.0.0.tgz#9ef238bfa6dc70bd8e7f9572b52d369af569b421"
-  integrity sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==
+linkify-it@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-5.0.1.tgz#10c4cecbb5c6828eabf81d3c801adc4a542dfb55"
+  integrity sha512-wVoTjP4Q6R0NW5hiZkVJaFZPWgtXfoGF+6LucL3/FtiNjmcHhYjEr5f1Kqjirc1nBW07J/ZuRFumqr2oqccEWg==
   dependencies:
     uc.micro "^2.0.0"
 
@@ -27413,14 +27425,14 @@ markdown-escapes@^1.0.0:
   resolved "https://registry.yarnpkg.com/markdown-escapes/-/markdown-escapes-1.0.1.tgz#1994df2d3af4811de59a6714934c2b2292734518"
   integrity sha1-GZTfLTr0gR3lmmcUk0wrIpJzRRg=
 
-markdown-it@14.1.1:
-  version "14.1.1"
-  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-14.1.1.tgz#856f90b66fc39ae70affd25c1b18b581d7deee1f"
-  integrity sha512-BuU2qnTti9YKgK5N+IeMubp14ZUKUUw7yeJbkjtosvHiP0AZ5c8IAgEMk79D0eC8F23r4Ac/q8cAIFdm2FtyoA==
+markdown-it@14.2.0:
+  version "14.2.0"
+  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-14.2.0.tgz#06d48d9035e77d5b1c85adb315482fc8240289ef"
+  integrity sha512-1TGiQiJVRQ3NPmZH6sx5Cfnmg6GQm9jvC1ch4TK511NjSJvjzKLzn5pPfZRNZkRPZP0HqCioSndqH8v2nRaWVQ==
   dependencies:
     argparse "^2.0.1"
     entities "^4.4.0"
-    linkify-it "^5.0.0"
+    linkify-it "^5.0.1"
     mdurl "^2.0.0"
     punycode.js "^2.3.1"
     uc.micro "^2.1.0"
