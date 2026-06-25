@@ -107,6 +107,9 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
       let internalHeaders: Record<string, string>;
 
       apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+        // `admin` is required: the install route enforces `securitySolution` +
+        // `entity-analytics` Kibana privileges that lower roles (e.g. platform_engineer)
+        // do not hold.
         const credentials = await samlAuth.asInteractiveUser('admin');
         defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
         internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
@@ -145,7 +148,9 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
         });
       });
 
-      apiTest.afterAll(async ({ apiClient, esClient }) => {
+      apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
+        await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+
         const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
           headers: defaultHeaders,
           responseType: 'json',
