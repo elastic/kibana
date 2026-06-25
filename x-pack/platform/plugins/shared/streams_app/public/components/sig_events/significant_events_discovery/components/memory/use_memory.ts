@@ -8,6 +8,7 @@
 import { useQuery, useMutation, useQueryClient, type UseMutationResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../../util/errors';
 import type {
   MemoryEntry,
   MemoryCategoryNode,
@@ -99,6 +100,14 @@ export const useMemoryMutations = () => {
     queryClient.invalidateQueries({ queryKey: memoryKeys.all });
   };
 
+  const onMutationError = (error: unknown) => {
+    core.notifications.toasts.addError(getFormattedError(error), {
+      title: i18n.translate('xpack.streams.memory.mutationError', {
+        defaultMessage: 'Failed to save memory entry.',
+      }),
+    });
+  };
+
   const createEntry = useMutation({
     mutationFn: (params: {
       name: string;
@@ -111,6 +120,7 @@ export const useMemoryMutations = () => {
         body: JSON.stringify(params),
       }),
     onSuccess: invalidateMemory,
+    onError: onMutationError,
   });
 
   const updateEntry = useMutation({
@@ -129,12 +139,14 @@ export const useMemoryMutations = () => {
         body: JSON.stringify(params),
       }),
     onSuccess: invalidateMemory,
+    onError: onMutationError,
   });
 
   const deleteEntry = useMutation({
     mutationFn: (id: string) =>
       core.http.delete<{ deleted: boolean }>(`${MEMORY_BASE}/entries/${id}`),
     onSuccess: invalidateMemory,
+    onError: onMutationError,
   });
 
   return { createEntry, updateEntry, deleteEntry };

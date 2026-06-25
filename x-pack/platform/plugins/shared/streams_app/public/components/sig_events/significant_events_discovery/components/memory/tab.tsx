@@ -383,6 +383,7 @@ function EntryFlyout({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [editCategories, setEditCategories] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [editTags, setEditTags] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
 
@@ -399,17 +400,21 @@ function EntryFlyout({
   }, [treeData]);
 
   const editCategoryLabels = editCategories.map((c) => c.label);
+  const editTagLabels = editTags.map((t) => t.label);
   const isDirty =
     isEditing &&
     !!entry &&
     (editContent !== entry.content ||
       editCategoryLabels.length !== entry.categories.length ||
-      editCategoryLabels.some((cat, i) => cat !== entry.categories[i]));
+      editCategoryLabels.some((cat, i) => cat !== entry.categories[i]) ||
+      editTagLabels.length !== entry.tags.length ||
+      editTagLabels.some((tag, i) => tag !== entry.tags[i]));
 
   const handleEdit = useCallback(() => {
     if (entry) {
       setEditContent(entry.content);
       setEditCategories(entry.categories.map((cat) => ({ label: cat })));
+      setEditTags(entry.tags.map((tag) => ({ label: tag })));
       setIsEditing(true);
     }
   }, [entry]);
@@ -421,6 +426,7 @@ function EntryFlyout({
           id: entry.id,
           content: editContent,
           categories: editCategoryLabels,
+          tags: editTagLabels,
           change_summary: 'Manual edit via UI',
         },
         { onSuccess: () => setIsEditing(false) }
@@ -428,7 +434,7 @@ function EntryFlyout({
     } else {
       setIsEditing(false);
     }
-  }, [entry, isDirty, editContent, editCategoryLabels, updateEntry]);
+  }, [entry, isDirty, editContent, editCategoryLabels, editTagLabels, updateEntry]);
 
   const handleDelete = useCallback(() => {
     if (entry) {
@@ -532,6 +538,28 @@ function EntryFlyout({
                     defaultMessage: 'e.g. infrastructure/kubernetes',
                   })}
                   data-test-subj="streamsMemoryEditCategories"
+                />
+                <EuiSpacer size="s" />
+                <EuiTitle size="xxs">
+                  <h4>
+                    {i18n.translate('xpack.streams.memory.tagsLabel', {
+                      defaultMessage: 'Tags',
+                    })}
+                  </h4>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiComboBox
+                  selectedOptions={editTags}
+                  onChange={setEditTags}
+                  onCreateOption={(searchValue) =>
+                    setEditTags((prev) => [...prev, { label: searchValue }])
+                  }
+                  isClearable
+                  fullWidth
+                  placeholder={i18n.translate('xpack.streams.memory.tagsEditPlaceholder', {
+                    defaultMessage: 'Add tags',
+                  })}
+                  data-test-subj="streamsMemoryEditTags"
                 />
                 <EuiSpacer size="m" />
                 <EuiFlexGroup gutterSize="s">
