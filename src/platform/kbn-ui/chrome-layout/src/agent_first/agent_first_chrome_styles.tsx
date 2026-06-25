@@ -496,6 +496,18 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${containerRadius} !important;
     }
 
+    ${scope} .euiButton {
+      border-radius: ${controlRadius} !important;
+      border-start-start-radius: ${controlRadius} !important;
+      border-start-end-radius: ${controlRadius} !important;
+      border-end-start-radius: ${controlRadius} !important;
+      border-end-end-radius: ${controlRadius} !important;
+    }
+
+    ${scope} .euiPopover__panel {
+      border-radius: ${containerRadius} !important;
+    }
+
     ${scope} .euiFlyout[class*='right']:not(
         [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
       ) {
