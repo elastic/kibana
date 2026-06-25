@@ -9,6 +9,10 @@ import { sampleRules } from './sample_rules';
 
 const CREATE_RULE_TOOL_ID = 'security.create_detection_rule';
 const FIND_RULES_TOOL_ID = 'security.find_rules';
+const DISCOVER_RULE_TAGS_TOOL_ID = 'security.discover_rule_tags';
+
+/** Minimum-sufficient find-rules path per find-security-rules SKILL.md (discover every turn). */
+const FIND_RULES_TRAJECTORY = [DISCOVER_RULE_TAGS_TOOL_ID, FIND_RULES_TOOL_ID] as const;
 
 export interface RuleRoutingExample {
   id: string;
@@ -42,14 +46,12 @@ const ruleCreationExamples: RuleRoutingExample[] = sampleRules.slice(0, 3).map((
     reference:
       'The agent should route to detection rule creation via security.create_detection_rule, not load the find-security-rules skill.',
     shouldNotActivateSkill: 'find-security-rules',
-    tool_sequence: [CREATE_RULE_TOOL_ID],
   },
   metadata: {
     category: 'rule-creation',
     routing_intent: 'Rule Creation',
     dataset_split: ['base'],
     expectedToolId: CREATE_RULE_TOOL_ID,
-    tool_sequence: [CREATE_RULE_TOOL_ID],
   },
 }));
 
@@ -61,7 +63,7 @@ const findRulesExamples: RuleRoutingExample[] = [
       reference:
         'The agent should load find-security-rules and call security.find_rules — not create a new detection rule.',
       expectedSkill: 'find-security-rules',
-      tool_sequence: [FIND_RULES_TOOL_ID],
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
     },
     metadata: {
       category: 'find-rules',
@@ -69,7 +71,7 @@ const findRulesExamples: RuleRoutingExample[] = [
       dataset_split: ['base'],
       expectedOnlyToolId: FIND_RULES_TOOL_ID,
       forbiddenToolId: CREATE_RULE_TOOL_ID,
-      tool_sequence: [FIND_RULES_TOOL_ID],
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
     },
   },
   {
@@ -79,7 +81,7 @@ const findRulesExamples: RuleRoutingExample[] = [
       reference:
         'The agent should load find-security-rules and query rules by MITRE technique — not invoke rule creation.',
       expectedSkill: 'find-security-rules',
-      tool_sequence: [FIND_RULES_TOOL_ID],
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
     },
     metadata: {
       category: 'find-rules',
@@ -87,7 +89,7 @@ const findRulesExamples: RuleRoutingExample[] = [
       dataset_split: ['base'],
       expectedOnlyToolId: FIND_RULES_TOOL_ID,
       forbiddenToolId: CREATE_RULE_TOOL_ID,
-      tool_sequence: [FIND_RULES_TOOL_ID],
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
     },
   },
   {
@@ -97,7 +99,7 @@ const findRulesExamples: RuleRoutingExample[] = [
       reference:
         'The agent should inventory rules via find-security-rules — not generate a new rule.',
       expectedSkill: 'find-security-rules',
-      tool_sequence: [FIND_RULES_TOOL_ID],
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
     },
     metadata: {
       category: 'find-rules',
@@ -105,7 +107,7 @@ const findRulesExamples: RuleRoutingExample[] = [
       dataset_split: ['base'],
       expectedOnlyToolId: FIND_RULES_TOOL_ID,
       forbiddenToolId: CREATE_RULE_TOOL_ID,
-      tool_sequence: [FIND_RULES_TOOL_ID],
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
     },
   },
 ];

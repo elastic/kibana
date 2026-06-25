@@ -79,6 +79,26 @@ export const toRoutingDatasetExample = (ex: RuleRoutingExample): RuleRoutingData
 
 const FILESTORE_READ_TOOL_ID = 'filestore.read';
 const FIND_SECURITY_RULES_SKILL = 'find-security-rules';
+const FIND_RULES_TOOL_ID = 'security.find_rules';
+const DISCOVER_RULE_TAGS_TOOL_ID = 'security.discover_rule_tags';
+
+function isFindRulesRoutingMetadata(metadata?: RuleRoutingDatasetMetadata): boolean {
+  return (
+    metadata?.expectedOnlyToolId === FIND_RULES_TOOL_ID ||
+    metadata?.category === 'find-rules'
+  );
+}
+
+function allowedDomainToolIdsForExample(metadata?: RuleRoutingDatasetMetadata): string[] | null {
+  const expectedOnlyToolId = metadata?.expectedOnlyToolId;
+  if (!expectedOnlyToolId) {
+    return null;
+  }
+  if (isFindRulesRoutingMetadata(metadata)) {
+    return [DISCOVER_RULE_TAGS_TOOL_ID, FIND_RULES_TOOL_ID];
+  }
+  return [expectedOnlyToolId];
+}
 
 function collectUniqueExpectedSkills(examples: RuleRoutingDatasetExample[]): string[] {
   const names = new Set<string>();
@@ -141,9 +161,19 @@ const createRuleRoutingTrajectoryEvaluator = (): Evaluator<
     ...inner,
     name: 'Trajectory',
     evaluate: async (args) => {
+      const metadata = args.metadata as RuleRoutingDatasetMetadata | undefined;
+      if (metadata?.category === 'rule-creation') {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation:
+            'Rule-creation routing is scored via ExpectedToolCalled / ForbiddenToolNotCalled, not trajectory.',
+        };
+      }
+
       const golden = resolveTrajectoryGolden(
         args.expected as RuleRoutingDatasetExpected | undefined,
-        args.metadata as RuleRoutingDatasetMetadata | undefined
+        metadata
       );
       if (golden.length === 0) {
         return {
@@ -186,8 +216,14 @@ const createToolUsageOnlyEvaluator = (): Evaluator<RuleRoutingDatasetExample, Ta
   name: 'ToolUsageOnly',
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
+    const meta = metadata as RuleRoutingDatasetMetadata | undefined;
     const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
     if (!expectedOnlyToolId) return { score: 1 };
+
+    const allowedToolIds = allowedDomainToolIdsForExample(meta);
+    if (!allowedToolIds) {
+      return { score: 1 };
+    }
 
     const toolCalls = getToolCallSteps(output as TaskOutput);
     const domainToolCalls = toolCalls.filter((t) => t.tool_id && !isInternalTool(t.tool_id));
@@ -195,17 +231,17 @@ const createToolUsageOnlyEvaluator = (): Evaluator<RuleRoutingDatasetExample, Ta
     if (domainToolCalls.length === 0) {
       return {
         score: 0,
-        metadata: { reason: 'No domain tool calls found', expectedOnlyToolId },
+        metadata: { reason: 'No domain tool calls found', expectedOnlyToolId, allowedToolIds },
       };
     }
 
     const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
     const hasExpected = usedToolIds.includes(expectedOnlyToolId);
-    const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
+    const allAllowed = usedToolIds.every((id) => allowedToolIds.includes(id));
 
     return {
-      score: hasExpected && allExpected ? 1 : 0,
-      metadata: { expectedOnlyToolId, usedToolIds },
+      score: hasExpected && allAllowed ? 1 : 0,
+      metadata: { expectedOnlyToolId, allowedToolIds, usedToolIds },
     };
   },
 });

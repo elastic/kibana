@@ -6,7 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
+import type { DefaultEvaluators, Evaluator, TaskOutput } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ruleRoutingExamples } from '../datasets/routing_examples';
 import { buildRuleRoutingEvaluators, toRoutingDatasetExample } from './evaluate_routing_dataset';
@@ -90,5 +90,81 @@ describe('ruleRoutingExamples', () => {
     expect(creation.length).toBeGreaterThanOrEqual(2);
     expect(findRules.length).toBeGreaterThanOrEqual(2);
     expect(distractors.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('uses discover-then-find trajectory goldens for find-rules routing', () => {
+    for (const example of ruleRoutingExamples.filter((ex) => ex.metadata.category === 'find-rules')) {
+      expect(example.metadata.tool_sequence).toEqual([
+        'security.discover_rule_tags',
+        'security.find_rules',
+      ]);
+    }
+  });
+
+  it('does not annotate rule-creation examples with tool trajectory goldens', () => {
+    for (const example of ruleRoutingExamples.filter(
+      (ex) => ex.metadata.category === 'rule-creation'
+    )) {
+      expect(example.metadata.tool_sequence).toBeUndefined();
+      expect(example.expected.tool_sequence).toBeUndefined();
+    }
+  });
+});
+
+describe('routing evaluator behavior', () => {
+  const wrappedExamples = ruleRoutingExamples.map(toRoutingDatasetExample);
+
+  const buildStack = () =>
+    buildRuleRoutingEvaluators({
+      ...buildBuildArgs(),
+      examples: wrappedExamples,
+    });
+
+  const findEvaluator = <T extends Evaluator>(stack: T[], name: string) => {
+    const evaluator = stack.find((e) => e.name === name);
+    expect(evaluator).toBeDefined();
+    return evaluator!;
+  };
+
+  it('scores discover + find_rules as ToolUsageOnly pass for find-rules routing', async () => {
+    const stack = buildStack();
+    const toolUsageOnly = findEvaluator(stack, 'ToolUsageOnly');
+    const findExample = wrappedExamples.find((ex) => ex.metadata?.category === 'find-rules')!;
+
+    const output: TaskOutput = {
+      steps: [
+        { type: 'tool_call', tool_id: 'security.discover_rule_tags', params: {} },
+        { type: 'tool_call', tool_id: 'security.find_rules', params: {} },
+      ],
+    };
+
+    const result = await toolUsageOnly.evaluate({
+      output,
+      expected: findExample.output,
+      metadata: findExample.metadata,
+      input: findExample.input,
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('returns N/A trajectory for rule-creation routing examples', async () => {
+    const stack = buildStack();
+    const trajectory = findEvaluator(stack, 'Trajectory');
+    const creationExample = wrappedExamples.find(
+      (ex) => ex.metadata?.category === 'rule-creation'
+    )!;
+
+    const result = await trajectory.evaluate({
+      output: {
+        steps: [{ type: 'tool_call', tool_id: 'security.create_detection_rule', params: {} }],
+      },
+      expected: creationExample.output,
+      metadata: creationExample.metadata,
+      input: creationExample.input,
+    });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
   });
 });
