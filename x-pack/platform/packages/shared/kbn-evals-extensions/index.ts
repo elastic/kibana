@@ -20,20 +20,6 @@ export type { Evaluator, Example, EvaluationDataset, TaskOutput } from '@kbn/eva
 
 export type { EvaluationScoreDocument } from '@kbn/evals-common';
 
-/**
- * Extension-specific types (to be populated in future PRs)
- */
-export interface ExtensionConfig {
-  /**
-   * Configuration for extension features
-   * Will be expanded as features are added
-   */
-  placeholder?: string;
-}
-
-// Placeholder export to ensure package builds
-export const EVALS_EXTENSIONS_VERSION = '1.0.0';
-
 export * as cli from './src/cli';
 export { runRedTeam, RED_TEAM_MODULE_IDS } from './src/red_team';
 export type { RedTeamConfig, RedTeamReport, RedTeamModuleId } from './src/red_team';

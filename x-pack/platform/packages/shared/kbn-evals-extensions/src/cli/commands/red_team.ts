@@ -94,7 +94,7 @@ export const redTeamCmd: Command<void> = {
     const repoRoot = process.cwd();
     const profile = await ensureEvalInit(repoRoot, log, flagsReader);
 
-    const { suite, suiteId, configPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
+    const { suite, suiteId } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
     if (!suiteId) {
       throw createFlagError(
@@ -116,7 +116,7 @@ export const redTeamCmd: Command<void> = {
     const skipServer = flagsReader.boolean('skip-server');
 
     log.info('');
-    log.info(`Suite:     ${suiteId ?? configPath}`);
+    log.info(`Suite:     ${suiteId}`);
     log.info(`Judge:     ${evaluationConnectorId}`);
     if (projects.length > 0) {
       log.info(`Models:    ${projects.join(', ')}`);
@@ -140,7 +140,6 @@ export const redTeamCmd: Command<void> = {
 
     const runArgs = buildEvalRunArgs({
       suiteId,
-      configPath,
       evaluationConnectorId,
       projects,
       profile,

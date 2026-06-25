@@ -102,7 +102,7 @@ export const startCmd: Command<void> = {
       });
     }
 
-    log.info(`[4/4] Running suite: ${suiteId ?? configPath}`);
+    log.info(`[run] Running suite: ${suiteId ?? configPath}`);
     log.info('');
 
     const envOverrides = buildEvalRunEnv({
