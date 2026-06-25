@@ -121,21 +121,26 @@ export class DatePicker {
     const getTestSubjLocator = (selector: string) =>
       this.getTestSubjLocator(selector, containerLocator);
 
+    /**
+     * Clears the input, types the value and submits with `Enter`.
+     * Same approach as the `time_picker.ts` for FTR.
+     */
+    const commitTypedDate = async (value: string) => {
+      const input = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
+      await input.clear();
+      await input.pressSequentially(value);
+      await input.press('Enter');
+    };
+
     // we start with end date
     await getTestSubjLocator('superDatePickerendDatePopoverButton').click();
     await this.openAbsoluteTab();
-    const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-    await inputFrom.clear();
-    await inputFrom.fill(to);
-    await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
+    await commitTypedDate(to);
     await this.page.keyboard.press('Escape');
     // and later change start date
     await getTestSubjLocator('superDatePickerstartDatePopoverButton').click();
     await this.openAbsoluteTab();
-    const inputTo = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-    await inputTo.clear();
-    await inputTo.fill(from);
-    await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
+    await commitTypedDate(from);
     await this.page.keyboard.press('Escape');
 
     if (validateDates) {
@@ -252,6 +257,21 @@ export class DatePicker {
     }
 
     await this.getTestSubjLocator('querySubmitButton', containerLocator).click();
+  }
+
+  private async openDateRangePickerSettings() {
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+
+    const settingsPanel = this.page.testSubj.locator('dateRangePickerSettingsPanel');
+    const settingsPanelOpened = await settingsPanel
+      .waitFor({ timeout: 1000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (!settingsPanelOpened) {
+      await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
+      await settingsPanel.waitFor();
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -430,7 +450,7 @@ export class DatePicker {
 
   async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
     if (await this.isNewDateRangePicker()) {
-      await this.openSettingsPanel();
+      await this.openDateRangePickerSettings();
 
       const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
       const isPaused = (await toggle.getAttribute('aria-checked')) !== 'true';
@@ -456,6 +476,26 @@ export class DatePicker {
       await this.refreshIntervalInput.fill(interval.toString());
       await this.refreshIntervalUnitSelect.selectOption({ value: dateUnit });
       await this.refreshIntervalInput.press('Enter');
+      await this.quickMenuButton.click();
+    }
+  }
+
+  async pauseAutoRefresh() {
+    if (await this.isNewDateRangePicker()) {
+      await this.openDateRangePickerSettings();
+
+      const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
+      const isRunning = (await toggle.getAttribute('aria-checked')) === 'true';
+
+      if (isRunning) await toggle.click();
+
+      await this.page.keyboard.press('Escape');
+    } else {
+      await this.quickMenuButton.click();
+      const isRunning = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
+
+      if (isRunning) await this.toggleRefreshButton.click();
+
       await this.quickMenuButton.click();
     }
   }
