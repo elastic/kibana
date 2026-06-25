@@ -16,13 +16,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Streams } from '@kbn/streams-schema';
+import { isRootStreamBaseField, Streams } from '@kbn/streams-schema';
 import { StreamsAppContextProvider } from '../../../streams_app_context_provider';
 import { SchemaEditorFlyout } from './flyout';
 import { useSchemaEditorContext } from './schema_editor_context';
 import type { SchemaField } from './types';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getGeoPointSuggestion } from './utils';
+
+const tooltipContent = i18n.translate(
+  'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
+  { defaultMessage: 'Open actions menu' }
+);
 
 export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const context = useKibana();
@@ -132,7 +137,12 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         // Don't show "Unmap field" for:
         // - Fields inherited from parent (the parent's mapping or documentation still applies)
         // - Documentation-only fields (no type) since there's nothing to unmap
-        if (!isInheritedFromParent && field.type) {
+        // - Default fields of the root stream
+        if (
+          !isInheritedFromParent &&
+          field.type &&
+          !isRootStreamBaseField(field.parent, field.name)
+        ) {
           actions.push({
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
@@ -216,28 +226,21 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
     return null;
   }
 
+  const button = (
+    <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={tooltipContent}
+        data-test-subj="streamsAppActionsButton"
+        iconType="boxesVertical"
+        onClick={toggle}
+      />
+    </EuiToolTip>
+  );
+
   return (
     <EuiPopover
       id={contextMenuPopoverId}
-      button={
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
-            { defaultMessage: 'Open actions menu' }
-          )}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            aria-label={i18n.translate(
-              'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
-              { defaultMessage: 'Open actions menu' }
-            )}
-            data-test-subj="streamsAppActionsButton"
-            iconType="boxesVertical"
-            onClick={toggle}
-          />
-        </EuiToolTip>
-      }
+      button={button}
       isOpen={popoverIsOpen}
       closePopover={closePopover}
       panelPaddingSize="none"

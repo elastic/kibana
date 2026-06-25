@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import { baseFields } from '@kbn/streams-plugin/server/lib/streams/component_templates/logs_layer';
-import { ecsBaseFields } from '@kbn/streams-plugin/server/lib/streams/component_templates/logs_ecs_layer';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, ecsBaseFields } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Streams, isInheritFailureStore } from '@kbn/streams-schema';
+import { Streams, isInheritFailureStore, isRootStreamBaseField } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
 import {
   isAndCondition,
@@ -20,7 +20,7 @@ import { MalformedStreamError } from '../errors/malformed_stream_error';
 import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
 
 /*
- * Changes to mappings (fields) and processing rules are not allowed on the root stream.
+ * Default mappings (fields) only allow description changes.
  * Changes to routing rules are allowed.
  * Root stream cannot inherit a lifecycle.
  */
@@ -28,22 +28,23 @@ export function validateRootStreamChanges(
   currentStreamDefinition: Streams.WiredStream.Definition,
   nextStreamDefinition: Streams.WiredStream.Definition
 ) {
-  const hasFieldChanges = !isEqual(
-    currentStreamDefinition.ingest.wired.fields,
-    nextStreamDefinition.ingest.wired.fields
-  );
+  const currentFields = currentStreamDefinition.ingest.wired.fields;
+  const nextFields = nextStreamDefinition.ingest.wired.fields;
 
-  if (hasFieldChanges) {
-    throw new RootStreamImmutabilityError('Root stream fields cannot be changed');
-  }
+  const uniqueFieldNames = new Set([...Object.keys(currentFields), ...Object.keys(nextFields)]);
 
-  const hasProcessingChanges = !isEqual(
-    currentStreamDefinition.ingest.processing,
-    nextStreamDefinition.ingest.processing
-  );
-
-  if (hasProcessingChanges) {
-    throw new RootStreamImmutabilityError('Root stream processing rules cannot be changed');
+  for (const fieldName of uniqueFieldNames) {
+    if (
+      !isEqual(
+        omit(currentFields[fieldName], 'description'),
+        omit(nextFields[fieldName], 'description')
+      ) &&
+      isRootStreamBaseField(currentStreamDefinition.name, fieldName)
+    ) {
+      throw new RootStreamImmutabilityError(
+        `Default root stream field '${fieldName}' only allows description changes`
+      );
+    }
   }
 
   if (isInheritLifecycle(nextStreamDefinition.ingest.lifecycle)) {

@@ -212,92 +212,6 @@ describe('StreamDetailSchemaEditor', () => {
     });
   });
 
-  describe('Root stream read-only callout', () => {
-    it('displays read-only callout for root streams', () => {
-      const definition = createMockWiredStreamDefinition({
-        stream: {
-          type: 'wired',
-          name: 'logs', // root stream
-          description: '',
-          updated_at: '2024-01-01T00:00:00.000Z',
-          ingest: {
-            lifecycle: { dsl: {} },
-            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
-            settings: {},
-            failure_store: { inherit: {} },
-            wired: {
-              fields: {},
-              routing: [],
-            },
-          },
-        },
-      });
-
-      mockUseStreamDetail.mockReturnValue({
-        definition,
-        loading: false,
-        refresh: mockRefreshDefinition,
-      });
-
-      render(
-        <I18nProvider>
-          <StreamDetailSchemaEditor
-            definition={definition}
-            refreshDefinition={mockRefreshDefinition}
-          />
-        </I18nProvider>
-      );
-
-      expect(
-        screen.getByText(
-          /Root streams are selectively immutable and their schema cannot be modified/
-        )
-      ).toBeInTheDocument();
-    });
-
-    it('does not display callout for non-root streams', () => {
-      const definition = createMockWiredStreamDefinition({
-        stream: {
-          type: 'wired',
-          name: 'logs.otel.child', // child stream
-          description: '',
-          updated_at: '2024-01-01T00:00:00.000Z',
-          ingest: {
-            lifecycle: { inherit: {} },
-            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
-            settings: {},
-            failure_store: { inherit: {} },
-            wired: {
-              fields: {},
-              routing: [],
-            },
-          },
-        },
-      });
-
-      mockUseStreamDetail.mockReturnValue({
-        definition,
-        loading: false,
-        refresh: mockRefreshDefinition,
-      });
-
-      render(
-        <I18nProvider>
-          <StreamDetailSchemaEditor
-            definition={definition}
-            refreshDefinition={mockRefreshDefinition}
-          />
-        </I18nProvider>
-      );
-
-      expect(
-        screen.queryByText(
-          /Root streams are selectively immutable and their schema cannot be modified/
-        )
-      ).not.toBeInTheDocument();
-    });
-  });
-
   describe('Pending changes bottom bar', () => {
     it('displays bottom bar when there are pending changes', () => {
       mockUseSchemaFields.mockReturnValue({
@@ -611,11 +525,60 @@ describe('StreamDetailSchemaEditor', () => {
       expect(screen.getByTestId('streamsAppContentAddFieldButton')).toBeInTheDocument();
     });
 
-    it('hides add field button for root streams even with manage privilege', () => {
+    it('hides add field button for root streams without manage privilege', () => {
       const definition = createMockWiredStreamDefinition({
         stream: {
           type: 'wired',
-          name: 'logs', // root stream
+          name: 'logs.ecs',
+          description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          ingest: {
+            lifecycle: { dsl: {} },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
+            settings: {},
+            failure_store: { inherit: {} },
+            wired: {
+              fields: {},
+              routing: [],
+            },
+          },
+        },
+        privileges: {
+          manage: false,
+          monitor: true,
+          lifecycle: false,
+          simulate: false,
+          text_structure: false,
+          read_failure_store: false,
+          manage_failure_store: false,
+          view_index_metadata: true,
+          create_snapshot_repository: true,
+        },
+      });
+
+      mockUseStreamDetail.mockReturnValue({
+        definition,
+        loading: false,
+        refresh: mockRefreshDefinition,
+      });
+
+      render(
+        <I18nProvider>
+          <StreamDetailSchemaEditor
+            definition={definition}
+            refreshDefinition={mockRefreshDefinition}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('streamsAppContentAddFieldButton')).not.toBeInTheDocument();
+    });
+
+    it('shows add field button for root streams with manage privilege', () => {
+      const definition = createMockWiredStreamDefinition({
+        stream: {
+          type: 'wired',
+          name: 'logs.ecs',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
@@ -657,7 +620,7 @@ describe('StreamDetailSchemaEditor', () => {
         </I18nProvider>
       );
 
-      expect(screen.queryByTestId('streamsAppContentAddFieldButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('streamsAppContentAddFieldButton')).toBeInTheDocument();
     });
   });
 });

@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiBottomBar,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { uniq } from 'lodash';
@@ -145,27 +137,12 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     );
   };
 
-  const isRootStream = isRootStreamDefinition(definition.stream);
   const isReplicated = definition.replicated === true;
-  const canEditSchema = !isRootStream && !isReplicated && definition.privileges.manage;
+  const canEditSchema = !isReplicated && definition.privileges.manage;
   const handleAddField = canEditSchema ? addField : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-      {isRootStream && (
-        <>
-          <EuiCallOut
-            iconType="info"
-            title={i18n.translate('xpack.streams.schemaEditor.rootStreamReadOnlyMode', {
-              defaultMessage:
-                'Root streams are selectively immutable and their schema cannot be modified. To modify the schema or to add processing steps, partition a new child stream first.',
-            })}
-            announceOnMount={false}
-            size="s"
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
       <EuiFlexItem grow={1} css={{ minHeight: 0 }}>
         <SchemaEditor
           fields={fields}

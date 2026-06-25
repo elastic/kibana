@@ -18,8 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
-import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { AssetImage } from '../../../asset_image';
 import { ProcessingPanel } from './pipeline_suggestions/processing_panel';
 import {
@@ -87,57 +85,6 @@ interface NoStepsEmptyPromptProps {
   canUsePipelineSuggestions: boolean;
   children?: React.ReactNode;
 }
-
-export const RootStreamEmptyPrompt = () => {
-  const router = useStreamsAppRouter();
-  const {
-    path: { key: streamName },
-  } = useStreamsAppParams('/{key}/management/{tab}');
-
-  return (
-    <EuiEmptyPrompt
-      aria-live="polite"
-      titleSize="xs"
-      icon={<AssetImage type="processorsCannotBeAddedToRootStreams" />}
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.title',
-            { defaultMessage: 'Processors cannot be added to root streams' }
-          )}
-        </h2>
-      }
-      body={
-        <p>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.body',
-            {
-              defaultMessage:
-                'To transform your data with processors, partition a new child stream.',
-            }
-          )}
-        </p>
-      }
-      actions={
-        <EuiButton
-          href={router.link('/{key}/management/{tab}', {
-            path: {
-              key: streamName,
-              tab: 'partitioning',
-            },
-          })}
-        >
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.button',
-            {
-              defaultMessage: 'Open stream partitioning',
-            }
-          )}
-        </EuiButton>
-      }
-    />
-  );
-};
 
 export const NoStepsEmptyPrompt = ({
   canUsePipelineSuggestions,

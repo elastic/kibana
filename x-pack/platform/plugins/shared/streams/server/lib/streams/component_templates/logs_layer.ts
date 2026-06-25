@@ -20,6 +20,6 @@ export {
   addAliasesForNamespacedFields,
   // Re-export with legacy names for backward compatibility
   otelLogsSettings as logsSettings,
-  otelBaseFields as baseFields,
   otelBaseMappings as baseMappings,
 } from './logs_otel_layer';
+export { otelBaseFields as baseFields } from '@kbn/streams-schema';

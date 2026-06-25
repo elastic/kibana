@@ -111,6 +111,7 @@ export {
   getRoot,
   MAX_NESTING_LEVEL,
   isRoot,
+  isRootStreamBaseField,
   ROOT_STREAM_NAMES,
   LOGS_ROOT_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
@@ -133,6 +134,8 @@ export {
   ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
+  ecsBaseFields,
+  otelBaseFields,
 } from './src/fields';
 
 export {

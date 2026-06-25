@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useReducer, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { isRootStreamBaseField, Streams } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SamplePreviewTable } from './sample_preview_table';
@@ -113,13 +113,19 @@ export const SchemaEditorFlyout = ({
   // This applies to:
   // 1. Inherited fields (can only add description override)
   // 2. When explicitly requested via isDescriptionOnlyMode prop
+  // 3. Default fields of the root stream
   const isDescriptionOnlyEditing =
-    isEditing && streamType === 'wired' && (field.status === 'inherited' || isDescriptionOnlyMode);
+    isEditing &&
+    streamType === 'wired' &&
+    (field.status === 'inherited' ||
+      isDescriptionOnlyMode ||
+      isRootStreamBaseField(field.parent, field.name));
   const isDocOnlyField = field.status === 'unmapped' && !field.type;
   const hasDescriptionChanged =
     (nextField.description ?? undefined) !== (field.description ?? undefined);
   const isInheritedDescriptionOnlyEditing =
     isDescriptionOnlyEditing && field.status === 'inherited';
+  const isBaseFieldDescriptionOnlyEditing = isDescriptionOnlyEditing && field.status === 'mapped';
   // For wired streams, unmapped fields can have description-only changes without selecting a type.
   // This also applies when user explicitly selects "Unmapped" from the type dropdown.
   const isUnmappedDescriptionOnlyChange =
@@ -154,6 +160,7 @@ export const SchemaEditorFlyout = ({
 
       {isIgnoredField && (
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           title={i18n.translate('xpack.streams.samplePreviewTable.ignoredFieldsCallOutTitle', {
@@ -170,6 +177,7 @@ export const SchemaEditorFlyout = ({
       {geoPointSuggestion && !geoPointSuggestionApplied && (
         <>
           <EuiCallOut
+            announceOnMount
             color="primary"
             iconType="waypoint"
             title={i18n.translate('xpack.streams.schemaEditorFlyout.geoPointSuggestionTitle', {
@@ -259,8 +267,9 @@ export const SchemaEditorFlyout = ({
                   !isUnmappedDescriptionOnlyChange &&
                   !hasValidFieldType) ||
                 !isValidAdvancedFieldMappings ||
-                // For inherited fields in description-only mode, require description change
-                (isInheritedDescriptionOnlyEditing && !hasDescriptionChanged) ||
+                // For inherited or mapped fields in description-only mode, require a description change
+                ((isInheritedDescriptionOnlyEditing || isBaseFieldDescriptionOnlyEditing) &&
+                  !hasDescriptionChanged) ||
                 // For doc-only fields in description-only mode, require description change
                 (isDescriptionOnlyEditing && isDocOnlyField && !hasDescriptionChanged) ||
                 (!isValidSimulation && !isExpensiveQueriesError)
@@ -275,6 +284,14 @@ export const SchemaEditorFlyout = ({
                       // continues to show the correct parent stream.
                       // buildSchemaSavePayload handles persisting the description
                       // override for inherited fields.
+                      return {
+                        ...field,
+                        description: nextField.description,
+                      } as SchemaField;
+                    }
+
+                    if (field.status === 'mapped') {
+                      // Preserve the existing mapping; only update description.
                       return {
                         ...field,
                         description: nextField.description,

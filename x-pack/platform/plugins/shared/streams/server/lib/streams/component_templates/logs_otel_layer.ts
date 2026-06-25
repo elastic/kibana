@@ -18,7 +18,7 @@ import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getRoot, namespacePrefixes } from '@kbn/streams-schema';
+import { getRoot, namespacePrefixes, otelBaseFields } from '@kbn/streams-schema';
 import type { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
 
 // This map is used to find the ECS equivalent field for a given OpenTelemetry attribute.
@@ -56,49 +56,6 @@ export const otelLogsSettings: IndicesIndexSettings = {
       },
       ignore_malformed: true,
     },
-  },
-};
-
-export const otelBaseFields: FieldDefinition = {
-  '@timestamp': {
-    type: 'date',
-  },
-  'stream.name': {
-    type: 'system',
-  },
-  'scope.name': {
-    type: 'keyword',
-    ignore_above: 1024,
-  },
-  trace_id: {
-    type: 'keyword',
-    ignore_above: 1024,
-  },
-  span_id: {
-    type: 'keyword',
-    ignore_above: 1024,
-  },
-  event_name: {
-    type: 'keyword',
-    ignore_above: 1024,
-  },
-  severity_text: {
-    type: 'keyword',
-    ignore_above: 1024,
-  },
-  'body.text': {
-    type: 'match_only_text',
-  },
-  severity_number: {
-    type: 'long',
-  },
-  'resource.attributes.host.name': {
-    type: 'keyword',
-    ignore_above: 1024,
-  },
-  'resource.attributes.service.name': {
-    type: 'keyword',
-    ignore_above: 1024,
   },
 };
 

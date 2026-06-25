@@ -29,6 +29,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Root streams API', () => {
     // Test logs.otel and logs.ecs root streams with the same validation rules
     ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
+      // Each root stream has stream-specific base fields that cannot have their type changed
+      const baseFieldToTest = rootStream === 'logs.ecs' ? 'log.level' : 'severity_text';
+
       describe(`${rootStream} root stream`, () => {
         before(async () => {
           apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -39,7 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await disableStreams(apiClient);
         });
 
-        it('Should not allow processing changes', async () => {
+        it('Should allow processing changes', async () => {
           // Fetch the current stream definition to get the real field definitions
           const currentStream = await getStream(apiClient, rootStream);
 
@@ -68,14 +71,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           };
-          const response = await putStream(apiClient, rootStream, body, 400);
-          expect(response).to.have.property(
-            'message',
-            'Desired stream state is invalid: Root stream processing rules cannot be changed'
-          );
+          const response = await putStream(apiClient, rootStream, body);
+          expect(response).to.have.property('acknowledged', true);
         });
 
-        it('Should not allow fields changes', async () => {
+        it('Should not allow changing base field type', async () => {
           // Fetch the current stream definition to get the real field definitions
           const currentStream = await getStream(apiClient, rootStream);
 
@@ -94,7 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   ...wiredStream.stream.ingest.wired,
                   fields: {
                     ...wiredStream.stream.ingest.wired.fields,
-                    'log.level': {
+                    [baseFieldToTest]: {
                       type: 'boolean',
                     },
                   },
@@ -106,8 +106,69 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(response).to.have.property(
             'message',
-            'Desired stream state is invalid: Root stream fields cannot be changed'
+            `Desired stream state is invalid: Default root stream field '${baseFieldToTest}' only allows description changes`
           );
+        });
+
+        it('Should allow changing base field description', async () => {
+          const currentStream = await getStream(apiClient, rootStream);
+          const wiredStream = currentStream as Streams.WiredStream.GetResponse;
+          const currentField = wiredStream.stream.ingest.wired.fields[baseFieldToTest];
+
+          const body: Streams.WiredStream.UpsertRequest = {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description: '',
+              ingest: {
+                ...wiredStream.stream.ingest,
+                processing: omit(wiredStream.stream.ingest.processing, 'updated_at'),
+                wired: {
+                  ...wiredStream.stream.ingest.wired,
+                  fields: {
+                    ...wiredStream.stream.ingest.wired.fields,
+                    [baseFieldToTest]: {
+                      ...currentField,
+                      description: 'updated description',
+                    },
+                  },
+                },
+              },
+            },
+          };
+          const response = await putStream(apiClient, rootStream, body);
+          expect(response).to.have.property('acknowledged', true);
+        });
+
+        it('Should allow adding custom field mappings', async () => {
+          // Fetch the current stream definition to get the real field definitions
+          const currentStream = await getStream(apiClient, rootStream);
+
+          // Type assertion: we know root streams are wired streams
+          const wiredStream = currentStream as Streams.WiredStream.GetResponse;
+
+          const body: Streams.WiredStream.UpsertRequest = {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description: '',
+              ingest: {
+                ...wiredStream.stream.ingest,
+                processing: omit(wiredStream.stream.ingest.processing, 'updated_at'),
+                wired: {
+                  ...wiredStream.stream.ingest.wired,
+                  fields: {
+                    ...wiredStream.stream.ingest.wired.fields,
+                    my_custom_field: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+              },
+            },
+          };
+          const response = await putStream(apiClient, rootStream, body);
+          expect(response).to.have.property('acknowledged', true);
         });
 
         it('Should allow routing changes', async () => {

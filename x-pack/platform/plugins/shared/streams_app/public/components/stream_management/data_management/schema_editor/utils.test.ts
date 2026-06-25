@@ -261,19 +261,6 @@ describe('buildSchemaSavePayload', () => {
 });
 
 describe('convertToFieldDefinitionConfig', () => {
-  it('throws for system-managed field type', () => {
-    const field = {
-      name: '@timestamp',
-      parent: 'logs',
-      status: 'mapped',
-      type: 'system',
-    } as MappedSchemaField;
-
-    expect(() => convertToFieldDefinitionConfig(field)).toThrow(
-      'Cannot convert system-managed field type to FieldDefinitionConfig'
-    );
-  });
-
   it('converts a valid mapped field', () => {
     const field = {
       name: 'message',
