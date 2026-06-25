@@ -15,6 +15,7 @@ import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   type ConnectorSetupAttachmentData,
 } from '../../../common/attachments';
+import { supportsAgentBuilder } from './utils';
 
 const proposeConnectorSchema = z.object({
   connector_type: z
@@ -62,12 +63,12 @@ export const createProposeConnectorTool = (): BuiltinSkillBoundedTool<
     const { attachments } = context;
 
     const spec = getConnectorSpec(input.connector_type);
-    if (!spec) {
+    if (!spec || !supportsAgentBuilder(spec)) {
       return {
         results: [
           createErrorResult({
             message:
-              `Unknown connector type '${input.connector_type}'. ` +
+              `Connector type '${input.connector_type}' is not available to set up from chat. ` +
               'Call `list_connector_types` and pick a `connector_type` value from the result.',
           }),
         ],

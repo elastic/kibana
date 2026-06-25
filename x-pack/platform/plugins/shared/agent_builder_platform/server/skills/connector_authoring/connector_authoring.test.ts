@@ -145,5 +145,21 @@ describe('connector-authoring inline tools', () => {
       expect(result.results[0].type).toBe(ToolResultType.error);
       expect(attachments.getActive()).toHaveLength(0);
     });
+
+    it('rejects a spec-backed connector that does not support Agent Builder', async () => {
+      // .email resolves to a real spec, but it is alerting-only (no agentBuilder
+      // support), so the agent could not use it afterwards - it must not be proposable.
+      getConnectorSpecMock.mockReturnValue(alertingOnlySpec as never);
+      const tool = createProposeConnectorTool();
+      const { context, attachments } = createTestContext();
+
+      const result = (await tool.handler(
+        { connector_type: '.email' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(attachments.getActive()).toHaveLength(0);
+    });
   });
 });

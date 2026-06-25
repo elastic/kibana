@@ -12,8 +12,7 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-
-const AGENT_BUILDER_FEATURE_ID = 'agentBuilder';
+import { supportsAgentBuilder } from './utils';
 
 interface ListedConnectorAction {
   name: string;
@@ -79,11 +78,7 @@ export const createListConnectorTypesTool = (): BuiltinSkillBoundedTool<
     try {
       const connectorTypes = Object.values(connectorsSpecs)
         .filter(isConnectorSpec)
-        .filter((spec) =>
-          (spec.metadata.supportedFeatureIds as readonly string[]).includes(
-            AGENT_BUILDER_FEATURE_ID
-          )
-        )
+        .filter(supportsAgentBuilder)
         .map(projectConnectorType)
         .sort((a, b) => a.name.localeCompare(b.name));
 
