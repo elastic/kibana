@@ -25,7 +25,7 @@ import { RuleDetails } from '../../rule/main';
  * - IP fields → Network details flyout (value = IP address)
  * - Rule name field → Rule details flyout (value = rule ID)
  *
- * @param _hit - Optional hit record for entity resolution (used by Host flyout, wired in a later PR)
+ * @param _hit - Optional hit record for entity resolution
  */
 export const buildFlyoutContent = (
   field: string,

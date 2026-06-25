@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SigEvent, SigEventImpact, SigEventStatus } from '@kbn/streams-schema';
+import type { SigEvent, SigEventStatus } from '@kbn/streams-schema';
 import type { EventClient } from '../../../lib/sig_events/events';
 
 export interface EventCreateInput {
@@ -16,7 +16,6 @@ export interface EventCreateInput {
   root_cause: string;
   stream_names: string[];
   criticality: number;
-  impact: SigEventImpact;
   confidence: number;
   recommendations: string[];
 }
@@ -36,14 +35,13 @@ export async function createEventToolHandler({
     created_at: now,
     event_id: eventId,
     discovery_slug: `agent-event-${eventId.slice(0, 8)}`,
-    verdict: eventInput.status ?? 'promoted',
+    status: eventInput.status ?? 'promoted',
     stream_names: eventInput.stream_names,
     title: eventInput.title,
     summary: eventInput.summary,
     root_cause: eventInput.root_cause,
     criticality: eventInput.criticality,
     confidence: eventInput.confidence,
-    impact: eventInput.impact,
     recommendations: eventInput.recommendations,
   };
 

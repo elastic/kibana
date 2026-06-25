@@ -7,25 +7,21 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
+import { CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS } from '../../../fixtures/constants';
 
 test.describe(
   'Custom threshold preview chart',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    const previewChartDataTestSubj = 'thresholdRulePreviewChart';
-
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-
       await pageObjects.rulesPage.goto();
-
-      await pageObjects.rulesPage.createRuleButton.click();
-      await pageObjects.rulesPage.observabilityCategory.click();
-      await pageObjects.rulesPage.customThresholdRuleTypeCard.click();
+      await pageObjects.rulesPage.openRuleTypeModal();
+      await pageObjects.rulesPage.clickCustomThresholdRuleType();
     });
 
     test('should render the empty chart only once at bootstrap', async ({ page }) => {
-      const previewChart = page.testSubj.locator(previewChartDataTestSubj);
+      const previewChart = page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART);
       await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible();
     });
 
@@ -41,6 +37,30 @@ test.describe(
       await page.testSubj.click('o11yClosablePopoverTitleButton');
 
       await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+    });
+
+    test('should render chart correctly after fixing an invalid equation', async ({ page }) => {
+      const customEquation = page.testSubj.locator('customEquation');
+      const customEquationField = page.testSubj.locator(
+        'thresholdRuleCustomEquationEditorFieldText'
+      );
+      const lensFailure = page.testSubj.locator('embeddable-lens-failure');
+      const previewChart = page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART);
+
+      // Introduce an invalid equation to trigger the error state
+      await customEquation.click();
+      await customEquationField.fill('A +');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
+      await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+
+      // Fix the equation back to a valid value
+      await customEquation.click();
+      await customEquationField.fill('A');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
+
+      // Chart should recover: error gone, chart container visible
+      await expect(lensFailure).toBeHidden({ timeout: 20_000 });
+      await expect(previewChart).toBeVisible({ timeout: 20_000 });
     });
   }
 );

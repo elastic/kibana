@@ -10,10 +10,11 @@ import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -181,21 +182,28 @@ export const Description = ({
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 {permissions.update ? (
-                  <EuiButtonIcon
-                    aria-label={i18n.EDIT_DESCRIPTION}
-                    iconType="pencil"
-                    onClick={() => setIsEditable(true)}
-                    data-test-subj="description-edit-icon"
-                  />
+                  <EuiToolTip content={i18n.EDIT_DESCRIPTION} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={i18n.EDIT_DESCRIPTION}
+                      iconType="pencil"
+                      onClick={() => setIsEditable(true)}
+                      data-test-subj="description-edit-icon"
+                    />
+                  </EuiToolTip>
                 ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
-                  iconType={isCollapsed ? 'unfold' : 'fold'}
-                  onClick={toggleCollapse}
-                  data-test-subj="description-collapse-icon"
-                />
+                <EuiToolTip
+                  content={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
+                    iconType={isCollapsed ? 'unfold' : 'fold'}
+                    onClick={toggleCollapse}
+                    data-test-subj="description-collapse-icon"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexGroup>
