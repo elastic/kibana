@@ -6,10 +6,10 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { FederatedDataPlugin } from './plugin';
+import { DataFederationPlugin } from './plugin';
 
-export type { FederatedDataPluginStart } from './types';
+export type { DataFederationPluginStart } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new FederatedDataPlugin(initializerContext);
+  return new DataFederationPlugin(initializerContext);
 }

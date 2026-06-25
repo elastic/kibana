@@ -7145,7 +7145,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/federated-data-plugin@link:x-pack/platform/plugins/private/federated_data":
+"@kbn/data-federation-plugin@link:x-pack/platform/plugins/private/data_federation":
   version "0.0.0"
   uid ""
 

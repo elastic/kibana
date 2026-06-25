@@ -8,7 +8,7 @@
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SetupDependencies, StartDependencies, FederatedDataPluginStart } from './types';
+import type { SetupDependencies, StartDependencies, DataFederationPluginStart } from './types';
 import { PLUGIN_ID } from '../common';
 
 const PLUGIN_NAME = i18n.translate('xpack.dataFederation.pluginName', {
@@ -22,8 +22,8 @@ const LIST_BREADCRUMB = [
   },
 ];
 
-export class FederatedDataPlugin
-  implements Plugin<void, FederatedDataPluginStart, SetupDependencies, StartDependencies>
+export class DataFederationPlugin
+  implements Plugin<void, DataFederationPluginStart, SetupDependencies, StartDependencies>
 {
   private readonly enableFederatedIdentityAuth: boolean;
   private readonly enableGoogleCloudStorageDataSourceType: boolean;
@@ -88,7 +88,7 @@ export class FederatedDataPlugin
     });
   }
 
-  public start(): FederatedDataPluginStart {
+  public start(): DataFederationPluginStart {
     return {};
   }
 }

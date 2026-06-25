@@ -10,6 +10,6 @@ export { config } from './config';
 export { DataSourcesClient } from './data_sources_client';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { FederatedDataServerPlugin } = await import('./plugin');
-  return new FederatedDataServerPlugin(initializerContext);
+  const { DataFederationServerPlugin } = await import('./plugin');
+  return new DataFederationServerPlugin(initializerContext);
 }

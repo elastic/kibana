@@ -157,7 +157,7 @@ mapped_pages:
 | [eventLog](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/event_log/README.md) | The event log plugin provides a persistent history of alerting and action activities. |
 | [exploratoryView](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/exploratory_view/README.md) | A shared component for visualizing observability data types via lens embeddable. For further details. |
 | [features](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/features/README.md) | The features plugin enhance Kibana with a per-feature privilege system. |
-| [federatedData](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/federated_data) | WARNING: Missing or empty README. |
+| [federatedData](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/data_federation) | WARNING: Missing or empty README. |
 | [feedback](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/feedback/README.md) | Universal way of giving feedback about Elastic in Kibana. |
 | [fieldsMetadata](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fields_metadata/README.md) | The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future. |
 | [fileUpload](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/file_upload) | WARNING: Missing or empty README. |

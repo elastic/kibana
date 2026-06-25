@@ -9,15 +9,15 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { PLUGIN_ID } from '../common';
 import { registerDataSetsRoutes } from './routes/register_routes';
-import type { FederatedDataConfigType } from './config';
+import type { DataFederationConfigType } from './config';
 
-export class FederatedDataServerPlugin
+export class DataFederationServerPlugin
   implements Plugin<void, void, { features: FeaturesPluginSetup }>
 {
-  private readonly config: FederatedDataConfigType;
+  private readonly config: DataFederationConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<FederatedDataConfigType>();
+    this.config = initializerContext.config.get<DataFederationConfigType>();
   }
 
   public setup({ http }: CoreSetup, { features }: { features: FeaturesPluginSetup }) {

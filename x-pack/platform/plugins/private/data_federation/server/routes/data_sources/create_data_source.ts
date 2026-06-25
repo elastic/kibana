@@ -11,11 +11,11 @@ import type { IRouter } from '@kbn/core/server';
 import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
 import { getRouteErrorMessage } from '../../get_route_error_message';
-import type { FederatedDataConfigType } from '../../config';
+import type { DataFederationConfigType } from '../../config';
 
 import { putDataSourceBodySchema } from './data_source_schema';
 
-export function registerCreateDataSource(router: IRouter, config: FederatedDataConfigType): void {
+export function registerCreateDataSource(router: IRouter, config: DataFederationConfigType): void {
   router.put(
     {
       path: DATA_SOURCE_BY_ID_ROUTE_PATH,
