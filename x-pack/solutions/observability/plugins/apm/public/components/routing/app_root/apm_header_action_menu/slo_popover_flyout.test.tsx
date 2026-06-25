@@ -9,23 +9,15 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SloPopoverAndFlyout } from './slo_popover_flyout';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { useSloFlyouts } from '../../../../hooks/use_slo_flyouts';
 
-const mockGetCreateSLOFormFlyout = jest.fn();
+const mockCreateSloFormFlyout = jest.fn(() => <div data-test-subj="mockSloFlyout">SLO Flyout</div>);
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      slo: {
-        getCreateSLOFormFlyout: mockGetCreateSLOFormFlyout,
-      },
-      http: {
-        basePath: {
-          prepend: (path: string) => path,
-        },
-      },
-    },
-  }),
+jest.mock('../../../../hooks/use_slo_flyouts', () => ({
+  useSloFlyouts: jest.fn(),
 }));
+
+const mockUseSloFlyouts = useSloFlyouts as jest.Mock;
 
 jest.mock('../../../../hooks/use_apm_params', () => ({
   useApmParams: () => ({
@@ -55,9 +47,10 @@ function renderSloPopover(props: { canReadSlos: boolean; canWriteSlos: boolean }
 describe('SloPopoverAndFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetCreateSLOFormFlyout.mockReturnValue(
-      <div data-test-subj="mockSloFlyout">SLO Flyout</div>
-    );
+    mockUseSloFlyouts.mockReturnValue({
+      CreateSLOFormFlyout: mockCreateSloFormFlyout,
+      SLODetailsFlyout: undefined,
+    });
   });
 
   it('renders SLOs header link', () => {
@@ -167,22 +160,23 @@ describe('SloPopoverAndFlyout', () => {
     fireEvent.click(screen.getByTestId('apmSlosMenuItemCreateLatencySlo'));
 
     await waitFor(() => {
-      expect(mockGetCreateSLOFormFlyout).toHaveBeenCalledWith(
-        expect.objectContaining({
-          initialValues: {
-            indicator: {
-              type: 'sli.apm.transactionDuration',
-              params: {
-                environment: 'production',
-              },
+      expect(mockCreateSloFormFlyout).toHaveBeenCalled();
+    });
+    expect(mockCreateSloFormFlyout.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        initialValues: {
+          indicator: {
+            type: 'sli.apm.transactionDuration',
+            params: {
+              environment: 'production',
             },
           },
-          formSettings: {
-            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
-          },
-        })
-      );
-    });
+        },
+        formSettings: {
+          allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+        },
+      })
+    );
   });
 
   it('opens availability SLO flyout when clicking create availability SLO', async () => {
@@ -197,22 +191,23 @@ describe('SloPopoverAndFlyout', () => {
     fireEvent.click(screen.getByTestId('apmSlosMenuItemCreateAvailabilitySlo'));
 
     await waitFor(() => {
-      expect(mockGetCreateSLOFormFlyout).toHaveBeenCalledWith(
-        expect.objectContaining({
-          initialValues: {
-            indicator: {
-              type: 'sli.apm.transactionErrorRate',
-              params: {
-                environment: 'production',
-              },
+      expect(mockCreateSloFormFlyout).toHaveBeenCalled();
+    });
+    expect(mockCreateSloFormFlyout.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        initialValues: {
+          indicator: {
+            type: 'sli.apm.transactionErrorRate',
+            params: {
+              environment: 'production',
             },
           },
-          formSettings: {
-            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
-          },
-        })
-      );
-    });
+        },
+        formSettings: {
+          allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+        },
+      })
+    );
   });
 
   it('closes popover after clicking create SLO option', async () => {
@@ -256,19 +251,20 @@ describe('SloPopoverAndFlyout', () => {
     fireEvent.click(screen.getByTestId('apmSlosMenuItemCreateLatencySlo'));
 
     await waitFor(() => {
-      expect(mockGetCreateSLOFormFlyout).toHaveBeenCalledWith(
-        expect.objectContaining({
-          initialValues: expect.objectContaining({
-            name: 'APM SLO for my-service',
-            indicator: expect.objectContaining({
-              params: expect.objectContaining({
-                service: 'my-service',
-              }),
+      expect(mockCreateSloFormFlyout).toHaveBeenCalled();
+    });
+    expect(mockCreateSloFormFlyout.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        initialValues: expect.objectContaining({
+          name: 'APM SLO for my-service',
+          indicator: expect.objectContaining({
+            params: expect.objectContaining({
+              service: 'my-service',
             }),
           }),
-        })
-      );
-    });
+        }),
+      })
+    );
 
     mockUseServiceName.mockReturnValue(undefined);
   });
@@ -287,13 +283,14 @@ describe('SloPopoverAndFlyout', () => {
     fireEvent.click(screen.getByTestId('apmSlosMenuItemCreateLatencySlo'));
 
     await waitFor(() => {
-      expect(mockGetCreateSLOFormFlyout).toHaveBeenCalledWith(
-        expect.objectContaining({
-          initialValues: expect.not.objectContaining({
-            name: expect.any(String),
-          }),
-        })
-      );
+      expect(mockCreateSloFormFlyout).toHaveBeenCalled();
     });
+    expect(mockCreateSloFormFlyout.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        initialValues: expect.not.objectContaining({
+          name: expect.any(String),
+        }),
+      })
+    );
   });
 });
