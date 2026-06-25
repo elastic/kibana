@@ -157,3 +157,28 @@ export interface DeleteAgentlessPolicyRequest {
   params: TypeOf<typeof DeleteAgentlessPolicyRequestSchema.params>;
   query: TypeOf<typeof DeleteAgentlessPolicyRequestSchema.query>;
 }
+
+export const GetAgentlessPolicyThroughputRequestSchema = {
+  params: schema.object({
+    policyId: schema.string({
+      meta: { description: 'The ID of the agentless package policy.' },
+    }),
+  }),
+};
+
+export const GetAgentlessPolicyThroughputResponseSchema = schema.object({
+  averagePerSecond: schema.number({
+    meta: { description: 'Average ingest rate over the last 24h in events per second.' },
+  }),
+  series: schema.arrayOf(
+    schema.object({
+      x: schema.number({ meta: { description: 'Bucket start timestamp in epoch milliseconds.' } }),
+      y: schema.number({ meta: { description: 'Events per second in this bucket.' } }),
+    }),
+    { meta: { description: '30-minute throughput buckets over the last 24h.' } }
+  ),
+});
+
+export type GetAgentlessPolicyThroughputResponse = TypeOf<
+  typeof GetAgentlessPolicyThroughputResponseSchema
+>;

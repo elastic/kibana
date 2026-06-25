@@ -13,6 +13,8 @@ import {
   CreateAgentlessPolicyResponseSchema,
   DeleteAgentlessPolicyRequestSchema,
   DeleteAgentlessPolicyResponseSchema,
+  GetAgentlessPolicyThroughputRequestSchema,
+  GetAgentlessPolicyThroughputResponseSchema,
 } from '../../../common/types/rest_spec/agentless_policy';
 import { AGENTLESS_POLICIES_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
@@ -24,6 +26,7 @@ import {
   createAgentlessPolicyHandler,
   deleteAgentlessPolicyHandler,
   syncAgentlessPoliciesHandler,
+  getAgentlessPolicyThroughputHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -165,5 +168,49 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       deleteAgentlessPolicyHandler
+    );
+
+  // Throughput
+  router.versioned
+    .get({
+      path: AGENTLESS_POLICIES_ROUTES.THROUGHPUT_PATTERN,
+      access: 'internal',
+      summary: 'Get throughput for an agentless policy',
+      description: 'Get 24h throughput data for an agentless integration policy.',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.AGENTS.READ,
+              ],
+            },
+          ],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetAgentlessPolicyThroughputRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetAgentlessPolicyThroughputResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            404: {
+              description: 'Not found.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getAgentlessPolicyThroughputHandler
     );
 };

@@ -13,9 +13,10 @@ import type {
   CreateAgentlessPolicyResponse,
   DeleteAgentlessPolicyRequest,
   DeleteAgentlessPolicyResponse,
+  GetAgentlessPolicyThroughputResponse,
 } from '../../../common/types/rest_spec/agentless_policy';
 
-import { sendRequestForRq } from './use_request';
+import { sendRequestForRq, useRequest } from './use_request';
 
 export const sendCreateAgentlessPolicy = (
   body: CreateAgentlessPolicyRequest['body'],
@@ -39,5 +40,13 @@ export const sendDeleteAgentlessPolicy = (
     method: 'delete',
     version: API_VERSIONS.public.v1,
     query,
+  });
+};
+
+export const useGetAgentlessPolicyThroughput = (policyId: string) => {
+  return useRequest<GetAgentlessPolicyThroughputResponse>({
+    path: agentlessPolicyRouteService.getThroughputPath(policyId),
+    method: 'get',
+    version: API_VERSIONS.internal.v1,
   });
 };
