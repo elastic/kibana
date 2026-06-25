@@ -9,23 +9,19 @@
       "filter": [
         {
           "term": {
-            "agent.type": "packetbeat"
-          }
-        }
-      ],
-      "should": [
-        {
-          "term": {
-            "event.dataset": "dns"
+            "event.category": "network"
           }
         },
         {
-          "term": {
-            "event.dataset": "network_traffic.dns"
+          "bool": {
+            "should": [
+              { "exists": { "field": "dns.question.registered_domain" } },
+              { "exists": { "field": "network_traffic.dns.question.etld_plus_one" } }
+            ],
+            "minimum_should_match": 1
           }
         }
       ],
-      "minimum_should_match": 1,
       "must_not": [
         {
           "bool": {
@@ -59,7 +55,7 @@
     "dns_question_etld": {
       "type": "keyword",
       "script": {
-        "source": "if(!doc.containsKey('dns.question.etld_plus_one') || doc['dns.question.etld_plus_one'].size() == 0)\r\n{\r\n  if(doc.containsKey('dns.question.registered_domain') && doc['dns.question.registered_domain'].size() != 0)\r\n  { emit(doc['dns.question.registered_domain'].value); }\r\n  else { emit('None'); }\r\n}\r\nelse { emit(doc['dns.question.etld_plus_one'].value); }"
+        "source": "if(!doc.containsKey('network_traffic.dns.question.etld_plus_one') || doc['network_traffic.dns.question.etld_plus_one'].size() == 0)\r\n{\r\n  if(doc.containsKey('dns.question.registered_domain') && doc['dns.question.registered_domain'].size() != 0)\r\n  { emit(doc['dns.question.registered_domain'].value); }\r\n  else { emit('None'); }\r\n}\r\nelse { emit(doc['network_traffic.dns.question.etld_plus_one'].value); }"
       }
     }
   }
