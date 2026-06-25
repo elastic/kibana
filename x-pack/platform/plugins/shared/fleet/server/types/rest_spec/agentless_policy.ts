@@ -90,9 +90,11 @@ export const GetAgentlessPolicyRequestSchema = {
 
 export const ListAgentlessPoliciesRequestSchema = {
   query: schema.object({
-    page: schema.maybe(schema.number({ defaultValue: 1, meta: { description: 'Page number' } })),
+    // Paging defaults (page=1, perPage=20) are owned by the service layer
+    // (`listAgentlessPolicies`), which is the single source of truth
+    page: schema.maybe(schema.number({ meta: { description: 'Page number. Defaults to `1`.' } })),
     perPage: schema.maybe(
-      schema.number({ defaultValue: 20, meta: { description: 'Number of results per page' } })
+      schema.number({ meta: { description: 'Number of results per page. Defaults to `20`.' } })
     ),
     sortField: schema.maybe(
       schema.string({
