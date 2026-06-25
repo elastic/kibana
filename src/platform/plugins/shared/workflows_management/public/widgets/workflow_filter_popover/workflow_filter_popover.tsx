@@ -26,6 +26,7 @@ interface WorkflowFilterPopoverProps {
   title: string;
   selectedValues: WorkflowFilterValue[];
   values: EuiSelectableOption[];
+  singleSelection?: boolean;
   onSelectedValuesChanged: (newValues: WorkflowFilterValue[]) => void;
 }
 
@@ -75,6 +76,7 @@ const WorkflowsFilterPopoverComponent = ({
   title,
   values,
   selectedValues,
+  singleSelection = false,
   onSelectedValuesChanged,
 }: WorkflowFilterPopoverProps) => {
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
@@ -130,6 +132,7 @@ const WorkflowsFilterPopoverComponent = ({
         aria-label="Search"
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
+        singleSelection={singleSelection}
         emptyMessage="No items available"
         noMatchesMessage="No items available"
       >
