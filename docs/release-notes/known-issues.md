@@ -8,6 +8,21 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Canvas Autoplay stops advancing after one page.
+
+Applies to: {{stack}} 9.3.6
+
+**Details**
+Multipage Canvas visualizations stop advancing after one page when in autoplay mode
+
+**Workaround**
+Manually advance to the next page or upgrade to 9.3.7 or later.
+
+**Resolved**
+This issue is resolved in 9.3.7.
+
+::::
+
 ::::{dropdown} Fleet bulk agent actions can affect agents in other spaces
 
 Applies to: {{stack}} 9.1.x, 9.2.0–9.2.7, 9.3.0–9.3.2
