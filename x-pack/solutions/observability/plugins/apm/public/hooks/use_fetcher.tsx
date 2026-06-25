@@ -93,6 +93,7 @@ export function useFetcher<TReturn>(
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
     skipTimeRangeRefreshUpdate?: boolean;
+    /** When provided, non-aborted fetch failures are reported to APM RUM under this label. Use a stable, human-readable identifier (e.g. 'fetch-trace-waterfall'). */
     operationId?: string;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
