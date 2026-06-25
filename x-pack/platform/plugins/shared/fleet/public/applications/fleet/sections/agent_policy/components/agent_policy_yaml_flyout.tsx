@@ -50,28 +50,29 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
     const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
       (packagePolicy) => packagePolicy?.secret_references?.length
     );
-    const body = isLoadingYaml || !formatters ? (
-      <Loading />
-    ) : error ? (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy"
-            defaultMessage="Error loading agent policy"
-          />
-        }
-        color="danger"
-        iconType="warning"
-      >
-        {error.message}
-      </EuiCallOut>
-    ) : (
-      <>
-        <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
-          {formatters.fullAgentPolicyToYaml(yamlData!.item)}
-        </EuiCodeBlock>
-      </>
-    );
+    const body =
+      isLoadingYaml || !formatters ? (
+        <Loading />
+      ) : error ? (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy"
+              defaultMessage="Error loading agent policy"
+            />
+          }
+          color="danger"
+          iconType="warning"
+        >
+          {error.message}
+        </EuiCallOut>
+      ) : (
+        <>
+          <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
+            {formatters.fullAgentPolicyToYaml(yamlData!.item)}
+          </EuiCodeBlock>
+        </>
+      );
 
     const downloadLink =
       core.http.basePath.prepend(agentPolicyRouteService.getInfoFullDownloadPath(policyId)) +
