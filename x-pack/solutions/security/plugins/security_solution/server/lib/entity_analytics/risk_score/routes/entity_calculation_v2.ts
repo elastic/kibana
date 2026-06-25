@@ -65,6 +65,11 @@ async function buildScoringContext({
     filter: { term: { 'entity.id': entityId } },
     size: 1,
   });
+
+  if (entities.length === 0) {
+    return;
+  }
+
   const entityDoc = entities[0];
   const entityIdentityFilter = euid.dsl.getEuidFilterBasedOnDocument(
     identifierType as EntityType,
@@ -134,13 +139,19 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
     const crudClient = securityContext.getEntityStoreUpdateClient();
 
     const { index: alertsIndex } = await getRiskInputsIndex({ dataViewId, logger, soClient });
-    const { alertFilters, resolutionTargetId } = await buildScoringContext({
+    const scoringContext = await buildScoringContext({
       entityId,
       identifierType,
       engineConfig,
       logger,
       crudClient,
     });
+
+    if (!scoringContext) {
+      return siemResponse.error({ statusCode: 400, body: 'Entity not found' });
+    }
+
+    const { alertFilters, resolutionTargetId } = scoringContext;
 
     const writer = await securityContext.getRiskScoreDataClient().getWriter({ namespace });
     const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(

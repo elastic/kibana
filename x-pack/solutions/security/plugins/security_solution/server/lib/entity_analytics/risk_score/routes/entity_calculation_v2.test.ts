@@ -228,6 +228,20 @@ describe('entity risk score V2 calculation route', () => {
     });
   });
 
+  it('returns 400 and skips scoring when entity is not found', async () => {
+    (clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>).listEntities =
+      jest.fn().mockResolvedValue({ entities: [] });
+
+    const response = await server.inject(
+      buildRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(400);
+    expect(response.body.message).toEqual('Entity not found');
+    expect(scoreBaseEntities).not.toHaveBeenCalled();
+  });
+
   it('throws an error on unhandled exceptions', async () => {
     (scoreBaseEntities as jest.Mock).mockRejectedValue(new Error('unexpected'));
 
