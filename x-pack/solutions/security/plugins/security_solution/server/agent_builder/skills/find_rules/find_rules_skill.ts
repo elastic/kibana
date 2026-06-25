@@ -28,14 +28,36 @@ export const createFindRulesSkill = ({
     name: 'find-security-rules',
     basePath: 'skills/security/rules',
     description:
-      'Discover, list, rank, and count Security detection rules. ' +
-      'Filter by tags, MITRE technique, severity, rule type, name, or enabled state. ' +
-      'Read-only.',
+      'List, count, filter, and rank Security detection rules — by tags (including MITRE), ' +
+      'MITRE technique or tactic ID, severity, enabled state, custom vs prebuilt, or name search. ' +
+      'Use when the user asks to list detection rules, count how many rules match, show rules ' +
+      'tagged with MITRE, find rules for technique T1059, or inventory enabled custom rules. ' +
+      'Read-only; not for creating, editing, or ES|QL hunting over raw events.',
     content: `# Find Detection Rules
 
-## Use This Skill
+## When to Use
 
-Use this skill to list, count, sort, or rank multiple Security detection rules.
+Use this skill when the user wants to **inventory, list, count, filter, sort, or rank Security detection rules** stored in Kibana — for example:
+
+- "List detection rules tagged with MITRE" or "rules with the MITRE tag"
+- "Show rules covering MITRE technique T1059" or a tactic name/ID
+- "How many custom (non-prebuilt) detection rules are enabled?"
+- "Find enabled critical rules" or "rules named PowerShell"
+
+Do **not** use this skill when the user wants to **create or edit** a rule (use detection rule creation / detection-rule-edit) or hunt **raw events** with ES|QL (use threat-hunting).
+
+## Process
+
+1. **Load this skill** (\`find-security-rules\`) — do not answer from platform search or ES|QL alone.
+2. **Call \`security.discover_rule_tags\` with \`{}\`** — required before every \`security.find_rules\` call in the same turn.
+3. **Call \`security.find_rules\`** with filters derived from discovery (tags, \`mitreTechnique\`, \`mitreTactic\`, \`enabled\`, \`ruleSource\`, \`perPage: 1\` for count-only questions, etc.).
+4. **Answer from tool results only** — cite \`total\` for counts; render the rule table from \`security.find_rules\` output.
+
+## Guardrails
+
+- **Never** use \`platform.core.search\`, \`platform.core.list_indices\`, \`platform.core.get_index_mapping\`, \`platform.core.sml_search\`, \`platform.core.generate_esql\`, or \`platform.core.execute_esql\` to list or count detection rules. Rule metadata lives in Kibana's detection-rules API, exposed only through \`security.discover_rule_tags\` and \`security.find_rules\`.
+- **Never** call \`security.find_rules\` without calling \`security.discover_rule_tags\` first in the **same** response turn (even on MITRE technique/tactic queries — discovery still runs; MITRE filters use \`mitreTechnique\` / \`mitreTactic\`, not the \`tags\` filter).
+- **Never** call \`security.create_detection_rule\` from this skill — read-only inventory only.
 
 ## Boundaries
 

@@ -167,4 +167,60 @@ describe('routing evaluator behavior', () => {
     expect(result.score).toBeNull();
     expect(result.label).toBe('N/A');
   });
+
+  it('returns N/A ExpectedToolCalled for find-rules routing examples', async () => {
+    const stack = buildStack();
+    const expectedToolCalled = findEvaluator(stack, 'ExpectedToolCalled');
+    const findExample = wrappedExamples.find((ex) => ex.metadata?.category === 'find-rules')!;
+
+    const result = await expectedToolCalled.evaluate({
+      output: {
+        steps: [{ type: 'tool_call', tool_id: 'platform.core.search', params: {} }],
+      },
+      expected: findExample.output,
+      metadata: findExample.metadata,
+      input: findExample.input,
+    });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  it('scores ExpectedToolCalled for rule-creation when create tool is invoked', async () => {
+    const stack = buildStack();
+    const expectedToolCalled = findEvaluator(stack, 'ExpectedToolCalled');
+    const creationExample = wrappedExamples.find(
+      (ex) => ex.metadata?.category === 'rule-creation'
+    )!;
+
+    const result = await expectedToolCalled.evaluate({
+      output: {
+        steps: [{ type: 'tool_call', tool_id: 'security.create_detection_rule', params: {} }],
+      },
+      expected: creationExample.output,
+      metadata: creationExample.metadata,
+      input: creationExample.input,
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('scores ExpectedToolCalled 0 for rule-creation when create tool is missing', async () => {
+    const stack = buildStack();
+    const expectedToolCalled = findEvaluator(stack, 'ExpectedToolCalled');
+    const creationExample = wrappedExamples.find(
+      (ex) => ex.metadata?.category === 'rule-creation'
+    )!;
+
+    const result = await expectedToolCalled.evaluate({
+      output: {
+        steps: [{ type: 'tool_call', tool_id: 'platform.core.search', params: {} }],
+      },
+      expected: creationExample.output,
+      metadata: creationExample.metadata,
+      input: creationExample.input,
+    });
+
+    expect(result.score).toBe(0);
+  });
 });

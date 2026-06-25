@@ -195,7 +195,18 @@ const createExpectedToolCalledEvaluator = (): Evaluator<RuleRoutingDatasetExampl
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
     const expectedToolId = getStringMeta(metadata, 'expectedToolId');
-    if (!expectedToolId) return { score: 1 };
+    const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
+    if (!expectedToolId) {
+      if (expectedOnlyToolId) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation:
+            'Find-rules routing is scored via ToolUsageOnly and Trajectory, not ExpectedToolCalled.',
+        };
+      }
+      return { score: 1 };
+    }
 
     const toolCalls = getToolCallSteps(output as TaskOutput);
     if (toolCalls.length === 0) {

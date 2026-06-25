@@ -225,6 +225,32 @@ describe('findRulesSkill', () => {
     expect(skill.content).toContain('security.find_rules');
   });
 
+  it('content forbids platform.core search/ES|QL for rule inventory', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(/Never.*platform\.core\.search/);
+    expect(skill.content).toMatch(/platform\.core\.generate_esql/);
+    expect(skill.content).toMatch(/platform\.core\.execute_esql/);
+    expect(skill.content).toMatch(/security\.discover_rule_tags.*security\.find_rules/s);
+  });
+
+  it('content includes When to Use triggers for MITRE and count inventory queries', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(/## When to Use/);
+    expect(skill.content).toMatch(/technique T1059/);
+    expect(skill.content).toMatch(/How many custom/);
+    expect(skill.content).toMatch(/tagged with MITRE/);
+  });
+
+  it('content documents the discover-then-find Process workflow', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(/## Process/);
+    expect(skill.content).toMatch(/security\.discover_rule_tags.*\{\}/);
+    expect(skill.content).toMatch(/Load this skill/);
+  });
+
   it('content teaches ruleId lookup for the noisy-rules flow', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
