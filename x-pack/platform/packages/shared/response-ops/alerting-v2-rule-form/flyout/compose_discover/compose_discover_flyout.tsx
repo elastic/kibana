@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -479,8 +480,10 @@ export function ComposeDiscoverFlyout({
     (kind: 'signal' | 'alert') => {
       if (kind === 'alert') {
         const full = getBreachQuery(methods.getValues('query'));
-        // A query with no alert condition (no_where) maps to a standalone breach
-        // query (every row is a breach); a real split yields a composed query.
+        /*
+         * A query with no alert condition (no_where) maps to a standalone breach
+         * query (every row is a breach); a real split yields a composed query.
+         */
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
@@ -672,19 +675,14 @@ export function ComposeDiscoverFlyout({
 
   const handleSandboxApply = useCallback(() => {
     /*
-     * The heuristic split is a create-time authoring aid: on Apply we derive the
-     * base/alert parts from the single unified editor. In edit we never re-split —
-     * edit mode keeps the existing base/alert tab UI and respects the rule's
-     * persisted structure as-is.
+     * In create mode the sandbox always shows a single unified editor — no
+     * base/alert tabs. On Apply, derive the base query and alert condition
+     * from that unified text via the heuristic split.
      */
-    const isUnifiedAlertApply =
-      uiState.mode === 'create' &&
-      !uiState.yamlMode &&
-      isAlert &&
-      currentStep?.id === 'alertCondition';
+    const shouldRunHeuristicSplit = uiState.mode === 'create' && !uiState.yamlMode && isAlert;
 
     let queryToCommit: RuleQuery = sandboxQuery;
-    if (isUnifiedAlertApply) {
+    if (shouldRunHeuristicSplit) {
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
       setSandboxQuery(queryToCommit);
@@ -708,7 +706,6 @@ export function ComposeDiscoverFlyout({
     sandboxTimeField,
     uiState.yamlMode,
     uiState.mode,
-    currentStep?.id,
     isAlert,
     methods,
     dispatch,
@@ -852,6 +849,21 @@ export function ComposeDiscoverFlyout({
     isAlert,
   ]);
 
+  /*
+   * Help text shown above the single unified editor in the create-mode alert flow.
+   * Absent in edit mode (where the sandbox shows base/alert tabs instead) and in
+   * builder/read-only mode (where the sandbox has no Apply button).
+   */
+  const sandboxHelpText =
+    isAlert && !sandboxTabs?.length && !isBuilderMode ? (
+      <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
+        <FormattedMessage
+          id="xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText"
+          defaultMessage="We'll automatically identify the base query and alert condition when you apply changes."
+        />
+      </EuiText>
+    ) : undefined;
+
   const handleSandboxTabChange = useCallback(
     (tab: QueryTab) => {
       const tabs = sandboxTabs ?? [];
@@ -990,7 +1002,7 @@ export function ComposeDiscoverFlyout({
                   syncSandbox();
                   dispatch({ type: 'CLOSE_CHILD' });
                 }}
-                isAlert={isAlert}
+                helpText={sandboxHelpText}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
               />
             )}

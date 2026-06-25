@@ -72,10 +72,11 @@ export interface QuerySandboxProps {
   /** Required with `timeFieldOptions` when the parent gates autoRun on resolution. */
   isTimeFieldResolved?: boolean;
   /**
-   * Shows the unified-editor helper text explaining that base/alert are derived
-   * on Apply. Only set in the create flow's single-editor alert mode.
+   * Optional help text rendered above the editor. The caller is responsible for
+   * content and styling (e.g. `<EuiText size="s">`). A spacer is added automatically
+   * below it. Absent or `undefined` → nothing is rendered.
    */
-  showUnifiedAlertHelper?: boolean;
+  helpText?: React.ReactNode;
   /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
@@ -114,7 +115,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   autoRun = false,
   timeFieldOptions: timeFieldOptionsProp,
   isTimeFieldResolved: isTimeFieldResolvedProp,
-  showUnifiedAlertHelper = false,
+  helpText,
   tabProps,
 }) => {
   const services = useRuleFormServices();
@@ -242,14 +243,9 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
   return (
     <div data-test-subj="querySandbox">
-      {showUnifiedAlertHelper && (
+      {helpText && (
         <>
-          <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
-            {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText', {
-              defaultMessage:
-                "We'll automatically identify the base query and alert condition when you apply changes.",
-            })}
-          </EuiText>
+          {helpText}
           <EuiSpacer size="s" />
         </>
       )}
