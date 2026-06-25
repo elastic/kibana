@@ -35,21 +35,18 @@ apiTest.describe(
       await teardownObsAlertsPrivilegeRules(apiClient, state.adminCreds, state.createdRules);
     });
 
-    apiTest(
-      'logs read: cannot acknowledge an alert via bulk update',
-      async ({ apiClient }) => {
-        const response = await apiClient.post('internal/rac/alerts/bulk_update', {
-          headers: { ...KIBANA_HEADERS, ...logsReadCreds.apiKeyHeader },
-          body: {
-            status: 'acknowledged',
-            ids: [state.realAlertId],
-            index: '.alerts-stack.alerts-default',
-          },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
+    apiTest('logs read: cannot acknowledge an alert via bulk update', async ({ apiClient }) => {
+      const response = await apiClient.post('internal/rac/alerts/bulk_update', {
+        headers: { ...KIBANA_HEADERS, ...logsReadCreds.apiKeyHeader },
+        body: {
+          status: 'acknowledged',
+          ids: [state.realAlertId],
+          index: '.alerts-stack.alerts-default',
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(403);
+    });
 
     apiTest('logs read: can find alerts via RAC', async ({ apiClient }) => {
       const response = await apiClient.post('internal/rac/alerts/find', {
