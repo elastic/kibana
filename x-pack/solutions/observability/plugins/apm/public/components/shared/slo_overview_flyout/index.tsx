@@ -51,11 +51,10 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { useManageSlosUrl } from '../../../hooks/use_manage_slos_url';
-import {
-  APM_SLO_INDICATOR_TYPES,
-  type ApmIndicatorType,
-} from '../../../../common/slo_indicator_types';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { DEFAULT_INDICATOR_TYPE } from '../constants';
+
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
 const STATUS_OPTIONS: Array<{ label: string; value: SloStatusFilter }> = [
@@ -308,8 +307,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setCreateSloFlyoutOpen(false);
     refetch();
   }, [refetch]);
-
-  const defaultIndicatorType: ApmIndicatorType = 'sli.apm.transactionDuration';
 
   const showCreateSloFlyout = createSloFlyoutOpen && CreateSLOFormFlyout;
 
@@ -742,7 +739,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           initialValues={{
             name: `APM SLO for ${serviceName}`,
             indicator: {
-              type: defaultIndicatorType,
+              type: DEFAULT_INDICATOR_TYPE,
               params: {
                 service: serviceName,
                 environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
