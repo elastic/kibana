@@ -14,7 +14,11 @@ import type {
   ResolveMlCapabilities,
   MlCapabilitiesKey,
 } from '@kbn/ml-common-types/capabilities';
-import { adminMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import {
+  adminMlCapabilities,
+  basicLicenseMlCapabilities,
+  featureCapabilities,
+} from '@kbn/ml-common-types/capabilities';
 import type { MlClient } from '../ml_client';
 import { mlLog } from '../log';
 import { upgradeCheckProvider } from './upgrade';
@@ -76,10 +80,39 @@ async function checkMlCapabilitiesViaPrivileges(
   return hasAllRequested;
 }
 
+export function areCapabilitiesAllowedByLicenseAndFeatures(
+  mlCapabilities: MlCapabilities,
+  requestedCapabilities: MlCapabilitiesKey[],
+  mlLicense: MlLicense
+): boolean {
+  if (!mlLicense.isMlEnabled()) {
+    return false;
+  }
+
+  return requestedCapabilities.every((cap) => {
+    if (featureCapabilities.ad.includes(cap) && !mlCapabilities.isADEnabled) {
+      return false;
+    }
+    if (featureCapabilities.dfa.includes(cap) && !mlCapabilities.isDFAEnabled) {
+      return false;
+    }
+    if (featureCapabilities.nlp.includes(cap) && !mlCapabilities.isNLPEnabled) {
+      return false;
+    }
+
+    if (!basicLicenseMlCapabilities.includes(cap) && !mlLicense.isFullLicense()) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
 export function hasMlCapabilitiesProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
   request: KibanaRequest,
-  authorization?: MlAuthorizationService
+  authorization?: MlAuthorizationService,
+  mlLicense?: MlLicense
 ) {
   let mlCapabilities: MlCapabilities | null = null;
 
@@ -98,13 +131,16 @@ export function hasMlCapabilitiesProvider(
     }
 
     if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
-      if (request.isFakeRequest && authorization) {
+      if (request.isFakeRequest && authorization && mlLicense) {
         const hasPrivileges = await checkMlCapabilitiesViaPrivileges(
           authorization,
           request,
           capabilities
         );
-        if (hasPrivileges) {
+        if (
+          hasPrivileges &&
+          areCapabilitiesAllowedByLicenseAndFeatures(mlCapabilities, capabilities, mlLicense)
+        ) {
           return;
         }
       }

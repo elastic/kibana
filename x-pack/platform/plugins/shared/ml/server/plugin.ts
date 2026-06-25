@@ -324,6 +324,7 @@ export class MlServerPlugin
         agentBuilder: plugins.agentBuilder,
         resolveMlCapabilities,
         authorization: plugins.security?.authz,
+        mlLicense: this.mlLicense,
       });
     }
 

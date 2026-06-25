@@ -7,8 +7,12 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { adGetJobInfoTool } from './ad_get_job_info';
+import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
+import { createAdGetJobInfoTool } from './ad_get_job_info';
 import { AD_GET_JOB_INFO_TOOL_ID } from './tool_ids';
+
+const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+const adGetJobInfoTool = createAdGetJobInfoTool(resolveMlCapabilities);
 
 const createMlMock = () => ({
   getJobs: jest.fn().mockResolvedValue({ jobs: [] }),
@@ -27,7 +31,11 @@ const createEsClientMock = (mlMock = createMlMock()) => ({
   },
 });
 
-const createContext = (esClient = createEsClientMock()) => ({ esClient } as any);
+const createContext = (esClient = createEsClientMock()) =>
+  ({
+    esClient,
+    request: {},
+  } as any);
 
 describe('adGetJobInfoTool', () => {
   it('has the correct ID and type', () => {

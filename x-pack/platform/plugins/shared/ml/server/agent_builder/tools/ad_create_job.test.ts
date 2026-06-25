@@ -7,8 +7,12 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { adCreateJobTool } from './ad_create_job';
+import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
+import { createAdCreateJobTool } from './ad_create_job';
 import { AD_CREATE_JOB_TOOL_ID } from './tool_ids';
+
+const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+const adCreateJobTool = createAdCreateJobTool(resolveMlCapabilities);
 
 const createMlMock = () => ({
   validate: jest.fn().mockResolvedValue({ valid: true }),
@@ -20,6 +24,7 @@ const createMlMock = () => ({
 const createContext = (mlMock = createMlMock()) =>
   ({
     esClient: { asCurrentUser: { ml: mlMock } },
+    request: {},
   } as any);
 
 describe('adCreateJobTool', () => {
@@ -68,6 +73,21 @@ describe('adCreateJobTool', () => {
       expect(ml.estimateModelMemory).toHaveBeenCalledWith({ body: jobConfig });
     });
 
+    it('operation=estimate_memory without job_config returns error', async () => {
+      const result = await adCreateJobTool.handler(
+        { operation: 'estimate_memory' },
+        createContext()
+      );
+
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'job_config is required for estimate_memory'
+      );
+    });
+
     it('operation=create_job calls ml.putJob with job_id and config', async () => {
       const ml = createMlMock();
       const jobConfig = { analysis_config: {} };
@@ -86,8 +106,12 @@ describe('adCreateJobTool', () => {
         createContext()
       );
 
-      expect((result as { results: Array<{ type: string }> }).results[0].type).toBe(
-        ToolResultType.error
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'job_id and job_config are required for create_job'
       );
     });
 
@@ -104,6 +128,23 @@ describe('adCreateJobTool', () => {
         datafeed_id: 'datafeed-my-job',
         body: datafeedConfig,
       });
+    });
+
+    it('returns error result when ML client throws', async () => {
+      const ml = createMlMock();
+      ml.validate.mockRejectedValue(new Error('invalid spec'));
+      const result = await adCreateJobTool.handler(
+        { operation: 'validate_spec', job_config: { analysis_config: {} } },
+        createContext(ml)
+      );
+
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'Error executing validate_spec: invalid spec'
+      );
     });
   });
 });

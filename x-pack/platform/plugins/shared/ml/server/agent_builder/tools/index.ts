@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { MlLicense } from '../../../common/license';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { createAdGetJobInfoTool } from './ad_get_job_info';
 import { createAdCreateJobTool } from './ad_create_job';
@@ -23,10 +24,19 @@ export {
 export const registerAnomalyDetectionTools = (
   agentBuilder: AgentBuilderPluginSetup,
   resolveMlCapabilities: ResolveMlCapabilities,
-  authorization?: MlAuthorizationService
+  authorization?: MlAuthorizationService,
+  mlLicense?: MlLicense
 ): void => {
-  agentBuilder.tools.register(createAdGetJobInfoTool(resolveMlCapabilities, authorization));
-  agentBuilder.tools.register(createAdCreateJobTool(resolveMlCapabilities, authorization));
-  agentBuilder.tools.register(createAdManageJobStateTool(resolveMlCapabilities, authorization));
-  agentBuilder.tools.register(createAdUpdateJobConfigTool(resolveMlCapabilities, authorization));
+  agentBuilder.tools.register(
+    createAdGetJobInfoTool(resolveMlCapabilities, authorization, mlLicense)
+  );
+  agentBuilder.tools.register(
+    createAdCreateJobTool(resolveMlCapabilities, authorization, mlLicense)
+  );
+  agentBuilder.tools.register(
+    createAdManageJobStateTool(resolveMlCapabilities, authorization, mlLicense)
+  );
+  agentBuilder.tools.register(
+    createAdUpdateJobConfigTool(resolveMlCapabilities, authorization, mlLicense)
+  );
 };

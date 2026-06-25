@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import type { MlLicense } from '../../../common/license';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { AD_GET_JOB_INFO_TOOL_ID } from './tool_ids';
@@ -71,7 +72,8 @@ const schema = z.object({
 
 export const createAdGetJobInfoTool = (
   resolveMlCapabilities: ResolveMlCapabilities,
-  authorization?: MlAuthorizationService
+  authorization?: MlAuthorizationService,
+  mlLicense?: MlLicense
 ): BuiltinToolDefinition<typeof schema> => ({
   id: AD_GET_JOB_INFO_TOOL_ID,
   type: ToolType.builtin,
@@ -83,7 +85,8 @@ export const createAdGetJobInfoTool = (
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       request,
-      authorization
+      authorization,
+      mlLicense
     );
     const ml = esClient.asCurrentUser.ml;
 

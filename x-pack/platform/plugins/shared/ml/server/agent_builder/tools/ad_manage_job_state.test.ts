@@ -7,8 +7,12 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { adManageJobStateTool } from './ad_manage_job_state';
+import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
+import { createAdManageJobStateTool } from './ad_manage_job_state';
 import { AD_MANAGE_JOB_STATE_TOOL_ID } from './tool_ids';
+
+const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+const adManageJobStateTool = createAdManageJobStateTool(resolveMlCapabilities);
 
 const createMlMock = () => ({
   openJob: jest.fn().mockResolvedValue({ opened: true }),
@@ -22,6 +26,7 @@ const createMlMock = () => ({
 const createContext = (mlMock = createMlMock()) =>
   ({
     esClient: { asCurrentUser: { ml: mlMock } },
+    request: {},
   } as any);
 
 describe('adManageJobStateTool', () => {
