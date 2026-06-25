@@ -95,11 +95,10 @@ export function fillTemplate(
       const key = keys[i];
       obj[key] = row[i];
       const max = maxValues[key];
-      if (max !== undefined && max !== 0) {
+      if (max !== undefined) {
         const num = Number(row[i]);
-        obj[`${key}_pct`] = isFinite(num)
-          ? Math.min(100, Math.max(0, Math.round((num / max) * 100)))
-          : 0;
+        obj[`${key}_pct`] =
+          max === 0 ? 0 : isFinite(num) ? Math.min(100, Math.max(0, Math.round((num / max) * 100))) : 0;
       }
     });
     return obj;

@@ -21,7 +21,7 @@ export function registerEsqlDataRoute(router: IRouter) {
       options: { access: 'internal' },
       validate: {
         body: schema.object({
-          esqlQuery: schema.string(),
+          esqlQuery: schema.string({ minLength: 1, maxLength: 1_000_000 }),
           timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
         }),
       },

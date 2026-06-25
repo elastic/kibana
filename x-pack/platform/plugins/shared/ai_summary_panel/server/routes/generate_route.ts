@@ -197,7 +197,10 @@ export function registerGenerateRoute(
         if (columns.length > 0) {
           const columnKeys = columnNamesToKeys(columns.map((c) => c.name));
           const schemaLines = columns
-            .map((c, i) => `  - ${c.name} (${c.type}) → placeholder: {{${columnKeys[i]}}}`)
+            .map(
+              (c, i) =>
+                `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)}) → placeholder: {{${columnKeys[i]}}}`
+            )
             .join('\n');
           const sampleSection =
             sampleRows.length > 0

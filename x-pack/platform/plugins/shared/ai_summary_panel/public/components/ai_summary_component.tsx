@@ -156,7 +156,7 @@ export const AiSummaryComponent = ({
     // Stream partial HTML into the iframe for static panels (no placeholders to leak through).
     if (!htmlRef.current && !esqlQuery) {
       intervalRef = setInterval(() => {
-        if (accRef.current) setHtml(sanitizeHtml(accRef.current));
+        if (accRef.current) setHtml(injectCsp(sanitizeHtml(accRef.current)));
       }, 300);
     }
 

@@ -16,6 +16,7 @@ import {
   useBatchedPublishingSubjects,
   apiPublishesReload,
   apiPublishesTimeRange,
+  hasEditCapabilities,
   type HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -87,7 +88,8 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
       onEdit: async () => {
         isEditFlyoutOpen$.next(true);
       },
-      isEditingEnabled: () => true,
+      isEditingEnabled: () =>
+        hasEditCapabilities(parentApi) ? parentApi.isEditingEnabled() : true,
       getTypeDisplayName: () => 'AI Panel',
     });
 
