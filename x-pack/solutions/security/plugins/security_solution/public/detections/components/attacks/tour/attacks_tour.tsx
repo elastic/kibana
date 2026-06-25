@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import {
   ATTACKS_TOUR_ANCHOR_TIMEOUT_MS,
@@ -13,6 +13,7 @@ import {
   ATTACKS_TOUR_STEP_TEST_ID,
 } from './constants';
 import { useAttacksTour } from './attacks_tour_provider';
+import { getAttacksTourSteps } from './tour_steps_config';
 import { useIsAnchorMounted } from './use_is_anchor_mounted';
 import * as i18n from './translations';
 
@@ -24,8 +25,8 @@ import * as i18n from './translations';
 const AttacksTourComponent: React.FC = () => {
   const {
     tourState,
-    steps,
     stepsTotal,
+    hasAttacks,
     isTourEnabled,
     nextStep,
     closeTour,
@@ -34,6 +35,10 @@ const AttacksTourComponent: React.FC = () => {
   } = useAttacksTour();
   const { isTourActive, currentTourStep } = tourState;
 
+  // Built here (rather than in the provider) so the step illustration SVGs stay
+  // in this lazy-loaded chunk and out of the page-load bundle. Mirrors the
+  // optimistic-while-loading variant used for `stepsTotal`.
+  const steps = useMemo(() => getAttacksTourSteps(hasAttacks !== false), [hasAttacks]);
   const currentStep = steps[currentTourStep - 1];
   const isCurrentAnchorMounted = useIsAnchorMounted(currentStep?.anchor ?? 'body');
 
