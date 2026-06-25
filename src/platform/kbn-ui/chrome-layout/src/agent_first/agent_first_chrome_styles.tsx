@@ -36,10 +36,12 @@ const NAV_SIDE_PANEL_CLASS = 'kbnChromeNav-sidePanel';
 
 export const AGENT_FIRST_LAYOUT_OVERRIDES: Pick<
   LayoutConfig,
-  'applicationMarginRight' | 'applicationMarginBottom'
+  'applicationMarginRight' | 'applicationMarginBottom' | 'applicationMarginTop' | 'headerHeight'
 > = {
   applicationMarginRight: AGENT_FIRST_GAP,
   applicationMarginBottom: AGENT_FIRST_GAP,
+  applicationMarginTop: AGENT_FIRST_GAP,
+  headerHeight: 0,
 };
 
 const panelSelectorList = [
@@ -264,6 +266,7 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       background: ${colors.backgroundBaseSubdued} !important;
     }
 
+    ${scope} .kbnChromeLayoutNavigation,
     ${scope} .kbnChromeLayoutAgent,
     ${scope} .kbnChromeLayoutApplication,
     ${scope} .${NAV_SIDE_PANEL_CLASS} {
@@ -273,27 +276,41 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: ${shadows.xs} !important;
     }
 
-    /* Agent column: no top/left gutter */
+    ${scope} .kbnChromeLayoutNavigation {
+      margin-top: ${layoutVar('application.marginTop')} !important;
+      margin-bottom: ${layoutVar('application.marginBottom')} !important;
+      height: calc(
+        100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
+      ) !important;
+    }
+
+    /* Agent column: no left gutter */
     ${scope} .kbnChromeLayoutAgent {
-      margin-top: 0 !important;
+      margin-top: ${layoutVar('application.marginTop')} !important;
       margin-left: 0 !important;
-      height: calc(100% - ${layoutVar('application.marginBottom')}) !important;
+      height: calc(
+        100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
+      ) !important;
       width: calc(
         100% - ${layoutVar('application.marginRight')} - ${layoutVar('agent.marginLeft', '0px')}
       ) !important;
     }
 
-    /* Application column: no top gutter */
     ${scope} .kbnChromeLayoutApplication {
-      margin-top: 0 !important;
-      height: calc(100% - ${layoutVar('application.marginBottom')}) !important;
+      margin-top: ${layoutVar('application.marginTop')} !important;
+      height: calc(
+        100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
+      ) !important;
       width: calc(100% - ${layoutVar('application.marginRight')}) !important;
     }
 
     @media screen {
+      ${scope} .kbnChromeLayoutNavigation,
       ${scope} .kbnChromeLayoutAgent,
       ${scope} .kbnChromeLayoutApplication {
-        height: calc(100% - ${layoutVar('application.marginBottom')}) !important;
+        height: calc(
+          100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
+        ) !important;
       }
     }
 
