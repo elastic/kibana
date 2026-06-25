@@ -20,6 +20,7 @@ import {
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { getInstallableRulesForReview } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
+import { buildMlAuthz } from '../../../lib/machine_learning/authz';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 
 jest.mock(
@@ -34,10 +35,22 @@ jest.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review',
   () => ({ getInstallableRulesForReview: jest.fn() })
 );
+jest.mock('../../../lib/machine_learning/authz', () => ({
+  buildMlAuthz: jest.fn().mockReturnValue({
+    validateRuleType: jest.fn().mockResolvedValue({ valid: true, message: undefined }),
+  }),
+}));
 
 const mockCreatePrebuiltRuleAssetsClient = jest.mocked(createPrebuiltRuleAssetsClient);
 const mockCreatePrebuiltRuleObjectsClient = jest.mocked(createPrebuiltRuleObjectsClient);
 const mockGetInstallableRulesForReview = jest.mocked(getInstallableRulesForReview);
+const mockBuildMlAuthz = jest.mocked(buildMlAuthz);
+
+// Sentinels threaded through the tool so the wiring can be asserted by identity.
+const mockMl = { mlSystemProvider: jest.fn() } as unknown as Parameters<
+  typeof createFindPrebuiltRulesInlineTool
+>[0]['ml'];
+const mockLicense = { hasAtLeast: jest.fn() };
 
 const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
   ({
@@ -68,7 +81,13 @@ const createMockDeps = () => {
   const alertingPlugin = {
     getRulesClientWithRequest: jest.fn().mockResolvedValue({}),
   };
-  const startPlugins: Record<string, unknown> = { alerting: alertingPlugin };
+  const licensingPlugin = {
+    getLicense: jest.fn().mockResolvedValue(mockLicense),
+  };
+  const startPlugins: Record<string, unknown> = {
+    alerting: alertingPlugin,
+    licensing: licensingPlugin,
+  };
   mockCore.getStartServices.mockResolvedValue([mockCoreStart, startPlugins, {}] as never);
 
   mockCreatePrebuiltRuleAssetsClient.mockReturnValue({
@@ -90,6 +109,7 @@ const createMockDeps = () => {
     mockLogger,
     mockEsClient,
     mockRequest,
+    ml: mockMl,
   };
 };
 
@@ -122,12 +142,10 @@ describe('findPrebuiltRulesSchema', () => {
       true
     );
     expect(
-      findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['TA0001', 'Execution'] } })
-        .success
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['TA0001', 'TA0006'] } }).success
     ).toBe(true);
     expect(
-      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1059', 'T1059.001'] } })
-        .success
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1059', 'T1071'] } }).success
     ).toBe(true);
     expect(findPrebuiltRulesSchema.safeParse({ fields: ['description', 'threat'] }).success).toBe(
       true
@@ -150,8 +168,22 @@ describe('findPrebuiltRulesSchema', () => {
     expect(
       findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['powershell'] } }).success
     ).toBe(false);
+    // Sub-techniques (T####.###) are not accepted — the filter only matches the technique id.
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1059.001'] } }).success
+    ).toBe(false);
     // A non-array value is no longer accepted.
     expect(findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: 'T1059' } }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects MITRE tactic values that are not TA-prefixed IDs', () => {
+    // Tactic display names must be converted to IDs upstream; the filter matches only on id.
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['Initial Access'] } }).success
+    ).toBe(false);
+    expect(findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['T1059'] } }).success).toBe(
       false
     );
   });
@@ -179,8 +211,8 @@ describe('createFindPrebuiltRulesInlineTool', () => {
   });
 
   it('has the correct id and type', () => {
-    const { getStartServices, mockLogger } = createMockDeps();
-    const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger });
+    const { getStartServices, mockLogger, ml } = createMockDeps();
+    const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger, ml });
     expect(tool.id).toBe(FIND_PREBUILT_RULES_INLINE_TOOL_ID);
     expect(tool.id).toBe('security.find_prebuilt_rules');
     expect(tool.type).toBe(ToolType.builtin);
@@ -191,9 +223,9 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       input: Record<string, unknown>,
       result: { rules: RuleResponse[]; total: number }
     ) => {
-      const { getStartServices, mockLogger, mockEsClient, mockRequest } = createMockDeps();
+      const { getStartServices, mockLogger, mockEsClient, mockRequest, ml } = createMockDeps();
       mockGetInstallableRulesForReview.mockResolvedValue(result);
-      const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger });
+      const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger, ml });
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
       // Parse through the schema so zod defaults (perPage, sort.order) are applied, exactly
       // as the Agent Builder framework does before invoking the handler in production.
@@ -201,6 +233,33 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       const toolResult = await tool.handler(validatedInput, context);
       return { toolResult, mockLogger };
     };
+
+    it('builds mlAuthz from the request license and ML plugin and forwards it to the review query', async () => {
+      const { getStartServices, mockLogger, mockEsClient, mockRequest, ml } = createMockDeps();
+      mockGetInstallableRulesForReview.mockResolvedValue({ rules: [], total: 0 });
+      const savedObjectsClient = { tag: 'so-client' };
+      const [coreStart] = await getStartServices();
+      (coreStart.savedObjects.getScopedClient as jest.Mock).mockReturnValue(savedObjectsClient);
+      const builtMlAuthz = {
+        validateRuleType: jest.fn().mockResolvedValue({ valid: true, message: undefined }),
+      };
+      mockBuildMlAuthz.mockReturnValue(builtMlAuthz);
+
+      const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger, ml });
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      await tool.handler(findPrebuiltRulesSchema.parse({}), context);
+
+      // mlAuthz is derived from the real request (license + ML plugin + request + SO client),
+      // so ML rules the user can't install are filtered out — matching the install flyout.
+      expect(mockBuildMlAuthz).toHaveBeenCalledWith({
+        license: mockLicense,
+        ml,
+        request: mockRequest,
+        savedObjectsClient,
+      });
+      // The built mlAuthz is the one handed to the installable-rules review query.
+      expect(mockGetInstallableRulesForReview.mock.calls[0][0].mlAuthz).toBe(builtMlAuthz);
+    });
 
     it('passes no KQL filter and the default triage projection for an empty call', async () => {
       await runHandler({}, { rules: [], total: 0 });
@@ -227,7 +286,7 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       );
       const args = mockGetInstallableRulesForReview.mock.calls[0][0];
       expect(args.filter).toBe(
-        '(security-rule.name: mimikatz OR security-rule.description: mimikatz) AND security-rule.severity: (critical)'
+        '(security-rule.name: mimikatz OR security-rule.description: mimikatz) AND security-rule.severity: ("critical")'
       );
     });
 
@@ -323,9 +382,9 @@ describe('createFindPrebuiltRulesInlineTool', () => {
     });
 
     it('returns an error result when the backend throws', async () => {
-      const { getStartServices, mockLogger, mockEsClient, mockRequest } = createMockDeps();
+      const { getStartServices, mockLogger, mockEsClient, mockRequest, ml } = createMockDeps();
       mockGetInstallableRulesForReview.mockRejectedValue(new Error('ES is down'));
-      const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger });
+      const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger, ml });
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
       const toolResult = await tool.handler({ perPage: 10 }, context);

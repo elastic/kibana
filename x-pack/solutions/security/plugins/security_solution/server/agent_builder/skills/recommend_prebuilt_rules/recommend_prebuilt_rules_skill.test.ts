@@ -13,16 +13,18 @@ import { GET_USER_DATA_INVENTORY_INLINE_TOOL_ID } from './get_user_data_inventor
 import { GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID } from './get_installable_catalog_overview_tool';
 import { GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID } from './get_installed_rules_mitre_coverage_tool';
 
+const mockMl = {} as unknown as Parameters<typeof createRecommendPrebuiltRulesSkill>[0]['ml'];
+
 const createDeps = () => {
   const { mockCore, mockLogger, mockEsClient } = createToolTestMocks();
   setupMockCoreStartServices(mockCore, mockEsClient);
-  return { getStartServices: mockCore.getStartServices, logger: mockLogger };
+  return { getStartServices: mockCore.getStartServices, logger: mockLogger, ml: mockMl };
 };
 
 describe('createRecommendPrebuiltRulesSkill', () => {
   it('has stable metadata', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.id).toBe('recommend-prebuilt-rules');
     expect(skill.name).toBe('recommend-prebuilt-rules');
     expect(skill.basePath).toBe('skills/security/rules');
@@ -30,14 +32,14 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('uses an allow-listed built-in skill id', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(isAllowedBuiltinSkill(skill.id)).toBe(true);
   });
 
   it('wires the four inline tools', async () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     const inlineTools = await skill.getInlineTools!();
     const ids = inlineTools.map((tool) => tool.id);
 
@@ -53,16 +55,16 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('stays within the per-skill tool-count guideline (<= 7)', async () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     const registryTools = (await skill.getRegistryTools?.()) ?? [];
     const inlineTools = await skill.getInlineTools!();
     expect(registryTools.length + inlineTools.length).toBeLessThanOrEqual(7);
   });
 
   it('content names all four tools', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toContain(FIND_PREBUILT_RULES_INLINE_TOOL_ID);
     expect(skill.content).toContain(GET_USER_DATA_INVENTORY_INLINE_TOOL_ID);
     expect(skill.content).toContain(GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID);
@@ -70,8 +72,8 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('content states the read-only constraint and routes to sibling skills', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toMatch(/Read-Only/i);
     expect(skill.content).toContain('find-security-rules');
     expect(skill.content).toContain('detection-rule-edit');
@@ -82,16 +84,16 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('content carries the mandatory discovery-before-tag-filter rule in bold', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toMatch(
       /\*\*Before any `security\.find_prebuilt_rules` call that uses a `tags` filter[\s\S]*?get_installable_catalog_overview[\s\S]*?\*\*/
     );
   });
 
   it('content includes the canonical 14 MITRE tactics', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     const tacticIds = [
       'TA0001',
       'TA0002',
@@ -112,23 +114,23 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('content covers data-source categories and integration coverage', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toMatch(/endpoint, identity, cloud, network/i);
     expect(skill.content).toContain('## Integration Coverage');
     expect(skill.content).toMatch(/related_integrations\.package/);
   });
 
   it('caps list length (10 for a flat list, 5 per category)', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toMatch(/\*\*at most 10\*\*/i);
     expect(skill.content).toMatch(/\*\*at most 5 per category\*\*/i);
   });
 
   it('frames integration presence as a likelihood, not a runnability guarantee', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     // The reframed coverage section must hedge: integration installed is a signal, not a promise.
     expect(skill.content).toMatch(/not a guarantee/i);
     // And it should not assert flat, unqualified runnability to the user.
@@ -136,23 +138,23 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('frames the skill as a personalized, customer-tailored recommender', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toContain('## Tailor to the Customer');
     expect(skill.content).toMatch(/personalized recommender, not a generic/i);
   });
 
   it('teaches progressive deepening of finalists via fields and ruleIds', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toContain('## Precision: Narrow, Then Deepen');
     expect(skill.content).toMatch(/\bfields\b/);
     expect(skill.content).toMatch(/\bruleIds\b/);
   });
 
   it('requires a wide survey pass and cutting the candidate pool down to the best fits', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     // A wide, thin survey pass before deepening.
     expect(skill.content).toMatch(/wide, thin net|survey pass|candidate landscape/i);
     // The shortlist must be larger than the final list, so the final set is normally a subset.
@@ -166,8 +168,8 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('encodes the v18 tactic-criticality prioritization default as an overridable soft default', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toContain('## Prioritization');
     // The Critical tier in correct v18 criticality order.
     expect(skill.content).toMatch(
@@ -180,8 +182,8 @@ describe('createRecommendPrebuiltRulesSkill', () => {
   });
 
   it('asks for a Selection notes block recording kept/dropped after a deepen pass', () => {
-    const { getStartServices, logger } = createDeps();
-    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const { getStartServices, logger, ml } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml });
     expect(skill.content).toContain('**Selection notes**');
     expect(skill.content).toMatch(/kept|dropped/i);
   });

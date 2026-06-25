@@ -18,6 +18,7 @@ import {
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { getInstallableRuleVersions } from '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review';
+import { buildMlAuthz } from '../../../lib/machine_learning/authz';
 
 jest.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
@@ -33,10 +34,22 @@ jest.mock(
     getInstallableRuleVersions: jest.fn(),
   })
 );
+jest.mock('../../../lib/machine_learning/authz', () => ({
+  buildMlAuthz: jest.fn().mockReturnValue({
+    validateRuleType: jest.fn().mockResolvedValue({ valid: true, message: undefined }),
+  }),
+}));
 
 const mockCreatePrebuiltRuleAssetsClient = jest.mocked(createPrebuiltRuleAssetsClient);
 const mockCreatePrebuiltRuleObjectsClient = jest.mocked(createPrebuiltRuleObjectsClient);
 const mockGetInstallableRuleVersions = jest.mocked(getInstallableRuleVersions);
+const mockBuildMlAuthz = jest.mocked(buildMlAuthz);
+
+// Sentinels threaded through the tool so the mlAuthz wiring can be asserted by identity.
+const mockMl = { mlSystemProvider: jest.fn() } as unknown as Parameters<
+  typeof createGetInstallableCatalogOverviewTool
+>[0]['ml'];
+const mockLicense = { hasAtLeast: jest.fn() };
 
 const makeVersion = (ruleId: string, version = 1) => ({
   rule_id: ruleId,
@@ -55,10 +68,13 @@ const createMockDeps = () => {
   const alertingPlugin = {
     getRulesClientWithRequest: jest.fn().mockResolvedValue(mockRulesClientInstance),
   };
+  const licensingPlugin = {
+    getLicense: jest.fn().mockResolvedValue(mockLicense),
+  };
 
   mockCore.getStartServices.mockResolvedValue([
     mockCoreStart,
-    { alerting: alertingPlugin },
+    { alerting: alertingPlugin, licensing: licensingPlugin },
     {},
   ] as never);
 
@@ -85,6 +101,8 @@ const createMockDeps = () => {
     mockRequest,
     mockRuleAssetsClient,
     mockRuleObjectsClient,
+    mockSavedObjectsClient,
+    ml: mockMl,
   };
 };
 
@@ -95,10 +113,11 @@ describe('createGetInstallableCatalogOverviewTool', () => {
 
   describe('tool definition', () => {
     it('has the correct id and type', () => {
-      const { getStartServices, mockLogger } = createMockDeps();
+      const { getStartServices, mockLogger, ml } = createMockDeps();
       const tool = createGetInstallableCatalogOverviewTool({
         getStartServices,
         logger: mockLogger,
+        ml,
       });
 
       expect(tool.id).toBe(GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID);
@@ -112,9 +131,56 @@ describe('createGetInstallableCatalogOverviewTool', () => {
     });
   });
 
+  describe('handler — ML authorization', () => {
+    it('builds mlAuthz from the request license and ML plugin and forwards it to the installable-versions query', async () => {
+      const {
+        getStartServices,
+        mockLogger,
+        mockRequest,
+        mockRuleAssetsClient,
+        mockSavedObjectsClient,
+        ml,
+      } = createMockDeps();
+      mockGetInstallableRuleVersions.mockResolvedValue([makeVersion('rule-1')]);
+      mockRuleAssetsClient.fetchAssetsByVersion.mockResolvedValue({
+        assets: [],
+        aggregations: { facet_tags: { buckets: [] } },
+      });
+      const builtMlAuthz = {
+        validateRuleType: jest.fn().mockResolvedValue({ valid: true, message: undefined }),
+      };
+      mockBuildMlAuthz.mockReturnValue(builtMlAuthz);
+
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+        ml,
+      });
+      const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
+      await tool.handler({}, context);
+
+      // mlAuthz is derived from the real request, so the count/tag facets exclude ML rules
+      // the user can't install — matching the install flyout and find_prebuilt_rules.
+      expect(mockBuildMlAuthz).toHaveBeenCalledWith({
+        license: mockLicense,
+        ml,
+        request: mockRequest,
+        savedObjectsClient: mockSavedObjectsClient,
+      });
+      // The built mlAuthz is the one handed to the installable-versions query (3rd positional arg).
+      expect(mockGetInstallableRuleVersions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        builtMlAuthz,
+        expect.anything()
+      );
+    });
+  });
+
   describe('handler — happy path', () => {
     it('returns total count and mapped tags from aggregation', async () => {
-      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient } = createMockDeps();
+      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient, ml } =
+        createMockDeps();
       // 50 installable rules; tags have overlapping membership so each count is <= 50
       const installableVersions = Array.from({ length: 50 }, (_, i) =>
         makeVersion(`rule-${i + 1}`)
@@ -136,6 +202,7 @@ describe('createGetInstallableCatalogOverviewTool', () => {
       const tool = createGetInstallableCatalogOverviewTool({
         getStartServices,
         logger: mockLogger,
+        ml,
       });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
@@ -155,7 +222,8 @@ describe('createGetInstallableCatalogOverviewTool', () => {
     });
 
     it('calls fetchAssetsByVersion with perPage=0 and tags aggregation', async () => {
-      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient } = createMockDeps();
+      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient, ml } =
+        createMockDeps();
       const installableVersions = [makeVersion('rule-1')];
       mockGetInstallableRuleVersions.mockResolvedValue(installableVersions);
       mockRuleAssetsClient.fetchAssetsByVersion.mockResolvedValue({
@@ -166,6 +234,7 @@ describe('createGetInstallableCatalogOverviewTool', () => {
       const tool = createGetInstallableCatalogOverviewTool({
         getStartServices,
         logger: mockLogger,
+        ml,
       });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       await tool.handler({}, context);
@@ -184,7 +253,8 @@ describe('createGetInstallableCatalogOverviewTool', () => {
     });
 
     it('returns empty tags array when aggregation has no buckets', async () => {
-      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient } = createMockDeps();
+      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient, ml } =
+        createMockDeps();
       mockGetInstallableRuleVersions.mockResolvedValue([makeVersion('rule-1')]);
       mockRuleAssetsClient.fetchAssetsByVersion.mockResolvedValue({
         assets: [],
@@ -194,6 +264,7 @@ describe('createGetInstallableCatalogOverviewTool', () => {
       const tool = createGetInstallableCatalogOverviewTool({
         getStartServices,
         logger: mockLogger,
+        ml,
       });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
@@ -208,13 +279,15 @@ describe('createGetInstallableCatalogOverviewTool', () => {
     });
 
     it('returns empty tags array when aggregation is absent', async () => {
-      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient } = createMockDeps();
+      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient, ml } =
+        createMockDeps();
       mockGetInstallableRuleVersions.mockResolvedValue([makeVersion('rule-1')]);
       mockRuleAssetsClient.fetchAssetsByVersion.mockResolvedValue({ assets: [] });
 
       const tool = createGetInstallableCatalogOverviewTool({
         getStartServices,
         logger: mockLogger,
+        ml,
       });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
@@ -231,12 +304,14 @@ describe('createGetInstallableCatalogOverviewTool', () => {
 
   describe('handler — empty catalog', () => {
     it('returns zero count and empty tags without calling fetchAssetsByVersion', async () => {
-      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient } = createMockDeps();
+      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient, ml } =
+        createMockDeps();
       mockGetInstallableRuleVersions.mockResolvedValue([]);
 
       const tool = createGetInstallableCatalogOverviewTool({
         getStartServices,
         logger: mockLogger,
+        ml,
       });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
@@ -255,12 +330,13 @@ describe('createGetInstallableCatalogOverviewTool', () => {
 
   describe('handler — error path', () => {
     it('returns ToolResultType.error when getInstallableRuleVersions throws', async () => {
-      const { getStartServices, mockLogger, mockRequest } = createMockDeps();
+      const { getStartServices, mockLogger, mockRequest, ml } = createMockDeps();
       mockGetInstallableRuleVersions.mockRejectedValue(new Error('ES is down'));
 
       const tool = createGetInstallableCatalogOverviewTool({
         getStartServices,
         logger: mockLogger,
+        ml,
       });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
@@ -274,13 +350,15 @@ describe('createGetInstallableCatalogOverviewTool', () => {
     });
 
     it('returns ToolResultType.error when fetchAssetsByVersion throws', async () => {
-      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient } = createMockDeps();
+      const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient, ml } =
+        createMockDeps();
       mockGetInstallableRuleVersions.mockResolvedValue([makeVersion('rule-1')]);
       mockRuleAssetsClient.fetchAssetsByVersion.mockRejectedValue(new Error('SO search failed'));
 
       const tool = createGetInstallableCatalogOverviewTool({
         getStartServices,
         logger: mockLogger,
+        ml,
       });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);

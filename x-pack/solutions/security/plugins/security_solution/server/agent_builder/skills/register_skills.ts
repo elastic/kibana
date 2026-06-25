@@ -59,7 +59,7 @@ export const registerSkills = async ({
   agentBuilder.skills.register(getDetectionRuleEditSkill());
   if (experimentalFeatures.dexAiSkillOnboardPrebuiltRules) {
     await agentBuilder.skills.register(
-      createRecommendPrebuiltRulesSkill({ getStartServices, logger })
+      createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
     );
   }
   await agentBuilder.skills.register(
