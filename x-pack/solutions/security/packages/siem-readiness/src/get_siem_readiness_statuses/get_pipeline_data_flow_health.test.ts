@@ -50,9 +50,7 @@ describe('getContinuityDataFlowHealth', () => {
 
     it('returns volume_drop_warning when above warning but below critical', () => {
       expect(
-        getContinuityDataFlowHealth(
-          makePipeline({ volumeDropPct: VOLUME_DROP_CRITICAL_PCT - 1 })
-        )
+        getContinuityDataFlowHealth(makePipeline({ volumeDropPct: VOLUME_DROP_CRITICAL_PCT - 1 }))
       ).toBe('volume_drop_warning');
     });
   });
