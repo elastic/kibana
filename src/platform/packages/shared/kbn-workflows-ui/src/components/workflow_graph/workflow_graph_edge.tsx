@@ -53,7 +53,11 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   } = props;
   const edgeData = data as WorkflowEdgeData | undefined;
 
-  const { path: edgePath, labelX, labelY } = computeEdgePath({
+  const {
+    path: edgePath,
+    labelX,
+    labelY,
+  } = computeEdgePath({
     sourceX,
     sourceY,
     targetX,
