@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import { EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
@@ -51,6 +52,10 @@ export function registerExternalResumeExecutionRoute(deps: RouteDependencies) {
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, '../examples/resume_execution_external.yaml'),
+        },
         validate: {
           request: {
             params: executionIdParamSchema,
