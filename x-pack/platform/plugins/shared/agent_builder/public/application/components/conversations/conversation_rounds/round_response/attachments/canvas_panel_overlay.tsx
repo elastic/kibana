@@ -20,7 +20,9 @@ import { shouldOfferSidebarConversation } from '../../../../../hooks/use_navigat
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
-const FADE_OUT_MS = 200;
+const ENTRY_DURATION_MS = 250;
+const EXIT_DURATION_MS = 150;
+const ENTRY_TRANSLATE_Y_PX = 14;
 
 interface CanvasPanelOverlayProps {
   attachmentsService: AttachmentsService;
@@ -158,7 +160,7 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
       node.addEventListener('transitionend', onTransitionEnd);
     }
 
-    const fallbackTimer = window.setTimeout(finishClose, FADE_OUT_MS);
+    const fallbackTimer = window.setTimeout(finishClose, EXIT_DURATION_MS);
 
     return () => {
       if (node) {
@@ -178,6 +180,12 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
 
   const isVisible = !isEntering && !isClosing;
 
+  const overlayTransition = isEntering
+    ? 'none'
+    : isClosing
+      ? `opacity ${EXIT_DURATION_MS}ms ease-in`
+      : `opacity ${ENTRY_DURATION_MS}ms ease-out, transform ${ENTRY_DURATION_MS}ms ease-out`;
+
   const overlayStyles = css`
     position: absolute;
     inset: 0;
@@ -187,7 +195,8 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({ attachme
     min-height: 0;
     background: ${euiTheme.colors.backgroundBasePlain};
     opacity: ${isVisible ? 1 : 0};
-    transition: opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
+    transform: translateY(${isEntering ? `${ENTRY_TRANSLATE_Y_PX}px` : '0'});
+    transition: ${overlayTransition};
   `;
 
   const bodyStyles = css`

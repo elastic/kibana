@@ -65,7 +65,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
 }) => {
   const {
     openCanvas: openCanvasContext,
-    closeCanvas,
     previewedAttachmentKey,
     setPreviewedAttachmentKey,
   } = useCanvasContext();
@@ -78,6 +77,8 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     isSidebar,
     isAgentWorkspaceMount
   );
+
+  const useOverlayPreview = isAgentWorkspaceMount && !isSidebar;
 
   const openCanvas = useCallback(() => {
     openCanvasContext(attachment, isSidebar);
@@ -120,11 +121,13 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         openCanvas,
         openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
         isCanvas: false,
-        setPreviewBadgeState: (nextPreviewState) => {
-          setPreviewedAttachmentKey(
-            nextPreviewState === 'previewing' ? attachmentPreviewKey : null
-          );
-        },
+        setPreviewBadgeState: useOverlayPreview
+          ? undefined
+          : (nextPreviewState) => {
+              setPreviewedAttachmentKey(
+                nextPreviewState === 'previewing' ? attachmentPreviewKey : null
+              );
+            },
       }) ?? [],
     [
       uiDefinition,
@@ -136,6 +139,8 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       setPreviewedAttachmentKey,
       attachmentPreviewKey,
       openSidebarConversation,
+      isSidebar,
+      useOverlayPreview,
     ]
   );
 
@@ -149,8 +154,9 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
 
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
-  const resolvedPreviewBadgeState: AttachmentPreviewState =
-    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
+  const resolvedPreviewBadgeState: AttachmentPreviewState = useOverlayPreview
+    ? 'none'
+    : previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
 
   if (!uiDefinition) {
     return null;
@@ -177,7 +183,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         badges={header?.badges}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
-        onClosePreview={closeCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
         {uiDefinition?.renderInlineContent?.(
