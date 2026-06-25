@@ -101,7 +101,10 @@ export const registerIamPermissionsRoute = (
       // Resolve permissions per service, falling back to the hardcoded matrix.
       const allActions: string[] = [];
       const allManagedPolicyArns: string[] = [];
-      const byService: Record<string, { policy: ReturnType<typeof buildIamPolicyDocument>; managedPolicyArns: string[] }> = {};
+      const byService: Record<
+        string,
+        { policy: ReturnType<typeof buildIamPolicyDocument>; managedPolicyArns: string[] }
+      > = {};
 
       for (const id of serviceIds) {
         const lookup = AWS_SERVICE_LOOKUP[id];
@@ -120,7 +123,10 @@ export const registerIamPermissionsRoute = (
             dataStream: lookup.dataStream ?? id,
           });
 
-          if (fromManifest && (fromManifest.actions.length > 0 || fromManifest.managedPolicyArns.length > 0)) {
+          if (
+            fromManifest &&
+            (fromManifest.actions.length > 0 || fromManifest.managedPolicyArns.length > 0)
+          ) {
             actions = fromManifest.actions;
             managedPolicyArns = fromManifest.managedPolicyArns;
           }

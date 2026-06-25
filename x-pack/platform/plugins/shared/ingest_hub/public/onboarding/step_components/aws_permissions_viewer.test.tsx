@@ -189,7 +189,10 @@ describe('AwsPermissionsViewer', () => {
   });
 
   it('shows merged managed policy ARNs in the all-integrations view', () => {
-    const arns = ['arn:aws:iam::aws:policy/SecurityAudit', 'arn:aws:iam::aws:policy/ReadOnlyAccess'];
+    const arns = [
+      'arn:aws:iam::aws:policy/SecurityAudit',
+      'arn:aws:iam::aws:policy/ReadOnlyAccess',
+    ];
 
     renderViewer({ mergedManagedPolicyArns: arns });
 

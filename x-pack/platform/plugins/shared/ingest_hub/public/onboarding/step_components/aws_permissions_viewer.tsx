@@ -106,8 +106,7 @@ export const AwsPermissionsViewer: React.FC<AwsPermissionsViewerProps> = ({
 
   // Render only when at least one service has inline actions or managed policy ARNs.
   const hasPermissions =
-    merged.Statement.flatMap((s) => s.Action).length > 0 ||
-    mergedManagedPolicyArns.length > 0;
+    merged.Statement.flatMap((s) => s.Action).length > 0 || mergedManagedPolicyArns.length > 0;
   if (!hasPermissions) {
     return null;
   }
