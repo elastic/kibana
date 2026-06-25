@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { UiSettingValues } from '@kbn/kbn-client';
+
 interface AgentBuilderUiSettings {
-  set: (settings: Record<string, unknown>) => Promise<void>;
-  unset: (key: string) => Promise<void>;
+  set: (values: UiSettingValues) => Promise<void>;
+  unset: (...keys: string[]) => Promise<unknown>;
 }
 
 const AGENT_BUILDER_EXPERIMENTAL_UI_SETTING = 'agentBuilder:experimentalFeatures' as const;

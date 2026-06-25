@@ -153,7 +153,7 @@ function configureExperiment({
   examples?: DatasetExample[];
 }): {
   task: ExperimentTask<DatasetExample, TaskOutput>;
-  evaluators: ReturnType<typeof selectEvaluators>;
+  evaluators: Evaluator<DatasetExample, TaskOutput>[];
 } {
   const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
     const agentId = getStringMeta(metadata, 'agentId');
@@ -201,7 +201,7 @@ function configureExperiment({
       referenceOutput?.groundTruth ?? {},
   });
 
-  const selectedEvaluators = selectEvaluators([
+  const selectedEvaluators = selectEvaluators<DatasetExample, TaskOutput>([
     {
       name: 'ExpectedToolCalled',
       kind: 'CODE' as const,
@@ -372,7 +372,7 @@ function configureExperiment({
                 return { score: null, label: 'error' };
               }
             },
-          },
+          } satisfies Evaluator<DatasetExample, TaskOutput>,
         ]
       : []),
   ]);
