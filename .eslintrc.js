@@ -3038,7 +3038,8 @@ module.exports = {
      * portable outside Kibana (e.g. Cloud UI). They may only import from the
      * baseline peer deps (`@elastic/eui`, `@emotion/*`, `react`, `react-dom`) plus
      * the `@kbn/*` modules that are stubbed at packaging time. Packaging, tests,
-     * and stories are excluded because they reference Kibana-only tooling.
+     * stories, and Storybook config are excluded because they reference
+     * Kibana-only tooling.
      */
     {
       files: ['src/platform/kbn-ui/**/*.{ts,tsx}'],
@@ -3048,6 +3049,7 @@ module.exports = {
         'src/platform/kbn-ui/**/__stories__/**',
         'src/platform/kbn-ui/**/__tests__/**',
         'src/platform/kbn-ui/**/packaging/**',
+        'src/platform/kbn-ui/storybook-config/**',
         'src/platform/kbn-ui/_tooling/**',
       ],
       rules: {
