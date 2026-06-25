@@ -9,10 +9,30 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '../../common/mock/react_beautiful_dnd';
-import { TestProviders } from '../../common/mock';
+import { TestProviders, createMockStore, mockGlobalState } from '../../common/mock';
 import { TimelineId } from '../../../common/types/timeline';
 import * as timelineActions from '../store/actions';
 import { TimelineWrapper } from '.';
+
+/**
+ * Builds a store where the timeline modal is shown (`show: true`), mirroring the
+ * graph "Investigate in Timeline" scenario where the modal is rendered on top of
+ * the expandable flyout.
+ */
+const createVisibleTimelineStore = () =>
+  createMockStore({
+    ...mockGlobalState,
+    timeline: {
+      ...mockGlobalState.timeline,
+      timelineById: {
+        ...mockGlobalState.timeline.timelineById,
+        [TimelineId.test]: {
+          ...mockGlobalState.timeline.timelineById[TimelineId.test],
+          show: true,
+        },
+      },
+    },
+  });
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -84,5 +104,54 @@ describe('TimelineWrapper', () => {
     expect(mockDispatch).toBeCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: false })
     );
+  });
+
+  it('should not bubble the esc keydown to the underlying flyout when the timeline modal is visible', async () => {
+    // The expandable flyout (e.g. the graph investigation view) registers a window-level
+    // keydown listener too. The timeline wrapper mounts first (persistent app shell), so its
+    // listener runs first and must stop the event before the flyout's listener fires.
+    const underlyingFlyoutHandler = jest.fn();
+
+    render(
+      <TestProviders store={createVisibleTimelineStore()}>
+        <TimelineWrapper {...props} />
+      </TestProviders>
+    );
+
+    window.addEventListener('keydown', underlyingFlyoutHandler);
+
+    try {
+      await userEvent.keyboard('{Escape}');
+
+      // The timeline modal still closes...
+      expect(mockDispatch).toBeCalledWith(
+        timelineActions.showTimeline({ id: TimelineId.test, show: false })
+      );
+      // ...but the underlying flyout's window-level handler is never reached.
+      expect(underlyingFlyoutHandler).not.toHaveBeenCalled();
+    } finally {
+      window.removeEventListener('keydown', underlyingFlyoutHandler);
+    }
+  });
+
+  it('should let the esc keydown reach the underlying flyout when the timeline modal is not visible', async () => {
+    const underlyingFlyoutHandler = jest.fn();
+
+    render(
+      <TestProviders>
+        <TimelineWrapper {...props} />
+      </TestProviders>
+    );
+
+    window.addEventListener('keydown', underlyingFlyoutHandler);
+
+    try {
+      await userEvent.keyboard('{Escape}');
+
+      // When the timeline is collapsed, Esc must keep working on other pages/flyouts.
+      expect(underlyingFlyoutHandler).toHaveBeenCalled();
+    } finally {
+      window.removeEventListener('keydown', underlyingFlyoutHandler);
+    }
   });
 });
