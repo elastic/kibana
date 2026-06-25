@@ -178,6 +178,8 @@ export type {
   TemplateAgentPolicyInput,
   DryRunPackagePolicy,
   AgentPolicy,
+  AgentlessAgentPolicyConfig,
+  AgentlessPolicy,
   Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
