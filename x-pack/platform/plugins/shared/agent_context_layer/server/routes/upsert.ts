@@ -226,8 +226,9 @@ export const registerUpsertRoute = ({
           ...(body.tags !== undefined ? { tags: body.tags } : {}),
         };
 
-        const existingCreatedAt = existing.find((d) => isVisibleInSpace(d.spaces, spaceId))
-          ?.created_at;
+        const existingCreatedAt = existing.find((d) =>
+          isVisibleInSpace(d.spaces, spaceId)
+        )?.created_at;
 
         await sml.indexAttachment({
           originId,

@@ -1411,7 +1411,9 @@ describe('createSmlIndexer', () => {
 
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['space-a', '*'] } });
-      expect(callArgs.query.bool.filter).not.toContainEqual({ terms: { spaces: ['space-b', '*'] } });
+      expect(callArgs.query.bool.filter).not.toContainEqual({
+        terms: { spaces: ['space-b', '*'] },
+      });
     });
   });
 });
