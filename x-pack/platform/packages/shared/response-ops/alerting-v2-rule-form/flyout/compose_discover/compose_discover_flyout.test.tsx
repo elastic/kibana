@@ -382,14 +382,10 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
     });
 
-    it('closes immediately when the form is pristine and Cancel is clicked', () => {
-      const onClose = jest.fn();
-      renderFlyout({ onClose });
+    it('does not render a Cancel button in the footer', () => {
+      renderFlyout({});
 
-      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
-
-      expect(onClose).toHaveBeenCalledTimes(1);
-      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverCancel')).not.toBeInTheDocument();
     });
 
     it('shows the confirmation modal when the form is dirty and the X button is clicked', () => {
@@ -403,12 +399,12 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
     });
 
-    it('shows the confirmation modal when the form is dirty and Cancel is clicked', () => {
+    it('shows the confirmation modal when the form is dirty and the X button is clicked (second check)', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
-      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
       expect(onClose).not.toHaveBeenCalled();
       expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
