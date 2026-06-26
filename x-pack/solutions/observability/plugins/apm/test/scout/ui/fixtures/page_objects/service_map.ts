@@ -416,16 +416,15 @@ export class ServiceMapPage {
     });
   }
 
+  async closeFlyout() {
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+    await this.waitForFlyoutToBeHidden();
+  }
+
   /** Dismiss any open popover (e.g. so a node is not covered). No-op if popover already hidden. */
   async dismissPopoverIfOpen() {
     await this.page.keyboard.press('Escape');
     await this.waitForPopoverToBeHidden({ timeout: 2000 }).catch(() => {});
-  }
-
-  /** Dismiss any open flyout (e.g. so a node is not covered). No-op if flyout already hidden. */
-  async dismissFlyoutIfOpen() {
-    await this.page.keyboard.press('Escape');
-    await this.waitForFlyoutToBeHidden({ timeout: 2000 }).catch(() => {});
   }
 
   /**

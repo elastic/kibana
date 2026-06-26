@@ -79,8 +79,7 @@ test.describe(
       await expect(serviceMapPage.serviceMapFlyoutContent).toBeVisible();
     });
 
-    test('dismisses flyout when clicking the close button', async ({
-      page,
+    test('dismisses service flyout when clicking the close button', async ({
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.clickFitView();
@@ -88,9 +87,7 @@ test.describe(
       await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
       await expect(serviceMapPage.serviceMapFlyout).toBeVisible();
 
-      await page.testSubj.click('euiFlyoutCloseButton');
-      await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.waitForFlyoutToBeHidden();
+      await serviceMapPage.closeFlyout();
       await expect(serviceMapPage.serviceMapFlyout).toBeHidden();
     });
 
