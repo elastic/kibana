@@ -1,5 +1,5 @@
 {
-  "sha1": "be1a49062fa72ee9380ec9ad2f9ea6c40f384027",
+  "sha1": "ec3509ccc8f2e510378fc999edda687dfd810f63",
   "tests": [
     {
       "id": "a3a9f820a79c452-b8b452a1ef0f11e",
@@ -10,7 +10,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 62,
+        "line": 65,
         "column": 9
       }
     },
@@ -23,7 +23,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 139,
+        "line": 140,
         "column": 9
       }
     },
@@ -36,7 +36,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 204,
+        "line": 205,
         "column": 9
       }
     },
@@ -49,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 267,
+        "line": 269,
         "column": 9
       }
     },
@@ -62,59 +62,59 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 281,
+        "line": 283,
         "column": 9
       }
     },
     {
-      "id": "a3a9f820a79c452-6c141dc0d4a74ef",
-      "title": "ComposeDiscoverFlyout — create and edit flows breach query validation: Apply without typing anything disables Next",
+      "id": "a3a9f820a79c452-43c1efc18e6e617",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: Apply without typing anything shows the empty callout and disables Next",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 312,
+        "line": 313,
         "column": 9
       }
     },
     {
-      "id": "a3a9f820a79c452-5767614bd465dd1",
-      "title": "ComposeDiscoverFlyout — create and edit flows breach query validation: base-only query shows callout and disables Next",
+      "id": "a3a9f820a79c452-69d20993f3d1ca1",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: base-only query shows the no-alert-condition callout and disables Next",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 331,
+        "line": 334,
         "column": 9
       }
     },
     {
-      "id": "a3a9f820a79c452-0bc3e3ef257d7ca",
-      "title": "ComposeDiscoverFlyout — create and edit flows breach query validation: no callout when both base and alert condition are provided",
+      "id": "a3a9f820a79c452-1ce1898f97e3c19",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: no callout when the query splits into base + alert condition",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 357,
+        "line": 363,
         "column": 9
       }
     },
     {
-      "id": "a3a9f820a79c452-c9d354100b88881",
-      "title": "ComposeDiscoverFlyout — create and edit flows breach query validation: missing breach query keeps user on Alert Condition step",
+      "id": "a3a9f820a79c452-d40f526988a4922",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: a base-only query keeps the user on the Alert Condition step",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 379,
+        "line": 385,
         "column": 9
       }
     },
