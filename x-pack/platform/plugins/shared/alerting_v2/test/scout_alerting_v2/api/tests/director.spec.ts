@@ -1379,11 +1379,12 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             },
           },
           no_data_strategy: 'last_known_status',
+          state_transition: { pending_count: 10 },
         })
       );
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
-        episodeStatus: 'active',
+        episodeStatus: 'pending',
       });
 
       await apiServices.alertingV2.sourceIndex.deleteDocs({
@@ -1401,7 +1402,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
       expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
       for (const event of noDataEvents) {
-        expect(event.episode?.status).toBe('active');
+        expect(event.episode?.status).toBe('pending');
       }
     }
   );
