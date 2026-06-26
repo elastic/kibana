@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { aiSummaryPanelEmbeddableFactory } from './ai_summary_embeddable';
+export { aiPanelEmbeddableFactory } from './ai_summary_embeddable';

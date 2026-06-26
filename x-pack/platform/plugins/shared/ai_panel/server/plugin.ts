@@ -8,8 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { AI_SUMMARY_PANEL_EMBEDDABLE_TYPE, AI_SUMMARY_PANEL_APP_NAME } from '../common/constants';
-import { aiSummaryPanelEmbeddableSchema } from './embeddable/schemas';
+import { AI_PANEL_EMBEDDABLE_TYPE, AI_PANEL_APP_NAME } from '../common/constants';
+import { aiPanelEmbeddableSchema } from './embeddable/schemas';
 import { registerGenerateRoute } from './routes/generate_route';
 
 interface SetupDeps {
@@ -20,11 +20,11 @@ interface StartDeps {
   inference: InferenceServerStart;
 }
 
-export class AiSummaryPanelPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+export class AiPanelPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, { embeddable }: SetupDeps) {
-    embeddable.registerEmbeddableServerDefinition(AI_SUMMARY_PANEL_EMBEDDABLE_TYPE, {
-      title: AI_SUMMARY_PANEL_APP_NAME,
-      getSchema: () => aiSummaryPanelEmbeddableSchema,
+    embeddable.registerEmbeddableServerDefinition(AI_PANEL_EMBEDDABLE_TYPE, {
+      title: AI_PANEL_APP_NAME,
+      getSchema: () => aiPanelEmbeddableSchema,
     });
 
     const router = core.http.createRouter();

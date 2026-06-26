@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { getESQLResults, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLResults, getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
 import dateMath from '@kbn/datemath';
+import type { HttpStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 
 export type EsqlDataResult = Awaited<ReturnType<typeof getESQLResults>>['response'];
@@ -14,21 +15,22 @@ export type EsqlDataResult = Awaited<ReturnType<typeof getESQLResults>>['respons
 /**
  * Fetches ES|QL query results client-side via the data plugin's search service.
  *
- * Time filtering: if the query contains `?_tstart` / `?_tend` named parameters,
- * `timeRange` is resolved and passed automatically. For queries without time params,
- * use `WHERE field >= ?_tstart AND field < ?_tend` to opt in to dashboard time filtering.
+ * Time field detection uses `getESQLTimeFieldFromQuery` which calls the server's
+ * timefield API — AST parsing first, then `@timestamp` fieldCaps fallback. This means
+ * queries that reference a date field indirectly (e.g. `BUCKET(@timestamp, 1 hour)`)
+ * are also time-filtered correctly without requiring explicit `?_tstart`/`?_tend` params.
+ * Results are LRU-cached so repeated calls for the same query have no extra network cost.
  */
 export async function fetchEsqlData(
   search: ISearchGeneric,
+  http: HttpStart,
   esqlQuery: string,
   timeRange: { from: string; to: string } | undefined,
   signal: AbortSignal
 ): Promise<EsqlDataResult> {
-  // Build a DSL range filter when the query declares a time field via ?_tstart / ?_tend.
-  // Queries without those params are time-independent and return all results.
   let filter: unknown;
   if (timeRange) {
-    const timeField = getTimeFieldFromESQLQuery(esqlQuery);
+    const timeField = await getESQLTimeFieldFromQuery({ query: esqlQuery, http });
     if (timeField) {
       filter = {
         range: {

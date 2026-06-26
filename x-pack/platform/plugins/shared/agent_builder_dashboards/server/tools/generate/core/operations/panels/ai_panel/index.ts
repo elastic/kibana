@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
 
 /**
- * AI Summary panel — renders anything (KPI cards, status boards, custom charts)
+ * AI panel — renders anything (KPI cards, status boards, custom charts)
  * from a natural-language prompt and an optional ES|QL query.
  */
 
@@ -39,5 +39,5 @@ export const aiPanelConfigInputSchema = z.object({
 });
 
 export const aiPanelDefinition = definePanelType({
-  embeddableType: 'ai_summary_panel',
+  embeddableType: 'ai_panel',
 });

@@ -75,5 +75,5 @@ export async function streamGenerate(
   onToken: (token: string) => void,
   signal: AbortSignal
 ): Promise<void> {
-  return streamNdjson(http, '/internal/ai_summary_panel/generate', params, onToken, signal);
+  return streamNdjson(http, '/internal/ai_panel/generate', params, onToken, signal);
 }

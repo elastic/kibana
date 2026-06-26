@@ -1,12 +1,12 @@
 {
   "type": "plugin",
-  "id": "@kbn/ai-summary-panel-plugin",
+  "id": "@kbn/ai-panel-plugin",
   "owner": "@elastic/kibana-presentation",
   "group": "platform",
   "visibility": "shared",
-  "description": "AI Summary panel embeddable for dashboards",
+  "description": "AI Panel panel embeddable for dashboards",
   "plugin": {
-    "id": "aiSummaryPanel",
+    "id": "aiPanel",
     "browser": true,
     "server": true,
     "requiredPlugins": [

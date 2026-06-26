@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export type { AiSummaryPanelEmbeddableState } from './embeddable/schemas';
-export { AI_SUMMARY_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
+export type { AiPanelEmbeddableState } from './embeddable/schemas';
+export { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 
 export const plugin = async () => {
-  const { AiSummaryPanelPlugin } = await import('./plugin');
-  return new AiSummaryPanelPlugin();
+  const { AiPanelPlugin } = await import('./plugin');
+  return new AiPanelPlugin();
 };

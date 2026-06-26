@@ -140,7 +140,7 @@ export function registerGenerateRoute(
 ) {
   router.post(
     {
-      path: '/internal/ai_summary_panel/generate',
+      path: '/internal/ai_panel/generate',
       security: {
         authz: { enabled: false, reason: 'Delegates auth to the inference plugin' },
       },

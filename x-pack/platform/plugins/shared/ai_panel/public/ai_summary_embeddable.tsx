@@ -22,18 +22,18 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
-import type { AiSummaryPanelEmbeddableState } from '../server';
-import { AI_SUMMARY_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
+import type { AiPanelEmbeddableState } from '../server';
+import { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 
-type AiSummaryPanelApi = DefaultEmbeddableApi<AiSummaryPanelEmbeddableState> & HasEditCapabilities;
+type AiPanelApi = DefaultEmbeddableApi<AiPanelEmbeddableState> & HasEditCapabilities;
 import { AiSummaryComponent } from './components/ai_summary_component';
 import { EditAiPanelFlyout } from './components/edit_ai_panel_flyout';
 
-export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
-  AiSummaryPanelEmbeddableState,
-  AiSummaryPanelApi
+export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
+  AiPanelEmbeddableState,
+  AiPanelApi
 > = {
-  type: AI_SUMMARY_PANEL_EMBEDDABLE_TYPE,
+  type: AI_PANEL_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
@@ -41,14 +41,14 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isEditFlyoutOpen$ = new BehaviorSubject<boolean>(false);
 
-    const serializeState = (): AiSummaryPanelEmbeddableState => ({
+    const serializeState = (): AiPanelEmbeddableState => ({
       ...titleManager.getLatestState(),
       prompt: prompt$.getValue(),
       esqlQuery: esqlQuery$.getValue(),
       template: template$.getValue(),
     });
 
-    const stateApi = initializeStateApi<AiSummaryPanelEmbeddableState>({
+    const stateApi = initializeStateApi<AiPanelEmbeddableState>({
       uuid,
       parentApi,
       serializeState,
@@ -95,7 +95,7 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
 
     return {
       api,
-      Component: function AiSummaryPanelComponent() {
+      Component: function AiPanelComponent() {
         const [title, hideTitle, prompt, esqlQuery, savedTemplate, isEditFlyoutOpen] =
           useBatchedPublishingSubjects(
             titleManager.api.title$,

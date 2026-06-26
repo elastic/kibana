@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { AiSummaryPanelPlugin } from './plugin';
+export const AI_PANEL_EMBEDDABLE_TYPE = 'ai_panel';
+export const AI_PANEL_APP_NAME = 'AI Panel';
 
-export { AI_SUMMARY_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
-export type { AiSummaryPanelEmbeddableState } from '../server';
-
-export const plugin = () => new AiSummaryPanelPlugin();

@@ -9,17 +9,17 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
-export const aiSummaryPanelStateSchema = schema.object({
+export const aiPanelStateSchema = schema.object({
   prompt: schema.string(),
   esqlQuery: schema.maybe(schema.string()),
   template: schema.maybe(schema.string()),
 });
 
-export const aiSummaryPanelEmbeddableSchema = schema.allOf([
-  aiSummaryPanelStateSchema,
+export const aiPanelEmbeddableSchema = schema.allOf([
+  aiPanelStateSchema,
   serializedTitlesSchema,
 ]);
 
-export type AiSummaryPanelState = TypeOf<typeof aiSummaryPanelStateSchema>;
-export type AiSummaryPanelEmbeddableState = TypeOf<typeof aiSummaryPanelEmbeddableSchema>;
+export type AiPanelState = TypeOf<typeof aiPanelStateSchema>;
+export type AiPanelEmbeddableState = TypeOf<typeof aiPanelEmbeddableSchema>;
 

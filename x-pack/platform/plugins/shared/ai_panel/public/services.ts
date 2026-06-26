@@ -20,6 +20,6 @@ export const setServices = (core: CoreStart, search: ISearchGeneric) => {
 };
 
 export const getServices = (): Services => {
-  if (!services) throw new Error('AiSummaryPanel services not initialized');
+  if (!services) throw new Error('AiPanel services not initialized');
   return services;
 };

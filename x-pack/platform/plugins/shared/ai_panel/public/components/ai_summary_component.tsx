@@ -111,11 +111,11 @@ export const AiSummaryComponent = ({
     setIsLoading(true);
     setError(undefined);
 
-    const { search } = getServices();
+    const { search, core } = getServices();
 
     // Fast path — esqlQuery panel with stored template: run query only, no LLM.
     if (template && esqlQuery) {
-      fetchEsqlData(search, esqlQuery, timeRange, controller.signal)
+      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
         .then(({ columns, values }) => {
           if (controller.signal.aborted) return;
           setHtml(fillTemplate(template, columns, values ?? []));
@@ -183,7 +183,7 @@ export const AiSummaryComponent = ({
 
     // Fetch data in parallel with LLM (template panels only)
     if (esqlQuery) {
-      fetchEsqlData(search, esqlQuery, timeRange, controller.signal)
+      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
         .then((data) => {
           if (controller.signal.aborted) return;
           esqlData = data;
@@ -258,7 +258,7 @@ export const AiSummaryComponent = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
-              {i18n.translate('aiSummaryPanel.badge.aiGenerated', {
+              {i18n.translate('aiPanel.badge.aiGenerated', {
                 defaultMessage: 'AI generated',
               })}
             </EuiBadge>
@@ -268,7 +268,7 @@ export const AiSummaryComponent = ({
       {error && (
         <EuiCallOut
           color="danger"
-          title={i18n.translate('aiSummaryPanel.error.title', {
+          title={i18n.translate('aiPanel.error.title', {
             defaultMessage: 'Failed to generate panel',
           })}
           style={{ margin: 16 }}
