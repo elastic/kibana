@@ -121,13 +121,16 @@ export const AgentlessPackagePoliciesTable = ({
   const [flyoutPackagePolicy, setFlyoutPackagePolicy] = useState<PackagePolicy>();
   const [flyoutAgentPolicy, setFlyoutAgentPolicy] = useState<AgentPolicy>();
   useEffect(() => {
-    const flyoutAgentPolicyIdFromQuery = queryParams.get('openEnrollmentFlyout');
-    if (flyoutAgentPolicyIdFromQuery) {
-      const pp = packagePolicies.find((p) =>
-        p.packagePolicy.policy_ids.includes(flyoutAgentPolicyIdFromQuery)
-      );
+    // The agentless save flow sets openEnrollmentFlyout=<packagePolicyId> via
+    // appendOnSaveQueryParamsToPath (AgentlessPolicy has no policy_ids, so
+    // policy.id is used). Match on packagePolicy.id accordingly.
+    // TODO: decouple this flyout from PackagePolicy — see follow-up issue for
+    // refactoring AgentlessEnrollmentFlyout to accept AgentlessPolicy directly.
+    const flyoutPolicyIdFromQuery = queryParams.get('openEnrollmentFlyout');
+    if (flyoutPolicyIdFromQuery) {
+      const pp = packagePolicies.find((p) => p.packagePolicy.id === flyoutPolicyIdFromQuery);
       if (pp) {
-        setFlyoutOpenForPolicyId(flyoutAgentPolicyIdFromQuery);
+        setFlyoutOpenForPolicyId(flyoutPolicyIdFromQuery);
         setFlyoutPackagePolicy(pp.packagePolicy);
         setFlyoutAgentPolicy(pp.agentPolicies[0]);
       }
