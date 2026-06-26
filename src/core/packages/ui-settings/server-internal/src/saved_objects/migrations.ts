@@ -49,7 +49,7 @@ export const TIMEPICKER_QUICK_RANGES_V3_PRESETS: ReadonlyArray<QuickRange> = [
   { from: 'now/y', to: 'now', display: 'This year until now' },
   { from: 'now-3h', to: 'now', display: 'Last 3 hours' },
   { from: 'now-12h', to: 'now', display: 'Last 12 hours' },
-  { from: 'now-3d', to: 'now', display: 'Last 3 days' },
+  { from: 'now-3d/d', to: 'now', display: 'Last 3 days' },
 ];
 
 /**
