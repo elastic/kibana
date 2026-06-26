@@ -11,6 +11,7 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const flyout = getService('flyout');
 
   return {
     async assertSourceListContainsEntry(sourceName: string) {
@@ -57,6 +58,8 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
     // Selects a saved search via the "Open Discover session" flyout (MlOpenSessionFlyout)
     async selectSavedSearch(name: string, nextPageSubj: string) {
       await retry.tryForTime(3 * 60 * 1000, async () => {
+        await flyout.ensureClosed('loadSearchForm');
+
         await testSubjects.click('mlOpenDiscoverSessionButton');
         await testSubjects.existOrFail('loadSearchForm', { timeout: 10 * 1000 });
         await testSubjects.existOrFail('savedObjectFinderSearchInput', { timeout: 30 * 1000 });
@@ -65,7 +68,7 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
         });
         await testSubjects.clickWhenNotDisabledWithoutRetry(`savedObjectTitle${name}`);
         // Wait for flyout to close, confirming selection was made
-        await testSubjects.missingOrFail('loadSearchForm', { timeout: 5 * 1000 });
+        await testSubjects.missingOrFail('loadSearchForm', { timeout: 10 * 1000 });
       });
       // Wait for URL to update with savedSearchId, confirming navigation completed
       await retry.tryForTime(10 * 1000, async () => {

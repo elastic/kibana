@@ -39,7 +39,8 @@
     "@kbn/kql",
     "@kbn/control-group-renderer",
     "@kbn/utility-types",
-    "@kbn/esql-language"
+    "@kbn/esql-language",
+    "@kbn/controls-renderer"
   ],
   "exclude": ["target/**/*"]
 }

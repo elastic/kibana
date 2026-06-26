@@ -19,8 +19,8 @@ const createMockClients = (definition: Streams.ingest.all.Definition) => {
       getStream: jest.fn().mockResolvedValue(definition),
       upsertStream,
     },
-    queryClient: {
-      getAssets: jest.fn().mockResolvedValue([]),
+    kiClient: {
+      getStreamToQueryLinksMap: jest.fn().mockResolvedValue({}),
     },
     attachmentClient: {
       getAttachments: jest.fn().mockResolvedValue([]),
@@ -48,12 +48,12 @@ describe('ingest_upsert', () => {
         failure_store: { inherit: {} },
       },
     };
-    const { streamsClient, queryClient, attachmentClient, upsertStream } =
+    const { streamsClient, kiClient, attachmentClient, upsertStream } =
       createMockClients(definition);
 
     await updateWiredIngest({
       streamsClient: streamsClient as never,
-      queryClient: queryClient as never,
+      kiClient: kiClient as never,
       attachmentClient: attachmentClient as never,
       name: definition.name,
       ingest: {
@@ -87,12 +87,12 @@ describe('ingest_upsert', () => {
         failure_store: { inherit: {} },
       },
     };
-    const { streamsClient, queryClient, attachmentClient, upsertStream } =
+    const { streamsClient, kiClient, attachmentClient, upsertStream } =
       createMockClients(definition);
 
     await updateClassicIngest({
       streamsClient: streamsClient as never,
-      queryClient: queryClient as never,
+      kiClient: kiClient as never,
       attachmentClient: attachmentClient as never,
       name: definition.name,
       ingest: {

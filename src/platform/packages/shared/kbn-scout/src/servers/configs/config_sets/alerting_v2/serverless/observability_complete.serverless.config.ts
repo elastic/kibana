@@ -14,6 +14,10 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, '--xpack.alerting_v2.enabled=true'],
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      '--xpack.alerting_v2.enabled=true',
+      '--uiSettings.globalOverrides.alerting:v2:enabled=true',
+    ],
   },
 };

@@ -20,7 +20,8 @@ import { i18n } from '@kbn/i18n';
 
 import {
   getNormalizedInputs,
-  isIntegrationPolicyTemplate,
+  isInputOnlyPolicyTemplate,
+  getPolicyTemplateDataStreamPaths,
   getRegistryStreamWithDataStreamForInputType,
   getInputEffectiveName,
   buildInputKey,
@@ -53,6 +54,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isUpgrade?: boolean;
   isAgentlessSelected?: boolean;
   varGroupSelections?: VarGroupSelection;
+  bottomExtension?: React.ReactNode;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -65,6 +67,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isUpgrade = false,
   isAgentlessSelected = false,
   varGroupSelections = {},
+  bottomExtension,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const deploymentMode =
@@ -103,12 +106,19 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     (hasIntegrations ? input.policy_template === policyTemplate.name : true)
                 );
 
+                // Scope stream resolution to this policy template's own data stream(s) so that
+                // input packages with multiple templates sharing an input type don't duplicate
+                // each template's streams (and stream vars like data_stream.dataset). Single-template
+                // integration packages keep searching all data streams, preserving previous behavior.
+                const dataStreamPaths =
+                  isInputOnlyPolicyTemplate(policyTemplate) || hasIntegrations
+                    ? getPolicyTemplateDataStreamPaths(packageInfo, policyTemplate)
+                    : [];
+
                 const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
                   registryEffectiveName,
                   packageInfo,
-                  hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
-                    ? policyTemplate.data_streams
-                    : []
+                  dataStreamPaths
                 );
 
                 if (
@@ -218,6 +228,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
               </React.Fragment>
             );
           })}
+          {bottomExtension && <EuiFlexItem>{bottomExtension}</EuiFlexItem>}
         </EuiFlexGroup>
       </>
     ) : (

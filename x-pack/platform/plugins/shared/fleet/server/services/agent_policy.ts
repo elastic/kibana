@@ -50,6 +50,7 @@ import {
 } from '../../common/services';
 
 import {
+  BUMP_AGENT_POLICIES_BATCH_SIZE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
@@ -171,6 +172,7 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
 import {
   getVersionSpecificPolicies,
@@ -204,6 +206,8 @@ export async function getAgentPolicySavedObjectType() {
     : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE;
 }
 
+// Above this number of agent policies, `_bumpPoliciesOrScheduleAsync` offloads the revision bump to a
+// background Task Manager task instead of blocking the request thread with the bulk Saved Objects updates.
 class AgentPolicyService {
   protected getLogger(...childContextPaths: string[]): Logger {
     return appContextService.getLogger().get('AgentPolicyService', ...childContextPaths);
@@ -1489,6 +1493,37 @@ class AgentPolicyService {
     }
   }
 
+  // Bumps the given policies inline, or offloads to a Task Manager task above the threshold so
+  // the bulk Saved Objects updates don't block the request thread. The task re-fetches by id and
+  // bumps synchronously via `bumpAgentPoliciesByIds`.
+  private async _bumpPoliciesOrScheduleAsync(
+    internalSoClientWithoutSpaceExtension: SavedObjectsClientContract,
+    savedObjectsResults: Array<SavedObject<AgentPolicySOAttributes>>,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    if (savedObjectsResults.length <= BUMP_AGENT_POLICIES_BATCH_SIZE) {
+      return this._bumpPolicies(
+        internalSoClientWithoutSpaceExtension,
+        savedObjectsResults,
+        options
+      );
+    }
+
+    this.getLogger('_bumpPoliciesOrScheduleAsync').debug(
+      `Scheduling background task to bump revision of ${savedObjectsResults.length} agent policies`
+    );
+
+    await scheduleBumpAgentPoliciesByIdTask(
+      appContextService.getTaskManagerStart()!,
+      savedObjectsResults.map((policy) => ({
+        id: policy.id,
+        spaceId: getSpaceForAgentPolicySO(policy),
+      })),
+      options?.user
+    );
+    return { saved_objects: [] };
+  }
+
   private async _bumpPolicies(
     internalSoClientWithoutSpaceExtension: SavedObjectsClientContract,
     savedObjectsResults: Array<SavedObject<AgentPolicySOAttributes>>,
@@ -1611,7 +1646,7 @@ class AgentPolicyService {
         }))
       );
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       [
         ...agentPoliciesUsingOutput.saved_objects,
@@ -1986,21 +2021,21 @@ class AgentPolicyService {
             fleetServerPolicies.map((fsp) => fsp.policy_id).filter((id) => !hasVersionSuffix(id))
           ),
         ];
-        await pMap(
-          deployedPolicyIds,
-          async (policyId) => {
-            const latestFleetPolicy = await this.getLatestFleetPolicyRevision(esClient, policyId);
-            const soRevision = policiesMap[policyId]?.revision;
-            if (latestFleetPolicy && soRevision && latestFleetPolicy.revision_idx !== soRevision) {
-              logger.warn(
-                `Policy [${policyId}] has mismatched revisions after deploy: ` +
-                  `.kibana_ingest revision [${soRevision}], ` +
-                  `.fleet-policies revision_idx [${latestFleetPolicy.revision_idx}]`
-              );
-            }
-          },
-          { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 }
+        const latestRevisionByPolicyId = await this.getLatestFleetPolicyRevisions(
+          esClient,
+          deployedPolicyIds
         );
+        for (const policyId of deployedPolicyIds) {
+          const latestRevisionIdx = latestRevisionByPolicyId.get(policyId);
+          const soRevision = policiesMap[policyId]?.revision;
+          if (latestRevisionIdx !== undefined && soRevision && latestRevisionIdx !== soRevision) {
+            logger.warn(
+              `Policy [${policyId}] has mismatched revisions after deploy: ` +
+                `.kibana_ingest revision [${soRevision}], ` +
+                `.fleet-policies revision_idx [${latestRevisionIdx}]`
+            );
+          }
+        }
 
         for (const agentPolicy of policies) {
           if (!agentPolicy.supports_agentless) {
@@ -2094,29 +2129,43 @@ class AgentPolicyService {
     }
   }
 
-  public async getLatestFleetPolicyRevision(
+  /**
+   * Resolve the latest deployed revision (`revision_idx` in `.fleet-policies`) for many agent
+   * policies in a single aggregation. Returns a map keyed by policy id; policies without a
+   * deployed revision are omitted from the map.
+   */
+  public async getLatestFleetPolicyRevisions(
     esClient: ElasticsearchClient,
-    agentPolicyId: string
-  ): Promise<Pick<FleetServerPolicy, 'revision_idx' | 'policy_id'> | null> {
-    const res = await esClient.search<Pick<FleetServerPolicy, 'revision_idx' | 'policy_id'>>({
-      index: AGENT_POLICY_INDEX,
-      ignore_unavailable: true,
-      rest_total_hits_as_int: true,
-      _source: ['revision_idx', 'policy_id'],
-      query: {
-        term: {
-          policy_id: agentPolicyId,
-        },
-      },
-      size: 1,
-      sort: [{ revision_idx: { order: 'desc' } }],
-    });
-
-    if ((res.hits.total as number) === 0) {
-      return null;
+    agentPolicyIds: string[]
+  ): Promise<Map<string, number>> {
+    const latestRevisionByPolicyId = new Map<string, number>();
+    if (agentPolicyIds.length === 0) {
+      return latestRevisionByPolicyId;
     }
 
-    return res.hits.hits[0]._source ?? null;
+    const res = await esClient.search<
+      unknown,
+      { policies: { buckets: Array<{ key: string; latest_revision: { value: number | null } }> } }
+    >({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      size: 0,
+      query: { terms: { policy_id: agentPolicyIds } },
+      aggs: {
+        policies: {
+          terms: { field: 'policy_id', size: agentPolicyIds.length, execution_hint: 'map' },
+          aggs: { latest_revision: { max: { field: 'revision_idx' } } },
+        },
+      },
+    });
+
+    for (const bucket of res.aggregations?.policies?.buckets ?? []) {
+      if (bucket.latest_revision.value !== null) {
+        latestRevisionByPolicyId.set(bucket.key, bucket.latest_revision.value);
+      }
+    }
+
+    return latestRevisionByPolicyId;
   }
 
   public async getFleetServerPolicy(
@@ -2275,7 +2324,7 @@ class AgentPolicyService {
         namespaces: ['*'],
       });
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       currentPolicies.saved_objects,
       options
@@ -2306,7 +2355,7 @@ class AgentPolicyService {
         namespaces: ['*'],
       });
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       currentPolicies.saved_objects,
       options

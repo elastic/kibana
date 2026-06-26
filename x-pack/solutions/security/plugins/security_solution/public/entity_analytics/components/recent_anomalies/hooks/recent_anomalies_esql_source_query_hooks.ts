@@ -42,7 +42,7 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
-    parts.push(`| EVAL ${entityType}_euid = ${euidApi.esql.getEuidEvaluation(entityType)}`);
+    parts.push(`| EVAL ${euidApi.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
   parts.push(

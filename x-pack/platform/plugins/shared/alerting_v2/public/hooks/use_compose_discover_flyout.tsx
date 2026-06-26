@@ -6,21 +6,22 @@
  */
 
 import type {
+  BuilderState,
   ComposeDiscoverMode,
   RuleFormServices,
-  BuilderState,
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
@@ -137,9 +138,10 @@ export const useComposeDiscoverFlyout = ({
       setFlyoutMode(mode);
 
       if (rule.metadata.builder_type) {
-        const query = rule.evaluation?.query?.base;
-        const recoveryQuery =
-          rule.recovery_policy?.type === 'query' ? rule.recovery_policy.query?.base : undefined;
+        const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
+        const recoveryQuery = rule.query
+          ? getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
+          : undefined;
         const state = query
           ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
           : null;

@@ -116,9 +116,11 @@ const upsertIngestRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
-      request,
-    });
+    const { streamsClient, getKnowledgeIndicatorClient, attachmentClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     const { name } = params.path;
     const { ingest } = params.body;
@@ -138,12 +140,12 @@ const upsertIngestRoute = createServerRoute({
       );
     }
 
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
 
     if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
-        queryClient,
+        kiClient,
         attachmentClient,
         name,
         ingest,
@@ -152,7 +154,7 @@ const upsertIngestRoute = createServerRoute({
 
     return await updateClassicIngest({
       streamsClient,
-      queryClient,
+      kiClient,
       attachmentClient,
       name,
       ingest,

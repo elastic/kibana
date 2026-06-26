@@ -22,7 +22,6 @@ import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
-import { ActionPolicyClient } from '../action_policy_client';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
@@ -90,7 +89,6 @@ export class RulesClient {
     @inject(PluginStart<TaskManagerStartContract>('taskManager'))
     private readonly taskManager: TaskManagerStartContract,
     @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
     @inject(RequestSpaceIdToken) private readonly spaceId: string
   ) {}
 
@@ -317,11 +315,6 @@ export class RulesClient {
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
-
-    await this.actionPolicyClient.deleteActionPoliciesByFilter({
-      type: 'single_rule',
-      ruleId: id,
-    });
   }
 
   @withApm

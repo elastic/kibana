@@ -48,13 +48,10 @@ export const useStreamFeatures = (
     [data?.features]
   );
 
-  const features = useMemo(
-    () => allFeatures.filter((feature) => !feature.excluded_at),
-    [allFeatures]
-  );
+  const features = useMemo(() => allFeatures.filter((feature) => !feature.excluded), [allFeatures]);
 
   const excludedFeatures = useMemo(
-    () => allFeatures.filter((feature) => !!feature.excluded_at),
+    () => allFeatures.filter((feature) => !!feature.excluded),
     [allFeatures]
   );
 

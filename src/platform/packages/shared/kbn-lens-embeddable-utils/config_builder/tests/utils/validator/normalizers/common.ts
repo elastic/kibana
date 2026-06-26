@@ -68,6 +68,7 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.visualization.layers.*.colorMapping.assignments.*.touched',
   'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
   'state.visualization.layers.*.colorMapping.colorMode.steps.*.touched',
+  'state.visualization.colorMapping.colorMode.steps.*.touched',
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -240,6 +241,22 @@ function removeOrphanedAdHocDataViews(attributes: LensAttributes, internalRefere
   for (const id of Object.keys(attributes.state.adHocDataViews ?? {})) {
     if (!referencedAdHocIds.has(id)) {
       delete attributes.state.adHocDataViews![id];
+    }
+  }
+}
+
+/**
+ * Switching between chart types in ES|QL mode leaves behind empty-column layers
+ * from previously selected charts (Check https://github.com/elastic/kibana/issues/243084).
+ * Only the active layer (in layerRemapping) survives the round-trip.
+ */
+function pruneEmptyColumnTextBasedLayers(attributes: LensAttributes) {
+  const textBasedLayers = attributes.state.datasourceStates.textBased?.layers;
+  if (!textBasedLayers) return;
+
+  for (const [layerId, layer] of Object.entries(textBasedLayers)) {
+    if (layer.columns.length === 0) {
+      delete textBasedLayers[layerId];
     }
   }
 }
@@ -421,6 +438,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
   original: (attributes: T) => {
     const { layerRemapping, columnRemapping, inferColumnDataType } = getArgs(attributes);
 
+    pruneEmptyColumnTextBasedLayers(attributes);
     normalizeAdHocDataViews(attributes);
     normalizeESQLQuery(attributes);
     normalizeEmptyQuery(attributes);

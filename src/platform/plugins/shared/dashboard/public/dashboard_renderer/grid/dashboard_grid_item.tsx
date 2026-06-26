@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
@@ -63,7 +63,8 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       useMargins,
       viewMode,
       dashboardContainerRef,
-      arePanelsRelated,
+      relatedPanelsIndicatorId,
+      blurredPanelIds,
     ] = useBatchedPublishingSubjects(
       dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
@@ -73,22 +74,30 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
-      dashboardInternalApi.arePanelsRelated$
+      dashboardApi.relatedPanelsIndicatorId$,
+      dashboardApi.blurredPanelIds$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
-    const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
-    const blurPanel =
-      focusedPanelId !== undefined &&
-      focusedPanelId !== id &&
-      !arePanelsRelated(id, focusedPanelId);
+
+    const isIndicatingRelatedPanels =
+      relatedPanelsIndicatorId !== undefined && relatedPanelsIndicatorId === id;
+
+    const focusPanel =
+      isIndicatingRelatedPanels || (focusedPanelId !== undefined && focusedPanelId === id);
+    const focusedForEdit = focusedPanelId !== undefined && focusedPanelId === id;
+
+    const blurPanel = blurredPanelIds.includes(id);
+
     const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
+      'dshDashboardGrid__item--selected': isIndicatingRelatedPanels,
+      'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: viewMode === 'print',
     });
@@ -238,6 +247,18 @@ const dashboardGridItemStyles = {
         // Call out focused panels with a simple border
         '&.dshDashboardGrid__item--focused .embPanel': {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
+        },
+        // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
+        '&.dshDashboardGrid__item--selected': {
+          // Ensure the overall panel still has a plain background so we can apply the semitransparent overlay on top of it
+          backgroundColor: context.euiTheme.colors.backgroundBasePlain,
+          '& .embPanel': {
+            backgroundColor: transparentize(context.euiTheme.colors.vis.euiColorVis0, 0.1),
+
+            '& div, & button': {
+              backgroundColor: 'transparent',
+            },
+          },
         },
       },
       getHighlightStyles(context),

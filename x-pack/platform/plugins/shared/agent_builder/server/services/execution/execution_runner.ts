@@ -121,6 +121,7 @@ const handleConversationExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    telemetryMetadata,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
@@ -129,6 +130,7 @@ const handleConversationExecution = async ({
   const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
     agentId,
     connectorId,
+    telemetryMetadata,
     request,
     ...deps,
   });
@@ -159,6 +161,7 @@ const handleConversationExecution = async ({
     abortSignal,
     conversation,
     defaultConnectorId: selectedConnectorId,
+    telemetryMetadata,
     runAgent,
     browserApiTools,
     configurationOverrides,
@@ -428,10 +431,12 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
+  const { telemetryMetadata } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
+    telemetryMetadata,
     request,
     ...deps,
   });
@@ -445,6 +450,7 @@ const handleStandaloneExecution = async ({
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
+    telemetryMetadata,
     runAgent,
     executionMode: AgentExecutionMode.standalone,
   });

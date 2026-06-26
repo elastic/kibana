@@ -41,6 +41,11 @@ export class ComposeDiscoverPage {
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
   public readonly createEsqlRuleCard: Locator;
   public readonly cancelButton: Locator;
+  /**
+   * Warning callout shown when the base query is applied but the breach
+   * (alert condition) segment is missing.
+   */
+  public readonly breachQueryMissingCallout: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -68,6 +73,7 @@ export class ComposeDiscoverPage {
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
     this.cancelButton = this.page.testSubj.locator('composeDiscoverCancel');
+    this.breachQueryMissingCallout = this.page.testSubj.locator('composeDiscoverAlertQueryMissing');
   }
 
   editRuleButton(ruleId: string) {
@@ -91,11 +97,20 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Types an ES|QL query into the sandbox code editor.
-   * The sandbox renders a single Monaco instance (model index 0).
+   * Types an ES|QL query into the sandbox base-tab code editor (Monaco index 0).
    */
   async setSandboxQuery(query: string) {
     await this.codeEditor.setCodeEditorValue(query, 0);
+  }
+
+  /**
+   * Switches the sandbox to the "Alert condition" tab and types the given
+   * segment into the alert-condition editor (Monaco index 1, because the
+   * locked base preview occupies index 0 on that tab).
+   */
+  async setSandboxAlertCondition(segment: string) {
+    await this.page.testSubj.locator('querySandboxTab-alert').click();
+    await this.codeEditor.setCodeEditorValue(segment, 1);
   }
 
   async clickNext() {
@@ -108,6 +123,11 @@ export class ComposeDiscoverPage {
 
   async clickApply() {
     await this.sandboxApplyButton.click();
+  }
+
+  async applySandboxBaseQueryOnly(query: string) {
+    await this.setSandboxQuery(query);
+    await this.clickApply();
   }
 
   async setRuleName(name: string) {

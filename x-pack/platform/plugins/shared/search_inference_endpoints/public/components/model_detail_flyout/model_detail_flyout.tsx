@@ -48,8 +48,9 @@ export interface ModelDetailFlyoutProps {
   allEndpoints: InferenceAPIConfigResponse[];
   onClose: () => void;
   onSaveEndpoint: () => void;
-  onDeleteEndpoint: (endpoint: InferenceAPIConfigResponse) => void;
+  onDeleteEndpoint?: (endpoint: InferenceAPIConfigResponse) => void;
   onCopyEndpointId: (id: string) => void;
+  canManage?: boolean;
 }
 
 export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
@@ -59,6 +60,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   onSaveEndpoint,
   onDeleteEndpoint,
   onCopyEndpointId,
+  canManage = true,
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -216,21 +218,23 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="plusInCircle"
-                  color="text"
-                  onClick={handleOpenAddModal}
-                  disabled={modelStatus === EisModelStatus.DeprecatedEOL}
-                  data-test-subj="modelDetailFlyoutAddEndpointButton"
-                >
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.addEndpointButton',
-                    { defaultMessage: 'Add endpoint' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              {canManage && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="plusInCircle"
+                    color="text"
+                    onClick={handleOpenAddModal}
+                    disabled={modelStatus === EisModelStatus.DeprecatedEOL}
+                    data-test-subj="modelDetailFlyoutAddEndpointButton"
+                  >
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.modelDetailFlyout.addEndpointButton',
+                      { defaultMessage: 'Add endpoint' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
 
@@ -242,7 +246,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                     endpoint={endpoint}
                     onView={handleOpenEditModal}
                     onCopy={onCopyEndpointId}
-                    onDelete={onDeleteEndpoint}
+                    onDelete={canManage ? onDeleteEndpoint : undefined}
                   />
                   {index !== endpoints.length - 1 && <EuiHorizontalRule margin="none" />}
                 </React.Fragment>

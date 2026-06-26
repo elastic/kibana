@@ -16,6 +16,7 @@ import {
   saveKnowledgeBaseContentToIndex,
   deletePackageKnowledgeBase,
 } from '../../knowledge_base_index';
+import { getPackageKnowledgeBase } from '../../get';
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
@@ -106,6 +107,17 @@ export async function stepSaveKnowledgeBase(
   // You can adjust the license requirement as needed (e.g., isGoldPlus(), isPlatinum(), isEnterprise())
   if (!licenseService.isEnterprise()) {
     logger.debug(`Knowledge base step: Skipping knowledge base save - requires Enterprise license`);
+    return { esReferences };
+  }
+
+  const existing = await getPackageKnowledgeBase({ esClient, pkgName: packageInfo.name });
+  if (
+    existing?.items.length &&
+    existing.items.every((item) => item.version === packageInfo.version)
+  ) {
+    logger.debug(
+      `Knowledge base already indexed for ${packageInfo.name}@${packageInfo.version}, skipping`
+    );
     return { esReferences };
   }
 

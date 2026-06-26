@@ -16,6 +16,7 @@ import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-comm
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
 import type { TrackingService } from '../../../telemetry';
+import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { createModelProvider, createModelProviderFactory } from './model_provider';
 
 jest.mock('../../../utils/resolve_selected_connector_id');
@@ -329,6 +330,53 @@ describe('createModelProvider', () => {
       await provider.selectModel({ effortLevel: 'low' });
 
       expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('telemetryMetadata', () => {
+    it('defaults to the Agent Builder telemetry and binds no metadata when none is provided', async () => {
+      const deps = setupDeps();
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.getDefaultModel();
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: { telemetryMetadata: MODEL_TELEMETRY_METADATA },
+        })
+      );
+      expect(deps.inference.getClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bindTo: { connectorId: 'default-connector' },
+        })
+      );
+    });
+
+    it('uses the provided telemetryMetadata for the chat model and binds it on the inference client', async () => {
+      const telemetryMetadata = {
+        pluginId: 'streams_sig_events_discovery',
+        aggregateBy: 'streams_significant_events',
+      };
+      const deps = setupDeps();
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, telemetryMetadata });
+      await provider.getDefaultModel();
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: { telemetryMetadata },
+        })
+      );
+      expect(deps.inference.getClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bindTo: {
+            connectorId: 'default-connector',
+            metadata: { connectorTelemetry: telemetryMetadata },
+          },
+        })
+      );
     });
   });
 

@@ -117,9 +117,6 @@ export interface QueriesOccurrencesGetResponse {
 }
 
 export interface QueryLink {
-  'asset.uuid': string;
-  'asset.type': 'query';
-  'asset.id': string;
   query: StreamQuery;
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */

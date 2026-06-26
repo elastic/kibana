@@ -19,26 +19,55 @@ import { i18n } from '@kbn/i18n';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { RootProfileProvider } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
-import type { AppMenuExtensionParams } from '../../../..';
+import type { AlertsLegacyRuleType, AppMenuExtensionParams } from '../../../..';
 
 export const createGetAppMenu =
   (services: ProfileProviderServices): RootProfileProvider['profile']['getAppMenu'] =>
   (prev) =>
   (params) => {
     const prevValue = prev(params);
+    const showCreateRuleV2 =
+      params.isEsqlMode &&
+      Boolean(services.alertingVTwo) &&
+      Boolean(services.application.capabilities.alertingVTwo);
 
     return {
+      getAlertsLegacyRuleTypes: showCreateRuleV2
+        ? () => getObservabilityAlertsClassicRuleTypes(services, params)
+        : undefined,
       appMenuRegistry: (registry) => {
-        // Register custom link actions
         registerDatasetQualityLink(registry, services);
-        // Register alerts sub menu actions
-        registerCreateSLOAction(registry, services, params);
-        registerCustomThresholdRuleAction(registry, services, params);
+
+        // When alerting v2 is enabled, Discover owns the alerts menu directly (v2 flyout).
+        // Registering popover items here would override that and hide the v2 experience.
+        if (!showCreateRuleV2) {
+          registerCustomThresholdRuleAction(registry, services, params);
+          registerCreateSLOAction(registry, services, params);
+        }
 
         return prevValue.appMenuRegistry(registry);
       },
     };
   };
+
+const getObservabilityAlertsClassicRuleTypes = (
+  services: ProfileProviderServices,
+  params: AppMenuExtensionParams
+): AlertsLegacyRuleType[] => {
+  const classicRuleTypes: AlertsLegacyRuleType[] = [];
+
+  const customThresholdRule = buildCustomThresholdClassicRuleType(services, params);
+  if (customThresholdRule) {
+    classicRuleTypes.push(customThresholdRule);
+  }
+
+  const createSloRule = buildCreateSloClassicRuleType(services, params);
+  if (createSloRule) {
+    classicRuleTypes.push(createSloRule);
+  }
+
+  return classicRuleTypes;
+};
 
 const registerDatasetQualityLink = (
   registry: AppMenuRegistry,
@@ -76,35 +105,35 @@ const registerDatasetQualityLink = (
   }
 };
 
-const registerCustomThresholdRuleAction = (
-  registry: AppMenuRegistry,
+const buildCustomThresholdClassicRuleType = (
   {
     data,
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
     ...services
   }: ProfileProviderServices,
   { dataView, authorizedRuleTypeIds }: AppMenuExtensionParams
-) => {
-  if (!authorizedRuleTypeIds.includes(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID)) return;
+): AlertsLegacyRuleType | undefined => {
+  if (!authorizedRuleTypeIds.includes(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID)) {
+    return undefined;
+  }
 
-  const popoverItem = {
+  return {
     id: 'custom-threshold-rule',
-    order: 2,
-    iconType: 'bell',
-    testId: 'discoverAppMenuCustomThresholdRule',
     label: i18n.translate('discover.observabilitySolution.appMenu.customThresholdRule', {
       defaultMessage: 'Create custom threshold rule',
     }),
-
-    run: ({ context: { onFinishAction } }: { context: { onFinishAction: () => void } }) => {
+    'data-test-subj': 'discoverAppMenuCustomThresholdRule',
+    render: (onClose) => {
       const index = dataView?.toMinimalSpec();
       const { filters, query } = data.query.getState();
 
+      const plugins = { ...services, data };
       // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
       // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
       // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
-      const plugins = { ...services, data };
-      if (!isValidRuleFormPlugins(plugins)) return null;
+      if (!isValidRuleFormPlugins(plugins)) {
+        return null;
+      }
 
       return (
         <RuleFormFlyout
@@ -132,62 +161,97 @@ const registerCustomThresholdRuleAction = (
               },
             },
           }}
-          onSubmit={onFinishAction}
-          onCancel={onFinishAction}
+          onSubmit={onClose}
+          onCancel={onClose}
         />
       );
     },
   };
-
-  registry.registerPopoverItem(AppMenuActionId.alerts, popoverItem);
 };
 
-const registerCreateSLOAction = (
+const registerCustomThresholdRuleAction = (
   registry: AppMenuRegistry,
+  services: ProfileProviderServices,
+  params: AppMenuExtensionParams
+) => {
+  const classicRuleType = buildCustomThresholdClassicRuleType(services, params);
+  if (!classicRuleType) {
+    return;
+  }
+
+  registry.registerPopoverItem(AppMenuActionId.alerts, {
+    id: classicRuleType.id,
+    order: 2,
+    iconType: 'bell',
+    testId: classicRuleType['data-test-subj'] ?? classicRuleType.id,
+    label: classicRuleType.label,
+    run: ({ context: { onFinishAction } }) => classicRuleType.render(onFinishAction),
+  });
+};
+
+const buildCreateSloClassicRuleType = (
   allServices: ProfileProviderServices,
   { dataView, isEsqlMode }: AppMenuExtensionParams
-) => {
+): AlertsLegacyRuleType | undefined => {
   const { data, discoverShared, application } = allServices;
   const sloFeature = discoverShared.features.registry.getById('observability-create-slo');
   const hasSloPermission = application.capabilities.slo?.write;
 
-  if (sloFeature && hasSloPermission) {
-    const popoverItem = {
-      id: 'create-slo',
-      order: 3,
-      label: i18n.translate('discover.observabilitySolution.appMenu.slo', {
-        defaultMessage: 'Create SLO',
-      }),
-      iconType: 'chartGauge',
-      testId: 'discoverAppMenuCreateSlo',
-      run: ({ context: { onFinishAction } }: { context: { onFinishAction: () => void } }) => {
-        const index = dataView?.getIndexPattern();
-        const timestampField = dataView?.timeFieldName;
-        const { filters, query: kqlQuery } = data.query.getState();
+  if (!sloFeature || !hasSloPermission) {
+    return undefined;
+  }
 
-        const filter = isEsqlMode
-          ? {}
-          : {
-              kqlQuery: isOfQueryType(kqlQuery) ? kqlQuery.query : '',
-              filters: filters?.map(({ meta, query }) => ({ meta, query })),
-            };
+  return {
+    id: 'create-slo',
+    label: i18n.translate('discover.observabilitySolution.appMenu.slo', {
+      defaultMessage: 'Create SLO',
+    }),
+    'data-test-subj': 'discoverAppMenuCreateSlo',
+    render: (onClose): React.ReactElement | null => {
+      const index = dataView?.getIndexPattern();
+      const timestampField = dataView?.timeFieldName;
+      const { filters, query: kqlQuery } = data.query.getState();
 
-        return sloFeature.createSLOFlyout({
-          initialValues: {
-            indicator: {
-              type: 'sli.kql.custom',
-              params: {
-                index,
-                timestampField,
-                filter,
-              },
+      const filter = isEsqlMode
+        ? {}
+        : {
+            kqlQuery: isOfQueryType(kqlQuery) ? kqlQuery.query : '',
+            filters: filters?.map(({ meta, query }) => ({ meta, query })),
+          };
+
+      return sloFeature.createSLOFlyout({
+        initialValues: {
+          indicator: {
+            type: 'sli.kql.custom',
+            params: {
+              index,
+              timestampField,
+              filter,
             },
           },
-          onClose: onFinishAction,
-        });
-      },
-    };
+        },
+        onClose,
+      }) as React.ReactElement | null;
+    },
+  };
+};
 
-    registry.registerPopoverItem(AppMenuActionId.alerts, popoverItem);
+const registerCreateSLOAction = (
+  registry: AppMenuRegistry,
+  services: ProfileProviderServices,
+  params: AppMenuExtensionParams
+) => {
+  const classicRuleType = buildCreateSloClassicRuleType(services, params);
+  if (!classicRuleType) {
+    return;
   }
+
+  registry.registerPopoverItem(AppMenuActionId.alerts, {
+    id: classicRuleType.id,
+    order: 3,
+    iconType: 'chartGauge',
+    testId: classicRuleType['data-test-subj'] ?? classicRuleType.id,
+    label: classicRuleType.label,
+    run: ({ context: { onFinishAction } }) => classicRuleType.render(onFinishAction),
+  });
 };

@@ -48,7 +48,7 @@ export async function bulkUpdate(
   const updateOperations =
     groupedOperations?.updates?.map((update) => [
       { update: { _id: update.id } },
-      { doc: update.value },
+      { doc: unflattenDoc(update.value) },
     ]) || [];
 
   const newDocs =
@@ -58,11 +58,11 @@ export async function bulkUpdate(
       return acc;
     }, {}) || {};
 
-  // Filter out new docs that have no fields defined
   const newDocOperations = Object.entries(newDocs)
+    // Filter out new docs that have no fields defined
     .filter(([, doc]) => Object.keys(doc).length > 0)
     .map(([id, doc]) => {
-      return [{ index: {} }, doc];
+      return [{ index: {} }, unflattenDoc(doc)];
     });
 
   const operations: BulkRequest['operations'] = [
@@ -110,4 +110,36 @@ export async function bulkUpdate(
     bulkResponse,
     bulkOperations: operations,
   };
+}
+
+/**
+ * Rebuilds a document so dotted field names become nested objects, e.g.
+ * `{ 'parent.child': 'value' }` -> `{ parent: { child: 'value' } }`.
+ *
+ * We receive field names as flattened paths when they are within objects,
+ * but when we need to update the document, we need to unflatten them,
+ * otherwise they can create a multi-value field.
+ */
+function unflattenDoc(doc: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(doc)) {
+    const segments = key.split('.');
+    let current = result;
+
+    segments.forEach((segment, index) => {
+      if (index === segments.length - 1) {
+        current[segment] = value;
+        return;
+      }
+
+      const next = current[segment];
+      if (typeof next !== 'object' || next === null || Array.isArray(next)) {
+        current[segment] = {};
+      }
+      current = current[segment] as Record<string, unknown>;
+    });
+  }
+
+  return result;
 }
