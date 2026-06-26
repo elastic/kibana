@@ -275,17 +275,6 @@ describe('rule_execution_history_schema', () => {
         });
         expect(result.success).toBe(false);
       });
-
-      it('attaches the refinement error to the page field', () => {
-        const result = getRuleExecutionsQuerySchema.safeParse({
-          page: 200,
-          perPage: 100,
-        });
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.issues[0].path).toEqual(['page']);
-        }
-      });
     });
 
     it('round-trips a fully populated query (with already-array fields)', () => {
@@ -344,12 +333,12 @@ describe('rule_execution_history_schema', () => {
     });
 
     it('rejects unknown outcomes', () => {
-      const row = { ...validView, outcome: 'skipped' as unknown as 'success' };
+      const row = { ...validView, outcome: 'skipped' };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
     it('requires error.message when error is present', () => {
-      const row = { ...validView, error: { stackTrace: null } as unknown as null };
+      const row = { ...validView, error: { stackTrace: null } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 

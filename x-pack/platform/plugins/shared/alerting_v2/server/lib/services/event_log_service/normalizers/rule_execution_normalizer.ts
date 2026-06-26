@@ -37,7 +37,7 @@ const isRuleExecutionOutcome = (value: unknown): value is RuleExecutionOutcome =
  * does not pass one to `eventLogger.logEvent`), so it is unique per run,
  * opaque, and stable across reads — properties a per-run identifier
  * needs without us inventing one. When the rule executor eventually
- * emits its own provider events (future Option C in the spec), this
+ * emits its own provider events, this
  * function will switch to reading the executor-assigned UUID from the
  * document body without changing the public shape.
  *

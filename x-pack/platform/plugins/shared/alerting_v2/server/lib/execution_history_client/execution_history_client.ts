@@ -20,9 +20,8 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import type { ExecutionHistoryClientContract } from './types';
-
-const RULE_NAME_LOOKUP_FAILED_CODE = 'EXECUTION_HISTORY_RULE_NAME_LOOKUP_FAILED';
 
 /**
  * Upper bound for the rule-name lookup on a single page. Matches the page's
@@ -85,12 +84,14 @@ export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
         filter: buildRuleIdsFilter(cappedRuleIds),
         perPage: MAX_RULES_PER_LOOKUP,
       });
+
       return new Map(items.map((rule) => [rule.id, rule.metadata.name]));
     } catch (error) {
       this.logger.error({
         error: error instanceof Error ? error : new Error(String(error)),
-        code: RULE_NAME_LOOKUP_FAILED_CODE,
+        code: ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_RULE_NAME_LOOKUP_FAILED,
       });
+
       return new Map();
     }
   }

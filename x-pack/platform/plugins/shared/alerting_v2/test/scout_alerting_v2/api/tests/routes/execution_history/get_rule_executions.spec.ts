@@ -10,7 +10,6 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
   ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
-  ALL_ROLE,
   apiTest,
   buildCreateRuleData,
   getRuleExecutionsUrl,
@@ -23,8 +22,6 @@ const OTHER_SPACE_ID = 'cross-space-execution-history';
 apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
-  let allCredentials: RoleApiCredentials;
-  let allHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     readerCredentials = await requestAuth.getApiKeyForCustomRole(
@@ -32,8 +29,6 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
     );
 
     readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
-    allCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
-    allHeaders = { ...testData.COMMON_HEADERS, ...allCredentials.apiKeyHeader };
 
     await apiServices.spaces.delete(OTHER_SPACE_ID);
     await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
@@ -57,19 +52,20 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: rule.id, runs: 1 });
 
       const response = await apiClient.get(getRuleExecutionsUrl({ ruleId: [rule.id] }), {
-        headers: allHeaders,
+        headers: readerHeaders,
       });
-      expect(response).toHaveStatusCode(200);
 
+      expect(response).toHaveStatusCode(200);
       expect(response.body.items.length).toBeGreaterThanOrEqual(1);
+
       for (const item of response.body.items) {
         expect(item.rule.id).toBe(rule.id);
         expect(item.spaceId).toBe('default');
-        expect(typeof item.startedAt).toBe('string');
-        expect(typeof item.endedAt).toBe('string');
+        expect(Date.parse(item.startedAt)).toBeGreaterThan(0);
+        expect(Date.parse(item.endedAt)).toBeGreaterThan(0);
         expect(['success', 'failure']).toContain(item.outcome);
-        expect(typeof item.timings.duration).toBe('number');
-        expect(typeof item.timings.scheduledDelay).toBe('number');
+        expect(Number.isInteger(item.timings.duration)).toBe(true);
+        expect(Number.isInteger(item.timings.scheduledDelay)).toBe(true);
       }
 
       const successful = response.body.items.find(
@@ -104,7 +100,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       });
 
       const response = await apiClient.get(getRuleExecutionsUrl({ perPage: 100 }), {
-        headers: allHeaders,
+        headers: readerHeaders,
       });
 
       expect(response).toHaveStatusCode(200);

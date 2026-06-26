@@ -88,18 +88,6 @@ export const getRuleExecutionsQuerySchema = z
   });
 export type GetRuleExecutionsQuery = z.infer<typeof getRuleExecutionsQuerySchema>;
 
-/**
- * Response shape for a single rule execution row.
- *
- *   - `rule.id` is parsed from the source `kibana.task.id`; `rule.name`
- *     is the best-effort display name (null when the rule was deleted or
- *     the rule SO lookup failed).
- *   - `startedAt` / `endedAt` are ISO instants; `timings.*` are millisecond
- *     metrics. The two concerns are kept separate so callers reading
- *     "when did it run?" don't have to read "how long did it take?".
- *   - `error` is `null` for runs with no recorded failure info — both the
- *     happy-path and failures Task Manager could not classify.
- */
 export const ruleExecutionViewSchema = z.object({
   id: z.string(),
   rule: z.object({

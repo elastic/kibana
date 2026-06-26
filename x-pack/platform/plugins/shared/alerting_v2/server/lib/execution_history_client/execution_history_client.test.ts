@@ -9,6 +9,7 @@ import type { GetRuleExecutionsQuery, RuleResponse } from '@kbn/alerting-v2-sche
 import type { EventLogService } from '../services/event_log_service/event_log_service';
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
 import type { RulesClient } from '../rules_client';
+import { createRulesClient } from '../rules_client/rules_client.mock';
 import type { RuleExecution } from '../services/event_log_service/types';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ExecutionHistoryClient } from './execution_history_client';
@@ -45,7 +46,7 @@ const buildRule = (id: string, name: string): RuleResponse =>
 interface Mocks {
   eventLogService: EventLogService;
   findRuleExecutions: jest.SpiedFunction<EventLogService['findRuleExecutions']>;
-  rulesClient: jest.Mocked<RulesClient>;
+  findRules: jest.SpiedFunction<RulesClient['findRules']>;
   client: ExecutionHistoryClient;
 }
 
@@ -56,14 +57,15 @@ const createMocks = (spaceId = 'default'): Mocks => {
     .spyOn(eventLogService, 'findRuleExecutions')
     .mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 });
 
-  const rulesClient = {
-    findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 100 }),
-  } as unknown as jest.Mocked<RulesClient>;
+  const { rulesClient } = createRulesClient();
+  const findRules = jest
+    .spyOn(rulesClient, 'findRules')
+    .mockResolvedValue({ items: [], total: 0, page: 1, perPage: 100 });
 
   const { loggerService } = createLoggerService();
 
   const client = new ExecutionHistoryClient(eventLogService, rulesClient, spaceId, loggerService);
-  return { eventLogService, findRuleExecutions, rulesClient, client };
+  return { eventLogService, findRuleExecutions, findRules, client };
 };
 
 describe('ExecutionHistoryClient', () => {
@@ -133,7 +135,7 @@ describe('ExecutionHistoryClient', () => {
     });
 
     it('resolves rule names with a single findRules call per page, deduped on rule id', async () => {
-      const { client, findRuleExecutions, rulesClient } = createMocks();
+      const { client, findRuleExecutions, findRules } = createMocks();
       findRuleExecutions.mockResolvedValue({
         items: [
           buildExecution({ rule: { id: 'rule-1' } }),
@@ -144,7 +146,7 @@ describe('ExecutionHistoryClient', () => {
         page: 1,
         perPage: 20,
       });
-      (rulesClient.findRules as jest.Mock).mockResolvedValue({
+      findRules.mockResolvedValue({
         items: [buildRule('rule-1', 'Rule One'), buildRule('rule-2', 'Rule Two')],
         total: 2,
         page: 1,
@@ -153,8 +155,8 @@ describe('ExecutionHistoryClient', () => {
 
       const result = await client.getRuleExecutions(baseQuery());
 
-      expect(rulesClient.findRules).toHaveBeenCalledTimes(1);
-      const arg = (rulesClient.findRules as jest.Mock).mock.calls[0][0];
+      expect(findRules).toHaveBeenCalledTimes(1);
+      const arg = findRules.mock.calls[0][0]!;
       expect(arg.perPage).toBeGreaterThan(0);
       expect(arg.filter).toContain('rule-1');
       expect(arg.filter).toContain('rule-2');
@@ -163,7 +165,7 @@ describe('ExecutionHistoryClient', () => {
     });
 
     it('maps a deleted / inaccessible rule (absent from findRules result) to rule.name: null', async () => {
-      const { client, findRuleExecutions, rulesClient } = createMocks();
+      const { client, findRuleExecutions, findRules } = createMocks();
       findRuleExecutions.mockResolvedValue({
         items: [
           buildExecution({ rule: { id: 'rule-alive' } }),
@@ -173,7 +175,7 @@ describe('ExecutionHistoryClient', () => {
         page: 1,
         perPage: 20,
       });
-      (rulesClient.findRules as jest.Mock).mockResolvedValue({
+      findRules.mockResolvedValue({
         items: [buildRule('rule-alive', 'Still Around')],
         total: 1,
         page: 1,
@@ -188,7 +190,7 @@ describe('ExecutionHistoryClient', () => {
     });
 
     it('falls back to rule.name: null and logs when findRules throws', async () => {
-      const { client, findRuleExecutions, rulesClient } = createMocks();
+      const { client, findRuleExecutions, findRules } = createMocks();
       findRuleExecutions.mockResolvedValue({
         items: [buildExecution({ rule: { id: 'rule-1' } })],
         total: 1,
@@ -196,14 +198,14 @@ describe('ExecutionHistoryClient', () => {
         perPage: 20,
       });
       const boom = new Error('rules client down');
-      (rulesClient.findRules as jest.Mock).mockRejectedValue(boom);
+      findRules.mockRejectedValue(boom);
 
       const result = await client.getRuleExecutions(baseQuery());
       expect(result.items[0].rule).toEqual({ id: 'rule-1', name: null });
     });
 
     it('skips the rule-name lookup when the page is empty', async () => {
-      const { client, findRuleExecutions, rulesClient } = createMocks();
+      const { client, findRuleExecutions, findRules } = createMocks();
       findRuleExecutions.mockResolvedValue({
         items: [],
         total: 0,
@@ -211,7 +213,7 @@ describe('ExecutionHistoryClient', () => {
         perPage: 20,
       });
       await client.getRuleExecutions(baseQuery());
-      expect(rulesClient.findRules).not.toHaveBeenCalled();
+      expect(findRules).not.toHaveBeenCalled();
     });
 
     it('echoes total/page/perPage from the service result', async () => {
