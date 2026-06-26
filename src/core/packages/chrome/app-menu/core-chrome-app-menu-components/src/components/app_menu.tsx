@@ -52,8 +52,9 @@ export const AppMenuComponent = ({
    * the app menu.
    */
   const hasVisibleStaticItems = hasNonGlobalStaticItems(staticItems);
+  const hasAnyStaticItems = (staticItems?.length ?? 0) > 0;
 
-  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems) {
+  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems && !hasAnyStaticItems) {
     return null;
   }
 
@@ -78,7 +79,7 @@ export const AppMenuComponent = ({
     shouldOverflow: shouldOverflowBase,
   } = getAppMenuItems({
     config,
-    hasStaticItems: hasVisibleStaticItems,
+    hasStaticItems: hasAnyStaticItems,
   });
 
   const processedStaticItems = processStaticItems(staticItems);

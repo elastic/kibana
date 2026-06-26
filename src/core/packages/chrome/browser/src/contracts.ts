@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig, AppMenuStaticItem } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNext } from './chrome_next';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
@@ -148,6 +148,16 @@ export interface ChromeStart {
    * };
    */
   setAppMenu(config?: AppMenuConfig): void;
+
+  /**
+   * Register a static app menu item appended to the overflow menu for all applications.
+   */
+  registerAppMenuStaticItem(item: AppMenuStaticItem): () => void;
+
+  /**
+   * Observable of registered static app menu items.
+   */
+  getAppMenuStaticItems$(): Observable<AppMenuStaticItem[]>;
 
   /**
    * Get an observable of the current extensions appended to breadcrumbs

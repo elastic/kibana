@@ -78,6 +78,7 @@ import {
   unregisterAgentWorkspaceSlot,
 } from './agent_workspace/register_agent_workspace';
 import { getWorkspaceAttachmentCallbacks } from './agent_workspace/workspace_attachment_callbacks';
+import { registerAgentFirstAttachmentCoordinatorShell } from './agent_first/register_agent_first_attachment_coordinator';
 
 export class AgentBuilderPlugin
   implements
@@ -105,6 +106,7 @@ export class AgentBuilderPlugin
   private isEarsEnabled = false;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
+  private unregisterAgentFirstCoordinator?: () => void;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -410,6 +412,13 @@ export class AgentBuilderPlugin
       getServices: () => internalServices,
     });
 
+    if (isAgentFirstChrome) {
+      this.unregisterAgentFirstCoordinator = registerAgentFirstAttachmentCoordinatorShell({
+        core,
+        agentBuilder: agentBuilderService,
+      });
+    }
+
     if (hasAgentBuilder) {
       core.chrome.navControls.registerRight({
         mount: (element) => {
@@ -471,6 +480,8 @@ export class AgentBuilderPlugin
   }
 
   stop() {
+    this.unregisterAgentFirstCoordinator?.();
+    this.unregisterAgentFirstCoordinator = undefined;
     unregisterAgentWorkspaceSlot();
     this.experimentalDeepLinksSubscription?.unsubscribe();
   }

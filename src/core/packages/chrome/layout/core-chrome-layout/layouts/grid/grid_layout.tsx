@@ -25,6 +25,7 @@ import {
   Sidebar,
   AgentWorkspacePanel,
   AgentWorkspaceSlot,
+  AgentFirstAttachmentCoordinatorShell,
   ApplicationWorkspaceBootstrap,
   useHasAppMenu,
   useHasChromeAppHeaderContent,
@@ -218,7 +219,7 @@ export class GridLayout implements LayoutService {
         );
       }
 
-      return (
+      const layoutContent = (
         <>
           {showAgentWorkspace && <AgentFirstChromeGlobalStyles />}
           <GridLayoutGlobalStyles chromeStyle={chromeStyle} hasAgentWorkspace={showAgentWorkspace} />
@@ -245,6 +246,12 @@ export class GridLayout implements LayoutService {
             </ChromeLayout>
           </ChromeLayoutConfigProvider>
         </>
+      );
+
+      return showAgentWorkspace ? (
+        <AgentFirstAttachmentCoordinatorShell>{layoutContent}</AgentFirstAttachmentCoordinatorShell>
+      ) : (
+        layoutContent
       );
     });
 

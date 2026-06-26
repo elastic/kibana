@@ -8,7 +8,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { AppMenuBreakpointSource } from '@kbn/core-chrome-app-menu-components';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useAppMenu } from './chrome_hooks';
 
 const AppMenu = lazy(async () => {
@@ -16,20 +17,18 @@ const AppMenu = lazy(async () => {
   return { default: AppMenuComponent };
 });
 
-export const HeaderAppMenu = ({
-  breakpointSource = 'application',
-}: {
-  breakpointSource?: AppMenuBreakpointSource;
-}) => {
+export const HeaderAppMenu = () => {
   const menuConfig = useAppMenu();
+  const chrome = useChromeService();
+  const staticItems = useObservable(chrome.getAppMenuStaticItems$(), []);
 
-  if (!menuConfig) {
+  if (!menuConfig && staticItems.length === 0) {
     return null;
   }
 
   return (
     <Suspense>
-      <AppMenu config={menuConfig} breakpointSource={breakpointSource} />
+      <AppMenu config={menuConfig} staticItems={staticItems} />
     </Suspense>
   );
 };
