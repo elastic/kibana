@@ -9,6 +9,7 @@ import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
+  CASE_EXTENDED_FIELDS,
   CASE_RULES_SAVED_OBJECT,
   MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   MAX_ALERTS_PER_CASE,
@@ -120,6 +121,10 @@ describe('CasesConnectorExecutor', () => {
     casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
     casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
     casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+    casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+      fieldDefinitions: [],
+      total: 0,
+    });
 
     getCasesClient.mockReturnValue(casesClientMock);
 
@@ -1385,6 +1390,132 @@ fields: []
               { key: 'req-text-key', type: CustomFieldTypes.TEXT, value: 'default-text' },
               { key: 'req-toggle-key', type: CustomFieldTypes.TOGGLE, value: false },
             ]);
+          });
+
+          it('populates extended_fields from inline template field defaults on the v2 path', async () => {
+            const v2TemplateWithInlineFields = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+fields:
+  - name: my_text
+    type: keyword
+    control: INPUT_TEXT
+    label: My text
+    metadata:
+      default: "hello world"
+  - name: my_number
+    type: long
+    control: INPUT_NUMBER
+    label: My number
+    metadata:
+      default: 42
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithInlineFields);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+              my_text_as_keyword: 'hello world',
+              my_number_as_long: '42',
+            });
+          });
+
+          it('populates extended_fields by resolving $ref fields from the library on the v2 path', async () => {
+            const v2TemplateWithRefField = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+fields:
+  - $ref: "library-field"
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithRefField);
+
+            casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+              fieldDefinitions: [
+                {
+                  fieldDefinitionId: 'fd-1',
+                  name: 'library-field',
+                  owner: params.owner,
+                  definition: `
+name: library_field
+type: keyword
+control: INPUT_TEXT
+label: Library field
+metadata:
+  default: "from-library"
+`,
+                },
+              ],
+              total: 1,
+            });
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+              library_field_as_keyword: 'from-library',
+            });
+          });
+
+          it('does not set extended_fields when the template has no fields', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
           });
         });
 

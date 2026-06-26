@@ -17,6 +17,7 @@ import type {
   TemplatesConfiguration,
 } from '../../../common/types/domain';
 import {
+  CASE_EXTENDED_FIELDS,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -54,7 +55,7 @@ import {
   GROUPED_BY_TITLE,
 } from './translations';
 import { toStringArray } from '../../../common/utils/attachments/string_utils';
-import { resolveV2Template } from './v2_template_utils';
+import { buildExtendedFieldsFromTemplate, resolveV2Template } from './v2_template_utils';
 import type { ParsedTemplateDefinition } from './v2_template_utils';
 
 interface CasesConnectorExecutorParams {
@@ -743,6 +744,7 @@ export class CasesConnectorExecutor {
     }
 
     let v2Template: ParsedTemplateDefinition | null = null;
+    let extendedFields: Record<string, string> | undefined;
 
     const { customFieldsConfigurationMap, templatesConfigurationMap } =
       await this.getCustomFieldsAndTemplatesConfiguration();
@@ -755,6 +757,14 @@ export class CasesConnectorExecutor {
         params.owner,
         this.logger
       );
+
+      if (v2Template) {
+        extendedFields = await buildExtendedFieldsFromTemplate(
+          this.casesClient,
+          v2Template,
+          params.owner
+        );
+      }
     }
 
     for (const error of nonFoundErrors) {
@@ -767,7 +777,8 @@ export class CasesConnectorExecutor {
             data,
             customFieldsConfigurationMap.get(params.owner),
             templatesConfigurationMap.get(params.owner),
-            v2Template ?? undefined
+            v2Template ?? undefined,
+            extendedFields
           )
         );
       }
@@ -811,7 +822,8 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId,
     v2Template: ParsedTemplateDefinition,
-    customFieldsConfigurations?: CustomFieldsConfiguration
+    customFieldsConfigurations?: CustomFieldsConfiguration,
+    extendedFields?: Record<string, string>
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -840,6 +852,10 @@ export class CasesConnectorExecutor {
       customFields: builtCustomFields,
     };
 
+    if (extendedFields && Object.keys(extendedFields).length > 0) {
+      baseRequest[CASE_EXTENDED_FIELDS] = extendedFields;
+    }
+
     if (v2Template.severity) {
       baseRequest.severity = v2Template.severity as CaseSeverity;
     }
@@ -856,7 +872,8 @@ export class CasesConnectorExecutor {
     groupingData: GroupedAlertsWithCaseId,
     customFieldsConfigurations?: CustomFieldsConfiguration,
     templatesConfigurations?: TemplatesConfiguration,
-    v2Template?: ParsedTemplateDefinition
+    v2Template?: ParsedTemplateDefinition,
+    extendedFields?: Record<string, string>
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -866,7 +883,8 @@ export class CasesConnectorExecutor {
         params,
         groupingData,
         v2Template,
-        customFieldsConfigurations
+        customFieldsConfigurations,
+        extendedFields
       );
     }
 
@@ -1167,6 +1185,7 @@ export class CasesConnectorExecutor {
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
 
     let v2TemplateForReopened: ParsedTemplateDefinition | null = null;
+    let extendedFieldsForReopened: Record<string, string> | undefined;
 
     const {
       customFieldsConfigurationMap: customFieldsConfigurationMapForReopened,
@@ -1181,6 +1200,14 @@ export class CasesConnectorExecutor {
         params.owner,
         this.logger
       );
+
+      if (v2TemplateForReopened) {
+        extendedFieldsForReopened = await buildExtendedFieldsFromTemplate(
+          this.casesClient,
+          v2TemplateForReopened,
+          params.owner
+        );
+      }
     }
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
@@ -1189,7 +1216,8 @@ export class CasesConnectorExecutor {
         record,
         customFieldsConfigurationMapForReopened.get(params.owner),
         templatesConfigurationMapForReopened.get(params.owner),
-        v2TemplateForReopened ?? undefined
+        v2TemplateForReopened ?? undefined,
+        extendedFieldsForReopened
       )
     );
 

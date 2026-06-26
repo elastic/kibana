@@ -9,6 +9,11 @@ import yaml from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
+import {
+  buildExtendedFieldsDefaults,
+  resolveTemplateFields,
+} from '../../../common/utils/template_fields';
+import type { FieldDefinitionsFindRequest } from '../../../common/types/api/field_definition/v1';
 import type { CasesClient } from '../../client';
 
 export type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
@@ -71,4 +76,24 @@ export const resolveV2Template = async (
   }
 
   return definition;
+};
+
+/**
+ * Fetches the owner's field-definition library and resolves all template fields
+ * (both inline and `$ref` entries) into a flat `extended_fields` map of defaults.
+ *
+ * Called once per connector run on the v2 template path, before case creation.
+ */
+export const buildExtendedFieldsFromTemplate = async (
+  casesClient: CasesClient,
+  definition: ParsedTemplateDefinition,
+  owner: string
+): Promise<Record<string, string>> => {
+  // The owner is already validated against the template SO; cast to the narrow owner type
+  // expected by the sub-client's FieldDefinitionsFindRequest.
+  const { fieldDefinitions } = await casesClient.fieldDefinitions.getFieldDefinitions({
+    owner: owner as FieldDefinitionsFindRequest['owner'],
+  });
+  const resolved = resolveTemplateFields(definition.fields ?? [], fieldDefinitions);
+  return buildExtendedFieldsDefaults(resolved);
 };
