@@ -31,6 +31,31 @@ export const handlePreview = async ({
   /** Agent-first chrome: preview in the agent column canvas, not the application workspace dashboard. */
   preferCanvasPreview?: boolean;
 }) => {
+  const getExistingDashboardId = async () => {
+    if (!attachment.origin) {
+      return undefined;
+    }
+
+    const exists = await checkSavedDashboardExist(attachment.origin);
+    return exists ? attachment.origin : undefined;
+  };
+
+  const openInDashboardViaLocator = () => {
+    if (!dashboardLocator) {
+      return;
+    }
+
+    const dashboardState = attachmentDataToDashboardState(attachment.data);
+    return handleEditInDashboard({
+      locator: dashboardLocator,
+      getExistingDashboardId,
+      dashboardLocatorParams: {
+        ...dashboardState,
+        viewMode: 'edit',
+      },
+    });
+  };
+
   // sidebar in dashboard experience - synchronize dashboard app to attachment
   if (!preferCanvasPreview && dashboardApi && canWriteDashboards) {
     return previewAttachmentInDashboard({
@@ -40,24 +65,14 @@ export const handlePreview = async ({
     });
   }
 
+  // Navigate to Dashboard app via locator (sidebar or full-layout when canvas preview is not preferred)
+  if (!preferCanvasPreview && dashboardLocator && canWriteDashboards && !isSidebar) {
+    return openInDashboardViaLocator();
+  }
+
   // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
   if (isSidebar && dashboardLocator && canWriteDashboards) {
-    const dashboardState = attachmentDataToDashboardState(attachment.data);
-    return handleEditInDashboard({
-      locator: dashboardLocator,
-      getExistingDashboardId: async () => {
-        if (!attachment.origin) {
-          return undefined;
-        }
-
-        const exists = await checkSavedDashboardExist(attachment.origin);
-        return exists ? attachment.origin : undefined;
-      },
-      dashboardLocatorParams: {
-        ...dashboardState,
-        viewMode: 'edit',
-      },
-    });
+    return openInDashboardViaLocator();
   }
 
   // full screen - open canvas

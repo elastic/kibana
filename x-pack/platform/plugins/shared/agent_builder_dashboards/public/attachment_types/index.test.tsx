@@ -22,10 +22,16 @@ import type {
   ConversationRound,
 } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
+import { isAgentFirst, isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { registerDashboardAttachmentUiDefinition } from '.';
+
+jest.mock('@kbn/core-chrome-feature-flags', () => ({
+  isAgentFirst: jest.fn(() => false),
+  isNextChrome: jest.fn(() => false),
+}));
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => null),
@@ -774,7 +780,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   });
 
   describe('getActionButtons', () => {
-    it('returns preview button only when not in canvas mode', () => {
+    it('returns preview button only when not in canvas mode and not agent-first', () => {
       const { attachment } = createMockAttachment('1');
 
       const canvasButtons = uiDefinition.getActionButtons!({
@@ -793,6 +799,35 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       });
       expect(normalButtons).toHaveLength(1);
       expect(normalButtons[0]).toMatchObject({ label: 'Preview', icon: 'eye' });
+    });
+
+    it('returns Edit in Dashboards when agent-first chrome is enabled', () => {
+      jest.mocked(isAgentFirst).mockReturnValue(true);
+      jest.mocked(isNextChrome).mockReturnValue(true);
+
+      unregister();
+      deps = createMockDeps();
+      unregister = registerDashboardAttachmentUiDefinition(deps);
+      uiDefinition = deps.addAttachmentType.mock.calls[0][1];
+
+      const { attachment } = createMockAttachment('agent-first');
+
+      const normalButtons = uiDefinition.getActionButtons!({
+        attachment,
+        isSidebar: false,
+        isCanvas: false,
+        updateOrigin: jest.fn(),
+      });
+
+      expect(normalButtons).toHaveLength(1);
+      expect(normalButtons[0]).toMatchObject({
+        label: 'Edit in Dashboards',
+        icon: 'productDashboard',
+        type: 'primary',
+      });
+
+      jest.mocked(isAgentFirst).mockReturnValue(false);
+      jest.mocked(isNextChrome).mockReturnValue(false);
     });
   });
 });
