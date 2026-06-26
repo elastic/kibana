@@ -39,6 +39,8 @@ export interface TimelineApiService {
   pinEvent: (timelineId: string, eventId: string) => Promise<string>;
   /** Add a timeline-level note. Returns the noteId. */
   addNote: (timelineId: string, noteMarkdown: string) => Promise<string>;
+  /** Total count of saved timelines for a given type. */
+  getCount: (timelineType?: 'default' | 'template') => Promise<number>;
   deleteAll: () => Promise<void>;
 }
 
@@ -56,6 +58,11 @@ interface PinnedEventApiResponse {
 
 interface NoteApiResponse {
   noteId: string;
+  // The route returns { note: NoteApiResponse } (note object nested, not top-level).
+}
+
+interface NoteApiEnvelope {
+  note: NoteApiResponse;
 }
 
 const DEFAULT_TIMELINE: TimelineInput = {
@@ -153,13 +160,23 @@ export const getTimelineApiService = ({
 
     addNote: async (timelineId, noteMarkdown) => {
       return measurePerformanceAsync(log, 'security.timeline.addNote', async () => {
-        const response = await kbnClient.request<NoteApiResponse>({
+        // Body field is `note` (not `noteMarkdown`) — matches BareNote in components.gen.ts.
+        // Response shape is { note: { noteId, ... } } — the note object is nested under `note`.
+        const response = await kbnClient.request<NoteApiEnvelope>({
           method: 'PATCH',
           path: `${basePath}${NOTE_URL}`,
-          body: { note: { timelineId, noteMarkdown } },
+          body: { note: { timelineId, note: noteMarkdown } },
         });
-        return response.data.noteId;
+        return response.data.note.noteId;
       });
+    },
+
+    getCount: async (timelineType = 'default') => {
+      const response = await kbnClient.request<{ totalCount: number }>({
+        method: 'GET',
+        path: `${basePath}${TIMELINES_URL}?page_size=1&page_index=1&sort_field=updated&sort_order=desc&timeline_type=${timelineType}`,
+      });
+      return response.data?.totalCount ?? 0;
     },
 
     deleteAll: async () => {

@@ -66,7 +66,10 @@ export class TimelinePage {
     this.batchActionsButton = this.page.testSubj.locator('batchActions');
     this.superTimelineBadge = this.page.testSubj.locator('timeline-modal-super-timeline-badge');
     this.viewSuperTimelineAction = this.page.testSubj.locator('view-super-timeline-action');
-    this.addToFavoritesButton = this.page.testSubj.locator('add-to-favorites-btn');
+    // The add-to-favorites button renders as 'timeline-favorite-empty-star' (unfavorited) or
+    // 'timeline-favorite-filled-star' (favorited). Use the empty-star variant for read-only
+    // assertions since Super Timeline opens without a favorited state.
+    this.addToFavoritesButton = this.page.testSubj.locator('timeline-favorite-empty-star');
   }
 
   /** Select a timeline row's checkbox by its title text. */

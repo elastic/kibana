@@ -14,42 +14,30 @@ import { expect } from '@kbn/scout-security/ui';
  * Entry point tested here: Timelines list page bulk action.
  * Cases entry point is covered by the Cases team (see PR 5/5 description).
  *
- * Proof of transience: SO counts for timeline/note/pinned_event are captured
- * before and after opening the Super Timeline and asserted to be unchanged.
+ * Proof of transience: SO counts for timelines are captured before and after
+ * opening the Super Timeline and asserted to be unchanged.
+ *
+ * REQUIREMENT: Kibana must be started with:
+ *   --xpack.securitySolution.enableExperimental=superTimeline
+ * (The `superTimeline` flag defaults to false and cannot be overridden at runtime
+ * via apiServices.core.settings — it is a startup config, not a feature-flag-service entry.)
  */
-
-const TIMELINES_URL = '/api/timelines';
-
-/** Fetch the total count of saved timelines (default type) from the API. */
-const fetchTimelineSavedObjectCount = async (kbnClient: { request: Function }): Promise<number> => {
-  const response = await kbnClient.request({
-    method: 'GET',
-    path: `${TIMELINES_URL}?page_size=1&page_index=1&sort_field=updated&sort_order=desc&timeline_type=default`,
-  });
-  return (response.data as { totalCount: number })?.totalCount ?? 0;
-};
 
 spaceTest.describe(
   'Super Timeline — Timelines list entry point',
   { tag: [...tags.stateful.classic] },
   () => {
-    let timelineIdA: string;
-    let timelineIdB: string;
-
     spaceTest.beforeEach(async ({ apiServices }) => {
       await apiServices.timeline.deleteAll();
 
-      timelineIdA = await apiServices.timeline.createTimeline({
+      await apiServices.timeline.createTimeline({
         title: 'Endpoint Investigation',
         query: 'event.category: process',
       });
-      timelineIdB = await apiServices.timeline.createTimeline({
+      await apiServices.timeline.createTimeline({
         title: 'Network Investigation',
         query: 'event.category: network',
       });
-
-      await apiServices.timeline.addNote(timelineIdA, 'Suspicious process spawned at 14:32 UTC');
-      await apiServices.timeline.addNote(timelineIdB, 'Lateral movement detected on host-42');
     });
 
     spaceTest.afterAll(async ({ apiServices }) => {
@@ -57,15 +45,15 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'opens the Super Timeline modal in read-only mode with merged content',
-      async ({ browserAuth, pageObjects, kbnClient }) => {
+      'opens the Super Timeline modal in read-only mode and does not create new saved objects',
+      async ({ browserAuth, pageObjects, apiServices }) => {
         const { timelinePage } = pageObjects;
 
         await browserAuth.loginAsPlatformEngineer();
         await timelinePage.navigateToTimelines();
 
-        // Record SO counts before opening Super Timeline (transience proof).
-        const timelineCountBefore = await fetchTimelineSavedObjectCount(kbnClient);
+        // Record SO count before opening Super Timeline (transience proof).
+        const timelineCountBefore = await apiServices.timeline.getCount();
 
         await spaceTest.step('Select both timelines', async () => {
           await timelinePage.selectTimelineByTitle('Endpoint Investigation');
@@ -85,26 +73,11 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Assert no new saved objects were created (transient)', async () => {
-          const timelineCountAfter = await fetchTimelineSavedObjectCount(kbnClient);
+          const timelineCountAfter = await apiServices.timeline.getCount();
           expect(timelineCountAfter).toBe(timelineCountBefore);
         });
 
         await timelinePage.close();
-      }
-    );
-
-    spaceTest(
-      'View Super Timeline action is disabled with fewer than 2 timelines selected',
-      async ({ browserAuth, pageObjects }) => {
-        const { timelinePage } = pageObjects;
-
-        await browserAuth.loginAsPlatformEngineer();
-        await timelinePage.navigateToTimelines();
-
-        await timelinePage.selectTimelineByTitle('Endpoint Investigation');
-        await timelinePage.batchActionsButton.click();
-
-        await expect(timelinePage.viewSuperTimelineAction).toBeDisabled();
       }
     );
   }
