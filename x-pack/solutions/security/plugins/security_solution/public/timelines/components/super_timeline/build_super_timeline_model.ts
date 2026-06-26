@@ -147,7 +147,8 @@ export const buildSuperTimelineModel = (
       if (combined?.filterQuery) {
         subFilters.push({
           meta: {
-            alias: title,
+            // Note: alias is intentionally omitted — buildCombinedFilter strips sub-filter
+            // aliases via cleanUpFilter, so only the outer SUPER_TIMELINE_QUERY_ALIAS is visible.
             type: 'custom',
             disabled: false,
             negate: false,
@@ -175,16 +176,24 @@ export const buildSuperTimelineModel = (
       : [];
 
   // ── Date range: earliest start → latest end ──────────────────────────────────
-  // dateRange strings can be relative (e.g. "now-7d") or absolute ISO. Parse to
-  // milliseconds before comparing so relative strings sort correctly.
+  // dateRange values can be relative (e.g. "now-7d"), absolute ISO strings, or
+  // numeric epoch ms (legacy saved objects store them as numbers — see SavedDateRangePickerRuntimeType).
+  // Normalize numeric values to ISO strings before parsing so dateMath handles all cases.
+  const toDateMathInput = (val: string | number): string =>
+    typeof val === 'number' ? new Date(val).toISOString() : val;
+
   const dateRange = timelines.reduce(
     (acc, timeline) => {
-      const startMs = dateMath.parse(timeline.dateRange.start)?.valueOf() ?? Infinity;
+      const startMs =
+        dateMath.parse(toDateMathInput(timeline.dateRange.start))?.valueOf() ?? Infinity;
       const endMs =
-        dateMath.parse(timeline.dateRange.end, { roundUp: true })?.valueOf() ?? -Infinity;
-      const accStartMs = acc.start ? dateMath.parse(acc.start)?.valueOf() ?? Infinity : Infinity;
+        dateMath.parse(toDateMathInput(timeline.dateRange.end), { roundUp: true })?.valueOf() ??
+        -Infinity;
+      const accStartMs = acc.start
+        ? dateMath.parse(toDateMathInput(acc.start))?.valueOf() ?? Infinity
+        : Infinity;
       const accEndMs = acc.end
-        ? dateMath.parse(acc.end, { roundUp: true })?.valueOf() ?? -Infinity
+        ? dateMath.parse(toDateMathInput(acc.end), { roundUp: true })?.valueOf() ?? -Infinity
         : -Infinity;
       return {
         start: startMs < accStartMs ? timeline.dateRange.start : acc.start,
