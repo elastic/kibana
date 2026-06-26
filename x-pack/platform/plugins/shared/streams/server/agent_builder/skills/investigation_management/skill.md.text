@@ -23,14 +23,14 @@ inputs:
   stream_names: ["<optional – data stream names to scope the investigation>"]
   context: { <optional – any structured context, e.g. sig event or alert metadata> }
   concurrency_key: "<optional – stable key to de-duplicate repeated investigations>"
-waitForCompletion: false
+waitForCompletion: true
 ```
 
-**Always set `waitForCompletion: false`.** The investigation runs an AI agent that can take up to 60 minutes. Waiting synchronously would block the chat for the full duration. Instead:
-1. Call `execute_workflow` with `waitForCompletion: false`.
-2. The tool returns immediately with an `executionId`.
-3. Tell the user the investigation has started and give them the `executionId`.
-4. Poll for completion with `platform.core.get_workflow_execution_status` using that `executionId`.
+**Always set `waitForCompletion: true`.** The call blocks until the investigation finishes and then returns the full execution, including the structured root-cause findings. Wait for it to complete, then present the results to the user in the same turn (see **Presenting results**).
+
+- Before triggering, briefly tell the user you're starting the investigation and that it may take a few minutes — the agent gathers and correlates logs, traces, and metrics before reaching a conclusion.
+- Stay on the tool call until it returns; do not ask the user to come back later, and do not start polling in a loop — the single `execute_workflow` call already waits.
+- If `execute_workflow` returns with a non-terminal execution (it exceeded the wait window), fall back to **Checking investigation status**.
 
 **Input schema:**
 - `message` (string, required) — a clear description of the issue to investigate. Include symptoms, time range, and any relevant context. Be specific.
@@ -46,7 +46,7 @@ execute_workflow({
     message: "Error rate on the checkout service spiked by 400% starting at 14:30 UTC. HTTP 503 errors are dominating.",
     stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"]
   },
-  waitForCompletion: false
+  waitForCompletion: true
 })
 ```
 
@@ -84,7 +84,7 @@ execute_workflow({
       recommendations: ["Increase pool size", "Add backpressure on checkout"]
     }
   },
-  waitForCompletion: false
+  waitForCompletion: true
 })
 ```
 
@@ -125,18 +125,19 @@ execute_workflow({
       }
     }
   },
-  waitForCompletion: false
+  waitForCompletion: true
 })
 ```
 
-### Checking investigation status
+### Checking investigation status (fallback)
 
-Use `platform.core.get_workflow_execution_status` with the `executionId` returned when the investigation was triggered.
+You normally won't need this: with `waitForCompletion: true` the findings come back directly from `execute_workflow`. Use this only if that call returned before the investigation reached a terminal state.
 
-- Status `running` — investigation is in progress; poll again in a minute.
-- Status `completed` — investigation finished; the execution output contains the RCA findings.
-- Status `failed` — investigation failed; the output contains error details.
-- Status `waiting_for_input` — the workflow is paused awaiting input; the status response includes a `waiting_input` object describing the expected `input` (and its `schema`). Resume with `platform.core.resume_workflow_execution`, passing the same `executionId` and an `input` object conforming to `waiting_input.schema`.
+Use `platform.core.get_workflow_execution_status` with the `executionId` from the returned execution.
+
+- Status `running` — investigation is still in progress; let the user know it's still running and share the `executionId` so they can ask for an update later.
+- Status `completed` — the execution output contains the RCA findings.
+- Status `failed` — the output contains error details.
 
 ### Presenting results
 
