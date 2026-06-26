@@ -250,7 +250,7 @@ Refer to the [rule-schema reference](./references/rule-schema.md) for allowed va
 When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
 \`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`. For composed query format, the \`base\` query is used as the data query.
 
-Signal rules cannot set \`no_data_strategy\`. Composed queries do not support \`no_data\`.
+Signal rules cannot set \`no_data_strategy\`.
 Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
 
 ## Final Validation
