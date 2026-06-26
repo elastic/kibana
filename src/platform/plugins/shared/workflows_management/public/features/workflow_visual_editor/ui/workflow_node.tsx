@@ -140,7 +140,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
                   {node.data.label}
                   {node.data.stepExecution?.status === ExecutionStatus.COMPLETED && (
                     <EuiIcon
-                      type="checkInCircleFilled"
+                      type="checkCircleFill"
                       color="#16C5C0"
                       aria-label={i18n.translate(
                         'workflows.workflowNode.completedStatusIconAriaLabel',
