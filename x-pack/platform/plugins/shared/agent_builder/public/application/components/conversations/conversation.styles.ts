@@ -7,8 +7,43 @@
 
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 
-export const headerHeight = 88;
+// Total measured header height (row + thin bottom border), matching the application panel header.
+export const headerHeight = 50;
+
+export const conversationHeaderShellStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  position: sticky;
+  top: 0;
+  z-index: ${layoutLevels.applicationTopBar};
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 0;
+  background: ${euiTheme.colors.backgroundBasePlain};
+  border-bottom: ${euiTheme.border.thin};
+  margin-bottom: -${euiTheme.border.width.thin};
+`;
+
+export const conversationHeaderRowStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: calc(${headerHeight}px - ${euiTheme.border.width.thin});
+  padding-inline: ${euiTheme.size.m};
+  padding-block: ${euiTheme.size.s};
+  width: 100%;
+`;
+
+export const conversationHeaderCondensedRowStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  gap: ${euiTheme.size.s};
+  padding-inline: ${euiTheme.size.s};
+  padding-block: ${euiTheme.size.s};
+  width: 100%;
+`;
 
 const maxConversationWidthStyles = css`
   max-width: 800px;

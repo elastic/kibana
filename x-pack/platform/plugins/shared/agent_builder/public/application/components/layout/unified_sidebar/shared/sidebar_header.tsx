@@ -24,6 +24,11 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getLastAgentId } from '../../../../hooks/use_last_agent_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
+import {
+  conversationHeaderCondensedRowStyles,
+  conversationHeaderRowStyles,
+  conversationHeaderShellStyles,
+} from '../../../conversations/conversation.styles';
 import { AgentSelector } from './agent_selector';
 
 const labels = {
@@ -60,47 +65,35 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const navigate = useNavigate();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
-  const headerStyles = css`
-    gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.base};
-    padding-left: ${euiTheme.size.l};
-    flex-grow: 0;
-  `;
+  const headerShellStyles = conversationHeaderShellStyles(euiTheme);
+  const headerRowStyles = conversationHeaderRowStyles(euiTheme);
+  const condensedRowStyles = conversationHeaderCondensedRowStyles(euiTheme);
 
-  const condensedHeaderStyles = css`
-    padding: ${euiTheme.size.base} 0;
-    flex-grow: 0;
-    align-items: center;
+  const rowContentStyles = css`
+    width: 100%;
   `;
 
   if (isCondensed) {
     return (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        css={condensedHeaderStyles}
-        gutterSize="s"
-      >
-        <EuiFlexItem grow={false}>
+      <div css={headerShellStyles}>
+        <div css={condensedRowStyles}>
           <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="transitionLeftIn"
               aria-label={labels.toggleSidebar}
               aria-expanded={false}
               color="text"
-              size="s"
+              size="xs"
               onClick={onToggleCondensed}
             />
           </EuiToolTip>
-        </EuiFlexItem>
-        {sidebarView === 'conversation' && (
-          <EuiFlexItem grow={false}>
+          {sidebarView === 'conversation' && (
             <EuiToolTip content={labels.newConversation} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plus"
                 display="base"
                 color="text"
-                size="s"
+                size="xs"
                 aria-label={labels.newConversation}
                 onClick={() => {
                   navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
@@ -111,41 +104,46 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 })}
               />
             </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          )}
+        </div>
+      </div>
     );
   }
 
   return (
-    <EuiFlexGroup direction="column" css={headerStyles}>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-        {sidebarView === 'conversation' ? (
-          <EuiFlexItem grow={true}>
-            <AgentSelector agentId={agentId} getNavigationPath={getNavigationPath} />
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="arrowLeft"
-              iconSide="left"
-              size="s"
-              flush="both"
-              color="text"
-              onClick={() => {
-                navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
-              }}
-              {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,
-                detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.BACK_CLICK,
-              })}
-            >
-              {labels.manageComponents}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-        {
+    <div css={headerShellStyles}>
+      <div css={headerRowStyles}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          css={rowContentStyles}
+        >
+          {sidebarView === 'conversation' ? (
+            <EuiFlexItem grow={true}>
+              <AgentSelector agentId={agentId} getNavigationPath={getNavigationPath} />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="arrowLeft"
+                iconSide="left"
+                size="s"
+                flush="both"
+                color="text"
+                onClick={() => {
+                  navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
+                }}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,
+                  detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.BACK_CLICK,
+                })}
+              >
+                {labels.manageComponents}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -153,13 +151,13 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 aria-label={labels.toggleSidebar}
                 aria-expanded={true}
                 color="text"
-                size="s"
+                size="xs"
                 onClick={onToggleCondensed}
               />
             </EuiToolTip>
           </EuiFlexItem>
-        }
-      </EuiFlexGroup>
-    </EuiFlexGroup>
+        </EuiFlexGroup>
+      </div>
+    </div>
   );
 };

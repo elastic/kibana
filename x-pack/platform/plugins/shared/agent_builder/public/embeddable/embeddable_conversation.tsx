@@ -14,7 +14,8 @@ import { Conversation } from '../application/components/conversations/conversati
 import { EmbeddableConversationHeader } from '../application/components/conversations/embeddable_conversation_header/embeddable_conversation_header';
 import {
   conversationBackgroundStyles,
-  headerHeight,
+  conversationHeaderRowStyles,
+  conversationHeaderShellStyles,
 } from '../application/components/conversations/conversation.styles';
 import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
 import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
@@ -32,13 +33,12 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     ${conversationBackgroundStyles(euiTheme)}
   `;
 
-  const headerStyles = css`
-    display: flex;
-    height: ${headerHeight}px;
+  const headerShellStyles = conversationHeaderShellStyles(euiTheme);
+  const headerRowStyles = conversationHeaderRowStyles(euiTheme);
+
+  const flyoutHeaderOverrideStyles = css`
     &.euiFlyoutHeader {
-      padding-inline: 0;
-      padding-block-start: 0;
-      padding: ${euiTheme.size.base};
+      padding: 0;
     }
   `;
   const bodyStyles = css`
@@ -65,8 +65,10 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     <div css={wrapperStyles} data-test-subj="agentBuilderConversation">
       <EmbeddableConversationsProvider {...props}>
         <EmbeddableAccessBoundary onClose={onClose}>
-          <EuiFlyoutHeader css={headerStyles}>
-            <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+          <EuiFlyoutHeader css={[headerShellStyles, flyoutHeaderOverrideStyles]}>
+            <div css={headerRowStyles}>
+              <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+            </div>
           </EuiFlyoutHeader>
           <EmbeddableWelcomeMessage />
           <EuiFlyoutBody css={bodyStyles}>

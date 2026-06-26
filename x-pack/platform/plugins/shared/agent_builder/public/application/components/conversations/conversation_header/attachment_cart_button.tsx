@@ -106,6 +106,7 @@ export const AttachmentCartButton: React.FC = () => {
         <EuiButtonIcon
           color="text"
           iconType={cartIconType}
+          size="xs"
           aria-label={labels.attachments(attachmentCount)}
           data-test-subj="agentBuilderAttachmentCartButton"
         />
