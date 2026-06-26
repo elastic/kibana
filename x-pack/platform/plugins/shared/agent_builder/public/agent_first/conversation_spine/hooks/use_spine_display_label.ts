@@ -12,6 +12,12 @@ const spineTypeLabels: Record<SpineType, string> = {
   chat: i18n.translate('xpack.agentBuilder.conversationSpine.type.chat', {
     defaultMessage: 'Chat',
   }),
+  case: i18n.translate('xpack.agentBuilder.conversationSpine.type.case', {
+    defaultMessage: 'Case',
+  }),
+  incident: i18n.translate('xpack.agentBuilder.conversationSpine.type.incident', {
+    defaultMessage: 'Incident',
+  }),
 };
 
 export const getSpineTypeLabel = (type: SpineType): string => spineTypeLabels[type];
