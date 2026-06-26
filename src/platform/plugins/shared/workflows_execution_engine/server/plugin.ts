@@ -40,9 +40,7 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
-import {
-  buildWorkflowExecutionDocument,
-} from './lib/build_workflow_execution_document';
+import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
