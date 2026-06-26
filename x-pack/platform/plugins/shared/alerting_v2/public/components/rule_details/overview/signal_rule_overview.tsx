@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -52,13 +52,11 @@ export const SignalRuleOverview: React.FC = () => {
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ACTIVITY_TIME_RANGE);
-  const [refreshTick, setRefreshTick] = useState(0);
 
   const handleTimeChange = useCallback(
     (next: OnTimeChangeProps) => setTimeRange({ from: next.start, to: next.end }),
     [setTimeRange]
   );
-  const handleRefresh = useCallback(() => setRefreshTick((n) => n + 1), []);
 
   const onBrushRange = useCallback(
     (fromMs: number, toMs: number) =>
@@ -66,17 +64,19 @@ export const SignalRuleOverview: React.FC = () => {
     [setTimeRange]
   );
 
-  const { gteMs, lteMs } = useMemo(() => {
-    void refreshTick;
-    return resolveGteLte(timeRange.from, timeRange.to);
-  }, [timeRange.from, timeRange.to, refreshTick]);
+  const { gteMs, lteMs } = useMemo(
+    () => resolveGteLte(timeRange.from, timeRange.to),
+    [timeRange.from, timeRange.to]
+  );
 
-  const { buckets, interval, lastFiringMs, isLoading, isError } = useFetchSignalFirings({
+  const { buckets, interval, lastFiringMs, isLoading, isError, refetch } = useFetchSignalFirings({
     ruleId: rule.id,
     gteMs,
     lteMs,
     data,
   });
+
+  const handleRefresh = useCallback(() => refetch(), [refetch]);
 
   const intervalMs = useMemo(() => intervalToMs(interval), [interval]);
 
