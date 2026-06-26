@@ -177,6 +177,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
     rulesClient.resolve.mockRejectedValue(notFoundError);
     rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+    rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 1, total: 0 });
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     await detectionRulesClient.restoreRuleFromHistory({ ruleId: RULE_ID, changeId: CHANGE_ID });
@@ -192,6 +193,23 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       })
     );
     expect(rulesClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws 409 when a rule with the same rule_id already exists after deletion', async () => {
+    const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+    const conflictingRule = getRuleMock(getQueryRuleParams(), {
+      id: '22222222-2222-4222-8222-222222222222',
+    });
+
+    rulesClient.resolve.mockRejectedValue(notFoundError);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+    rulesClient.find.mockResolvedValue({ data: [conflictingRule], page: 1, perPage: 1, total: 1 });
+
+    await expect(
+      detectionRulesClient.restoreRuleFromHistory({ ruleId: RULE_ID, changeId: CHANGE_ID })
+    ).rejects.toMatchObject({ statusCode: 409 });
+
+    expect(rulesClient.create).not.toHaveBeenCalled();
   });
 
   it('throws 404 when the changeId is not found', async () => {
@@ -304,6 +322,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
     rulesClient.resolve.mockRejectedValue(notFoundError);
     rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
+    rulesClient.find.mockResolvedValue({ data: [], page: 1, perPage: 1, total: 0 });
     rulesClient.create.mockRejectedValue(conflictError);
 
     await expect(

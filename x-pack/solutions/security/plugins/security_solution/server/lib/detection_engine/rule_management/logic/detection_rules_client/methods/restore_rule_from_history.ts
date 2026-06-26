@@ -25,6 +25,7 @@ import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_re
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { ClientError, validateFieldWritePermissions, validateMlAuth } from '../utils';
 import { getRuleById } from './get_rule_by_id';
+import { getRuleByRuleId } from './get_rule_by_rule_id';
 
 export const restoreRuleFromHistory = async ({
   actionsClient,
@@ -67,6 +68,15 @@ export const restoreRuleFromHistory = async ({
   const snapshotRule = convertAlertingRuleToRuleResponse(item.rule as SanitizedRule<RuleParams>);
 
   if (existingRule == null) {
+    const conflictingRule = await getRuleByRuleId({ rulesClient, ruleId: snapshotRule.rule_id });
+
+    if (conflictingRule != null) {
+      throw new ClientError(
+        `Cannot restore rule: a rule with rule_id "${snapshotRule.rule_id}" already exists (id: "${conflictingRule.id}"). The rule may have been reinstalled after deletion. Delete the existing rule first, or restore from its own history instead.`,
+        409
+      );
+    }
+
     await validateMlAuth(mlAuthz, snapshotRule.type);
 
     validateFieldWritePermissions(
