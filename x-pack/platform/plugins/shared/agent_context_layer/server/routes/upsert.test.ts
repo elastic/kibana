@@ -17,11 +17,15 @@ import {
 } from './test_helpers';
 import { registerUpsertRoute } from './upsert';
 
+// The body no longer carries `type` — the URL does. See the route's
+// JSDoc and `common/constants.ts` for why the URL is compound on
+// `(type, originId)`.
 const validBody = {
-  type: 'visualization',
   title: 'Test Viz',
   content: 'some content',
 };
+
+const validParams = { type: 'visualization', originId: 'viz-1' };
 
 describe('registerUpsertRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
@@ -55,18 +59,23 @@ describe('registerUpsertRoute', () => {
   };
 
   it('returns 404 when feature flag is disabled', async () => {
-    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody }, false);
+    const response = await callHandler({ params: validParams, body: validBody }, false);
     expect(response.notFound).toHaveBeenCalled();
     expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
   });
 
   it('creates a new origin via indexAttachment content-mode when no chunks exist', async () => {
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
-    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
 
-    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+    const response = await callHandler({ params: validParams, body: validBody });
 
+    // The route resolves the canonical `(type, originId)` from the URL
+    // and hands them to the indexer; the body never carried the type.
+    expect(mockSmlService.findByOriginAcrossSpaces).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'visualization', originId: 'viz-1' })
+    );
     expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
         originId: 'viz-1',
@@ -91,16 +100,16 @@ describe('registerUpsertRoute', () => {
   });
 
   it('passes action=update and created=false when origin already exists in caller space', async () => {
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
     // The route now privilege-checks existing chunks before overwriting
     // them — see the "returns 404 when caller lacks read access" test
     // for the rationale. This test focuses on the happy path, so we
     // explicitly authorize the chunk read.
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
-    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
 
-    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+    const response = await callHandler({ params: validParams, body: validBody });
 
     expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'update' })
@@ -110,12 +119,12 @@ describe('registerUpsertRoute', () => {
   });
 
   it('forwards tags to the indexer when provided', async () => {
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
-    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
     const bodyWithTags = { ...validBody, tags: ['otel', 'claude-code'] };
 
-    await callHandler({ params: { originId: 'viz-1' }, body: bodyWithTags });
+    await callHandler({ params: validParams, body: bodyWithTags });
 
     expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -138,13 +147,13 @@ describe('registerUpsertRoute', () => {
     // indexer rather than the post-write read because the indexer is
     // the single source of truth for what lands on disk.
     const taggedDoc = { ...sampleDocument, tags: ['stale-tag-1', 'stale-tag-2'] };
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([taggedDoc]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([taggedDoc]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
-    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     // Body explicitly does NOT include `tags`.
-    await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+    await callHandler({ params: validParams, body: validBody });
 
     const [callArgs] = mockSmlService.indexAttachment.mock.calls;
     const passedContent = callArgs[0].content as Array<{ tags?: unknown }>;
@@ -157,12 +166,12 @@ describe('registerUpsertRoute', () => {
 
   it('returns 404 when origin is owned by another space', async () => {
     const otherSpaceDoc = { ...sampleDocument, spaces: ['other-space'] };
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
 
-    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+    const response = await callHandler({ params: validParams, body: validBody });
 
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML origin 'viz-1' not found" },
+      body: { message: "SML origin 'visualization/viz-1' not found" },
     });
     expect(mockSmlService.indexAttachment).not.toHaveBeenCalled();
   });
@@ -176,10 +185,10 @@ describe('registerUpsertRoute', () => {
     // caller's input — content injection on a resource they cannot read.
     // This mirrors the DELETE route's `checkItemsAccess` gate.
     const gatedDoc = { ...sampleDocument, id: 'chunk-1', spaces: ['test-space'] };
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([gatedDoc]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([gatedDoc]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
 
-    const response = await callHandler({ params: { originId: 'viz-1' }, body: validBody });
+    const response = await callHandler({ params: validParams, body: validBody });
 
     expect(mockSmlService.checkItemsAccess).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -188,7 +197,7 @@ describe('registerUpsertRoute', () => {
       })
     );
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML origin 'viz-1' not found" },
+      body: { message: "SML origin 'visualization/viz-1' not found" },
     });
     // The whole point of the gate — no write must happen on the
     // unauthorized branch.
@@ -199,11 +208,14 @@ describe('registerUpsertRoute', () => {
     // A brand-new origin has nothing to read-gate — the privilege check
     // would have to short-circuit anyway. Asserting it isn't called
     // both avoids a wasted ES round-trip and documents the contract.
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
-    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
 
-    await callHandler({ params: { originId: 'viz-new' }, body: validBody });
+    await callHandler({
+      params: { type: 'visualization', originId: 'viz-new' },
+      body: validBody,
+    });
 
     expect(mockSmlService.checkItemsAccess).not.toHaveBeenCalled();
     expect(mockSmlService.indexAttachment).toHaveBeenCalled();
@@ -213,17 +225,17 @@ describe('registerUpsertRoute', () => {
     // Content-mode writes now accept any `type` — the indexer is the
     // single point of decision on what permissions to stamp. The route
     // no longer pre-checks the registry, so any value matching the
-    // identifier regex (`/^[a-z][a-z0-9_]*$/`) passes the body schema
+    // identifier regex (`/^[a-z][a-z0-9_]*$/`) passes the params schema
     // and the indexer handles permissioning. Verifying the call here
     // is enough; the indexer's own tests cover the empty-permission
     // stamping + warn-once behaviour.
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
-    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     const response = await callHandler({
-      params: { originId: 'note-1' },
-      body: { ...validBody, type: 'my_notes' },
+      params: { type: 'my_notes', originId: 'note-1' },
+      body: validBody,
     });
 
     expect(response.ok).toHaveBeenCalled();
@@ -233,28 +245,26 @@ describe('registerUpsertRoute', () => {
     expect(response.badRequest).not.toHaveBeenCalled();
   });
 
-  it('exposes the type identifier regex on the route schema', () => {
+  it('exposes the type identifier regex on the route params schema', () => {
     // Syntactic guard at the route layer — the indexer is permissive
-    // about *whether* a type is registered, but the body schema still
-    // refuses junk values (slashes, uppercase, leading digits) from
-    // leaking in as durable chunk namespaces. The httpServerMock test
-    // setup bypasses schema validation entirely, so we extract and
-    // exercise the schema directly here.
+    // about *whether* a type is registered, but the params schema
+    // still refuses junk values (slashes, uppercase, leading digits)
+    // from leaking in as durable chunk namespaces. The httpServerMock
+    // test setup bypasses schema validation entirely, so we extract
+    // and exercise the schema directly here.
     const [routeConfig] = router.put.mock.calls[0];
-    const bodySchema = (routeConfig as any).validate.body;
-    expect(() => bodySchema.validate({ type: 'BadType/slash', title: 't', content: 'c' })).toThrow(
+    const paramsSchema = (routeConfig as any).validate.params;
+    expect(() => paramsSchema.validate({ type: 'BadType/slash', originId: 'a' })).toThrow(
       /lowercase identifier/
     );
-    expect(() =>
-      bodySchema.validate({ type: '1startswithdigit', title: 't', content: 'c' })
-    ).toThrow(/lowercase identifier/);
-    expect(() => bodySchema.validate({ type: 'my_notes', title: 't', content: 'c' })).not.toThrow();
-    expect(() =>
-      bodySchema.validate({ type: 'visualization', title: 't', content: 'c' })
-    ).not.toThrow();
+    expect(() => paramsSchema.validate({ type: '1startswithdigit', originId: 'a' })).toThrow(
+      /lowercase identifier/
+    );
+    expect(() => paramsSchema.validate({ type: 'my_notes', originId: 'a' })).not.toThrow();
+    expect(() => paramsSchema.validate({ type: 'visualization', originId: 'a' })).not.toThrow();
   });
 
-  it('rejects body payloads that overflow the per-field maxLength caps', () => {
+  it('rejects body/param payloads that overflow the maxLength caps', () => {
     // Defense-in-depth against unbounded HTTP payloads — a missing
     // `maxLength` once let a single PUT push arbitrary content into
     // the SML index. Pin each cap so a future refactor can't silently
@@ -266,23 +276,22 @@ describe('registerUpsertRoute', () => {
     const paramsSchema = (routeConfig as any).validate.params;
 
     // title cap: > MAX_SML_TITLE_LENGTH (1024) chars
-    expect(() =>
-      bodySchema.validate({ type: 'lens', title: 'x'.repeat(1025), content: 'c' })
-    ).toThrow(/title/);
+    expect(() => bodySchema.validate({ title: 'x'.repeat(1025), content: 'c' })).toThrow(/title/);
 
     // content cap: > MAX_SML_CONTENT_LENGTH (50_000) chars
-    expect(() =>
-      bodySchema.validate({ type: 'lens', title: 't', content: 'x'.repeat(50_001) })
-    ).toThrow(/content/);
-
-    // type cap: > MAX_SML_TYPE_LENGTH (256) chars — even when the
-    // regex matches, the length envelope must bite.
-    expect(() => bodySchema.validate({ type: 'a'.repeat(257), title: 't', content: 'c' })).toThrow(
-      /type/
+    expect(() => bodySchema.validate({ title: 't', content: 'x'.repeat(50_001) })).toThrow(
+      /content/
     );
 
+    // type cap: > MAX_SML_TYPE_LENGTH (256) chars — even when the
+    // regex matches, the length envelope must bite. The type now lives
+    // in the URL params, not the body.
+    expect(() => paramsSchema.validate({ type: 'a'.repeat(257), originId: 'o' })).toThrow(/type/);
+
     // originId URL param cap: > MAX_SML_ORIGIN_ID_LENGTH (512) chars.
-    expect(() => paramsSchema.validate({ originId: 'x'.repeat(513) })).toThrow(/originId/);
+    expect(() => paramsSchema.validate({ type: 'lens', originId: 'x'.repeat(513) })).toThrow(
+      /originId/
+    );
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {
@@ -296,14 +305,14 @@ describe('registerUpsertRoute', () => {
 
     const [, localHandler] = localRouter.put.mock.calls[0];
     const request = httpServerMock.createKibanaRequest({
-      params: { originId: 'viz-1' },
+      params: validParams,
       body: validBody,
     });
     const response = httpServerMock.createResponseFactory();
 
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
     mockSmlService.indexAttachment.mockResolvedValue(undefined);
-    mockSmlService.findByOriginId.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOrigin.mockResolvedValue([sampleDocument]);
 
     await localHandler(buildMockContext(true), request, response);
 
@@ -313,10 +322,10 @@ describe('registerUpsertRoute', () => {
   });
 
   it('propagates unexpected errors from sml.indexAttachment', async () => {
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
     mockSmlService.indexAttachment.mockRejectedValue(new Error('write failed'));
 
-    await expect(callHandler({ params: { originId: 'viz-1' }, body: validBody })).rejects.toThrow(
+    await expect(callHandler({ params: validParams, body: validBody })).rejects.toThrow(
       'write failed'
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('write failed'));

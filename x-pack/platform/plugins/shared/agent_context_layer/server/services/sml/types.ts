@@ -602,15 +602,22 @@ export interface SmlService {
   }) => Promise<{ total: number; results: SmlDocument[] }>;
 
   /**
-   * Fetch every chunk written under `originId` that is visible in `spaceId`.
+   * Fetch every chunk written under the compound `(type, originId)`
+   * key that is visible in `spaceId`.
    *
    * Used by the HTTP GET route and other origin-scoped reads. A workflow
    * step writing in content mode (or `getSmlData` in origin mode) may
    * produce multiple chunks per origin — all are returned.
    *
-   * Resolves to an empty array when no visible chunks exist; callers that
-   * need the "exists in another space" distinction (for cross-space
-   * write guards) should use {@link SmlService.findByOriginIdAcrossSpaces}.
+   * The caller MUST pass both `type` and `originId`. The bare
+   * `originId` is not unique on its own (a `lens` chunk and a
+   * `dashboard` chunk may legitimately share an id), so the lookup
+   * keys against the canonical `origin.uri = ${type}://${originId}`.
+   *
+   * Resolves to an empty array when no visible chunks exist; callers
+   * that need the "exists in another space" distinction (for
+   * cross-space write guards) should use
+   * {@link SmlService.findByOriginAcrossSpaces}.
    *
    * **Does NOT perform per-user permission checks.** The caller is
    * expected to have already authorized the user against the space.
@@ -618,21 +625,24 @@ export interface SmlService {
    * `checkItemsAccess` filter on top — or wait for the route helper that
    * does this for them.
    */
-  findByOriginId: (params: {
+  findByOrigin: (params: {
+    type: string;
     originId: string;
     spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<SmlDocument[]>;
 
   /**
-   * Fetch every chunk written under `originId` regardless of space.
+   * Fetch every chunk written under the compound `(type, originId)`
+   * key regardless of space.
    *
    * Used exclusively for the HTTP route's cross-space-overwrite guard:
    * a write request from space A must be blocked when the origin is
    * already owned by space B. Callers MUST NOT use this for read paths
    * that surface data to users — it bypasses space isolation.
    */
-  findByOriginIdAcrossSpaces: (params: {
+  findByOriginAcrossSpaces: (params: {
+    type: string;
     originId: string;
     esClient: IScopedClusterClient;
   }) => Promise<SmlDocument[]>;

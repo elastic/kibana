@@ -8,28 +8,40 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlDeleteHttpResponse } from '../../common/http_api/sml';
-import { smlByOriginIdPath, MAX_SML_ORIGIN_ID_LENGTH } from '../../common/constants';
+import {
+  smlByTypeAndOriginIdPath,
+  MAX_SML_ORIGIN_ID_LENGTH,
+  MAX_SML_TYPE_LENGTH,
+} from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import { isVisibleInSpace } from '../services/sml/sml_service';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { WRITE_SECURITY, withSmlFeatureFlag } from './common';
 
 /**
- * `DELETE /internal/agent_context_layer/sml/{originId}`
+ * `DELETE /internal/agent_context_layer/sml/{type}/{originId}`
  *
- * Removes every chunk written under the origin (manual + crawled) via
+ * Removes every chunk written under the compound `(type, originId)`
+ * key (manual + crawled) via
  * {@link SmlService.deleteAttachment} with `ingestionMethod: 'all'`,
  * mirroring the PUT route's "claim the origin" semantic in reverse.
  *
- * `attachmentType` is not part of the URL — the route discovers it by
- * looking up the existing chunks first. This relies on the system-wide
- * convention that `origin_id` is globally unique (same one the PUT
- * route assumes). If multiple types share an `origin_id`, every type
- * found is dispatched a separate delete so cleanup is total.
+ * `type` is part of the URL because the storage's canonical key is
+ * the compound `origin.uri = ${type}://${originId}`. An earlier
+ * design discovered the type by enumerating existing chunks — that
+ * path queried a phantom `origin_id` keyword that's not in the index
+ * mapping and silently returned `[]`, so every DELETE 404'd. Putting
+ * `type` in the URL also lets the indexer's `deleteAttachment`
+ * target a single canonical URI in `deleteByQuery`, instead of the
+ * route fanning out one call per discovered type.
  *
- * Cross-space guard: an origin owned by another space is reported as
- * 404 (same shape as the GET route) so a caller in space A cannot
- * even probe for origins in space B.
+ * Cross-space guard: an origin owned by another space is reported
+ * as 404 (same shape as the GET route) so a caller in space A
+ * cannot even probe for origins in space B.
+ *
+ * Per-chunk privilege guard: a caller who cannot read every chunk
+ * for the origin should not be allowed to delete the lot. Mirrors
+ * the upsert route's `checkItemsAccess` shape.
  */
 export const registerDeleteRoute = ({
   router,
@@ -44,9 +56,17 @@ export const registerDeleteRoute = ({
 }) => {
   router.delete(
     {
-      path: smlByOriginIdPath,
+      path: smlByTypeAndOriginIdPath,
       validate: {
         params: schema.object({
+          type: schema.string({
+            minLength: 1,
+            maxLength: MAX_SML_TYPE_LENGTH,
+            validate: (v) =>
+              /^[a-z][a-z0-9_]*$/.test(v)
+                ? undefined
+                : 'must be a lowercase identifier starting with a letter, e.g. "visualization", "my_notes"',
+          }),
           originId: schema.string({ minLength: 1, maxLength: MAX_SML_ORIGIN_ID_LENGTH }),
         }),
       },
@@ -56,7 +76,7 @@ export const registerDeleteRoute = ({
     withSmlFeatureFlag(async (ctx, request, response) => {
       try {
         const sml = getSmlService();
-        const { originId } = request.params as { originId: string };
+        const { type, originId } = request.params as { type: string; originId: string };
         const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
         const savedObjectsClient = coreContext.savedObjects.client;
@@ -64,17 +84,17 @@ export const registerDeleteRoute = ({
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
-        const existing = await sml.findByOriginIdAcrossSpaces({ originId, esClient });
+        const existing = await sml.findByOriginAcrossSpaces({ type, originId, esClient });
         if (existing.length === 0) {
           return response.notFound({
-            body: { message: `SML origin '${originId}' not found` },
+            body: { message: `SML origin '${type}/${originId}' not found` },
           });
         }
 
         const visibleInCallerSpace = existing.some((doc) => isVisibleInSpace(doc.spaces, spaceId));
         if (!visibleInCallerSpace) {
           return response.notFound({
-            body: { message: `SML origin '${originId}' not found` },
+            body: { message: `SML origin '${type}/${originId}' not found` },
           });
         }
 
@@ -90,35 +110,24 @@ export const registerDeleteRoute = ({
         const unauthorized = existing.filter((d) => accessMap.get(d.id) !== true);
         if (unauthorized.length > 0) {
           return response.notFound({
-            body: { message: `SML origin '${originId}' not found` },
+            body: { message: `SML origin '${type}/${originId}' not found` },
           });
         }
 
-        // Origin id is conventionally globally unique, but a producer
-        // could in theory reuse the same id under two types — dispatch
-        // a delete per distinct type so cleanup is exhaustive instead
-        // of leaving the second type's chunks dangling.
-        //
-        // The deletes are independent (each is scoped by `(origin_id,
-        // attachmentType)`) so `Promise.all` is safe and meaningfully
-        // faster than a serial loop on every origin reuse case — the
-        // typical pathological example is a corpus_entry id reused as
-        // a notes type during migration, which currently doubles
-        // route latency for no reason.
-        const types = new Set(existing.map((d) => d.type));
-        await Promise.all(
-          Array.from(types, (attachmentType) =>
-            sml.deleteAttachment({
-              originId,
-              attachmentType,
-              spaces: [spaceId],
-              esClient: esClient.asInternalUser,
-              savedObjectsClient,
-              logger,
-              ingestionMethod: 'all',
-            })
-          )
-        );
+        // Single delete — `type` pins the canonical `origin.uri`, no
+        // multi-type fan-out needed. The previous shape looped over
+        // distinct types because the URL omitted `type` and the
+        // route had to discover it; that whole branch is dead with
+        // `type` in the path.
+        await sml.deleteAttachment({
+          originId,
+          attachmentType: type,
+          spaces: [spaceId],
+          esClient: esClient.asInternalUser,
+          savedObjectsClient,
+          logger,
+          ingestionMethod: 'all',
+        });
 
         const body: SmlDeleteHttpResponse = { origin_id: originId, deleted: true };
         return response.ok({ body });

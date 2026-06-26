@@ -178,11 +178,11 @@ class SmlServiceImpl implements SmlServiceInstance {
           tags,
         });
       },
-      findByOriginId: async ({ originId, spaceId, esClient }) => {
-        return findByOriginId({ originId, spaceId, esClient, logger });
+      findByOrigin: async ({ type, originId, spaceId, esClient }) => {
+        return findByOrigin({ type, originId, spaceId, esClient, logger });
       },
-      findByOriginIdAcrossSpaces: async ({ originId, esClient }) => {
-        return findByOriginIdAcrossSpaces({ originId, esClient, logger });
+      findByOriginAcrossSpaces: async ({ type, originId, esClient }) => {
+        return findByOriginAcrossSpaces({ type, originId, esClient, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
@@ -1379,35 +1379,54 @@ const extractTotalHits = (total: SearchTotalHits | number | undefined): number =
 };
 
 /**
- * Fetch every chunk written under `originId` that is visible in `spaceId`.
+ * Compose the canonical `origin.uri` from the SML `type` and bare
+ * `originId`. Single source of truth so callers can't disagree about
+ * the URI scheme (an earlier iteration had two divergent builders —
+ * one in `buildIndexOp`, one in `deleteChunks` — which made adding a
+ * new addressable identifier a footgun).
  *
- * Multiple chunks per origin are expected: the workflow step's content
- * mode and `getSmlData` in origin mode can both produce >1 chunk per
- * origin. Ordering is unspecified.
+ * Exported for the HTTP routes; the indexer derives it internally.
+ */
+export const buildOriginUri = (type: string, originId: string): string => `${type}://${originId}`;
+
+/**
+ * Fetch every chunk written under `(type, originId)` that is visible
+ * in `spaceId`.
  *
- * Lookups happen via the `origin_id` keyword field (not `origin.uri`)
- * because callers carry the bare id, not the typed URI, and we treat
- * `origin_id` as globally unique by convention (the HTTP routes
- * deliberately omit `type` from the URL).
+ * Multiple chunks per origin are expected: the workflow step's
+ * content mode and `getSmlData` in origin mode can both produce >1
+ * chunk per origin. Ordering is unspecified.
+ *
+ * Lookups happen via the `origin.uri` keyword field — the only
+ * top-level identifier the storage actually mapped (an earlier
+ * design queried a phantom `origin_id` keyword that lives nowhere in
+ * the mapping, so every lookup silently returned `[]` and the
+ * per-origin routes 404'd unconditionally). The compound URI is also
+ * the only safe addressable key because the bare `originId` is not
+ * guaranteed unique across SML types — a lens id and a dashboard id
+ * can legitimately collide. The HTTP routes carry both pieces in the
+ * URL (`/sml/{type}/{originId}`) for the same reason.
  *
  * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow is
- * logged with `track_total_hits` so operators can spot a producer that
- * has gone off the rails (or a typo collapsing many distinct origins
- * into one). The first `MAX_CHUNKS_PER_ORIGIN` chunks are still
- * returned — the per-space response is a degraded view rather than an
- * error.
+ * logged with `track_total_hits` so operators can spot a producer
+ * that has gone off the rails. The first `MAX_CHUNKS_PER_ORIGIN`
+ * chunks are still returned — the per-space response is a degraded
+ * view rather than an error.
  */
-const findByOriginId = async ({
+const findByOrigin = async ({
+  type,
   originId,
   spaceId,
   esClient,
   logger,
 }: {
+  type: string;
   originId: string;
   spaceId: string;
   esClient: IScopedClusterClient;
   logger: Logger;
 }): Promise<SmlDocument[]> => {
+  const originUri = buildOriginUri(type, originId);
   try {
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
@@ -1418,7 +1437,7 @@ const findByOriginId = async ({
       query: {
         bool: {
           filter: [
-            { term: { origin_id: originId } },
+            { term: { 'origin.uri': originUri } },
             {
               bool: {
                 should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
@@ -1433,7 +1452,7 @@ const findByOriginId = async ({
     const total = extractTotalHits(response.hits.total);
     if (total > MAX_CHUNKS_PER_ORIGIN) {
       logger.warn(
-        `SML findByOriginId: origin '${originId}' has ${total} chunks in space '${spaceId}' but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned. Producer is likely misbehaving — investigate before the cross-space guard becomes unreliable.`
+        `SML findByOrigin: origin '${originUri}' has ${total} chunks in space '${spaceId}' but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned. Producer is likely misbehaving — investigate before the cross-space guard becomes unreliable.`
       );
     }
 
@@ -1444,24 +1463,24 @@ const findByOriginId = async ({
     if (isNotFoundError(error)) {
       return [];
     }
-    logger.warn(`SML findByOriginId failed: ${(error as Error).message}`);
+    logger.warn(`SML findByOrigin failed: ${(error as Error).message}`);
     throw error;
   }
 };
 
 /**
- * `_source` fields fetched by `findByOriginIdAcrossSpaces`.
+ * `_source` fields fetched by `findByOriginAcrossSpaces`.
  *
  * The cross-space guard only reads `id`, `type`, `spaces` (and uses
- * `origin.uri` indirectly via `hydrateDocument`'s `origin_id` fallback
- * — kept for resilience against documents written before the dedicated
- * `origin_id` field is in place). Everything else — `content`, `title`,
- * `description`, `tags`, `permissions`, … — is pulled back on the
- * per-space path (`findByOriginId`) which is the one that surfaces to
- * users. The guard runs on every PUT and DELETE, so trimming the
- * payload here matters: with `size: 1000` and a 50 KB `content` field
- * per chunk, the un-filtered version could pull up to 50 MB per guard
- * call and immediately discard 99% of it.
+ * `origin.uri` indirectly via `hydrateDocument`'s `origin_id`
+ * derivation — `origin_id` is not stored, it's parsed from the URI at
+ * read time). Everything else — `content`, `title`, `description`,
+ * `tags`, `permissions`, … — is pulled back on the per-space path
+ * (`findByOrigin`) which is the one that surfaces to users. The
+ * guard runs on every PUT and DELETE, so trimming the payload here
+ * matters: with `size: 1000` and a 50 KB `content` field per chunk,
+ * the un-filtered version could pull up to 50 MB per guard call and
+ * immediately discard 99% of it.
  *
  * Listed as a typed constant rather than inline so a future field
  * addition has a single place to consider whether the guard needs to
@@ -1475,7 +1494,8 @@ const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof SmlDocument> = [
 ];
 
 /**
- * Fetch every chunk written under `originId` regardless of space.
+ * Fetch every chunk written under `(type, originId)` regardless of
+ * space.
  *
  * Used by the HTTP routes' cross-space-overwrite guard and the
  * `checkItemsAccess` privilege gate — never for read paths that
@@ -1486,8 +1506,8 @@ const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof SmlDocument> = [
  * Returns an empty array on `index_not_found` rather than throwing —
  * "no SML index yet" is a normal first-write state.
  *
- * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow has a
- * security implication: if more than the limit exists, chunks in
+ * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow has
+ * a security implication: if more than the limit exists, chunks in
  * another space might fall outside the returned window and the
  * cross-space guard would silently pass. We log a warning when
  * overflow is detected so operators have an audit trail; the limit
@@ -1500,15 +1520,18 @@ const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof SmlDocument> = [
  * defaulted to empty by `hydrateDocument`. Callers must treat the
  * result as guard-only and not surface it to users.
  */
-const findByOriginIdAcrossSpaces = async ({
+const findByOriginAcrossSpaces = async ({
+  type,
   originId,
   esClient,
   logger,
 }: {
+  type: string;
   originId: string;
   esClient: IScopedClusterClient;
   logger: Logger;
 }): Promise<SmlDocument[]> => {
+  const originUri = buildOriginUri(type, originId);
   try {
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
@@ -1519,7 +1542,7 @@ const findByOriginIdAcrossSpaces = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ term: { origin_id: originId } }],
+          filter: [{ term: { 'origin.uri': originUri } }],
         },
       },
     });
@@ -1527,7 +1550,7 @@ const findByOriginIdAcrossSpaces = async ({
     const total = extractTotalHits(response.hits.total);
     if (total > MAX_CHUNKS_PER_ORIGIN) {
       logger.warn(
-        `SML findByOriginIdAcrossSpaces: origin '${originId}' has ${total} chunks but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned — the cross-space overwrite guard may miss chunks beyond that limit. Investigate the producer immediately.`
+        `SML findByOriginAcrossSpaces: origin '${originUri}' has ${total} chunks but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned — the cross-space overwrite guard may miss chunks beyond that limit. Investigate the producer immediately.`
       );
     }
 
@@ -1538,7 +1561,7 @@ const findByOriginIdAcrossSpaces = async ({
     if (isNotFoundError(error)) {
       return [];
     }
-    logger.warn(`SML findByOriginIdAcrossSpaces failed: ${(error as Error).message}`);
+    logger.warn(`SML findByOriginAcrossSpaces failed: ${(error as Error).message}`);
     throw error;
   }
 };
@@ -1546,9 +1569,8 @@ const findByOriginIdAcrossSpaces = async ({
 /**
  * Project an ES `_source` payload into the canonical `SmlDocument`
  * shape used everywhere downstream. Centralised because three readers
- * (getDocumentsByIds, findByOriginId, findByOriginIdAcrossSpaces)
- * apply the same mapping — keeping them in sync by-hand is a
- * footgun.
+ * (getDocumentsByIds, findByOrigin, findByOriginAcrossSpaces) apply
+ * the same mapping — keeping them in sync by-hand is a footgun.
  */
 const hydrateDocument = (source: SmlDocument): SmlDocument => {
   const originUri = source.origin?.uri ?? '';
@@ -1579,7 +1601,7 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
  * `spaceId`. Wildcard (`'*'`) entries are treated as global.
  *
  * Exported so route helpers (HTTP upsert/delete cross-space guard) can
- * apply the same predicate used internally by `findByOriginId`.
+ * apply the same predicate used internally by `findByOrigin`.
  */
 export const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
   if (!spaces || spaces.length === 0) return false;

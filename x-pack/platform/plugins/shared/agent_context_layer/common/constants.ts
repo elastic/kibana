@@ -9,15 +9,27 @@ export const internalApiPath = '/internal/agent_context_layer';
 export const smlSearchPath = `${internalApiPath}/sml/_search`;
 export const smlBasePath = `${internalApiPath}/sml`;
 /**
- * Path for GET/PUT/DELETE of a single SML origin. The URL parameter is the
- * `origin_id` — globally unique across types — not a per-chunk document id.
- * GET returns every chunk written under that origin (a workflow step may
- * write multiple). PUT/DELETE both operate on the origin as a whole and
- * route through {@link SmlIndexer.indexAttachment} / `deleteAttachment` so
- * permissions and ingestion-method semantics stay consistent with every
- * other write path.
+ * Path for GET/PUT/DELETE of a single SML origin.
+ *
+ * The path uses **both** the SML `type` and the `origin_id` because
+ * the storage's canonical key is the compound `origin.uri =
+ * ${type}://${originId}`. A `(type, originId)` pair is the smallest
+ * thing the system can address unambiguously — two different SML
+ * types can legitimately reuse the same bare `origin_id` (e.g. a lens
+ * id and a dashboard id can collide). An earlier design used
+ * `/sml/{originId}` and assumed the bare id was globally unique; that
+ * assumption never held, and the resulting query path (`term:
+ * { origin_id }`) hit an unmapped field — silent zero-result reads
+ * that masked every guard the per-origin routes apply.
+ *
+ * GET returns every chunk written under the origin (workflow steps
+ * can produce more than one). PUT/DELETE both operate on the origin
+ * as a whole and route through
+ * {@link SmlIndexer.indexAttachment} / `deleteAttachment` so
+ * permissions and ingestion-method semantics stay consistent with
+ * every other write path.
  */
-export const smlByOriginIdPath = `${smlBasePath}/{originId}`;
+export const smlByTypeAndOriginIdPath = `${smlBasePath}/{type}/{originId}`;
 export const smlAutocompletePath = `${internalApiPath}/sml/_autocomplete`;
 
 /**
@@ -77,7 +89,8 @@ export const MAX_SML_TAGS_PER_DOCUMENT = 100;
 
 /**
  * Maximum number of chunks the SML service will return for a single
- * `origin_id` from `findByOriginId` / `findByOriginIdAcrossSpaces`.
+ * origin (compound `(type, originId)`) from `findByOrigin` /
+ * `findByOriginAcrossSpaces`.
  *
  * Used as the `size` of the per-origin lookup queries. ES capped at
  * 10_000 by default (`index.max_result_window`), but 1000 is the
@@ -88,6 +101,6 @@ export const MAX_SML_TAGS_PER_DOCUMENT = 100;
  * warning so operators can detect a producer that has gone off the
  * rails (or a typo collapsing many distinct origins into one). The
  * cross-space guard may miss chunks beyond this limit — see
- * `findByOriginIdAcrossSpaces` JSDoc.
+ * `findByOriginAcrossSpaces` JSDoc.
  */
 export const MAX_CHUNKS_PER_ORIGIN = 1000;

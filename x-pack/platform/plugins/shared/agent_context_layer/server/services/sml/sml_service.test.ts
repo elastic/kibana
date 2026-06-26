@@ -244,8 +244,8 @@ describe('createSmlService', () => {
       expect(smlService.autocomplete).toBeDefined();
       expect(smlService.checkItemsAccess).toBeDefined();
       expect(smlService.getDocuments).toBeDefined();
-      expect(smlService.findByOriginId).toBeDefined();
-      expect(smlService.findByOriginIdAcrossSpaces).toBeDefined();
+      expect(smlService.findByOrigin).toBeDefined();
+      expect(smlService.findByOriginAcrossSpaces).toBeDefined();
       expect(smlService.indexAttachment).toBeDefined();
       expect(smlService.deleteAttachment).toBeDefined();
       expect(smlService.getTypeDefinition).toBeDefined();
@@ -2179,8 +2179,8 @@ describe('SmlService', () => {
     });
   });
 
-  describe('findByOriginId', () => {
-    it('returns every chunk matching origin_id that is visible in the caller space', async () => {
+  describe('findByOrigin', () => {
+    it('returns every chunk matching (type, originId) that is visible in the caller space', async () => {
       esClient.search.mockResolvedValue({
         hits: {
           total: 2,
@@ -2190,7 +2190,6 @@ describe('SmlService', () => {
                 id: 'chunk-1',
                 type: 'visualization',
                 title: 'Viz',
-                origin_id: 'ref-1',
                 origin: { uri: 'visualization://ref-1' },
                 content: 'c1',
                 created_at: '2024-01-01',
@@ -2205,7 +2204,6 @@ describe('SmlService', () => {
                 id: 'chunk-2',
                 type: 'visualization',
                 title: 'Viz',
-                origin_id: 'ref-1',
                 origin: { uri: 'visualization://ref-1' },
                 content: 'c2',
                 created_at: '2024-01-01',
@@ -2223,7 +2221,8 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      const result = await smlService.findByOriginId({
+      const result = await smlService.findByOrigin({
+        type: 'visualization',
         originId: 'ref-1',
         spaceId: 'default',
         esClient: scopedClient,
@@ -2231,11 +2230,13 @@ describe('SmlService', () => {
 
       expect(result).toHaveLength(2);
       expect(result.map((d) => d.id).sort()).toEqual(['chunk-1', 'chunk-2']);
-      // Query targets the `origin_id` keyword field and applies the
-      // space filter — not `origin.uri`, because callers carry the bare id.
+      // Query targets the canonical `origin.uri` keyword — the only
+      // top-level identifier the storage actually maps. Earlier
+      // revisions queried a phantom `origin_id` field that didn't
+      // exist in the mapping and every lookup silently returned [].
       const passed = esClient.search.mock.calls[0][0] as any;
       const filters = passed.query.bool.filter as any[];
-      expect(filters[0]).toEqual({ term: { origin_id: 'ref-1' } });
+      expect(filters[0]).toEqual({ term: { 'origin.uri': 'visualization://ref-1' } });
     });
 
     it('returns [] when no chunks exist or the index is missing', async () => {
@@ -2245,7 +2246,8 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      const result = await smlService.findByOriginId({
+      const result = await smlService.findByOrigin({
+        type: 'visualization',
         originId: 'never',
         spaceId: 'default',
         esClient: scopedClient,
@@ -2262,15 +2264,14 @@ describe('SmlService', () => {
       const smlService = service.start({ logger });
 
       await expect(
-        smlService.findByOriginId({
+        smlService.findByOrigin({
+          type: 'visualization',
           originId: 'ref-1',
           spaceId: 'default',
           esClient: scopedClient,
         })
       ).rejects.toThrow('cluster melted');
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('SML findByOriginId failed')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('SML findByOrigin failed'));
     });
 
     it('logs a warning when total chunks exceed MAX_CHUNKS_PER_ORIGIN', async () => {
@@ -2280,7 +2281,7 @@ describe('SmlService', () => {
       // has gone off the rails (or a typo collapsing many distinct
       // origins into one). The returned chunks are still useful — the
       // per-space lookup is informational, not security-critical (see
-      // findByOriginIdAcrossSpaces for the guard-side case).
+      // findByOriginAcrossSpaces for the guard-side case).
       esClient.search.mockResolvedValue({
         hits: {
           total: { value: 1500, relation: 'eq' },
@@ -2292,14 +2293,15 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      await smlService.findByOriginId({
+      await smlService.findByOrigin({
+        type: 'visualization',
         originId: 'overfull',
         spaceId: 'default',
         esClient: scopedClient,
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("origin 'overfull' has 1500 chunks")
+        expect.stringContaining("origin 'visualization://overfull' has 1500 chunks")
       );
 
       // The query also opts into `track_total_hits` and uses the
@@ -2311,7 +2313,7 @@ describe('SmlService', () => {
     });
   });
 
-  describe('findByOriginIdAcrossSpaces', () => {
+  describe('findByOriginAcrossSpaces', () => {
     it('returns matching chunks regardless of which space they are in', async () => {
       esClient.search.mockResolvedValue({
         hits: {
@@ -2322,7 +2324,6 @@ describe('SmlService', () => {
                 id: 'chunk-1',
                 type: 'visualization',
                 title: 'Viz',
-                origin_id: 'ref-1',
                 origin: { uri: 'visualization://ref-1' },
                 content: '',
                 created_at: '',
@@ -2337,7 +2338,6 @@ describe('SmlService', () => {
                 id: 'chunk-2',
                 type: 'visualization',
                 title: 'Viz',
-                origin_id: 'ref-1',
                 origin: { uri: 'visualization://ref-1' },
                 content: '',
                 created_at: '',
@@ -2355,16 +2355,17 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      const result = await smlService.findByOriginIdAcrossSpaces({
+      const result = await smlService.findByOriginAcrossSpaces({
+        type: 'visualization',
         originId: 'ref-1',
         esClient: scopedClient,
       });
 
       expect(result).toHaveLength(2);
-      // No space filter — only the origin_id filter is applied.
+      // No space filter — only the origin.uri filter is applied.
       const passed = esClient.search.mock.calls[0][0] as any;
       const filters = passed.query.bool.filter as any[];
-      expect(filters).toEqual([{ term: { origin_id: 'ref-1' } }]);
+      expect(filters).toEqual([{ term: { 'origin.uri': 'visualization://ref-1' } }]);
     });
 
     it('returns [] when index is missing', async () => {
@@ -2374,7 +2375,8 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      const result = await smlService.findByOriginIdAcrossSpaces({
+      const result = await smlService.findByOriginAcrossSpaces({
+        type: 'visualization',
         originId: 'never',
         esClient: scopedClient,
       });
@@ -2390,13 +2392,14 @@ describe('SmlService', () => {
       const smlService = service.start({ logger });
 
       await expect(
-        smlService.findByOriginIdAcrossSpaces({
+        smlService.findByOriginAcrossSpaces({
+          type: 'visualization',
           originId: 'ref-1',
           esClient: scopedClient,
         })
       ).rejects.toThrow('boom');
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('SML findByOriginIdAcrossSpaces failed')
+        expect.stringContaining('SML findByOriginAcrossSpaces failed')
       );
     });
 
@@ -2416,7 +2419,8 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      await smlService.findByOriginIdAcrossSpaces({
+      await smlService.findByOriginAcrossSpaces({
+        type: 'visualization',
         originId: 'ref-1',
         esClient: scopedClient,
       });
@@ -2442,13 +2446,14 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      await smlService.findByOriginIdAcrossSpaces({
+      await smlService.findByOriginAcrossSpaces({
+        type: 'visualization',
         originId: 'overfull',
         esClient: scopedClient,
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("origin 'overfull' has 2000 chunks")
+        expect.stringContaining("origin 'visualization://overfull' has 2000 chunks")
       );
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('cross-space overwrite guard may miss chunks')

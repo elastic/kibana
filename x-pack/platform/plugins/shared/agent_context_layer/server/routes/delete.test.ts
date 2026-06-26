@@ -17,6 +17,8 @@ import {
 } from './test_helpers';
 import { registerDeleteRoute } from './delete';
 
+const validParams = { type: 'visualization', originId: 'viz-1' };
+
 describe('registerDeleteRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let handler: Function;
@@ -46,51 +48,56 @@ describe('registerDeleteRoute', () => {
   };
 
   it('returns 404 when feature flag is disabled', async () => {
-    const response = await callHandler({ originId: 'viz-1' }, false);
+    const response = await callHandler(validParams, false);
     expect(response.notFound).toHaveBeenCalled();
     expect(mockSmlService.deleteAttachment).not.toHaveBeenCalled();
   });
 
   it('returns 404 when origin has no chunks anywhere', async () => {
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([]);
-    const response = await callHandler({ originId: 'missing' });
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([]);
+    const response = await callHandler({ type: 'visualization', originId: 'missing' });
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML origin 'missing' not found" },
+      body: { message: "SML origin 'visualization/missing' not found" },
     });
     expect(mockSmlService.deleteAttachment).not.toHaveBeenCalled();
   });
 
   it('returns 404 when origin is owned by another space', async () => {
     const otherSpaceDoc = { ...sampleDocument, spaces: ['other-space'] };
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([otherSpaceDoc]);
 
-    const response = await callHandler({ originId: 'viz-1' });
+    const response = await callHandler(validParams);
 
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML origin 'viz-1' not found" },
+      body: { message: "SML origin 'visualization/viz-1' not found" },
     });
     expect(mockSmlService.deleteAttachment).not.toHaveBeenCalled();
   });
 
   it('returns 404 when caller cannot access every chunk', async () => {
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, false]]));
 
-    const response = await callHandler({ originId: 'viz-1' });
+    const response = await callHandler(validParams);
 
     expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: "SML origin 'viz-1' not found" },
+      body: { message: "SML origin 'visualization/viz-1' not found" },
     });
     expect(mockSmlService.deleteAttachment).not.toHaveBeenCalled();
   });
 
   it('deletes every chunk for the origin with ingestionMethod=all', async () => {
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
     mockSmlService.deleteAttachment.mockResolvedValue(undefined);
 
-    const response = await callHandler({ originId: 'viz-1' });
+    const response = await callHandler(validParams);
 
+    // Single delete — `type` is pinned by the URL. No multi-type
+    // fan-out; the previous version of this route discovered `type`
+    // by enumerating chunks and looped, which was a side-effect of
+    // the (now removed) `/sml/{originId}` URL shape.
+    expect(mockSmlService.deleteAttachment).toHaveBeenCalledTimes(1);
     expect(mockSmlService.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
         originId: 'viz-1',
@@ -104,27 +111,26 @@ describe('registerDeleteRoute', () => {
     });
   });
 
-  it('dispatches a separate delete per type when the origin spans multiple types', async () => {
+  it('targets only the URL-pinned type even if chunks of other types share the bare id', async () => {
+    // With `type` in the URL, the route never needs to enumerate
+    // types — the `findByOriginAcrossSpaces` query is already scoped
+    // by `origin.uri = ${type}://${originId}`. This test pins the
+    // contract that a DELETE for `visualization/viz-1` will never
+    // touch a `dashboard/viz-1` chunk that legitimately shares the
+    // bare id. The mock service returns only what the canonical URI
+    // would match, so the route's behaviour reduces to: one delete,
+    // exactly one `attachmentType`.
     const vizChunk = { ...sampleDocument, id: 'chunk-1', type: 'visualization' };
-    const dashChunk = { ...sampleDocument, id: 'chunk-2', type: 'dashboard' };
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([vizChunk, dashChunk]);
-    mockSmlService.checkItemsAccess.mockResolvedValue(
-      new Map([
-        [vizChunk.id, true],
-        [dashChunk.id, true],
-      ])
-    );
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([vizChunk]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[vizChunk.id, true]]));
     mockSmlService.deleteAttachment.mockResolvedValue(undefined);
 
-    await callHandler({ originId: 'viz-1' });
+    await callHandler(validParams);
 
+    expect(mockSmlService.deleteAttachment).toHaveBeenCalledTimes(1);
     expect(mockSmlService.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ attachmentType: 'visualization' })
     );
-    expect(mockSmlService.deleteAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({ attachmentType: 'dashboard' })
-    );
-    expect(mockSmlService.deleteAttachment).toHaveBeenCalledTimes(2);
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {
@@ -137,11 +143,11 @@ describe('registerDeleteRoute', () => {
     });
 
     const [, localHandler] = localRouter.delete.mock.calls[0];
-    const request = httpServerMock.createKibanaRequest({ params: { originId: 'viz-1' } });
+    const request = httpServerMock.createKibanaRequest({ params: validParams });
     const response = httpServerMock.createResponseFactory();
 
     const defaultSpaceDoc = { ...sampleDocument, spaces: ['default'] };
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([defaultSpaceDoc]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([defaultSpaceDoc]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[defaultSpaceDoc.id, true]]));
     mockSmlService.deleteAttachment.mockResolvedValue(undefined);
 
@@ -153,11 +159,11 @@ describe('registerDeleteRoute', () => {
   });
 
   it('propagates errors from sml.deleteAttachment', async () => {
-    mockSmlService.findByOriginIdAcrossSpaces.mockResolvedValue([sampleDocument]);
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([sampleDocument]);
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
     mockSmlService.deleteAttachment.mockRejectedValue(new Error('boom'));
 
-    await expect(callHandler({ originId: 'viz-1' })).rejects.toThrow('boom');
+    await expect(callHandler(validParams)).rejects.toThrow('boom');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 });
