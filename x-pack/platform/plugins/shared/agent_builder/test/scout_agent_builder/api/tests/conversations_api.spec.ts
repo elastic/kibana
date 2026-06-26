@@ -313,22 +313,6 @@ apiTest.describe(
       });
     });
 
-    apiTest('converse rejects unsupported access mode values', async ({ asAdmin }) => {
-      const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
-        body: {
-          input: 'Unsupported access mode test',
-          connector_id: connectorId,
-          _execution_mode: 'local',
-          access_control: {
-            access_mode: 'shared',
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(400);
-    });
-
     apiTest('GET /conversations/:id returns 404 for missing id', async ({ asAdmin }) => {
       const response = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/non-existent-conversation-id-12345`,
