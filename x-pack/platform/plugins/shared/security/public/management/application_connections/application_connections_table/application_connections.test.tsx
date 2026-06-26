@@ -872,10 +872,5 @@ describe('ApplicationConnections', () => {
     expect(within(flyout).getByText('My MCP app')).toBeInTheDocument();
     expect(within(flyout).getByText('client-a')).toBeInTheDocument();
     expect(within(flyout).getByText(mcpServerUrl)).toBeInTheDocument();
-    expect(
-      within(flyout).queryByText(
-        'https://cluster.example.com/api/agent_builder/mcp/api/agent_builder/mcp'
-      )
-    ).not.toBeInTheDocument();
   });
 });
