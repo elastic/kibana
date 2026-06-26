@@ -10,11 +10,7 @@ import type {
   ToolSelectionRelevantFields,
   ToolDefinition,
 } from '@kbn/agent-builder-common';
-import {
-  ToolType,
-  allToolsSelectionWildcard,
-  elasticCapabilitiesExcludedBuiltinSkillIds,
-} from '@kbn/agent-builder-common';
+import { ToolType, allToolsSelectionWildcard } from '@kbn/agent-builder-common';
 import {
   toggleToolSelection,
   isToolSelected,
@@ -171,24 +167,20 @@ describe('tool_selection_utils', () => {
       expect(result.map((s) => s.id)).toEqual(['skill1', 'skill3']);
     });
 
-    it('should not auto-include elastic-capabilities-excluded built-in skills', () => {
-      const skillsWithExcluded = [
-        ...mockSkills,
-        { id: elasticCapabilitiesExcludedBuiltinSkillIds[0], readonly: true },
-      ];
+    it('should auto-include ml.anomaly-detection built-in skill when elastic capabilities are enabled', () => {
+      const skillsWithMl = [...mockSkills, { id: 'ml.anomaly-detection', readonly: true }];
 
-      const result = getActiveSkills(skillsWithExcluded, undefined, true);
+      const result = getActiveSkills(skillsWithMl, undefined, true);
 
-      expect(result.map((s) => s.id)).toEqual(['skill1', 'skill3']);
+      expect(result.map((s) => s.id)).toEqual(['skill1', 'skill3', 'ml.anomaly-detection']);
     });
 
-    it('should include excluded built-in skills when explicitly selected', () => {
-      const excludedId = elasticCapabilitiesExcludedBuiltinSkillIds[0];
-      const skillsWithExcluded = [...mockSkills, { id: excludedId, readonly: true }];
+    it('should include ml.anomaly-detection when explicitly selected', () => {
+      const skillsWithMl = [...mockSkills, { id: 'ml.anomaly-detection', readonly: true }];
 
-      const result = getActiveSkills(skillsWithExcluded, [excludedId], true);
+      const result = getActiveSkills(skillsWithMl, ['ml.anomaly-detection'], true);
 
-      expect(result.map((s) => s.id)).toEqual([excludedId, 'skill1', 'skill3']);
+      expect(result.map((s) => s.id)).toEqual(['ml.anomaly-detection', 'skill1', 'skill3']);
     });
 
     it('should return empty array when explicit ids is empty and capabilities are disabled', () => {

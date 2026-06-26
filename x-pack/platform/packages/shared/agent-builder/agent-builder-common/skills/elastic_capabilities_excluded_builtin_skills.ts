@@ -9,8 +9,11 @@
  * Built-in skills that are registered and visible in the skills library, but are not
  * automatically enabled when `enable_elastic_capabilities` is true. Users must add
  * these skills explicitly on an agent.
+ *
+ * Skills that should only be available when a plugin is enabled (for example ML) should
+ * rely on plugin registration instead of being listed here.
  */
-export const elasticCapabilitiesExcludedBuiltinSkillIds = ['ml.anomaly-detection'] as const;
+export const elasticCapabilitiesExcludedBuiltinSkillIds = [] as const;
 
 export type ElasticCapabilitiesExcludedBuiltinSkillId =
   (typeof elasticCapabilitiesExcludedBuiltinSkillIds)[number];

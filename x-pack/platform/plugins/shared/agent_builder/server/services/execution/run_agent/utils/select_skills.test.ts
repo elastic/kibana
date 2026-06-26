@@ -6,7 +6,6 @@
  */
 
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
-import { elasticCapabilitiesExcludedBuiltinSkillIds } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { createSkillsServiceMock, createSkillsStoreMock } from '../../../../test_utils/runner';
 import { selectSkills } from './select_skills';
@@ -144,11 +143,11 @@ describe('selectSkills', () => {
     expect(result.map((s) => s.id).sort()).toEqual(['builtin-1', 'builtin-2', 'custom-1']);
   });
 
-  it('does not auto-include elastic-capabilities-excluded built-in skills', async () => {
-    const excludedSkill = createSkill(elasticCapabilitiesExcludedBuiltinSkillIds[0], true);
+  it('auto-includes ml.anomaly-detection built-in skill when elastic capabilities are enabled', async () => {
+    const mlSkill = createSkill('ml.anomaly-detection', true);
     const includedBuiltin = createSkill('builtin-1', true);
     const skills = createSkillsServiceMock();
-    skills.list.mockResolvedValue([excludedSkill, includedBuiltin]);
+    skills.list.mockResolvedValue([mlSkill, includedBuiltin]);
     const skillsStore = createSkillsStoreMock();
 
     const result = await selectSkills({
@@ -157,27 +156,25 @@ describe('selectSkills', () => {
       agentConfiguration: createConfig({ enable_elastic_capabilities: true }),
     });
 
-    expect(result.map((s) => s.id)).toEqual(['builtin-1']);
+    expect(result.map((s) => s.id).sort()).toEqual(['builtin-1', 'ml.anomaly-detection']);
   });
 
-  it('includes excluded built-in skills when explicitly selected', async () => {
-    const excludedSkill = createSkill(elasticCapabilitiesExcludedBuiltinSkillIds[0], true);
+  it('includes explicitly selected built-in skills', async () => {
+    const mlSkill = createSkill('ml.anomaly-detection', true);
     const skills = createSkillsServiceMock();
-    skills.bulkGet.mockResolvedValue(
-      new Map([[elasticCapabilitiesExcludedBuiltinSkillIds[0], excludedSkill]])
-    );
+    skills.bulkGet.mockResolvedValue(new Map([['ml.anomaly-detection', mlSkill]]));
     const skillsStore = createSkillsStoreMock();
 
     const result = await selectSkills({
       skills,
       skillsStore,
       agentConfiguration: createConfig({
-        skill_ids: [elasticCapabilitiesExcludedBuiltinSkillIds[0]],
+        skill_ids: ['ml.anomaly-detection'],
         enable_elastic_capabilities: true,
       }),
     });
 
-    expect(result).toEqual([excludedSkill]);
+    expect(result).toEqual([mlSkill]);
   });
 
   describe('additionalSkillIds (plugin skills)', () => {
