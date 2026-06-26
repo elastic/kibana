@@ -28,6 +28,8 @@ export interface SignalFiringsChartProps {
   buckets: SignalFiringBucket[];
   gteMs: number;
   lteMs: number;
+  /** Histogram bucket width in epoch ms; required so sparse buckets render at full width. */
+  minIntervalMs: number;
   timeZone?: string;
   /** Called when the user drag-selects a range on the chart (epoch ms). */
   onBrushRange: (fromMs: number, toMs: number) => void;
@@ -37,6 +39,7 @@ export const SignalFiringsChart: React.FC<SignalFiringsChartProps> = ({
   buckets,
   gteMs,
   lteMs,
+  minIntervalMs,
   timeZone,
   onBrushRange,
 }) => {
@@ -60,7 +63,7 @@ export const SignalFiringsChart: React.FC<SignalFiringsChartProps> = ({
         baseTheme={baseTheme}
         locale={i18n.getLocale()}
         showLegend={false}
-        xDomain={{ min: gteMs, max: lteMs }}
+        xDomain={{ min: gteMs, max: lteMs, minInterval: minIntervalMs }}
         onBrushEnd={handleBrushEnd as BrushEndListener}
       />
       <Axis id="signalFiringsLeft" position={Position.Left} ticks={3} integersOnly />

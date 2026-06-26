@@ -22,6 +22,7 @@ import type { OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { intervalToMs } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -76,6 +77,8 @@ export const SignalRuleOverview: React.FC = () => {
     lteMs,
     data,
   });
+
+  const intervalMs = useMemo(() => intervalToMs(interval), [interval]);
 
   const kpis = useMemo(
     () => deriveSignalFiringKpis(buckets, gteMs, lteMs, interval),
@@ -163,7 +166,21 @@ export const SignalRuleOverview: React.FC = () => {
 
       {/* KPI panel */}
       <EuiPanel hasBorder paddingSize="m" data-test-subj="signalOverviewKpiPanel">
-        <StatsRow stats={stats} data-test-subj="signalOverviewStatsRow" />
+        {isLoading && (
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            responsive={false}
+            data-test-subj="signalOverviewKpiLoading"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiLoadingChart size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {!isLoading && !isError && (
+          <StatsRow stats={stats} data-test-subj="signalOverviewStatsRow" />
+        )}
       </EuiPanel>
 
       <EuiSpacer size="m" />
@@ -263,6 +280,7 @@ export const SignalRuleOverview: React.FC = () => {
             buckets={buckets}
             gteMs={gteMs}
             lteMs={lteMs}
+            minIntervalMs={intervalMs}
             timeZone={timeZone}
             onBrushRange={onBrushRange}
           />
