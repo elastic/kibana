@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 
 import type {
   AgentConditionExpression,
@@ -17,11 +17,14 @@ import type {
   ExperimentalDataStreamFeature,
 } from '../types';
 import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
+import type { RegistryVarGroup } from '../types/models/package_spec';
+import type { NewAgentlessPolicy } from '../types/rest_spec/agentless_policy';
 
 import { PackagePolicyValidationError } from '../errors';
 
 import { packageToPackagePolicy, getInputEffectiveName } from '.';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
+import { detectTargetCsp } from './cloud_connectors';
 
 export type SimplifiedVars = Record<
   string,
@@ -329,3 +332,51 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
   return packagePolicy;
 }
+
+type AgentlessPolicyInput = NewPackagePolicy & {
+  force?: boolean;
+  create_dataset_templates?: boolean;
+};
+
+export const toNewAgentlessPolicy = (
+  packagePolicy: AgentlessPolicyInput,
+  varGroups?: RegistryVarGroup[]
+): NewAgentlessPolicy => {
+  const targetCsp = detectTargetCsp(packagePolicy, varGroups);
+
+  return {
+    ...omit(
+      packagePolicy,
+      'policy_ids',
+      'policy_id',
+      'output_id',
+      'package',
+      'enabled',
+      'inputs',
+      'vars',
+      'id',
+      'condition',
+      'supports_agentless',
+      'supports_cloud_connector',
+      'cloud_connector_id',
+      'cloud_connector_name'
+    ),
+    package: omit(packagePolicy.package, 'title'),
+    id: packagePolicy.id ? String(packagePolicy.id) : undefined,
+    inputs: formatInputs(packagePolicy.inputs, true),
+    vars: formatVars(packagePolicy.vars),
+    ...(packagePolicy.supports_cloud_connector && {
+      cloud_connector: {
+        enabled: true,
+        ...(targetCsp && { target_csp: targetCsp }),
+        ...(packagePolicy.cloud_connector_id && {
+          cloud_connector_id: packagePolicy.cloud_connector_id,
+        }),
+        ...(!packagePolicy.cloud_connector_id &&
+          packagePolicy.cloud_connector_name && {
+            name: packagePolicy.cloud_connector_name,
+          }),
+      },
+    }),
+  };
+};
