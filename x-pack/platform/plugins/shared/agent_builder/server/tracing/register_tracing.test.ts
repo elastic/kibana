@@ -105,7 +105,6 @@ describe('registerTracingExporter', () => {
   it('always initializes the tracing pipeline (ES exporter is always set up for uiSetting-based toggling)', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      send_to_self: false,
       exporters: [],
       scheduledDelay: 1000,
       opik_distributed_tracing: false,
@@ -128,7 +127,6 @@ describe('registerTracingExporter', () => {
   it('creates OTLPTraceExporter when exporters with url are configured', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      send_to_self: false,
       exporters: [
         {
           url: 'http://otel-collector:4318/v1/traces',
@@ -155,10 +153,9 @@ describe('registerTracingExporter', () => {
     );
   });
 
-  it('creates ElasticsearchOtlpExporter (always, not gated by send_to_self)', async () => {
+  it('creates ElasticsearchOtlpExporter (always)', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      send_to_self: false,
       exporters: [],
       scheduledDelay: 500,
       opik_distributed_tracing: false,
@@ -178,7 +175,6 @@ describe('registerTracingExporter', () => {
   it('initializes inference tracer provider with span processors', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      send_to_self: true,
       exporters: [],
       scheduledDelay: 250,
       opik_distributed_tracing: false,
@@ -206,7 +202,6 @@ describe('registerTracingExporter', () => {
   it('createCachedTracingSettings returns enabled=true after registerTracingExporter resolves', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
       opik_distributed_tracing: false,
@@ -229,7 +224,6 @@ describe('registerTracingExporter', () => {
     scopedUiSettings.get.mockResolvedValue(true);
 
     const tracingConfig: TracingConfig = {
-      send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
       opik_distributed_tracing: false,
@@ -253,7 +247,6 @@ describe('registerTracingExporter', () => {
     scopedUiSettings.get.mockResolvedValue(true);
 
     const tracingConfig: TracingConfig = {
-      send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
       opik_distributed_tracing: false,
@@ -276,7 +269,6 @@ describe('registerTracingExporter', () => {
     scopedUiSettings.get.mockResolvedValue(true);
 
     const tracingConfig: TracingConfig = {
-      send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
       opik_distributed_tracing: false,

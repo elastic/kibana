@@ -144,14 +144,14 @@ async function removeAgentBuilderOverviewDashboard(
 }
 
 /**
- * sync the dashboard for all spaces. The dashboard visualizes Agent Builder
- * traces, which are only shipped to the local cluster when
- * `xpack.agentBuilder.tracing.send_to_self` is enabled, so the dashboard is
- * installed only when that flag is on and removed from every space otherwise.
+ * Sync the dashboard for all spaces. The dashboard visualizes Agent Builder
+ * traces. When tracing is enabled (via the experimental features and tracing
+ * uiSettings), the dashboard is installed into every space; otherwise it is
+ * removed.
  */
 export async function syncAgentBuilderOverviewDashboard(
   coreStart: Pick<CoreStart, 'savedObjects'>,
-  sendToSelf: boolean,
+  tracingEnabled: boolean,
   logger: Logger
 ): Promise<void> {
   const client = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
@@ -168,7 +168,7 @@ export async function syncAgentBuilderOverviewDashboard(
     async (spaceId) => {
       const namespace = spaceId === 'default' ? undefined : spaceId;
       try {
-        if (sendToSelf) {
+        if (tracingEnabled) {
           await installAgentBuilderOverviewDashboard(client, importer, logger, spaceId, namespace);
         } else {
           await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
