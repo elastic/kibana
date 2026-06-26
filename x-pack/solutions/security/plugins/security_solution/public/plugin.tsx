@@ -302,13 +302,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases.attachmentFramework.registerUnified(getSecurityAlertType());
     cases.attachmentFramework.registerUnified(getTimelineAttachment());
 
-    if (this.experimentalFeatures.entityAttachmentsEnabled) {
-      // Lazily registered: the entity attachment is only rendered inside a case view
-      // (a lazy-loaded route), so keep its module graph out of the page-load bundle.
-      void import('./cases/attachments/entity').then(({ getEntityAttachment }) => {
-        cases.attachmentFramework.registerUnified(getEntityAttachment());
-      });
-    }
+    // Always register the entity attachment renderer so that attachments created
+    // while the feature flag was enabled continue to display correctly after the
+    // flag is disabled. The flag gates server-side writes; client-side rendering
+    // must be unconditional to avoid "Attachment type is not registered" errors.
+    // Lazily imported to keep the entity attachment module out of the page-load bundle.
+    void import('./cases/attachments/entity').then(({ getEntityAttachment }) => {
+      cases.attachmentFramework.registerUnified(getEntityAttachment());
+    });
 
     this.registerDiscoverSharedFeatures(core, plugins);
 
