@@ -12,13 +12,6 @@ import type { PackagePolicy } from '../../../common/types/models';
 
 import { getPolicyThroughput } from './throughput';
 
-jest.mock('../data_streams', () => ({
-  dataStreamService: {
-    streamPartsToIndexPattern: ({ type, dataset }: { type: string; dataset: string }) =>
-      `${type}-${dataset}-*`,
-  },
-}));
-
 jest.mock('../epm/elasticsearch/retry', () => ({
   retryTransientEsErrors: (fn: () => Promise<unknown>) => fn(),
 }));

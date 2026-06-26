@@ -19,6 +19,7 @@ import type {
 } from '../../../common/types/rest_spec/agentless_policy';
 
 import { sendRequestForRq } from './use_request';
+import type { RequestError } from './use_request';
 
 export const sendCreateAgentlessPolicy = (body: CreateAgentlessPolicyRequest['body']) => {
   return sendRequestForRq<CreateAgentlessPolicyResponse>({
@@ -42,7 +43,7 @@ export const sendDeleteAgentlessPolicy = (
 };
 
 export const useBulkGetAgentlessPolicyThroughput = (policyIds: string[]) => {
-  return useQuery<GetBulkAgentlessPolicyThroughputResponse>(
+  return useQuery<GetBulkAgentlessPolicyThroughputResponse, RequestError>(
     ['agentlessPolicyThroughput', policyIds],
     () =>
       sendRequestForRq<GetBulkAgentlessPolicyThroughputResponse>({
@@ -53,6 +54,8 @@ export const useBulkGetAgentlessPolicyThroughput = (policyIds: string[]) => {
       }),
     {
       enabled: policyIds.length > 0,
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
     }
   );
 };

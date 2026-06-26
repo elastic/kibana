@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { PackagePolicy } from '../../../common/types/models';
 import type { AgentlessPolicyThroughput } from '../../../common/types/rest_spec/agentless_policy';
-import { dataStreamService } from '../data_streams';
+import { getAgentlessThroughputIndexPatterns } from '../../../common/services/agentless_throughput_helper';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 const PEAK_WINDOW_SECONDS = 10;
@@ -34,18 +32,7 @@ export const getPolicyThroughput = async (
   const emptyResult = { averagePerSecond: 0, series: [] };
 
   // Derive unique index patterns from the package policy's enabled data streams
-  const indexPatterns = uniq(
-    packagePolicy.inputs.flatMap((input) =>
-      input.streams
-        .filter((stream) => stream.enabled)
-        .map((stream) =>
-          dataStreamService.streamPartsToIndexPattern({
-            type: stream.data_stream.type ?? 'logs',
-            dataset: stream.data_stream.dataset,
-          })
-        )
-    )
-  );
+  const indexPatterns = getAgentlessThroughputIndexPatterns(packagePolicy);
 
   if (indexPatterns.length === 0) {
     return emptyResult;

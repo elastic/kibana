@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { Axis, Chart, Position, Settings, AreaSeries, ScaleType } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
@@ -30,9 +30,10 @@ export const ThroughputNotApplicable: React.FC = () => (
 export const ThroughputCell: React.FC<{
   data?: AgentlessPolicyThroughput;
   isLoading: boolean;
-}> = ({ data, isLoading }) => {
+  discover?: { href: string; navigate: () => void };
+}> = ({ data, isLoading, discover }) => {
   const chartBaseTheme = useElasticChartsTheme();
-  const locale = useMemo(() => i18n.getLocale(), []);
+  const locale = i18n.getLocale();
   const formatTimestamp = useCallback(
     (ms: number) =>
       new Date(ms).toLocaleString(locale, {
@@ -52,7 +53,7 @@ export const ThroughputCell: React.FC<{
     return <ThroughputDash data-test-subj="agentlessThroughputNoData" />;
   }
 
-  return (
+  const content = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiText size="s" className="eui-textNoWrap" data-test-subj="agentlessThroughputValue">
@@ -87,5 +88,30 @@ export const ThroughputCell: React.FC<{
         </Chart>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+
+  if (!discover) {
+    return content;
+  }
+
+  return (
+    <EuiLink
+      href={discover.href}
+      onClick={(e: React.MouseEvent) => {
+        // Allow modifier-key clicks (cmd/ctrl/shift) and middle-clicks to open
+        // a new tab naturally; intercept plain left-clicks for SPA navigation.
+        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+          e.preventDefault();
+          discover.navigate();
+        }
+      }}
+      data-test-subj="agentlessThroughputDiscoverLink"
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.packageDetails.integrationList.throughputDiscoverLink',
+        { defaultMessage: 'View throughput documents in Discover' }
+      )}
+    >
+      {content}
+    </EuiLink>
   );
 };

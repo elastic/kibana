@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +31,9 @@ import {
   useAuthz,
   useStartServices,
   useBulkGetAgentlessPolicyThroughput,
+  useDiscoverLocator,
 } from '../../../../../../hooks';
+import { getAgentlessThroughputIndexPatterns } from '../../../../../../../../../common/services';
 import {
   Loading,
   PackagePolicyActionsMenu,
@@ -96,6 +98,30 @@ export const AgentlessPackagePoliciesTable = ({
         {}
       ),
     [throughputData]
+  );
+
+  const discoverLocator = useDiscoverLocator();
+  const getThroughputDiscoverParams = useCallback(
+    (packagePolicy: InMemoryPackagePolicy) => {
+      const indexPatterns = getAgentlessThroughputIndexPatterns(packagePolicy);
+      if (!discoverLocator || indexPatterns.length === 0) return undefined;
+      const title = indexPatterns.join(',');
+      const params = {
+        dataViewSpec: {
+          id: `fleet-agentless-throughput-${packagePolicy.id}`,
+          name: title,
+          title,
+          timeFieldName: 'event.ingested',
+        },
+        timeRange: { from: 'now-24h', to: 'now' },
+        query: { language: 'kuery', query: `agent.name: *${packagePolicy.id}*` },
+      };
+      return {
+        href: discoverLocator.getRedirectUrl(params),
+        navigate: () => discoverLocator.navigate(params),
+      };
+    },
+    [discoverLocator]
   );
 
   // Kuery for all agents enrolled into the agent policies associated with the package policies
@@ -272,6 +298,7 @@ export const AgentlessPackagePoliciesTable = ({
                 <ThroughputCell
                   data={throughputByPolicyId[packagePolicy.id]}
                   isLoading={isThroughputLoading}
+                  discover={getThroughputDiscoverParams(packagePolicy)}
                 />
               );
             },
