@@ -153,7 +153,7 @@ describe('actionTypeRegistry', () => {
           })
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature ids for connector type \\"my-connector-type\\" must not exceed 100 characters."`
+        `"Feature IDs for connector type \\"my-connector-type\\" must not exceed 100 characters."`
       );
     });
 
