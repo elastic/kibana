@@ -336,10 +336,13 @@ const ESQLEditorInternal = function ESQLEditor({
     reportInputLatency();
   }, [code, reportInputLatency]);
 
-  // Sync external fixedQuery; omit `code` from deps so keystrokes aren't overwritten.
   useEffect(() => {
-    setCode(fixedQuery);
-  }, [fixedQuery]);
+    if (editorRef.current) {
+      if (code !== fixedQuery) {
+        setCode(fixedQuery);
+      }
+    }
+  }, [code, fixedQuery]);
 
   // If variables are passed to the editor, sync them with the variables service.
   // This ensures that the latest variables are always available for suggestions.
@@ -748,7 +751,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   isNlToEsqlEnabled
                     ? i18n.translate('esqlEditor.placeholder', {
                         defaultMessage:
-                          "Start typing ES|QL, or describe what you're looking for in a // comment, then press {commandKey}+J to generate the query",
+                          "Start typing ES|QL, or write a // comment and press {commandKey}+J to describe what you're looking for",
                         values: { commandKey: isMac ? '⌘' : 'Ctrl' },
                       })
                     : i18n.translate('esqlEditor.placeholder.basic', {
@@ -828,7 +831,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   // Add Tab keybinding rules for inline suggestions
                   addTabKeybindingRules();
 
-                  const mouseDownDisposable = editor.onMouseDown((e) => {
+                  editor.onMouseDown((e) => {
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
                     }
@@ -840,7 +843,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     }
                   });
 
-                  const focusDisposable = editor.onDidFocusEditorText(() => {
+                  editor.onDidFocusEditorText(() => {
                     // Skip triggering suggestions on initial focus to avoid interfering
                     // with editor initialization and automated tests
                     // Also skip when date picker is open to prevent overlap
@@ -851,10 +854,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     isFirstFocusRef.current = false;
                   });
 
-                  const suggestionPopupDisposable = trackSuggestionPopupState(
-                    editor,
-                    isSuggestionPopupOpenRef
-                  );
+                  trackSuggestionPopupState(editor, isSuggestionPopupOpenRef);
 
                   // on CMD/CTRL + / comment out the entire line
                   editor.addCommand(
@@ -875,11 +875,11 @@ const ESQLEditorInternal = function ESQLEditor({
                       setEditorHeight(EDITOR_MAX_HEIGHT);
                     }
                   }
-                  const layoutChangeDisposable = editor.onDidLayoutChange((layoutInfoEvent) => {
+                  editor.onDidLayoutChange((layoutInfoEvent) => {
                     onLayoutChangeRef.current(layoutInfoEvent);
                   });
 
-                  const modelContentDisposable = editor.onDidChangeModelContent(async () => {
+                  editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
@@ -887,15 +887,6 @@ const ESQLEditorInternal = function ESQLEditor({
                     }
                     maybeTriggerSuggestions();
                   });
-
-                  const listenerDisposables = [
-                    mouseDownDisposable,
-                    focusDisposable,
-                    layoutChangeDisposable,
-                    modelContentDisposable,
-                    suggestionPopupDisposable,
-                  ];
-                  editorCommandDisposables.current.get(currentEditor)?.push(...listenerDisposables);
 
                   // Auto-focus the editor and move the cursor to the end.
                   if (!disableAutoFocus) {

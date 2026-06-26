@@ -50,7 +50,6 @@ Generate the ES|QL Query: Provide a complete ES|QL query tailored to the stated 
 Guidelines for ES|QL query generation:
 - If generated query does not have any aggregations (using STATS..BY command), make sure you add operator metadata _id, _index, _version after source index in FROM command
 - Do not use any date range filters in the query (like WHERE @timestamp > NOW() - 5 minutes) or bucket aggregation limited by time (COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), unless explicitly told to include them in query. The system will handle time range filtering separately.
-- Never use ES|QL named time parameters (?_tstart, ?_tend, or TRANGE(?_tstart, ?_tend)). Detection rules apply the time window outside the query.
 - Never include bucket aggregation limited by time (like this example COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), to avoid clash with scheduling of the detection rule.
 - If you use KEEP command, after METADATA operator, make sure to include _id field.
 - If there is no relevant data in provided index patterns context to fulfil user request, use the best effort to create query based on your knowledge of ES|QL and security detection use cases.
@@ -73,7 +72,6 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         nlQuery: state.userQuery,
         additionalInstructions,
         executeQuery: false,
-        disableNamedParams: true,
         maxRetries: 3,
         model: { chatModel: model as ScopedModel['chatModel'], inferenceClient, connector },
         esClient,
