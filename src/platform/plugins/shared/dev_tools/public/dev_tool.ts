@@ -64,6 +64,11 @@ export class DevToolApp {
    */
   public readonly order: number;
 
+  /**
+   * Mark the navigation tab as beta. Renders an icon-only beta badge on the tab.
+   */
+  public readonly isBeta?: boolean;
+
   constructor(
     id: string,
     title: string,
@@ -71,7 +76,8 @@ export class DevToolApp {
     enableRouting: boolean,
     order: number,
     toolTipContent = '',
-    disabled = false
+    disabled = false,
+    isBeta?: boolean
   ) {
     this.id = id;
     this.title = title;
@@ -80,6 +86,7 @@ export class DevToolApp {
     this.order = order;
     this.tooltipContent = toolTipContent;
     this.disabled = disabled;
+    this.isBeta = isBeta;
   }
 
   public enable() {
@@ -103,5 +110,6 @@ export const createDevToolApp = ({
   order,
   tooltipContent,
   disabled,
+  isBeta,
 }: CreateDevToolArgs) =>
-  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled);
+  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled, isBeta);

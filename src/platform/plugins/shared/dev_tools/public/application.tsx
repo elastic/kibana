@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
-import { EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiIconTip, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type {
@@ -69,6 +69,13 @@ export const staticStyles = {
 
   devApp: devAppContainerStyles,
 };
+
+const BETA_BADGE_ICON_TYPE = 'flask';
+
+const getBetaTooltip = () =>
+  i18n.translate('devTools.badge.beta.tooltip', {
+    defaultMessage: 'Beta',
+  });
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -142,6 +149,9 @@ function DevToolsWrapper({
         isSelected: currentDevTool === activeDevTool,
         disabled: currentDevTool.isDisabled(),
         toolTipContent: currentDevTool.tooltipContent,
+        badge: currentDevTool.isBeta
+          ? { iconType: BETA_BADGE_ICON_TYPE, tooltip: getBetaTooltip() }
+          : undefined,
         onClick: () => {
           if (!currentDevTool.isDisabled()) {
             history.push(`/${currentDevTool.id}`);
@@ -165,6 +175,15 @@ function DevToolsWrapper({
                   history.push(`/${currentDevTool.id}`);
                 }
               }}
+              append={
+                currentDevTool.isBeta ? (
+                  <EuiIconTip
+                    type={BETA_BADGE_ICON_TYPE}
+                    content={getBetaTooltip()}
+                    position="bottom"
+                  />
+                ) : undefined
+              }
             >
               <EuiToolTip content={currentDevTool.tooltipContent}>
                 <span tabIndex={0}>{currentDevTool.title}</span>
