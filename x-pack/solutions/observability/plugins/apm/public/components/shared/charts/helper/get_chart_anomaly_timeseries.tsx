@@ -102,11 +102,10 @@ export function getChartAnomalyTimeseries({
       },
       point: {
         visible: 'always',
-        opacity: 0.75,
+        opacity: 1,
         radius: 3,
-        strokeWidth: 1,
         fill: color,
-        stroke: rgba(0, 0, 0, 0.1),
+        shape: 'triangle',
       },
     };
 

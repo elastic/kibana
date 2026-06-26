@@ -49,7 +49,7 @@ export function OpenAnomalies({ mlJobId, detectorType, dataTestSubj }: OpenAnoma
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <div data-test-subj={dataTestSubj ?? 'apmTransactionChartOpenAnomalies'}>
-          <EuiToolTip content={openAnomaliesLabel} position="bottom">
+          <EuiToolTip content={openAnomaliesLabel}>
             <MLSingleMetricLink
               jobId={mlJobId}
               detectorIndex={getAnomalyDetectorIndex(detectorType)}
