@@ -6,10 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSelect } from '@elastic/eui';
-import type { AnomalyThreshold } from '@kbn/apm-types';
+import { getEnvironmentLabel, type AnomalyThreshold } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import React from 'react';
+import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import type { AnomalyThresholdDisabledReason } from '../../../../hooks/use_anomaly_threshold';
 import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 
@@ -52,7 +53,7 @@ const getOptions = (): Array<{ value: AnomalyThreshold; text: string }> => [
   },
 ];
 
-const getTooltipContent = (disabledReason: AnomalyThresholdDisabledReason) => {
+const getTooltipContent = (disabledReason: AnomalyThresholdDisabledReason, environment: string) => {
   switch (disabledReason) {
     case 'allEnvironments':
       return i18n.translate('xpack.apm.anomalyThresholdSelect.allEnvironmentsTooltip', {
@@ -60,7 +61,8 @@ const getTooltipContent = (disabledReason: AnomalyThresholdDisabledReason) => {
       });
     case 'notConfiguredForEnvironment':
       return i18n.translate('xpack.apm.anomalyThresholdSelect.notConfiguredForEnvironmentTooltip', {
-        defaultMessage: 'Anomaly detection is not enabled for this environment',
+        defaultMessage: 'Anomaly detection is not enabled for environment "{environment}"',
+        values: { environment: getEnvironmentLabel(environment) },
       });
     case 'kuery':
       return i18n.translate('xpack.apm.anomalyThresholdSelect.kueryFilterTooltip', {
@@ -76,6 +78,7 @@ export function AnomalyThresholdSelect({
 }: {
   onChange: (value: AnomalyThreshold) => void;
 }) {
+  const { preferredEnvironment } = useEnvironmentsContext();
   const { anomalyThreshold, isDisabled, disabledReason } = useAnomalyThreshold();
 
   return (
@@ -98,7 +101,10 @@ export function AnomalyThresholdSelect({
       </EuiFlexItem>
       {isDisabled && (
         <EuiFlexItem grow={false}>
-          <EuiIconTip type="question" content={getTooltipContent(disabledReason)} />
+          <EuiIconTip
+            type="question"
+            content={getTooltipContent(disabledReason, preferredEnvironment)}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

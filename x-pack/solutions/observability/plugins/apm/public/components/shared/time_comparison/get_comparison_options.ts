@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import type { Environment } from '../../../../common/environment_rt';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { ENVIRONMENT_ALL, getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import type { AnomalyDetectionJobsContextValue } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
@@ -131,11 +131,13 @@ function getExpectedBoundsText({
   hasJobForEnvironment,
   kuery,
   status,
+  environment,
 }: {
   isAllEnvironments: boolean;
   hasJobForEnvironment: boolean;
   kuery?: string;
   status?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsStatus'];
+  environment: string;
 }) {
   if (isAllEnvironments) {
     return i18n.translate('xpack.apm.comparison.mlExpectedBoundsAllEnvironmentsText', {
@@ -145,7 +147,9 @@ function getExpectedBoundsText({
 
   if (!hasJobForEnvironment && status === FETCH_STATUS.SUCCESS) {
     return i18n.translate('xpack.apm.comparison.mlExpectedBoundsEnvironmentDisabledText', {
-      defaultMessage: 'Expected bounds (Anomaly detection must be enabled for this environment)',
+      defaultMessage:
+        'Expected bounds (Anomaly detection must be enabled for environment "{environment}")',
+      values: { environment: getEnvironmentLabel(environment) },
     });
   }
 
@@ -201,7 +205,7 @@ export function getComparisonOptions({
   showSelectedBoundsOption?: boolean;
   anomalyDetectionJobsStatus?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsStatus'];
   anomalyDetectionJobsData?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsData'];
-  preferredEnvironment?: Environment;
+  preferredEnvironment: Environment;
   kuery?: string;
 }) {
   const momentStart = moment(start);
@@ -249,6 +253,7 @@ export function getComparisonOptions({
         hasJobForEnvironment,
         kuery,
         status: anomalyDetectionJobsStatus,
+        environment: preferredEnvironment,
       }),
       disabled,
       'data-test-subj': getExpectedBoundsTestSubj({

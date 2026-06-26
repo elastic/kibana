@@ -9,13 +9,12 @@ import type { ReactChild } from 'react';
 import React, { createContext } from 'react';
 import type { AnomalyDetectionSetupState } from '../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { getAnomalyDetectionSetupState } from '../../../common/anomaly_detection/get_anomaly_detection_setup_state';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { useApmParams } from '../../hooks/use_apm_params';
 import type { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { useFetcher } from '../../hooks/use_fetcher';
 import type { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../license/use_license_context';
+import { useEnvironmentsContext } from '../environments_context/use_environments_context';
 
 export interface AnomalyDetectionJobsContextValue {
   anomalyDetectionJobsData?: APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;
@@ -45,12 +44,10 @@ export function AnomalyDetectionJobsContextProvider({ children }: { children: Re
     { showToastOnError: false }
   );
 
-  const { query } = useApmParams('/*');
-
-  const environment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
+  const { preferredEnvironment } = useEnvironmentsContext();
 
   const anomalyDetectionSetupState = getAnomalyDetectionSetupState({
-    environment,
+    environment: preferredEnvironment,
     fetchStatus: status,
     jobs: data?.jobs ?? [],
     isAuthorized,
