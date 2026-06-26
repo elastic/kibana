@@ -336,13 +336,10 @@ const ESQLEditorInternal = function ESQLEditor({
     reportInputLatency();
   }, [code, reportInputLatency]);
 
+  // Sync external fixedQuery; omit `code` from deps so keystrokes aren't overwritten.
   useEffect(() => {
-    if (editorRef.current) {
-      if (code !== fixedQuery) {
-        setCode(fixedQuery);
-      }
-    }
-  }, [code, fixedQuery]);
+    setCode(fixedQuery);
+  }, [fixedQuery]);
 
   // If variables are passed to the editor, sync them with the variables service.
   // This ensures that the latest variables are always available for suggestions.
