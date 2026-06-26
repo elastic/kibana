@@ -96,8 +96,8 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       if (init?.signal) {
         races.push(
           new Promise<void>((resolve) => {
-            if (init.signal!.aborted) resolve();
-            else init.signal!.addEventListener('abort', () => resolve(), { once: true });
+            if (init.signal?.aborted) resolve();
+            else init.signal?.addEventListener('abort', () => resolve(), { once: true });
           })
         );
       }
