@@ -106,13 +106,39 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     return agentPolicyInfo;
   }
 
-  private async checkAgentIds(ids: string[]): Promise<{
+  private async checkAgentIds(
+    ids: string[],
+    integrationPolicyIds?: string[]
+  ): Promise<{
     valid: string[];
     invalid: string[];
     allValid: boolean;
     hosts: HostMetadata[];
   }> {
+    const fleetServices = this.options.endpointService.getInternalFleetServices(
+      this.options.spaceId
+    );
     const uniqueIds = [...new Set(ids)];
+
+    if (integrationPolicyIds?.length) {
+      const integrationPolicyAgentIds = await fleetServices.getAgentIdsForIntegrations(
+        integrationPolicyIds
+      );
+
+      for (const agentId of integrationPolicyAgentIds.agentIds) {
+        if (!uniqueIds.includes(agentId)) {
+          uniqueIds.push(agentId);
+        }
+      }
+
+      this.log.debug(
+        () =>
+          `List of agents IDs after adding agents associated with integration policies [${integrationPolicyIds.join(
+            ', '
+          )}]: ${stringify(uniqueIds)}`
+      );
+    }
+
     const foundEndpointHosts = await this.options.endpointService
       .getEndpointMetadataService(this.options.spaceId)
       .getMetadataForEndpoints(uniqueIds);
@@ -256,8 +282,11 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionReq: TOptions,
     options?: TMethodOptions
   ): Promise<TResponse> {
-    const validatedAgents = await this.checkAgentIds(actionReq.endpoint_ids);
     const actionId = uuidv4();
+    const validatedAgents = await this.checkAgentIds(
+      actionReq.endpoint_ids,
+      actionReq.integration_policy_ids
+    );
     const { error: validationError } = await this.validateRequest({
       ...actionReq,
       command,

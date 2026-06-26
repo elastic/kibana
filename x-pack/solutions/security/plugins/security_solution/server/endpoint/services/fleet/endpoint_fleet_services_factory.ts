@@ -74,6 +74,12 @@ export interface EndpointFleetServicesInterface {
    */
   getIntegrationNamespaces(integrationNames: string[]): Promise<Record<string, string[]>>;
 
+  /**
+   * Retrieves a list of all agent IDs for a given integration policy ID
+   * @param integrationPolicyIds
+   */
+  getAgentIdsForIntegrations(integrationPolicyIds: string[]): Promise<{ agentIds: string[] }>;
+
   /** Checks to see if the Endpoint (Elastic Defend) package is installed */
   isEndpointPackageInstalled: () => Promise<boolean>;
 }
@@ -189,6 +195,17 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         });
       };
 
+    const getAgentIdsForIntegrations: EndpointFleetServicesInterface['getAgentIdsForIntegrations'] =
+      async (integrationPolicyIds) => {
+        return fetchAgentIdsForIntegrations({
+          soClient: getSoClient(),
+          logger: this.logger,
+          packagePolicyService: packagePolicy,
+          agentService: agent,
+          integrationPolicyIds,
+        });
+      };
+
     const isEndpointPackageInstalled = async (): Promise<boolean> => {
       const installedEndpointPackages = await packageService.asInternalUser.getInstalledPackages({
         nameQuery: 'endpoint',
@@ -215,6 +232,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       ensureInCurrentSpace,
       getPolicyNamespace,
       getIntegrationNamespaces,
+      getAgentIdsForIntegrations,
       getSoClient,
       isEndpointPackageInstalled,
     };
@@ -503,6 +521,69 @@ const fetchIntegrationNamespaces = async ({
   );
 
   logger.debug(() => `Integration namespaces in use:\n${stringify(response)}`);
+
+  return response;
+};
+
+interface FetchAgentIdsForIntegrationOptions {
+  integrationPolicyIds: string[];
+  logger: Logger;
+  soClient: SavedObjectsClientContract;
+  packagePolicyService: PackagePolicyClient;
+  agentService: AgentClient;
+}
+
+const fetchAgentIdsForIntegrations = async ({
+  integrationPolicyIds,
+  logger: _logger,
+  soClient,
+  packagePolicyService,
+  agentService,
+}: FetchAgentIdsForIntegrationOptions): Promise<{ agentIds: string[] }> => {
+  const logger = _logger.get('fetchAgentIdsForIntegration');
+
+  logger.debug(
+    () =>
+      `Retrieving list of fleet agents running with integration policies: ${stringify(
+        integrationPolicyIds
+      )}`
+  );
+
+  const response: { agentIds: string[] } = { agentIds: [] };
+  const integrationPolicies = await packagePolicyService
+    .getByIDs(soClient, integrationPolicyIds)
+    .catch(catchAndWrapError);
+  const agentPolicyIds = new Set<string>();
+
+  for (const integrationPolicy of integrationPolicies) {
+    integrationPolicy.policy_ids.forEach((policyId) => agentPolicyIds.add(policyId));
+  }
+
+  // FIXME:PT listAgents below needs to use PIT and do pagination in order to be more efficient (maybe use aysnc iterator)
+
+  const listAgentsOptions: Parameters<AgentClient['listAgents']>[0] = {
+    kuery: `policy_id:(${Array.from(agentPolicyIds)
+      .map((id) => `"${id}"`)
+      .join(' OR ')})`,
+    showInactive: false,
+    page: 1,
+    perPage: 10_000,
+  };
+
+  logger.debug(() => `searching for agents using: ${stringify(listAgentsOptions)}`);
+
+  const agentList = await agentService.listAgents(listAgentsOptions).catch(catchAndWrapError);
+
+  for (const agent of agentList.agents) {
+    response.agentIds.push(agent.id);
+  }
+
+  logger.debug(
+    () =>
+      `Found ${response.agentIds.length} agents running with integration policies: ${stringify(
+        integrationPolicyIds
+      )}`
+  );
 
   return response;
 };
