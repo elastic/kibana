@@ -130,6 +130,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'NDJSON',
     }),
 
+  settingsFormatTsv: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatTsv', {
+      defaultMessage: 'TSV',
+    }),
+
   settingsFormatOrc: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatOrc', {
       defaultMessage: 'ORC',
@@ -251,6 +256,241 @@ export const createDatasetFlyoutStrings = {
   settingsHivePartitioningLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningLabel', {
       defaultMessage: 'Hive partitioning',
+    }),
+
+  settingsDelimiterLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterLabel', {
+      defaultMessage: 'Delimiter',
+    }),
+
+  settingsDelimiterHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterHelp', {
+      defaultMessage: 'The character that separates fields.',
+    }),
+
+  settingsModeLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeLabel', {
+      defaultMessage: 'Quote mode',
+    }),
+
+  settingsModePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModePlaceholder', {
+      defaultMessage: 'Default',
+    }),
+
+  settingsModeQuoted: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeQuoted', {
+      defaultMessage: 'Quoted',
+    }),
+
+  settingsModeEscaped: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeEscaped', {
+      defaultMessage: 'Escaped',
+    }),
+
+  settingsModePlain: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModePlain', {
+      defaultMessage: 'Plain',
+    }),
+
+  settingsHeaderRowLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHeaderRowLabel', {
+      defaultMessage: 'Header row',
+    }),
+
+  settingsHeaderRowPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHeaderRowPlaceholder', {
+      defaultMessage: 'Default',
+    }),
+
+  settingsHeaderRowTrue: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHeaderRowTrue', {
+      defaultMessage: 'Yes',
+    }),
+
+  settingsHeaderRowFalse: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHeaderRowFalse', {
+      defaultMessage: 'No',
+    }),
+
+  settingsNullValueLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsNullValueLabel', {
+      defaultMessage: 'Null value',
+    }),
+
+  settingsNullValueHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsNullValueHelp', {
+      defaultMessage: 'The string treated as null, for example NULL or NA.',
+    }),
+
+  settingsEncodingLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEncodingLabel', {
+      defaultMessage: 'Encoding',
+    }),
+
+  settingsEncodingHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEncodingHelp', {
+      defaultMessage: 'Character encoding of the file.',
+    }),
+
+  settingsQuoteLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsQuoteLabel', {
+      defaultMessage: 'Quote character',
+    }),
+
+  settingsQuoteHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsQuoteHelp', {
+      defaultMessage: 'The character used to quote fields.',
+    }),
+
+  settingsEscapeLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEscapeLabel', {
+      defaultMessage: 'Escape character',
+    }),
+
+  settingsEscapeHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEscapeHelp', {
+      defaultMessage: 'The character used to escape special characters.',
+    }),
+
+  settingsCommentLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsCommentLabel', {
+      defaultMessage: 'Comment prefix',
+    }),
+
+  settingsCommentHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsCommentHelp', {
+      defaultMessage: 'Lines beginning with this prefix are skipped.',
+    }),
+
+  settingsColumnPrefixLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsColumnPrefixLabel', {
+      defaultMessage: 'Column prefix',
+    }),
+
+  settingsColumnPrefixHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsColumnPrefixHelp', {
+      defaultMessage: 'Prefix for generated column names when no header row is present.',
+    }),
+
+  settingsDatetimeFormatLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDatetimeFormatLabel', {
+      defaultMessage: 'Datetime format',
+    }),
+
+  settingsDatetimeFormatHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDatetimeFormatHelp', {
+      defaultMessage: 'Pattern used to parse date and time values.',
+    }),
+
+  settingsMultiValueSyntaxLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxLabel', {
+      defaultMessage: 'Multi-value syntax',
+    }),
+
+  settingsMultiValueSyntaxPlaceholder: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxPlaceholder',
+      {
+        defaultMessage: 'Default',
+      }
+    ),
+
+  settingsMultiValueSyntaxNone: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxNone', {
+      defaultMessage: 'None',
+    }),
+
+  settingsMultiValueSyntaxBrackets: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxBrackets', {
+      defaultMessage: 'Brackets',
+    }),
+
+  settingsMaxFieldSizeLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeLabel', {
+      defaultMessage: 'Max field size',
+    }),
+
+  settingsMaxFieldSizeHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeHelp', {
+      defaultMessage: 'Maximum size of a single field in bytes. 0 means unlimited.',
+    }),
+
+  settingsMaxFieldSizeInvalid: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeInvalid', {
+      defaultMessage: 'Must be a non-negative integer.',
+    }),
+
+  settingsSegmentSizeLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSegmentSizeLabel', {
+      defaultMessage: 'Segment size',
+    }),
+
+  settingsSegmentSizeHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSegmentSizeHelp', {
+      defaultMessage: 'Unit a file is divided into for parallel reading, for example 4mb.',
+    }),
+
+  settingsOptimizedReaderLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderLabel', {
+      defaultMessage: 'Optimized reader',
+    }),
+
+  settingsOptimizedReaderPlaceholder: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderPlaceholder',
+      {
+        defaultMessage: 'Default',
+      }
+    ),
+
+  settingsOptimizedReaderEnabled: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderEnabled', {
+      defaultMessage: 'Enabled',
+    }),
+
+  settingsOptimizedReaderDisabled: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderDisabled', {
+      defaultMessage: 'Disabled',
+    }),
+
+  settingsLateMaterializationLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationLabel', {
+      defaultMessage: 'Late materialization',
+    }),
+
+  settingsLateMaterializationPlaceholder: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationPlaceholder',
+      {
+        defaultMessage: 'Default',
+      }
+    ),
+
+  settingsLateMaterializationEnabled: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationEnabled',
+      {
+        defaultMessage: 'Enabled',
+      }
+    ),
+
+  settingsLateMaterializationDisabled: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationDisabled',
+      {
+        defaultMessage: 'Disabled',
+      }
+    ),
+
+  advancedSettingsShow: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.advancedSettingsShow', {
+      defaultMessage: 'Show advanced settings',
+    }),
+
+  advancedSettingsHide: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.advancedSettingsHide', {
+      defaultMessage: 'Hide advanced settings',
     }),
 
   cancelButton: () =>

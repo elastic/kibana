@@ -39,36 +39,73 @@ const renderSettings = () => {
   return render(<Wrapper />);
 };
 
+const getSettingsValue = (getByTestId: ReturnType<typeof render>['getByTestId']) =>
+  JSON.parse(getByTestId('settingsValue').textContent ?? '{}');
+
 describe('CreateDatasetFlyoutSettings', () => {
   it('hides optional settings by default and shows them when toggled', () => {
     const { getByTestId } = renderSettings();
 
     const toggle = getByTestId('createDatasetFlyoutOptionalSettingsToggle');
-    const errorMode = getByTestId('createDatasetFlyoutSettingsErrorMode');
+    const partitionDetection = getByTestId('createDatasetFlyoutSettingsPartitionDetection');
 
-    expect(errorMode).not.toBeVisible();
+    expect(partitionDetection).not.toBeVisible();
     fireEvent.click(toggle);
-    expect(errorMode).toBeVisible();
+    expect(partitionDetection).toBeVisible();
   });
 
-  it('updates form state when selecting options', () => {
+  it('updates partition_detection in form state', () => {
     const { getByTestId } = renderSettings();
 
     fireEvent.click(getByTestId('createDatasetFlyoutOptionalSettingsToggle'));
-
-    fireEvent.change(getByTestId('createDatasetFlyoutSettingsErrorMode'), {
-      target: { value: 'skip_row' },
-    });
     fireEvent.change(getByTestId('createDatasetFlyoutSettingsPartitionDetection'), {
       target: { value: 'hive' },
     });
 
-    expect(getByTestId('settingsValue')).toHaveTextContent(
-      JSON.stringify({
-        error_mode: 'skip_row',
-        partition_detection: 'hive',
-        schema_sample_size: '',
-      })
-    );
+    expect(getSettingsValue(getByTestId)).toMatchObject({ partition_detection: 'hive' });
+  });
+
+  it('shows error_mode and schema_sample_size in generic (auto) format view', () => {
+    const { getByTestId } = renderSettings();
+
+    fireEvent.click(getByTestId('createDatasetFlyoutOptionalSettingsToggle'));
+
+    expect(getByTestId('createDatasetFlyoutSettingsErrorMode')).toBeVisible();
+    expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
+  });
+
+  it('shows CSV-specific fields when format is set to csv', () => {
+    const { getByTestId } = renderSettings();
+
+    fireEvent.click(getByTestId('createDatasetFlyoutOptionalSettingsToggle'));
+    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+      target: { value: 'csv' },
+    });
+
+    expect(getByTestId('createDatasetFlyoutSettingsDelimiter')).toBeVisible();
+    expect(getByTestId('createDatasetFlyoutSettingsMode')).toBeVisible();
+    expect(getByTestId('createDatasetFlyoutSettingsHeaderRow')).toBeVisible();
+  });
+
+  it('shows NDJSON schema_sample_size when format is ndjson', () => {
+    const { getByTestId } = renderSettings();
+
+    fireEvent.click(getByTestId('createDatasetFlyoutOptionalSettingsToggle'));
+    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+      target: { value: 'ndjson' },
+    });
+
+    expect(getByTestId('createDatasetFlyoutSettingsSchemaSampleSize')).toBeVisible();
+  });
+
+  it('updates format in form state', () => {
+    const { getByTestId } = renderSettings();
+
+    fireEvent.click(getByTestId('createDatasetFlyoutOptionalSettingsToggle'));
+    fireEvent.change(getByTestId('createDatasetFlyoutSettingsFormat'), {
+      target: { value: 'parquet' },
+    });
+
+    expect(getSettingsValue(getByTestId)).toMatchObject({ format: 'parquet' });
   });
 });

@@ -14,7 +14,11 @@ import {
   emptyCreateDatasetSettingsFormValues,
   type CreateDatasetFormValues,
   type CreateDatasetSettingsFormValues,
+  type DatasetBooleanFormValue,
   type DatasetErrorModeFormValue,
+  type DatasetFormatFormValue,
+  type DatasetModeFormValue,
+  type DatasetMultiValueSyntaxFormValue,
   type DatasetPartitionDetectionFormValue,
 } from './create_dataset_flyout_form_state';
 
@@ -32,6 +36,12 @@ export const dataSetFromListItem = (item: DataSetWithName): DataSetWithName => (
   description: item.description ?? '',
 });
 
+const boolToFormValue = (value: boolean | undefined): DatasetBooleanFormValue => {
+  if (value === true) return 'true';
+  if (value === false) return 'false';
+  return '';
+};
+
 const settingsToFlyoutFormValues = (
   settings: DatasetSettings | undefined
 ): CreateDatasetSettingsFormValues => {
@@ -40,15 +50,31 @@ const settingsToFlyoutFormValues = (
     return defaults;
   }
 
-  const fileSettings = settings as DatasetSettingsFile;
+  const s = settings as DatasetSettingsFile;
 
   return {
     ...defaults,
-    error_mode: (fileSettings.error_mode ?? '') as DatasetErrorModeFormValue,
-    partition_detection: (fileSettings.partition_detection ??
-      '') as DatasetPartitionDetectionFormValue,
-    schema_sample_size:
-      fileSettings.schema_sample_size !== undefined ? String(fileSettings.schema_sample_size) : '',
+    format: (s.format ?? '') as DatasetFormatFormValue,
+    partition_detection: (s.partition_detection ?? '') as DatasetPartitionDetectionFormValue,
+    schema_sample_size: s.schema_sample_size !== undefined ? String(s.schema_sample_size) : '',
+    delimiter: s.delimiter ?? '',
+    mode: (s.mode ?? '') as DatasetModeFormValue,
+    header_row: boolToFormValue(s.header_row),
+    null_value: s.null_value ?? '',
+    encoding: s.encoding ?? '',
+    error_mode: (s.error_mode ?? '') as DatasetErrorModeFormValue,
+    max_errors: s.max_errors !== undefined ? String(s.max_errors) : '',
+    max_error_ratio: s.max_error_ratio !== undefined ? String(s.max_error_ratio) : '',
+    quote: s.quote ?? '',
+    escape: s.escape ?? '',
+    comment: s.comment ?? '',
+    column_prefix: s.column_prefix ?? '',
+    datetime_format: s.datetime_format ?? '',
+    multi_value_syntax: (s.multi_value_syntax ?? '') as DatasetMultiValueSyntaxFormValue,
+    max_field_size: s.max_field_size !== undefined ? String(s.max_field_size) : '',
+    segment_size: s.segment_size ?? '',
+    optimized_reader: boolToFormValue(s.optimized_reader),
+    late_materialization: boolToFormValue(s.late_materialization),
   };
 };
 
