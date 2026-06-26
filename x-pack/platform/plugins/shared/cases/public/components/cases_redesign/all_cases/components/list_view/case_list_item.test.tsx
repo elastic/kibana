@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { renderWithTestingProviders } from '../../../../../common/mock';
 import { CaseListItem } from './case_list_item';
@@ -15,6 +16,15 @@ import { suggestionUserProfiles } from '../../../../../containers/user_profiles/
 import { CaseSeverity } from '../../../../../../common/types/domain';
 import { CaseStatuses } from '@kbn/cases-components';
 import * as i18n from '../../translations';
+
+const mockNavigateToCaseView = jest.fn();
+jest.mock('../../../../../common/navigation/hooks', () => ({
+  ...jest.requireActual('../../../../../common/navigation/hooks'),
+  useCaseViewNavigation: () => ({
+    navigateToCaseView: mockNavigateToCaseView,
+    getCaseViewUrl: jest.fn().mockReturnValue('/cases/test-id'),
+  }),
+}));
 
 jest.mock('../../../../all_cases/use_actions', () => ({
   ...jest.requireActual('../../../../all_cases/use_actions'),
@@ -168,5 +178,21 @@ describe('CaseListItem', () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
 
     expect(screen.getByTestId('mock-action-column')).toBeInTheDocument();
+  });
+
+  it('navigates to case view when the card is clicked', async () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('cases-list-item-reporter'));
+
+    expect(mockNavigateToCaseView).toHaveBeenCalledWith({ detailName: mockCase.id });
+  });
+
+  it('does not navigate when the action button is clicked', async () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('mock-action-column'));
+
+    expect(mockNavigateToCaseView).not.toHaveBeenCalled();
   });
 });

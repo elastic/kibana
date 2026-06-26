@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAvatar,
@@ -26,7 +26,7 @@ import { UserToolTip } from '../../../../user_profiles/user_tooltip';
 import { SmallUserAvatar } from '../../../../user_profiles/small_user_avatar';
 import { useAssignees } from '../../../../../containers/user_profiles/use_assignees';
 import { FormattedRelativePreferenceDate } from '../../../../formatted_date';
-import { CaseDetailsLink } from '../../../../links';
+import { useCaseViewNavigation } from '../../../../../common/navigation/hooks';
 import { ActionColumnComponent as ActionColumn } from '../../../../all_cases/use_actions';
 import { severities } from '../../../../severity/config';
 import * as i18n from '../../translations';
@@ -41,16 +41,44 @@ export const CaseListItem: React.FC<{
   selectedFields: CasesColumnSelection[];
 }> = React.memo(({ theCase, userProfiles, disableActions, selectedFields }) => {
   const { euiTheme } = useEuiTheme();
+  const { navigateToCaseView } = useCaseViewNavigation();
+
+  const handleCardClick = useCallback(
+    (e: React.MouseEvent | React.KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('a') || target.closest('button')) {
+        return;
+      }
+      if ('key' in e && e.key !== 'Enter' && e.key !== ' ') {
+        return;
+      }
+      e.preventDefault();
+      navigateToCaseView({ detailName: theCase.id });
+    },
+    [navigateToCaseView, theCase.id]
+  );
 
   const styles = useMemo(
     () => ({
       mainFlexGroup: css`
         height: 100%;
       `,
+      cardLink: css`
+        display: block;
+        text-decoration: none;
+        color: inherit;
+
+        &:hover,
+        &:focus {
+          text-decoration: none;
+          color: inherit;
+        }
+      `,
       panel: css`
         min-height: ${LIST_ITEM_HEIGHT}px;
         border-radius: ${euiTheme.border.radius.medium};
         transition: background-color 150ms ease-in-out;
+        cursor: pointer;
 
         &:hover {
           background-color: ${euiTheme.colors.backgroundBaseSubdued};
@@ -82,140 +110,147 @@ export const CaseListItem: React.FC<{
   const reporterName = theCase.createdBy.fullName ?? theCase.createdBy.username ?? i18n.UNKNOWN;
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="m"
-      data-test-subj={`cases-list-item-${theCase.id}`}
-      css={styles.panel}
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={handleCardClick}
+      css={styles.cardLink}
+      data-test-subj={`cases-list-item-clickable-${theCase.id}`}
     >
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        wrap={false}
-        css={styles.mainFlexGroup}
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="m"
+        data-test-subj={`cases-list-item-${theCase.id}`}
+        css={styles.panel}
       >
-        <EuiFlexItem grow>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-            {theCase.incrementalId != null && (
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          wrap={false}
+          css={styles.mainFlexGroup}
+        >
+          <EuiFlexItem grow>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+              {theCase.incrementalId != null && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued" data-test-subj="cases-list-item-id">
+                    {'#'}
+                    {theCase.incrementalId}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued" data-test-subj="cases-list-item-id">
-                  {'#'}
-                  {theCase.incrementalId}
-                </EuiText>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
                 <EuiText size="s" data-test-subj="cases-list-item-title" css={styles.title}>
                   {theCase.title}
                 </EuiText>
-              </CaseDetailsLink>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color={severities[theCase.severity].badgeColor}
-                data-test-subj={`case-severity-badge-${theCase.severity}`}
-              >
-                {severities[theCase.severity].label}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <Status status={theCase.status} />
-            </EuiFlexItem>
-            {theCase.totalAlerts > 0 && (
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge
-                  color="danger"
-                  iconType="warning"
-                  data-test-subj="cases-list-item-alerts-badge"
+                  color={severities[theCase.severity].badgeColor}
+                  data-test-subj={`case-severity-badge-${theCase.severity}`}
                 >
-                  {theCase.totalAlerts}
+                  {severities[theCase.severity].label}
                 </EuiBadge>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-            wrap={false}
-            css={styles.metaRow}
-          >
-            {allAssignees.length > 0 && (
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  data-test-subj="cases-list-item-assignees"
-                >
-                  {allAssignees.slice(0, MAX_VISIBLE_ASSIGNEES).map((assignee) => (
-                    <EuiFlexItem grow={false} key={assignee.uid}>
-                      <UserToolTip userInfo={assignee.profile}>
-                        <SmallUserAvatar userInfo={assignee.profile} />
-                      </UserToolTip>
-                    </EuiFlexItem>
-                  ))}
-                  {allAssignees.length > MAX_VISIBLE_ASSIGNEES && (
-                    <EuiFlexItem grow={false}>
-                      <EuiAvatar
-                        name={`+${allAssignees.length - MAX_VISIBLE_ASSIGNEES}`}
-                        initials={`+${allAssignees.length - MAX_VISIBLE_ASSIGNEES}`}
-                        initialsLength={2}
-                        size="s"
-                        color="subdued"
-                        data-test-subj="cases-list-item-assignees-overflow"
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                <Status status={theCase.status} />
               </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="cases-list-item-reporter">
-                <span css={styles.labelSpan}>
-                  {i18n.LIST_REPORTED_BY}
-                  {':'}
-                </span>{' '}
-                {reporterName}
-              </EuiText>
-            </EuiFlexItem>
-            {theCase.updatedAt && (
+              {theCase.totalAlerts > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    color="danger"
+                    iconType="warning"
+                    data-test-subj="cases-list-item-alerts-badge"
+                  >
+                    {theCase.totalAlerts}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              wrap={false}
+              css={styles.metaRow}
+            >
+              {allAssignees.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup
+                    gutterSize="xs"
+                    alignItems="center"
+                    responsive={false}
+                    data-test-subj="cases-list-item-assignees"
+                  >
+                    {allAssignees.slice(0, MAX_VISIBLE_ASSIGNEES).map((assignee) => (
+                      <EuiFlexItem grow={false} key={assignee.uid}>
+                        <UserToolTip userInfo={assignee.profile}>
+                          <SmallUserAvatar userInfo={assignee.profile} />
+                        </UserToolTip>
+                      </EuiFlexItem>
+                    ))}
+                    {allAssignees.length > MAX_VISIBLE_ASSIGNEES && (
+                      <EuiFlexItem grow={false}>
+                        <EuiAvatar
+                          name={`+${allAssignees.length - MAX_VISIBLE_ASSIGNEES}`}
+                          initials={`+${allAssignees.length - MAX_VISIBLE_ASSIGNEES}`}
+                          initialsLength={2}
+                          size="s"
+                          color="subdued"
+                          data-test-subj="cases-list-item-assignees-overflow"
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="cases-list-item-updated-at">
+                <EuiText size="xs" color="subdued" data-test-subj="cases-list-item-reporter">
                   <span css={styles.labelSpan}>
-                    {i18n.LIST_LAST_UPDATE}
+                    {i18n.LIST_REPORTED_BY}
                     {':'}
                   </span>{' '}
-                  <FormattedRelativePreferenceDate value={theCase.updatedAt} stripMs />
+                  {reporterName}
                 </EuiText>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <ListItemOptionalFields theCase={theCase} selectedFields={selectedFields} />
-        </EuiFlexItem>
+              {theCase.updatedAt && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" data-test-subj="cases-list-item-updated-at">
+                    <span css={styles.labelSpan}>
+                      {i18n.LIST_LAST_UPDATE}
+                      {':'}
+                    </span>{' '}
+                    <FormattedRelativePreferenceDate value={theCase.updatedAt} stripMs />
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <ListItemOptionalFields theCase={theCase} selectedFields={selectedFields} />
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color={euiTheme.colors.backgroundLightText}
-                iconType="comment"
-                data-test-subj="cases-list-item-comments-badge"
-              >
-                {theCase.totalComment}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ActionColumn theCase={theCase} disableActions={disableActions} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color={euiTheme.colors.backgroundLightText}
+                  iconType="comment"
+                  data-test-subj="cases-list-item-comments-badge"
+                >
+                  {String(theCase.totalComment)}
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ActionColumn theCase={theCase} disableActions={disableActions} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </div>
   );
 });
 
