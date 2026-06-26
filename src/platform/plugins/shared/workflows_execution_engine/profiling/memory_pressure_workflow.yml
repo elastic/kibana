@@ -1,0 +1,51 @@
+# Profiling workflow: fan-in chain that stresses rehydrateOutputs.
+#
+# N HTTP connector steps each produce a large payload (~512kb by default).
+# A final "summarise" step templates several predecessors, forcing
+# prepareForRead → rehydrateOutputs for all N outputs at once.
+#
+# Point the HTTP steps at memory_pressure_server.js running on port 19876.
+#
+# Adjust FAN_IN_COUNT to scale pressure. Start with 4 to confirm the
+# baseline heap issue exists, then increase for a more pronounced signal.
+
+name: memory-pressure-fan-in
+description: Profiling harness — measures heap impact of large step outputs
+triggers:
+  - type: manual
+
+steps:
+  - name: fetch_1
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/1"
+      method: GET
+
+  - name: fetch_2
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/2"
+      method: GET
+
+  - name: fetch_3
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/3"
+      method: GET
+
+  - name: fetch_4
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/4"
+      method: GET
+
+  - name: summarise
+    type: data.set
+    # Template references all four predecessors, forcing rehydrateOutputs
+    # to pull all four evicted outputs back into memory at once.
+    with:
+      sizes: >
+        {{steps.fetch_1.output.data.size}},
+        {{steps.fetch_2.output.data.size}},
+        {{steps.fetch_3.output.data.size}},
+        {{steps.fetch_4.output.data.size}}

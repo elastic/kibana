@@ -1,0 +1,786 @@
+# Profiling workflow: 4-tier 100-step fan-in for SQLite off-heap cache analysis.
+#
+# Structure:
+#   100 HTTP fetch steps (4 groups of 25) → 4 intermediate summarise_group_N steps →
+#   1 final summarise_final step.
+#
+# Why tiered instead of a single flat fan-in:
+#   In the flat 100-step workflow, all 100 outputs (400 MB) are rehydrated simultaneously for the
+#   single summarise step, neutralising peak-heap savings. With the tiered layout:
+#
+#     fetch_1..25  → summarise_group_1 ──┐
+#     fetch_26..50 → summarise_group_2 ──┤
+#     fetch_51..75 → summarise_group_3 ──┼─→ summarise_final
+#     fetch_76..100→ summarise_group_4 ──┘
+#
+#   After each summarise_group_N finishes, dropConsumedTransients() drops its 25 predecessor
+#   fetch outputs from heap. By the time summarise_final runs, only the 4 small intermediate
+#   outputs are live — not the 400 MB of raw payloads.
+#
+#   Expected peak rehydration window: 25 × 4 MB = 100 MB (one group at a time), vs 400 MB flat.
+#
+# Prerequisites:
+#   node profiling/memory_pressure_server.js 19876 4096
+#
+# Import into the Workflows UI or POST to /api/workflows/test.
+
+name: memory-pressure-tiered-100
+description: Profiling harness — 4-tier 100-step fan-in for SQLite dropConsumedTransients analysis
+triggers:
+  - type: manual
+
+steps:
+
+  # ── Group 1: fetch_1..25 ────────────────────────────────────────────────────
+
+  - name: fetch_1
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/1"
+      method: GET
+
+  - name: fetch_2
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/2"
+      method: GET
+
+  - name: fetch_3
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/3"
+      method: GET
+
+  - name: fetch_4
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/4"
+      method: GET
+
+  - name: fetch_5
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/5"
+      method: GET
+
+  - name: fetch_6
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/6"
+      method: GET
+
+  - name: fetch_7
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/7"
+      method: GET
+
+  - name: fetch_8
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/8"
+      method: GET
+
+  - name: fetch_9
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/9"
+      method: GET
+
+  - name: fetch_10
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/10"
+      method: GET
+
+  - name: fetch_11
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/11"
+      method: GET
+
+  - name: fetch_12
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/12"
+      method: GET
+
+  - name: fetch_13
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/13"
+      method: GET
+
+  - name: fetch_14
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/14"
+      method: GET
+
+  - name: fetch_15
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/15"
+      method: GET
+
+  - name: fetch_16
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/16"
+      method: GET
+
+  - name: fetch_17
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/17"
+      method: GET
+
+  - name: fetch_18
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/18"
+      method: GET
+
+  - name: fetch_19
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/19"
+      method: GET
+
+  - name: fetch_20
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/20"
+      method: GET
+
+  - name: fetch_21
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/21"
+      method: GET
+
+  - name: fetch_22
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/22"
+      method: GET
+
+  - name: fetch_23
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/23"
+      method: GET
+
+  - name: fetch_24
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/24"
+      method: GET
+
+  - name: fetch_25
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/25"
+      method: GET
+
+  # Intermediate merge for group 1.
+  # After this step finishes, dropConsumedTransients drops fetch_1..25 from heap.
+  - name: summarise_group_1
+    type: data.set
+    with:
+      group: 1
+      sizes: >
+        {{steps.fetch_1.output.data.size}},
+        {{steps.fetch_2.output.data.size}},
+        {{steps.fetch_3.output.data.size}},
+        {{steps.fetch_4.output.data.size}},
+        {{steps.fetch_5.output.data.size}},
+        {{steps.fetch_6.output.data.size}},
+        {{steps.fetch_7.output.data.size}},
+        {{steps.fetch_8.output.data.size}},
+        {{steps.fetch_9.output.data.size}},
+        {{steps.fetch_10.output.data.size}},
+        {{steps.fetch_11.output.data.size}},
+        {{steps.fetch_12.output.data.size}},
+        {{steps.fetch_13.output.data.size}},
+        {{steps.fetch_14.output.data.size}},
+        {{steps.fetch_15.output.data.size}},
+        {{steps.fetch_16.output.data.size}},
+        {{steps.fetch_17.output.data.size}},
+        {{steps.fetch_18.output.data.size}},
+        {{steps.fetch_19.output.data.size}},
+        {{steps.fetch_20.output.data.size}},
+        {{steps.fetch_21.output.data.size}},
+        {{steps.fetch_22.output.data.size}},
+        {{steps.fetch_23.output.data.size}},
+        {{steps.fetch_24.output.data.size}},
+        {{steps.fetch_25.output.data.size}}
+
+  # ── Group 2: fetch_26..50 ───────────────────────────────────────────────────
+
+  - name: fetch_26
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/26"
+      method: GET
+
+  - name: fetch_27
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/27"
+      method: GET
+
+  - name: fetch_28
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/28"
+      method: GET
+
+  - name: fetch_29
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/29"
+      method: GET
+
+  - name: fetch_30
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/30"
+      method: GET
+
+  - name: fetch_31
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/31"
+      method: GET
+
+  - name: fetch_32
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/32"
+      method: GET
+
+  - name: fetch_33
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/33"
+      method: GET
+
+  - name: fetch_34
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/34"
+      method: GET
+
+  - name: fetch_35
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/35"
+      method: GET
+
+  - name: fetch_36
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/36"
+      method: GET
+
+  - name: fetch_37
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/37"
+      method: GET
+
+  - name: fetch_38
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/38"
+      method: GET
+
+  - name: fetch_39
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/39"
+      method: GET
+
+  - name: fetch_40
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/40"
+      method: GET
+
+  - name: fetch_41
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/41"
+      method: GET
+
+  - name: fetch_42
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/42"
+      method: GET
+
+  - name: fetch_43
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/43"
+      method: GET
+
+  - name: fetch_44
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/44"
+      method: GET
+
+  - name: fetch_45
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/45"
+      method: GET
+
+  - name: fetch_46
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/46"
+      method: GET
+
+  - name: fetch_47
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/47"
+      method: GET
+
+  - name: fetch_48
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/48"
+      method: GET
+
+  - name: fetch_49
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/49"
+      method: GET
+
+  - name: fetch_50
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/50"
+      method: GET
+
+  # Intermediate merge for group 2.
+  # After this step finishes, dropConsumedTransients drops fetch_26..50 from heap.
+  - name: summarise_group_2
+    type: data.set
+    with:
+      group: 2
+      sizes: >
+        {{steps.fetch_26.output.data.size}},
+        {{steps.fetch_27.output.data.size}},
+        {{steps.fetch_28.output.data.size}},
+        {{steps.fetch_29.output.data.size}},
+        {{steps.fetch_30.output.data.size}},
+        {{steps.fetch_31.output.data.size}},
+        {{steps.fetch_32.output.data.size}},
+        {{steps.fetch_33.output.data.size}},
+        {{steps.fetch_34.output.data.size}},
+        {{steps.fetch_35.output.data.size}},
+        {{steps.fetch_36.output.data.size}},
+        {{steps.fetch_37.output.data.size}},
+        {{steps.fetch_38.output.data.size}},
+        {{steps.fetch_39.output.data.size}},
+        {{steps.fetch_40.output.data.size}},
+        {{steps.fetch_41.output.data.size}},
+        {{steps.fetch_42.output.data.size}},
+        {{steps.fetch_43.output.data.size}},
+        {{steps.fetch_44.output.data.size}},
+        {{steps.fetch_45.output.data.size}},
+        {{steps.fetch_46.output.data.size}},
+        {{steps.fetch_47.output.data.size}},
+        {{steps.fetch_48.output.data.size}},
+        {{steps.fetch_49.output.data.size}},
+        {{steps.fetch_50.output.data.size}}
+
+  # ── Group 3: fetch_51..75 ───────────────────────────────────────────────────
+
+  - name: fetch_51
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/51"
+      method: GET
+
+  - name: fetch_52
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/52"
+      method: GET
+
+  - name: fetch_53
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/53"
+      method: GET
+
+  - name: fetch_54
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/54"
+      method: GET
+
+  - name: fetch_55
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/55"
+      method: GET
+
+  - name: fetch_56
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/56"
+      method: GET
+
+  - name: fetch_57
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/57"
+      method: GET
+
+  - name: fetch_58
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/58"
+      method: GET
+
+  - name: fetch_59
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/59"
+      method: GET
+
+  - name: fetch_60
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/60"
+      method: GET
+
+  - name: fetch_61
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/61"
+      method: GET
+
+  - name: fetch_62
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/62"
+      method: GET
+
+  - name: fetch_63
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/63"
+      method: GET
+
+  - name: fetch_64
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/64"
+      method: GET
+
+  - name: fetch_65
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/65"
+      method: GET
+
+  - name: fetch_66
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/66"
+      method: GET
+
+  - name: fetch_67
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/67"
+      method: GET
+
+  - name: fetch_68
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/68"
+      method: GET
+
+  - name: fetch_69
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/69"
+      method: GET
+
+  - name: fetch_70
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/70"
+      method: GET
+
+  - name: fetch_71
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/71"
+      method: GET
+
+  - name: fetch_72
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/72"
+      method: GET
+
+  - name: fetch_73
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/73"
+      method: GET
+
+  - name: fetch_74
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/74"
+      method: GET
+
+  - name: fetch_75
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/75"
+      method: GET
+
+  # Intermediate merge for group 3.
+  # After this step finishes, dropConsumedTransients drops fetch_51..75 from heap.
+  - name: summarise_group_3
+    type: data.set
+    with:
+      group: 3
+      sizes: >
+        {{steps.fetch_51.output.data.size}},
+        {{steps.fetch_52.output.data.size}},
+        {{steps.fetch_53.output.data.size}},
+        {{steps.fetch_54.output.data.size}},
+        {{steps.fetch_55.output.data.size}},
+        {{steps.fetch_56.output.data.size}},
+        {{steps.fetch_57.output.data.size}},
+        {{steps.fetch_58.output.data.size}},
+        {{steps.fetch_59.output.data.size}},
+        {{steps.fetch_60.output.data.size}},
+        {{steps.fetch_61.output.data.size}},
+        {{steps.fetch_62.output.data.size}},
+        {{steps.fetch_63.output.data.size}},
+        {{steps.fetch_64.output.data.size}},
+        {{steps.fetch_65.output.data.size}},
+        {{steps.fetch_66.output.data.size}},
+        {{steps.fetch_67.output.data.size}},
+        {{steps.fetch_68.output.data.size}},
+        {{steps.fetch_69.output.data.size}},
+        {{steps.fetch_70.output.data.size}},
+        {{steps.fetch_71.output.data.size}},
+        {{steps.fetch_72.output.data.size}},
+        {{steps.fetch_73.output.data.size}},
+        {{steps.fetch_74.output.data.size}},
+        {{steps.fetch_75.output.data.size}}
+
+  # ── Group 4: fetch_76..100 ──────────────────────────────────────────────────
+
+  - name: fetch_76
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/76"
+      method: GET
+
+  - name: fetch_77
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/77"
+      method: GET
+
+  - name: fetch_78
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/78"
+      method: GET
+
+  - name: fetch_79
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/79"
+      method: GET
+
+  - name: fetch_80
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/80"
+      method: GET
+
+  - name: fetch_81
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/81"
+      method: GET
+
+  - name: fetch_82
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/82"
+      method: GET
+
+  - name: fetch_83
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/83"
+      method: GET
+
+  - name: fetch_84
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/84"
+      method: GET
+
+  - name: fetch_85
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/85"
+      method: GET
+
+  - name: fetch_86
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/86"
+      method: GET
+
+  - name: fetch_87
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/87"
+      method: GET
+
+  - name: fetch_88
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/88"
+      method: GET
+
+  - name: fetch_89
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/89"
+      method: GET
+
+  - name: fetch_90
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/90"
+      method: GET
+
+  - name: fetch_91
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/91"
+      method: GET
+
+  - name: fetch_92
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/92"
+      method: GET
+
+  - name: fetch_93
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/93"
+      method: GET
+
+  - name: fetch_94
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/94"
+      method: GET
+
+  - name: fetch_95
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/95"
+      method: GET
+
+  - name: fetch_96
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/96"
+      method: GET
+
+  - name: fetch_97
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/97"
+      method: GET
+
+  - name: fetch_98
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/98"
+      method: GET
+
+  - name: fetch_99
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/99"
+      method: GET
+
+  - name: fetch_100
+    type: http
+    with:
+      url: "http://127.0.0.1:19876/payload/100"
+      method: GET
+
+  # Intermediate merge for group 4.
+  # After this step finishes, dropConsumedTransients drops fetch_76..100 from heap.
+  - name: summarise_group_4
+    type: data.set
+    with:
+      group: 4
+      sizes: >
+        {{steps.fetch_76.output.data.size}},
+        {{steps.fetch_77.output.data.size}},
+        {{steps.fetch_78.output.data.size}},
+        {{steps.fetch_79.output.data.size}},
+        {{steps.fetch_80.output.data.size}},
+        {{steps.fetch_81.output.data.size}},
+        {{steps.fetch_82.output.data.size}},
+        {{steps.fetch_83.output.data.size}},
+        {{steps.fetch_84.output.data.size}},
+        {{steps.fetch_85.output.data.size}},
+        {{steps.fetch_86.output.data.size}},
+        {{steps.fetch_87.output.data.size}},
+        {{steps.fetch_88.output.data.size}},
+        {{steps.fetch_89.output.data.size}},
+        {{steps.fetch_90.output.data.size}},
+        {{steps.fetch_91.output.data.size}},
+        {{steps.fetch_92.output.data.size}},
+        {{steps.fetch_93.output.data.size}},
+        {{steps.fetch_94.output.data.size}},
+        {{steps.fetch_95.output.data.size}},
+        {{steps.fetch_96.output.data.size}},
+        {{steps.fetch_97.output.data.size}},
+        {{steps.fetch_98.output.data.size}},
+        {{steps.fetch_99.output.data.size}},
+        {{steps.fetch_100.output.data.size}}
+
+  # ── Final merge ─────────────────────────────────────────────────────────────
+  # References only the 4 summarise_group_N outputs (small strings), NOT the 100 fetch outputs.
+  # By the time this runs, dropConsumedTransients has dropped all fetch outputs; only the
+  # 4 intermediate summaries are live on the heap.
+  - name: summarise_final
+    type: data.set
+    with:
+      group_1_sizes: "{{steps.summarise_group_1.output.sizes}}"
+      group_2_sizes: "{{steps.summarise_group_2.output.sizes}}"
+      group_3_sizes: "{{steps.summarise_group_3.output.sizes}}"
+      group_4_sizes: "{{steps.summarise_group_4.output.sizes}}"
+      total_groups: 4
+      total_steps: 100
