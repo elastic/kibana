@@ -46,7 +46,6 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
         Pick<AnomalySwimLaneAttachmentState, 'query' | 'filters'>
       >;
 
-      // Feed the saved query/filters to the embeddable so its data fetcher applies them.
       const parentApi = useMemo(
         () => ({
           getSerializedStateForChild: () => embeddableState,
@@ -59,7 +58,6 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
             id: caseData.id,
           },
         }),
-        // Attachment state never changes after mount.
         // eslint-disable-next-line react-hooks/exhaustive-deps
         []
       );

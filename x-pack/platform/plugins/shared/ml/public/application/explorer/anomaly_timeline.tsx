@@ -218,8 +218,8 @@ export const AnomalyTimeline: FC = () => {
         // For cases attachment, pass just the job IDs to maintain stale data
         job_ids: selectedJobs?.map((v) => v.id) ?? [],
         time_range: globalTimeRange,
-        // Keep the active query with the attachment so it renders with its original search context.
-        ...(isDefined(queryString) && queryString !== ''
+        // Only the viewBy swim lane applies the query; the overall lane ignores it in the data fetcher.
+        ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY && isDefined(queryString) && queryString !== ''
           ? {
               query: {
                 query: queryString,
