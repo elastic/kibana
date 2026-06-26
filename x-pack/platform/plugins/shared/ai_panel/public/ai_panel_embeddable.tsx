@@ -96,10 +96,8 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
     return {
       api,
       Component: function AiPanelEmbeddableComponent() {
-        const [title, hideTitle, prompt, esqlQuery, savedTemplate, isEditFlyoutOpen] =
+        const [prompt, esqlQuery, savedTemplate, isEditFlyoutOpen] =
           useBatchedPublishingSubjects(
-            titleManager.api.title$,
-            titleManager.api.hideTitle$,
             prompt$,
             esqlQuery$,
             template$,
@@ -135,8 +133,6 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
           <>
             <AiPanelComponent
               embeddableId={uuid}
-              title={title}
-              hideTitle={hideTitle}
               prompt={prompt}
               esqlQuery={esqlQuery}
               timeRange={timeRange}

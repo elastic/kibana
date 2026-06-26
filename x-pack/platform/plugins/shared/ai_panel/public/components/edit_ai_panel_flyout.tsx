@@ -24,6 +24,7 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -64,11 +65,6 @@ interface EditAiPanelFlyoutProps {
   onClose: () => void;
 }
 
-const monoTextAreaCss = css({
-  fontFamily: 'monospace',
-  fontSize: '12px',
-});
-
 export const EditAiPanelFlyout = ({
   prompt,
   esqlQuery,
@@ -77,6 +73,11 @@ export const EditAiPanelFlyout = ({
   onSave,
   onClose,
 }: EditAiPanelFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
+  const monoTextAreaCss = css({
+    fontFamily: 'monospace',
+    fontSize: euiTheme.size.m,
+  });
   const [draftPrompt, setDraftPrompt] = useState(prompt);
   const [draftEsqlQuery, setDraftEsqlQuery] = useState(esqlQuery ?? '');
   const [draftTemplate, setDraftTemplate] = useState(template ?? '');
@@ -348,13 +349,19 @@ export const EditAiPanelFlyout = ({
                 'The HTML template uses {{column_name}} placeholders filled with live query data. Changing the prompt or query will regenerate this template.',
             })}
           >
-            <div css={css({ height: 400, border: '1px solid #D3DAE6', borderRadius: 4 })}>
+            <div
+              css={css({
+                height: 400,
+                border: euiTheme.border.thin,
+                borderRadius: euiTheme.border.radius.small,
+              })}
+            >
               <CodeEditor
                 languageId={HANDLEBARS_LANG_ID}
                 value={draftTemplate}
                 onChange={setDraftTemplate}
                 options={{
-                  fontSize: 12,
+                  fontSize: parseInt(euiTheme.size.m, 10),
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
                   wordWrap: 'on',

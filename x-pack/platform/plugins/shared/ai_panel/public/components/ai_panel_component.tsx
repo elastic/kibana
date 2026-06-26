@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -21,8 +13,6 @@ import { useAiPanelHtml } from '../hooks/use_ai_panel_html';
 
 interface AiPanelComponentProps {
   embeddableId: string;
-  title: string | undefined;
-  hideTitle: boolean | undefined;
   prompt: string;
   esqlQuery: string | undefined;
   timeRange: { from: string; to: string } | undefined;
@@ -48,8 +38,6 @@ const iframeCss = css({
 
 export const AiPanelComponent = ({
   embeddableId,
-  title,
-  hideTitle,
   prompt,
   esqlQuery,
   timeRange,
@@ -84,34 +72,13 @@ export const AiPanelComponent = ({
   return (
     <div css={wrapperCss}>
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      {!hideTitle && title && (
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-          style={{ padding: '8px 16px 0', flexShrink: 0 }}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              {i18n.translate('aiPanel.badge.aiGenerated', {
-                defaultMessage: 'AI generated',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
       {error && (
         <EuiCallOut
           color="danger"
           title={i18n.translate('aiPanel.error.title', {
             defaultMessage: 'Failed to generate panel',
           })}
-          style={{ margin: 16 }}
+          style={{ margin: euiTheme.size.base }}
           announceOnMount
         >
           {error}
@@ -119,7 +86,7 @@ export const AiPanelComponent = ({
       )}
       {!error && html && (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={html} sandbox="" title={title ?? 'AI panel'} />
+          <iframe css={iframeCss} srcDoc={html} sandbox="" title="AI panel" />
         </div>
       )}
     </div>
