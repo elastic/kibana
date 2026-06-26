@@ -645,6 +645,8 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           experimentalFeatures,
           logger,
           ml,
+          // this is a workaround for a bug in the ML providers where Kibana privileges not read correctly from fake requests
+          // (which is what the tool receives from the agent builder context when running as a background task)
           request: {} as KibanaRequest,
           soClient: savedObjectsClient,
           spaceId,

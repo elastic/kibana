@@ -91,24 +91,24 @@ export class EnrichEntityService {
       logger: this.opts.logger,
     };
 
-    const riskScoreData = await getRiskScoreData({
-      ...sharedOpts,
-      spaceId: this.opts.spaceId,
-      getAlerts: getAlertInputsForRiskScore,
-    });
-
-    const anomalyData = await getAnomalyData({
-      ...sharedOpts,
-      experimentalFeatures: this.opts.experimentalFeatures,
-      fromDate: anomalyFromDate,
-      toDate: anomalyToDate,
-      ml: this.opts.ml,
-      request: this.opts.request,
-      soClient: this.opts.soClient,
-      uiSettingsClient: this.opts.uiSettingsClient,
-    });
-
-    const vulnerabilityData = await getVulnerabilityData({ ...sharedOpts, fields });
+    const [riskScoreData, anomalyData, vulnerabilityData] = await Promise.all([
+      getRiskScoreData({
+        ...sharedOpts,
+        spaceId: this.opts.spaceId,
+        getAlerts: getAlertInputsForRiskScore,
+      }),
+      getAnomalyData({
+        ...sharedOpts,
+        experimentalFeatures: this.opts.experimentalFeatures,
+        fromDate: anomalyFromDate,
+        toDate: anomalyToDate,
+        ml: this.opts.ml,
+        request: this.opts.request,
+        soClient: this.opts.soClient,
+        uiSettingsClient: this.opts.uiSettingsClient,
+      }),
+      getVulnerabilityData({ ...sharedOpts, fields }),
+    ]);
 
     return {
       entities: entities.map((entity, i) => ({
