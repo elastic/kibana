@@ -471,12 +471,6 @@ evaluate.describe(
   }
 );
 
-// Boundaries (the distinction Anish asked about): queries that share rules/prebuilt
-// vocabulary but concern already-installed rules, rule editing, ML jobs, or alert
-// triage must NOT activate recommend-prebuilt-rules — they belong to a sibling skill.
-// The first example uses `shouldNotActivateSkill` (it only asserts this skill stays
-// out, so it holds regardless of which sibling is registered); the rest assert the
-// correct sibling via `expectedSkill`, mirroring the find-rules "Boundaries" suite.
 evaluate.describe(
   'Security Skills - Recommend Prebuilt Rules Boundaries',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
