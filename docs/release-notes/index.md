@@ -651,14 +651,14 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Fixes the {{esql}} document summary column counting `null` values against the displayed field limit, which could hide fields with real values behind an "and X more fields" label [#273610]({{kib-pull}}273610).
 
 **Elastic Observability solution**:
-For the Elastic Observability 9.3.7 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+For the Elastic Observability 9.3.7 release information, refer to [Elastic Observability release notes](docs-content://release-notes/elastic-observability/index.md).
 
 **Elastic Security solution**:
-For the Elastic Security 9.3.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 9.3.7 release information, refer to [Elastic Security release notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
 * Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys [#256233]({{kib-pull}}256233).
-* Fixes the Files plugin blob download to return the requested file kind [#274783]({{kib-pull}}274783).
+* Fixes the Files plugin blob download to return the requested file type [#274783]({{kib-pull}}274783).
 
 **Management**:
 * Fixes **Dev Tools Console** autocomplete in query filter context to suggest query DSL instead of the obsolete Elasticsearch 1.x filter DSL [#272907]({{kib-pull}}272907).
