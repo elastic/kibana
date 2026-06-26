@@ -15,11 +15,13 @@ type AttachWithFlightHandler = (
 ) => Promise<void>;
 
 type CartPulseListener = () => void;
+type CartReceivingListener = (isReceiving: boolean) => void;
 
 let attachWithFlightHandler: AttachWithFlightHandler | null = null;
 let agentCartButtonElement: HTMLElement | null = null;
 let applicationAttachButtonElement: HTMLElement | null = null;
 const cartPulseListeners = new Set<CartPulseListener>();
+const cartReceivingListeners = new Set<CartReceivingListener>();
 
 export const setAttachWithFlightHandler = (handler: AttachWithFlightHandler | null): void => {
   attachWithFlightHandler = handler;
@@ -51,6 +53,20 @@ export const subscribeCartPulse = (listener: CartPulseListener): (() => void) =>
 export const triggerCartPulse = (): void => {
   cartPulseListeners.forEach((listener) => {
     listener();
+  });
+};
+
+export const subscribeCartReceiving = (listener: CartReceivingListener): (() => void) => {
+  cartReceivingListeners.add(listener);
+
+  return () => {
+    cartReceivingListeners.delete(listener);
+  };
+};
+
+export const triggerCartReceiving = (isReceiving: boolean): void => {
+  cartReceivingListeners.forEach((listener) => {
+    listener(isReceiving);
   });
 };
 

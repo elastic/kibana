@@ -13,6 +13,7 @@ import { useActiveConversationAttachmentCount } from '../../../hooks/use_active_
 import {
   registerAgentCartButtonElement,
   subscribeCartPulse,
+  subscribeCartReceiving,
 } from '../../../../agent_first/attachment_coordinator/coordinator_bridge';
 
 const labels = {
@@ -43,6 +44,7 @@ export const AttachmentCartButton: React.FC = () => {
   const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
   const pulseTimeoutRef = useRef<number | undefined>(undefined);
   const [isPulsing, setIsPulsing] = React.useState(false);
+  const [isReceiving, setIsReceiving] = React.useState(false);
 
   const triggerPulse = useCallback(() => {
     window.clearTimeout(pulseTimeoutRef.current);
@@ -72,6 +74,12 @@ export const AttachmentCartButton: React.FC = () => {
     return subscribeCartPulse(triggerPulse);
   }, [triggerPulse]);
 
+  useEffect(() => {
+    return subscribeCartReceiving(setIsReceiving);
+  }, []);
+
+  const cartIconType = isReceiving ? 'folderOpen' : 'folder';
+
   const badgeStyles = css`
     position: absolute;
     inset-block-start: -${euiTheme.size.xs};
@@ -97,7 +105,7 @@ export const AttachmentCartButton: React.FC = () => {
       >
         <EuiButtonIcon
           color="text"
-          iconType="paperClip"
+          iconType={cartIconType}
           aria-label={labels.attachments(attachmentCount)}
           data-test-subj="agentBuilderAttachmentCartButton"
         />
