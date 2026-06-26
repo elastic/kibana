@@ -93,17 +93,19 @@ describe('getUserFromRequest', () => {
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 
-  it('does not include id in the result when falling back to ES authenticate', async () => {
+  it('includes the id from getCurrentUser when falling back to ES authenticate for the username', async () => {
     const request = httpServerMock.createFakeKibanaRequest({});
 
+    // getCurrentUser resolves a profile_uid but no username, so we still fall back to ES for the username
+    security.authc.getCurrentUser.mockReturnValue({ profile_uid: 'profile-456' } as any);
     esClient.security.authenticate.mockResolvedValue({
       username: 'some-user',
     } as any);
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).not.toHaveProperty('id');
-    expect(result.username).toBe('some-user');
+    expect(result).toEqual({ id: 'profile-456', username: 'some-user' });
+    expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 });
 

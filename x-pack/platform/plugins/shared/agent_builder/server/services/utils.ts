@@ -50,6 +50,7 @@ export const getUserFromRequest = async ({
   // task scheduled before enrichment): call ES _security/_authenticate
   const authResponse = await esClient.security.authenticate();
   return {
+    id: authUser?.profile_uid,
     username: authResponse.username,
   };
 };
