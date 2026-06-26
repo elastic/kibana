@@ -41,7 +41,11 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
   const { isDeploying, serviceStatuses, failedPackages, deployErrors } = deployAndDetectStep;
 
   const hasStarted = Object.keys(serviceStatuses).length > 0;
-  const allSucceeded = hasStarted && !isDeploying && failedPackages.length === 0;
+  const allSucceeded =
+    hasStarted &&
+    !isDeploying &&
+    failedPackages.length === 0 &&
+    Object.values(serviceStatuses).some((s) => s === 'receiving');
 
   return (
     <div data-test-subj="onboardingStep-deploy-and-detect">

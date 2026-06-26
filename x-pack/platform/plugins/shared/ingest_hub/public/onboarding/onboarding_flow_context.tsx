@@ -144,7 +144,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
             ...(rest.policyIdsByPackage ?? {}),
           },
           failedPackages: rest.failedPackages ?? prev?.failedPackages ?? [],
-          deployErrors: { ...(prev?.deployErrors ?? {}), ...(rest.deployErrors ?? {}) },
+          deployErrors: rest.deployErrors !== undefined ? rest.deployErrors : (prev?.deployErrors ?? {}),
         });
       }
     },
