@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { ButtonColor, IconType } from '@elastic/eui';
+import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
   AttachmentVersion,
@@ -96,7 +96,7 @@ export interface ActionButton {
   /** Whether this is the primary action button */
   type: ActionButtonType;
   /** Optional EUI button color override (defaults to 'text') */
-  color?: ButtonColor;
+  color?: EuiButtonColor;
   /** Whether the action is currently unavailable */
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */
