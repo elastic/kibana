@@ -124,6 +124,7 @@ describe('Cloud Plugin', () => {
         const decodedId: DecodedCloudId = {
           defaultPort: '9000',
           host: 'host',
+          kibanaClusterId: 'kibana-cluster-id',
           elasticsearchUrl: 'elasticsearch-url',
           kibanaUrl: 'kibana-url',
         };
@@ -135,6 +136,7 @@ describe('Cloud Plugin', () => {
             cloudHost: 'host',
             elasticsearchUrl: 'elasticsearch-url',
             kibanaUrl: 'kibana-url',
+            kibanaClusterId: 'kibana-cluster-id',
           })
         );
         expect(decodeCloudIdMock).toHaveBeenCalledTimes(1);

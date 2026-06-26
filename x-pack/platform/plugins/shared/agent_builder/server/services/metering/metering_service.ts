@@ -105,6 +105,11 @@ class MeteringServiceImpl implements MeteringService {
     if (instanceGroupType !== 'serverless_project') {
       source.provider = this.cloud.csp;
       source.region = this.cloud.region;
+
+      const clusterId = this.cloud.kibanaClusterId;
+      if (clusterId) {
+        source.metadata = { cluster_id: clusterId };
+      }
     }
 
     const record: UsageRecord = {

@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 export interface DecodedCloudId {
   host: string;
   defaultPort: string;
+  kibanaClusterId: string;
   elasticsearchUrl: string;
   kibanaUrl: string;
 }
@@ -48,6 +49,7 @@ export function decodeCloudId(cid: string, logger: Logger): DecodedCloudId | und
   return {
     host,
     defaultPort,
+    kibanaClusterId: kbId,
     elasticsearchUrl: esUrl,
     kibanaUrl: kbUrl,
   };

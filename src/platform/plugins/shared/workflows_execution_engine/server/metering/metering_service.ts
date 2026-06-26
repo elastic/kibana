@@ -138,6 +138,11 @@ export class WorkflowsMeteringService {
     if (instanceGroupType !== 'serverless_project') {
       source.provider = cloudSetup?.csp;
       source.region = cloudSetup?.region;
+
+      const clusterId = cloudSetup?.kibanaClusterId;
+      if (clusterId) {
+        source.metadata = { cluster_id: clusterId };
+      }
     }
 
     return {
