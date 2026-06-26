@@ -8,9 +8,11 @@
 import type { ReactNode } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 
-export type SpineType = 'chat' | 'case' | 'incident';
+export type SpineType = 'chat' | 'case' | 'incident' | 'threat_hunt';
 
-export type SpineTabId = 'attachments' | 'people';
+export type SpineBadgeVariant = 'ghost' | 'solid';
+
+export type SpineTabId = string;
 
 export type AttachmentsPanelView =
   | { mode: 'grid' }
