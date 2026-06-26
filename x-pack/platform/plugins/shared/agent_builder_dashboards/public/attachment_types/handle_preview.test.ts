@@ -7,12 +7,17 @@
 
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { handlePreview } from './handle_preview';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
+import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
 jest.mock('./dashboard_integration/preview_attachment', () => ({
   previewAttachmentInDashboard: jest.fn(),
+}));
+
+jest.mock('./handle_edit_in_dashboard', () => ({
+  handleEditInDashboard: jest.fn(),
 }));
 
 const attachment: DashboardAttachment = {
@@ -26,9 +31,13 @@ describe('handlePreview', () => {
   const dashboardApi = {} as DashboardApi;
   const checkSavedDashboardExist = jest.fn();
   const openCanvas = jest.fn();
+  const dashboardLocator = {
+    navigate: jest.fn(),
+  } as unknown as NonNullable<DashboardRendererProps['locator']>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    checkSavedDashboardExist.mockResolvedValue(true);
   });
 
   it('syncs to the dashboard app when dashboardApi is available', async () => {
@@ -43,6 +52,7 @@ describe('handlePreview', () => {
 
     expect(previewAttachmentInDashboard).toHaveBeenCalled();
     expect(openCanvas).not.toHaveBeenCalled();
+    expect(handleEditInDashboard).not.toHaveBeenCalled();
   });
 
   it('opens canvas in agent-first chrome even when dashboardApi is available', async () => {
@@ -57,6 +67,23 @@ describe('handlePreview', () => {
     });
 
     expect(previewAttachmentInDashboard).not.toHaveBeenCalled();
+    expect(handleEditInDashboard).not.toHaveBeenCalled();
     expect(openCanvas).toHaveBeenCalled();
+  });
+
+  it('navigates via locator when canvas preview is not preferred and dashboardApi is unavailable', async () => {
+    await handlePreview({
+      attachment,
+      canWriteDashboards: true,
+      isSidebar: false,
+      dashboardLocator,
+      checkSavedDashboardExist,
+      openCanvas,
+      preferCanvasPreview: false,
+    });
+
+    expect(previewAttachmentInDashboard).not.toHaveBeenCalled();
+    expect(handleEditInDashboard).toHaveBeenCalled();
+    expect(openCanvas).not.toHaveBeenCalled();
   });
 });

@@ -147,6 +147,38 @@ export const registerDashboardAttachmentUiDefinition = ({
       if (isCanvas) {
         return [];
       }
+
+      const preferCanvasPreview = openTarget !== 'nativeApp' && isAgentFirstChrome;
+
+      if (isAgentFirstChrome) {
+        return [
+          {
+            label: i18n.translate(
+              'xpack.agentBuilderDashboards.attachments.dashboard.canvasEditActionLabel',
+              {
+                defaultMessage: 'Edit in Dashboards',
+              }
+            ),
+            icon: 'productDashboard',
+            type: ActionButtonType.PRIMARY,
+            handler: async () => {
+              const { handlePreview } = await import('./async_services');
+
+              return handlePreview({
+                attachment,
+                dashboardApi,
+                canWriteDashboards,
+                isSidebar,
+                dashboardLocator,
+                checkSavedDashboardExist,
+                openCanvas,
+                preferCanvasPreview: false,
+              });
+            },
+          },
+        ];
+      }
+
       return [
         {
           label: i18n.translate(
@@ -168,7 +200,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               dashboardLocator,
               checkSavedDashboardExist,
               openCanvas,
-              preferCanvasPreview: openTarget !== 'nativeApp' && isAgentFirstChrome,
+              preferCanvasPreview,
             });
           },
         },
