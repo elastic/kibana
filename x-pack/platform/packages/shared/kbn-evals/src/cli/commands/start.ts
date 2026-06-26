@@ -5,53 +5,18 @@
  * 2.0.
  */
 
-import Path from 'path';
-import Fs from 'fs';
 import { spawn } from 'child_process';
-import inquirer from 'inquirer';
-import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { resolveEvalSuites } from '../suites';
-import { promptForSuite, isTTY, getAllAvailableConnectors } from '../prompts';
+import { ensureEvalStack } from '../eval_stack';
 import {
-  stripTrailingSlash,
-  probeHttp,
-  isExportProfileImplicitLocal,
-  isDevVaultProfile,
-  resolveVaultConfigPath,
-} from '../profiles';
-import { resolveRunContext } from '../run_context';
-import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } from './init';
-import { ensureEvalStack, isEisConnectorId } from '../ensure_eval_stack';
-
-const shellQuote = (value: string): string => {
-  // Prefer single quotes for bash/zsh. If the string contains single quotes, fall back to double quotes.
-  if (!value.includes("'")) {
-    return `'${value}'`;
-  }
-  const escaped = value.replace(/(["\\$`])/g, '\\$1');
-  return `"${escaped}"`;
-};
-
-const formatRerunCommand = (args: string[]): string =>
-  ['node', 'scripts/evals', ...args.map((a) => (a.includes(' ') ? shellQuote(a) : a))].join(' ');
-
-const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
-  const suites = resolveEvalSuites(repoRoot, log);
-  const match = suites.find((suite) => suite.id === suiteId);
-  if (match) return match;
-
-  log.info(`Suite "${suiteId}" not found in metadata; refreshing discovery...`);
-  const refreshed = resolveEvalSuites(repoRoot, log, { refresh: true });
-  const refreshedMatch = refreshed.find((suite) => suite.id === suiteId);
-  if (refreshedMatch) return refreshedMatch;
-
-  const available = refreshed.map((suite) => suite.id).join(', ');
-  throw createFlagError(
-    `Unknown suite "${suiteId}". Available suites: ${available || 'none found'}`
-  );
-};
+  ensureEvalInit,
+  resolveEvalSuite,
+  resolveEvalRunContext,
+  buildEvalRunArgs,
+  buildEvalRunEnv,
+  formatEvalCliCommand,
+  evalRunFlags,
+} from '../run_helpers';
 
 export const startCmd: Command<void> = {
   name: 'start',
@@ -70,152 +35,27 @@ export const startCmd: Command<void> = {
     node scripts/evals start --suite agent-builder --skip-server
     node scripts/evals stop
   `,
-  flags: {
-    string: [
-      'suite',
-      'config',
-      'evaluation-connector-id',
-      'project',
-      'repetitions',
-      'grep',
-      'profile',
-      'datasets-profile',
-      'export-profile',
-      'evaluations-kbn-url',
-      'evaluations-kbn-api-key',
-    ],
-    boolean: ['skip-server', 'dry-run', 'skip-init'],
-    alias: { model: 'project', judge: 'evaluation-connector-id' },
-    default: { 'skip-server': false, 'dry-run': false, 'skip-init': false },
-  },
+  flags: evalRunFlags,
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
-    let profile = flagsReader.string('profile') ?? undefined;
+    const profile = await ensureEvalInit(repoRoot, log, flagsReader);
 
-    if (!flagsReader.boolean('skip-init')) {
-      if (!profile) {
-        if (!isTTY()) {
-          throw createFlagError(
-            '--profile is required in non-interactive mode (e.g. --profile dev-vault, --profile local).'
-          );
-        }
+    const { suite, suiteId, configPath, resolvedConfigPath } = await resolveEvalSuite(
+      repoRoot,
+      log,
+      flagsReader
+    );
 
-        type InfraChoice = 'local' | 'golden-cluster' | 'custom';
-        const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
-          type: 'list',
-          name: 'choice',
-          message: 'How do you want to run evals and export results and traces?',
-          choices: [
-            { name: 'Local (localhost ES/Kibana)', value: 'local' },
-            {
-              name: 'Golden cluster (uses Vault -- no config file needed)',
-              value: 'golden-cluster',
-            },
-            { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
-          ],
-        });
-
-        if (choice === 'local') {
-          await ensureLocalConfig(repoRoot, log);
-          profile = 'local';
-        } else if (choice === 'golden-cluster') {
-          await ensureVaultAuth(log);
-          profile = 'dev-vault';
-        } else {
-          const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
-            type: 'input',
-            name: 'customProfile',
-            message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
-            default: '',
-          });
-          const resolvedProfile = customProfile.trim() || 'default';
-          await runConfigInit(repoRoot, log, { profile: resolvedProfile });
-          profile = resolvedProfile;
-        }
-      } else if (isDevVaultProfile(profile)) {
-        await ensureVaultAuth(log);
-      } else if (profile === 'local') {
-        await ensureLocalConfig(repoRoot, log);
-      } else {
-        const configPath = resolveVaultConfigPath(repoRoot, profile);
-        if (!Fs.existsSync(configPath)) {
-          if (!isTTY()) {
-            throw createFlagError(
-              `Config not found: ${configPath}. Run \`node scripts/evals init config --profile ${profile}\` to create it.`
-            );
-          }
-          log.info(`Config file for profile "${profile}" not found. Running setup wizard...`);
-          log.info('');
-          await runConfigInit(repoRoot, log, { profile });
-        }
-      }
-
-      if (getAllAvailableConnectors(repoRoot).length === 0) {
-        if (!isTTY()) {
-          throw createFlagError(
-            'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run with a TTY to use the setup wizard.'
-          );
-        }
-      }
-
-      if (isTTY()) {
-        await runConnectorSetup(repoRoot, log);
-      }
-    }
-
-    // --- Resolve suite ---
-    let suiteId = flagsReader.string('suite');
-    const configPath = flagsReader.string('config');
-
-    if (!suiteId && !configPath) {
-      if (isTTY()) {
-        const selected = await promptForSuite(repoRoot, log);
-        suiteId = selected.id;
-      } else {
-        throw createFlagError('Missing --suite (or provide --config).');
-      }
-    }
-
-    if (suiteId && configPath) {
-      throw createFlagError('Use either --suite or --config, not both.');
-    }
-
-    const suite = suiteId ? ensureSuite(suiteId, repoRoot, log) : undefined;
-    const resolvedConfigPath = suite
-      ? suite.absoluteConfigPath
-      : Path.resolve(repoRoot, configPath as string);
-
-    const { evaluationConnectorId, projects, profileEnvOverrides, exportProfile } =
-      await resolveRunContext(repoRoot, log, flagsReader, { baseProfile: profile });
+    const {
+      evaluationConnectorId,
+      projects,
+      profileEnvOverrides,
+      exportProfile,
+      datasetsProfile,
+      requiresEisCcm,
+    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
 
     const skipServer = flagsReader.boolean('skip-server');
-    const requiresEisCcm =
-      isEisConnectorId(evaluationConnectorId) ||
-      (projects.length > 0
-        ? projects.some(isEisConnectorId)
-        : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
-
-    // Best-effort default: if we implicitly resolved an export profile, don't fail the run when the
-    // export ES isn't reachable. Instead, warn and continue without export (preflight won't run).
-    // When the user actively chose a profile (via CLI flag or wizard), trust their config.
-    const exportProfileIsImplicit =
-      !profile && isExportProfileImplicitLocal(flagsReader, exportProfile);
-    if (exportProfileIsImplicit) {
-      const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
-
-      const tracingReachable = tracingEsUrl
-        ? await probeHttp(stripTrailingSlash(tracingEsUrl))
-        : true;
-
-      if (!tracingReachable) {
-        log.warning(
-          `Export profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
-            'Continuing without external trace queries. To require export, pass --export-profile local.'
-        );
-        delete profileEnvOverrides.TRACING_ES_URL;
-        delete profileEnvOverrides.TRACING_ES_API_KEY;
-      }
-    }
 
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);
@@ -230,52 +70,21 @@ export const startCmd: Command<void> = {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
     log.info(
-      `Profiles:  datasets=${
-        flagsReader.string('datasets-profile') ?? profile ?? 'config'
-      } export=${exportProfile ?? 'none'}`
+      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
     );
     log.info('');
 
-    const rerunArgs: string[] = [];
-    if (suiteId) {
-      rerunArgs.push('--suite', suiteId);
-    } else if (configPath) {
-      rerunArgs.push('--config', configPath);
-    }
+    const rerunArgs = buildEvalRunArgs({
+      suiteId,
+      configPath,
+      evaluationConnectorId,
+      projects,
+      profile,
+      flagsReader,
+      skipServer,
+    });
 
-    rerunArgs.push('--judge', evaluationConnectorId);
-
-    if (projects.length > 0) {
-      rerunArgs.push('--model', projects.join(','));
-    }
-
-    if (profile) {
-      rerunArgs.push('--profile', profile);
-    }
-    const passedDatasetsProfile = flagsReader.string('datasets-profile');
-    const passedExportProfile = flagsReader.string('export-profile');
-    if (passedDatasetsProfile) {
-      rerunArgs.push('--datasets-profile', passedDatasetsProfile);
-    }
-    if (passedExportProfile) {
-      rerunArgs.push('--export-profile', passedExportProfile);
-    }
-
-    const grep = flagsReader.string('grep');
-    if (grep) {
-      rerunArgs.push('--grep', grep);
-    }
-
-    const repetitions = flagsReader.string('repetitions');
-    if (repetitions) {
-      rerunArgs.push('--repetitions', repetitions);
-    }
-
-    if (skipServer) {
-      rerunArgs.push('--skip-server');
-    }
-
-    log.info(`Re-run command: ${formatRerunCommand(['start', ...rerunArgs])}`);
+    log.info(`Re-run command: ${formatEvalCliCommand(['start', ...rerunArgs])}`);
     log.info('');
 
     if (flagsReader.boolean('dry-run')) {
@@ -287,52 +96,31 @@ export const startCmd: Command<void> = {
       await ensureEvalStack({
         repoRoot,
         log,
-        serverConfigSet: suite?.serverConfigSet ?? 'evals_tracing',
-        requiresEisCcm,
         profileEnvOverrides,
+        serverConfigSet: suite?.serverConfigSet,
+        requiresEisCcm,
       });
     }
 
-    // --- Run the eval suite ---
-    log.info(`Running suite: ${suiteId ?? configPath}`);
+    log.info(`[run] Running suite: ${suiteId ?? configPath}`);
     log.info('');
 
-    const envOverrides: Record<string, string> = {
-      EVALUATION_CONNECTOR_ID: evaluationConnectorId,
-    };
-
-    if (requiresEisCcm && !skipServer) {
-      envOverrides.KBN_EVALS_AWAIT_CCM_CONNECTORS = '1';
-    }
-
-    if (suite) {
-      envOverrides.EVAL_SUITE_ID = suite.id;
-    }
-
-    Object.assign(envOverrides, profileEnvOverrides);
-
-    if (envOverrides.TRACING_ES_URL) {
-      log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
-    }
-    if (repetitions) {
-      envOverrides.EVALUATION_REPETITIONS = repetitions;
-    }
-
-    const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
-    if (evaluationsKbnUrl) {
-      envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
-    }
-
-    const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
-    if (evaluationsKbnApiKey) {
-      envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
-    }
+    const envOverrides = buildEvalRunEnv({
+      evaluationConnectorId,
+      requiresEisCcm,
+      skipServer,
+      suite,
+      profileEnvOverrides,
+      flagsReader,
+      log,
+    });
 
     const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];
     for (const p of projects) {
       args.push('--project', p);
     }
 
+    const grep = flagsReader.string('grep');
     if (grep) {
       args.push('--grep', grep);
     }

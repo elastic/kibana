@@ -1,5 +1,5 @@
 {
-  "sha1": "bd4c1d0063ce1f0a9860b990f0c7d3083f5ed43f",
+  "sha1": "2639e0a6bee3a529e8b28de7dfd4d5d05f81c093",
   "tests": [
     {
       "id": "0e89de24e8ff3a8-faf07b914e53ca6",
@@ -141,8 +141,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/auto_upgrade_policies.spec.ts",
-        "line": 81,
-        "column": 12
+        "line": 82,
+        "column": 15
       }
     },
     {
@@ -169,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_private_location.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 95,
+        "column": 15
       }
     },
     {
@@ -2036,6 +2036,20 @@
       }
     },
     {
+      "id": "05dd61025210a2c-a56a9338bc80bac",
+      "title": "EditMonitorAPI - Public Location persists deletion of label and header keys instead of deep-merging them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
+        "line": 137,
+        "column": 12
+      }
+    },
+    {
       "id": "05dd61025210a2c-1a5a3e9819d72f4",
       "title": "EditMonitorAPI - Public Location strips unknown keys from monitor edits",
       "expectedStatus": "passed",
@@ -2045,7 +2059,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 137,
+        "line": 175,
         "column": 12
       }
     },
@@ -2059,7 +2073,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 189,
+        "line": 227,
         "column": 12
       }
     },
@@ -2073,7 +2087,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 203,
+        "line": 241,
         "column": 12
       }
     },
@@ -2087,7 +2101,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 212,
+        "line": 250,
         "column": 12
       }
     },
@@ -2101,7 +2115,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 231,
+        "line": 269,
         "column": 12
       }
     },
@@ -2115,7 +2129,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 279,
+        "line": 317,
         "column": 12
       }
     },
@@ -3817,16 +3831,30 @@
       }
     },
     {
-      "id": "4fbd64e81cfcfd7-05aebefd9ed0ded",
-      "title": "SyncGlobalParams pending Scout port (comparePolicies sample data) — see file header",
-      "expectedStatus": "skipped",
+      "id": "b696ee43142090b-4770f9051e3c862",
+      "title": "SyncGlobalParamsSpaces syncs space-scoped params into the right monitor policy and keeps policy/monitor counts in lock-step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/sync_global_params_spaces.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fbd64e81cfcfd7-e3b46c114927d9a",
+      "title": "SyncGlobalParams syncs a global param into a private-location monitor policy and removes it on delete",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/sync_global_params.spec.ts",
-        "line": 37,
+        "line": 72,
         "column": 12
       }
     },

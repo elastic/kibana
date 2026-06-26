@@ -7,20 +7,21 @@
 
 import type { BaseFeature } from '@kbn/streams-schema';
 import type { Logger } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
-import type { FeatureClient } from '../../../lib/streams/feature/feature_client';
+import type { KnowledgeIndicatorClient } from '../../../lib/streams/ki';
 
 export async function createFeatureKnowledgeIndicatorToolHandler({
-  featureClient,
+  kiClient,
   streamName,
   featureInput,
+  expiresAt,
   logger,
 }: {
-  featureClient: FeatureClient;
+  kiClient: KnowledgeIndicatorClient;
   streamName: string;
   featureInput: Omit<BaseFeature, 'stream_name'>;
+  expiresAt?: string;
   logger: Logger;
-}): Promise<{ id: string; uuid: string }> {
+}): Promise<{ id: string }> {
   logger.debug(
     `ki_feature_create: creating feature KI for stream "${streamName}" with id "${featureInput.id}"`
   );
@@ -28,19 +29,16 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
   const feature = {
     ...featureInput,
     stream_name: streamName,
-    uuid: uuidv4(),
-    status: 'active' as const,
-    last_seen: new Date().toISOString(),
+    expires_at: expiresAt,
   };
 
-  await featureClient.bulk(streamName, [{ index: { feature } }]);
+  await kiClient.bulk(streamName, [{ index: { feature } }]);
 
   logger.debug(
-    `ki_feature_create: created feature KI for stream "${streamName}" with id "${feature.id}" and uuid "${feature.uuid}"`
+    `ki_feature_create: created feature KI for stream "${streamName}" with id "${feature.id}"`
   );
 
   return {
     id: feature.id,
-    uuid: feature.uuid,
   };
 }
