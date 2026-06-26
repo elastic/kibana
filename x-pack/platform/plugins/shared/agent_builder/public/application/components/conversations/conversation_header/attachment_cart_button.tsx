@@ -16,7 +16,9 @@ import {
   subscribeCartPulse,
   subscribeCartReceiving,
 } from '../../../../agent_first/attachment_coordinator/coordinator_bridge';
+import { useOptionalConversationSpineContext } from '../../../../agent_first/conversation_spine/conversation_spine_context';
 import { useCanvasContext } from '../conversation_rounds/round_response/attachments/canvas_context';
+import { useIsAgentWorkspaceMount } from '../../../hooks/use_navigation';
 
 const labels = {
   attachments: (count: number) =>
@@ -45,6 +47,8 @@ export const AttachmentCartButton: React.FC = () => {
   const attachmentCount = useActiveConversationAttachmentCount();
   const { isEmbeddedContext } = useConversationContext();
   const { openAttachmentCart } = useCanvasContext();
+  const spineContext = useOptionalConversationSpineContext();
+  const isAgentWorkspaceMount = useIsAgentWorkspaceMount();
   const pulseTimeoutRef = useRef<number | undefined>(undefined);
   const [isPulsing, setIsPulsing] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
@@ -81,8 +85,16 @@ export const AttachmentCartButton: React.FC = () => {
   }, []);
 
   const handleOpenCart = useCallback(() => {
+    if (isAgentWorkspaceMount && !isEmbeddedContext && spineContext) {
+      spineContext.openSpine({
+        tabId: 'attachments',
+        attachmentsView: { mode: 'grid' },
+        isSidebar: false,
+      });
+      return;
+    }
     openAttachmentCart(isEmbeddedContext);
-  }, [openAttachmentCart, isEmbeddedContext]);
+  }, [isAgentWorkspaceMount, isEmbeddedContext, spineContext, openAttachmentCart]);
 
   const cartIconType = isReceiving ? 'folderOpen' : 'folder';
   const ariaLabel = labels.attachments(attachmentCount);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -19,11 +19,9 @@ import {
   shouldOfferSidebarConversation,
   useIsAgentWorkspaceMount,
 } from '../../../../../hooks/use_navigation';
-import { getApplicationWorkspaceMountElement } from '../../../../../../agent_workspace/agent_workspace_flyout_defaults';
 import { AttachmentHeader } from './attachment_header';
 import { AttachmentCartPanel } from './attachment_cart_panel';
 import { useCanvasContext } from './canvas_context';
-import { CanvasPanelOverlay } from './canvas_panel_overlay';
 
 const DEFAULT_CANVAS_WIDTH = '50vw';
 const CANVAS_MIN_WIDTH = 300;
@@ -142,37 +140,9 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const useApplicationWorkspaceOverlay =
     isAgentWorkspaceMount && canvasState && !canvasState.isSidebar;
 
-  const [, retryApplicationWorkspaceMount] = useReducer((count) => count + 1, 0);
-
-  useEffect(() => {
-    if (!useApplicationWorkspaceOverlay || getApplicationWorkspaceMountElement()) {
-      return;
-    }
-
-    const rafId = requestAnimationFrame(() => {
-      retryApplicationWorkspaceMount();
-    });
-
-    return () => window.cancelAnimationFrame(rafId);
-  }, [useApplicationWorkspaceOverlay, canvasState]);
-
-  const applicationWorkspaceMountElement = useApplicationWorkspaceOverlay
-    ? getApplicationWorkspaceMountElement()
-    : null;
-
-  // Agent-first attachment preview and cart use a portaled overlay — never mount a flyout first or
-  // EuiFlyout will call onClose on unmount and clear canvas state before the overlay appears.
+  // Agent-first: conversation spine is portaled via ConversationSpineMount.
   if (useApplicationWorkspaceOverlay) {
-    if (!applicationWorkspaceMountElement) {
-      return null;
-    }
-
-    return (
-      <CanvasPanelOverlay
-        attachmentsService={attachmentsService}
-        mountElement={applicationWorkspaceMountElement}
-      />
-    );
+    return null;
   }
 
   const flyoutBodyStyles = css`
