@@ -143,9 +143,9 @@ Data ingestion and Fleet::
 Developer tools::
 * Fixes **Dev Tools Console** autocomplete in query filter context to suggest query DSL instead of the obsolete Elasticsearch 1.x filter DSL ({kibana-pull}272907[#272907]).
 Elastic Security solution::
-For the Elastic Security 8.19.18 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+For the Elastic Security 8.19.18 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
 Kibana platform::
-* Fixes the Files plugin blob download to return the requested file kind ({kibana-pull}274783[#274783]).
+* Fixes the Files plugin blob download to return the requested file type ({kibana-pull}274783[#274783]).
 * Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys ({kibana-pull}256233[#256233]).
 
 [[release-notes-8.19.17]]
