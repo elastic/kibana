@@ -12,7 +12,7 @@ import type { InlineSuggestionItem } from './types';
 
 jest.mock('../../commands/registry/options/recommended_queries', () => ({
   getRecommendedQueriesTemplates: jest.fn(),
-  getRelevantSuggestionField: jest.fn(),
+  getTimeAndCategorizationFields: jest.fn(),
 }));
 
 jest.mock('../shared/columns_retrieval_helpers', () => ({
@@ -26,7 +26,7 @@ jest.mock('./inline_suggestions_cache', () => ({
 
 import {
   getRecommendedQueriesTemplates,
-  getRelevantSuggestionField,
+  getTimeAndCategorizationFields,
 } from '../../commands/registry/options/recommended_queries';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { setToCache } from './inline_suggestions_cache';
@@ -34,8 +34,8 @@ import { setToCache } from './inline_suggestions_cache';
 const mockGetRecommendedQueriesTemplates = getRecommendedQueriesTemplates as jest.MockedFunction<
   typeof getRecommendedQueriesTemplates
 >;
-const mockGetRelevantSuggestionField = getRelevantSuggestionField as jest.MockedFunction<
-  typeof getRelevantSuggestionField
+const mockGetTimeAndCategorizationFields = getTimeAndCategorizationFields as jest.MockedFunction<
+  typeof getTimeAndCategorizationFields
 >;
 const mockGetColumnsByTypeRetriever = getColumnsByTypeRetriever as jest.MockedFunction<
   typeof getColumnsByTypeRetriever
@@ -61,10 +61,9 @@ describe('inlineSuggest', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockGetRelevantSuggestionField.mockResolvedValue({
+    mockGetTimeAndCategorizationFields.mockResolvedValue({
       timeField: '@timestamp',
       categorizationField: 'message',
-      keywordField: 'host.name',
     });
     mockGetRecommendedQueriesTemplates.mockReturnValue([
       {
@@ -147,8 +146,7 @@ describe('inlineSuggest', () => {
         typeof call[1] === 'object' &&
         call[1] &&
         'timeField' in call[1] &&
-        'categorizationField' in call[1] &&
-        'keywordField' in call[1]
+        'categorizationField' in call[1]
     );
     expect(fieldCacheCall).toBeDefined();
   });

@@ -31,12 +31,10 @@ export const getRecommendedQueriesTemplates = ({
   fromCommand,
   timeField,
   categorizationField,
-  keywordField,
 }: {
   fromCommand: string;
   timeField?: string;
   categorizationField?: string;
-  keywordField?: string | undefined;
 }): QueryTemplate[] => {
   // Recommend TBUCKET for @timestamp fields as it is smarter and has easier to understand syntax
   const bucketExpression =
@@ -148,13 +146,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Change point on count aggregation',
               }
             ),
-            ...(keywordField
-              ? {
-                  queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} | CHANGE_POINT count ON buckets BY ${keywordField}| WHERE type IS NOT NULL`,
-                }
-              : {
-                  queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} | CHANGE_POINT count ON buckets | WHERE type IS NOT NULL`,
-                }),
+            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} | CHANGE_POINT count ON buckets | WHERE type IS NOT NULL`,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {
@@ -221,16 +213,13 @@ export const getRecommendedQueriesTemplates = ({
   return queries;
 };
 
-export async function getRelevantSuggestionField(getColumnsByType: GetColumnsByTypeFn): Promise<{
-  timeField: string;
-  categorizationField: string | undefined;
-  keywordField: string | undefined;
-}> {
-  const [dateFields, textFields, keywordFields] = await Promise.all([
+export async function getTimeAndCategorizationFields(
+  getColumnsByType: GetColumnsByTypeFn
+): Promise<{ timeField: string; categorizationField: string | undefined }> {
+  const [dateFields, textFields] = await Promise.all([
     getColumnsByType(['date'], [], { openSuggestions: true }),
     // get text fields separately to avoid mixing them with date fields
     getColumnsByType(['text'], [], { openSuggestions: true }),
-    getColumnsByType(['keyword'], [], { openSuggestions: true }),
   ]);
 
   const timeField =
@@ -243,12 +232,7 @@ export async function getRelevantSuggestionField(getColumnsByType: GetColumnsByT
       ? getCategorizationField(textFields.map((field) => field.text))
       : undefined;
 
-  const keywordField =
-    keywordFields.length > 0
-      ? getKeywordField(keywordFields.map((field) => field.text))
-      : undefined;
-
-  return { timeField, categorizationField, keywordField };
+  return { timeField, categorizationField };
 }
 
 const buildRecommendedQueryCommand = (
@@ -264,15 +248,12 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
   fromCommand: string = ''
 ): Promise<ISuggestionItem[]> => {
-  const { timeField, categorizationField, keywordField } = await getRelevantSuggestionField(
-    getFieldsByType
-  );
+  const { timeField, categorizationField } = await getTimeAndCategorizationFields(getFieldsByType);
 
   const recommendedQueries = getRecommendedQueriesTemplates({
     fromCommand,
     timeField,
     categorizationField,
-    keywordField,
   });
 
   const suggestions: ISuggestionItem[] = recommendedQueries.map((query) => {
@@ -388,9 +369,4 @@ export function getCategorizationField(fields: string[]): string | undefined {
   // Filter out metadata fields
   const filteredFields = fields.filter((field) => !METADATA_FIELDS.includes(field));
   return filteredFields[0] ?? undefined;
-}
-
-export function getKeywordField(fields: string[]): string | undefined {
-  const filteredFields = fields.filter((f) => !METADATA_FIELDS.includes(f));
-  return filteredFields[0];
 }
