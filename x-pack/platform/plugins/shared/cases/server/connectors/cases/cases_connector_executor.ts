@@ -743,29 +743,10 @@ export class CasesConnectorExecutor {
       return casesMap;
     }
 
-    let v2Template: ParsedTemplateDefinition | null = null;
-    let extendedFields: Record<string, string> | undefined;
-
     const { customFieldsConfigurationMap, templatesConfigurationMap } =
       await this.getCustomFieldsAndTemplatesConfiguration();
 
-    if (params.templateVersion && params.templateId) {
-      v2Template = await resolveV2Template(
-        this.casesClient,
-        params.templateId,
-        params.templateVersion,
-        params.owner,
-        this.logger
-      );
-
-      if (v2Template) {
-        extendedFields = await buildExtendedFieldsFromTemplate(
-          this.casesClient,
-          v2Template,
-          params.owner
-        );
-      }
-    }
+    const { v2Template, extendedFields } = await this.resolveV2TemplateWithFields(params);
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
@@ -1184,31 +1165,13 @@ export class CasesConnectorExecutor {
 
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
 
-    let v2TemplateForReopened: ParsedTemplateDefinition | null = null;
-    let extendedFieldsForReopened: Record<string, string> | undefined;
-
     const {
       customFieldsConfigurationMap: customFieldsConfigurationMapForReopened,
       templatesConfigurationMap: templatesConfigurationMapForReopened,
     } = await this.getCustomFieldsAndTemplatesConfiguration();
 
-    if (params.templateVersion && params.templateId) {
-      v2TemplateForReopened = await resolveV2Template(
-        this.casesClient,
-        params.templateId,
-        params.templateVersion,
-        params.owner,
-        this.logger
-      );
-
-      if (v2TemplateForReopened) {
-        extendedFieldsForReopened = await buildExtendedFieldsFromTemplate(
-          this.casesClient,
-          v2TemplateForReopened,
-          params.owner
-        );
-      }
-    }
+    const { v2Template: v2TemplateForReopened, extendedFields: extendedFieldsForReopened } =
+      await this.resolveV2TemplateWithFields(params);
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(
@@ -1419,6 +1382,29 @@ export class CasesConnectorExecutor {
     { tags = [], labels = {} }: { tags?: string[]; labels?: Record<string, unknown> } = {}
   ) {
     return { tags: ['cases-connector', `rule:${params.rule.id}`, ...tags], labels };
+  }
+
+  private async resolveV2TemplateWithFields(params: CasesConnectorRunParams): Promise<{
+    v2Template: ParsedTemplateDefinition | null;
+    extendedFields: Record<string, string> | undefined;
+  }> {
+    if (!params.templateVersion || !params.templateId) {
+      return { v2Template: null, extendedFields: undefined };
+    }
+
+    const v2Template = await resolveV2Template(
+      this.casesClient,
+      params.templateId,
+      params.templateVersion,
+      params.owner,
+      this.logger
+    );
+
+    const extendedFields = v2Template
+      ? await buildExtendedFieldsFromTemplate(this.casesClient, v2Template, params.owner)
+      : undefined;
+
+    return { v2Template, extendedFields };
   }
 
   private async getCustomFieldsAndTemplatesConfiguration(): Promise<{

@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import { OptionalFieldLabel } from '../../optional_field_label';
 import { useGetTemplates } from '../../templates_v2/hooks/use_get_templates';
 import {
+  DEFAULT_EMPTY_TEMPLATE_NAME,
   TEMPLATE_HELP_TEXT,
   TEMPLATE_LABEL,
   TEMPLATE_SELECT_PLACEHOLDER,
@@ -49,7 +50,7 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
 
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () => [
-      { label: 'No template selected', value: EMPTY_VALUE },
+      { label: DEFAULT_EMPTY_TEMPLATE_NAME, value: EMPTY_VALUE },
       ...(templatesData?.templates ?? []).map((template) => ({
         key: template.templateId,
         label: template.name,
@@ -63,7 +64,7 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
     () =>
       templateId
         ? options.filter((opt) => opt.value === templateId)
-        : [{ label: 'No template selected', value: EMPTY_VALUE }],
+        : [{ label: DEFAULT_EMPTY_TEMPLATE_NAME, value: EMPTY_VALUE }],
     [options, templateId]
   );
 

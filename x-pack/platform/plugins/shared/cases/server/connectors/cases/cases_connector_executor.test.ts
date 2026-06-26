@@ -1517,6 +1517,34 @@ metadata:
 
             expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
           });
+
+          it('uses v2 template when creating cases from closed cases (createNewCasesOutOfClosedCases path)', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+              errors: [],
+            });
+
+            mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+              reopenClosedCases: false,
+            });
+
+            expect(casesClientMock.templates.getTemplate).toHaveBeenCalledWith(
+              'tmpl-v2-id',
+              '1',
+              expect.any(Object)
+            );
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.description).toBe('Created from v2 template');
+            expect(createdCase.severity).toBe('medium');
+          });
         });
 
         describe('Custom Fields', () => {

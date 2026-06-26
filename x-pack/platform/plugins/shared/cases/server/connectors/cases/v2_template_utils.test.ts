@@ -8,8 +8,13 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SavedObject, Logger } from '@kbn/core/server';
 import type { Template } from '../../../common/types/domain/template/v1';
-import { parseTemplateDefinition, resolveV2Template } from './v2_template_utils';
+import {
+  buildExtendedFieldsFromTemplate,
+  parseTemplateDefinition,
+  resolveV2Template,
+} from './v2_template_utils';
 import type { CasesClient } from '../../client';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 
 const mockLogger = loggingSystemMock.createLogger() as unknown as Logger;
 
@@ -136,5 +141,71 @@ describe('resolveV2Template', () => {
       expect.stringContaining('invalid definition'),
       expect.any(Object)
     );
+  });
+});
+
+describe('buildExtendedFieldsFromTemplate', () => {
+  const makeClientWithDefs = (defs: FieldDefinition[]): CasesClient =>
+    ({
+      fieldDefinitions: {
+        getFieldDefinitions: jest
+          .fn()
+          .mockResolvedValue({ fieldDefinitions: defs, total: defs.length }),
+      },
+    } as unknown as CasesClient);
+
+  it('returns an empty map when the definition has no fields', async () => {
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([]),
+      { name: 'T', fields: [] },
+      'securitySolution'
+    );
+    expect(result).toEqual({});
+  });
+
+  it('coerces an inline numeric default to a string key', async () => {
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'count',
+            type: 'long',
+            control: 'INPUT_NUMBER',
+            label: 'Count',
+            metadata: { default: 42 },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result).toEqual({ count_as_long: '42' });
+  });
+
+  it('resolves a $ref field from the library and includes its default', async () => {
+    const libraryDef: FieldDefinition = {
+      fieldDefinitionId: 'fd-1',
+      name: 'lib_field',
+      owner: 'securitySolution',
+      definition:
+        'name: lib_field\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Lib field\nmetadata:\n  default: "from-library"',
+    };
+
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([libraryDef]),
+      { name: 'T', fields: [{ $ref: 'lib_field' }] },
+      'securitySolution'
+    );
+    expect(result).toEqual({ lib_field_as_keyword: 'from-library' });
+  });
+
+  it('skips a $ref field that has no matching library definition', async () => {
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([]),
+      { name: 'T', fields: [{ $ref: 'missing_field' }] },
+      'securitySolution'
+    );
+    expect(result).toEqual({});
   });
 });
