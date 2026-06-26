@@ -109,9 +109,9 @@ export const updateListItem = async ({
         const checkIfListUpdated = async (): Promise<void> => {
           const updatedListItem = await getListItem({
             esClient,
+            esRealtime: false,
             id,
             listItemIndex,
-            realtime: false,
           });
           if (updatedListItem?._version === listItem._version) {
             throw Error('List item has not been re-indexed in time');
