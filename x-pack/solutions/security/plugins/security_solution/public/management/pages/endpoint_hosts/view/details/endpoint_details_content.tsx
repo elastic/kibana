@@ -182,7 +182,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               {/* `host.ip` is typed string[] but a custom ingest pipeline can coerce
                   it to a string, and the whole `host` object can be missing. Normalize
                   so the flyout does not crash. See security-team#17020. */}
-              {castArray(hostInfo.metadata.host.ip ?? []).map((ip: string, index: number) => (
+              {castArray(hostInfo.metadata.host?.ip ?? []).map((ip: string, index: number) => (
                 <EuiFlexItem key={index}>
                   <EuiText size="xs">{ip}</EuiText>
                 </EuiFlexItem>
