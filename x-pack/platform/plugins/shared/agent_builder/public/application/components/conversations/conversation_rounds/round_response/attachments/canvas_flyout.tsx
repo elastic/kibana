@@ -219,6 +219,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { attachment, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
+  const headerIcon = header?.icon ?? uiDefinition?.getIcon?.();
 
   const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
   const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
@@ -239,7 +240,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       paddingSize="none"
     >
       <AttachmentHeader
-        icon={header?.icon}
+        icon={headerIcon}
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}

@@ -40,7 +40,7 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHea
   defaultMessage: 'Close',
 });
 
-export const HEADER_HEIGHT = 72;
+export const COMPACT_WIDTH_THRESHOLD = 560;
 
 interface AttachmentHeaderProps {
   icon?: IconType;
@@ -60,8 +60,6 @@ interface AttachmentHeaderProps {
    */
   previewBadgeState?: 'none' | 'preview_available' | 'previewing';
 }
-
-export const COMPACT_WIDTH_THRESHOLD = 560;
 
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   icon,
@@ -96,7 +94,6 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     position: relative;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
-    min-height: ${HEADER_HEIGHT}px;
   `;
 
   const badgeStyles = css`
@@ -147,9 +144,9 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                 grow={true}
                 style={{
                   minWidth: 0,
-                  borderLeft: euiTheme.border.thin,
-                  borderColor: euiTheme.colors.borderBaseSubdued,
-                  paddingLeft: euiTheme.size.s,
+                  borderLeft: icon ? euiTheme.border.thin : undefined,
+                  borderColor: icon ? euiTheme.colors.borderBaseSubdued : undefined,
+                  paddingLeft: icon ? euiTheme.size.s : undefined,
                 }}
               >
                 <EuiFlexGroup

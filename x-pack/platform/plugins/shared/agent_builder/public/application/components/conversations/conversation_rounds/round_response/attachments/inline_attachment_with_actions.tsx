@@ -164,6 +164,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
+  const headerIcon = header?.icon ?? uiDefinition?.getIcon?.();
   const maxWidth = uiDefinition?.getMaxWidth?.(attachment);
 
   return (
@@ -178,7 +179,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       `}
     >
       <AttachmentHeader
-        icon={header?.icon}
+        icon={headerIcon}
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}

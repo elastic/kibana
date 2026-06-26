@@ -822,7 +822,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       expect(normalButtons).toHaveLength(1);
       expect(normalButtons[0]).toMatchObject({
         label: 'Edit in Dashboards',
-        icon: 'productDashboard',
+        icon: 'kqlFunction',
         type: 'primary',
       });
 
