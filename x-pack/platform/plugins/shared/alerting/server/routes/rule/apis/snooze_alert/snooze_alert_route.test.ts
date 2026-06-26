@@ -52,7 +52,7 @@ describe('snoozeAlertRoute', () => {
 
     expect(rulesClient.snoozeAlertInstance).toHaveBeenCalledWith({
       params: { alertId: 'rule-1', alertInstanceId: 'alert-1' },
-      query: { validateAlertsExistence: undefined },
+      query: { validateAlertsExistence: true },
       body: {
         expiresAt: '2026-05-01T00:00:00.000Z',
         conditions: undefined,

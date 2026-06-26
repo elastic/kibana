@@ -11,5 +11,5 @@ import type { RewriteRequestCase } from '../../../../../lib';
 export const transformRequestQueryToApplication: RewriteRequestCase<MuteAlertQuery> = ({
   validate_alerts_existence: validateAlertsExistence,
 }) => ({
-  validateAlertsExistence,
+  validateAlertsExistence: validateAlertsExistence === undefined ? true : validateAlertsExistence,
 });
