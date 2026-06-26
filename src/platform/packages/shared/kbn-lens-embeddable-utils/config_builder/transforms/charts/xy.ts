@@ -19,6 +19,7 @@ import type { LensAttributes } from '../../types';
 import { buildDatasourceStates, buildReferences, getAdhocDataviews } from '../utils';
 import { buildVisualizationAPI, buildVisualizationState } from './xy/chart';
 import { buildFormBasedXYLayer, getValueColumns } from './xy/state_layers';
+import { getIdForLayer, isAPIAnnotationLayer } from './xy/helpers';
 import { LENS_LAYER_SUFFIX } from '../constants';
 
 type XYLens = Extract<TypedLensSerializedState['attributes'], { visualizationType: 'lnsXY' }>;
@@ -60,9 +61,17 @@ export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilte
     annotationGroupReferences
   );
 
+  const annotationLayerIds = new Set(
+    config.layers
+      .map((layer, index) =>
+        isAPIAnnotationLayer(layer) ? getIdForLayer(layer, index) : undefined
+      )
+      .filter((id): id is string => id != null)
+  );
+
   const references = [
     ...annotationGroupReferences,
-    ...(regularDataViews.length ? buildReferences(regularDataViewsMap) : []),
+    ...buildReferences(regularDataViewsMap, annotationLayerIds),
   ];
 
   return {

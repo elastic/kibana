@@ -121,6 +121,36 @@ describe('XY', () => {
           validator.xy.fromState(setSeriesType(byRefAnnotationXY, type));
         });
       }
+
+      // Regression test for https://github.com/elastic/kibana/issues/268821
+      // A by-value annotation layer must round-trip its data view reference under
+      // the `xy-visualization-layer-` name, matching the layer id in the rebuilt
+      // visualization state. If the reference is emitted with the generic
+      // `indexpattern-datasource-layer-` prefix, the runtime cannot resolve the
+      // annotation layer's data view and the panel fails to render.
+      it('preserves resolvable data view references for a by-value annotation layer after an API round trip', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(annotationXY);
+        const lensState = builder.fromAPIFormat(api);
+
+        const referenceNames = new Set(lensState.references.map((ref) => ref.name));
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        for (const layer of visualizationLayers) {
+          if (layer.layerType === 'annotations' && layer.persistanceType !== 'byReference') {
+            expect(referenceNames.has(`xy-visualization-layer-${layer.layerId}`)).toBe(true);
+          }
+        }
+
+        const formBasedLayerIds = Object.keys(
+          lensState.state.datasourceStates.formBased?.layers ?? {}
+        );
+        for (const layerId of formBasedLayerIds) {
+          expect(referenceNames.has(`indexpattern-datasource-layer-${layerId}`)).toBe(true);
+        }
+      });
     });
 
     describe('ES|QL panels', () => {
