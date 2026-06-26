@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { validateNonEmptyString } from '../../schema_utils';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../../endpoint/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
 
@@ -31,15 +32,16 @@ export const HostOsTypeSchemaLiteral = SUPPORTED_HOST_OS_TYPE.map((osType) =>
 
 export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
-  endpoint_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
-    minSize: 1,
+  endpoint_ids: schema.arrayOf(schema.string({ minLength: 1, validate: validateNonEmptyString }), {
+    minSize: 0,
     maxSize: 250,
-    validate: (endpointIds) => {
-      if (endpointIds.map((v) => v.trim()).some((v) => !v.length)) {
-        return 'endpoint_ids cannot contain empty strings';
-      }
-    },
   }),
+  integration_policy_ids: schema.maybe(
+    schema.arrayOf(
+      schema.string({ minLength: 1, maxLength: 100, validate: validateNonEmptyString }),
+      { minSize: 1, maxSize: 1 }
+    )
+  ),
   /** If defined, any case associated with the given IDs will be updated */
   alert_ids: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), {

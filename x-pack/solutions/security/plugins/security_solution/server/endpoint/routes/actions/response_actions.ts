@@ -392,6 +392,15 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     try {
       const experimentalFeatures = endpointContext.experimentalFeatures;
 
+      // TODO:PT Move this validation to the schema (needs some refactoring lift)
+      // Validate that at least 1 endpoint ID or 1 Policy ID is present in the request and error is not
+      if (!req.body.endpoint_ids?.length && !req.body.integration_policy_ids?.length) {
+        throw new CustomHttpRequestError(
+          `[request body.endpoint_ids]: must contain at least 1 ID, OR, [request.body.integration_policy_ids]: must contain at least 1 ID`,
+          400
+        );
+      }
+
       // Note:  because our API schemas are defined as module static variables (as opposed to a
       //        `getter` function), we need to include this additional validation here, since
       //        `agent_type` is included in the schema independent of the feature flag

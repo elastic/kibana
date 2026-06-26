@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BaseActionRequestBody } from '../../../../common/api/endpoint';
 import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 import type { BasicConsoleProps } from '../../hooks/use_with_show_responder';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
@@ -29,6 +30,11 @@ export interface EndpointCommandDefinitionMeta {
   privileges: EndpointPrivileges;
   platform: SupportedHostOsType;
   isBulkResponseMode: boolean;
+  /** Response Action API base properties that should be used by all requests */
+  apiReqBodyBase: Pick<
+    BaseActionRequestBody,
+    'endpoint_ids' | 'integration_policy_ids' | 'agent_type'
+  >;
 }
 
 export type EndpointResponderExtensionComponentProps =

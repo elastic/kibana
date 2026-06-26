@@ -202,7 +202,9 @@ export const getEndpointConsoleCommands = ({
 }: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const endpointAgentId: string[] = Array.isArray(_endpointAgentId)
     ? _endpointAgentId
-    : [_endpointAgentId];
+    : _endpointAgentId
+    ? [_endpointAgentId]
+    : [];
   const isBulkResponseMode = endpointAgentId.length > 1 || !!integrationPolicyId;
   const featureFlags = ExperimentalFeaturesService.get();
   const {
@@ -220,6 +222,11 @@ export const getEndpointConsoleCommands = ({
     endpointId: endpointAgentId,
     capabilities: endpointCapabilities,
     privileges: endpointPrivileges,
+    apiReqBodyBase: {
+      endpoint_ids: endpointAgentId,
+      integration_policy_ids: integrationPolicyId ? [integrationPolicyId] : undefined,
+      agent_type: agentType,
+    },
   };
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {

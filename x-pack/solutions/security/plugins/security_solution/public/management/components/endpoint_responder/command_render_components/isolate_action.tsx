@@ -6,6 +6,7 @@
  */
 
 import { memo, useMemo } from 'react';
+import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';
 import { useSendIsolateEndpointRequest } from '../../../hooks/response_actions/use_send_isolate_endpoint_request';
@@ -14,18 +15,16 @@ export const IsolateActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
     const isolateHostApi = useSendIsolateEndpointRequest();
 
-    const actionRequestBody = useMemo(() => {
-      const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
+    const actionRequestBody: IsolationRouteRequestBody | undefined = useMemo(() => {
+      const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
       const comment = command.args.args?.comment?.[0];
 
-      return endpointId
-        ? {
-            agent_type: agentType,
-            endpoint_ids: endpointId,
-            comment,
-          }
-        : undefined;
+      return endpointId && apiReqBodyBase ? { ...apiReqBodyBase, comment } : undefined;
     }, [command.args.args?.comment, command.commandDefinition?.meta]);
+
+    if (!actionRequestBody) {
+      throw new Error('Command defintion missing `apiReqBodyBase`!!');
+    }
 
     return useConsoleActionSubmitter({
       ResultComponent,
