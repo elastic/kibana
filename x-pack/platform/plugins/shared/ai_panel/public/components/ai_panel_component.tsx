@@ -29,7 +29,7 @@ import {
   sanitizeHtml,
 } from '../utils/template_fill';
 
-interface AiSummaryComponentProps {
+interface AiPanelComponentProps {
   embeddableId: string;
   title: string | undefined;
   hideTitle: boolean | undefined;
@@ -56,7 +56,7 @@ const iframeCss = css({
   background: 'transparent',
 });
 
-export const AiSummaryComponent = ({
+export const AiPanelComponent = ({
   embeddableId,
   title,
   hideTitle,
@@ -66,7 +66,7 @@ export const AiSummaryComponent = ({
   generationVersion,
   savedTemplate,
   onTemplateChange,
-}: AiSummaryComponentProps) => {
+}: AiPanelComponentProps) => {
   const { euiTheme } = useEuiTheme();
   const [html, setHtml] = useState('');
   const [isLoading, setIsLoading] = useState(Boolean(prompt));

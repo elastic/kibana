@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { HANDLEBARS_LANG_ID } from '@kbn/monaco';
+import { HANDLEBARS_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
@@ -205,7 +205,7 @@ export const EditAiPanelFlyout = ({
           buttonContent={
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="database" />
+                <EuiIcon type="database" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">
@@ -252,6 +252,7 @@ export const EditAiPanelFlyout = ({
                 defaultMessage:
                   'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
               })}
+              announceOnMount
             />
           )}
 
@@ -274,7 +275,7 @@ export const EditAiPanelFlyout = ({
           {previewError && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut color="danger" size="s" title={previewError} />
+              <EuiCallOut color="danger" size="s" title={previewError} announceOnMount />
             </>
           )}
 
@@ -287,6 +288,7 @@ export const EditAiPanelFlyout = ({
                 title={i18n.translate('aiPanel.editFlyout.noRows', {
                   defaultMessage: 'Query returned no rows for the current time range.',
                 })}
+                announceOnMount
               />
             </>
           )}
@@ -314,7 +316,7 @@ export const EditAiPanelFlyout = ({
           buttonContent={
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="editorCodeBlock" />
+                <EuiIcon type="editorCodeBlock" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">

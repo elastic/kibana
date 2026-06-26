@@ -26,7 +26,7 @@ import type { AiPanelEmbeddableState } from '../server';
 import { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 
 type AiPanelApi = DefaultEmbeddableApi<AiPanelEmbeddableState> & HasEditCapabilities;
-import { AiSummaryComponent } from './components/ai_summary_component';
+import { AiPanelComponent } from './components/ai_panel_component';
 import { EditAiPanelFlyout } from './components/edit_ai_panel_flyout';
 
 export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
@@ -95,7 +95,7 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
 
     return {
       api,
-      Component: function AiPanelComponent() {
+      Component: function AiPanelEmbeddableComponent() {
         const [title, hideTitle, prompt, esqlQuery, savedTemplate, isEditFlyoutOpen] =
           useBatchedPublishingSubjects(
             titleManager.api.title$,
@@ -133,7 +133,7 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
 
         return (
           <>
-            <AiSummaryComponent
+            <AiPanelComponent
               embeddableId={uuid}
               title={title}
               hideTitle={hideTitle}
