@@ -9,7 +9,6 @@ import type { Headers, FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import pLimit from 'p-limit';
@@ -152,18 +151,13 @@ export class DispatchStep implements DispatcherStep {
       return undefined;
     }
 
-    const model: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel({
+    const model: WorkflowExecutionEngineModel = {
       id: workflow.id,
       name: workflow.name,
       enabled: workflow.enabled,
-      definition: workflow.definition,
+      definition: workflow.definition ?? undefined,
       yaml: workflow.yaml,
-      version: workflow.version,
-      managed: workflow.managed,
-      managedBy: workflow.managedBy,
-      originManagedWorkflowId: workflow.originManagedWorkflowId,
-      managedVersion: workflow.managedVersion,
-    });
+    };
 
     const payload: ActionPolicyWorkflowPayload = {
       id: group.id,
