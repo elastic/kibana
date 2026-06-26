@@ -166,7 +166,7 @@ export const registerDashboardAttachmentUiDefinition = ({
 
               return handlePreview({
                 attachment,
-                dashboardApi,
+                dashboardApi: undefined,
                 canWriteDashboards,
                 isSidebar,
                 dashboardLocator,
