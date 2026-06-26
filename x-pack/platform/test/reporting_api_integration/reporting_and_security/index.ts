@@ -35,9 +35,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./telemetry'));
 
     // CSV-specific
-    loadTestFile(require.resolve('./csv/csv_v2'));
-    loadTestFile(require.resolve('./csv/csv_v2_esql'));
-    loadTestFile(require.resolve('./csv/generate_csv_discover'));
+    loadTestFile(require.resolve('./csv/generate_csv_searchsource')); // Uses deprecated API
+    loadTestFile(require.resolve('./csv/generate_csv_v2')); // Uses raw locator params without saved search
+    loadTestFile(require.resolve('./csv/csv_v2')); // Uses locator params with saved search
+    loadTestFile(require.resolve('./csv/csv_v2_esql')); // Uses locator params with ESQL
 
     // Screenshot-specific
     loadTestFile(require.resolve('./screenshot/network_policy'));

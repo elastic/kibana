@@ -7,7 +7,7 @@
 
 import type { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
-import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { JobParamsCSV, JobParamsCsvV2 } from '@kbn/reporting-export-types-csv-common';
 import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import {
@@ -289,7 +289,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams, schedule: scheduleToUse });
   };
-  const generateCsv = async (
+  const generateCsvDeprecated = async (
     job: JobParamsCSV,
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme',
@@ -303,8 +303,22 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
+  const generateCsvV2 = async (
+    job: JobParamsCsvV2,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    spaceId: string = 'default'
+  ) => {
+    const jobParams = rison.encode(job);
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+    return await supertestWithoutAuth
+      .post(`${spacePrefix}/api/reporting/generate/csv_v2`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams });
+  };
   const scheduleCsv = async (
-    job: JobParamsCSV,
+    job: JobParamsCsvV2,
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme',
     schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
@@ -315,14 +329,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
       : schedule;
     return await supertestWithoutAuth
-      .post(`/internal/reporting/schedule/csv_searchsource`)
+      .post(`/internal/reporting/schedule/csv_v2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams, schedule: scheduleToUse });
   };
 
   const scheduleCsvWithNotification = async (
-    job: JobParamsCSV,
+    job: JobParamsCsvV2,
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme',
     schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
@@ -334,7 +348,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
       : schedule;
     return await supertestWithoutAuth
-      .post(`/internal/reporting/schedule/csv_searchsource`)
+      .post(`/internal/reporting/schedule/csv_v2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams, schedule: scheduleToUse, notification });
@@ -585,7 +599,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     createManageReportingUser,
     generatePdf,
     generatePng,
-    generateCsv,
+    generateCsvDeprecated,
+    generateCsvV2,
     schedulePdf,
     schedulePng,
     scheduleCsv,

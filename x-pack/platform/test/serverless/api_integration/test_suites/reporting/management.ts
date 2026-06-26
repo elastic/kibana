@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { JobParamsCsvV2 } from '@kbn/reporting-export-types-csv-common';
 import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -42,54 +43,27 @@ export default ({ getService }: FtrProviderContext) => {
 
       // generate a report that can be deleted in the test
       const result = await reportingAPI.createReportJobInternal(
-        'csv_searchsource',
+        'csv_v2',
         {
           browserTimezone: 'UTC',
           objectType: 'search',
-          searchSource: {
-            fields: [
-              { field: 'order_date', include_unmapped: true },
-              { field: 'order_id', include_unmapped: true },
-              { field: 'products.product_id', include_unmapped: true },
-            ],
-            filter: [
-              {
-                meta: {
-                  field: 'order_date',
-                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
-                  params: {},
-                },
-                query: {
-                  range: {
-                    order_date: {
-                      format: 'strict_date_optional_time',
-                      gte: '2019-06-20T23:59:44.609Z',
-                      lte: '2019-06-21T00:01:06.957Z',
-                    },
-                  },
+          locatorParams: [
+            {
+              id: 'DISCOVER_APP_LOCATOR',
+              params: {
+                dataViewId: '5193f870-d861-11e9-a311-0fa548c5f953',
+                sort: [['order_date', 'desc']],
+                timeRange: {
+                  from: '2019-06-20T23:59:44.609Z',
+                  to: '2019-06-21T00:01:06.957Z',
                 },
               },
-              {
-                $state: { store: 'appState' },
-                meta: {
-                  alias: null,
-                  disabled: false,
-                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
-                  key: 'products.product_id',
-                  negate: false,
-                  params: { query: 22599 },
-                  type: 'phrase',
-                },
-                query: { match_phrase: { 'products.product_id': 22599 } },
-              },
-            ],
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            query: { language: 'kuery', query: '' },
-            sort: [{ order_date: { format: 'strict_date_optional_time', order: 'desc' } }],
-          },
+              version: '9.2.0',
+            },
+          ],
           title: 'Ecommerce Data',
-          version: '8.15.0',
-        },
+          version: '9.2.0',
+        } as JobParamsCsvV2,
         cookieCredentials,
         internalReqHeader
       );

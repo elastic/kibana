@@ -52,8 +52,6 @@ export const getCsvReportParams: ReportParamsGetter<
   },
   CsvSearchModeParams
 > = ({ sharingData, forShareUrl = false, useAbsoluteTime = false }) => {
-  const getSearchSource = sharingData.getSearchSource;
-
   if (sharingData.isTextBased) {
     const locatorParams = sharingData.locatorParams;
 
@@ -64,15 +62,8 @@ export const getCsvReportParams: ReportParamsGetter<
         : locatorParams,
     };
   }
-
-  // csv v1 uses search source and columns
   return {
-    isEsqlMode: false,
-    columns: sharingData.columns,
-    searchSource: getSearchSource({
-      addGlobalTimeFilter: true,
-      absoluteTime: !forShareUrl,
-    }),
+    locatorParams: sharingData.locatorParams as LocatorParams[],
   };
 };
 

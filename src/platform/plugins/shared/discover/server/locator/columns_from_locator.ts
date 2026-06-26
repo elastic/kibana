@@ -19,29 +19,35 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 }
 
 /**
+ * Determines if a time field should be included based on data view and UI settings
  * @internal
  */
-export const getColumns = async (
+export const shouldIncludeTimeField = async (
   services: LocatorServicesDeps,
-  index: DataView,
-  savedSearch: SavedSearch
-) => {
+  dataView: DataView
+): Promise<string | undefined> => {
   const hideTimeColumn = await services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
+  return dataView?.timeFieldName && !hideTimeColumn ? dataView.timeFieldName : undefined;
+};
 
-  // Add/adjust columns from the saved search attributes and UI Settings
-  let columns: string[] | undefined;
-  let columnsNext: string[] | undefined;
-  let timeFieldName: string | undefined;
+/**
+ * Processes saved search columns and adds time field if needed
+ * @internal
+ */
+export const processSavedSearchColumns = async (
+  services: LocatorServicesDeps,
+  dataView: DataView,
+  savedSearch: { columns?: string[] }
+): Promise<string[]> => {
+  const timeFieldName = await shouldIncludeTimeField(services, dataView);
+
   // ignore '_source' column: it may be the only column when the user wishes to export all fields
   const columnsTemp = savedSearch.columns?.filter((col) => col !== '_source');
 
   if (typeof columnsTemp !== 'undefined' && columnsTemp.length > 0 && isStringArray(columnsTemp)) {
-    columns = columnsTemp;
+    let columns = columnsTemp;
 
-    // conditionally add the time field column:
-    if (index?.timeFieldName && !hideTimeColumn) {
-      timeFieldName = index.timeFieldName;
-    }
+    // Add time field if it exists and is not already in the columns
     if (timeFieldName && !columnsTemp.includes(timeFieldName)) {
       columns = [timeFieldName, ...columns];
     }
@@ -51,15 +57,10 @@ export const getColumns = async (
      * Otherwise, the requests will ask for all fields, even if only a few are really needed.
      * Discover does not set fields, since having all fields is needed for the UI.
      */
-    if (columns.length) {
-      columnsNext = columns;
-    }
+    return columns;
   }
 
-  return {
-    timeFieldName,
-    columns: columnsNext,
-  };
+  return [];
 };
 
 /**
@@ -71,26 +72,56 @@ export function columnsFromLocatorFactory(services: LocatorServicesDeps) {
    *
    * @public
    */
-  const columnsFromLocator = async (
+  const columnsFromLocator: ColumnsFromLocatorFn = async (
     params: DiscoverAppLocatorParams
   ): Promise<string[] | undefined> => {
-    if (!params.savedSearchId) {
-      throw new Error(`Saved Search ID is required in DiscoverAppLocatorParams`);
+    let dataView: DataView | undefined;
+    let savedSearch: SavedSearch | undefined;
+
+    if (params.savedSearchId) {
+      // get data view from saved search
+      savedSearch = await getSavedSearch(params.savedSearchId, services);
+      dataView = savedSearch.searchSource.getField('index');
+    } else if (params.dataViewId) {
+      // get data view by id
+      dataView = await services.dataViewsService.get(params.dataViewId);
     }
 
-    const savedSearch = await getSavedSearch(params.savedSearchId, services);
-
-    const index = savedSearch.searchSource.getField('index');
-
-    if (!index) {
-      throw new Error(`Search Source is missing the "index" field`);
+    if (!dataView) {
+      throw new Error(`Can not determine data view from DiscoverAppLocatorParams!`);
     }
 
-    const { columns } = await getColumns(services, index, savedSearch);
+    // If columns are specified in params, they take precedence over saved search columns
+    if (params.columns && params.columns.length > 0) {
+      let resultColumns = [...params.columns];
 
-    return columns;
+      // Get time field directly from data view (no need to process saved search)
+      const timeFieldName = await shouldIncludeTimeField(services, dataView);
+
+      // Prepend time field if it exists and is not already in the columns
+      if (timeFieldName && !resultColumns.includes(timeFieldName)) {
+        resultColumns = [timeFieldName, ...resultColumns];
+      }
+
+      return resultColumns;
+    }
+
+    // Fallback: locator params don't specify columns, so we use the saved search columns
+    const columns = await processSavedSearchColumns(services, dataView, savedSearch ?? {});
+
+    // if columns is empty, return undefined to allow default behavior in Discover
+    return columns.length > 0 ? columns : undefined;
   };
-  return columnsFromLocator;
+
+  const columnsFromEsqlLocator: ColumnsFromLocatorFn = async (
+    params: DiscoverAppLocatorParams
+  ): Promise<string[] | undefined> => {
+    return params.columns;
+  };
+
+  return { columnsFromLocator, columnsFromEsqlLocator };
 }
 
-export type ColumnsFromLocatorFn = ReturnType<typeof columnsFromLocatorFactory>;
+export type ColumnsFromLocatorFn = (
+  params: DiscoverAppLocatorParams
+) => Promise<string[] | undefined>;

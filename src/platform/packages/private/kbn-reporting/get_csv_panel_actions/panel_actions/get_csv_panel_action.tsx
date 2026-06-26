@@ -47,7 +47,6 @@ import type { CsvSearchModeParams } from '@kbn/reporting-public/share/shared/get
 import { getSearchCsvJobParams } from '@kbn/reporting-public/share/shared/get_search_csv_job_params';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import type { LocatorParams } from '@kbn/reporting-common/types';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getI18nStrings } from './strings';
 
@@ -127,10 +126,6 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     const [{ uiSettings }, { data }] = await firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
-  }
-
-  private isEsqlMode(savedSearch: SavedSearch) {
-    return isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
   }
 
   public isCompatible = async (context: EmbeddableApiContext) => {
@@ -223,24 +218,16 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       absoluteTime: true,
     });
 
-    if (this.isEsqlMode(savedSearch)) {
-      return this.executeGenerate({
-        title,
-        searchModeParams: {
-          isEsqlMode: true,
-          locatorParams: [
-            {
-              id: DISCOVER_APP_LOCATOR,
-              params: this.getDiscoverLocatorParamsForEsqlCSV(embeddable, searchSource, columns),
-            } as LocatorParams,
-          ],
-        },
-      });
-    }
-
     return this.executeGenerate({
       title,
-      searchModeParams: { isEsqlMode: false, searchSource, columns },
+      searchModeParams: {
+        locatorParams: [
+          {
+            id: DISCOVER_APP_LOCATOR,
+            params: this.getDiscoverLocatorParamsForEsqlCSV(embeddable, searchSource, columns),
+          } as LocatorParams,
+        ],
+      },
     });
   };
 }
