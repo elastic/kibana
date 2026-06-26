@@ -81,7 +81,8 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
   const onUpdateAssignees = useCallback(
     (newAssignees: Assignee[]) => {
       const newAssigneeUids = newAssignees.map((assignee) => ({ uid: assignee.uid }));
-      if (!isEqual(newAssigneeUids.sort(), assignees.sort())) {
+      const newUids = newAssignees.map((assignee) => assignee.uid);
+      if (!isEqual([...newUids].sort(), [...assignees].sort())) {
         onUpdateField({ key: 'assignees', value: newAssigneeUids });
       }
     },

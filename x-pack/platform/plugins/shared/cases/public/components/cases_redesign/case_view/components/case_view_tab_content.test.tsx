@@ -20,10 +20,10 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('./case_view_activity', () => ({
   CaseViewActivity: () => <div data-test-subj="case-view-activity" />,
 }));
-jest.mock('./case_view_attachments', () => ({
+jest.mock('../../../case_view/components/case_view_attachments', () => ({
   CaseViewAttachments: () => <div data-test-subj="case-view-attachments" />,
 }));
-jest.mock('./case_view_similar_cases', () => ({
+jest.mock('../../../case_view/components/case_view_similar_cases', () => ({
   CaseViewSimilarCases: () => <div data-test-subj="case-view-similar-cases" />,
 }));
 jest.mock('./case_view_sidebar', () => ({

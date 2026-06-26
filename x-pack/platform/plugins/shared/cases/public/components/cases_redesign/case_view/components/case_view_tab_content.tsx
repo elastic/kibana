@@ -15,9 +15,10 @@ import { useUrlParams } from '../../../../common/navigation';
 import { ATTACHMENT_TAB_ALIASES } from '../../../case_view/use_case_attachment_tabs';
 import { CaseViewTabs } from '../../../case_view/case_view_tabs';
 import { CaseViewActivity } from './case_view_activity';
-import { CaseViewSimilarCases } from './case_view_similar_cases';
-import { CaseViewAttachments } from './case_view_attachments';
+import { CaseViewSimilarCases } from '../../../case_view/components/case_view_similar_cases';
+import { CaseViewAttachments } from '../../../case_view/components/case_view_attachments';
 import { CaseViewSidebar } from './case_view_sidebar';
+import { SavedObjectInAppUrlsProvider } from '../../../attachments/common/saved_object/saved_object_in_app_urls_context';
 import type { OnUpdateFields } from '../../../case_view/types';
 
 interface CaseViewTabContentProps {
@@ -44,7 +45,7 @@ export const CaseViewTabContent: FC<CaseViewTabContentProps> = ({
       : CASE_VIEW_PAGE_TABS.ACTIVITY;
 
   return (
-    <>
+    <SavedObjectInAppUrlsProvider caseData={caseData}>
       <CaseViewTabs caseData={caseData} activeTab={activeTabId} searchTerm={searchTerm} />
       <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
         <EuiFlexItem
@@ -63,12 +64,12 @@ export const CaseViewTabContent: FC<CaseViewTabContentProps> = ({
             />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
-            <CaseViewSimilarCases caseData={caseData} searchTerm={searchTerm} />
+            <CaseViewSimilarCases caseData={caseData} />
           )}
         </EuiFlexItem>
         <CaseViewSidebar caseData={caseData} />
       </EuiFlexGroup>
-    </>
+    </SavedObjectInAppUrlsProvider>
   );
 };
 
