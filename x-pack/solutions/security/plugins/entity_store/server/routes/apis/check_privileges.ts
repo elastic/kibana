@@ -69,8 +69,8 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
               index: {
                 [entitiesAliasPattern]: ['read', 'write'],
                 [latestEntityIndexPattern]: ['read', 'write'],
-                [metadataAliasPattern]: ['read', 'write'],
-                [metadataEntityIndexPattern]: ['read', 'write'],
+                [metadataAliasPattern]: ['read'],
+                [metadataEntityIndexPattern]: ['read'],
               },
             },
           },
