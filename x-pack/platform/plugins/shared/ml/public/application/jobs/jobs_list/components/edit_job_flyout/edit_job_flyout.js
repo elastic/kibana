@@ -42,7 +42,7 @@ import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warnin
 import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
-import { showUpdateConfirmationModal } from '@kbn/ml-cps';
+import { showProjectRoutingChangeConfirmModal } from '@kbn/ml-cps';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -312,7 +312,7 @@ export class EditJobFlyoutUI extends Component {
     ) {
       const { overlays, ...startServices } = this.props.kibana.services;
       try {
-        await showUpdateConfirmationModal({
+        await showProjectRoutingChangeConfirmModal({
           overlays,
           startServices,
           jobCount: 1,

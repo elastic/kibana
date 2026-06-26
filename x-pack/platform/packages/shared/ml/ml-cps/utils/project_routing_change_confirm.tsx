@@ -12,7 +12,7 @@ import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, htmlIdGenerator } from '@ela
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-export function showUpdateConfirmationModal({
+export function showProjectRoutingChangeConfirmModal({
   overlays,
   startServices,
   jobCount,
