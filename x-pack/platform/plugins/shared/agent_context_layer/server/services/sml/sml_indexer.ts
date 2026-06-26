@@ -176,6 +176,7 @@ class SmlIndexerImpl implements SmlIndexer {
         savedObjectsClient,
         contextLogger,
         chunks: params.content!,
+        createdAt: params.createdAt,
       });
       return;
     }
@@ -335,6 +336,7 @@ class SmlIndexerImpl implements SmlIndexer {
     savedObjectsClient,
     contextLogger,
     chunks,
+    createdAt,
   }: {
     originId: string;
     attachmentType: string;
@@ -343,6 +345,7 @@ class SmlIndexerImpl implements SmlIndexer {
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     contextLogger: Logger;
     chunks: SmlChunk[];
+    createdAt?: string;
   }): Promise<void> {
     const originUri = `${attachmentType}://${originId}`;
     if (chunks.length === 0) {
@@ -414,6 +417,7 @@ class SmlIndexerImpl implements SmlIndexer {
         spaces,
         ingestionMethod: 'manual',
         resolvedPermissions,
+        createdAt,
       })
     );
 
@@ -481,6 +485,7 @@ class SmlIndexerImpl implements SmlIndexer {
     spaces,
     ingestionMethod,
     resolvedPermissions,
+    createdAt,
   }: {
     chunkId: string;
     chunk: SmlChunk;
@@ -488,6 +493,7 @@ class SmlIndexerImpl implements SmlIndexer {
     spaces: string[];
     ingestionMethod: SmlIngestionMethod;
     resolvedPermissions: SmlPermissions;
+    createdAt?: string;
   }) {
     const now = new Date().toISOString();
     const document: SmlDocument = {
@@ -496,7 +502,7 @@ class SmlIndexerImpl implements SmlIndexer {
       title: chunk.title,
       origin: { uri: `${chunk.type}://${originId}` },
       content: chunk.content,
-      created_at: now,
+      created_at: createdAt ?? now,
       updated_at: now,
       spaces,
       permissions: {
@@ -661,11 +667,13 @@ class SmlIndexerImpl implements SmlIndexer {
       filter.push({ term: { ingestion_method: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
-      // Scope the delete to chunks that are visible in at least one of the
-      // provided spaces. A chunk is visible in a space when the space id
-      // appears in its `spaces` array, so a single `terms` query is correct
-      // (ES applies a "contains any" match against array fields).
-      filter.push({ terms: { spaces } });
+      // Scope the delete to chunks visible in at least one of the provided
+      // spaces. Mirrors `isVisibleInSpace`: a chunk is visible when its
+      // `spaces` array contains the space id OR the wildcard `'*'` (global
+      // chunks). Without the `'*'` entry, crawler-written globally-scoped
+      // chunks would survive the delete and violate the "claim the origin"
+      // replace semantic of content-mode writes.
+      filter.push({ terms: { spaces: [...spaces, '*'] } });
     }
     const label = ingestionMethod ? `${ingestionMethod} chunks` : 'chunks';
 

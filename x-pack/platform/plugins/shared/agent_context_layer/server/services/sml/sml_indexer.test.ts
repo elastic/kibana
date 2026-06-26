@@ -97,6 +97,7 @@ const createContentIndexerParams = (overrides: {
   logger?: ReturnType<typeof createMockLogger>;
   action?: 'create' | 'update' | 'delete';
   content: SmlChunk[];
+  createdAt?: string;
 }): SmlIndexerContentParams => ({
   originId: overrides.originId ?? 'att-123',
   attachmentType: overrides.attachmentType ?? 'lens',
@@ -106,6 +107,7 @@ const createContentIndexerParams = (overrides: {
   logger: overrides.logger ?? createMockLogger(),
   action: overrides.action ?? 'create',
   content: overrides.content,
+  ...(overrides.createdAt !== undefined ? { createdAt: overrides.createdAt } : {}),
 });
 
 describe('createSmlIndexer', () => {
@@ -977,6 +979,65 @@ describe('createSmlIndexer', () => {
         expect(bulkMock).not.toHaveBeenCalled();
       });
 
+      it('content mode preserves created_at from caller when provided (update path)', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        const originalCreatedAt = '2025-01-15T10:00:00.000Z';
+
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-preserve-ts',
+            attachmentType: 'lens',
+            action: 'update',
+            spaces: ['default'],
+            esClient,
+            content: [{ type: 'lens', title: 'Updated Title', content: 'new content' }],
+            createdAt: originalCreatedAt,
+          })
+        );
+
+        const bulkCall = bulkMock.mock.calls[0][0];
+        const doc = bulkCall.operations[0].index.document;
+        expect(doc.created_at).toBe(originalCreatedAt);
+        expect(doc.updated_at).not.toBe(originalCreatedAt);
+      });
+
+      it('content mode stamps created_at=now when createdAt is not provided (create path)', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        const before = new Date().toISOString();
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-new-ts',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['default'],
+            esClient,
+            content: [{ type: 'lens', title: 'New', content: 'content' }],
+          })
+        );
+        const after = new Date().toISOString();
+
+        const bulkCall = bulkMock.mock.calls[0][0];
+        const doc = bulkCall.operations[0].index.document;
+        expect(doc.created_at >= before && doc.created_at <= after).toBe(true);
+        expect(doc.updated_at).toBe(doc.created_at);
+      });
+
       it('content mode scopes deleteByQuery to the caller space (chunks in other spaces preserved)', async () => {
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
@@ -1000,7 +1061,7 @@ describe('createSmlIndexer', () => {
 
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
         const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-        expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['my-space'] } });
+        expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['my-space', '*'] } });
       });
 
       it('delete action removes only crawled chunks (manual entries preserved)', async () => {
@@ -1286,11 +1347,12 @@ describe('createSmlIndexer', () => {
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-      // Space-scoped: only chunks visible in 'default' are deleted.
-      // No ingestion_method term means both manual + crawled are removed.
+      // Space-scoped: only chunks visible in 'default' are deleted, including
+      // globally-scoped ('*') chunks. No ingestion_method term means both
+      // manual + crawled are removed.
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-all' } },
-        { terms: { spaces: ['default'] } },
+        { terms: { spaces: ['default', '*'] } },
       ]);
     });
 
@@ -1309,7 +1371,7 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-manual' } },
         { term: { ingestion_method: 'manual' } },
-        { terms: { spaces: ['default'] } },
+        { terms: { spaces: ['default', '*'] } },
       ]);
     });
 
@@ -1328,7 +1390,7 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-default-scope' } },
         { term: { ingestion_method: 'crawled' } },
-        { terms: { spaces: ['default'] } },
+        { terms: { spaces: ['default', '*'] } },
       ]);
     });
 
@@ -1348,8 +1410,8 @@ describe('createSmlIndexer', () => {
       );
 
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-      expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['space-a'] } });
-      expect(callArgs.query.bool.filter).not.toContainEqual({ terms: { spaces: ['space-b'] } });
+      expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['space-a', '*'] } });
+      expect(callArgs.query.bool.filter).not.toContainEqual({ terms: { spaces: ['space-b', '*'] } });
     });
   });
 });

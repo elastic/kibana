@@ -417,6 +417,14 @@ export interface SmlIndexAttachmentContentMode {
   /** Pre-built chunks; skips getSmlData; marks `ingestion_method='manual'`. */
   content: SmlChunk[];
   force?: undefined;
+  /**
+   * `created_at` to stamp on the written chunks. When provided (e.g. the
+   * HTTP PUT route passes the value from the existing chunk so updates
+   * preserve the original creation timestamp), the chunks are written with
+   * this value instead of the current time. Omit on first-write — the
+   * indexer will stamp `now`.
+   */
+  createdAt?: string;
 }
 
 /**
@@ -454,20 +462,16 @@ export type SmlIndexerParams = SmlIndexerOriginParams | SmlIndexerContentParams;
  * scope selector that lets callers wipe more than just crawled chunks.
  *
  * @remarks
- * `spaces` is informational only: the delete operates on the global
- * `(origin_id, attachmentType[, ingestion_method])` selector and never
- * filters by space. The field is forwarded to the structured log line
- * emitted at the start of `deleteAttachment` so operators can correlate
- * the request with the caller's space, but it has no effect on which
- * documents are removed. The cross-space-overwrite/visibility guard
- * has to live at the route layer (see `delete.ts`) — the indexer can't
- * gate on space without breaking the crawler's tombstoning path, which
- * legitimately runs without a calling space context.
+ * `spaces` controls which chunks are deleted: only chunks whose stored
+ * `spaces` array contains at least one of the provided space IDs (or the
+ * wildcard `'*'`) are removed. HTTP-path callers (PUT/DELETE routes) pass
+ * `[spaceId]` so the delete is scoped to the caller's space and chunks
+ * belonging to other spaces are left intact.
  *
- * Keeping the field shape-symmetric with `SmlIndexerBaseParams` rather
- * than dropping it costs nothing and lets every call site stay
- * uniform; refactoring it out would be a sweeping change for no
- * functional gain.
+ * Crawler origin-mode paths omit `spaces` (via `indexAttachment`) so
+ * their deletes remain global — the crawler owns the full origin across
+ * all spaces and must be able to wipe stale chunks regardless of which
+ * space they were written from.
  */
 export interface SmlIndexerDeleteAttachmentParams {
   originId: string;

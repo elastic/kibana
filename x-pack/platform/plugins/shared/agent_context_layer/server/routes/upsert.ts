@@ -226,6 +226,9 @@ export const registerUpsertRoute = ({
           ...(body.tags !== undefined ? { tags: body.tags } : {}),
         };
 
+        const existingCreatedAt = existing.find((d) => isVisibleInSpace(d.spaces, spaceId))
+          ?.created_at;
+
         await sml.indexAttachment({
           originId,
           attachmentType: type,
@@ -235,6 +238,7 @@ export const registerUpsertRoute = ({
           savedObjectsClient,
           logger,
           content: [chunk],
+          createdAt: existingCreatedAt,
         });
 
         // Re-read so the response reflects what the indexer actually
