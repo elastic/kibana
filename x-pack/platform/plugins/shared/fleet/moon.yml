@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/i18n-react'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/deeplinks-management'
   - '@kbn/core-application-common'
   - '@kbn/core-capabilities-common'
   - '@kbn/i18n'
@@ -124,6 +125,7 @@ dependsOn:
   - '@kbn/rison'
   - '@kbn/rule-data-utils'
   - '@kbn/doc-links'
+  - '@kbn/yaml-loader'
 tags:
   - plugin
   - prod

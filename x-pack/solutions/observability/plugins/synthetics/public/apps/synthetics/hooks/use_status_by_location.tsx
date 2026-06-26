@@ -6,7 +6,6 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import {
@@ -16,6 +15,7 @@ import {
 import type { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../contexts';
 import { useLocations } from './use_locations';
+import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 
 export type LocationsStatus = Array<{ status: string; id: string; label: string; color: string }>;
 
@@ -32,7 +32,7 @@ export function useStatusByLocation({
 
   const { locations: allLocations } = useLocations();
 
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useSyntheticsEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       size: 0,
