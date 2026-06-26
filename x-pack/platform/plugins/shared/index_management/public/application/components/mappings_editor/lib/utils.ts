@@ -780,8 +780,8 @@ export function getStateWithCopyToFields(state: State): State {
           updatedState.fields.rootLevelFields.push(existingTextField.id);
         }
       } else {
-        // Reference field not found in the current or view fields — skip copy_to wiring.
-        // reference_field was already stripped above, so it won't reach Elasticsearch.
+        // Reference field not found in the current or view fields, skip copy_to wiring.
+        // reference_field was already stripped above, so it won't reach ES.
       }
     }
   }

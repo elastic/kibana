@@ -877,7 +877,7 @@ describe('utils', () => {
           mappingViewFields: { byId: {} },
         } as any;
 
-        // Should not throw — reference_field is stripped, copy_to wiring is skipped
+        // Should not throw, reference_field is stripped and copy_to wiring gets skipped
         const result = getStateWithCopyToFields(state);
         expect(result.fields.byId['sem-field'].source).not.toHaveProperty('reference_field');
       });

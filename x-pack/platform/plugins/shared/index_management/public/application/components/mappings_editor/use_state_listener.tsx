@@ -87,7 +87,7 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
         getData: () => {
           // Pull the mappings properties from the current editor.
           // For semantic_text fields the UI stores a `reference_field` param that
-          // Elasticsearch doesn't accept. Strip it (and wire copy_to on the
+          // ES doesn't accept. Strip it (and wire copy_to on the
           // referenced text field when one was chosen) before serializing.
           const resolvedFields =
             state.documentFields.editor !== 'json' && hasSemanticTextField(state.fields)
