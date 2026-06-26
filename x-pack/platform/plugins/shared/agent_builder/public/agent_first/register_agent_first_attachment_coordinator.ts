@@ -9,11 +9,9 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import {
   registerAgentFirstAttachmentCoordinator,
-  registerApplicationAttachmentHarness,
 } from '@kbn/core-chrome-browser-components';
 import type { AgentBuilderPluginStart } from '../types';
 import { AgentFirstAttachmentCoordinatorProvider } from './attachment_coordinator/attachment_coordinator_provider';
-import { ApplicationAttachmentHarness } from './application_attachment_harness';
 // Overflow "Attach to" POC — disabled for now; re-enable via registerAgentFirstAttachAppMenuItem.
 // import { registerAgentFirstAttachAppMenuItem } from './register_agent_first_app_menu_item';
 
@@ -27,13 +25,10 @@ export const registerAgentFirstAttachmentCoordinatorShell = ({
     React.createElement(AgentFirstAttachmentCoordinatorProvider, { agentBuilder }, children)
   );
 
-  const unregisterHarness = registerApplicationAttachmentHarness(ApplicationAttachmentHarness);
-
   // const unregisterMenuItem = registerAgentFirstAttachAppMenuItem(core);
 
   return () => {
     // unregisterMenuItem();
-    unregisterHarness();
     unregisterCoordinator();
   };
 };

@@ -6,10 +6,10 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { ApplicationAttachmentButtonProps } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { registerApplicationAttachButtonElement } from './attachment_coordinator/coordinator_bridge';
 import { useApplicationAttachmentState } from './use_application_attachment_state';
 
@@ -30,7 +30,9 @@ export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonPr
   linkDescriptor,
   iconType = 'documents',
   disabled = false,
+  displayVariant = 'default',
 }) => {
+  const { euiTheme } = useEuiTheme();
   const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
   const { canAttach, isLinked, attach } = useApplicationAttachmentState({
     getAttachment,
@@ -57,6 +59,15 @@ export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonPr
   const tooltip = isLinked ? labels.alreadyAttached : labels.attach;
   const buttonIconType = isLinked ? 'link' : 'paperClip';
 
+  const isAppHeader = displayVariant === 'appHeader';
+  const appHeaderIconButton = useMemo(
+    () =>
+      css`
+        color: ${euiTheme.colors.textSubdued};
+      `,
+    [euiTheme.colors.textSubdued]
+  );
+
   return (
     <EuiToolTip content={tooltip} disableScreenReaderOutput>
       <div
@@ -71,6 +82,9 @@ export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonPr
           aria-label={tooltip}
           disabled={isDisabled}
           onClick={handleClick}
+          display={isAppHeader ? 'empty' : undefined}
+          size={isAppHeader ? 'xs' : undefined}
+          css={isAppHeader ? appHeaderIconButton : undefined}
           data-test-subj="agentBuilderApplicationAttachmentButton"
         />
       </div>

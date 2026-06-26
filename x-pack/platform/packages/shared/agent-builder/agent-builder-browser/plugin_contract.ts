@@ -148,6 +148,10 @@ export interface ApplicationAttachmentButtonProps {
   linkDescriptor?: ApplicationAttachmentLinkDescriptor;
   iconType?: IconType;
   disabled?: boolean;
+  /**
+   * Matches App Header quick-action icon buttons (e.g. beside share on hover).
+   */
+  displayVariant?: 'default' | 'appHeader';
 }
 
 export interface UseApplicationAttachmentStateOptions {
