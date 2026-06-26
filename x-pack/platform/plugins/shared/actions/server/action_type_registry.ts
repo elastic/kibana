@@ -181,7 +181,7 @@ export class ActionTypeRegistry {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.featureIdTooLong', {
           defaultMessage:
-            'Feature ids for connector type "{connectorTypeId}" must not exceed {maxLength} characters.',
+            'Feature IDs for connector type "{connectorTypeId}" must not exceed {maxLength} characters.',
           values: {
             connectorTypeId: actionType.id,
             maxLength: MAX_FEATURE_ID_LENGTH,
