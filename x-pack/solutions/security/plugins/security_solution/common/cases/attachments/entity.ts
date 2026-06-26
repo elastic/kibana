@@ -7,18 +7,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-
-/**
- * The kind of entity being attached. Mirrors the Entity Analytics entity types.
- */
-export const ENTITY_ATTACHMENT_TYPES = ['user', 'host', 'service', 'generic'] as const;
+import { EntityType } from '@kbn/entity-store/common';
 
 const EntityAttachmentMetadataSchema = z
   .object({
     /** Human-readable entity name, used as the link label in the attachment view. */
     entityName: z.string().max(256),
     /** The kind of entity (user, host, service, generic). */
-    entityType: z.enum(ENTITY_ATTACHMENT_TYPES),
+    entityType: EntityType,
     /** Optional risk score (0-100) captured at attach time. */
     riskScore: z.number().optional(),
     /** Optional risk level (e.g. Low, Moderate, High, Critical) captured at attach time. */

@@ -18,10 +18,8 @@ import { registerCaseAttachments } from './register';
 import { EndpointAttachmentPayloadSchema } from '../../../common/cases/attachments/endpoint';
 import { TimelineAttachmentPayloadSchema } from '../../../common/cases/attachments/timeline';
 import { SecurityEventAttachmentPayloadSchema } from '../../../common/cases/attachments/event';
-import {
-  EntityAttachmentPayloadSchema,
-  ENTITY_ATTACHMENT_TYPES,
-} from '../../../common/cases/attachments/entity';
+import { EntityAttachmentPayloadSchema } from '../../../common/cases/attachments/entity';
+import { EntityType } from '@kbn/entity-store/common';
 
 // Reproduces the path:message summary that `parseUnifiedAttachmentWithSchema`
 // in `@kbn/cases-plugin` builds at the write boundary. Keeping this assertion
@@ -174,7 +172,7 @@ describe('registerCaseAttachments', () => {
       expect(result.success).toBe(true);
     });
 
-    it.each(ENTITY_ATTACHMENT_TYPES)(
+    it.each(EntityType.options)(
       'accepts each entityType enum value for security.entity payload: %s',
       (entityType) => {
         const result = EntityAttachmentPayloadSchema.safeParse({
