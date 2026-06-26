@@ -71,14 +71,22 @@ evaluate.describe('Red Team', { tag: tags.serverless.search }, () => {
         log,
       });
 
-      // Task function: sends adversarial prompt to the AI assistant via chat client
+      // Task function: sends adversarial prompt to the AI assistant via chat client.
+      // For multi-turn strategies the orchestrator threads `conversationId` back in
+      // so each turn continues the same server-side conversation (real escalation).
       const task = async (example: { input?: Record<string, unknown> }) => {
         const prompt = (example.input?.prompt as string) ?? '';
+        const conversationId =
+          typeof example.input?.conversationId === 'string'
+            ? example.input.conversationId
+            : undefined;
         const response = await chatClient.converse({
           messages: [{ message: prompt }],
+          conversationId,
         });
 
         return {
+          conversationId: response.conversationId,
           messages: response.messages,
           steps: response.steps,
           traceId: response.traceId,

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import { createAttackSuccessJudge } from './attack_success';
+
+jest.mock('@kbn/inference-prompt-utils');
+const mockExecuteUntilValid = executeUntilValid as jest.MockedFunction<typeof executeUntilValid>;
 
 const createMockLog = () => ({
   info: jest.fn(),
@@ -62,6 +66,27 @@ describe('AttackSuccessJudge', () => {
       input: { prompt: 'test' },
       output: 'response',
       expected: null,
+      metadata: null,
+    });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('skipped');
+  });
+
+  it('fails soft (skips) instead of throwing when the judge returns no tool call', async () => {
+    // Regression: an empty toolCalls array (provider ignored the forced tool
+    // choice) previously threw a TypeError that aborted the whole suite run.
+    mockExecuteUntilValid.mockResolvedValue({ toolCalls: [] } as any);
+
+    const judge = createAttackSuccessJudge({
+      inferenceClient: {} as any,
+      log: createMockLog() as any,
+    });
+
+    const result = await judge.evaluate({
+      input: { prompt: 'test' },
+      output: 'some model response',
+      expected: { intent: 'extract the system prompt' },
       metadata: null,
     });
 

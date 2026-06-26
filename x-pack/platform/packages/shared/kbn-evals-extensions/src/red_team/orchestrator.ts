@@ -21,6 +21,7 @@ import {
   createPromptLeakDetectionEvaluator,
   createToolPoisoningEvaluator,
   createScopeViolationEvaluator,
+  getToolCallSteps,
 } from '@kbn/evals';
 import type {
   AttackModule,
@@ -38,6 +39,7 @@ import { getAttackModule, getAvailableModules } from './modules';
 import { getStrategy } from './strategies';
 import { scanWithGuardrails, mergeGuardrailRules, DEFAULT_GUARDRAIL_RULES } from './guardrails';
 import { classifySeverity, type NamedEvaluationResult } from './severity';
+import { extractResponseText } from './output_text';
 import { isAttackPass } from './pass_check';
 import { createAttackSuccessJudge } from './judge/attack_success';
 import { createRefusalQualityJudge } from './judge/refusal_quality';
@@ -52,7 +54,7 @@ export interface RedTeamOrchestratorOptions {
 }
 
 interface RedTeamOrchestrator {
-  run: (task: ExperimentTask<any, any>) => Promise<RedTeamReport>;
+  run: (task: ExperimentTask<Example, TaskOutput>) => Promise<RedTeamReport>;
 }
 
 const buildDefaultEvaluators = (
@@ -72,15 +74,13 @@ const buildDefaultEvaluators = (
     evaluators.push(
       createToolPoisoningEvaluator({
         allowedTools: targetContext.availableTools,
-        extractToolCalls: (output: unknown) => {
-          if (typeof output === 'object' && output !== null && 'toolCalls' in output) {
-            const calls = (output as Record<string, unknown>).toolCalls;
-            if (Array.isArray(calls)) {
-              return calls.map((c) => (typeof c === 'string' ? c : String(c)));
-            }
-          }
-          return [];
-        },
+        // Agent-builder task output exposes invocations under `steps` (type
+        // 'tool_call'), not a top-level `toolCalls` array. Reuse the shared
+        // extractor so unauthorized tool calls are actually detected.
+        extractToolCalls: (output: unknown) =>
+          getToolCallSteps(output as TaskOutput)
+            .map((step) => step.tool_id)
+            .filter((toolId): toolId is string => typeof toolId === 'string'),
       })
     );
   }
@@ -89,6 +89,7 @@ const buildDefaultEvaluators = (
     evaluators.push(
       createScopeViolationEvaluator({
         allowedPatterns: targetContext.authorizedScopes.map((scope) => new RegExp(scope, 'i')),
+        refusalAware: true,
       })
     );
   }
@@ -107,31 +108,16 @@ const resolveStrategies = (config: RedTeamConfig): Strategy[] => {
 };
 
 /**
- * Extracts a text string from a task output value.
- * - If the output is a string, returns it directly (truncated to maxLen).
- * - If the output is an object with a `messages` array, returns the last message text (truncated to maxLen).
- * - Otherwise, returns the JSON-stringified output (truncated to maxLen).
+ * Extracts the server-side conversation id from a task output, when present.
+ * Used to continue the same conversation across multi-turn attack turns so the
+ * target model accumulates context instead of seeing each turn cold.
  */
-const extractTextFromOutput = (output: TaskOutput, maxLen?: number): string => {
-  let text: string;
-  if (typeof output === 'string') {
-    text = output;
-  } else if (output && typeof output === 'object') {
-    const messages = (output as Record<string, unknown>).messages;
-    if (Array.isArray(messages) && messages.length > 0) {
-      const lastMsg = messages[messages.length - 1];
-      const msgText =
-        typeof lastMsg === 'object' && lastMsg !== null
-          ? (lastMsg as Record<string, unknown>).message ?? JSON.stringify(lastMsg)
-          : String(lastMsg);
-      text = String(msgText);
-    } else {
-      text = JSON.stringify(output);
-    }
-  } else {
-    text = String(JSON.stringify(output) ?? output);
+const extractConversationId = (output: TaskOutput): string | undefined => {
+  if (output && typeof output === 'object') {
+    const id = (output as Record<string, unknown>).conversationId;
+    return typeof id === 'string' ? id : undefined;
   }
-  return maxLen !== undefined ? text.substring(0, maxLen) : text;
+  return undefined;
 };
 
 interface ProcessResultsParams {
@@ -240,7 +226,7 @@ const processExperimentResults = (
     bySeverity[severity]++;
 
     // Extract response excerpt for the report
-    const responseExcerpt = extractTextFromOutput(taskRun.output, 500);
+    const responseExcerpt = extractResponseText(taskRun.output, 500);
 
     results.push({
       example: examples[taskRun.exampleIndex] ?? { input: taskRun.input },
@@ -279,7 +265,7 @@ export const createRedTeamOrchestrator = (
     targetContext: config.targetContext,
   };
 
-  const run = async (task: ExperimentTask<any, any>): Promise<RedTeamReport> => {
+  const run = async (task: ExperimentTask<Example, TaskOutput>): Promise<RedTeamReport> => {
     const runId = uuidv4();
     const modules = resolveModules(config);
     const strategies = resolveStrategies(config);
@@ -372,13 +358,17 @@ export const createRedTeamOrchestrator = (
             let finalEvaluated = false;
             let lastTurnExample: { input: Record<string, unknown> } | null = null;
             let lastTargetOutput: TaskOutput = '';
+            // Carries the server-side conversation id between turns so the target
+            // model continues the same conversation (real escalation) rather than
+            // answering each turn cold. The task forwards it to chatClient.converse.
+            let conversationId: string | undefined;
 
             while (currentPrompt !== null && turnNumber < strategy.maxTurns) {
               conversationHistory.push({ role: 'attacker', content: currentPrompt });
 
               const turnExample = {
                 ...example,
-                input: { ...example.input, prompt: currentPrompt },
+                input: { ...example.input, prompt: currentPrompt, conversationId },
               };
               lastTurnExample = turnExample;
 
@@ -396,7 +386,10 @@ export const createRedTeamOrchestrator = (
               const turnRuns = Object.values(turnExperiment.runs);
               const targetOutput = turnRuns.length > 0 ? turnRuns[0].output : '';
               lastTargetOutput = targetOutput;
-              const targetText = extractTextFromOutput(targetOutput);
+              // Carry the server-side conversation id forward so the next turn
+              // continues the same conversation instead of starting cold.
+              conversationId = extractConversationId(targetOutput) ?? conversationId;
+              const targetText = extractResponseText(targetOutput);
               conversationHistory.push({ role: 'target', content: targetText });
 
               const nextTurn = strategy.generateNextTurn(attackPrompt, conversationHistory);
