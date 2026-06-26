@@ -49,11 +49,10 @@ interface DailyAggBucket {
 }
 
 export class HistoricalSummaryClient {
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
 
   async fetch(
-    params: FetchHistoricalSummaryParams,
-    { spaceId }: { spaceId: string }
+    params: FetchHistoricalSummaryParams,    
   ): Promise<FetchHistoricalSummaryResponse> {
     const dateRangeBySlo = params.list.reduce<
       Record<SLOId, { range: DateRange; queryRange: DateRange }>
@@ -77,7 +76,7 @@ export class HistoricalSummaryClient {
           timeWindow,
           budgetingMethod,
           dateRange: dateRangeBySlo[sloId],
-          spaceId,
+          spaceId: this.spaceId,
         }),
       ]
     );
