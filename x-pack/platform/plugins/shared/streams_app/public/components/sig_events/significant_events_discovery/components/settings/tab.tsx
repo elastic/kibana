@@ -216,7 +216,7 @@ export function SettingsTab() {
                       'xpack.streams.significantEventsDiscovery.settings.indexPatternsHelp',
                       {
                         defaultMessage:
-                          'Comma-separated list of index patterns to use for feature detection and analysis.',
+                          'Comma-separated list of index patterns to use for feature detection, analysis, and continuous extraction.',
                       }
                     )}{' '}
                     {i18n.translate(
@@ -313,7 +313,7 @@ export function SettingsTab() {
                       'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionHelp',
                       {
                         defaultMessage:
-                          'When enabled, knowledge indicator extraction runs automatically on managed streams at the configured interval.',
+                          'When enabled, knowledge indicator extraction runs automatically on streams matching the index patterns above, minus any excluded patterns, at the configured interval.',
                       }
                     )}
                   </EuiText>
@@ -376,7 +376,7 @@ export function SettingsTab() {
                     'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsHelp',
                     {
                       defaultMessage:
-                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to skip during continuous extraction.',
+                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to skip during continuous extraction. Streams must also match the index patterns above to be eligible.',
                     }
                   )}
                 >

@@ -10,8 +10,12 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
+  OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
+import {
+  parseSigEventsIndexPatterns,
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
@@ -39,11 +43,13 @@ export interface EligibleStreamsResponse {
   alreadyRunning: StreamClassificationResult['alreadyRunning'];
   upToDate: StreamCandidate[];
   excluded: string[];
+  notMatchingIndexPatterns: string[];
   unsupported: string[];
   skipped: StreamCandidate[];
   settings: {
     enabled: boolean;
     intervalHours: number;
+    indexPatterns: string[];
     excludePatterns: string[];
   };
   connectorId: string;
@@ -105,13 +111,14 @@ const eligibleStreamsRoute = createServerRoute({
       throw new StatusError('Continuous KI extraction is disabled', 400);
     }
 
-    const [intervalHoursSetting, excludedStreamPatterns] = await Promise.all([
+    const [intervalHoursSetting, excludedStreamPatterns, indexPatternsSetting] = await Promise.all([
       globalUiSettingsClient.get<number>(
         OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS
       ),
       globalUiSettingsClient.get<string>(
         OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS
       ),
+      uiSettingsClient.get<string>(OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS),
     ]);
 
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
@@ -142,10 +149,19 @@ const eligibleStreamsRoute = createServerRoute({
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
     const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
+    const resolvedIndexPatterns = parseSigEventsIndexPatterns(indexPatternsSetting);
 
-    const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
+    const {
+      alreadyRunning,
+      candidates,
+      upToDate,
+      excluded,
+      notMatchingIndexPatterns,
+      unsupported,
+    } = classifyStreams({
       allStreams,
       sortedTasks,
+      indexPatterns: resolvedIndexPatterns,
       excludedStreamPatterns: resolvedExcludedPatterns,
       intervalHours,
     });
@@ -162,11 +178,13 @@ const eligibleStreamsRoute = createServerRoute({
       alreadyRunning,
       upToDate,
       excluded,
+      notMatchingIndexPatterns,
       unsupported,
       skipped,
       settings: {
         enabled,
         intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
+        indexPatterns: resolvedIndexPatterns,
         excludePatterns: parseExcludePatterns(excludedStreamPatterns),
       },
       connectorId,

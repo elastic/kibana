@@ -90,7 +90,7 @@ export function registerFeatureFlags(
             value: DEFAULT_INDEX_PATTERNS,
             description: i18n.translate('xpack.streams.sigEventsIndexPatternsSettingsDescription', {
               defaultMessage:
-                'Comma-separated list of index patterns used for Significant Events stream filtering and analysis.',
+                'Comma-separated list of index patterns used for Significant Events stream filtering, analysis, and continuous knowledge indicator extraction.',
             }),
             type: 'string',
             schema: schema.string(),
@@ -153,7 +153,7 @@ export function registerFeatureFlags(
             value: false,
             description: i18n.translate('xpack.streams.continuousKiExtractionEnabledDescription', {
               defaultMessage:
-                'When enabled, knowledge indicator extraction runs automatically on managed streams.',
+                'When enabled, knowledge indicator extraction runs automatically on streams that match Significant Events index patterns, minus any excluded patterns.',
             }),
             type: 'boolean',
             schema: schema.boolean(),
@@ -192,7 +192,7 @@ export function registerFeatureFlags(
               'xpack.streams.continuousKiExtractionExcludedStreamPatternsDescription',
               {
                 defaultMessage:
-                  'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to exclude from automatic knowledge indicator extraction.',
+                  'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to exclude from automatic knowledge indicator extraction. Streams must also match Significant Events index patterns to be eligible.',
               }
             ),
             type: 'string',

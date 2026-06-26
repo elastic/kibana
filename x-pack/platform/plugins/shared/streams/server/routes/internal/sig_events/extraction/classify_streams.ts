@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams, TaskStatus } from '@kbn/streams-schema';
+import { Streams, streamMatchesIndexPatterns, TaskStatus } from '@kbn/streams-schema';
 import { minimatch } from 'minimatch';
 import type { PersistedTask } from '../../../../lib/tasks/types';
 import type { FeaturesIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/features_identification';
@@ -20,8 +20,10 @@ export interface StreamClassificationResult {
   candidates: StreamCandidate[];
   upToDate: StreamCandidate[];
   excluded: string[];
+  notMatchingIndexPatterns: string[];
   unsupported: string[];
   excludePatterns: string[];
+  indexPatterns: string[];
 }
 
 export const parseExcludePatterns = (raw: string | undefined): string[] =>
@@ -41,17 +43,20 @@ const matchesExcludePatterns = (name: string, patterns: string[]): boolean =>
 export const classifyStreams = ({
   allStreams,
   sortedTasks,
+  indexPatterns,
   excludedStreamPatterns,
   intervalHours,
 }: {
   allStreams: Streams.all.Definition[];
   sortedTasks: Array<PersistedTask<FeaturesIdentificationTaskParams>>;
+  indexPatterns: string[];
   excludedStreamPatterns: string;
   intervalHours: number;
 }): StreamClassificationResult => {
   const excludePatterns = parseExcludePatterns(excludedStreamPatterns);
 
   const excluded: string[] = [];
+  const notMatchingIndexPatterns: string[] = [];
   const unsupported: string[] = [];
   const eligibleNames = new Set<string>();
   for (const stream of allStreams) {
@@ -60,6 +65,10 @@ export const classifyStreams = ({
       !Streams.ClassicStream.Definition.is(stream)
     ) {
       unsupported.push(stream.name);
+      continue;
+    }
+    if (!streamMatchesIndexPatterns(stream.name, indexPatterns)) {
+      notMatchingIndexPatterns.push(stream.name);
       continue;
     }
     if (matchesExcludePatterns(stream.name, excludePatterns)) {
@@ -106,7 +115,9 @@ export const classifyStreams = ({
     candidates: allCandidates,
     upToDate,
     excluded,
+    notMatchingIndexPatterns,
     unsupported,
     excludePatterns,
+    indexPatterns,
   };
 };

@@ -75,6 +75,7 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import { reconcileContinuousKiExtractionOnStartup } from './lib/workflows/reconcile_continuous_ki_extraction_on_startup';
 import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -104,6 +105,8 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
+  private taskService?: TaskService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -158,6 +161,7 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, inferenceResolver, this.logger);
     const taskService = new TaskService(plugins.taskManager);
+    this.taskService = taskService;
     const getScopedClients = async ({
       request,
     }: {
@@ -284,6 +288,7 @@ export class StreamsPlugin
         this.logger,
         plugins.workflowsManagement.management
       );
+      this.continuousKiExtractionWorkflowService = continuousKiExtractionWorkflowService;
     }
 
     const telemetryClient = this.ebtTelemetryService.getClient();
@@ -551,6 +556,30 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
+
+    if (this.continuousKiExtractionWorkflowService && this.taskService) {
+      void (async () => {
+        try {
+          const taskClient = await this.taskService!.getClient(
+            core,
+            plugins.taskManager,
+            this.logger
+          );
+          await reconcileContinuousKiExtractionOnStartup({
+            core,
+            continuousKiExtractionWorkflowService: this.continuousKiExtractionWorkflowService!,
+            taskClient,
+            logger: this.logger,
+          });
+        } catch (err) {
+          this.logger.warn(
+            `Failed to reconcile continuous KI extraction on startup: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        }
+      })();
+    }
 
     return {};
   }

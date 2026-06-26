@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskStatus, type Streams } from '@kbn/streams-schema';
+import { DEFAULT_INDEX_PATTERNS, TaskStatus, type Streams } from '@kbn/streams-schema';
 import type { PersistedTask } from '../../../../lib/tasks/types';
 import type { FeaturesIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/features_identification';
 import { classifyStreams, parseExcludePatterns } from './classify_streams';
@@ -82,6 +82,7 @@ describe('classifyStreams', () => {
   const defaultArgs = {
     allStreams: [] as ReturnType<typeof makeStream>[],
     sortedTasks: [] as TaskForTest[],
+    indexPatterns: [DEFAULT_INDEX_PATTERNS],
     excludedStreamPatterns: '',
     intervalHours: 12,
   };
@@ -89,27 +90,93 @@ describe('classifyStreams', () => {
   it('skips unsupported stream types and reports them', () => {
     const result = classifyStreams({
       ...defaultArgs,
-      allStreams: [makeStream('logs'), makeStream('my-query', { query: true })],
+      allStreams: [makeStream('logs.ecs'), makeStream('my-query', { query: true })],
     });
 
-    expect(candidateNames(result)).toEqual(['logs']);
+    expect(candidateNames(result)).toEqual(['logs.ecs']);
     expect(result.unsupported).toEqual(['my-query']);
   });
 
   it('excludes streams matching exclude patterns', () => {
     const result = classifyStreams({
       ...defaultArgs,
-      allStreams: [makeStream('logs'), makeStream('debug-app'), makeStream('test-data')],
-      excludedStreamPatterns: 'debug-*, test-*',
+      allStreams: [
+        makeStream('logs.ecs'),
+        makeStream('logs.debug-app'),
+        makeStream('logs.test-data'),
+      ],
+      excludedStreamPatterns: 'logs.debug-*, logs.test-*',
     });
 
-    expect(result.excluded).toEqual(['debug-app', 'test-data']);
-    expect(candidateNames(result)).toEqual(['logs']);
+    expect(result.excluded).toEqual(['logs.debug-app', 'logs.test-data']);
+    expect(candidateNames(result)).toEqual(['logs.ecs']);
+  });
+
+  it('excludes streams that do not match index patterns', () => {
+    const result = classifyStreams({
+      ...defaultArgs,
+      allStreams: [
+        makeStream('logs.ecs'),
+        makeStream('logs-generic.otel-default'),
+        makeStream('metrics-generic.otel-default'),
+        makeStream('traces-generic.otel-default'),
+      ],
+    });
+
+    expect(result.notMatchingIndexPatterns).toEqual([
+      'metrics-generic.otel-default',
+      'traces-generic.otel-default',
+    ]);
+    expect(candidateNames(result)).toEqual(['logs.ecs', 'logs-generic.otel-default']);
+  });
+
+  it('includes metrics streams when index patterns allow them', () => {
+    const result = classifyStreams({
+      ...defaultArgs,
+      indexPatterns: ['logs*', 'metrics*'],
+      allStreams: [makeStream('logs.ecs'), makeStream('metrics-generic.otel-default')],
+    });
+
+    expect(result.notMatchingIndexPatterns).toEqual([]);
+    expect(candidateNames(result)).toEqual(['logs.ecs', 'metrics-generic.otel-default']);
+  });
+
+  it('applies exclude patterns only within index-pattern matches', () => {
+    const result = classifyStreams({
+      ...defaultArgs,
+      allStreams: [
+        makeStream('logs.ecs'),
+        makeStream('logs.debug.app'),
+        makeStream('metrics-generic.otel-default'),
+      ],
+      excludedStreamPatterns: 'logs.debug.*',
+    });
+
+    expect(result.excluded).toEqual(['logs.debug.app']);
+    expect(result.notMatchingIndexPatterns).toEqual(['metrics-generic.otel-default']);
+    expect(candidateNames(result)).toEqual(['logs.ecs']);
+  });
+
+  it('with default index patterns, never schedules metrics streams', () => {
+    const result = classifyStreams({
+      ...defaultArgs,
+      allStreams: [
+        makeStream('metrics-generic.otel-default'),
+        makeStream('metrics-hostmetricsreceiver.otel-default'),
+      ],
+    });
+
+    expect(candidateNames(result)).toEqual([]);
+    expect(result.notMatchingIndexPatterns).toEqual([
+      'metrics-generic.otel-default',
+      'metrics-hostmetricsreceiver.otel-default',
+    ]);
   });
 
   it('treats streams without a task as never-processed candidates', () => {
     const result = classifyStreams({
       ...defaultArgs,
+      indexPatterns: ['*'],
       allStreams: [makeStream('stream-a'), makeStream('stream-b')],
     });
 
@@ -119,6 +186,7 @@ describe('classifyStreams', () => {
   it('identifies already running (in-progress) tasks', () => {
     const result = classifyStreams({
       ...defaultArgs,
+      indexPatterns: ['*'],
       allStreams: [makeStream('running-stream')],
       sortedTasks: [
         makeTask('running-stream', {
@@ -135,6 +203,7 @@ describe('classifyStreams', () => {
   it('treats BeingCanceled tasks as already running', () => {
     const result = classifyStreams({
       ...defaultArgs,
+      indexPatterns: ['*'],
       allStreams: [makeStream('canceling-stream')],
       sortedTasks: [
         makeTask('canceling-stream', {
@@ -152,6 +221,7 @@ describe('classifyStreams', () => {
     const recentCompletion = new Date().toISOString();
     const result = classifyStreams({
       ...defaultArgs,
+      indexPatterns: ['*'],
       allStreams: [makeStream('fresh-stream')],
       sortedTasks: [makeTask('fresh-stream', { last_completed_at: recentCompletion })],
     });
@@ -166,6 +236,7 @@ describe('classifyStreams', () => {
     const oldCompletion = '2024-01-01T00:00:00Z';
     const result = classifyStreams({
       ...defaultArgs,
+      indexPatterns: ['*'],
       allStreams: [makeStream('old-stream')],
       sortedTasks: [makeTask('old-stream', { last_completed_at: oldCompletion })],
     });
@@ -179,6 +250,7 @@ describe('classifyStreams', () => {
     const recentFailure = new Date().toISOString();
     const result = classifyStreams({
       ...defaultArgs,
+      indexPatterns: ['*'],
       allStreams: [makeStream('failed-stream')],
       sortedTasks: [
         makeTask('failed-stream', {
@@ -198,6 +270,7 @@ describe('classifyStreams', () => {
     const oldCompletion = '2024-01-01T00:00:00Z';
     const result = classifyStreams({
       ...defaultArgs,
+      indexPatterns: ['*'],
       allStreams: [makeStream('old-stream'), makeStream('new-stream')],
       sortedTasks: [makeTask('old-stream', { last_completed_at: oldCompletion })],
     });

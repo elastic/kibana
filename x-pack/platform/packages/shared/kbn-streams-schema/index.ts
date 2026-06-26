@@ -279,6 +279,7 @@ export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
+export { parseSigEventsIndexPatterns } from './src/helpers/parse_sig_events_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
 
 export {
