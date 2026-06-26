@@ -107,7 +107,7 @@ export const buildRuleActionButtons = ({
           disabledReason,
           handler: () => {
             // getActionButtons is not reactive to saving$, so guard against double-submit here.
-            if (aiRuleCreation.getIsSaving()) {
+            if (aiRuleCreation.getIsSaving(attachmentId)) {
               return;
             }
             aiRuleCreation.requestSaveRule(
@@ -125,7 +125,7 @@ export const buildRuleActionButtons = ({
           disabled: !isEsql,
           disabledReason,
           handler: () => {
-            if (aiRuleCreation.getIsSaving()) {
+            if (aiRuleCreation.getIsSaving(attachmentId)) {
               return;
             }
             const { id: _id, ...ruleWithoutId } = rule as RuleResponse & { id?: string };

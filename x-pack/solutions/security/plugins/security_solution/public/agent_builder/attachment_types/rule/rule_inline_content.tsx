@@ -106,7 +106,8 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   attachment,
   aiRuleCreation,
 }) => {
-  const isSaving = useObservable(aiRuleCreation.saving$, false);
+  const savingAttachmentId = useObservable(aiRuleCreation.saving$, null);
+  const isSaving = savingAttachmentId === attachment.id;
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 

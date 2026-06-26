@@ -30,7 +30,8 @@ export interface SaveRuleRequest {
 
 export class AiRuleCreationService {
   private readonly saveRuleSubject = new Subject<SaveRuleRequest>();
-  private readonly savingSubject = new BehaviorSubject<boolean>(false);
+  // Tracks the attachment ID currently being saved, or null when idle.
+  private readonly savingSubject = new BehaviorSubject<string | null>(null);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
   // `null` = form idle (no active bind). Released when a brand-new rule card is minted.
@@ -39,6 +40,7 @@ export class AiRuleCreationService {
   private session: AiRuleCreationSession | null = null;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
+  /** Emits the attachment ID currently being saved, or null when idle. */
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
@@ -69,7 +71,7 @@ export class AiRuleCreationService {
       updateOrigin?: UpdateAttachmentOriginFn;
     }
   ): void => {
-    this.savingSubject.next(true);
+    this.savingSubject.next(options?.attachmentId ?? '__saving__');
     this.saveRuleSubject.next({
       rule,
       attachmentId: options?.attachmentId,
@@ -78,11 +80,13 @@ export class AiRuleCreationService {
   };
 
   public clearSaving = (): void => {
-    this.savingSubject.next(false);
+    this.savingSubject.next(null);
   };
 
-  public getIsSaving = (): boolean => {
-    return this.savingSubject.getValue();
+  /** Returns true if the given attachment is currently being saved, or (no arg) if any save is in progress. */
+  public getIsSaving = (attachmentId?: string): boolean => {
+    const current = this.savingSubject.getValue();
+    return attachmentId !== undefined ? current === attachmentId : current !== null;
   };
 
   public setAiCreatedRule = (rule: RuleResponse, attachmentId?: string): void => {
