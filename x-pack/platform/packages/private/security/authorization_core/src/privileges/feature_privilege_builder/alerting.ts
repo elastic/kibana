@@ -123,7 +123,8 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
       const manageRuleSettings =
         get(privilegeDefinition.alerting, `${entity}.manage_rule_settings`) ?? [];
       const muteAlerts = get(privilegeDefinition.alerting, `${entity}.mute_alerts`) ?? [];
-      const findMutedAlerts = get(privilegeDefinition.alerting, `${entity}.find_muted_alerts`) ?? [];
+      const findMutedAlerts =
+        get(privilegeDefinition.alerting, `${entity}.find_muted_alerts`) ?? [];
       const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
 
       return uniq([
