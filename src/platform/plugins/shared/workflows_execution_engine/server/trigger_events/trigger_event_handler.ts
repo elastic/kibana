@@ -10,8 +10,8 @@
 import pLimit from 'p-limit';
 import { v4 as generateUuid } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
   EsWorkflowExecution,
   WorkflowDetailDto,

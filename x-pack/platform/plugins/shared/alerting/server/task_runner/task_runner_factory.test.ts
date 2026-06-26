@@ -13,7 +13,6 @@ import { TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
-  httpServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
   uiSettingsServiceMock,
@@ -111,7 +110,6 @@ describe('Task Runner Factory', () => {
     actionsPlugin: actionsMock.createStart(),
     alertsService: mockAlertService,
     backfillClient,
-    basePathService: httpServiceMock.createBasePath(),
     cancelAlertsOnRuleTimeout: true,
     connectorAdapterRegistry,
     data: dataPlugin,

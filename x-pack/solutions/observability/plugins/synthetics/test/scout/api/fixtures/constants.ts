@@ -22,8 +22,19 @@ export const SYNTHETICS_API_URLS = {
   FILTERS: '/internal/synthetics/monitor/filters',
   SUGGESTIONS: '/internal/synthetics/suggestions',
   PRIVATE_LOCATIONS: '/api/synthetics/private_locations',
-  DYNAMIC_SETTINGS: '/internal/synthetics/settings',
+  PRIVATE_LOCATIONS_MONITORS: '/internal/synthetics/private_locations/monitors',
+  SERVICE_LOCATIONS: '/internal/uptime/service/locations',
+  DYNAMIC_SETTINGS: '/api/synthetics/settings',
+  PARAMS: '/api/synthetics/params',
+  PRIVATE_LOCATIONS_CLEANUP: '/internal/synthetics/private_locations/_cleanup',
+  SYNC_GLOBAL_PARAMS: '/internal/synthetics/sync_global_params',
+  ENABLE_DEFAULT_ALERTING: '/internal/synthetics/enable_default_alerting',
+  SYNTHETICS_MONITOR_INSPECT: '/internal/synthetics/service/monitor/inspect',
+  SYNTHETICS_MONITOR_RESET: '/internal/synthetics/monitors/{monitorId}/_reset',
+  SYNTHETICS_MONITORS_BULK_RESET: '/internal/synthetics/monitors/_bulk_reset',
+  SYNTHETICS_MONITORS_PROJECT: '/api/synthetics/project/{projectName}/monitors',
   SYNTHETICS_MONITORS_PROJECT_UPDATE: '/api/synthetics/project/{projectName}/monitors/_bulk_update',
+  SYNTHETICS_MONITORS_PROJECT_DELETE: '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 } as const;
 
 export const PUBLIC_API_VERSION = '2023-10-31';

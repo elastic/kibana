@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
@@ -24,6 +25,11 @@ export const registerSolutionNavigation = async (
     (productType) => productType.product_line === ProductLine.aiSoc
   );
 
+  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
+    AGENT_BUILDER_NAV_AT_TOP_FLAG,
+    false
+  );
+
   // Do not pass a defaultOverride: when userValue is unset, get() must use the registered
   // default (e.g. Agent for security spaces from aiAssistantManagementSelection), not Classic.
   const chatExperience$ = services.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
@@ -36,10 +42,13 @@ export const registerSolutionNavigation = async (
   const workflowsUiEnabled$ = services.settings.client.get$<boolean>(WORKFLOWS_UI_SETTING_ID);
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
-  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
-
   const navigationTree = shouldUseAINavigation
-    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled, showAlertingV2)
+    ? createAiNavigationTree(
+        services,
+        initialChatExperience,
+        workflowsUiEnabled,
+        agentBuilderNavAtTop
+      )
     : await createNavigationTree(services, initialChatExperience);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);

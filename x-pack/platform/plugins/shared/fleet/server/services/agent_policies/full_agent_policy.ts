@@ -166,9 +166,24 @@ export async function getFullAgentPolicy(
     const dataOutputProxy = dataOutput?.proxy_id
       ? proxies.find((p) => p.id === dataOutput.proxy_id)
       : undefined;
+
+    const packageOutputs = new Map<string, Output>();
+    for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
+      if (!pkgPolicy.output_id) continue;
+      const override = outputs.find((o) => o.id === pkgPolicy.output_id);
+      if (override) {
+        packageOutputs.set(pkgPolicy.id, override);
+      } else {
+        logger.warn(
+          `Output override [${pkgPolicy.output_id}] for package policy [${pkgPolicy.id}] not found, falling back to data output`
+        );
+      }
+    }
+
     otelcolConfig = generateOtelcolConfig({
       inputs: agentInputs,
       dataOutput,
+      packageOutputs,
       packageInfoCache,
       proxy: dataOutputProxy,
       logger,
@@ -273,6 +288,11 @@ export async function getFullAgentPolicy(
         packagePolicy
       );
     } else {
+      if (packagePolicy.output_id) {
+        logger.warn(
+          `Output override [${packagePolicy.output_id}] for package policy [${packagePolicy.id}] not found, falling back to data output`
+        );
+      }
       packagePoliciesByOutputId[getOutputIdForAgentPolicy(dataOutput)].push(packagePolicy);
     }
   });

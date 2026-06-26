@@ -50,8 +50,7 @@ const APM_TIME_RANGE = {
   rangeTo: TRACES.DEFAULT_END_TIME,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/261438
-spaceTest.describe.skip(
+spaceTest.describe(
   'Traces in Discover - Explore from APM',
   {
     tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
@@ -190,15 +189,15 @@ spaceTest.describe.skip(
       }
     );
 
-    spaceTest(
-      'Transaction Detail - "Open in Discover" links open traces experience',
-      async ({ page, pageObjects }) => {
-        const transactionDetailParams = {
-          ...APM_TIME_RANGE,
-          transactionName: RICH_TRACE.TRANSACTION_NAME,
-          transactionType: 'request',
-        };
+    const transactionDetailParams = {
+      ...APM_TIME_RANGE,
+      transactionName: RICH_TRACE.TRANSACTION_NAME,
+      transactionType: 'request',
+    };
 
+    spaceTest(
+      'Transaction Detail - Charts open traces experience',
+      async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
           await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
             params: transactionDetailParams,
@@ -210,6 +209,7 @@ spaceTest.describe.skip(
             timeout: CHART_LINK_CLICK_TIMEOUT,
           });
           await expectTracesExperienceEnabled(pageObjects);
+          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
           await page.goBack();
         });
 
@@ -228,6 +228,17 @@ spaceTest.describe.skip(
           await expectTracesExperienceEnabled(pageObjects);
           await page.goBack();
         });
+      }
+    );
+
+    spaceTest(
+      'Transaction Detail - Waterfall and span links open traces experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM transaction detail', async () => {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
+            params: transactionDetailParams,
+          });
+        });
 
         await spaceTest.step('"Open in Discover" button opens traces experience', async () => {
           await clickAndWaitForDiscover(page, 'apmWaterfallOpenInDiscoverButton');
@@ -244,11 +255,23 @@ spaceTest.describe.skip(
           await page.goBack();
           await pageObjects.tracesExperience.apm.dismissFlyout();
         });
+      }
+    );
+
+    spaceTest(
+      'Transaction Detail - Correlations open traces experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM transaction detail', async () => {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
+            params: transactionDetailParams,
+          });
+        });
 
         await spaceTest.step('Latency correlations opens traces experience', async () => {
           await page.testSubj.locator('apmLatencyCorrelationsTabButton').click();
           await clickAndWaitForDiscover(page, 'apmLatencyCorrelationsOpenInDiscoverButton');
           await expectTracesExperienceEnabled(pageObjects);
+          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
           await page.goBack();
         });
 
@@ -294,12 +317,6 @@ spaceTest.describe.skip(
     spaceTest(
       'Transaction Detail - Unified waterfall size warning "view in Discover" link opens traces experience',
       async ({ page, pageObjects }) => {
-        const transactionDetailParams = {
-          ...APM_TIME_RANGE,
-          transactionName: RICH_TRACE.TRANSACTION_NAME,
-          transactionType: 'request',
-        };
-
         await spaceTest.step(
           'intercept unified trace API to force exceedsMax condition',
           async () => {

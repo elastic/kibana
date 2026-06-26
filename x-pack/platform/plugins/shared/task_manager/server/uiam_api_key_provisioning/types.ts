@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CoreStart, ISavedObjectsRepository } from '@kbn/core/server';
+import type {
+  CoreStart,
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { TaskUiamProvisioningStatusDoc } from './lib/task_uiam_provisioning_observability_status';
 import type { TaskUserScope } from '../task';
@@ -59,7 +63,15 @@ export interface TaskApiKeyToConvertAttributes {
 export interface TaskManagerUiamProvisioningRunContext {
   coreStart: CoreStart;
   taskManager: TaskManagerStartContract;
+  /** Plain internal repository for reads and the non-encrypted provisioning status SO. */
   savedObjectsClient: ISavedObjectsRepository;
+  /**
+   * Encryption-aware client (carries the ESO encryption extension) for writes that
+   * touch encrypted attributes: the `task` `uiamApiKey` bulk update and the
+   * `api_key_to_invalidate` `uiamApiKey` bulk create. Using the plain repository for
+   * these would persist the secret unencrypted and break later decryption.
+   */
+  unsafeSavedObjectsClient: SavedObjectsClientContract;
   uiamConvert: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
 }
 

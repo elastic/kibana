@@ -172,7 +172,10 @@ describe('dashboardSmlType', () => {
         expect.objectContaining({
           type: 'dashboard',
           title: 'System Overview',
-          permissions: ['saved_object:dashboard/get'],
+          permissions: {
+            kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+            elasticsearch: { indices: [] },
+          },
         }),
       ],
     });
@@ -197,11 +200,15 @@ describe('dashboardSmlType', () => {
         type: 'dashboard',
         title: 'System Overview',
         origin_id: 'dashboard-1',
+        origin: { uri: 'dashboard://dashboard-1' },
         content: '...',
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
         spaces: ['default'],
-        permissions: ['saved_object:dashboard/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          elasticsearch: { indices: [] },
+        },
         ingestion_method: 'crawled',
       },
       {
@@ -255,11 +262,15 @@ describe('dashboardSmlType', () => {
         type: 'dashboard',
         title: 'API Lens Dashboard',
         origin_id: 'dashboard-2',
+        origin: { uri: 'dashboard://dashboard-2' },
         content: '...',
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
         spaces: ['default'],
-        permissions: ['saved_object:dashboard/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          elasticsearch: { indices: [] },
+        },
         ingestion_method: 'crawled',
       },
       {

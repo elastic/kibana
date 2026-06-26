@@ -29,12 +29,13 @@ import type {
   NotificationsStart,
   ScopedHistory,
 } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { addSpaceIdToPath, type Space } from '../../../common';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';

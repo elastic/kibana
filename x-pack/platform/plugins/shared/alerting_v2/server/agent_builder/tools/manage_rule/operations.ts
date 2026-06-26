@@ -13,12 +13,17 @@ import {
   metadataSchema,
   ruleKindSchema,
   scheduleSchema,
-  evaluationQuerySchema,
+  querySchema,
+  recoveryStrategySchema,
+  noDataStrategySchema,
+  getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
-  recoveryPolicySchema,
   isStateTransitionAllowed,
-  isRecoveryPolicyQueryProvided,
+  isSignalUsingStandaloneFormat,
+  isSignalQueryBreachOnly,
+  isRecoveryQueryConsistentWithStrategy,
+  isRecoveryQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 
@@ -41,8 +46,11 @@ export const setScheduleOperationSchema = scheduleSchema
   .partial()
   .extend({ operation: z.literal('set_schedule') });
 
-export const setQueryOperationSchema = evaluationQuerySchema.extend({
+export const setQueryOperationSchema = z.object({
   operation: z.literal('set_query'),
+  query: querySchema,
+  recovery_strategy: recoveryStrategySchema.optional(),
+  no_data_strategy: noDataStrategySchema.optional(),
 });
 
 export const setGroupingOperationSchema = groupingSchema.extend({
@@ -54,10 +62,6 @@ export const setStateTransitionOperationSchema = stateTransitionSchema
   .unwrap()
   .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') });
-
-export const setRecoveryPolicyOperationSchema = recoveryPolicySchema.extend({
-  operation: z.literal('set_recovery_policy'),
-});
 
 export const validateOperationSchema = z.object({
   operation: z.literal('validate'),
@@ -72,7 +76,6 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setQueryOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
-  setRecoveryPolicyOperationSchema,
   validateOperationSchema,
 ]);
 
@@ -170,18 +173,32 @@ export const executeRuleOperations = async (
         break;
       }
 
-      case 'set_query':
+      case 'set_query': {
         if (esClient) {
-          lastQueryColumns = await validateEsqlQuery(esClient, op.base);
+          lastQueryColumns = await validateEsqlQuery(esClient, getRootEsqlQuery(op.query));
         }
         next = {
           ...next,
-          evaluation: {
-            ...next.evaluation,
-            query: { base: op.base },
-          },
+          query: op.query,
+          ...(op.recovery_strategy !== undefined
+            ? { recovery_strategy: op.recovery_strategy }
+            : {}),
+          ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
         };
+
+        if (!isRecoveryQueryConsistentWithStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'query.recovery is only allowed when recovery_strategy is "query".'
+          );
+        }
+        if (!isRecoveryQueryProvidedForStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'recovery_strategy "query" requires a recovery block in the query ' +
+              '(recovery: { segment } for composed, recovery: { query } for standalone).'
+          );
+        }
         break;
+      }
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
@@ -218,16 +235,6 @@ export const executeRuleOperations = async (
         };
         break;
 
-      case 'set_recovery_policy':
-        next = {
-          ...next,
-          recovery_policy: {
-            type: op.type,
-            ...(op.query ? { query: op.query } : {}),
-          },
-        };
-        break;
-
       case 'validate': {
         const payload = buildRulePayload(next);
         const result = createRuleDataSchema.safeParse(payload);
@@ -254,9 +261,13 @@ export const executeRuleOperations = async (
     );
   }
 
-  if (!isRecoveryPolicyQueryProvided(next)) {
+  if (!isSignalUsingStandaloneFormat(next)) {
+    throw new RuleOperationValidationError('kind "signal" requires query.format "standalone".');
+  }
+
+  if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
-      'recovery_policy.query.base is required when recovery_policy.type is "query".'
+      'Signal rules cannot set recovery_strategy or no_data_strategy.'
     );
   }
 

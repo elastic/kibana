@@ -83,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
             isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
+            hasFrozenOrDeletePhase: false,
           });
         });
       });

@@ -38,6 +38,19 @@ export interface ServiceMapDagreLayoutFallbackParams {
   stack_head: string;
 }
 
+export interface ServiceMapAddedToDashboardParams {
+  /** True when the user opened the "new dashboard" flow vs picking an existing one. */
+  new_dashboard: boolean;
+  /** True when a service.name filter was attached to the panel state. */
+  has_service_name: boolean;
+  /** True when a KQL filter was attached (URL kuery + Controls + pills, captured at click time). */
+  has_kuery: boolean;
+  /** Number of view-filter chips (alerts + SLO + connection + anomaly) attached to the panel state. */
+  view_filter_count: number;
+  /** True when the new panel is configured to follow the dashboard's global filters. */
+  sync_with_dashboard_filters: boolean;
+}
+
 export type MetricsCalloutType = 'overlap' | 'non_overlap';
 
 export interface MetricsCalloutDateRangeSelectedParams {
@@ -57,6 +70,7 @@ export interface ITelemetryClient {
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
   reportSloInfoShown(): void;
   reportServiceMapDagreLayoutFallback(params: ServiceMapDagreLayoutFallbackParams): void;
+  reportServiceMapAddedToDashboard(params: ServiceMapAddedToDashboardParams): void;
   reportMetricsCalloutDateRangeSelected(params: MetricsCalloutDateRangeSelectedParams): void;
   reportMetricsCalloutLoaded(params: MetricsCalloutLoadedParams): void;
 }
@@ -68,6 +82,7 @@ export enum TelemetryEventTypes {
   SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
   SLO_INFO_SHOWN = 'slo_info_shown',
   SERVICE_MAP_DAGRE_LAYOUT_FALLBACK = 'service_map_dagre_layout_fallback',
+  SERVICE_MAP_ADDED_TO_DASHBOARD = 'service_map_added_to_dashboard',
   METRICS_CALLOUT_DATE_RANGE_SELECTED = 'metrics_callout_date_range_selected',
   METRICS_CALLOUT_LOADED = 'metrics_callout_loaded',
 }
@@ -93,6 +108,10 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.SERVICE_MAP_DAGRE_LAYOUT_FALLBACK;
       schema: RootSchema<ServiceMapDagreLayoutFallbackParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.SERVICE_MAP_ADDED_TO_DASHBOARD;
+      schema: RootSchema<ServiceMapAddedToDashboardParams>;
     }
   | {
       eventType: TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED;

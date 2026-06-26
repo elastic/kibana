@@ -20,6 +20,7 @@ import type { StartServices } from '../../../../types';
 import { isTimelineScope } from '../../../../helpers';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
+import { buildIncludeNullFilter } from './utils';
 
 export const createFilterOutCellActionFactory = ({
   services,
@@ -63,6 +64,23 @@ export const createFilterOutCellActionFactory = ({
       }
 
       if (!fieldName) return;
+
+      const fm =
+        metadata?.scopeId && isTimelineScope(metadata.scopeId)
+          ? timelineFilterManager
+          : filterManager;
+
+      if (metadata?.includeNullValues) {
+        fm.addFilters([
+          buildIncludeNullFilter({
+            fieldName,
+            dataViewId,
+            value,
+            negate: metadata?.negateFilters !== true,
+          }),
+        ]);
+        return;
+      }
 
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterIn with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterIn : addFilterOut;

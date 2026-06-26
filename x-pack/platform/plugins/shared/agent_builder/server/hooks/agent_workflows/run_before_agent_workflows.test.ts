@@ -13,10 +13,10 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus } from '@kbn/workflows';
 import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
-import { executeWorkflow } from '../../services/workflow/execute_workflow';
+import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
-jest.mock('../../services/workflow/execute_workflow', () => ({
+jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   executeWorkflow: jest.fn(),
 }));
 

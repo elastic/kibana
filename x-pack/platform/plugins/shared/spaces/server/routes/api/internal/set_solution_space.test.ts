@@ -40,9 +40,7 @@ describe('PUT /internal/spaces/space/{id}/solution', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup({
-      basePath: httpService.basePath,
-    });
+    service.setup();
 
     const clientServiceStart = clientService.start(
       coreStart,
@@ -51,7 +49,6 @@ describe('PUT /internal/spaces/space/{id}/solution', () => {
     );
 
     const spacesServiceStart = service.start({
-      basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
 

@@ -7,7 +7,6 @@
 
 import type {
   ActionPolicyBulkAction,
-  ActionPolicyDestinationType,
   ActionPolicyResponse,
   CreateActionPolicyDataInput,
   MatchedActionPolicy,
@@ -48,12 +47,8 @@ export interface FindActionPoliciesParams {
   page?: number;
   perPage?: number;
   search?: string;
-  destinationType?: ActionPolicyDestinationType;
-  createdBy?: string;
   enabled?: boolean;
   tags?: string[];
-  ruleId?: string;
-  type?: 'global' | 'single_rule';
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }

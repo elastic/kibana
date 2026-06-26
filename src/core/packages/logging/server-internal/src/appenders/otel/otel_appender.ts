@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createSecureContext } from 'tls';
 import { isNil } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Ecs } from '@elastic/ecs';
@@ -155,15 +156,15 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     if (id !== undefined) attrs['service.id'] = id;
     // Flatten anything that we don't know about into the service object (ideally, nothing).
     Object.entries(getFlattenedObject(serviceRest)).forEach(([key, value]) => {
-      attrs[key] = value;
+      attrs[`service.${key}`] = value;
     });
 
-    // Flatten non-service meta into individual OTel attributes prefixed with
-    // kibana.log.meta. so they are discoverable as flat fields in backends.
+    // Flatten non-service meta into individual OTel attributes so they are
+    // discoverable as flat fields in backends.
     // Only included for pattern layout: with JSON layout the meta is part of
     // the structured body and repeating it here would be redundant.
     Object.entries(getFlattenedObject(metaRest)).forEach(([key, value]) => {
-      attrs[`kibana.log.meta.${key}`] = value as AttributeValue;
+      attrs[key] = value as AttributeValue;
     });
   }
 
@@ -209,6 +210,7 @@ export class OtelAppender implements DisposableAppender {
             [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
             { defaultValue: 'full' }
           ),
+          allowPartialTrustChain: schema.boolean({ defaultValue: true }),
         },
         {
           validate: (raw) => {
@@ -344,10 +346,14 @@ const createExporter = (
         metadata,
         ...(tls
           ? {
-              credentials: credentials.createSsl(
-                toGrpcRootCerts(tls),
-                tls.key ?? null,
-                tls.cert ?? null,
+              // Using createFromSecureContext instead of createSsl because createSsl does not support allowPartialTrustChain.
+              credentials: credentials.createFromSecureContext(
+                createSecureContext({
+                  ca: toGrpcRootCerts(tls),
+                  key: tls.key,
+                  cert: tls.cert,
+                  allowPartialTrustChain: tls.allowPartialTrustChain,
+                }),
                 buildGrpcVerifyOptions(tls)
               ),
             }

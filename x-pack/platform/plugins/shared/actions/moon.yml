@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/actions-types'
   - '@kbn/core-http-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-application-common'
