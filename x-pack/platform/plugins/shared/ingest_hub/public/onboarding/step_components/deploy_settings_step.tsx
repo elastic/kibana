@@ -39,7 +39,8 @@ export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepPro
   }, [selectedServiceIds]);
 
   // Fetch IAM permissions from the server endpoint.
-  const { data: iamPermissions, error: iamPermissionsError } = useIamPermissions(selectedServiceIds);
+  const { data: iamPermissions, error: iamPermissionsError } =
+    useIamPermissions(selectedServiceIds);
 
   // Display names for the per-service toggle in the permissions viewer dropdown.
   const viewerServices = useMemo(
