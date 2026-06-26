@@ -10,7 +10,11 @@ import { schema } from '@kbn/config-schema';
 import type { ILicenseState } from '../lib';
 import type { ActionsRequestHandlerContext } from '../types';
 import type { GetGlobalExecutionLogParams, RewriteRequestCase } from '../../common';
-import { INTERNAL_BASE_ACTION_API_PATH, ISO_DATE_MAX_LENGTH } from '../../common';
+import {
+  INTERNAL_BASE_ACTION_API_PATH,
+  ISO_DATE_MAX_LENGTH,
+  MAX_EXECUTION_FILTER_LENGTH,
+} from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { rewriteNamespaces } from './rewrite_namespaces';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
@@ -31,11 +35,11 @@ const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
 const bodySchema = schema.object({
   date_start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
   date_end: schema.maybe(schema.string({ maxLength: ISO_DATE_MAX_LENGTH })),
-  filter: schema.maybe(schema.string({ maxLength: 8192 })),
+  filter: schema.maybe(schema.string({ maxLength: MAX_EXECUTION_FILTER_LENGTH })),
   per_page: schema.number({ defaultValue: 10, min: 1, max: 100 }),
   page: schema.number({ defaultValue: 1, min: 1, max: 1000 }),
   sort: sortFieldsSchema,
-  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
+  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 })),
 });
 
 const rewriteBodyReq: RewriteRequestCase<GetGlobalExecutionLogParams> = ({
