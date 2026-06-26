@@ -7,24 +7,54 @@
 
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
-import { evaluate } from '../../src/evaluate';
+import { evaluate as base } from '../../src/evaluate';
+import type { EvaluateDataset } from '../../src/evaluate_dataset';
+import { createEvaluateDataset } from '../../src/evaluate_dataset';
 
 /**
- * Deterministic precision eval for the `recommend-prebuilt-rules` skill:
- * when the user asks for rules covering a MITRE tactic, every rule the skill
- * surfaces from the installable catalog must actually cover that tactic.
+ * Evals for the `recommend-prebuilt-rules` skill. Two kinds live in this file:
  *
- * This is a programmatic check (raw `converse` + `expect`), not an LLM-judge
- * dataset example — the claim is structural and reads straight off the
- * `security.find_prebuilt_rules` tool call (its `params` and `results`).
+ * 1. Deterministic precision/grounding checks (raw `converse` + `expect`): when
+ *    the user asks for rules covering a MITRE tactic, every rule the skill
+ *    surfaces from the installable catalog must actually cover that tactic, etc.
+ *    The claims are structural and read straight off the
+ *    `security.find_prebuilt_rules` tool call (its `params` and `results`).
+ *
+ * 2. Skill-routing / boundary checks (LLM-judge dataset examples via
+ *    `evaluateDataset`): the agent must invoke this skill for install / browse /
+ *    coverage questions about *not-yet-installed* prebuilt rules, and must NOT
+ *    invoke it for rule-adjacent questions that belong to a sibling skill
+ *    (already-installed rules -> `find-security-rules`, editing a rule ->
+ *    `detection-rule-edit`, ML jobs -> `find-security-ml-jobs`, alert triage ->
+ *    `alert-analysis`). These answer "can the agent distinguish when to call
+ *    this skill vs. others?" and mirror the find-rules "Boundaries" suite.
  *
  * Requirements for the eval target Kibana:
  * - Start with the `dexAiSkillRecommendPrebuiltRules` experimental flag enabled
  *   (`xpack.securitySolution.enableExperimental`), otherwise the skill is never
  *   registered and the agent cannot route to it.
+ * - The boundary examples that route to `find-security-rules` also require the
+ *   `dexAiSkillFindRules` flag, so that sibling skill is registered too.
  * - The bundled `security_detection_engine` package is installed in `beforeAll`
  *   to populate the installable catalog (see below).
  */
+
+const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
+  evaluateDataset: [
+    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+      use(
+        createEvaluateDataset({
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        })
+      );
+    },
+    { scope: 'test' },
+  ],
+});
 
 // Tactic under test. The ID is stable across MITRE and rule-package versions, so
 // we assert on it rather than rule names/counts. Defense Evasion (TA0005) is one
@@ -327,6 +357,211 @@ evaluate.describe(
           .filter((rule) => !relatesToIntegration(rule, INTEGRATION_PACKAGE))
           .map((rule) => rule?.name ?? '<unknown>');
         expect(unrelated).toEqual([]);
+      }
+    );
+  }
+);
+
+// Positive routing: install / browse / coverage questions about not-yet-installed
+// prebuilt rules must activate `recommend-prebuilt-rules`. Each phrasing is one the
+// router could plausibly mistake for the installed-rules skill, so a green here is
+// evidence the agent picks THIS skill for catalog/recommendation intent.
+evaluate.describe(
+  'Security Skills - Recommend Prebuilt Rules Routing',
+  { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
+  () => {
+    evaluate.beforeAll(async ({ kbnClient, log }) => {
+      log.info(
+        '[recommend-prebuilt-rules routing eval] Installing bundled security_detection_engine package...'
+      );
+      await kbnClient.request({
+        path: FLEET_BULK_INSTALL_PATH,
+        method: 'POST',
+        query: { prerelease: true },
+        headers: { 'elastic-api-version': '2023-10-31' },
+        body: { packages: ['security_detection_engine'], force: false },
+      });
+      log.info('[recommend-prebuilt-rules routing eval] Package install complete');
+    });
+
+    evaluate(
+      'install / browse / coverage queries activate the recommend-prebuilt-rules skill',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: security-recommend-prebuilt-rules-routing',
+            description:
+              'Validates that install, browse, count, and coverage-gap questions about ' +
+              'not-yet-installed prebuilt rules activate the recommend-prebuilt-rules skill ' +
+              '(and not a sibling rules skill).',
+            examples: [
+              {
+                input: {
+                  question: 'What new detection rules should I install to improve my coverage?',
+                },
+                output: {
+                  expected:
+                    'I will recommend Elastic prebuilt detection rules to install, after looking at the data sources you have and where your installed coverage is thin, and present the recommended rules by name so you can install them from the Add Elastic Rules page.',
+                },
+                metadata: {
+                  query_intent: 'Install Recommendation',
+                  expectedSkill: 'recommend-prebuilt-rules',
+                },
+              },
+              {
+                input: {
+                  question:
+                    'I just set up the Okta integration. Which Elastic prebuilt rules can I install for it?',
+                },
+                output: {
+                  expected:
+                    'I will search the installable prebuilt rule catalog for rules whose related integrations include Okta and recommend the ones worth installing for that integration.',
+                },
+                metadata: {
+                  query_intent: 'Integration Recommendation',
+                  expectedSkill: 'recommend-prebuilt-rules',
+                },
+              },
+              {
+                input: {
+                  question:
+                    'Which MITRE ATT&CK tactics am I not yet covering, and what rules can I add to close those gaps?',
+                },
+                output: {
+                  expected:
+                    'I will compare the MITRE coverage of my installed rules against the installable catalog and recommend prebuilt rules to install that close the uncovered tactics.',
+                },
+                metadata: {
+                  query_intent: 'Coverage Gap',
+                  expectedSkill: 'recommend-prebuilt-rules',
+                },
+              },
+              {
+                input: {
+                  question:
+                    'How many critical-severity prebuilt rules are available for me to install?',
+                },
+                output: {
+                  expected:
+                    'I will count the not-yet-installed prebuilt rules in the installable catalog that have critical severity and report the total.',
+                },
+                metadata: {
+                  query_intent: 'Catalog Browse/Count',
+                  expectedSkill: 'recommend-prebuilt-rules',
+                },
+              },
+              {
+                input: {
+                  question: 'Are there any machine learning detection rules I can install?',
+                },
+                output: {
+                  expected:
+                    'I will search the installable catalog for prebuilt rules of type machine_learning and recommend the ones available to install. This is about installable detection rules, not the anomaly-detection jobs themselves.',
+                },
+                metadata: {
+                  query_intent: 'Catalog Browse',
+                  expectedSkill: 'recommend-prebuilt-rules',
+                },
+              },
+            ],
+          },
+        });
+      }
+    );
+  }
+);
+
+// Boundaries (the distinction Anish asked about): queries that share rules/prebuilt
+// vocabulary but concern already-installed rules, rule editing, ML jobs, or alert
+// triage must NOT activate recommend-prebuilt-rules — they belong to a sibling skill.
+// The first example uses `shouldNotActivateSkill` (it only asserts this skill stays
+// out, so it holds regardless of which sibling is registered); the rest assert the
+// correct sibling via `expectedSkill`, mirroring the find-rules "Boundaries" suite.
+evaluate.describe(
+  'Security Skills - Recommend Prebuilt Rules Boundaries',
+  { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
+  () => {
+    evaluate(
+      'rule-adjacent queries do NOT activate recommend-prebuilt-rules and route to the correct sibling skill',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: security-recommend-prebuilt-rules-distractors',
+            description:
+              'Distractor queries that touch rules/prebuilt vocabulary but concern ' +
+              'already-installed rules, rule editing, ML jobs, or alert triage, and should ' +
+              'activate a sibling skill (find-security-rules, detection-rule-edit, ' +
+              'find-security-ml-jobs, alert-analysis) rather than recommend-prebuilt-rules.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'How many prebuilt detection rules do I already have installed and enabled?',
+                },
+                output: {
+                  expected:
+                    'I will count the prebuilt rules currently installed and enabled on this deployment by querying the installed rule inventory. This is about already-installed rules, not the installable catalog.',
+                },
+                metadata: {
+                  query_intent: 'Installed Rule Count',
+                  shouldNotActivateSkill: 'recommend-prebuilt-rules',
+                },
+              },
+              {
+                input: {
+                  question:
+                    'List all the detection rules I currently have enabled, with their severities.',
+                },
+                output: {
+                  expected:
+                    'I will list the detection rules currently enabled on this deployment along with their severities by querying the installed rule inventory.',
+                },
+                metadata: {
+                  query_intent: 'Installed Rule Discovery',
+                  expectedSkill: 'find-security-rules',
+                },
+              },
+              {
+                input: {
+                  question: "Disable the 'Suspicious PowerShell Execution' detection rule.",
+                },
+                output: {
+                  expected: 'I will disable the detection rule "Suspicious PowerShell Execution".',
+                },
+                metadata: {
+                  query_intent: 'Rule Editing',
+                  expectedSkill: 'detection-rule-edit',
+                },
+              },
+              {
+                input: {
+                  question: 'Which security machine learning jobs are currently running?',
+                },
+                output: {
+                  expected:
+                    'I will list the security machine learning anomaly-detection jobs and report which ones are currently running. This is about the ML jobs themselves, not installable detection rules.',
+                },
+                metadata: {
+                  query_intent: 'ML Jobs',
+                  expectedSkill: 'find-security-ml-jobs',
+                },
+              },
+              {
+                input: {
+                  question: 'Help me triage alert abc-123 and check for related activity.',
+                },
+                output: {
+                  expected:
+                    'I will triage alert abc-123 by fetching its details and looking at related alerts and activity.',
+                },
+                metadata: {
+                  query_intent: 'Alert Triage',
+                  expectedSkill: 'alert-analysis',
+                },
+              },
+            ],
+          },
+        });
       }
     );
   }
