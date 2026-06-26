@@ -39,7 +39,6 @@ export interface EnrichedEntity {
   entity: Entity;
   fields?: SearchHit['fields'];
   riskScore?: EntityRiskScoreRecord;
-  resolutionRiskScore?: EntityRiskScoreRecord;
   anomalies?: AnomalyRecord[];
   vulnerabilities?: SearchHit[];
   vulnerabilitiesTotal?: Record<string, number>;
