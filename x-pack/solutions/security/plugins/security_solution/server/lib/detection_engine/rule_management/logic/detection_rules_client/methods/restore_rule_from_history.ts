@@ -84,7 +84,7 @@ export const restoreRuleFromHistory = async ({
         exceptions_list: snapshotRule.exceptions_list,
         note: snapshotRule.note,
         investigation_fields: snapshotRule.investigation_fields,
-        enabled: snapshotRule.enabled,
+        enabled: false,
       },
       rulesAuthz
     );
@@ -94,7 +94,7 @@ export const restoreRuleFromHistory = async ({
         ...convertRuleResponseToAlertingRule(snapshotRule, actionsClient),
         alertTypeId: ruleTypeMappings[snapshotRule.type],
         consumer: SERVER_APP_ID,
-        enabled: snapshotRule.enabled ?? false,
+        enabled: false,
       },
       options: { id: ruleId },
       changeTracking: {
