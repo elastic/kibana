@@ -24,6 +24,8 @@ export type {
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
   AppHeaderTab,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
   ChromeNext,
