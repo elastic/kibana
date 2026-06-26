@@ -12,6 +12,7 @@ import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
 import type { LegacyMetricState, VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import { getLegacyMetricDataBounds } from '@kbn/expression-legacy-metric-vis-plugin/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
 import { defaultPaletteParams } from './palette_config';
@@ -34,11 +35,8 @@ export function MetricDimensionEditor(
   const currentColorMode = state?.colorMode || ColorMode.None;
   const hasDynamicColoring = currentColorMode !== ColorMode.None;
 
-  const currentMinMax = {
-    min: Math.min(firstRow[accessor] * 2, firstRow[accessor] === 0 ? -50 : 0),
-    // if value is 0, then fallback to 100 as last resort
-    max: Math.max(firstRow[accessor] * 2, firstRow[accessor] === 0 ? 100 : 0),
-  };
+  const dataBounds = getLegacyMetricDataBounds(accessor, currentData);
+  const currentMinMax = firstRow[accessor] === 0 ? { min: -50, max: 100 } : dataBounds;
 
   const activePalette =
     state?.palette ||
