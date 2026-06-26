@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import type { Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
@@ -94,20 +95,10 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   // small pill after 5s. Persisted in localStorage so the choice sticks
   // across reloads.
   const HIDE_CONTROLS_MENU_KEY = 'workflowsUi.bottomBar.hideControlsMenu';
-  const [hideControlsMenu, setHideControlsMenu] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    const stored = window.localStorage.getItem(HIDE_CONTROLS_MENU_KEY);
-    return stored === null ? true : stored === 'true';
-  });
-  const handleHideControlsMenuChange = useCallback((next: boolean) => {
-    setHideControlsMenu(next);
-    try {
-      window.localStorage.setItem(HIDE_CONTROLS_MENU_KEY, String(next));
-    } catch {
-      // localStorage may be unavailable (private mode, quota); silently skip —
-      // the in-memory state still drives the bar for this session.
-    }
-  }, []);
+  const [hideControlsMenu, handleHideControlsMenuChange] = useLocalStorage<boolean>(
+    HIDE_CONTROLS_MENU_KEY,
+    true
+  );
 
   const dispatch = useDispatch();
 
