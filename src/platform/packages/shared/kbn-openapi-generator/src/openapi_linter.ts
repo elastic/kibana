@@ -10,7 +10,7 @@
 /* eslint-disable no-console */
 
 import { resolve } from 'path';
-import globby from 'globby';
+import { globby } from 'globby';
 import execa from 'execa';
 import chalk from 'chalk';
 import { REPO_ROOT } from '@kbn/repo-info';

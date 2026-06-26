@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { dirname, resolve } from 'path';
-import * as globby from 'globby';
+import { globbySync } from 'globby';
 import { getKibanaDir } from '#pipeline-utils';
 
 const TEST_FILE_PATTERNS = ['**/*.test.{ts,tsx,js,jsx,mjs}', '**/*.spec.{ts,tsx,js,jsx,mjs}'];
@@ -35,7 +35,7 @@ function getIgnorePatterns(): string[] {
  */
 function hasTestFiles(configAbsPath: string): boolean {
   const dir = dirname(configAbsPath);
-  const matches = globby.sync(TEST_FILE_PATTERNS, {
+  const matches = globbySync(TEST_FILE_PATTERNS, {
     cwd: dir,
     ignore: getIgnorePatterns(),
     onlyFiles: true,

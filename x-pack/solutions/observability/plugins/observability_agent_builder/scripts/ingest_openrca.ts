@@ -45,7 +45,7 @@
 
 import { createReadStream, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join, resolve as resolvePath } from 'node:path';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import Papa from 'papaparse';
 import type { Client } from '@elastic/elasticsearch';
 import {
@@ -239,8 +239,7 @@ function discoverCases(dataDir: string): string[] {
     for (const root of config.telemetryRoots) {
       const telDir = join(dataDir, root, 'telemetry');
       if (!existsSync(telDir)) continue;
-      const dates = globby
-        .sync(join(telDir, '*'), { onlyDirectories: true })
+      const dates = globbySync(join(telDir, '*'), { onlyDirectories: true })
         .map((d) => d.split('/').pop()!)
         .filter(Boolean)
         .sort();
@@ -261,7 +260,7 @@ function discoverLogFiles(dataDir: string, config: SystemConfig, dateFilter?: st
   const patterns = config.telemetryRoots.map((root) =>
     join(dataDir, root, 'telemetry', dateGlob, 'log', '*.csv')
   );
-  return globby.sync(patterns).sort();
+  return globbySync(patterns).sort();
 }
 
 // ---------------------------------------------------------------------------
@@ -273,7 +272,7 @@ function discoverMetricFiles(dataDir: string, config: SystemConfig, dateFilter?:
   const patterns = config.telemetryRoots.map((root) =>
     join(dataDir, root, 'telemetry', dateGlob, 'metric', '*.csv')
   );
-  return globby.sync(patterns).sort();
+  return globbySync(patterns).sort();
 }
 
 // ---------------------------------------------------------------------------
@@ -285,7 +284,7 @@ function discoverTraceFiles(dataDir: string, config: SystemConfig, dateFilter?: 
   const patterns = config.telemetryRoots.map((root) =>
     join(dataDir, root, 'telemetry', dateGlob, 'trace', '*.csv')
   );
-  return globby.sync(patterns).sort();
+  return globbySync(patterns).sort();
 }
 
 // ---------------------------------------------------------------------------

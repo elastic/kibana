@@ -17,7 +17,7 @@ import { createGunzip, createGzip } from 'zlib';
 import { inspect } from 'util';
 
 import archiver from 'archiver';
-import globby from 'globby';
+import { globby } from 'globby';
 import cpy from 'cpy';
 import del from 'del';
 import * as tar from 'tar';

@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import globby from 'globby';
+import { globby } from 'globby';
 
 import { ascending } from '../common';
 

@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import * as globby from 'globby';
+import { globbySync } from 'globby';
 
 const REPO_ROOT = path.resolve(__dirname, '../../..');
 
@@ -20,7 +20,7 @@ const REPO_ROOT = path.resolve(__dirname, '../../..');
 const COVERED_EXTENSIONS = /\.(test|spec)\.(ts|tsx|js|jsx|mjs)$/;
 
 describe('filterEmptyJestConfigs glob coverage', () => {
-  const allConfigs = globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
+  const allConfigs = globbySync(['**/jest.config.js', '!**/__fixtures__/**'], {
     cwd: REPO_ROOT,
     absolute: true,
     ignore: ['**/node_modules/**'],

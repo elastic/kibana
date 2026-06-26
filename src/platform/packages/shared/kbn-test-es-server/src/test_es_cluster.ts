@@ -11,7 +11,7 @@ import Path from 'path';
 import { format } from 'url';
 import del from 'del';
 import { v4 as uuidv4 } from 'uuid';
-import globby from 'globby';
+import { globby } from 'globby';
 import createArchiver from 'archiver';
 import Fs from 'fs';
 import { pipeline } from 'stream/promises';

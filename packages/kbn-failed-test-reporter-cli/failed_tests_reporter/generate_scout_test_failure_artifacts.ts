@@ -12,7 +12,7 @@ import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createHash } from 'crypto';
 import fs from 'fs';
-import globby from 'globby';
+import { globby } from 'globby';
 import type { BuildkiteMetadata } from './buildkite_metadata';
 
 const SCOUT_TEST_FAILURE_DIR_PATTERN = '.scout/reports/scout-playwright-test-failures-*';

@@ -12,7 +12,7 @@ import Path from 'path';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import globby from 'globby';
+import { globby } from 'globby';
 import { asyncForEachWithLimit } from '@kbn/std';
 import { CACHE_IGNORE_GLOBS, TYPES_DIRECTORY_GLOB, TYPE_CHECK_CONFIG_GLOB } from './constants';
 export type { ArchiveMetadata } from './file_system/types';

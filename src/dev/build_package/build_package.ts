@@ -12,7 +12,7 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import execa from 'execa';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -146,7 +146,7 @@ async function copySources({
   targetDir: string;
   files: { include: string[]; exclude?: string[] };
 }) {
-  const allFiles = globby.sync(files.include, {
+  const allFiles = globbySync(files.include, {
     cwd: root,
     ignore: files.exclude,
     dot: false,

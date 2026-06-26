@@ -43,7 +43,7 @@
 
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import {
   type BaseArgs,
   type DatasetId,
@@ -183,8 +183,7 @@ function discoverCases(dataDir: string, filterCase?: string): CaseInfo[] {
     ? join(dataDir, filterCase.split('/')[0], filterCase.split('/')[1] ?? '*', 'logs.csv')
     : join(dataDir, '*', '*', 'logs.csv');
 
-  return globby
-    .sync(pattern)
+  return globbySync(pattern)
     .sort()
     .map((logsFile) => {
       const casePath = dirname(logsFile);
