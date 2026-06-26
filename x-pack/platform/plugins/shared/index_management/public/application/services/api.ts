@@ -56,6 +56,10 @@ interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
 }
 
+interface SyntheticSourceStatus {
+  syntheticSourceFallbackToStoredSource: boolean;
+}
+
 // Temporary hack to provide the uiMetricService and reindexService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
 let uiMetricService: UiMetricService;
@@ -332,6 +336,12 @@ export async function loadIndexSettings(indexName: string) {
     `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
   );
   return response;
+}
+
+export async function loadSyntheticSourceStatus(): Promise<SyntheticSourceStatus> {
+  return await httpService.httpClient.get<SyntheticSourceStatus>(
+    `${API_BASE_PATH}/synthetic_source`
+  );
 }
 
 export async function updateIndexSettings(indexName: string, body: object) {

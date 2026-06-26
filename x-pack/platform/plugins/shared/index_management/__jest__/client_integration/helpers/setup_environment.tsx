@@ -137,7 +137,7 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
     settings: settingsServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     kibanaVersion,
-    canUseSyntheticSource: false,
+    hasAtLeastEnterpriseLicense: false,
   };
 };
 

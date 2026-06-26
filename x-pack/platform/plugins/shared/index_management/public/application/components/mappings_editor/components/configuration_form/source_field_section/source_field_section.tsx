@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiCallOut, EuiText } from '@elastic/eui';
 
-import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services/documentation';
 import { UseField, FormDataProvider, FormRow, SuperSelectField } from '../../../shared_imports';
 import type { ComboBoxOption } from '../../../types';
@@ -21,9 +20,13 @@ import { STORED_SOURCE_OPTION, DISABLED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION }
 import type { IndexMode } from '../../../../../../../common/types/data_streams';
 import { LOGSDB_INDEX_MODE } from '../../../../../../../common/constants';
 
-export const SourceFieldSection = ({ indexMode }: { indexMode?: IndexMode }) => {
-  const { canUseSyntheticSource } = useAppContext();
-
+export const SourceFieldSection = ({
+  canUseSyntheticSource,
+  indexMode,
+}: {
+  canUseSyntheticSource: boolean;
+  indexMode?: IndexMode;
+}) => {
   const renderOptionDropdownDisplay = (option: SourceOptionKey) => (
     <Fragment>
       <strong>{sourceOptionLabels[option]}</strong>
