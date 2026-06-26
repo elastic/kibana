@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
@@ -55,13 +55,19 @@ const WorkflowLink = ({ id, name, isDraft }: { id: string; name: string; isDraft
   }
 
   return (
-    <EuiLink
-      href={application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${id}` })}
-      target="_blank"
-      rel="noopener noreferrer"
+    <EuiToolTip
+      content={name}
+      position="top"
+      anchorProps={{ css: { display: 'contents' } }}
     >
-      {name}
-    </EuiLink>
+      <EuiLink
+        href={application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${id}` })}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {name}
+      </EuiLink>
+    </EuiToolTip>
   );
 };
 
