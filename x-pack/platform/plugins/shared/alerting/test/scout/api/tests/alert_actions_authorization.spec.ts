@@ -7,7 +7,7 @@
 
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { RoleApiCredentials, ScoutTestConfig } from '@kbn/scout';
+import type { EsClient, RoleApiCredentials, ScoutTestConfig } from '@kbn/scout';
 import { COMMON_HEADERS } from '../fixtures/constants';
 import { waitForSuccessfulEventLogEntry } from '../lib/wait_for_successful_event_log';
 
@@ -52,13 +52,7 @@ apiTest.describe(
     let ruleId: string;
     let connectorId: string;
 
-    const getAlertAttrs = async (esClient: {
-      search: (params: {
-        index: string;
-        query: Record<string, unknown>;
-        size: number;
-      }) => Promise<{ hits: { hits: Array<{ _source?: unknown }> } }>;
-    }) => {
+    const getAlertAttrs = async (esClient: EsClient) => {
       const result = await esClient.search({
         index: '.kibana_alerting_cases*',
         query: { term: { _id: `alert:${ruleId}` } },
