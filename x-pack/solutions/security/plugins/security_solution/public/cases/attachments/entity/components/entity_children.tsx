@@ -16,7 +16,7 @@ import {
   ENTITY_RISK_LEVEL_TEST_ID,
   ENTITY_RISK_SCORE_TEST_ID,
   ENTITY_TYPE_TEST_ID,
-} from './test_ids';
+} from '../../../../../common/cases/attachments/entity/test_ids';
 
 export interface EntityChildrenProps {
   /**

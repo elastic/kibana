@@ -14,7 +14,7 @@ import {
   ENTITY_TAB_EMPTY_TEST_ID,
   ENTITY_TAB_NO_PRIVILEGES_TEST_ID,
   ENTITY_TAB_TABLE_TEST_ID,
-} from './test_ids';
+} from '../../../../../common/cases/attachments/entity/test_ids';
 import {
   DataViewContext,
   EntitiesTableSection,

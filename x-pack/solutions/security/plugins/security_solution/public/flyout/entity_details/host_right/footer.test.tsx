@@ -12,7 +12,7 @@ import { HostPanelFooter } from './footer';
 import {
   ADD_TO_NEW_CASE_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
-} from '../../../cases/attachments/entity/components/test_ids';
+} from '../../../../common/cases/attachments/entity/test_ids';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
 jest.mock('@kbn/entity-store/public', () => ({

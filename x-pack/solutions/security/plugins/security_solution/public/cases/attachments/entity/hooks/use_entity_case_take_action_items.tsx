@@ -11,7 +11,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityToAttach } from '..';
 import { AddToNewCase } from '../components/add_to_new_case';
 import { AddToExistingCase } from '../components/add_to_existing_case';
-import { ADD_TO_NEW_CASE_TEST_ID, ADD_TO_EXISTING_CASE_TEST_ID } from '../components/test_ids';
+import {
+  ADD_TO_NEW_CASE_TEST_ID,
+  ADD_TO_EXISTING_CASE_TEST_ID,
+} from '../../../../../common/cases/attachments/entity/test_ids';
 import { useEntityCasePermissions } from './use_case_permission';
 
 /**

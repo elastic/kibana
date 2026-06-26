@@ -6,6 +6,12 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
+import {
+  ADD_TO_NEW_CASE_TEST_ID,
+  ADD_TO_EXISTING_CASE_TEST_ID,
+  ENTITY_TAB_TABLE_TEST_ID,
+  ENTITY_TAB_EMPTY_TEST_ID,
+} from '../../../../../common/cases/attachments/entity/test_ids';
 
 /**
  * Page object for entity attachment Cases UI interactions:
@@ -38,12 +44,12 @@ export class EntityCasesPage {
     this.alertsTable = page.testSubj.locator('alertsTableIsLoaded');
 
     this.takeActionButton = page.testSubj.locator('take-action-button');
-    this.addToNewCaseItem = page.testSubj.locator('eaCasesAddToNewCase');
-    this.addToExistingCaseItem = page.testSubj.locator('eaCasesAddToExistingCase');
+    this.addToNewCaseItem = page.testSubj.locator(ADD_TO_NEW_CASE_TEST_ID);
+    this.addToExistingCaseItem = page.testSubj.locator(ADD_TO_EXISTING_CASE_TEST_ID);
 
     this.entitiesTab = page.testSubj.locator('case-view-tab-title-entities');
-    this.entityTabTable = page.testSubj.locator('eaCasesEntityTabTable');
-    this.entityTabEmpty = page.testSubj.locator('eaCasesEntityTabEmpty');
+    this.entityTabTable = page.testSubj.locator(ENTITY_TAB_TABLE_TEST_ID);
+    this.entityTabEmpty = page.testSubj.locator(ENTITY_TAB_EMPTY_TEST_ID);
 
     // Scope to the Cases plugin's stable `caseTitle` form row, then the single
     // `<input>` within it — avoids matching stray `data-test-subj="input"` fields

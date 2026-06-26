@@ -10,7 +10,10 @@ import { render } from '@testing-library/react';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { EntityAttachmentPayload } from '../../../../../common/cases/attachments/entity';
 import AttachmentChildren from './attachment_children';
-import { ENTITY_NAME_TEST_ID, ENTITY_TYPE_TEST_ID } from './test_ids';
+import {
+  ENTITY_NAME_TEST_ID,
+  ENTITY_TYPE_TEST_ID,
+} from '../../../../../common/cases/attachments/entity/test_ids';
 import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
 
 type Props = UnifiedReferenceAttachmentViewProps<

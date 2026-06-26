@@ -14,7 +14,7 @@ import {
   ENTITY_TAB_EMPTY_TEST_ID,
   ENTITY_TAB_NO_PRIVILEGES_TEST_ID,
   ENTITY_TAB_TABLE_TEST_ID,
-} from './test_ids';
+} from '../../../../../common/cases/attachments/entity/test_ids';
 import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
 import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { useEntityStoreDataView } from '../../../../entity_analytics/components/home/use_entity_store_data_view';
