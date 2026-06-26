@@ -21,9 +21,13 @@ const cartTitle = (count: number) =>
 
 export interface AttachmentCartPanelProps {
   onClose: () => void;
+  squareBottomCorners?: boolean;
 }
 
-export const AttachmentCartPanel: React.FC<AttachmentCartPanelProps> = ({ onClose }) => {
+export const AttachmentCartPanel: React.FC<AttachmentCartPanelProps> = ({
+  onClose,
+  squareBottomCorners = false,
+}) => {
   const { euiTheme } = useEuiTheme();
   const attachmentCount = useActiveConversationAttachmentCount();
 
@@ -37,10 +41,11 @@ export const AttachmentCartPanel: React.FC<AttachmentCartPanelProps> = ({ onClos
   return (
     <>
       <AttachmentHeader
-        icon="folder"
+        icon="paperClip"
         title={cartTitle(attachmentCount)}
         onClose={onClose}
         previewBadgeState="none"
+        squareBottomCorners={squareBottomCorners}
       />
       <div css={bodyStyles}>
         <AttachmentCartGrid />

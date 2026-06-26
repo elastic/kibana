@@ -324,6 +324,12 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       ) !important;
     }
 
+    /* Agent Builder nav sidebar: square right edge against conversation column */
+    ${scope} .kbnChromeLayoutAgent [aria-label='Agent Builder navigation'] {
+      border-start-end-radius: 0 !important;
+      border-end-end-radius: 0 !important;
+    }
+
     ${scope} .kbnChromeLayoutApplication {
       margin-top: ${layoutVar('application.marginTop')} !important;
       height: calc(
@@ -501,7 +507,8 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     /* Canvas overlay attachment header: flush bottom edge against preview content */
-    ${scope} [data-test-subj='agentWorkspaceCanvasOverlay'] .euiSplitPanel__inner {
+    ${scope} [data-test-subj='agentWorkspaceCanvasOverlay'] .euiSplitPanel__inner,
+    ${scope} [data-test-subj='agentWorkspaceAttachmentCartOverlay'] .euiSplitPanel__inner {
       border-radius: ${controlRadius} ${controlRadius} 0 0 !important;
     }
 
@@ -511,6 +518,10 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       border-start-end-radius: ${controlRadius} !important;
       border-end-start-radius: ${controlRadius} !important;
       border-end-end-radius: ${controlRadius} !important;
+    }
+
+    ${scope} .euiNotificationBadge {
+      border-radius: ${controlRadius} !important;
     }
 
     ${scope} .euiPopover__panel {
