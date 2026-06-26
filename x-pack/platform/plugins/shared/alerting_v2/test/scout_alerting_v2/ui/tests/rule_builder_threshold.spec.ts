@@ -143,6 +143,7 @@ test.describe(
               breach: { segment: '| WHERE count > 5' },
             },
             time_field: '@timestamp',
+            recovery_strategy: undefined,
           })
         );
         ruleId = rule.id;
