@@ -22,6 +22,7 @@ import {
   isConversationCreatedEvent,
   createBadRequestError,
   AgentExecutionMode,
+  ConversationAccessControlMode,
 } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import {
@@ -190,6 +191,29 @@ export function registerChatRoutes({
         }
       )
     ),
+    access_control: schema.maybe(
+      schema.object(
+        {
+          access_mode: schema.oneOf(
+            [
+              schema.literal(ConversationAccessControlMode.Private),
+              schema.literal(ConversationAccessControlMode.Public),
+            ],
+            {
+              meta: {
+                description:
+                  'Access mode to apply when creating a new conversation. Ignored when continuing an existing conversation.',
+              },
+            }
+          ),
+        },
+        {
+          meta: {
+            description: 'Optional conversation access control. Defaults to private when omitted.',
+          },
+        }
+      )
+    ),
     capabilities: schema.maybe(
       schema.object(
         {
@@ -331,6 +355,7 @@ export function registerChatRoutes({
       input,
       prompts,
       attachments,
+      access_control: accessControl,
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
@@ -353,6 +378,7 @@ export function registerChatRoutes({
         connectorId,
         conversationId,
         autoCreateConversationWithId: true,
+        accessControl,
         capabilities,
         browserApiTools,
         configurationOverrides,
@@ -416,7 +442,7 @@ export function registerChatRoutes({
           data: { round },
         } = events.find(isRoundCompleteEvent)!;
         const {
-          data: { conversation_id: convId },
+          data: { conversation_id: convId, access_control: accessControl },
         } = events.find(
           (e): e is ConversationUpdatedEvent | ConversationCreatedEvent =>
             isConversationUpdatedEvent(e) || isConversationCreatedEvent(e)
@@ -424,6 +450,7 @@ export function registerChatRoutes({
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
+            access_control: accessControl,
             round_id: round.id,
             ...omit(round, ['id', 'input', 'response', 'pending_prompts', 'state']),
             response: {
