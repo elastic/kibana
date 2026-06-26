@@ -438,7 +438,7 @@ export function getUiSettings(
             }),
           },
           {
-            from: 'now-3d',
+            from: 'now-3d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last3Days', {
               defaultMessage: 'Last 3 days',
