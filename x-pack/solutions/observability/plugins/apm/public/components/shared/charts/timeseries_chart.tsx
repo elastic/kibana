@@ -9,7 +9,6 @@ import type {
   LineAnnotation,
   RectAnnotationStyle,
   SeriesIdentifier,
-  TooltipInfo,
   XYBrushEvent,
   XYChartSeriesIdentifier,
   SettingsSpec,
@@ -40,7 +39,6 @@ import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_op
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
-import { AnomalyChartTooltip } from './helper/anomaly_chart_tooltip';
 import {
   expectedBoundsTitle,
   getChartAnomalyTimeseries,
@@ -139,17 +137,6 @@ export function TimeseriesChart({
     return formattedValue;
   };
 
-  // When anomalies from multiple environments are combined into a single
-  // timeseries, use a custom tooltip so each anomaly can display the
-  // environment it belongs to.
-  const hasAnomalyEnvironments = anomalyTimeseries?.anomalies.some(
-    (anomaly) => anomaly.environment != null
-  );
-  const customTooltip = hasAnomalyEnvironments
-    ? (props: TooltipInfo) => (
-        <AnomalyChartTooltip {...props} headerFormatter={tooltipHeaderFormatter} />
-      )
-    : undefined;
   // Using custom legendSort here when comparing expected bounds
   // because by default elastic-charts will show legends for expected bounds first
   // but for consistency, we are making `Expected bounds` last
@@ -188,7 +175,6 @@ export function TimeseriesChart({
           stickTo="top"
           showNullValues={false}
           headerFormatter={({ value }) => tooltipHeaderFormatter(value)}
-          customTooltip={customTooltip}
         />
         <Settings
           onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
@@ -245,32 +231,32 @@ export function TimeseriesChart({
           ]}
           style={endZoneRectAnnotationStyle}
         />
-        {allSeries.map((serie, index) => {
-          const Series = getChartType(serie.type);
+        {allSeries.map((series, index) => {
+          const Series = getChartType(series.type);
 
           return (
             <Series
               timeZone={timeZone}
-              key={serie.id ?? `${serie.title}-${index}`}
-              id={serie.id || serie.title}
-              name={serie.title}
-              groupId={serie.groupId}
+              key={series.id ?? `${series.title}-${index}`}
+              id={series.id || series.title}
+              name={series.title}
+              groupId={series.groupId}
               // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
-              yAccessors={serie.yAccessors ?? ['y']}
-              y0Accessors={serie.y0Accessors}
-              stackAccessors={serie.stackAccessors ?? undefined}
-              markSizeAccessor={serie.markSizeAccessor}
-              data={isEmpty ? [] : serie.data}
-              color={serie.color}
+              yAccessors={series.yAccessors ?? ['y']}
+              y0Accessors={series.y0Accessors}
+              stackAccessors={series.stackAccessors ?? undefined}
+              markSizeAccessor={series.markSizeAccessor}
+              data={isEmpty ? [] : series.data}
+              color={series.color}
               curve={CurveType.CURVE_MONOTONE_X}
-              hideInLegend={serie.hideLegend}
-              fit={serie.fit ?? undefined}
-              filterSeriesInTooltip={serie.hideTooltipValue ? () => false : undefined}
-              areaSeriesStyle={serie.areaSeriesStyle}
-              lineSeriesStyle={serie.lineSeriesStyle}
+              hideInLegend={series.hideLegend}
+              fit={series.fit ?? undefined}
+              filterSeriesInTooltip={series.hideTooltipValue ? () => false : undefined}
+              areaSeriesStyle={series.areaSeriesStyle}
+              lineSeriesStyle={series.lineSeriesStyle}
             />
           );
         })}

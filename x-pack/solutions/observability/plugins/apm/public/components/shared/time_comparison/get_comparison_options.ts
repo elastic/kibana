@@ -232,8 +232,6 @@ export function getComparisonOptions({
   });
 
   if (showSelectedBoundsOption && hasMLJob) {
-    // Expected bounds are independent per environment and can't be combined,
-    // so the option is disabled unless a specific environment is selected.
     const isAllEnvironments = preferredEnvironment === ENVIRONMENT_ALL.value;
     const hasJobForEnvironment =
       anomalyDetectionJobsStatus === 'success' &&
