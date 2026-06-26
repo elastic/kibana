@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useSearchParams, useNavigate, useLocation, Navigate } from 'react-router-dom-v5-compat';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
@@ -88,16 +88,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       ),
       description: metricsOnboardingEnabled
         ? i18n.translate('xpack.observability_onboarding.onboardingFlowForm.hostDescription', {
-            defaultMessage:
-              'Track your host and its services by setting up SLOs, receiving alerts, and remediating performance issues',
-          })
+          defaultMessage:
+            'Track your host and its services by setting up SLOs, receiving alerts, and remediating performance issues',
+        })
         : i18n.translate(
-            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
-            {
-              defaultMessage:
-                'Ingest and analyze logs on your host such as OS, service, application and other logs',
-            }
-          ),
+          'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
+          {
+            defaultMessage:
+              'Ingest and analyze logs on your host such as OS, service, application and other logs',
+          }
+        ),
       logos: ['opentelemetry', 'apache', 'mysql'],
     },
     {
@@ -108,18 +108,18 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       ),
       description: metricsOnboardingEnabled
         ? i18n.translate(
-            'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
-            {
-              defaultMessage:
-                'Monitor your Kubernetes cluster and container workloads using logs, metrics, traces, and profiling data',
-            }
-          )
+          'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
+          {
+            defaultMessage:
+              'Monitor your Kubernetes cluster and container workloads using logs, metrics, traces, and profiling data',
+          }
+        )
         : i18n.translate(
-            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
-            {
-              defaultMessage: 'Observe logs from your Kubernetes environments',
-            }
-          ),
+          'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
+          {
+            defaultMessage: 'Observe logs from your Kubernetes environments',
+          }
+        ),
       logos: ['kubernetes', 'opentelemetry'],
     },
     ...(metricsOnboardingEnabled ? [applicationUseCaseOption] : []),
@@ -218,15 +218,9 @@ export const OnboardingFlowForm: FunctionComponent = () => {
    */
   const searchExcludePackageIdList = isCloud ? ['epr:awsfirehose'] : [];
 
-  let isSelectingCategoryWithKeyboard: boolean = false;
-
-  // The Kubernetes tile routes straight to the OTel flow, so the intermediate
-  // single-card category page is no longer a real destination. Redirect any
-  // deep-link / locator that still lands on ?category=kubernetes (the public
-  // onboarding locator can produce it) to keep one Kubernetes entry behavior.
-  if (selectedCategory === 'kubernetes') {
-    return <Navigate to={buildKubernetesRoutePath(location.search)} replace />;
-  }
+  // True while a radio is being selected via keyboard, used to tell keyboard
+  // selection apart from a pointer click. A ref so it survives re-renders.
+  const isSelectingCategoryWithKeyboard = useRef(false);
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -310,26 +304,24 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                * from conflicting with browser's native one to
                * put keyboard-focused item into the view.
                */
-              onKeyDown={() => (isSelectingCategoryWithKeyboard = true)}
-              onKeyUp={() => (isSelectingCategoryWithKeyboard = false)}
-              // onChange (not onClick) navigates the Kubernetes tile: it fires on
-              // selection in every browser (Chromium fires a spurious click on
-              // arrow-select that an onClick handler would catch) and avoids the
-              // label+radio bubble double-fire. Matches CollectionMethodSelector.
-              // Trade-off: arrow-key selection routes away immediately rather than
-              // letting a keyboard user traverse the whole group, but the Kubernetes
-              // flow stays reachable by keyboard (selecting the tile lands on it).
-              // Landing-only params are stripped so the destination URL stays clean.
+              onKeyDown={() => (isSelectingCategoryWithKeyboard.current = true)}
+              onKeyUp={() => (isSelectingCategoryWithKeyboard.current = false)}
+              // Selecting a tile reveals its featured cards. A pointer click on
+              // Kubernetes navigates instead (handled in onClick), so skip the
+              // category update there to avoid clobbering that route.
               onChange={() => {
-                if (option.id === 'kubernetes') {
-                  navigate(buildKubernetesRoutePath(location.search));
+                setIntegrationSearch('');
+                if (option.id === 'kubernetes' && !isSelectingCategoryWithKeyboard.current) {
                   return;
                 }
-                setIntegrationSearch('');
                 setSearchParams({ category: option.id }, { replace: true });
               }}
               onClick={() => {
-                if (!isSelectingCategoryWithKeyboard && suggestedPackagesRef.current) {
+                if (option.id === 'kubernetes' && !isSelectingCategoryWithKeyboard.current) {
+                  navigate(buildKubernetesRoutePath(location.search));
+                  return;
+                }
+                if (!isSelectingCategoryWithKeyboard.current && suggestedPackagesRef.current) {
                   setTimeout(
                     scrollIntoViewWithOffset,
                     40, // Adding slight delay to ensure DOM is updated before calculating scroll position
@@ -364,26 +356,33 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         <div ref={suggestedPackagesRef}>
           <EuiTitle size="s" id={packageListTitleId}>
             <strong>
-              {selectedCategory === 'application'
+              {selectedCategory === 'kubernetes'
                 ? i18n.translate(
+                  'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
+                  {
+                    defaultMessage: 'Monitor your Kubernetes cluster using:',
+                  }
+                )
+                : selectedCategory === 'application'
+                  ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Application using:',
                     }
                   )
-                : selectedCategory === 'cloud'
-                ? i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
-                    {
-                      defaultMessage: 'Select your Cloud provider:',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
-                    {
-                      defaultMessage: 'Monitor your Host using:',
-                    }
-                  )}
+                  : selectedCategory === 'cloud'
+                    ? i18n.translate(
+                      'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
+                      {
+                        defaultMessage: 'Select your Cloud provider:',
+                      }
+                    )
+                    : i18n.translate(
+                      'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
+                      {
+                        defaultMessage: 'Monitor your Host using:',
+                      }
+                    )}
             </strong>
           </EuiTitle>
           <EuiSpacer size="m" />

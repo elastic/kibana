@@ -135,7 +135,11 @@ describe('OnboardingFlowForm', () => {
       expect(grid).toBeInTheDocument();
     });
 
-    it('redirects ?category=kubernetes deep-links to the Kubernetes OTel flow', () => {
+    it('shows the OpenTelemetry quickstart card on the ?category=kubernetes deep-link instead of redirecting', () => {
+      mockUseCustomCards.mockReturnValue([
+        { id: 'otel-kubernetes', title: 'OpenTelemetry Kubernetes' } as IntegrationCardItem,
+      ]);
+
       renderWithProviders(
         <>
           <OnboardingFlowForm />
@@ -144,11 +148,13 @@ describe('OnboardingFlowForm', () => {
         ['/?category=kubernetes']
       );
 
-      expect(screen.getByTestId('location-display')).toHaveTextContent('/kubernetes');
-      expect(screen.queryByTestId('package-item-otel-kubernetes')).not.toBeInTheDocument();
+      // Deep-link stays on the landing page and reveals the card, no auto-route.
+      expect(screen.getByTestId('location-display')).toHaveTextContent('/?category=kubernetes');
+      expect(screen.getByTestId('location-display')).not.toHaveTextContent('/kubernetes?');
+      expect(screen.getByTestId('package-item-otel-kubernetes')).toBeInTheDocument();
     });
 
-    it('navigates directly to the Kubernetes OTel flow when the Kubernetes tile is selected, preserving non-landing query params', () => {
+    it('navigates to the Kubernetes OTel flow when the Kubernetes tile is clicked, preserving non-landing query params', () => {
       renderWithProviders(
         <>
           <OnboardingFlowForm />
@@ -176,6 +182,31 @@ describe('OnboardingFlowForm', () => {
       fireEvent.click(within(kubernetesTile).getByRole('radio'));
 
       expect(screen.getByTestId('location-display')).toHaveTextContent('/kubernetes?foo=bar');
+    });
+
+    it('reveals the card without navigating when the Kubernetes tile is selected via keyboard', () => {
+      mockUseCustomCards.mockReturnValue([
+        { id: 'otel-kubernetes', title: 'OpenTelemetry Kubernetes' } as IntegrationCardItem,
+      ]);
+
+      renderWithProviders(
+        <>
+          <OnboardingFlowForm />
+          <LocationDisplay />
+        </>,
+        ['/?foo=bar']
+      );
+
+      const radio = within(
+        screen.getByTestId('observabilityOnboardingUseCaseCard-kubernetes')
+      ).getByRole('radio');
+
+      // keydown flag + the click Chromium fires on arrow-select: reveals card, no nav.
+      fireEvent.keyDown(radio, { key: 'ArrowRight' });
+      fireEvent.click(radio);
+
+      expect(screen.getByTestId('location-display')).not.toHaveTextContent('/kubernetes?');
+      expect(screen.getByTestId('package-item-otel-kubernetes')).toBeInTheDocument();
     });
 
     it('leads with the AWS quickstart in the provider grid and shows the AWS collection as a fallback below', () => {

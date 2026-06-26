@@ -128,13 +128,27 @@ test.describe('Onboarding UI Validation', () => {
       ],
     },
     async ({ page, pageObjects }) => {
-      await test.step('navigates to /kubernetes when the Kubernetes tile is selected via keyboard', async () => {
+      await test.step('arrow-key selection reveals the Kubernetes card without navigating', async () => {
         // tab to the first use case card (radio group)
         await page.keyTo('[data-test-subj="observabilityOnboardingUseCaseCard-host"] input', 'Tab');
 
-        // ArrowRight selects the adjacent Kubernetes tile, which navigates directly
-        // to the OTel flow (selection, not a separate activation step, triggers nav)
         await page.keyboard.press('ArrowRight');
+        await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
+        await expect(page).not.toHaveURL(/\/kubernetes(\?|$|#)/);
+
+        await page.keyboard.press('ArrowRight');
+        await expect(page).not.toHaveURL(/\/kubernetes(\?|$|#)/);
+        await expect(page).toHaveURL(/category=(application|cloud)/);
+      });
+
+      await test.step('activating the Kubernetes card by keyboard opens the OTel flow', async () => {
+        await pageObjects.onboarding.goto();
+        await page.keyTo('[data-test-subj="observabilityOnboardingUseCaseCard-host"] input', 'Tab');
+
+        await page.keyboard.press('ArrowRight');
+        await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
+        await page.keyTo('[data-test-subj="integration-card:otel-kubernetes"] button', 'Tab');
+        await page.keyboard.press('Enter');
 
         await expect(page).toHaveURL(/\/kubernetes(\?|$|#)/);
       });
