@@ -8,12 +8,12 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
-import { WORKFLOWS_VERSIONING_SETTING_ID } from '@kbn/workflows/common/constants';
+import { WORKFLOWS_VERSIONING_SETTING_ID } from '../../common/constants';
 
 /**
  * Reads the global workflow versioning gate once at Kibana startup.
  * The uiSetting is registered with `requiresPageReload: true`, so the value is
- * frozen for the process lifetime after WorkflowsService initializes.
+ * frozen for the process lifetime after the first read.
  */
 export const readWorkflowVersioningEnabled = async (coreStart: CoreStart): Promise<boolean> => {
   const savedObjectsClient = coreStart.savedObjects.createInternalRepository();

@@ -24,10 +24,10 @@
 import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowsService } from './workflows_management_service';
-import { readWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -36,9 +36,13 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 jest.mock('../services/workflow_change_history_service');
-jest.mock('../lib/is_workflow_versioning_enabled', () => ({
-  readWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
-}));
+jest.mock('@kbn/workflows/server', () => {
+  const actual = jest.requireActual('@kbn/workflows/server');
+  return {
+    ...actual,
+    readWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
+  };
+});
 
 const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as jest.MockedClass<
   typeof WorkflowChangeHistoryService

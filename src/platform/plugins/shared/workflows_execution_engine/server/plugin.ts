@@ -28,6 +28,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
+import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -36,6 +37,7 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
@@ -44,7 +46,6 @@ import {
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
-import { normalizeEventChainVisitedWorkflowIds } from './lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
@@ -668,68 +669,30 @@ export class WorkflowsExecutionEnginePlugin
       }
     };
 
-    // Builds an execution document without persisting it. Shared by the
-    // single-item persist helper and the bulk scheduling path.
-    const buildWorkflowExecutionDocument = (args: {
+    const isWorkflowVersioningEnabled = async (): Promise<boolean> => {
+      return readWorkflowVersioningEnabled(coreStart);
+    };
+
+    const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string;
       now: Date;
-    }): WorkflowExecutionForInputRendering => {
-      const { workflow, context, defaultTriggeredBy, authenticatedUser, now } = args;
-      const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
-      const spaceId = (context.spaceId as string | undefined) || 'default';
-      const metadata = context.metadata as Record<string, unknown> | undefined;
-      const eventPayload = context.event as Record<string, unknown> | undefined;
-      let rootEventChainDepth: number | undefined;
-      if (eventPayload) {
-        const rawDepth = eventPayload.eventChainDepth;
-        if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
-          rootEventChainDepth = rawDepth;
-        } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
-          const parsed = parseInt(rawDepth, 10);
-          if (!Number.isNaN(parsed) && parsed >= 0) {
-            rootEventChainDepth = parsed;
-          }
-        }
-      }
-      const rootVisited = normalizeEventChainVisitedWorkflowIds(
-        eventPayload?.eventChainVisitedWorkflowIds,
-        this.config.eventDriven.maxChainDepth
-      );
-      const dispatchEventId =
-        typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
-      const workflowExecution: WorkflowExecutionForInputRendering = {
-        id: generateUuid(),
-        spaceId,
-        workflowId: workflow.id,
-        ...pickManagedWorkflowFields(workflow),
-        isTestRun: workflow.isTestRun,
-        workflowDefinition: workflow.definition,
-        yaml: workflow.yaml,
-        context,
-        status: ExecutionStatus.PENDING,
-        createdAt: now.toISOString(),
-        executedBy: authenticatedUser,
-        triggeredBy,
-        ...(metadata ? { metadata } : {}),
-        ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
-        ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
-        ...(dispatchEventId ? { dispatchEventId } : {}),
-      };
-
-      const concurrencyGroupKey = this.getConcurrencyGroupKey(
-        workflowExecution,
-        workflow.definition?.settings,
-        coreStart,
-        dependencies
-      );
-      if (concurrencyGroupKey) {
-        workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
-      }
-
-      return workflowExecution;
+    }): Promise<WorkflowExecutionForInputRendering> => {
+      const versioningEnabled = await isWorkflowVersioningEnabled();
+      return buildWorkflowExecutionDocument({
+        ...args,
+        workflowVersioningEnabled: versioningEnabled,
+        maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+        getConcurrencyGroupKey: (execution) =>
+          this.getConcurrencyGroupKey(
+            execution,
+            args.workflow.definition?.settings,
+            coreStart,
+            dependencies
+          ),
+      });
     };
 
     const createAndPersistWorkflowExecution = async (
@@ -752,7 +715,7 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
 
-      const workflowExecution = buildWorkflowExecutionDocument({
+      const workflowExecution = await buildExecutionDocument({
         workflow,
         context,
         defaultTriggeredBy,
@@ -981,7 +944,7 @@ export class WorkflowsExecutionEnginePlugin
               );
             }
           }
-          const workflowExecution = buildWorkflowExecutionDocument({
+          const workflowExecution = await buildExecutionDocument({
             workflow: item.workflow,
             context: item.context,
             defaultTriggeredBy: 'alert',

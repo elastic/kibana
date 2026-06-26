@@ -8,9 +8,8 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
-import { WORKFLOWS_VERSIONING_SETTING_ID } from '@kbn/workflows/common/constants';
-
-import { readWorkflowVersioningEnabled } from './is_workflow_versioning_enabled';
+import { readWorkflowVersioningEnabled } from './read_workflow_versioning_enabled';
+import { WORKFLOWS_VERSIONING_SETTING_ID } from '../../common/constants';
 
 describe('readWorkflowVersioningEnabled', () => {
   it('reads the global workflows versioning uiSetting', async () => {

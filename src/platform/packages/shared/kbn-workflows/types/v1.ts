@@ -171,6 +171,11 @@ export interface EsWorkflowExecution {
    * step reported usage. See {@link WorkflowTokenUsage}.
    */
   usage?: WorkflowTokenUsage;
+  /**
+   * Workflow document version (`_source.version`) captured when the execution was
+   * created.
+   */
+  version?: number;
 }
 
 export interface ProviderInput {
@@ -286,6 +291,8 @@ export interface WorkflowExecutionDto {
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   /** Aggregated LLM token usage across all `ai.*` steps in this execution. */
   usage?: WorkflowTokenUsage;
+  /** Workflow document version captured at execution start. See {@link EsWorkflowExecution.version}. */
+  version?: number;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -484,6 +491,8 @@ export interface WorkflowExecutionEngineModel
   isTestRun?: boolean;
   isEphemeral?: boolean;
   spaceId?: string;
+  /** Domain monotonic version counter from the workflow document (`_source.version`). */
+  version?: number;
 }
 
 export interface WorkflowListItemAction {
