@@ -37,6 +37,7 @@ plugins:
     - graph
     - grokdebugger
     - home
+    - image_embeddable
     - index_lifecycle_management
     - index_management
     - infra
