@@ -26,7 +26,8 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
  *    invoke it for rule-adjacent questions that belong to a sibling skill
  *    (already-installed rules -> `find-security-rules`, editing a rule ->
  *    `detection-rule-edit`, ML jobs -> `find-security-ml-jobs`, alert triage ->
- *    `alert-analysis`). These answer "can the agent distinguish when to call
+ *    `alert-analysis`, authoring a custom Alerting V2 / ES|QL rule ->
+ *    `rule-management`). These answer "can the agent distinguish when to call
  *    this skill vs. others?" and mirror the find-rules "Boundaries" suite.
  *
  * Requirements for the eval target Kibana:
@@ -35,6 +36,10 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
  *   registered and the agent cannot route to it.
  * - The boundary examples that route to `find-security-rules` also require the
  *   `dexAiSkillFindRules` flag, so that sibling skill is registered too.
+ * - The boundary example that routes to `rule-management` requires the Alerting V2
+ *   plugin enabled (`xpack.alerting_v2.enabled: true`); that plugin is disabled by
+ *   default, so otherwise its skill is never registered and the agent cannot route
+ *   to it.
  * - The bundled `security_detection_engine` package is installed in `beforeAll`
  *   to populate the installable catalog (see below).
  */
@@ -483,9 +488,10 @@ evaluate.describe(
             name: 'agent builder: security-recommend-prebuilt-rules-distractors',
             description:
               'Distractor queries that touch rules/prebuilt vocabulary but concern ' +
-              'already-installed rules, rule editing, ML jobs, or alert triage, and should ' +
-              'activate a sibling skill (find-security-rules, detection-rule-edit, ' +
-              'find-security-ml-jobs, alert-analysis) rather than recommend-prebuilt-rules.',
+              'already-installed rules, rule editing, ML jobs, alert triage, or authoring a ' +
+              'custom alerting rule, and should activate a sibling skill (find-security-rules, ' +
+              'detection-rule-edit, find-security-ml-jobs, alert-analysis, rule-management) ' +
+              'rather than recommend-prebuilt-rules.',
             examples: [
               {
                 input: {
@@ -551,6 +557,20 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Alert Triage',
                   expectedSkill: 'alert-analysis',
+                },
+              },
+              {
+                input: {
+                  question:
+                    'Create an Alerting V2 rule that uses an ES|QL query to alert me when host CPU stays above 90%.',
+                },
+                output: {
+                  expected:
+                    'I will help author an Alerting V2 rule whose condition is an ES|QL query that fires when host CPU stays above 90%. This is about creating a custom alerting rule, not installing prebuilt Elastic detection rules.',
+                },
+                metadata: {
+                  query_intent: 'Alerting V2 Rule Authoring',
+                  expectedSkill: 'rule-management',
                 },
               },
             ],
