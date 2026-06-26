@@ -16,18 +16,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getServices } from '../services';
-import { streamGenerate } from '../utils/stream_generate';
-import { fetchEsqlData } from '../utils/fetch_esql_data';
-import type { EsqlDataResult } from '../utils/fetch_esql_data';
-import {
-  fillTemplate,
-  sanitizeTemplate,
-  isValidTemplate,
-  injectCsp,
-  sanitizeHtml,
-} from '../utils/template_fill';
+import React, { useMemo } from 'react';
+import { useAiPanelHtml } from '../hooks/use_ai_panel_html';
 
 interface AiPanelComponentProps {
   embeddableId: string;
@@ -68,165 +58,15 @@ export const AiPanelComponent = ({
   onTemplateChange,
 }: AiPanelComponentProps) => {
   const { euiTheme } = useEuiTheme();
-  const [html, setHtml] = useState('');
-  const [isLoading, setIsLoading] = useState(Boolean(prompt));
-  const [error, setError] = useState<string | undefined>();
-  const abortRef = useRef<AbortController | null>(null);
-  const accRef = useRef('');
-  const htmlRef = useRef('');
-  htmlRef.current = html;
-
-  // Refs so effect closure always reads latest value without them being deps.
-  const savedTemplateRef = useRef(savedTemplate);
-  const onTemplateChangeRef = useRef(onTemplateChange);
-  useEffect(() => {
-    savedTemplateRef.current = savedTemplate;
-  }, [savedTemplate]);
-  useEffect(() => {
-    onTemplateChangeRef.current = onTemplateChange;
-  }, [onTemplateChange]);
-
-  useEffect(() => {
-    if (!prompt) {
-      setIsLoading(false);
-      return;
-    }
-
-    // Abort any prior inflight request unconditionally before taking any path.
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    accRef.current = '';
-
-    const template = savedTemplateRef.current;
-
-    // Fast path — static panel with stored HTML: sanitize then render, no server calls.
-    if (template && !esqlQuery) {
-      setHtml(injectCsp(sanitizeHtml(template)));
-      setIsLoading(false);
-      setError(undefined);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(undefined);
-
-    const { search, core } = getServices();
-
-    // Fast path — esqlQuery panel with stored template: run query only, no LLM.
-    if (template && esqlQuery) {
-      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
-        .then(({ columns, values }) => {
-          if (controller.signal.aborted) return;
-          setHtml(fillTemplate(template, columns, values ?? []));
-          setIsLoading(false);
-        })
-        .catch((err: Error) => {
-          if (controller.signal.aborted || err.name === 'AbortError') return;
-          setError(err.message || 'Failed to fetch data');
-          setIsLoading(false);
-        });
-
-      return () => controller.abort();
-    }
-
-    // Slow path — no stored template: LLM generates template. For esqlQuery panels the
-    // data fetch runs in parallel so both complete as close together as possible.
-    let esqlData: EsqlDataResult | null = null;
-    let templateDone = false;
-    let dataDone = !esqlQuery;
-    let hasFailed = false;
-
-    let intervalRef: ReturnType<typeof setInterval> | undefined;
-    const stopInterval = () => {
-      if (intervalRef) {
-        clearInterval(intervalRef);
-        intervalRef = undefined;
-      }
-    };
-
-    // Stream partial HTML into the iframe for static panels (no placeholders to leak through).
-    if (!htmlRef.current && !esqlQuery) {
-      intervalRef = setInterval(() => {
-        if (accRef.current) setHtml(injectCsp(sanitizeHtml(accRef.current)));
-      }, 300);
-    }
-
-    const tryFinish = () => {
-      if (!templateDone || !dataDone || hasFailed || controller.signal.aborted) return;
-      stopInterval();
-
-      let rendered: string;
-
-      if (esqlQuery && esqlData) {
-        const cleaned = sanitizeTemplate(accRef.current);
-        if (!isValidTemplate(cleaned)) {
-          setError('Failed to generate panel: LLM returned invalid template');
-          setIsLoading(false);
-          return;
-        }
-        rendered = fillTemplate(cleaned, esqlData.columns, esqlData.values ?? []);
-        onTemplateChangeRef.current(cleaned);
-      } else if (!esqlQuery) {
-        // Static panel: sanitize then store. CSP is already in the accumulator
-        // from the route's first token, but sanitizeHtml must still run to strip
-        // any anchor tags the LLM emitted.
-        rendered = injectCsp(sanitizeHtml(accRef.current));
-        onTemplateChangeRef.current(rendered);
-      } else {
-        return; // esqlQuery present but data fetch failed — error already set
-      }
-
-      setHtml(rendered);
-      setIsLoading(false);
-    };
-
-    // Fetch data in parallel with LLM (template panels only)
-    if (esqlQuery) {
-      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
-        .then((data) => {
-          if (controller.signal.aborted) return;
-          esqlData = data;
-          dataDone = true;
-          tryFinish();
-        })
-        .catch((err: Error) => {
-          if (controller.signal.aborted || err.name === 'AbortError') return;
-          hasFailed = true;
-          setError(err.message || 'Failed to fetch data');
-          setIsLoading(false);
-        });
-    }
-
-    const http = getServices().core.http;
-    streamGenerate(
-      http,
-      { prompt, esqlQuery, timeRange },
-      (token) => {
-        accRef.current += token;
-      },
-      controller.signal
-    )
-      .catch((err: Error) => {
-        if (err.name !== 'AbortError') {
-          hasFailed = true;
-          stopInterval();
-          setError(err instanceof Error ? err.message : String(err));
-          setIsLoading(false);
-        }
-      })
-      .finally(() => {
-        if (hasFailed || controller.signal.aborted) return;
-        templateDone = true;
-        tryFinish();
-      });
-
-    return () => {
-      stopInterval();
-      controller.abort();
-    };
-    // savedTemplate intentionally omitted — read via savedTemplateRef to avoid re-triggering.
-  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion]);
+  const { html, isLoading, error } = useAiPanelHtml({
+    embeddableId,
+    prompt,
+    esqlQuery,
+    timeRange,
+    generationVersion,
+    savedTemplate,
+    onTemplateChange,
+  });
 
   const wrapperCss = useMemo(
     () =>

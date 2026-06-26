@@ -35,6 +35,12 @@ export function injectCsp(html: string): string {
   return CSP_META + html;
 }
 
+// Sanitizes HTML and injects the CSP meta tag — the two steps always go together
+// before an HTML string is set as iframe srcDoc.
+export function prepareHtml(html: string): string {
+  return injectCsp(sanitizeHtml(html));
+}
+
 // Strips <a> anchor tags and other unsafe elements before the HTML reaches the iframe.
 // Applied after Liquid rendering so injected data values are also covered.
 export function sanitizeHtml(html: string): string {
@@ -116,5 +122,5 @@ export function fillTemplate(
       '<p style="color:#d36086;padding:16px">Template error — please edit the prompt to regenerate.</p>';
   }
 
-  return injectCsp(sanitizeHtml(rendered));
+  return prepareHtml(rendered);
 }
