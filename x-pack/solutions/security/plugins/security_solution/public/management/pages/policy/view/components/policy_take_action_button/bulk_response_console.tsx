@@ -49,13 +49,14 @@ export const BulkResponseConsole = memo<BulkResponseConsoleProps>(
 
     const consoleCommands = useMemo(() => {
       return getEndpointConsoleCommands({
-        agentType: 'endpoint',
+        agentType: 'endpoint', // FIXME:PT support for other agent types
+        integrationPolicyId,
         endpointPrivileges: authz,
         platform: 'windows',
         endpointAgentId: '',
         endpointCapabilities: [],
       });
-    }, [authz]);
+    }, [authz, integrationPolicyId]);
 
     const ConsoleTitleComponent: React.ComponentType = useMemo(() => {
       if (!policyDetailsResponse?.item) {

@@ -115,6 +115,7 @@ const capabilitiesAndPrivilegesValidator = (
 ): ((command: Command) => string | true) => {
   return (command: Command) => {
     const privileges = command.commandDefinition.meta.privileges;
+    const isBulkResponseMode = command.commandDefinition.meta.isBulkResponseMode;
     const agentCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
     const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
     const responderCapabilities =
@@ -122,7 +123,7 @@ const capabilitiesAndPrivilegesValidator = (
     let errorMessage = '';
 
     // We only validate Agent capabilities for the command for Endpoint agents
-    if (agentType === 'endpoint') {
+    if (agentType === 'endpoint' && !isBulkResponseMode) {
       if (!responderCapabilities.length) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       } else if (
@@ -179,7 +180,10 @@ const commandCommentArgument = (): { comment: CommandArgDefinition } => {
 };
 
 export interface GetEndpointConsoleCommandsOptions {
-  endpointAgentId: string;
+  /** Endpoint agent ID. When an array with length > 1 is used, the console commands will be setup for "bulk" response */
+  endpointAgentId: string | string[];
+  /** The integration policy id. When defined, the console commands will be setup for "bulk" response */
+  integrationPolicyId?: string;
   agentType: ResponseActionAgentType;
   /** Applicable only for Endpoint Agents */
   endpointCapabilities: ImmutableArray<string>;
@@ -189,12 +193,17 @@ export interface GetEndpointConsoleCommandsOptions {
 }
 
 export const getEndpointConsoleCommands = ({
-  endpointAgentId,
+  endpointAgentId: _endpointAgentId,
+  integrationPolicyId,
   agentType,
   endpointCapabilities,
   endpointPrivileges,
   platform,
 }: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
+  const endpointAgentId: string[] = Array.isArray(_endpointAgentId)
+    ? _endpointAgentId
+    : [_endpointAgentId];
+  const isBulkResponseMode = endpointAgentId.length > 1 || !!integrationPolicyId;
   const featureFlags = ExperimentalFeaturesService.get();
   const {
     crowdstrikeRunScriptEnabled,
@@ -207,14 +216,16 @@ export const getEndpointConsoleCommands = ({
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
     platform,
+    isBulkResponseMode,
     endpointId: endpointAgentId,
     capabilities: endpointCapabilities,
     privileges: endpointPrivileges,
   };
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
-    // Agent capabilities are only validated for Endpoint agent types
-    if (agentType !== 'endpoint') {
+    // Agent capabilities are only validated for Endpoint agent types. Also, if in "bulk" mode,
+    // we don't do capability validation checks
+    if (agentType !== 'endpoint' || isBulkResponseMode) {
       return true;
     }
 
@@ -251,7 +262,7 @@ export const getEndpointConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 0,
-      helpDisabled: doesEndpointSupportCommand('isolate') === false,
+      helpDisabled: !doesEndpointSupportCommand('isolate'),
       helpHidden: !getRbacControl({ commandName: 'isolate', privileges: endpointPrivileges }),
     },
     {

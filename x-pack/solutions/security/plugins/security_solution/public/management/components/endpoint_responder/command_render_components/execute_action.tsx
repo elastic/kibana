@@ -39,7 +39,7 @@ export const ExecuteActionResult = memo<
     }
     return {
       agent_type: agentType,
-      endpoint_ids: [endpointId],
+      endpoint_ids: endpointId,
       parameters: {
         command: command.args.args.command[0],
         timeout: parsedExecuteTimeout(command.args.args.timeout?.[0]),

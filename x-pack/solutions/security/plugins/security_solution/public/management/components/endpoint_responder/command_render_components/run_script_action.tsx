@@ -125,7 +125,7 @@ export const RunScriptActionResult = memo<
 
     return {
       agent_type: agentType,
-      endpoint_ids: [endpointId],
+      endpoint_ids: endpointId,
       parameters: getParams(),
       comment: command.args.args?.comment?.[0],
     } as unknown as RunScriptActionRequestBody;

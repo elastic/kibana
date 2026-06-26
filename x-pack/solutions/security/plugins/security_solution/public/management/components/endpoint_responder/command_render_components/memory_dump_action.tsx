@@ -43,7 +43,7 @@ export const MemoryDumpActionResult = memo<
 
     const reqBody: MemoryDumpActionRequestBody = {
       agent_type: agentType,
-      endpoint_ids: [endpointId],
+      endpoint_ids: endpointId,
       ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters: {
         type: kernel?.[0] ? 'kernel' : 'process',

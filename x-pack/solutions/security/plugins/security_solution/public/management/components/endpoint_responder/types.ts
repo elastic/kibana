@@ -23,11 +23,12 @@ import type { CommandExecutionComponentProps } from '../console/types';
  * the data that is defined for all commands (see `lib/console_commands_definition.ts`).
  */
 export interface EndpointCommandDefinitionMeta {
-  endpointId: string;
+  endpointId: string[];
   agentType: ResponseActionAgentType;
   capabilities: MaybeImmutable<string[]>;
   privileges: EndpointPrivileges;
   platform: SupportedHostOsType;
+  isBulkResponseMode: boolean;
 }
 
 export type EndpointResponderExtensionComponentProps =

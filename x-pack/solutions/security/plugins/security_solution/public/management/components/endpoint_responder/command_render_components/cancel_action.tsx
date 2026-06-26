@@ -28,7 +28,7 @@ export const CancelActionResult = memo<
     return endpointId
       ? {
           agent_type: agentType,
-          endpoint_ids: [endpointId],
+          endpoint_ids: endpointId,
           comment: comment?.[0],
           parameters: {
             id: action[0],

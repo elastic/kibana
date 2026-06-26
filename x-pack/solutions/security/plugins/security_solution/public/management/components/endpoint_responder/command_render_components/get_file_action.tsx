@@ -29,7 +29,7 @@ export const GetFileActionResult = memo<
     return endpointId
       ? {
           agent_type: agentType,
-          endpoint_ids: [endpointId],
+          endpoint_ids: endpointId,
           comment: comment?.[0],
           parameters: {
             path: path[0],

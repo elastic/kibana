@@ -22,7 +22,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
     const actionRequestBody = useMemo(() => {
       return endpointId
         ? {
-            endpoint_ids: [endpointId],
+            endpoint_ids: endpointId,
             comment,
             agent_type: agentType,
           }

@@ -21,7 +21,7 @@ export const ReleaseActionResult = memo<ActionRequestComponentProps>(
       return endpointId
         ? {
             agent_type: agentType,
-            endpoint_ids: [endpointId],
+            endpoint_ids: endpointId,
             comment,
           }
         : undefined;
