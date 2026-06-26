@@ -755,7 +755,10 @@ describe('STATS Autocomplete', () => {
             }),
             // Filter out functions that are not compatible with this context
             ...allGroupingFunctions.filter(
-              (f) => !['CATEGORIZE', 'TBUCKET'].some((incompatible) => f.includes(incompatible))
+              (f) =>
+                !['CATEGORIZE', 'TBUCKET', 'WITHOUT'].some((incompatible) =>
+                  f.includes(incompatible)
+                )
             ),
           ],
           mockCallbacks
