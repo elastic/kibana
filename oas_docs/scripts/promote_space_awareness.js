@@ -85,21 +85,15 @@ run(
     const doc = new Document(oasDoc, { aliasDuplicateObjects: false, schema: 'yaml-1.1' });
     visit(doc, {
       Pair(_key, node) {
+        // Preserve exact formatting of multi-line code samples (x-codeSamples `source`).
         if (
           isScalar(node.key) &&
+          node.key.value === 'source' &&
           isScalar(node.value) &&
           typeof node.value.value === 'string' &&
           node.value.value.includes('\n')
         ) {
-          if (node.key.value === 'source') {
-            // Preserve exact formatting of multi-line code samples (x-codeSamples `source`).
-            node.value.type = 'BLOCK_LITERAL';
-          } else {
-            // Use double-quoted style for all other multi-line strings (e.g. error `message`
-            // fields) so they serialize with \n/\t escape sequences on a single line,
-            // matching js-yaml's previous output.
-            node.value.type = 'QUOTE_DOUBLE';
-          }
+          node.value.type = 'BLOCK_LITERAL';
         }
       },
     });
