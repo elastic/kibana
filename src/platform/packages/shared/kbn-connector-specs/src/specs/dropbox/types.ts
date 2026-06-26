@@ -158,15 +158,3 @@ export const CallToolInputSchema = lazySchema(() =>
 );
 export type CallToolInput = z.infer<typeof CallToolInputSchema>;
 
-export const GetTagsInputSchema = lazySchema(() =>
-  z.object({
-    paths: z
-      .array(z.string().min(1).max(1024))
-      .min(1)
-      .max(100)
-      .describe(
-        'List of Dropbox file or folder paths to retrieve tags for. Example: ["/Documents/report.pdf", "/Projects/design"].'
-      ),
-  })
-);
-export type GetTagsInput = z.infer<typeof GetTagsInputSchema>;

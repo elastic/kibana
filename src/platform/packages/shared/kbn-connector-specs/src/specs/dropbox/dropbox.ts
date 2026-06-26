@@ -25,7 +25,6 @@ import type {
   CreateSharedLinkInput,
   GetFileContentInput,
   GetFileMetadataInput,
-  GetTagsInput,
   ListFolderInput,
   ListSharedLinksInput,
   SearchInput,
@@ -35,7 +34,6 @@ import {
   CreateSharedLinkInputSchema,
   GetFileContentInputSchema,
   GetFileMetadataInputSchema,
-  GetTagsInputSchema,
   ListFolderInputSchema,
   ListSharedLinksInputSchema,
   ListToolsInputSchema,
@@ -156,19 +154,6 @@ export const Dropbox: ConnectorSpec = {
       },
     },
 
-    getTags: {
-      isTool: true,
-      description:
-        'Retrieve tags for one or more files or folders in Dropbox. Returns a list of tags for each path. ' +
-        'Use paths from search or listFolder results.',
-      input: GetTagsInputSchema,
-      handler: async (ctx, input: GetTagsInput) => {
-        return callToolJson(ctx, 'get_tags', {
-          paths: input.paths,
-        });
-      },
-    },
-
     getFileContent: {
       isTool: true,
       description:
@@ -266,7 +251,7 @@ export const Dropbox: ConnectorSpec = {
     '',
     '### File tags',
     'Dropbox does not support searching or filtering by tag — there is no "find files tagged X" API.',
-    'To see tags for files, call `getTags` with one or more paths from `search` or `listFolder` results.',
+    'The Dropbox MCP server does not expose a tags tool; use `callTool` with `listTools` to check for future additions.',
     '',
     '### Searching vs. browsing',
     'Combine both: use `search` to locate a folder path by keyword, then `listFolder` to enumerate its contents.',

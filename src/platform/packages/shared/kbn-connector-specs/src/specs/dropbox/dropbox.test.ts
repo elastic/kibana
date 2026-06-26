@@ -324,22 +324,6 @@ describe('Dropbox', () => {
     });
   });
 
-  describe('getTags action', () => {
-    it('is exposed as a tool', () => {
-      expect(Dropbox.actions.getTags.isTool).toBe(true);
-    });
-
-    it('calls get_tags with paths', async () => {
-      const input = parse('getTags', { paths: ['/Documents/report.pdf', '/Projects'] });
-      await Dropbox.actions.getTags.handler(mockContext, input);
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'get_tags',
-        arguments: { paths: ['/Documents/report.pdf', '/Projects'] },
-      });
-    });
-  });
-
   describe('listTools action', () => {
     it('is exposed as a tool', () => {
       expect(Dropbox.actions.listTools.isTool).toBe(true);

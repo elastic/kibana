@@ -43,9 +43,6 @@ The Dropbox connector exposes the following actions:
 `getFileMetadata`
 :   Get detailed metadata for a specific file or folder, including size, modification date, content hash, and sharing information. Use this to inspect a file before you download its content.
 
-`getTags`
-:   Retrieve tags for one or more files or folders in Dropbox. Pass a list of paths obtained from `search` or `listFolder` results. Returns tags for each path.
-
 `getFileContent`
 :   Download the content of a file from Dropbox. Dropbox extracts text from documents up to 5 MB. For binary files, Dropbox returns base64-encoded content. Check file size with `getFileMetadata` before retrieving large files.
 
