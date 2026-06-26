@@ -57,7 +57,10 @@ export async function bulkEditRuleParamsWithReadAuth<Params extends RuleParams>(
     auditAction,
     requiredAuthOperation,
     shouldInvalidateApiKeys,
-    changeTrackingAction: RuleChangeTrackingAction.ruleUpdate,
+    changeTracking: {
+      action: RuleChangeTrackingAction.ruleUpdate,
+      ...options.changeTracking,
+    },
     updateFn: (opts: UpdateOperationOpts) =>
       updateRuleParamsInMemory<Params>({
         ...opts,

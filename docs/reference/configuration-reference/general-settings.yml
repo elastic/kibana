@@ -27,10 +27,9 @@ groups:
       - setting: execution_context.enabled
         description: |
           Propagate request-specific metadata to Elasticsearch server by way of the `x-opaque-id` header.
-          It is available in {{ecloud}} 8.1.0 and later versions.
         datatype: bool
         applies_to:
-          stack: ga
+          stack: ga 8.1
           ech: ga
           self: ga
 
@@ -411,11 +410,10 @@ groups:
       - setting: elasticsearch.compression
         description: |
           Specifies whether {{kib}} should use compression for communications with {{es}}.
-          It is available in {{ecloud}} 8.3.0 and later versions.
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
 
@@ -453,11 +451,10 @@ groups:
         id: elasticsearch-maxsockets
         description: |
           The maximum number of sockets that can be used for communications with {{es}}.
-          It is available in {{ecloud}} 8.2.0 and later versions.
         datatype: int
         default: 800
         applies_to:
-          stack: ga
+          stack: ga 8.2
           ech: ga
           self: ga
 
@@ -811,20 +808,18 @@ groups:
       - setting: migrations.discardUnknownObjects
         description: |
           Discard saved objects with unknown types during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
-          It is available in {{ecloud}} 8.4.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.4
           ech: ga
           self: ga
 
       - setting: migrations.discardCorruptObjects
         description: |
           Discard corrupt saved objects, as well as those that cause transform errors during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
-          It is available in {{ecloud}} 8.4.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.4
           ech: ga
           self: ga
 
@@ -850,9 +845,12 @@ groups:
 
       - setting: migrations.useCumulativeLogger
         description: |
-          Skip logging migration progress unless there are any errors. Set to `false` when troubleshooting migration issues and not automatically shown.
+          When enabled, migration progress is only logged if the migration fails, reducing log volume during successful startups. When disabled (the default), migration steps are logged continuously, which keeps failing or stuck migrations visible. Set to `true` to reduce startup log volume.
+        note: |
+          :applies_to: stack: ga 9.2-9.4
+          In these versions, this setting defaults to `true`.
         datatype: bool
-        default: true
+        default: false
         applies_to:
           - "stack: ga 9.2"
           - "ech: unavailable"
@@ -894,9 +892,13 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` or upgrade to a later version.
 
       - setting: data.autocomplete.valueSuggestions.timeout
         description: |
@@ -904,9 +906,13 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.timeout` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.timeout` or upgrade to a later version.
 
       - setting: unifiedSearch.autocomplete.valueSuggestions.timeout
         description: |
@@ -914,7 +920,7 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
 
@@ -924,7 +930,7 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
         note: "To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide."
@@ -1131,11 +1137,10 @@ groups:
       - setting: server.compression.brotli.enabled
         description: |
           Set to `true` to enable brotli (br) compression format. Browsers not supporting brotli compression will fallback to using gzip instead. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`.
-          It is available in {{ecloud}} 8.6.0 and later versions.
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: ga 8.6
           ech: ga
           self: ga
 
@@ -1295,7 +1300,6 @@ groups:
         id: server-securityresponseheaders-crossoriginopenerpolicy
         description: |
           Controls whether the [`Cross-Origin-Opener-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`.
-          It is available in {{ecloud}} 8.7.0 and later versions.
         datatype: enum
         default: '"same-origin"'
         options:
@@ -1304,7 +1308,7 @@ groups:
           - option: same-origin
           - option: "null"
         applies_to:
-          stack: ga
+          stack: ga 8.7
           ech: ga
           self: ga
 
@@ -1465,11 +1469,10 @@ groups:
           ```text
           *Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
           ```
-          It is available in {{ecloud}} 8.0.0 and later versions.
         datatype: string
         default: "[]"
         applies_to:
-          stack: ga
+          stack: ga 8.0
           ech: ga
           self: ga
 
@@ -1677,10 +1680,9 @@ groups:
       - setting: xpack.securitySolution.maxUploadResponseActionFileBytes
         description: |
           Allow to configure the max file upload size for use with the Upload File Response action available with the Defend Integration. To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
-          It is available in {{ecloud}} 8.9.0 and later versions.
         datatype: string
         applies_to:
-          stack: ga
+          stack: ga 8.9
           ech: ga
           self: ga
 

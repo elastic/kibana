@@ -8,6 +8,7 @@ This file defines the format of summaries and structured outputs that the agent 
 
 - [Scenario format](#scenario-format)
 - [Gherkin self-review](#gherkin-self-review--run-before-saving-any-draft)
+- [Issue Clarity Assessment section](#issue-clarity-assessment-section)
 - [Footer format](#footer-format)
 - [Sources Summary](#sources-summary)
 
@@ -73,9 +74,59 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
   - For each feature-area row: `P0 + P1 + P2 = Scenarios` **and** `Automated + Manual only = Scenarios`.
   - For each column: the **Total** cell equals the column-wise sum of all feature-area rows (Scenarios, P0, P1, P2, Automated, Manual only).
   - **Total Scenarios** equals the actual number of `#### Scenario:` headings rendered in the document — count them.
+- [ ] **Issue Clarity Assessment section** is present immediately before the footer, wrapped in `<details><summary>📊 Issue Clarity Assessment</summary>…</details>`:
+  - One row per issue read in Step 1 (target, parent, every sub-issue) — none omitted, even those scoring 5/5.
+  - Per-issue scores follow the rubric and tie-breakers in [`issue-clarity-assessment.md`](issue-clarity-assessment.md) (AC ❌ → max 2; AC ❌ and Scope ❌ → 1).
+  - **Combined readability** is computed from the union of the corpus, not as an average of per-issue scores; rationale sentence is present.
+  - **Issue Coverage Ratio** denominator equals **Total Scenarios** from the Test Coverage Summary above — they must match.
+  - **Actionable feedback** bullets present iff at least one issue scored ≤ 3 or Coverage Ratio &lt; 60%; otherwise the block is omitted.
 - [ ] Footer is present at the end of the file with the correct model identifier and today's date
 
 If any item fails, fix the scenario before saving. If fixing requires information that is not available, apply the Core rule: stop and ask the user.
+
+---
+
+## Issue Clarity Assessment section
+
+The full rubric and procedure live in [`issue-clarity-assessment.md`](issue-clarity-assessment.md). This section defines the **canonical markdown format** to render in the test plan. Append the assembled block immediately before the footer, after running the procedure in `issue-clarity-assessment.md`.
+
+### Format
+
+```markdown
+<details>
+<summary>📊 Issue Clarity Assessment</summary>
+
+| Issue | Type | Score | Critical gaps |
+|---|---|---|---|
+| #<number> (<role>) | <Target / Epic / Parent epic / Sub-issue> | <n>/5 | <1–2 clause note, or "None"> |
+
+**Combined readability: <n>/5** — <one-sentence rationale; explain why combined differs from per-issue scores when it does>.
+
+**Issue Coverage Ratio: <X> / <Y> scenarios (<Z>%)** are derivable from issue text alone. <breakdown of fact categories that required PR analysis, or "All scenarios derivable from issue text — no PR-only facts." when Z = 100>.
+
+<!--
+  Include the next two lines (heading + bullets) ONLY when at least one
+  per-issue score is ≤ 3 OR the Coverage Ratio is below 60%.
+  When both conditions fail, OMIT the heading and the bullets entirely —
+  do not emit "**Actionable feedback:**" as an empty header.
+-->
+**Actionable feedback:**
+- <Specific feedback: which issue, which dimension, what to add. Generic recommendations are not allowed.>
+
+</details>
+```
+
+### Rules
+
+- **Always present.** Render this block in every test plan, regardless of scores. The audience (PMs/writers) gets value from seeing the 5/5 results too.
+- **One row per issue read** in Step 1 — target, parent (if any), every sub-issue. Do not omit any.
+- **`Type` values** are exactly one of: `Target` (when target is not an epic), `Epic` (when the target is itself the epic), `Parent epic`, `Sub-issue`. The role in parentheses next to the issue number (`(target)`, `(parent)`, `(sub)`) is a hint for readers and is always present.
+- **Score format** is exactly `<n>/5` — never `<n>` or `<n>/5.0` or `<n>%`. No emojis next to the score.
+- **Critical gaps** is `None` when score = 5, otherwise a 1–2 clause note. Examples: *"UI flow not described; edge cases missing"*, *"No numbered ACs, prose only"*. Do not exceed two clauses.
+- **Combined rationale sentence is required.** When combined matches the lowest per-issue score, write a short sentence such as *"All issues are equally weak — combined matches the worst per-issue score."* — do not leave the rationale empty.
+- **Coverage Ratio denominator** must equal the **Total Scenarios** in the Test Coverage Summary table. If they do not match, recount the scenarios before saving.
+- **Actionable feedback block is conditional:** include the bullets only when at least one issue scored ≤ 3 or the Coverage Ratio is below 60%. When omitted, do not leave an empty `**Actionable feedback:**` header.
+- **Wrap in `<details>`** so the section is collapsed by default in the GitHub comment.
 
 ---
 

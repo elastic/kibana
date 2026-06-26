@@ -22,6 +22,7 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -216,18 +217,28 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiCopy textToCopy={connector.id}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          onClick={copy}
-                          color="text"
-                          iconType="copy"
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
                             {
                               defaultMessage: 'Copy Connector ID',
                             }
                           )}
-                          data-test-subj="copyConnectorIdButton"
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            onClick={copy}
+                            color="text"
+                            iconType="copy"
+                            aria-label={i18n.translate(
+                              'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
+                              {
+                                defaultMessage: 'Copy Connector ID',
+                              }
+                            )}
+                            data-test-subj="copyConnectorIdButton"
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </EuiFlexItem>

@@ -108,6 +108,7 @@
     "@kbn/shared-ux-ai-components",
     "@kbn/streams-ai",
     "@kbn/cps",
+    "@kbn/agent-builder-browser",
     "@kbn/evals-plugin",
     "@kbn/shared-ux-ai-components",
     "@kbn/deeplinks-management",
@@ -116,5 +117,9 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/inference-connectors",
     "@kbn/safer-lodash-set",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
+    "@kbn/core-chrome-layout-constants",
   ]
 }

@@ -62,12 +62,12 @@ describe('useFilterUrlSync', () => {
     );
   });
 
-  it('does not call setAppFilters when _a has no filters', () => {
+  it('clears inherited app filters when _a has no filters', () => {
     mockGet.mockReturnValue(null);
 
     renderHook(() => useFilterUrlSync());
 
-    expect(mockFilterManager.setAppFilters).not.toHaveBeenCalled();
+    expect(mockFilterManager.setAppFilters).toHaveBeenCalledWith([]);
   });
 
   it('writes filterManager app filters back to _a.filters on updates (excluding environment)', () => {

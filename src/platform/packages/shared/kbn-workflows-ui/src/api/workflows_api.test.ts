@@ -204,6 +204,15 @@ describe('WorkflowApi', () => {
         version: VERSION,
       });
     });
+
+    it('should include managed filter when provided', async () => {
+      await api.getAggs({ fields: ['tags'], managed: 'all' });
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/aggs', {
+        query: { fields: ['tags'], managed: 'all' },
+        version: VERSION,
+      });
+    });
   });
 
   describe('getConnectors', () => {
@@ -233,6 +242,24 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/internal/workflows/config', {
         version: '1',
+      });
+    });
+  });
+
+  describe('searchTriggerEvents', () => {
+    it('should call POST /internal/workflows/trigger_events/_search with body', async () => {
+      const params = {
+        kql: 'eventId: "e1"',
+        from: '2025-01-01',
+        to: '2025-12-31',
+        page: 2,
+        size: 25,
+      };
+      await api.searchTriggerEvents(params);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/workflows/trigger_events/_search', {
+        body: JSON.stringify(params),
+        version: INTERNAL_VERSION,
       });
     });
   });
@@ -287,6 +314,8 @@ describe('WorkflowApi', () => {
       const params = {
         page: 1,
         size: 10,
+        startedAfter: 'now-1w',
+        startedBefore: 'now',
         finishedAfter: '2026-05-01T00:00:00.000Z',
         finishedBefore: '2026-05-14T00:00:00.000Z',
         sortField: 'finishedAt' as const,

@@ -25,11 +25,10 @@ export const lensVisTypeAlias: VisTypeAlias = {
   name: APP_ID,
   promotion: true,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
-    defaultMessage: 'Lens',
+    defaultMessage: 'Visualization',
   }),
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
-    defaultMessage:
-      'Create visualizations using an intuitive drag-and-drop interface. Smart suggestions help you follow best practices and find the chart types that best match your data.',
+    defaultMessage: 'Build charts, metrics, and tables with a point-and-click editor.',
   }),
   order: 60,
   icon: LENS_ICON,

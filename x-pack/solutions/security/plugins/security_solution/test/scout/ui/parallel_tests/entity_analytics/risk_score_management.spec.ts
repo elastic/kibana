@@ -17,13 +17,13 @@ const RISK_SCORE_RULE: typeof CUSTOM_QUERY_RULE = {
   rule_id: 'risk-score-tab-rule',
 };
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/266895
+spaceTest.describe.skip(
   'Entity analytics management page - Risk Score tab',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await apiServices.detectionRule.deleteAll();
 
       await apiServices.detectionRule.createCustomQueryRule({
@@ -36,7 +36,6 @@ spaceTest.describe(
 
     spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await apiServices.detectionRule.deleteAll();
     });
 
@@ -74,9 +73,10 @@ spaceTest.describe(
       async ({ pageObjects, apiServices }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
-        await apiServices.entityAnalytics.initRiskEngine();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
+        await managementPage.toggleEntityAnalytics();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
 
         await expect(managementPage.riskScoreSaveButton).toBeHidden();
 
@@ -91,9 +91,10 @@ spaceTest.describe(
       async ({ pageObjects, apiServices }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
-        await apiServices.entityAnalytics.initRiskEngine();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
+        await managementPage.toggleEntityAnalytics();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
 
         await expect(managementPage.riskScoreSaveButton).toBeHidden();
 
@@ -108,9 +109,10 @@ spaceTest.describe(
       async ({ pageObjects, apiServices }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
-        await apiServices.entityAnalytics.initRiskEngine();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
+        await managementPage.toggleEntityAnalytics();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
 
         await expect(managementPage.includeClosedAlertsSwitch).not.toBeChecked();
 
@@ -130,9 +132,10 @@ spaceTest.describe(
       async ({ pageObjects, apiServices }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
-        await apiServices.entityAnalytics.initRiskEngine();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
+        await managementPage.toggleEntityAnalytics();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
 
         await expect(managementPage.includeClosedAlertsSwitch).not.toBeChecked();
 

@@ -30,6 +30,7 @@ import type {
   AppMenuSwitch,
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
 const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
   [...items].sort((a, b) => a.order - b.order);
@@ -121,11 +122,13 @@ export const getAppMenuItems = ({
 };
 
 export const processStaticItems = (staticItems?: AppMenuItemType[]): AppMenuItemType[] =>
-  sortByOrder(staticItems ?? []).map(({ separator, ...item }, index) => ({
+  sortByOrder(staticItems ?? []).map(({ separator, ...item }) => ({
     ...item,
     overflow: true,
-    ...(index === 0 ? { separator: 'above' as const } : {}),
   }));
+
+export const hasNonGlobalStaticItems = (staticItems?: Array<{ global?: boolean }>): boolean =>
+  !!staticItems?.some((item) => !item.global);
 
 export const isDisabled = (disableButton: AppMenuItemCommon['disableButton']) =>
   Boolean(isFunction(disableButton) ? disableButton() : disableButton);
@@ -158,7 +161,9 @@ export const createReturnFocus =
       parentElement.focus();
       return;
     }
-    document.querySelector<HTMLElement>('[data-test-subj="app-menu-overflow-button"]')?.focus();
+    document
+      .querySelector<HTMLElement>(`[data-test-subj="${APP_MENU_TEST_SUBJECTS.overflowButton}"]`)
+      ?.focus();
   };
 
 export const mapAppMenuItemToPanelItem = (
@@ -198,14 +203,13 @@ export const mapAppMenuItemToPanelItem = (
       ? getRouterLinkProps({ href: item.href, onClick: handleClick })
       : { onClick: hasClickHandler ? handleClick : undefined };
 
+  const itemTestSubj = item.testId ?? getAppMenuItemTestSubj(item.id);
+
   const itemName: ReactNode = item.labelBadgeText ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AppMenuBadge
-          text={item.labelBadgeText}
-          data-test-subj={item.testId ? `${item.testId}-badge` : undefined}
-        />
+        <AppMenuBadge text={item.labelBadgeText} data-test-subj={`${itemTestSubj}-badge`} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
@@ -220,7 +224,7 @@ export const mapAppMenuItemToPanelItem = (
     href: item?.href,
     target: item?.href ? item?.target : undefined,
     disabled: isDisabled(item?.disableButton),
-    'data-test-subj': item?.testId,
+    'data-test-subj': itemTestSubj,
     toolTipContent: content,
     toolTipProps: {
       title,
@@ -302,7 +306,7 @@ export const getPopoverSwitchItems = ({
           checked={switchConfig.checked}
           onChange={(e) => switchConfig.onChange(e.target.checked)}
           compressed
-          data-test-subj={switchConfig['data-test-subj'] ?? 'app-menu-switch'}
+          data-test-subj={switchConfig['data-test-subj'] ?? APP_MENU_TEST_SUBJECTS.switch}
         />
       ),
     },
@@ -433,10 +437,13 @@ export const getPopoverPanels = ({
     const mainPanel = panels.find((panel) => panel.id === startPanelId);
 
     if (staticPanel && mainPanel) {
-      mainPanel.items = [
-        ...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]),
-        ...(staticPanel.items as EuiContextMenuPanelItemDescriptor[]),
-      ];
+      const mainItems = mainPanel.items as EuiContextMenuPanelItemDescriptor[];
+      const staticPanelItems = staticPanel.items as EuiContextMenuPanelItemDescriptor[];
+
+      // Only add a separator between regular and static items
+      const separator = mainItems.length > 0 ? [createSeparatorItem('static-items-separator')] : [];
+
+      mainPanel.items = [...mainItems, ...separator, ...staticPanelItems];
       panels.splice(panels.indexOf(staticPanel), 1);
     }
   }

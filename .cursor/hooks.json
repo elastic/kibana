@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/strip-review-event.mjs",
+        "matcher": "\\bgh\\b"
+      },
+      {
+        "command": ".cursor/hooks/guard-skill-boundaries.mjs",
+        "matcher": "\\.netrc|\\.env|\\.aws|\\.ssh|\\.claude|\\.config/gh|references/|SKILL\\.md"
+      }
+    ]
+  }
+}

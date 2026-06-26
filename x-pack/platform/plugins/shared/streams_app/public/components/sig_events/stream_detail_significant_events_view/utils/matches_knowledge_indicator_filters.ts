@@ -20,8 +20,7 @@ export interface KnowledgeIndicatorFilterCriteria {
   searchTerm?: string;
 }
 
-const isActive = (ki: KnowledgeIndicator): boolean =>
-  ki.kind === 'query' || !ki.feature.excluded_at;
+const isActive = (ki: KnowledgeIndicator): boolean => ki.kind === 'query' || !ki.feature.excluded;
 
 export const matchesKnowledgeIndicatorFilters = (
   ki: KnowledgeIndicator,

@@ -31,7 +31,7 @@ import type {
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
@@ -150,12 +150,13 @@ export const MetricVis = ({
   );
 
   let breakdownByColumn: DatatableColumn | undefined;
-  let formatBreakdownValue: FieldFormatConvertFunction;
+  let formatBreakdownValue: TextContextTypeConvert;
   if (config.dimensions.breakdownBy) {
     breakdownByColumn = getColumnByAccessor(config.dimensions.breakdownBy, data.columns);
-    formatBreakdownValue = getFormatService()
-      .deserialize(getFormatByAccessor(config.dimensions.breakdownBy, data.columns))
-      .getConverterFor('text');
+    const breakdownFormatter = getFormatService().deserialize(
+      getFormatByAccessor(config.dimensions.breakdownBy, data.columns)
+    );
+    formatBreakdownValue = (v: unknown) => breakdownFormatter.convertToText(v);
   }
 
   const maxColId = config.dimensions.max
@@ -181,12 +182,9 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
-    let tileColor = defaultColor;
-
-    if (config.metric.applyColorTo) {
-      if (config.metric.palette?.params && typeof value === 'number') {
-        tileColor =
-          getColor(
+    const paletteColor =
+      config.metric.palette?.params && typeof value === 'number'
+        ? getColor(
             value,
             config.metric.palette,
             {
@@ -196,11 +194,10 @@ export const MetricVis = ({
             },
             data,
             rowIdx
-          ) ?? defaultColor;
-      } else {
-        tileColor = config.metric.color ?? defaultColor;
-      }
-    }
+          ) ?? defaultColor
+        : undefined;
+
+    const tileColor = paletteColor ?? config.metric.color ?? defaultColor;
 
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
@@ -288,9 +285,11 @@ export const MetricVis = ({
     return {
       ...baseMetric,
       // Override the background and main value color when the color is applied to the value
-      ...(config.metric.applyColorTo === 'value'
-        ? { color: defaultColor, valueColor: tileColor }
-        : { color: tileColor, valueColor: undefined }),
+      ...(config.metric.applyColorTo === 'value' && { color: defaultColor, valueColor: tileColor }),
+      ...(config.metric.applyColorTo === 'background' && {
+        color: tileColor,
+        valueColor: undefined,
+      }),
     };
   });
 

@@ -8,7 +8,7 @@
 import type { z } from '@kbn/zod/v4';
 import React, { useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea, EuiMarkdownEditor } from '@elastic/eui';
 import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
@@ -31,6 +31,7 @@ export const Textarea = ({
   label,
   name,
   type,
+  metadata,
   isRequired,
   patternValidation,
   minLength,
@@ -40,6 +41,7 @@ export const Textarea = ({
   const { control, resetField } = useFormContext();
   const [isFocused, setIsFocused] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+  const isMarkdown = metadata?.markdown === true;
 
   const rules = useMemo(() => {
     const validate: Record<string, (value: unknown) => true | string> = {};
@@ -92,19 +94,32 @@ export const Textarea = ({
             error={fieldState.error?.message}
             fullWidth
           >
-            <EuiTextArea
-              inputRef={field.ref}
-              name={field.name}
-              value={(field.value as string) ?? ''}
-              onChange={(e) => field.onChange(e.target.value)}
-              onBlur={() => {
-                field.onBlur();
-                setIsFocused(false);
-              }}
-              onFocus={() => setIsFocused(true)}
-              isInvalid={!!fieldState.error}
-              fullWidth
-            />
+            {isMarkdown ? (
+              <EuiMarkdownEditor
+                value={(field.value as string) ?? ''}
+                onChange={(value) => {
+                  field.onChange(value);
+                  if (!isFocused) setIsFocused(true);
+                }}
+                aria-label={typeof label === 'string' ? label : name}
+                editorId={path}
+                data-test-subj="template-field-markdown-editor"
+              />
+            ) : (
+              <EuiTextArea
+                inputRef={field.ref}
+                name={field.name}
+                value={(field.value as string) ?? ''}
+                onChange={(e) => field.onChange(e.target.value)}
+                onBlur={() => {
+                  field.onBlur();
+                  setIsFocused(false);
+                }}
+                onFocus={() => setIsFocused(true)}
+                isInvalid={!!fieldState.error}
+                fullWidth
+              />
+            )}
           </EuiFormRow>
           {showInlineActions && (
             <InlineFieldActions

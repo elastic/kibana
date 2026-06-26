@@ -9,7 +9,7 @@ import { EuiCallOut, EuiFlexGroup, EuiSpacer, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { COMPOSITE_SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { COMPOSITE_SLO_EDIT_FORM_DEFAULT_VALUES, MIN_COMPOSITE_MEMBERS } from '../constants';
 import type { CreateCompositeSLOForm } from '../types';
 import { CompositeSloDescriptionSection } from './composite_slo_description_section';
 import { CompositeSloFormFooter } from './composite_slo_form_footer';
@@ -26,7 +26,7 @@ export function CompositeSloEditForm({ initialValues, compositeSloId, isEditMode
   const form = useForm<CreateCompositeSLOForm>({
     defaultValues: initialValues ?? COMPOSITE_SLO_EDIT_FORM_DEFAULT_VALUES,
     values: initialValues,
-    mode: 'all',
+    mode: 'onSubmit',
   });
 
   const { watch, formState } = form;
@@ -34,7 +34,8 @@ export function CompositeSloEditForm({ initialValues, compositeSloId, isEditMode
   const name = watch('name');
 
   const isMembersSectionValid =
-    members.length > 0 && members.every((m) => Number.isInteger(m.weight) && m.weight >= 1);
+    members.length >= MIN_COMPOSITE_MEMBERS &&
+    members.every((m) => Number.isInteger(m.weight) && m.weight >= 1);
   const isObjectiveSectionValid =
     formState.isValid || (!formState.errors.timeWindow && !formState.errors.objective);
   const isDescriptionSectionValid = Boolean(name);

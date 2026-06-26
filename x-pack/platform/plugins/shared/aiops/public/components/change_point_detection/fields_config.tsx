@@ -20,6 +20,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -426,13 +427,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
                   setIsActionMenuOpen(false);
                   openCasesModalCallback({
                     time_range: timeRange,
-                    viewType: caseAttachment.viewType,
-                    fn: fieldConfig.fn,
-                    metricField: fieldConfig.metricField,
-                    dataViewId: dataView.id,
+                    view_type: caseAttachment.viewType,
+                    aggregation_function: fieldConfig.fn,
+                    metric_field: fieldConfig.metricField,
+                    data_view_id: dataView.id,
                     ...(fieldConfig.splitField
                       ? {
-                          splitField: fieldConfig.splitField,
+                          split_field: fieldConfig.splitField,
                           partitions: selectedPartitions,
                         }
                       : {}),
@@ -479,13 +480,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
         serializedState: {
           title: newTitle,
           description: newDescription,
-          viewType: dashboardAttachment.viewType,
-          dataViewId: dataView.id,
-          metricField: fieldConfig.metricField,
-          splitField: fieldConfig.splitField,
-          fn: fieldConfig.fn,
-          ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
-          maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
+          view_type: dashboardAttachment.viewType,
+          data_view_id: dataView.id,
+          metric_field: fieldConfig.metricField,
+          split_field: fieldConfig.splitField,
+          aggregation_function: fieldConfig.fn,
+          ...(dashboardAttachment.applyTimeRange ? { time_range: timeRange } : {}),
+          max_series_to_plot: dashboardAttachment.maxSeriesToPlot,
           ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
         },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
@@ -518,19 +519,29 @@ const FieldPanel: FC<FieldPanelProps> = ({
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems={'flexStart'} justifyContent={'spaceBetween'} gutterSize={'s'}>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="aiopsChangePointDetectionExpandConfigButton"
-            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-            onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.aiops.changePointDetection.toggleChangePointsTableLabel',
               {
                 defaultMessage: 'Toggle change points table',
               }
             )}
-            aria-expanded={isExpanded}
-            size="s"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="aiopsChangePointDetectionExpandConfigButton"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
+              aria-label={i18n.translate(
+                'xpack.aiops.changePointDetection.toggleChangePointsTableLabel',
+                {
+                  defaultMessage: 'Toggle change points table',
+                }
+              )}
+              aria-expanded={isExpanded}
+              size="s"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -565,21 +576,28 @@ const FieldPanel: FC<FieldPanelProps> = ({
                   }
                 )}
                 button={
-                  <EuiButtonIcon
-                    data-test-subj="aiopsChangePointDetectionContextMenuButton"
-                    aria-label={i18n.translate(
-                      'xpack.aiops.changePointDetection.configActionsLabel',
-                      {
-                        defaultMessage: 'Context menu',
-                      }
-                    )}
-                    color="text"
-                    display="base"
-                    size="s"
-                    isSelected={isActionMenuOpen}
-                    iconType="boxesVertical"
-                    onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
-                  />
+                  <EuiToolTip
+                    content={i18n.translate('xpack.aiops.changePointDetection.configActionsLabel', {
+                      defaultMessage: 'Context menu',
+                    })}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="aiopsChangePointDetectionContextMenuButton"
+                      aria-label={i18n.translate(
+                        'xpack.aiops.changePointDetection.configActionsLabel',
+                        {
+                          defaultMessage: 'Context menu',
+                        }
+                      )}
+                      color="text"
+                      display="base"
+                      size="s"
+                      isSelected={isActionMenuOpen}
+                      iconType="boxesVertical"
+                      onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isActionMenuOpen}
                 closePopover={setIsActionMenuOpen.bind(null, false)}

@@ -41,6 +41,7 @@ export const SyntheticsSharedContext: React.FC<
         storage,
         contentManagement: startPlugins.contentManagement,
         data: startPlugins.data,
+        dataViews: startPlugins.dataViews,
         inspector: startPlugins.inspector,
         triggersActionsUi: startPlugins.triggersActionsUi,
         observability: startPlugins.observability,

@@ -9,12 +9,32 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
+const mockUpsertRule = jest.fn().mockResolvedValue({});
+const mockNavigateToUrl = jest.fn();
+const mockAddSuccess = jest.fn();
+const mockPrepend = (path: string) => `/base${path}`;
+
 jest.mock('@kbn/core-di-browser', () => ({
   Context: {
     Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   },
-  useService: () => ({}),
   CoreStart: (key: string) => key,
+  useService: (token: unknown) => {
+    if (token === 'application') {
+      return { navigateToUrl: mockNavigateToUrl };
+    }
+    if (token === 'http') {
+      return { basePath: { prepend: mockPrepend } };
+    }
+    if (token === 'notifications') {
+      return { toasts: { addSuccess: mockAddSuccess } };
+    }
+    return { upsertRule: mockUpsertRule };
+  },
+}));
+
+jest.mock('../../services/rules_api', () => ({
+  RulesApi: Symbol('RulesApi'),
 }));
 
 jest.mock('../../components/rule_details/rule_context', () => ({
@@ -30,23 +50,6 @@ jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
 }));
 
 const createMockServices = () => ({
-  rulesApi: {
-    createRule: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
-    updateRule: jest.fn().mockResolvedValue({}),
-    getRule: jest.fn().mockResolvedValue({}),
-    deleteRule: jest.fn().mockResolvedValue({}),
-    bulkEnableRules: jest.fn().mockResolvedValue({}),
-    bulkDisableRules: jest.fn().mockResolvedValue({}),
-  } as any,
-  application: {
-    navigateToUrl: jest.fn(),
-  } as any,
-  basePath: {
-    prepend: (path: string) => `/base${path}`,
-  } as any,
-  notifications: {
-    toasts: { addSuccess: jest.fn(), addError: jest.fn() },
-  } as any,
   container: {} as any,
 });
 
@@ -61,7 +64,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     metadata: { name: 'My Rule', tags: ['tag1'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    evaluation: { query: { kql: 'host.name: *' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
     state_transition: null,
     enabled: overrides.enabled,
   } as any,
@@ -130,7 +133,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('proposed')).toBeDefined();
+      expect(getByText('draft')).toBeDefined();
     });
 
     it('shows enabled status when origin set and enabled is undefined (server default)', () => {
@@ -245,10 +248,11 @@ describe('createRuleAttachmentDefinition', () => {
     });
 
     describe('Create rule handler', () => {
-      it('calls createRule and updateOrigin with the new rule id', async () => {
+      it('calls upsertRule and updateOrigin', async () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment();
+        attachment.data.id = 'pre-assigned-id';
         const registerActionButtons = jest.fn();
         const updateOrigin = jest.fn().mockResolvedValue(undefined);
 
@@ -270,15 +274,16 @@ describe('createRuleAttachmentDefinition', () => {
         const saveButton = buttons.find((b: { label: string }) => b.label === 'Create rule');
         await saveButton.handler();
 
-        expect(services.rulesApi.createRule).toHaveBeenCalledWith(
+        expect(mockUpsertRule).toHaveBeenCalledWith(
+          'pre-assigned-id',
           expect.objectContaining({ kind: 'signal' })
         );
-        expect(updateOrigin).toHaveBeenCalledWith('new-rule-id');
+        expect(updateOrigin).toHaveBeenCalledWith('pre-assigned-id');
       });
     });
 
     describe('Update Rule handler', () => {
-      it('calls updateRule with the rule id', async () => {
+      it('calls upsertRule with the origin id', async () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment({ origin: 'rule-123' });
@@ -302,7 +307,7 @@ describe('createRuleAttachmentDefinition', () => {
         const updateButton = buttons.find((b: { label: string }) => b.label === 'Update Rule');
         await updateButton.handler();
 
-        expect(services.rulesApi.updateRule).toHaveBeenCalledWith(
+        expect(mockUpsertRule).toHaveBeenCalledWith(
           'rule-123',
           expect.objectContaining({ metadata: attachment.data.metadata })
         );
@@ -334,9 +339,7 @@ describe('createRuleAttachmentDefinition', () => {
         const viewButton = buttons.find((b: { label: string }) => b.label === 'View in Rules');
         viewButton.handler();
 
-        expect(services.application.navigateToUrl).toHaveBeenCalledWith(
-          expect.stringContaining('rule-123')
-        );
+        expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('rule-123'));
       });
     });
   });

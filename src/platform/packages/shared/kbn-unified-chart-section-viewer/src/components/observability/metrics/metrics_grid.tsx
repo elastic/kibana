@@ -13,8 +13,11 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
+import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
+import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
@@ -23,10 +26,49 @@ import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
-import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_OPEN_IN_DISCOVER,
+  ACTION_VIEW_DETAILS,
+} from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
+
+const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
+
+const useStableApplicableDimensions = (
+  dimensions: Dimension[],
+  dimensionFields: readonly Dimension[]
+): Dimension[] => {
+  const stabilizedRef = useRef<{ key: string | null; value: Dimension[] }>({
+    key: null,
+    value: EMPTY_APPLICABLE_DIMENSIONS,
+  });
+
+  return useMemo(() => {
+    const applicable = dimensions.filter((dimension) =>
+      dimensionFields.some((field) => field.name === dimension.name)
+    );
+    const key = applicable.length === 0 ? null : stableStringify(applicable);
+
+    if (stabilizedRef.current.key === key) {
+      return stabilizedRef.current.value;
+    }
+
+    const value = applicable.length === 0 ? EMPTY_APPLICABLE_DIMENSIONS : applicable;
+    stabilizedRef.current = { key, value };
+    return value;
+  }, [dimensions, dimensionFields]);
+};
+
+const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_INSPECT_PANEL,
+  ACTION_VIEW_DETAILS,
+  ACTION_COPY_TO_DASHBOARD,
+];
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -281,10 +323,9 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
-    const applicableDimensions = useMemo(
-      () =>
-        dimensions.filter((dim) => metricItem.dimensionFields.some((df) => df.name === dim.name)),
-      [dimensions, metricItem.dimensionFields]
+    const applicableDimensions = useStableApplicableDimensions(
+      dimensions,
+      metricItem.dimensionFields
     );
 
     const esqlQuery = useMemo(() => {
@@ -306,6 +347,13 @@ const ChartItem = React.memo(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
     );
+
+    const titleHighlight = useMemo(() => {
+      if (!searchTerm?.trim()) {
+        return undefined;
+      }
+      return getFieldSearchMatchingHighlight(metricItem.metricName, searchTerm.trim());
+    }, [metricItem.metricName, searchTerm]);
 
     return (
       <A11yGridCell
@@ -332,8 +380,9 @@ const ChartItem = React.memo(
           chartLayers={chartLayers}
           syncCursor
           syncTooltips={false}
-          titleHighlight={searchTerm}
+          titleHighlight={titleHighlight}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+          quickActionIds={METRICS_QUICK_ACTION_IDS}
           userMessages={userMessages}
           profileId={profileId}
         />

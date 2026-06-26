@@ -47,11 +47,16 @@ jest.mock('@xyflow/react', () => {
     ),
     useNodesState: jest.fn((initialNodes: unknown) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges: unknown) => [initialEdges, jest.fn()]),
+    useStore: jest.fn((selector: (state: { width: number; height: number }) => unknown) =>
+      selector({ width: 1200, height: 600 })
+    ),
     useReactFlow: jest.fn(() => ({
       fitView: jest.fn(),
       zoomIn: jest.fn(),
       zoomOut: jest.fn(),
       setCenter: jest.fn(),
+      getNodes: jest.fn(() => []),
+      getNodesBounds: jest.fn(() => ({ x: 0, y: 0, width: 0, height: 0 })),
     })),
   };
 });
@@ -77,10 +82,26 @@ jest.mock('./popover', () => ({
 
 jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes: unknown) => nodes),
+  applyServiceMapLayout: jest.fn((nodes: unknown) => nodes),
 }));
 
 jest.mock('./service_map_minimap', () => ({
   ServiceMapMinimap: () => <div data-testid="react-flow-minimap" />,
+}));
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
 }));
 
 const createMockNode = (id: string, label: string): ServiceMapNode => ({
@@ -124,6 +145,22 @@ function ServiceMapGraphWithFullscreenState(
   );
 }
 
+const expectButtonTooltip = async (button: HTMLElement, content: string) => {
+  expect(button).toHaveAccessibleName(content);
+  expect(button).not.toHaveAttribute('title');
+
+  const tooltipAnchor = button.closest('.euiToolTipAnchor') ?? button;
+  fireEvent.mouseEnter(tooltipAnchor);
+  fireEvent.mouseOver(tooltipAnchor);
+
+  await waitFor(() => {
+    expect(screen.getByRole('tooltip')).toHaveTextContent(content);
+  });
+
+  fireEvent.mouseLeave(tooltipAnchor);
+  fireEvent.mouseOut(tooltipAnchor);
+};
+
 describe('ServiceMapGraph - Controls', () => {
   it('renders the controls container', () => {
     render(
@@ -156,14 +193,13 @@ describe('ServiceMapGraph - Controls', () => {
 
     const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
     expect(fullscreenButton).toBeInTheDocument();
-    expect(fullscreenButton).toHaveAttribute('title', 'Enter fullscreen');
+    await expectButtonTooltip(fullscreenButton, 'Enter fullscreen');
 
     await act(async () => {
       fullscreenButton.click();
     });
     await waitFor(() => {
-      expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAttribute(
-        'title',
+      expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAccessibleName(
         'Exit fullscreen (esc)'
       );
     });
@@ -177,20 +213,19 @@ describe('ServiceMapGraph - Controls', () => {
     );
 
     const fullscreenButton = screen.getByTestId('serviceMapFullScreenButton');
-    expect(fullscreenButton).toHaveAttribute('title', 'Exit fullscreen (esc)');
+    await expectButtonTooltip(fullscreenButton, 'Exit fullscreen (esc)');
 
     await act(async () => {
       fullscreenButton.click();
     });
     await waitFor(() => {
-      expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAttribute(
-        'title',
+      expect(screen.getByTestId('serviceMapFullScreenButton')).toHaveAccessibleName(
         'Enter fullscreen'
       );
     });
   });
 
-  it('renders "View full service map" button when fullMapHref is provided', () => {
+  it('renders "View full service map" button when fullMapHref is provided', async () => {
     const fullMapHref = '/app/apm/service-map?rangeFrom=now-24h&rangeTo=now';
     render(
       <ReactFlowProvider>
@@ -201,7 +236,7 @@ describe('ServiceMapGraph - Controls', () => {
     const viewFullMapButton = screen.getByTestId('serviceMapViewFullMapButton');
     expect(viewFullMapButton).toBeInTheDocument();
     expect(viewFullMapButton).toHaveAttribute('href', fullMapHref);
-    expect(viewFullMapButton).toHaveAttribute('title', 'View full service map');
+    await expectButtonTooltip(viewFullMapButton, 'View full service map');
   });
 
   it('does not render "View full service map" button when fullMapHref is not provided', () => {

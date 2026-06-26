@@ -2,7 +2,6 @@
   "x-pack/platform/test/fixtures/es_archives/action_task_params",
   "x-pack/platform/test/fixtures/es_archives/actions",
   "x-pack/platform/test/fixtures/es_archives/alerting/8_2_0",
-  "x-pack/platform/test/fixtures/es_archives/alerts",
   "x-pack/platform/test/fixtures/es_archives/cases/default",
   "x-pack/platform/test/fixtures/es_archives/cases/migrations/7.11.1",
   "x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2",

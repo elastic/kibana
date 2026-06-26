@@ -10,11 +10,12 @@ import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { API_VERSIONS, ACTIONS_INDEX } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
 
 const USERS_PAGE_SIZE = 10;
 
@@ -74,22 +75,10 @@ export const getHistoryUsersRoute = (
 
           const index = actionsIndexExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX;
 
-          const spaceFilter =
-            spaceId === 'default'
-              ? {
-                  bool: {
-                    should: [
-                      { term: { space_id: 'default' } },
-                      { bool: { must_not: { exists: { field: 'space_id' } } } },
-                    ],
-                  },
-                }
-              : { term: { space_id: spaceId } };
-
           const { searchTerm } = request.query;
 
           const filter: estypes.QueryDslQueryContainer[] = [
-            spaceFilter,
+            buildSpaceIdFilter(spaceId),
             { term: { type: 'INPUT_ACTION' } },
             { term: { input_type: 'osquery' } },
             { exists: { field: 'user_id' } },

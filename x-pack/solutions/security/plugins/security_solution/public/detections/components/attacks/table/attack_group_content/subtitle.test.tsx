@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { ATTACK_DISCOVERY_AD_HOC_RULE_ID } from '@kbn/elastic-assistant-common';
 import { Subtitle } from './subtitle';
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 
@@ -26,8 +27,10 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 jest.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
   () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
-      <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown, alertIds }) => (
+      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
+        {markdown}
+      </div>
     )),
   })
 );
@@ -35,39 +38,96 @@ jest.mock(
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
 describe('Subtitle', () => {
-  it('should render with formatted date and summary', () => {
-    const { getByTestId } = render(<Subtitle attack={mockAttack} />);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (getFormattedDate as jest.Mock).mockReturnValue('2023-10-27 10:00:00');
+  });
 
+  it('should render with formatted date and summary for scheduled attacks', () => {
+    const scheduledAttack = { ...mockAttack, alertRuleUuid: 'some_other_rule_id' };
+    const { getByTestId } = render(<Subtitle attack={scheduledAttack} />);
+
+    expect(getByTestId('attack-subtitle')).toHaveTextContent(
+      'Detected on 2023-10-27 10:00:00|Malware and credential theft detected on {{ host.name SRVMAC08 }} by {{ user.name james }}.'
+    );
     expect(getByTestId('mock-markdown-formatter')).toHaveTextContent(
-      'Detected on 2023-10-27 10:00:00 • Malware and credential theft detected on {{ host.name SRVMAC08 }} by {{ user.name james }}.'
+      'Malware and credential theft detected on {{ host.name SRVMAC08 }} by {{ user.name james }}.'
     );
   });
 
   it('should render with formatted date only if summary is missing', () => {
-    const attackWithoutSummary = { ...mockAttack, entitySummaryMarkdown: undefined };
-    const { getByTestId } = render(<Subtitle attack={attackWithoutSummary} />);
+    const attackWithoutSummary = {
+      ...mockAttack,
+      alertRuleUuid: 'some_other_rule_id',
+      entitySummaryMarkdown: undefined,
+    };
+    const { getByTestId, queryByTestId } = render(<Subtitle attack={attackWithoutSummary} />);
 
-    expect(getByTestId('mock-markdown-formatter')).toHaveTextContent(
-      'Detected on 2023-10-27 10:00:00'
-    );
+    expect(getByTestId('attack-subtitle')).toHaveTextContent('Detected on 2023-10-27 10:00:00');
+    expect(queryByTestId('mock-markdown-formatter')).not.toBeInTheDocument();
   });
 
   it('should render anonymized summary when showAnonymized is true', () => {
-    const { getByTestId } = render(<Subtitle attack={mockAttack} showAnonymized={true} />);
+    const scheduledAttack = { ...mockAttack, alertRuleUuid: 'some_other_rule_id' };
+    const { getByTestId } = render(<Subtitle attack={scheduledAttack} showAnonymized={true} />);
 
     expect(getByTestId('mock-markdown-formatter')).toHaveTextContent(
-      'Detected on 2023-10-27 10:00:00 • Malware and credential theft detected on {{ host.name 3d241119-f77a-454e-8ee3-d36e05a8714f }} by {{ user.name 325761dd-b22b-4fdc-8444-a4ef66d76380 }}.'
+      'Malware and credential theft detected on {{ host.name 3d241119-f77a-454e-8ee3-d36e05a8714f }} by {{ user.name 325761dd-b22b-4fdc-8444-a4ef66d76380 }}.'
     );
   });
 
   it('should render only summary if formatted date is missing', () => {
     (getFormattedDate as jest.Mock).mockReturnValue(null);
-    const { getByTestId } = render(<Subtitle attack={mockAttack} />);
+    const scheduledAttack = { ...mockAttack, alertRuleUuid: 'some_other_rule_id' };
+    const { getByTestId } = render(<Subtitle attack={scheduledAttack} />);
 
     expect(getByTestId('mock-markdown-formatter')).toHaveTextContent(
       'Malware and credential theft detected on {{ host.name SRVMAC08 }} by {{ user.name james }}.'
     );
-    expect(getByTestId('mock-markdown-formatter')).not.toHaveTextContent('Detected on');
-    expect(getByTestId('mock-markdown-formatter')).not.toHaveTextContent('•');
+    expect(getByTestId('attack-subtitle')).not.toHaveTextContent('Detected on');
+    expect(getByTestId('attack-subtitle')).not.toHaveTextContent('|');
+  });
+
+  it('should render with avatar and "Run by" section for manually generated attacks', () => {
+    const manualAttack = {
+      ...mockAttack,
+      alertRuleUuid: ATTACK_DISCOVERY_AD_HOC_RULE_ID,
+      userName: 'test_user',
+    };
+    const { getByTestId } = render(<Subtitle attack={manualAttack} />);
+
+    expect(getByTestId('attack-subtitle')).toHaveTextContent('Detected on 2023-10-27 10:00:00');
+    expect(getByTestId('attack-subtitle')).toHaveTextContent('Run by:');
+    expect(getByTestId('attack-subtitle')).toHaveTextContent('|');
+    expect(getByTestId('attack-run-by-avatar')).toBeInTheDocument();
+  });
+
+  it('should render with "Unknown" user if userName is missing for manually generated attacks', () => {
+    const manualAttack = {
+      ...mockAttack,
+      alertRuleUuid: ATTACK_DISCOVERY_AD_HOC_RULE_ID,
+      userName: undefined,
+    };
+    const { getByTestId } = render(<Subtitle attack={manualAttack} />);
+
+    expect(getByTestId('attack-subtitle')).toHaveTextContent('Detected on 2023-10-27 10:00:00');
+    expect(getByTestId('attack-subtitle')).toHaveTextContent('Run by:');
+    expect(getByTestId('attack-subtitle')).toHaveTextContent('|');
+    expect(getByTestId('attack-run-by-avatar')).toBeInTheDocument();
+  });
+
+  it('should pass originalAlertIds to AttackDiscoveryMarkdownFormatter', () => {
+    const scheduledAttack = {
+      ...mockAttack,
+      alertRuleUuid: 'some_other_rule_id',
+      alertIds: ['alert-1', 'alert-2'],
+      replacements: { 'alert-1': 'original-1' },
+    };
+    const { getByTestId } = render(<Subtitle attack={scheduledAttack} />);
+
+    expect(getByTestId('mock-markdown-formatter')).toHaveAttribute(
+      'data-alert-ids',
+      JSON.stringify(['original-1', 'alert-2'])
+    );
   });
 });

@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
 import React from 'react';
-import { FieldIcon } from '@kbn/field-utils';
-import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import {
   createStubDataView,
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataTableColumnHeader } from './data_table_column_header';
-import { waitFor } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 const stubDataViewWithNested = createStubDataView({
   spec: {
@@ -54,32 +52,24 @@ const stubDataViewWithNested = createStubDataView({
   },
 });
 
-describe('DataTableColumnHeader', function () {
-  async function mountComponent(element: ReactElement) {
-    const component = mountWithI18nProvider(element);
-    // wait for lazy modules
-    await new Promise((resolve) => setTimeout(resolve, 5));
-    component.update();
-
-    return component;
-  }
+describe('DataTableColumnHeader', () => {
   it('should render a correct token', async () => {
-    const component = await mountComponent(
+    renderWithKibanaRenderContext(
       <DataTableColumnHeader
-        columnName="bytes"
         columnDisplayName="bytesDisplayName"
+        columnName="bytes"
         dataView={stubLogstashDataView}
         showColumnTokens
       />
     );
-    expect(component.find(FieldIcon).first().prop('type')).toBe('number');
-    await waitFor(() => expect(component.text()).toBe('NumberbytesDisplayName'));
+
+    expect(await screen.findByText('Number')).toBeVisible();
+    expect(screen.getByText('bytesDisplayName')).toBeVisible();
   });
 
   it('should render a correct token for a custom column type (in case of text-based queries)', async () => {
-    const component = await mountComponent(
+    renderWithKibanaRenderContext(
       <DataTableColumnHeader
-        columnName="bytes"
         columnDisplayName="bytesDisplayName"
         columnsMeta={{
           bytes: {
@@ -87,37 +77,43 @@ describe('DataTableColumnHeader', function () {
             esType: 'keyword',
           },
         }}
+        columnName="bytes"
         dataView={stubLogstashDataView}
         showColumnTokens
       />
     );
-    expect(component.text()).toBe('KeywordbytesDisplayName');
-    expect(component.find(FieldIcon).first().prop('type')).toBe('keyword');
+
+    expect(await screen.findByText('Keyword')).toBeVisible();
+    expect(screen.getByText('bytesDisplayName')).toBeVisible();
   });
 
-  it('should not render a token for Document column', async () => {
-    const component = await mountComponent(
+  it('should not render a token for Document column', () => {
+    renderWithKibanaRenderContext(
       <DataTableColumnHeader
-        columnName="_source"
         columnDisplayName="Document"
+        columnName="_source"
         dataView={stubLogstashDataView}
         showColumnTokens
       />
     );
-    expect(component.text()).toBe('Document');
-    expect(component.find(FieldIcon).exists()).toBe(false);
+
+    expect(screen.getByText('Document')).toBeVisible();
+    expect(screen.queryByText('Number')).not.toBeInTheDocument();
+    expect(screen.queryByText('Keyword')).not.toBeInTheDocument();
+    expect(screen.queryByText('Nested')).not.toBeInTheDocument();
   });
 
   it('should render the nested icon', async () => {
-    const component = await mountComponent(
+    renderWithKibanaRenderContext(
       <DataTableColumnHeader
-        columnName="nested_user"
         columnDisplayName="Nested User"
+        columnName="nested_user"
         dataView={stubDataViewWithNested}
         showColumnTokens
       />
     );
-    expect(component.text()).toBe('NestedNested User');
-    expect(component.find(FieldIcon).first().prop('type')).toBe('nested');
+
+    expect(await screen.findByText('Nested')).toBeVisible();
+    expect(screen.getByText('Nested User')).toBeVisible();
   });
 });

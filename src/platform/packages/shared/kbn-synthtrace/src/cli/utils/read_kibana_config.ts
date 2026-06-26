@@ -12,6 +12,8 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 
+export const discoverRepoRoot = (): string => REPO_ROOT;
+
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 
 export const readKibanaConfig = () => {

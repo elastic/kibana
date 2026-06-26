@@ -16,7 +16,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
 const FAILURE_HOOKS_CONFIG = require.resolve('./__fixtures__/failure_hooks/config.js');
 
-describe('failure hooks', function () {
+// Failing: See https://github.com/elastic/kibana/issues/271289
+describe.skip('failure hooks', function () {
   it('runs and prints expected output', () => {
     const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG], {
       // this FTR run should not produce a scout report

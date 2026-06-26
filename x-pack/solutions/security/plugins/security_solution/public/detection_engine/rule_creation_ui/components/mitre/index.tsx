@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiToolTip,
+} from '@elastic/eui';
 import { camelCase, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -136,13 +143,15 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              isDisabled={isDisabled || isEqual(values, threatDefault)}
-              onClick={() => removeTactic(index)}
-              aria-label={Rulei18n.DELETE}
-            />
+            <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+              <EuiButtonIcon
+                color="danger"
+                iconType="trash"
+                isDisabled={isDisabled || isEqual(values, threatDefault)}
+                onClick={() => removeTactic(index)}
+                aria-label={Rulei18n.DELETE}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       );

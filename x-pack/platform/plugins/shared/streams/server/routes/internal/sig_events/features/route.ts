@@ -8,8 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
-import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
-import { v4 as uuid } from 'uuid';
+import { baseFeatureSchema, featureUpsertSchema, type Feature } from '@kbn/streams-schema';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -22,7 +21,9 @@ import {
 } from '../../../../lib/tasks/task_definitions/features_identification';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
-import type { FeatureBulkOperation } from '../../../../lib/streams/feature/feature_client';
+import type { KIBulkOperation } from '../../../../lib/streams/ki';
+
+const MAX_INPUT_STRING_LENGTH = 255;
 
 export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
 
@@ -42,7 +43,7 @@ export const upsertFeatureRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: baseFeatureSchema.and(z.object({ uuid: z.string().optional() })),
+    body: baseFeatureSchema.and(z.object({ expires_at: z.iso.datetime().optional() })),
   }),
   handler: async ({
     params,
@@ -50,39 +51,36 @@ export const upsertFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
-      {
+    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
+      await getScopedClients({
         request,
-      }
-    );
+      });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    const featureClient = await getFeatureClient();
-    const { uuid: existingUuid, ...baseBody } = params.body;
+    const kiClient = await getKnowledgeIndicatorClient();
+    const { id, expires_at, ...baseBody } = params.body;
 
-    if (existingUuid) {
-      const [resolved] = await featureClient.findFeaturesByUuids([existingUuid]);
-      if (!resolved) {
-        throw new StatusError(`Feature ${existingUuid} not found`, 404);
-      }
-      if (resolved.stream_name !== params.path.name) {
+    if (id) {
+      const { hits } = await kiClient.getFeatures(params.path.name, { id: [id] });
+      const [resolved] = hits;
+      if (resolved && resolved.stream_name !== params.path.name) {
         throw new StatusError(
-          `Feature ${existingUuid} belongs to stream '${resolved.stream_name}', not '${params.path.name}'`,
+          `Feature ${id} belongs to stream '${resolved.stream_name}', not '${params.path.name}'`,
           400
         );
       }
     }
 
-    await featureClient.bulk(params.path.name, [
+    await kiClient.bulk(params.path.name, [
       {
         index: {
           feature: {
+            id,
             ...baseBody,
-            status: 'active' as const,
-            last_seen: new Date().toISOString(),
-            uuid: existingUuid ?? uuid(),
+            updated_at: new Date().toISOString(),
+            expires_at,
           },
         },
       },
@@ -93,7 +91,7 @@ export const upsertFeatureRoute = createServerRoute({
 });
 
 export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{uuid}',
+  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
   options: {
     access: 'internal',
     summary: 'Deletes a feature for a stream',
@@ -105,7 +103,10 @@ export const deleteFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), uuid: z.string() }),
+    path: z.object({
+      name: z.string().max(MAX_INPUT_STRING_LENGTH),
+      id: z.string().max(MAX_INPUT_STRING_LENGTH),
+    }),
   }),
   handler: async ({
     params,
@@ -113,17 +114,16 @@ export const deleteFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
-      {
+    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
+      await getScopedClients({
         request,
-      }
-    );
+      });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    const featureClient = await getFeatureClient();
-    await featureClient.deleteFeature(params.path.name, params.path.uuid);
+    const kiClient = await getKnowledgeIndicatorClient();
+    await kiClient.bulk(params.path.name, [{ delete: { type: 'feature', id: params.path.id } }]);
 
     return { acknowledged: true };
   },
@@ -142,7 +142,7 @@ export const listFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_INPUT_STRING_LENGTH) }),
     query: z.optional(
       z.object({
         query: z.string().optional(),
@@ -157,24 +157,23 @@ export const listFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
-      {
+    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
+      await getScopedClients({
         request,
-      }
-    );
+      });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    const featureClient = await getFeatureClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     const {
       query,
       search_mode: searchMode,
       include_excluded: includeExcluded,
     } = params.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(params.path.name, query, { searchMode, includeExcluded })
-      : await featureClient.getFeatures(params.path.name, { includeExcluded });
+      ? await kiClient.findFeatures(params.path.name, query, { searchMode, includeExcluded })
+      : await kiClient.getFeatures(params.path.name, { includeExcluded });
 
     return { features };
   },
@@ -207,26 +206,25 @@ export const listAllFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
-      {
+    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
+      await getScopedClients({
         request,
-      }
-    );
+      });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
 
-    const featureClient = await getFeatureClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     const {
       query,
       search_mode: searchMode,
       include_excluded: includeExcluded,
     } = params?.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
-      : await featureClient.getFeatures(streamNames, { includeExcluded });
+      ? await kiClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
+      : await kiClient.getFeatures(streamNames, { includeExcluded });
 
     return { features };
   },
@@ -251,7 +249,7 @@ export const bulkFeaturesRoute = createServerRoute({
         z.union([
           z.object({
             index: z.object({
-              feature: featureSchema,
+              feature: featureUpsertSchema,
             }),
           }),
           z.object({
@@ -279,11 +277,10 @@ export const bulkFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { getFeatureClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients(
-      {
+    const { getKnowledgeIndicatorClient, streamsClient, licensing, uiSettingsClient } =
+      await getScopedClients({
         request,
-      }
-    );
+      });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -294,8 +291,11 @@ export const bulkFeaturesRoute = createServerRoute({
 
     await streamsClient.ensureStream(name);
 
-    const featureClient = await getFeatureClient();
-    await featureClient.bulk(name, operations);
+    const kiClient = await getKnowledgeIndicatorClient();
+    const kiOps: KIBulkOperation[] = operations.map((op) =>
+      'delete' in op ? { delete: { type: 'feature' as const, id: op.delete.id } } : op
+    );
+    await kiClient.bulk(name, kiOps);
 
     return { acknowledged: true };
   },
@@ -334,30 +334,32 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
-    const { getFeatureClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const featureClient = await getFeatureClient();
+    const kiClient = await getKnowledgeIndicatorClient();
 
     // Resolve UUID → stream_name server-side. UUIDs not found in storage are
     // idempotent no-ops counted as `skipped` (matching the queries endpoint
     // pattern, which uses getQueryLinks for the same purpose).
-    const opsByUuid = new Map<string, FeatureBulkOperation>();
+    const opsByUuid = new Map<string, KIBulkOperation>();
     for (const op of params.body.operations) {
       const id = 'delete' in op ? op.delete.id : 'exclude' in op ? op.exclude.id : op.restore.id;
-      // Last write wins on duplicate UUIDs in the input — caller shouldn't
-      // pass duplicates, but if they do, the latter op replaces the former.
-      opsByUuid.set(id, op);
+      const kiOp: KIBulkOperation =
+        'delete' in op ? { delete: { type: 'feature', id: op.delete.id } } : op;
+      opsByUuid.set(id, kiOp);
     }
     const requestedUuids = Array.from(opsByUuid.keys());
-    const resolved = await featureClient.findFeaturesByUuids(requestedUuids);
+    const resolved = await kiClient.findFeaturesByIds(requestedUuids);
     const skippedFromLookup = requestedUuids.length - resolved.length;
 
     // Group resolved ops by stream.
-    const byStream = resolved.reduce<Record<string, FeatureBulkOperation[]>>(
-      (acc, { uuid: featureUuid, stream_name: streamName }) => {
-        const op = opsByUuid.get(featureUuid);
+    const byStream = resolved.reduce<Record<string, KIBulkOperation[]>>(
+      (acc, { id: featureId, stream_name: streamName }) => {
+        const op = opsByUuid.get(featureId);
         if (!op) {
           return acc;
         }
@@ -370,7 +372,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       {}
     );
 
-    // featureClient.bulk silently drops exclude/restore ops targeting computed
+    // kiClient.bulk silently drops exclude/restore ops targeting computed
     // features (and any stale UUIDs that slipped through between the lookup
     // and the bulk call). Both classes show up as additional `skipped` count.
     // Only thrown batches count as `failed`.
@@ -380,7 +382,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     for (const [streamName, ops] of Object.entries(byStream)) {
       try {
-        const { applied, skipped: streamSkipped } = await featureClient.bulk(streamName, ops);
+        const { applied, skipped: streamSkipped } = await kiClient.bulk(streamName, ops);
         succeeded += applied;
         skipped += streamSkipped;
       } catch (error) {
@@ -397,6 +399,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   },
 });
 
+/** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead. Will be removed in a follow-up. */
 export const featuresStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features/_status',
   options: {
@@ -434,6 +437,7 @@ export const featuresStatusRoute = createServerRoute({
   },
 });
 
+/** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead. Will be removed in a follow-up. */
 export const featuresTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features/_task',
   options: {

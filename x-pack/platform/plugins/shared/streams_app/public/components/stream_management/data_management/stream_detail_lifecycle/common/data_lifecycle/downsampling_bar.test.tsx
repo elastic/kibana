@@ -104,7 +104,7 @@ describe('DownsamplingBar', () => {
       fireEvent.click(button);
 
       expect(screen.getByTestId('downsamplingPopover-step1-title')).toBeInTheDocument();
-      expect(screen.getByTestId('downsamplingPopover-step1-afterDataStored')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingPopover-step1-ageBadge')).toHaveTextContent('0d');
       expect(screen.getByTestId('downsamplingPopover-step1-interval')).toBeInTheDocument();
       expect(screen.getByLabelText('Downsample step 1')).toBeInTheDocument();
     });

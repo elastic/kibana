@@ -18,6 +18,8 @@ project:
   sourceRoot: src/core/packages/chrome/browser-internal-types
 dependsOn:
   - '@kbn/core-chrome-browser'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - shared-common
   - package

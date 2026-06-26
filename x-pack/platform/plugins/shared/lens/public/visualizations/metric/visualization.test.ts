@@ -12,6 +12,8 @@ import type {
   ExpressionAstExpression,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FrameMock } from '../../mocks';
@@ -1055,6 +1057,7 @@ describe('metric visualization', () => {
             visualization.toExpression(
               {
                 ...fullState,
+                applyColorTo: undefined,
                 showBar: true,
                 color: undefined,
               },

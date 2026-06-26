@@ -37,6 +37,7 @@ export type {
   WorkflowExecutionListItemDto,
   WorkflowExecutionLogModel,
   WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
@@ -45,12 +46,14 @@ export type {
   WorkflowStepExecutionListDto,
   WorkflowMgetResponseDto,
   ChildWorkflowExecutionItem,
+  WorkflowExecutionCollapseField,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
   // api types
+  WorkflowSortField,
   WorkflowsSearchParams,
   // connector types
   ConnectorSubAction,
@@ -86,6 +89,7 @@ export {
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,

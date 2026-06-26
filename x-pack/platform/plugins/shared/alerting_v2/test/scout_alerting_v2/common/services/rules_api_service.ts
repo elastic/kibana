@@ -9,6 +9,7 @@ import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type {
+  BulkGetRulesResponse,
   BulkOperationParams,
   BulkOperationResponse,
   CreateRuleData,
@@ -32,6 +33,7 @@ export interface RulesApiService {
   bulkDelete: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
   bulkDisable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
   bulkEnable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
+  bulkGet: (id: string[]) => Promise<BulkGetRulesResponse>;
   waitForEnabledState: (params: WaitForEnabledStateParams) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
@@ -142,6 +144,16 @@ export const getRulesApiService = ({
             intervals: [POLL_INTERVAL_MS],
           })
           .toBe(enabled);
+      }),
+    bulkGet: (ids) =>
+      measurePerformanceAsync(log, 'rules.bulkGet', async () => {
+        const response = await kbnClient.request<BulkGetRulesResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_get`,
+          headers: COMMON_HEADERS,
+          body: { ids },
+        });
+        return response.data;
       }),
     cleanUp: () =>
       measurePerformanceAsync(log, 'rules.cleanUp', async () => {

@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-http-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/zod'
   - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-security-server-mocks'
@@ -91,6 +92,7 @@ dependsOn:
   - '@kbn/core-analytics-server-mocks'
   - '@kbn/cps-server-utils'
   - '@kbn/cps-utils'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

@@ -8,9 +8,9 @@ import { inject, injectable } from 'inversify';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   createRuleDataSchema,
+  errorResponseSchema,
   ruleResponseSchema,
   type CreateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -36,10 +36,10 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     description:
       'Creates a rule with the given identifier, or fully replaces it if one already exists.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createRuleDataSchema),
-      params: buildRouteValidationWithZod(ruleIdParamsSchema),
+      body: createRuleDataSchema,
+      params: ruleIdParamsSchema,
     },
     response: {
       200: {
@@ -51,7 +51,17 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
         description: 'Returns the newly created rule.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
+      },
+      404: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the rule with the given ID does not exist.',
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description:
+          'Indicates the rule was created or updated concurrently, or the request changes immutable fields.',
       },
     },
   };

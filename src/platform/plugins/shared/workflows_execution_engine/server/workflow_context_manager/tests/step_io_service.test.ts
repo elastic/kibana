@@ -15,11 +15,13 @@ import type {
   ConnectorStep,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  StackFrame,
   WorkflowYaml,
 } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
+import { buildStepExecutionId } from '../../utils';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -250,6 +252,42 @@ describe('StepIoService', () => {
 
       expect(service.getOutputSizeStats()).toEqual({ totalBytes: 0, stepCount: 0 });
     });
+
+    it('clears the evicted flag so rehydration does not overwrite fresh output', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: 0,
+      });
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'run_health_check',
+        { stale: true },
+        1,
+        'workflow.execute'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.hasEvictedOutputs()).toBe(true);
+
+      service.setStepOutput('step-1', { health: 'ok' });
+
+      expect(service.hasEvictedOutputs()).toBe(false);
+      expect(service.getStepOutput('step-1')).toEqual({ health: 'ok' });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'step-1',
+          output: { stale: true },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.rehydrateOutputs(['step-1']);
+
+      expect(service.getStepOutput('step-1')).toEqual({ health: 'ok' });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+    });
   });
 
   describe('size threshold (driven through setStepOutput)', () => {
@@ -457,6 +495,98 @@ describe('StepIoService', () => {
 
       expect(service.getStepOutput('step-1')).toBeDefined();
       expect(service.hasEvictedOutputs()).toBe(false);
+    });
+
+    describe('loop source pinning (pinForeachSource / unpinForeachScope)', () => {
+      it('keeps a pinned loop source resident across an eviction cycle', async () => {
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+        // A >threshold source output the loop iterates over.
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'source-exec',
+          'bigSource',
+          { items: 'x'.repeat(200) },
+          250,
+          'connector'
+        );
+
+        // Pin it as a foreach source (the expression references `bigSource`).
+        service.pinForeachSource('myForeach', '{{ steps.bigSource.output.items }}');
+
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        // Without the pin this would be evicted (it is above threshold); the
+        // pin must keep it resident for the lifetime of the loop.
+        expect(service.getStepOutput('source-exec')).toEqual({ items: 'x'.repeat(200) });
+        expect(service.hasEvictedOutputs()).toBe(false);
+      });
+
+      it('allows the source to be evicted again after the loop scope is unpinned', async () => {
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'source-exec',
+          'bigSource',
+          { items: 'x'.repeat(200) },
+          250,
+          'connector'
+        );
+
+        service.pinForeachSource('myForeach', '{{ steps.bigSource.output.items }}');
+
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.getStepOutput('source-exec')).toBeDefined();
+
+        // Loop exits -> release the pin. The output is no longer protected:
+        // re-touching it re-queues it for the deferred eviction cycle (mirrors a
+        // subsequent step write in the same flush), and it is now evicted.
+        service.unpinForeachScope('myForeach');
+        service.setStepOutput('source-exec', { items: 'x'.repeat(200) }, 250);
+
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        expect(service.getStepOutput('source-exec')).toBeUndefined();
+        expect(service.hasEvictedOutputs()).toBe(true);
+      });
+
+      it('keeps the source pinned until every loop scope that pinned it has unpinned', async () => {
+        const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+        seedCompletedStepWithSize(
+          state,
+          service,
+          'source-exec',
+          'bigSource',
+          { items: 'x'.repeat(200) },
+          250,
+          'connector'
+        );
+
+        // Two distinct loop scopes pin the same source (nested/sibling loops).
+        service.pinForeachSource('loopA', '{{ steps.bigSource.output.items }}');
+        service.pinForeachSource('loopB', '{{ steps.bigSource.output.items }}');
+
+        // Inner loop exits — source must stay resident for the outer loop. Even
+        // re-touching it (re-queuing for eviction) must not evict while loopA
+        // still holds the pin.
+        service.unpinForeachScope('loopB');
+        service.setStepOutput('source-exec', { items: 'x'.repeat(200) }, 250);
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.getStepOutput('source-exec')).toBeDefined();
+        expect(service.hasEvictedOutputs()).toBe(false);
+
+        // Outer loop exits — now nothing pins it and it can be evicted.
+        service.unpinForeachScope('loopA');
+        service.setStepOutput('source-exec', { items: 'x'.repeat(200) }, 250);
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.getStepOutput('source-exec')).toBeUndefined();
+      });
     });
 
     it('does not evict failed steps (output: null is semantic)', async () => {
@@ -1260,7 +1390,7 @@ describe('StepIoService', () => {
 
   describe('prepareForRead', () => {
     function buildGraphWorkflow() {
-      const workflow: WorkflowYaml = {
+      const workflow = {
         name: 'Targeted',
         version: '1',
         description: 'test',
@@ -1279,7 +1409,7 @@ describe('StepIoService', () => {
             with: { message: '{{steps.step_b.output}}' },
           } as ConnectorStep,
         ],
-      };
+      } as unknown as WorkflowYaml;
       const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
       const stepCNode = graph.topologicalOrder
         .map((nodeId) => graph.getNode(nodeId))
@@ -1294,6 +1424,74 @@ describe('StepIoService', () => {
         node: stepCNode,
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+    });
+
+    it('preserves fresh output when a deferred step completes on resume before flush', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness();
+      state.updateWorkflowExecution({ stepExecutionIds: ['exec-child'] });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValueOnce([
+        {
+          id: 'exec-child',
+          stepId: 'run_health_check',
+          stepType: 'workflow.execute',
+          status: ExecutionStatus.WAITING_FOR_CHILD,
+        } as EsWorkflowStepExecution,
+      ]);
+      await service.load();
+
+      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(service.getStepOutput('exec-child')).toBeUndefined();
+
+      state.upsertStep({
+        id: 'exec-child',
+        stepId: 'run_health_check',
+        stepType: 'workflow.execute',
+        status: ExecutionStatus.COMPLETED,
+      });
+      const childOutput = { health: 'ok' };
+      service.setStepOutput('exec-child', childOutput);
+
+      const workflow = {
+        name: 'Parent',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'run_health_check',
+            type: 'workflow.execute',
+            with: { 'workflow-id': 'child' },
+          } as ConnectorStep,
+          {
+            name: 'log_result',
+            type: 'console',
+            with: { message: '{{steps.run_health_check.output | json}}' },
+          } as ConnectorStep,
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const logResultNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'log_result')!;
+
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'exec-child',
+          output: null,
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: logResultNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      expect(service.getStepOutput('exec-child')).toEqual(childOutput);
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
@@ -1322,6 +1520,427 @@ describe('StepIoService', () => {
       // Only step_b is referenced by step_c — exec-a should not be rehydrated.
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-b'],
+        ['id', 'output', 'workflowRunId']
+      );
+    });
+
+    it('rehydrates outputs referenced by the active foreach source expression', async () => {
+      const workflow: WorkflowYaml = {
+        name: 'Foreach source dependency',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'get_active_alerts',
+            type: 'console',
+            with: { message: 'alerts' },
+          } as ConnectorStep,
+          {
+            name: 'foreach_alert',
+            type: 'foreach',
+            foreach: '{{steps.get_active_alerts.output.hits.hits}}',
+            steps: [
+              {
+                name: 'create_new_case',
+                type: 'console',
+                with: { message: 'case' },
+              } as ConnectorStep,
+              {
+                name: 'add_alert_to_case',
+                type: 'console',
+                with: {
+                  message: 'case={{steps.create_new_case.output.id}} alert={{foreach.item._id}}',
+                },
+              } as ConnectorStep,
+            ],
+          },
+        ],
+      };
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const addAlertNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'add_alert_to_case')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const alertsOutput = { hits: { hits: [{ _id: 'alert-1' }] } };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-alerts',
+        'get_active_alerts',
+        alertsOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-case',
+        'create_new_case',
+        { id: 'case-1' },
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      const scopeStack: StackFrame[] = [
+        {
+          stepId: 'foreach_alert',
+          nestedScopes: [
+            {
+              nodeId: 'enterForeach_foreach_alert',
+              nodeType: 'enter-foreach',
+              scopeId: '0',
+            },
+          ],
+        },
+      ];
+      const foreachExecutionId = buildStepExecutionId(
+        state.getWorkflowExecutionId(),
+        'foreach_alert',
+        []
+      );
+      state.updateWorkflowExecution({ scopeStack });
+      state.upsertStep({
+        id: foreachExecutionId,
+        stepId: 'foreach_alert',
+        stepType: 'foreach',
+        status: ExecutionStatus.RUNNING,
+        state: { index: 0, total: 1 },
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepInput(foreachExecutionId, {
+        foreach: '{{steps.get_active_alerts.output.hits.hits}}',
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+        { id: 'exec-case', output: { id: 'case-1' } } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: addAlertNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-case']));
+      expect(rehydratedIds).toHaveLength(2);
+    });
+
+    it('rehydrates outputs referenced by nested active foreach source expressions', async () => {
+      const workflow = {
+        name: 'Nested foreach source dependencies',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'get_outer_source',
+            type: 'console',
+            with: { message: 'outer' },
+          } as ConnectorStep,
+          {
+            name: 'get_inner_source',
+            type: 'console',
+            with: { message: 'inner' },
+          } as ConnectorStep,
+          {
+            name: 'outer_loop',
+            type: 'foreach',
+            foreach: '{{steps.get_outer_source.output.items}}',
+            steps: [
+              {
+                name: 'create_new_case',
+                type: 'console',
+                with: { message: 'case' },
+              } as ConnectorStep,
+              {
+                name: 'inner_loop',
+                type: 'foreach',
+                foreach: '{{steps.get_inner_source.output.items}}',
+                steps: [
+                  {
+                    name: 'deep_step',
+                    type: 'console',
+                    with: {
+                      message: 'case={{steps.create_new_case.output.id}} item={{foreach.item._id}}',
+                    },
+                  } as ConnectorStep,
+                ],
+              },
+            ],
+          },
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const deepStepNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'deep_step')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const outerOutput = { items: [{ group: 'a' }] };
+      const innerOutput = { items: [{ _id: 'alert-1' }] };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-outer-source',
+        'get_outer_source',
+        outerOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-inner-source',
+        'get_inner_source',
+        innerOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-case',
+        'create_new_case',
+        { id: 'case-1' },
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      const outerFrame: StackFrame = {
+        stepId: 'outer_loop',
+        nestedScopes: [
+          {
+            nodeId: 'enterForeach_outer_loop',
+            nodeType: 'enter-foreach',
+            scopeId: '0',
+          },
+        ],
+      };
+      const innerFrame: StackFrame = {
+        stepId: 'inner_loop',
+        nestedScopes: [
+          {
+            nodeId: 'enterForeach_inner_loop',
+            nodeType: 'enter-foreach',
+            scopeId: '0',
+          },
+        ],
+      };
+      const outerExecutionId = buildStepExecutionId(
+        state.getWorkflowExecutionId(),
+        'outer_loop',
+        []
+      );
+      const innerExecutionId = buildStepExecutionId(state.getWorkflowExecutionId(), 'inner_loop', [
+        outerFrame,
+      ]);
+      state.updateWorkflowExecution({ scopeStack: [outerFrame, innerFrame] });
+      state.upsertStep({
+        id: outerExecutionId,
+        stepId: 'outer_loop',
+        stepType: 'foreach',
+        status: ExecutionStatus.RUNNING,
+        state: { index: 0, total: 1 },
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepInput(outerExecutionId, {
+        foreach: '{{steps.get_outer_source.output.items}}',
+      });
+      state.upsertStep({
+        id: innerExecutionId,
+        stepId: 'inner_loop',
+        stepType: 'foreach',
+        status: ExecutionStatus.RUNNING,
+        state: { index: 0, total: 1 },
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepInput(innerExecutionId, {
+        foreach: '{{steps.get_inner_source.output.items}}',
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-outer-source', output: outerOutput } as unknown as EsWorkflowStepExecution,
+        { id: 'exec-inner-source', output: innerOutput } as unknown as EsWorkflowStepExecution,
+        { id: 'exec-case', output: { id: 'case-1' } } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: deepStepNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      expect(rehydratedIds).toEqual(
+        expect.arrayContaining(['exec-outer-source', 'exec-inner-source', 'exec-case'])
+      );
+      expect(rehydratedIds).toHaveLength(3);
+    });
+
+    it('rehydrates outputs referenced by switch case match templates', async () => {
+      const workflow = {
+        name: 'Switch match dependency',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'get_active_alerts',
+            type: 'console',
+            with: { message: 'alerts' },
+          },
+          {
+            name: 'expected_relation',
+            type: 'console',
+            with: { message: 'eq' },
+          },
+          {
+            name: 'choose_branch',
+            type: 'switch',
+            expression: '{{steps.expected_relation.output}}',
+            cases: [
+              {
+                match: '{{steps.get_active_alerts.output.hits.total.relation}}',
+                steps: [
+                  {
+                    name: 'matched_branch',
+                    type: 'console',
+                    with: { message: 'matched' },
+                  },
+                ],
+              },
+            ],
+            default: [
+              {
+                name: 'default_branch',
+                type: 'console',
+                with: { message: 'default' },
+              },
+            ],
+          },
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const switchNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'choose_branch' && n.type === 'enter-switch')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const alertsOutput = { hits: { total: { relation: 'eq' } } };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-alerts',
+        'get_active_alerts',
+        alertsOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-relation',
+        'expected_relation',
+        'eq',
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+        { id: 'exec-relation', output: 'eq' } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: switchNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-relation']));
+      expect(rehydratedIds).toHaveLength(2);
+    });
+
+    it('rehydrates outputs referenced by while exit conditions', async () => {
+      const workflow = {
+        name: 'While exit dependency',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'get_active_alerts',
+            type: 'console',
+            with: { message: 'alerts' },
+          },
+          {
+            name: 'create_new_case',
+            type: 'console',
+            with: { message: 'case' },
+          },
+          {
+            name: 'check_while',
+            type: 'while',
+            condition: '{{steps.get_active_alerts.output.hits.total.value}}',
+            'max-iterations': 2,
+            steps: [
+              {
+                name: 'while_log',
+                type: 'console',
+                with: { message: 'case={{steps.create_new_case.output.id}}' },
+              },
+            ],
+          },
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const exitWhileNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'check_while' && n.type === 'exit-while')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const alertsOutput = { hits: { total: { value: 5 } } };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-alerts',
+        'get_active_alerts',
+        alertsOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-case',
+        'create_new_case',
+        { id: 'case-1' },
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: exitWhileNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['exec-alerts'],
         ['id', 'output', 'workflowRunId']
       );
     });

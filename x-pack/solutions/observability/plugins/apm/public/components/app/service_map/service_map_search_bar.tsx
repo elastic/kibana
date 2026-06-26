@@ -55,21 +55,36 @@ export function ServiceMapSearchBar() {
   const history = useHistory();
   const serviceName = useServiceName();
 
-  const controlsConfig = useMemo(
-    () =>
-      serviceName
-        ? SERVICE_MAP_CONTROLS_CONFIG.filter((c) => c.field_name !== 'service.name')
-        : SERVICE_MAP_CONTROLS_CONFIG,
-    [serviceName]
-  );
+  const controlsConfig = useMemo(() => {
+    const base = serviceName
+      ? SERVICE_MAP_CONTROLS_CONFIG.filter((c) => c.field_name !== 'service.name')
+      : SERVICE_MAP_CONTROLS_CONFIG;
+
+    const visible = dataView
+      ? base.filter((c) => dataView.fields.getByName(c.field_name) !== undefined)
+      : base;
+
+    if (visible.length <= 2) {
+      return visible.map((c) => ({ ...c, width: 'medium' as const, grow: false }));
+    }
+
+    return visible;
+  }, [serviceName, dataView]);
 
   // Persist filter-bar pills and control selections in the URL (_a) so they survive refresh.
-  const { persistControlSelections, getRestoredControlSelections } = useFilterUrlSync();
+  const { initialAppFilters, persistControlSelections, getRestoredControlSelections } =
+    useFilterUrlSync();
+
+  const getFilterBarFilters = useCallback(
+    () => [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()],
+    [filterManager]
+  );
 
   // Mirror filterManager state so filter-bar pill changes trigger a re-render.
-  const [filterBarFilters, setFilterBarFilters] = useState<Filter[]>(() =>
-    filterManager.getFilters()
-  );
+  const [filterBarFilters, setFilterBarFilters] = useState<Filter[]>(() => [
+    ...filterManager.getGlobalFilters(),
+    ...initialAppFilters,
+  ]);
 
   // Controls API selections — set by onFiltersChange.
   const [panelFilters, setPanelFilters] = useState<Filter[]>([]);
@@ -81,10 +96,10 @@ export function ServiceMapSearchBar() {
   // Keep filterBarFilters in sync with Kibana's filterManager.
   useEffect(() => {
     const sub = filterManager.getUpdates$().subscribe(() => {
-      setFilterBarFilters(filterManager.getFilters());
+      setFilterBarFilters(getFilterBarFilters());
     });
     return () => sub.unsubscribe();
-  }, [filterManager]);
+  }, [filterManager, getFilterBarFilters]);
 
   // When Controls fire, record that they have and update panel filters.
   const handlePanelFiltersChange = useCallback((filters: Filter[]) => {

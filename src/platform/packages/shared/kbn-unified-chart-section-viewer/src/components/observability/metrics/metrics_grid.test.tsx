@@ -50,7 +50,7 @@ jest.mock('../../../common/utils', () => ({
       splitAccessors.length > 0
         ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
         : '';
-    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
+    return `FROM ${metricItem.indexName} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
   }),
 }));
 
@@ -78,7 +78,7 @@ describe('MetricsGrid', () => {
   const metricItems: MetricsGridProps['metricItems'] = [
     {
       metricName: 'system.cpu.utilization',
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -86,7 +86,7 @@ describe('MetricsGrid', () => {
     },
     {
       metricName: 'system.memory.utilization',
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -285,7 +285,7 @@ describe('MetricsGrid', () => {
     const heterogeneousMetrics: MetricsGridProps['metricItems'] = [
       {
         metricName: 'fieldsense.energy.battery.voltage',
-        dataStream: 'fieldsense-station-metrics',
+        indexName: 'fieldsense-station-metrics',
         units: [null],
         metricTypes: ['gauge'],
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -293,7 +293,7 @@ describe('MetricsGrid', () => {
       },
       {
         metricName: 'system.cpu.utilization',
-        dataStream: 'metrics-hostmetricsreceiver.otel-default',
+        indexName: 'metrics-hostmetricsreceiver.otel-default',
         units: [null],
         metricTypes: ['gauge'],
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -339,7 +339,7 @@ describe('MetricsGrid', () => {
       relativeTimeRange: { from: 'now-1h', to: 'now' },
     });
 
-    const dataStreamFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
+    const sourceFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
       filters: [],
       query: { esql: 'TS edge-case-gauge-to-counter' },
       esqlVariables: [],
@@ -362,14 +362,14 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed data stream as originalSource', () => {
-      renderMetricsGrid({ fetchParams: dataStreamFetchParams });
+      renderMetricsGrid({ fetchParams: sourceFetchParams });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-gauge-to-counter' })
       );
     });
 
-    it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to dataStream)', () => {
+    it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to indexName)', () => {
       renderMetricsGrid({ fetchParams: globFetchParams });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
@@ -460,7 +460,7 @@ describe('MetricsGrid', () => {
         ...metricItems,
         {
           metricName: 'system.disk.utilization',
-          dataStream: 'metrics-*',
+          indexName: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],
           fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -468,7 +468,7 @@ describe('MetricsGrid', () => {
         },
         {
           metricName: 'system.network.utilization',
-          dataStream: 'metrics-*',
+          indexName: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],
           fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -618,7 +618,7 @@ describe('MetricsGrid', () => {
     it('renders the flyout when initial restorable flyoutState references an existing metric', () => {
       const { queryByTestId } = renderMetricsGridWithInitialFlyoutState({
         gridPosition: 1,
-        metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       });
@@ -641,7 +641,7 @@ describe('MetricsGrid', () => {
       const onInitialStateChange = jest.fn();
       const initialFlyoutState: FlyoutState = {
         gridPosition: 0,
-        metricUniqueKey: `${metricItems[0].dataStream}::${metricItems[0].metricName}`,
+        metricUniqueKey: `${metricItems[0].indexName}::${metricItems[0].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.cpu.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       };
@@ -698,7 +698,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 0,
-              metricUniqueKey: `${metricItems[0].dataStream}::${metricItems[0].metricName}`,
+              metricUniqueKey: `${metricItems[0].indexName}::${metricItems[0].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.cpu.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -727,7 +727,7 @@ describe('MetricsGrid', () => {
       const { queryByTestId } = renderMetricsGridWithInitialFlyoutState(
         {
           gridPosition: 1,
-          metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+          metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
           esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
           selectedTabId: 'overview',
         },
@@ -740,7 +740,7 @@ describe('MetricsGrid', () => {
     it('renders the restored flyout once the owning tab becomes active', () => {
       const initialFlyoutState: FlyoutState = {
         gridPosition: 1,
-        metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       };
@@ -786,7 +786,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 1,
-              metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+              metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -825,7 +825,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 0,
-              metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+              metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -846,6 +846,148 @@ describe('MetricsGrid', () => {
       expect(document.activeElement).toBe(gridCells[1]);
 
       (global.requestAnimationFrame as unknown as jest.SpyInstance).mockRestore();
+    });
+  });
+
+  describe('render efficiency', () => {
+    // Two metrics whose dimensionFields do NOT overlap.
+    // Selecting 'host.name' is only meaningful for the first metric.
+    const nonOverlappingMetrics: MetricsGridProps['metricItems'] = [
+      {
+        metricName: 'system.cpu.utilization',
+        indexName: 'metrics-system',
+        units: ['ms'],
+        metricTypes: ['counter'],
+        fieldTypes: [ES_FIELD_TYPES.LONG],
+        dimensionFields: [{ name: 'host.name' }],
+      },
+      {
+        metricName: 'k8s.container.cpu',
+        indexName: 'metrics-k8s',
+        units: ['ms'],
+        metricTypes: ['counter'],
+        fieldTypes: [ES_FIELD_TYPES.LONG],
+        dimensionFields: [{ name: 'container.id' }],
+      },
+    ];
+
+    it('recomputes esqlQuery only for metrics whose applicable dimensions changed', () => {
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={[]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(nonOverlappingMetrics.length);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      // Select 'host.name'. Only system.cpu.utilization supports it —
+      // k8s.container.cpu stays at [] → [] with a stable empty array reference.
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={[{ name: 'host.name' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not recompute esqlQuery when dimensions get a new array with identical content', () => {
+      const dimensions = [{ name: 'host.name' }];
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={dimensions}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(nonOverlappingMetrics.length);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={[{ name: 'host.name' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+    });
+
+    it('recomputes esqlQuery when a dimension type changes but the name stays the same', () => {
+      const hostMetric = nonOverlappingMetrics[0];
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[hostMetric]}
+            dimensions={[{ name: 'host.name', type: 'keyword' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[hostMetric]}
+            dimensions={[{ name: 'host.name', type: 'ip' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-renders every ChartItem when flyoutState changes, exposing a spurious context subscription', () => {
+      renderMetricsGrid();
+
+      expect(Chart).toHaveBeenCalledTimes(metricItems.length);
+
+      // Capture the onViewDetails handler before clearing the mock.
+      const onViewDetails = (Chart as jest.Mock).mock.calls[0][0].onViewDetails;
+      (Chart as jest.Mock).mockClear();
+
+      // Trigger a flyoutState change. No ChartItem prop changes — metricItems,
+      // dimensions, fetchParams, handleViewDetails, and isFocused are all
+      // unchanged. React.memo on ChartItem should therefore skip all re-renders.
+      //
+      // It does not, because ChartItem calls useMetricsExperienceState() to
+      // read `profileId`. That gives it a live subscription to the context
+      // object, which receives a new reference on every state update. When
+      // flyoutState changes, all N ChartItems re-render via the subscription
+      // even though `profileId` itself is static.
+      act(() => {
+        onViewDetails();
+      });
+
+      // BUG: Chart is called once per ChartItem (N = metricItems.length) despite
+      // no prop change. After the fix (pass profileId as a prop from MetricsGrid
+      // instead of reading it inside ChartItem), this count should be 0.
+      expect(Chart).toHaveBeenCalledTimes(metricItems.length);
     });
   });
 });

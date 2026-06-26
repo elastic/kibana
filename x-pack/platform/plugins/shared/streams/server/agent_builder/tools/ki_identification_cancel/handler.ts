@@ -5,33 +5,32 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/streams-schema';
-import type { TaskClient } from '../../../lib/tasks/task_client';
-import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
-import { getOnboardingTaskId } from '../../../lib/tasks/task_definitions/onboarding';
+import type { KibanaRequest } from '@kbn/core/server';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
+import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface CancelKiIdentificationHandlerParams {
-  stream_name: string;
-  task_client: TaskClient<StreamsTaskType>;
+  streamName: string;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+  request: KibanaRequest;
 }
 
 interface CancelKiIdentificationHandlerResult {
   stream_name: string;
-  task_id: string;
-  status: TaskStatus.BeingCanceled;
+  execution_id: string | null;
+  status: SigEventsWorkflowStatus.Canceled;
 }
 
 export async function cancelKiIdentificationToolHandler({
-  stream_name: streamName,
-  task_client: taskClient,
+  streamName,
+  streamsKIsOnboardingClient,
+  request,
 }: CancelKiIdentificationHandlerParams): Promise<CancelKiIdentificationHandlerResult> {
-  const taskId = getOnboardingTaskId(streamName);
-
-  await taskClient.cancel(taskId);
+  const executionId = await streamsKIsOnboardingClient.cancel({ streamName, request });
 
   return {
     stream_name: streamName,
-    task_id: taskId,
-    status: TaskStatus.BeingCanceled,
+    execution_id: executionId,
+    status: SigEventsWorkflowStatus.Canceled,
   };
 }

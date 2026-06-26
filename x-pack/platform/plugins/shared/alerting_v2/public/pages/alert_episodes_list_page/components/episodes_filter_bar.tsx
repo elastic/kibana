@@ -8,18 +8,17 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useState,
   type ChangeEvent,
   type SetStateAction,
 } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFilterGroup,
   EuiFieldSearch,
   EuiSuperDatePicker,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
@@ -31,8 +30,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
-import deepEqual from 'fast-deep-equal';
-import { DEFAULT_EPISODES_LIST_FILTER } from '../utils/episodes_list_url_state';
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
 
 export interface EpisodesFilterBarProps {
@@ -58,6 +56,7 @@ export const EpisodesFilterBar = ({
   isLoading = false,
   services,
 }: EpisodesFilterBarProps) => {
+  const { euiTheme } = useEuiTheme();
   const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
 
   useEffect(() => {
@@ -107,18 +106,8 @@ export const EpisodesFilterBar = ({
     setQueryStringInput(e.target.value);
   }, []);
 
-  const hasActiveFilters = useMemo(
-    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER) || queryStringInput.trim() !== '',
-    [filterState, queryStringInput]
-  );
-
-  const onClearFilters = useCallback(() => {
-    setQueryStringInput('');
-    onFilterChange({ ...DEFAULT_EPISODES_LIST_FILTER });
-  }, [onFilterChange]);
-
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
       <EuiFlexItem grow>
         <EuiFieldSearch
           fullWidth
@@ -127,6 +116,11 @@ export const EpisodesFilterBar = ({
           value={queryStringInput}
           onChange={onKueryChange}
           data-test-subj="episodesFilterBar-search"
+          css={css`
+            // When opening the details push flyout the filters bar shrinks, this ensures
+            // that the search bar keeps a minimum size for typing ergonomics
+            min-width: ${euiTheme.base * 20}px;
+          `}
         />
       </EuiFlexItem>
 
@@ -165,17 +159,6 @@ export const EpisodesFilterBar = ({
             </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          disabled={!hasActiveFilters}
-          onClick={onClearFilters}
-          data-test-subj="episodesFilterBar-resetFilters"
-        >
-          {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
-        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker

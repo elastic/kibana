@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH } from '../constants';
 
 const detectionEvidenceSchema = z.object({
   change_point_type: z.string().optional(),
@@ -14,9 +15,9 @@ const detectionEvidenceSchema = z.object({
 
 export const detectionSchema = z.object({
   '@timestamp': z.iso.datetime(),
-  silent: z.boolean(),
+  kind: z.enum(['detection', 'quiet', 'handled']),
   processed: z.boolean(),
-  detection_id: z.string().optional(),
+  detection_id: z.string().max(MAX_ID_LENGTH),
   rule_uuid: z.string(),
   rule_name: z.string(),
   stream_name: z.string().optional(),
@@ -24,7 +25,7 @@ export const detectionSchema = z.object({
   alert_index: z.string().optional(),
   workflow_execution_id: z.string().optional(),
   resolution_lookback_minutes: z.number().optional(),
-  peak_30m_alert_count: z.number().optional(),
+  peak_alert_count: z.number().optional(),
   detection_evidence: detectionEvidenceSchema.optional(),
   alert_samples: z.array(z.record(z.string(), z.unknown())).optional(),
   rules_activity: z.array(z.record(z.string(), z.unknown())).optional(),

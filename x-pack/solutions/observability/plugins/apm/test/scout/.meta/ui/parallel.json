@@ -1,6 +1,22 @@
 {
-  "sha1": "1a2d0ac75f8396587c395067057a715c0de7c8d7",
+  "sha1": "83939c840e9193939dd27e952cfd0478e1c264e1",
   "tests": [
+    {
+      "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
+      "title": "Clean up APM data after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 14,
+        "column": 1
+      }
+    },
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -13,7 +29,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 27,
+        "line": 28,
         "column": 1
       }
     },
@@ -578,6 +594,70 @@
       }
     },
     {
+      "id": "df56a3325a48a71-afebe196ba7356a",
+      "title": "Infrastructure tab passes automated accessibility checks",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-20a57e1ac67e92e",
+      "title": "Infrastructure tab shows container, pod, and host tabs when all infrastructure attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-840fea91fe7661e",
+      "title": "Infrastructure tab shows only the host tab when only host attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-0e5d0a0406776e4",
+      "title": "Infrastructure tab shows no data message when no infrastructure attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
       "id": "60c9455fa8e8206-13b591e4873487b",
       "title": "Service Dashboards displays a linked dashboard with a control group",
       "expectedStatus": "passed",
@@ -733,7 +813,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 86,
+        "line": 94,
         "column": 9
       }
     },
@@ -905,7 +985,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 44,
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ab0e55ecb54392-1c6000de23b1820",
+      "title": "Service map embeddable adds a Service map panel with filters + sync toggle and saves the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
+        "line": 255,
         "column": 9
       }
     },
@@ -1323,6 +1419,54 @@
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
         "line": 217,
         "column": 11
+      }
+    },
+    {
+      "id": "fb951fb128dda84-c5d46582a2eba63",
+      "title": "Metrics Tab - Instrumentation Switching narrows sequential migration ranges from the mixed instrumentation callout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "fb951fb128dda84-f23c65b841b8134",
+      "title": "Metrics Tab - Instrumentation Switching swaps chart sets for single-instrumentation ranges and shows no-data state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    },
+    {
+      "id": "fb951fb128dda84-dee252a0579642b",
+      "title": "Metrics Tab - Instrumentation Switching shows overlap warning when classic APM and OpenTelemetry metrics overlap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
+        "line": 133,
+        "column": 9
       }
     },
     {
@@ -2283,7 +2427,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 18,
+        "line": 54,
         "column": 9
       }
     },
@@ -2299,7 +2443,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 32,
+        "line": 68,
         "column": 9
       }
     },
@@ -2345,7 +2489,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 14,
+        "line": 26,
         "column": 7
       }
     },
@@ -2359,7 +2503,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 28,
+        "line": 40,
         "column": 7
       }
     },
@@ -2575,7 +2719,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 81,
+        "line": 89,
         "column": 9
       }
     },
@@ -2591,7 +2735,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 93,
+        "line": 101,
         "column": 9
       }
     },

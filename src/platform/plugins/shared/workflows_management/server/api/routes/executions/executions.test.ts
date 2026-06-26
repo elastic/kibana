@@ -9,11 +9,13 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import {
   WorkflowExecutionNotFoundError,
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
+import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
 import type { RouteDependencies } from '../types';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
@@ -26,6 +28,12 @@ describe('Execution Routes', () => {
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
       emitEvent: jest.fn(),
+      managedWorkflows: {
+        install: jest.fn(),
+        uninstall: jest.fn(),
+        getWorkflowStatus: jest.fn(),
+        execute: jest.fn(),
+      },
     }),
     licensing: Promise.resolve({
       license: {
@@ -56,6 +64,10 @@ describe('Execution Routes', () => {
     forbidden: jest.fn((params?: any) => ({ type: 'forbidden', ...params })),
     conflict: jest.fn((params?: any) => ({ type: 'conflict', ...params })),
   };
+  const defaultAuthzResult = {
+    [WorkflowsManagementApiActions.readExecution]: true,
+    [WorkflowsManagementApiActions.readManagedExecution]: true,
+  };
 
   const mockWorkflow = {
     id: 'wf-1',
@@ -85,12 +97,18 @@ describe('Execution Routes', () => {
       resumeWorkflowExecution: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
     };
+    mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: false });
 
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
         .fn()
         .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
-          routeHandlers[`${method}:${path}`] = { handler };
+          routeHandlers[`${method}:${path}`] = {
+            handler: async (context, request, response) => {
+              request.authzResult ??= defaultAuthzResult;
+              return handler(context, request, response);
+            },
+          };
           return { addVersion: jest.fn() };
         }),
     });
@@ -323,8 +341,11 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
           finishedAfter: '2026-05-01T00:00:00.000Z',
           finishedBefore: '2026-05-14T00:00:00.000Z',
+          collapse: 'concurrencyGroupKey',
           sortField: 'finishedAt',
           sortOrder: 'desc',
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
@@ -334,7 +355,7 @@ describe('Execution Routes', () => {
       await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflowExecutions).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           workflowId: 'wf-1',
           statuses: ['running'],
           executionTypes: undefined,
@@ -343,11 +364,14 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
           finishedAfter: '2026-05-01T00:00:00.000Z',
           finishedBefore: '2026-05-14T00:00:00.000Z',
+          collapse: 'concurrencyGroupKey',
           sortField: 'finishedAt',
           sortOrder: 'desc',
-        },
+        }),
         'default'
       );
     });
@@ -377,14 +401,39 @@ describe('Execution Routes', () => {
       await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.searchStepExecutions).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           workflowId: 'wf-1',
           stepId: 's1',
           includeInput: true,
           includeOutput: false,
           page: 1,
           size: 10,
+        }),
+        'default'
+      );
+    });
+
+    it('should forward startedAfter and startedBefore query params to api.searchStepExecutions', async () => {
+      mockApi.searchStepExecutions.mockResolvedValue({ stepExecutions: [] });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { workflowId: 'wf-1' },
+        query: {
+          stepId: 's1',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
         },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.searchStepExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          stepId: 's1',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
+        }),
         'default'
       );
     });
@@ -427,6 +476,27 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
+    });
+
+    it('should reject managed executions without managed execution read privilege', async () => {
+      mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: true });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+        authzResult: {
+          [WorkflowsManagementApiActions.readExecution]: true,
+        },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: {
+          message: new ManagedWorkflowExecutionReadForbiddenError().message,
+        },
+      });
+      expect(result).toMatchObject({ type: 'forbidden' });
     });
   });
 

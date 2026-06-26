@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface PlaygroundNameProps {
@@ -25,15 +25,17 @@ export const PlaygroundName = ({ playgroundName, onEditName }: PlaygroundNamePro
     <EuiTitle css={css({ whiteSpace: 'nowrap' })} data-test-subj="playgroundName" size="xs">
       <h2>
         {playgroundName}
-        <EuiButtonIcon
-          aria-label={EDIT_NAME_LABEL}
-          color="text"
-          data-test-subj="edit-playground-name-button"
-          display="empty"
-          iconType="pencil"
-          size="s"
-          onClick={onEditName}
-        />
+        <EuiToolTip content={EDIT_NAME_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={EDIT_NAME_LABEL}
+            color="text"
+            data-test-subj="edit-playground-name-button"
+            display="empty"
+            iconType="pencil"
+            size="s"
+            onClick={onEditName}
+          />
+        </EuiToolTip>
       </h2>
     </EuiTitle>
   );

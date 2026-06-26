@@ -12,7 +12,7 @@ if: github.event.label.name == 'backlog-groom'
 steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
     with:
-      node-version-file: '.node-version'
+      node-version: '24.14.1'
       cache: yarn
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
@@ -48,6 +48,7 @@ network:
 checkout:
   fetch-depth: 0
 safe-outputs:
+  report-failure-as-issue: false
   staged: true
   create-pull-request:
     max: 1

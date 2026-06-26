@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-
 /**
- * Shape of the metadata stored on a `security.endpoint` unified attachment.
- * Server-side `validateEndpointAttachmentMetadata` guarantees this shape on
- * the write path, so renderers can safely cast the unified view's `metadata`
- * (typed as `Record<string, JsonValue>`) to `EndpointMetadata`.
+ * Public re-exports of the zod-inferred shapes for the `security.endpoint`
+ * unified attachment. The single source of truth lives in
+ * `common/cases/attachments/endpoint.ts` so the server-side registry
+ * (`registerUnified({ schema })`) and the client-side renderers can never drift.
+ *
+ * The cases unified-reference dispatcher types `metadata` as
+ * `Record<string, JsonValue>`; renderers cast to `EndpointMetadata` because
+ * the registered zod payload schema guarantees this shape on the write path.
  */
-export interface EndpointTarget {
-  endpointId: string;
-  hostname: string;
-  agentType: ResponseActionAgentType;
-}
-
-export interface EndpointMetadata {
-  comment: string;
-  command: string;
-  targets: EndpointTarget[];
-}
+export type {
+  EndpointAttachmentMetadata as EndpointMetadata,
+  EndpointAttachmentTarget as EndpointTarget,
+  EndpointAttachmentData as EndpointData,
+} from '../../../../common/cases/attachments/endpoint';

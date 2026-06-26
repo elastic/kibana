@@ -22,7 +22,7 @@ import { CollapsibleNav } from './collapsible_nav';
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
 
-const visibleIn = ['globalSearch' as const, 'sideNav' as const];
+const visibleIn = ['globalSearch' as const, 'classicSideNav' as const, 'projectSideNav' as const];
 
 function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
   return {

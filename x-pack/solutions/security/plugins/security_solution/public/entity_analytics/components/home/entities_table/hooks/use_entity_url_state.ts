@@ -53,11 +53,16 @@ export interface EntityURLStateResult {
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
 }
 
+export const DEFAULT_ENTITIES_TABLE_SORT: Array<[string, string]> = [
+  ['entity.risk.calculated_score_norm', 'desc'],
+  ['@timestamp', 'desc'],
+];
+
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery) => ({
   query,
   filters,
   pageFilters: [],
-  sort: { field: '@timestamp', direction: 'desc' },
+  sort: DEFAULT_ENTITIES_TABLE_SORT,
   pageIndex: 0,
 });
 export const useEntityURLState = ({

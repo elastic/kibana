@@ -8,7 +8,8 @@
 import { getAxiosAuthStrategy } from './get_axios_auth_strategy';
 import { EarsStrategy } from './ears_strategy';
 import { OAuthAuthCodeStrategy } from './oauth_auth_code_strategy';
-import { DefaultStrategy } from './default_strategy';
+import { OAuthClientCredentialsStrategy } from './oauth_client_credentials_strategy';
+import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_credentials_private_key_jwt_strategy';
 
 describe('getAxiosAuthStrategy', () => {
   it('returns EarsStrategy for "ears"', () => {
@@ -19,15 +20,23 @@ describe('getAxiosAuthStrategy', () => {
     expect(getAxiosAuthStrategy('oauth_authorization_code')).toBeInstanceOf(OAuthAuthCodeStrategy);
   });
 
-  it('returns DefaultStrategy for "oauth_client_credentials"', () => {
-    expect(getAxiosAuthStrategy('oauth_client_credentials')).toBeInstanceOf(DefaultStrategy);
+  it('returns OAuthClientCredentialsStrategy for "oauth_client_credentials"', () => {
+    expect(getAxiosAuthStrategy('oauth_client_credentials')).toBeInstanceOf(
+      OAuthClientCredentialsStrategy
+    );
   });
 
-  it('returns DefaultStrategy for "none"', () => {
-    expect(getAxiosAuthStrategy('none')).toBeInstanceOf(DefaultStrategy);
+  it('returns OAuthClientCredentialsPrivateKeyJwtStrategy for "oauth_client_credentials_private_key_jwt"', () => {
+    expect(getAxiosAuthStrategy('oauth_client_credentials_private_key_jwt')).toBeInstanceOf(
+      OAuthClientCredentialsPrivateKeyJwtStrategy
+    );
   });
 
-  it('returns DefaultStrategy for unknown auth types', () => {
-    expect(getAxiosAuthStrategy('some_future_type')).toBeInstanceOf(DefaultStrategy);
+  it('returns OAuthClientCredentialsStrategy for "none"', () => {
+    expect(getAxiosAuthStrategy('none')).toBeInstanceOf(OAuthClientCredentialsStrategy);
+  });
+
+  it('returns OAuthClientCredentialsStrategy for unknown auth types', () => {
+    expect(getAxiosAuthStrategy('some_future_type')).toBeInstanceOf(OAuthClientCredentialsStrategy);
   });
 });

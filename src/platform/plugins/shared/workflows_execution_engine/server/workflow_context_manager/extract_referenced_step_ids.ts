@@ -29,6 +29,8 @@ const referencedStepIdsCache = new WeakMap<GraphNodeUnion, Set<string> | null>()
  *    `steps[variables.x].output`) — caller should fall back to all predecessors
  *
  * For `enter-if` nodes, KQL condition strings are also analyzed via `extractPropertyPathsFromKql`.
+ * The full node is scanned, not just `configuration`, because some graph nodes render
+ * top-level fields or declare `templateDependencies` for values rendered by their implementation.
  *
  * Result is memoised per-node — see {@link referencedStepIdsCache}.
  */
@@ -57,38 +59,40 @@ function computeReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
       }
     }
 
-    // Scan the entire node's configuration for template variables
-    // This covers `with`, `condition`, `foreach`, `expression`, `match`, etc.
-    if ('configuration' in node) {
-      variables.push(...scanForTemplateVariables(node.configuration));
-    }
+    // Scan the full graph node so template-bearing fields outside `configuration`
+    // (for example exit-while.condition) are included automatically.
+    variables.push(...scanForTemplateVariables(node));
 
-    const referencedStepIds = new Set<string>();
-
-    for (const variable of variables) {
-      if (variable === 'steps') {
-        // Bare `steps` reference means the path was truncated at a dynamic bracket access
-        // (e.g. `steps[variables.name].output`). We cannot determine the step ID statically.
-        return null;
-      }
-
-      if (variable.startsWith(STEPS_PREFIX)) {
-        // Extract step ID: `steps.myStep.output.field` → `myStep`
-        const dotIndex = variable.indexOf('.', STEPS_PREFIX.length);
-        const stepId =
-          dotIndex === -1
-            ? variable.slice(STEPS_PREFIX.length)
-            : variable.slice(STEPS_PREFIX.length, dotIndex);
-
-        if (stepId) {
-          referencedStepIds.add(stepId);
-        }
-      }
-    }
-
-    return referencedStepIds;
+    return extractReferencedStepIdsFromVariables(variables);
   } catch {
     // If template parsing fails for any reason, fall back to all predecessors
     return null;
   }
+}
+
+export function extractReferencedStepIdsFromVariables(variables: string[]): Set<string> | null {
+  const referencedStepIds = new Set<string>();
+
+  for (const variable of variables) {
+    if (variable === 'steps') {
+      // Bare `steps` reference means the path was truncated at a dynamic bracket access
+      // (e.g. `steps[variables.name].output`). We cannot determine the step ID statically.
+      return null;
+    }
+
+    if (variable.startsWith(STEPS_PREFIX)) {
+      // Extract step ID: `steps.myStep.output.field` → `myStep`
+      const dotIndex = variable.indexOf('.', STEPS_PREFIX.length);
+      const stepId =
+        dotIndex === -1
+          ? variable.slice(STEPS_PREFIX.length)
+          : variable.slice(STEPS_PREFIX.length, dotIndex);
+
+      if (stepId) {
+        referencedStepIds.add(stepId);
+      }
+    }
+  }
+
+  return referencedStepIds;
 }

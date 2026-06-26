@@ -1,0 +1,288 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  type PackagePolicy,
+} from '@kbn/fleet-plugin/common';
+import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
+import { syntheticsParamType } from '../../../common/types/saved_objects';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import type {
+  EncryptedSyntheticsMonitorAttributes,
+  OverviewStatusState,
+  SyntheticsParams,
+} from '../../../common/runtime_types';
+import type { SyntheticsServerSetup } from '../../types';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import type { OverviewStatusQuery } from '../common';
+import { OverviewStatusService } from '../overview_status/overview_status_service';
+import type { SyntheticsEsClient } from '../../lib';
+import { getPrivateLocationsAndAgentPolicies } from '../settings/private_locations/get_private_locations';
+import { getAgentPoliciesAsInternalUser } from '../settings/private_locations/get_agent_policies';
+import type { ServiceLocationErrors } from '../../../common/runtime_types';
+import {
+  countMonitorsByLocationId,
+  redactMonitorAttributesForDiagnostics,
+} from './redact_monitor_attributes_for_diagnostics';
+
+const SYNTHETICS_PACKAGE_POLICIES_KUERY = 'ingest-package-policies.package.name:synthetics';
+
+const PACKAGE_POLICY_REFERENCE_TYPES = new Set([
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+]);
+
+const summarizePackagePolicy = (policy: PackagePolicy) => ({
+  id: policy.id,
+  name: policy.name,
+  description: policy.description,
+  namespace: policy.namespace,
+  enabled: policy.enabled,
+  is_managed: policy.is_managed,
+  revision: policy.revision,
+  policy_ids: policy.policy_ids,
+  spaceIds: policy.spaceIds,
+  package: policy.package
+    ? {
+        name: policy.package.name,
+        title: policy.package.title,
+        version: policy.package.version,
+      }
+    : undefined,
+  updated_at: policy.updated_at,
+  updated_by: policy.updated_by,
+  created_at: policy.created_at,
+  created_by: policy.created_by,
+});
+
+const listAllSyntheticsPackagePolicies = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  server: SyntheticsServerSetup
+): Promise<PackagePolicy[]> => {
+  const items: PackagePolicy[] = [];
+  let page = 1;
+  const perPage = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const result = await server.fleet.packagePolicyService.list(savedObjectsClient, {
+      kuery: SYNTHETICS_PACKAGE_POLICIES_KUERY,
+      page,
+      perPage,
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+    items.push(...result.items);
+    hasMore = result.items.length === perPage;
+    page += 1;
+  }
+
+  return items;
+};
+
+const collectGlobalParamMetadata = async (savedObjectsClient: SavedObjectsClientContract) => {
+  const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsParams>({
+    type: syntheticsParamType,
+    perPage: 500,
+  });
+
+  const params: Array<{
+    id: string;
+    key: string;
+    description?: string;
+    tags?: string[];
+    namespaces?: string[];
+  }> = [];
+
+  for await (const result of finder.find()) {
+    for (const so of result.saved_objects) {
+      const { key, description, tags } = so.attributes;
+      if (typeof key !== 'string') {
+        continue;
+      }
+      params.push({
+        id: so.id,
+        key,
+        ...(typeof description === 'string' ? { description } : {}),
+        ...(Array.isArray(tags) ? { tags: tags as string[] } : {}),
+        namespaces: so.namespaces,
+      });
+    }
+  }
+
+  void finder.close();
+
+  return params;
+};
+
+const fetchIndicesDiagnostics = async (syntheticsEsClient: SyntheticsEsClient) => {
+  try {
+    const [mappings, settings, stats] = await Promise.all([
+      syntheticsEsClient.baseESClient.indices.getMapping({
+        index: 'synthetics-*',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      }),
+      syntheticsEsClient.baseESClient.indices.getSettings({
+        index: 'synthetics-*',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      }),
+      syntheticsEsClient.baseESClient.indices.stats({
+        index: 'synthetics-*',
+        metric: ['store', 'docs'],
+      }),
+    ]);
+    return { mappings, settings, stats };
+  } catch (e) {
+    return {
+      error: e instanceof Error ? e.message : String(e),
+    };
+  }
+};
+
+/**
+ * Filters synthetics service sync errors so that only `failed_monitors` belonging to
+ * monitors visible in the current space are surfaced. Service-level errors that are not
+ * tied to any specific monitor are kept as-is — they describe location-wide infrastructure
+ * issues rather than per-space data.
+ */
+const filterSyncErrorsToCurrentSpace = (
+  syncErrors: ServiceLocationErrors | null | undefined,
+  monitorIdsInSpace: Set<string>
+): ServiceLocationErrors | null | undefined => {
+  if (!syncErrors) {
+    return syncErrors;
+  }
+  const filtered: ServiceLocationErrors = [];
+  for (const entry of syncErrors) {
+    const failedMonitors = entry.error.failed_monitors;
+    if (!failedMonitors) {
+      filtered.push(entry);
+      continue;
+    }
+    const monitorsInSpace = failedMonitors.filter((fm) => monitorIdsInSpace.has(fm.id));
+    if (monitorsInSpace.length === 0) {
+      continue;
+    }
+    filtered.push({
+      ...entry,
+      error: { ...entry.error, failed_monitors: monitorsInSpace },
+    });
+  }
+  return filtered;
+};
+
+const getOverviewStatusForDiagnostics = async (
+  routeContext: RouteContext,
+  monitorSavedObjects: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
+): Promise<OverviewStatusState | { error: string }> => {
+  try {
+    return await new OverviewStatusService(
+      routeContext as RouteContext<Record<string, unknown>, OverviewStatusQuery>
+    ).getOverviewStatusWithPrefetchedMonitors(
+      monitorSavedObjects as Array<
+        SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { urls?: string }>
+      >
+    );
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : String(e) };
+  }
+};
+
+export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () => ({
+  method: 'GET',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_DIAGNOSTICS,
+  validate: {},
+  // Diagnostics bundles include broad metadata; require the same `uptime-write`
+  // privilege as monitor edits so only operators with full Synthetics access can pull them.
+  writeAccess: true,
+  handler: async (routeContext) => {
+    const {
+      monitorConfigRepository,
+      savedObjectsClient,
+      server,
+      spaceId,
+      syntheticsEsClient,
+      syntheticsMonitorClient,
+    } = routeContext;
+
+    const [
+      monitorSavedObjects,
+      privateLocationsContext,
+      agentPolicies,
+      packagePolicies,
+      globalParams,
+      dynamicSettings,
+      indices,
+    ] = await Promise.all([
+      monitorConfigRepository.getAll({}),
+      getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
+      getAgentPoliciesAsInternalUser({ server, withAgentCount: true, spaceId }),
+      listAllSyntheticsPackagePolicies(savedObjectsClient, server),
+      collectGlobalParamMetadata(savedObjectsClient),
+      getSyntheticsDynamicSettings(savedObjectsClient),
+      fetchIndicesDiagnostics(syntheticsEsClient),
+    ]);
+
+    const overviewStatusPromise = getOverviewStatusForDiagnostics(
+      routeContext,
+      monitorSavedObjects
+    );
+
+    const referencedPackagePolicyIds = new Set<string>();
+    const monitorIdsInSpace = new Set<string>();
+    for (const so of monitorSavedObjects) {
+      monitorIdsInSpace.add(so.id);
+      for (const ref of so.references ?? []) {
+        if (ref.id && PACKAGE_POLICY_REFERENCE_TYPES.has(ref.type)) {
+          referencedPackagePolicyIds.add(ref.id);
+        }
+      }
+    }
+
+    const monitors = monitorSavedObjects.map((so) => ({
+      type: so.type,
+      id: so.id,
+      namespaces: so.namespaces,
+      updated_at: so.updated_at,
+      created_at: so.created_at,
+      references: so.references,
+      attributes: redactMonitorAttributesForDiagnostics(so.attributes as Record<string, unknown>),
+    }));
+
+    const packagePolicySummaries = packagePolicies.map(summarizePackagePolicy);
+
+    const overviewStatus = await overviewStatusPromise;
+
+    return {
+      meta: {
+        spaceId,
+        kibanaVersion: server.stackVersion,
+      },
+      overviewStatus,
+      monitors,
+      monitorCountByLocationId: countMonitorsByLocationId(monitorSavedObjects),
+      referencedPackagePolicyIds: [...referencedPackagePolicyIds].sort(),
+      packagePolicies: packagePolicySummaries,
+      privateLocations: privateLocationsContext.locations,
+      privateLocationAgentPolicies: privateLocationsContext.agentPolicies,
+      fleetAgentPolicies: agentPolicies,
+      globalParams,
+      dynamicSettings,
+      indices,
+      syntheticsServiceSyncErrors: filterSyncErrorsToCurrentSpace(
+        syntheticsMonitorClient.syntheticsService.syncErrors,
+        monitorIdsInSpace
+      ),
+    };
+  },
+});

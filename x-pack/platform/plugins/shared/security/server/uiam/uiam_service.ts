@@ -281,10 +281,12 @@ export interface UiamServicePublic {
 }
 
 interface UiamServiceOptions {
-  /** The base URL of the Kibana server. */
-  kibanaServerURL: string;
+  /** The URL of the Kibana resource server. */
+  kibanaServerResourceURL: string;
   /** The URL of the Elasticsearch cluster. */
   elasticsearchUrl?: string;
+  /** The Kibana version, used to set the User-Agent header on outbound UIAM requests. */
+  kibanaVersion: string;
 }
 
 /**
@@ -294,13 +296,15 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
-  readonly #kibanaServerURL: string;
+  readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
+  readonly #userAgentHeader: string;
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
-    this.#kibanaServerURL = options.kibanaServerURL;
+    this.#kibanaServerResourceURL = options.kibanaServerResourceURL;
     this.#elasticsearchUrl = options.elasticsearchUrl;
+    this.#userAgentHeader = `Kibana/${options.kibanaVersion}`;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
     const { enabled, url, sharedSecret, ssl } = config;
@@ -349,6 +353,7 @@ export class UiamService implements UiamServicePublic {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
           },
           body: JSON.stringify({ refresh_token: refreshToken }),
@@ -376,6 +381,7 @@ export class UiamService implements UiamServicePublic {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
@@ -401,10 +407,7 @@ export class UiamService implements UiamServicePublic {
   async exchangeOAuthToken(accessToken: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
-    // Temporary workaround for https://github.com/elastic/cp-iam-team/issues/2697
-    const expectedAudience = this.#kibanaServerURL.endsWith('/')
-      ? this.#kibanaServerURL
-      : `${this.#kibanaServerURL}/`;
+    const expectedAudience = this.#kibanaServerResourceURL;
     const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
@@ -415,6 +418,7 @@ export class UiamService implements UiamServicePublic {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
@@ -469,6 +473,7 @@ export class UiamService implements UiamServicePublic {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: authorization.toString(),
           },
@@ -499,6 +504,7 @@ export class UiamService implements UiamServicePublic {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `ApiKey ${apiKey}`,
           },
@@ -541,6 +547,7 @@ export class UiamService implements UiamServicePublic {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
           },
           body: JSON.stringify(body),
@@ -573,6 +580,7 @@ export class UiamService implements UiamServicePublic {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
@@ -606,6 +614,7 @@ export class UiamService implements UiamServicePublic {
         await fetch(url.toString(), {
           method: 'GET',
           headers: {
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
@@ -640,6 +649,7 @@ export class UiamService implements UiamServicePublic {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
+              'User-Agent': this.#userAgentHeader,
               [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
@@ -678,6 +688,7 @@ export class UiamService implements UiamServicePublic {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'User-Agent': this.#userAgentHeader,
               [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
@@ -721,6 +732,7 @@ export class UiamService implements UiamServicePublic {
         await fetch(url.toString(), {
           method: 'GET',
           headers: {
+            'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
@@ -758,6 +770,7 @@ export class UiamService implements UiamServicePublic {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
+              'User-Agent': this.#userAgentHeader,
               [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
@@ -799,6 +812,7 @@ export class UiamService implements UiamServicePublic {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'User-Agent': this.#userAgentHeader,
               [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },

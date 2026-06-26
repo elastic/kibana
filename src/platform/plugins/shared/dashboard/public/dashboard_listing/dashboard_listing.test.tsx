@@ -27,6 +27,11 @@ jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
   TabbedTableListView: jest.fn().mockReturnValue(null),
 }));
 
+jest.mock('@kbn/app-header', () => ({
+  __esModule: true,
+  AppHeader: () => null,
+}));
+
 const renderDashboardListing = (
   props: Partial<DashboardListingProps> = {},
   { initialEntries = ['/list'] }: { initialEntries?: string[] } = {}
@@ -58,7 +63,6 @@ test('renders TabbedTableListView with correct title and dashboards tab', () => 
   expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
   const props = mockTabbedTableListView.mock.calls[0][0];
   expect(props).toMatchObject({
-    title: 'Dashboards',
     headingId: 'dashboardListingHeading',
   });
   expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'Dashboards' });

@@ -52,6 +52,8 @@ dependsOn:
   - '@kbn/core-feature-flags-server-internal'
   - '@kbn/core-feature-flags-server-mocks'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/core-user-storage-server'
+  - '@kbn/core-user-storage-server-mocks'
   - '@kbn/repo-info'
 tags:
   - shared-server

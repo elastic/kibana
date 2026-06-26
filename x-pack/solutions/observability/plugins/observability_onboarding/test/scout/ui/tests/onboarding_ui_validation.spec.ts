@@ -61,7 +61,6 @@ test.describe('Onboarding UI Validation', () => {
         await expect(pageObjects.onboarding.otelLogsCard).toBeVisible();
 
         await pageObjects.onboarding.selectKubernetesUseCase();
-        await expect(pageObjects.onboarding.kubernetesQuickStartCard).toBeVisible();
         await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
 
         await pageObjects.onboarding.selectCloudUseCase();
@@ -119,7 +118,7 @@ test.describe('Onboarding UI Validation', () => {
   );
 
   test(
-    'navigates correctly within Kubernetes Host flow',
+    'navigates correctly within Kubernetes OpenTelemetry flow',
     {
       tag: [
         ...tags.stateful.classic,
@@ -128,18 +127,16 @@ test.describe('Onboarding UI Validation', () => {
       ],
     },
     async ({ page, pageObjects }) => {
-      await test.step('navigates correctly when Kubernetes quick-start card is clicked', async () => {
+      await test.step('navigates correctly when Kubernetes OpenTelemetry card is clicked', async () => {
         await pageObjects.onboarding.selectKubernetesUseCase();
-        await pageObjects.onboarding.clickIntegrationCard(
-          'integration-card:kubernetes-quick-start'
-        );
+        await pageObjects.onboarding.clickIntegrationCard('integration-card:otel-kubernetes');
         expect(page.url()).toContain('/kubernetes');
       });
     }
   );
 
   test(
-    'Navigates correctly within Kubernetes Host flow using the keyboard only',
+    'navigates correctly within Kubernetes OpenTelemetry flow using the keyboard only',
     {
       tag: [
         ...tags.stateful.classic,
@@ -158,15 +155,11 @@ test.describe('Onboarding UI Validation', () => {
           'ArrowRight'
         );
 
-        await expect(pageObjects.onboarding.kubernetesQuickStartCard).toBeVisible();
         await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
       });
 
-      await test.step('navigates correctly when Kubernetes quick-start card is tabbed to and enter is pressed', async () => {
-        await page.keyTo(
-          '[data-test-subj="integration-card:kubernetes-quick-start"] button',
-          'Tab'
-        );
+      await test.step('navigates correctly when Kubernetes OpenTelemetry card is tabbed to and enter is pressed', async () => {
+        await page.keyTo('[data-test-subj="integration-card:otel-kubernetes"] button', 'Tab');
         await page.keyboard.press('Enter');
         expect(page.url()).toContain('/kubernetes');
       });

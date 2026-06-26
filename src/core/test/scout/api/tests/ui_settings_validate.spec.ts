@@ -17,6 +17,7 @@ const SERVERLESS_TAGS = [
   ...tags.serverless.observability.complete,
   ...tags.serverless.security.complete,
   ...tags.serverless.workplaceai,
+  ...tags.serverless.vectordb,
 ];
 
 const DEFAULT_COLUMNS_SETTING = 'defaultColumns';

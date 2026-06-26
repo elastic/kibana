@@ -40,6 +40,7 @@ import type { OutputType, ValueOf } from '../../../../../../../common/types';
 
 import {
   outputTypeSupportPresets,
+  outputTypeSupportsOtelExporter,
   outputYmlIncludesReservedPerformanceKey,
 } from '../../../../../../../common/services/output_helpers';
 
@@ -114,6 +115,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const supportsPresets = inputs.typeInput.value
     ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
     : false;
+  const supportsOtelExporter = outputTypeSupportsOtelExporter(
+    inputs.typeInput.value as ValueOf<OutputType> | undefined
+  );
 
   const yamlConfigValue = inputs.additionalYamlConfigInput.value;
   const presetValue = inputs.presetInput.value;
@@ -587,7 +591,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </div>
           </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
-          {isESOutput && (
+          {supportsOtelExporter && (
             <>
               <EuiSpacer size="l" />
               <EuiAccordion

@@ -20,7 +20,6 @@ export {
   platformCoreTools,
   platformStreamsSigEventsTools,
   attachmentTools,
-  filestoreTools,
   internalTools,
   defaultAgentToolIds,
   editableToolTypes,
@@ -99,21 +98,26 @@ export {
   createHooksExecutionError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
-export { type UserIdAndName } from './base/users';
+export { type UserIdAndName, type CurrentUser } from './base/users';
 export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
-  AgentVisibility,
-  VISIBILITY_ICON,
-  VISIBILITY_BADGE_COLOR,
+  AgentAccessControlMode,
+  ACCESS_CONTROL_MODE_ICON,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
   AgentExecutionErrorCode,
-  isAgentOwner,
-  canChangeAgentVisibility,
-  hasAgentReadAccess,
-  hasAgentWriteAccess,
-  canCurrentUserEditAgent,
+  AgentAccessControlRole,
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAccessControlRole,
+  accessControlRoleMeets,
+  maxAccessControlRole,
+  getDefaultAgentAccessControl,
+  type AgentAccessControl,
+  type AgentAccessControlEntry,
+  type AgentAccessControlPrincipalType,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -163,6 +167,7 @@ export {
   carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
+  ConversationDisplayStatus,
   type ChatEventBase,
   type ChatEvent,
   type ConversationAction,
@@ -219,6 +224,18 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  type AskUserQuestionStep,
+  type AskUserQuestionStepData,
+  createAskUserQuestionStep,
+  isAskUserQuestionStep,
+  type UserQuestionAskedEvent,
+  type UserQuestionAskedEventData,
+  type UserQuestionAnsweredEvent,
+  type UserQuestionAnsweredEventData,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
+  createUserQuestionAskedEvent,
+  createUserQuestionAnsweredEvent,
   type ConversationListOptions,
 } from './chat';
 export {
@@ -268,3 +285,4 @@ export {
   type OAuthClientConnectionsSummary,
   OAuthClientType,
 } from './oauth_clients';
+export { MCP_SERVER_PATH } from './mcp';

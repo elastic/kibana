@@ -21,10 +21,10 @@ export function resolveSearchMode(searchMode?: SearchMode): SearchMode {
   return searchMode ?? DEFAULT_SEARCH_MODE;
 }
 
-export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
+export type QueryLinkRequest = Omit<QueryLink, 'stream_name' | 'rule_backed' | 'rule_id'>;
 
-export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
+export interface QueryUnlinkRequest {
+  id: string;
+}
 
-export type Query = QueryLink & {
-  title: string;
-};
+export type Query = QueryLink;

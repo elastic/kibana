@@ -117,6 +117,8 @@ const mergeInputAttachmentsIntoAttachmentState = async (
         data: input.data,
         ...(input.origin !== undefined ? { origin: input.origin } : {}),
         ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+        ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.group_id !== undefined ? { group_id: input.group_id } : {}),
       },
       ATTACHMENT_REF_ACTOR.user,
       options?.resolveContext
@@ -249,9 +251,14 @@ export const prepareConversation = async ({
     })
   );
 
+  const allVersionedAttachments = attachmentStateManager.getAll();
+
   const versionedAttachmentPresentation = await prepareAttachmentPresentation(
-    attachmentStateManager.getAll(),
-    undefined,
+    allVersionedAttachments,
+    {
+      resolveMaxContentLength: (attachment) =>
+        attachmentsService.getTypeDefinition(attachment.type)?.maxContentLength,
+    },
     async (attachment, data) => {
       const definition = attachmentsService.getTypeDefinition(attachment.type);
       if (!definition) {

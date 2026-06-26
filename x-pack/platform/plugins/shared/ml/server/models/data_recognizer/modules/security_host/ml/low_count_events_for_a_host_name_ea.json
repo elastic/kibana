@@ -1,9 +1,6 @@
 {
   "description": "Security: Host - Looks for a sudden drop in host based traffic. This can be due to a range of security issues, such as a compromised system, a failed service, or a network misconfiguration.",
-  "groups": [
-    "security",
-    "host"
-  ],
+  "groups": ["security", "host"],
   "analysis_config": {
     "bucket_span": "5m",
     "detectors": [
@@ -14,14 +11,7 @@
         "detector_index": 0
       }
     ],
-    "influencers": [
-      "host.name",
-      "host.id",
-      "host.ip",
-      "event.dataset",
-      "event.action",
-      "event.category"
-    ]
+    "influencers": ["host.name", "host.id", "host.ip", "event.dataset", "event.action", "event.category"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -34,6 +24,8 @@
     "created_by": "ml-module-security-host",
     "security_app_display_name": "Decrease in the Host Traffic",
     "managed": true,
-    "job_revision": 1
+    "job_revision": 1,
+    "threat_tactics": ["TA0005", "TA0040"],
+    "threat_techniques": ["T1562", "T1489", "T1499"]
   }
 }

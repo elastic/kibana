@@ -52,7 +52,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -75,6 +75,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -91,6 +92,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -147,7 +151,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -166,6 +170,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -182,6 +187,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -238,7 +246,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -261,6 +269,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -277,6 +286,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -333,7 +345,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -352,6 +364,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -368,6 +381,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -424,7 +440,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -443,6 +459,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -459,6 +476,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -515,7 +535,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -538,6 +558,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -554,6 +575,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -610,7 +634,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -629,6 +653,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -645,6 +670,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -701,7 +729,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -720,6 +748,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -736,6 +765,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -792,7 +824,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -811,6 +843,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -827,6 +860,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -883,7 +919,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -902,6 +938,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -918,6 +955,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -979,7 +1019,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1002,6 +1042,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1018,6 +1059,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1076,7 +1120,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1095,6 +1139,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1111,6 +1156,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1172,7 +1220,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1195,6 +1243,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1211,6 +1260,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1272,7 +1324,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1291,6 +1343,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1307,6 +1360,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1363,7 +1419,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1382,6 +1438,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1398,6 +1455,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1459,7 +1519,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1482,6 +1542,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1498,6 +1559,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1559,7 +1623,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1578,6 +1642,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1594,6 +1659,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1655,7 +1723,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1674,6 +1742,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1690,6 +1759,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1753,7 +1825,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1772,6 +1844,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1788,6 +1861,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1851,7 +1927,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1870,6 +1946,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1886,6 +1963,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;

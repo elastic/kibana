@@ -9,7 +9,7 @@ import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
 import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
-import type { SanitizedRule, RuleTypeParams } from '../types';
+import type { RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import type { RulesClientContext } from './types';
 import type { CloneRuleParams } from '../application/rule/methods/clone';
@@ -52,7 +52,7 @@ import type { AggregateParams } from '../application/rule/methods/aggregate/type
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import type { DeleteRuleParams } from '../application/rule/methods/delete';
 import { deleteRule } from '../application/rule/methods/delete';
-import type { BulkDeleteRulesRequestBody } from '../application/rule/methods/bulk_delete';
+import type { BulkDeleteRulesParams } from '../application/rule/methods/bulk_delete/types';
 import { bulkDeleteRules } from '../application/rule/methods/bulk_delete';
 import type { BulkDisableRulesRequestBody } from '../application/rule/methods/bulk_disable';
 import { bulkDisableRules } from '../application/rule/methods/bulk_disable';
@@ -62,6 +62,8 @@ import type { BulkEditRuleParamsOptions } from '../application/rule/methods/bulk
 import { bulkEditRuleParamsWithReadAuth } from '../application/rule/methods/bulk_edit_params/bulk_edit_rule_params';
 import type { BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { bulkEnableRules } from '../application/rule/methods/bulk_enable';
+import type { BulkCreateRulesParams } from '../application/rule/methods/bulk_create';
+import { bulkCreateRules } from '../application/rule/methods/bulk_create';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
@@ -118,17 +120,7 @@ import type {
 import type { FindGapAutoFillSchedulerLogsParams } from '../application/gaps/auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
 import { findGapAutoFillSchedulerLogs } from '../application/gaps/auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
 
-export type ConstructorOptions = Omit<
-  RulesClientContext,
-  'fieldsToExcludeFromPublicApi' | 'minimumScheduleIntervalInMs'
->;
-
-export const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
-  'monitoring',
-  'mapped_params',
-  'snoozeSchedule',
-  'activeSnoozes',
-];
+export type ConstructorOptions = Omit<RulesClientContext, 'minimumScheduleIntervalInMs'>;
 
 export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParams> = new Set([
   'activeSnoozes',
@@ -163,7 +155,6 @@ export class RulesClient {
     this.context = {
       ...context,
       minimumScheduleIntervalInMs: parseDuration(context.minimumScheduleInterval.value),
-      fieldsToExcludeFromPublicApi,
     };
   }
 
@@ -204,7 +195,10 @@ export class RulesClient {
 
   public bulkGetRules = <Params extends RuleTypeParams = never>(params: BulkGetRulesParams) =>
     bulkGetRules<Params>(this.context, params);
-  public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
+  public bulkCreateRules = <Params extends RuleTypeParams = never>(
+    params: BulkCreateRulesParams<Params>
+  ) => bulkCreateRules<Params>(this.context, params);
+  public bulkDeleteRules = (options: BulkDeleteRulesParams) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);

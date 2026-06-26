@@ -60,6 +60,8 @@ import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
 import { registerInitializationRoutes } from '../lib/initialization';
+import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/register_alert_analysis_routes';
+import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -137,7 +139,12 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled, publicAttacksApiEnabled } = config.experimentalFeatures;
+
+  // If publicAttacksApiEnabled is enabled, register the attacks routes.
+  if (publicAttacksApiEnabled) {
+    registerAttacksRoutes(router);
+  }
 
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
@@ -152,6 +159,7 @@ export const initRoutes = (
     logger,
     telemetrySender,
     ml,
+    hasEncryptionKey,
   });
   registerSiemMigrationsRoutes(router, config, logger);
 
@@ -167,6 +175,7 @@ export const initRoutes = (
   registerTrialCompanionRoutes(trialCompanionDeps);
 
   registerInitializationRoutes({ router, logger });
+  registerAlertAnalysisRoutes(router, logger);
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

@@ -15,7 +15,7 @@ import {
 import type { ApmTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
+import { nullifyEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
@@ -130,7 +130,7 @@ async function getServiceTransactionGroupDetailedStatistics({
   const totalDuration = response.aggregations?.total_duration.value;
   return buckets.map((bucket) => {
     const transactionName = bucket.key as string;
-    const latency = nullifyLeadingTrailingEmptyRedMetricPoints(
+    const latency = nullifyEmptyRedMetricPoints(
       bucket.timeseries.buckets.map((timeseriesBucket) => ({
         x: timeseriesBucket.key,
         docCount: timeseriesBucket.doc_count,
@@ -140,14 +140,14 @@ async function getServiceTransactionGroupDetailedStatistics({
         }),
       }))
     );
-    const throughput = nullifyLeadingTrailingEmptyRedMetricPoints(
+    const throughput = nullifyEmptyRedMetricPoints(
       bucket.timeseries.buckets.map((timeseriesBucket) => ({
         x: timeseriesBucket.key,
         docCount: timeseriesBucket.doc_count,
         y: timeseriesBucket.doc_count,
       }))
     );
-    const errorRate = nullifyLeadingTrailingEmptyRedMetricPoints(
+    const errorRate = nullifyEmptyRedMetricPoints(
       bucket.timeseries.buckets.map((timeseriesBucket) => ({
         x: timeseriesBucket.key,
         docCount: timeseriesBucket.doc_count,

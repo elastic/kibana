@@ -7,11 +7,19 @@
 
 import type { ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout-oblt';
-import { UptimeAppPage } from './page_objects';
+import {
+  UptimeAppPage,
+  UptimeOverviewPage,
+  MonitorDetailsPage,
+  UptimeSettingsPage,
+} from './page_objects';
 
 export interface UptimeTestFixtures extends ObltTestFixtures {
   pageObjects: ObltTestFixtures['pageObjects'] & {
     uptimeApp: UptimeAppPage;
+    uptimeOverview: UptimeOverviewPage;
+    monitorDetails: MonitorDetailsPage;
+    uptimeSettings: UptimeSettingsPage;
   };
 }
 
@@ -31,6 +39,9 @@ export const test = baseTest.extend<UptimeTestFixtures>({
     const extendedPageObjects: UptimeTestFixtures['pageObjects'] = {
       ...pageObjects,
       uptimeApp: createLazyPageObject(UptimeAppPage, page, kbnUrl),
+      uptimeOverview: createLazyPageObject(UptimeOverviewPage, page),
+      monitorDetails: createLazyPageObject(MonitorDetailsPage, page),
+      uptimeSettings: createLazyPageObject(UptimeSettingsPage, page),
     };
 
     await use(extendedPageObjects);

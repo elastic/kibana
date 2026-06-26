@@ -229,7 +229,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('when saving a new by-value Discover session panel back to a dashboard with matching controls', () => {
-      it('should update the existing dashboard control instead of creating a duplicate', async () => {
+      // This is flacky and sometimes it creates a duplicate: https://github.com/elastic/kibana/issues/265636
+      it.skip('should update the existing dashboard control instead of creating a duplicate', async () => {
         await addUnlinkedSavedSearch();
 
         expect(await dashboardControls.getControlsCount()).to.be(1);

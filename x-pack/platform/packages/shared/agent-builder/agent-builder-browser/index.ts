@@ -31,6 +31,8 @@ export type {
   AgentBuilderPluginStart,
   EmbeddableConversationProps,
   PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
   OpenConversationSidebarOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
@@ -40,3 +42,10 @@ export type {
   AgentBuilderAnnouncementModalProps,
   AgentBuilderAnnouncementVariant,
 } from './announcement_modal/agent_builder_announcement_modal';
+export { McpClientDetails, McpClientLogo } from './oauth_clients';
+export type {
+  McpClientDetailsProps,
+  McpClientDetailsData,
+  McpClientDetailsPresentation,
+  McpClientLogoProps,
+} from './oauth_clients';

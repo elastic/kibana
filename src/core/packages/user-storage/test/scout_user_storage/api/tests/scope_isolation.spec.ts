@@ -46,9 +46,9 @@ apiTest.describe('User Storage - Scope Isolation', { tag: [...tags.stateful.clas
     async ({ apiClient }) => {
       await h.put(apiClient, 'test:string_key', 'default-space-value');
 
-      const response = await h.getInSpace(apiClient, TEST_SPACE);
+      const response = await h.getKeyInSpace(apiClient, TEST_SPACE, 'test:string_key');
       expect(response).toHaveStatusCode(200);
-      expect(response.body['test:string_key']).toBe('default_value');
+      expect(response.body.value).toBe('default_value');
     }
   );
 
@@ -57,17 +57,17 @@ apiTest.describe('User Storage - Scope Isolation', { tag: [...tags.stateful.clas
     async ({ apiClient }) => {
       await h.put(apiClient, 'test:number_key', 999);
 
-      const response = await h.getInSpace(apiClient, TEST_SPACE);
+      const response = await h.getKeyInSpace(apiClient, TEST_SPACE, 'test:number_key');
       expect(response).toHaveStatusCode(200);
-      expect(response.body['test:number_key']).toBe(999);
+      expect(response.body.value).toBe(999);
     }
   );
 
   apiTest('global key set from another space is visible everywhere', async ({ apiClient }) => {
     await h.putInSpace(apiClient, TEST_SPACE, 'test:boolean_key', true);
 
-    const response = await h.get(apiClient);
+    const response = await h.getKey(apiClient, 'test:boolean_key');
     expect(response).toHaveStatusCode(200);
-    expect(response.body['test:boolean_key']).toBe(true);
+    expect(response.body.value).toBe(true);
   });
 });

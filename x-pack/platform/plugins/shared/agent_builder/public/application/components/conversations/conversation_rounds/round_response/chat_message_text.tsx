@@ -52,6 +52,7 @@ interface Props {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  isStreaming?: boolean;
 }
 
 /**
@@ -64,6 +65,7 @@ export function ChatMessageText({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  isStreaming = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
 
@@ -104,6 +106,36 @@ export function ChatMessageText({
       // Internal link in full page: target="_blank" handles navigation
     },
     [isSidebar, http?.externalUrl, application]
+  );
+
+  const visualizationRenderer = useMemo(
+    () =>
+      createVisualizationRenderer({
+        startDependencies,
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
+    [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]
+  );
+
+  const renderAttachmentRenderer = useMemo(
+    () =>
+      createRenderAttachmentRenderer({
+        conversationAttachments,
+        attachmentRefs,
+        conversationId,
+        isSidebar,
+        attachmentsService,
+        isStreaming,
+      }),
+    [
+      conversationAttachments,
+      attachmentRefs,
+      conversationId,
+      isSidebar,
+      attachmentsService,
+      isStreaming,
+    ]
   );
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -185,18 +217,8 @@ export function ChatMessageText({
           </EuiTableRowCell>
         );
       },
-      [visualizationElement.tagName]: createVisualizationRenderer({
-        startDependencies,
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
-      }),
-      [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
-        conversationAttachments,
-        attachmentRefs,
-        conversationId,
-        isSidebar,
-        attachmentsService,
-      }),
+      [visualizationElement.tagName]: visualizationRenderer,
+      [renderAttachmentElement.tagName]: renderAttachmentRenderer,
     };
 
     return {
@@ -209,17 +231,7 @@ export function ChatMessageText({
       ],
       processingPluginList: processingPlugins,
     };
-  }, [
-    startDependencies,
-    stepsFromCurrentRound,
-    stepsFromPrevRounds,
-    conversationAttachments,
-    attachmentRefs,
-    conversationId,
-    isSidebar,
-    attachmentsService,
-    handleLinkClick,
-  ]);
+  }, [visualizationRenderer, renderAttachmentRenderer, handleLinkClick]);
 
   return (
     <>

@@ -97,12 +97,21 @@ export function ApmOverview() {
     trackEvent({ metric: 'slo_callout_dismissed', metricType: METRIC_TYPE.CLICK });
   }, [trackEvent, setSloCalloutDismissed]);
 
-  const handleOnLoadTable = (key: keyof TablesLoadedState) =>
-    setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
+  const handleOnLoadTable = useCallback((key: keyof TablesLoadedState) => {
+    setHaveTablesLoaded((currentValues) =>
+      currentValues[key] ? currentValues : { ...currentValues, [key]: true }
+    );
+  }, []);
 
-  const onTransactionsTableLoad = useCallback(() => handleOnLoadTable('transactions'), []);
-  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), []);
-  const onDependenciesTableLoad = useCallback(() => handleOnLoadTable('dependencies'), []);
+  const onTransactionsTableLoad = useCallback(
+    () => handleOnLoadTable('transactions'),
+    [handleOnLoadTable]
+  );
+  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), [handleOnLoadTable]);
+  const onDependenciesTableLoad = useCallback(
+    () => handleOnLoadTable('dependencies'),
+    [handleOnLoadTable]
+  );
 
   const shouldRenderCallout =
     !sloCalloutDismissed && !hasSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;

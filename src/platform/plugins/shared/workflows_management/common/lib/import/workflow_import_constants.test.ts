@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { detectFileFormat, isDynamicWorkflowReference, isValidWorkflowId } from '.';
+import {
+  detectFileFormat,
+  generateWorkflowId,
+  isDynamicWorkflowReference,
+  isValidWorkflowId,
+} from '.';
 
 describe('isValidWorkflowId', () => {
   it('should reject IDs with reserved prefixes', () => {
@@ -17,6 +22,13 @@ describe('isValidWorkflowId', () => {
 
   it('should accept valid non-reserved IDs', () => {
     expect(isValidWorkflowId('my-workflow')).toBe(true);
+  });
+});
+
+describe('generateWorkflowId', () => {
+  it('should not generate IDs with reserved workflow prefixes', () => {
+    expect(generateWorkflowId('system-foo')).toBe('workflow-system-foo');
+    expect(generateWorkflowId('internal-bar')).toBe('workflow-internal-bar');
   });
 });
 

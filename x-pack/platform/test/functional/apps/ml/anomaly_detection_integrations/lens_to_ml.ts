@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
 
   const dashboardTitle = 'lens_to_ml';
   const dashboardArchive =
@@ -40,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
 
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await kibanaServer.importExport.load(dashboardArchive);
       await browser.setWindowSize(1920, 1080);
     });

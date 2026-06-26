@@ -17,53 +17,59 @@ export const statusSchema = schema.oneOf([
   schema.literal(adHocRunStatus.TIMEOUT),
 ]);
 
-export const backfillResponseSchema = schema.object({
-  id: schema.string(),
-  created_at: schema.string(),
-  duration: schema.string(),
-  enabled: schema.boolean(),
-  rule: schema.object({
+export const backfillResponseSchema = schema.object(
+  {
     id: schema.string(),
-    name: schema.string(),
-    tags: schema.arrayOf(schema.string()),
-    rule_type_id: schema.string(),
-    params: ruleParamsSchemaV1,
-    api_key_owner: schema.nullable(schema.string()),
-    api_key_created_by_user: schema.maybe(schema.nullable(schema.boolean())),
-    consumer: schema.string(),
-    enabled: schema.boolean(),
-    schedule: schema.object({ interval: schema.string() }),
-    created_by: schema.nullable(schema.string()),
-    updated_by: schema.nullable(schema.string()),
     created_at: schema.string(),
-    updated_at: schema.string(),
-    revision: schema.number(),
-  }),
-  space_id: schema.string(),
-  initiator: schema.oneOf([
-    schema.literal(backfillInitiator.USER),
-    schema.literal(backfillInitiator.SYSTEM),
-  ]),
-  initiator_id: schema.maybe(schema.string()),
-  start: schema.string(),
-  status: statusSchema,
-  end: schema.maybe(schema.string()),
-  schedule: schema.arrayOf(
-    schema.object({
-      run_at: schema.string(),
-      status: statusSchema,
-      interval: schema.string(),
-    })
-  ),
-});
-
-export const errorResponseSchema = schema.object({
-  error: schema.object({
-    message: schema.string(),
-    status: schema.maybe(schema.number()),
+    duration: schema.string(),
+    enabled: schema.boolean(),
     rule: schema.object({
       id: schema.string(),
-      name: schema.maybe(schema.string()),
+      name: schema.string(),
+      tags: schema.arrayOf(schema.string()),
+      rule_type_id: schema.string(),
+      params: ruleParamsSchemaV1,
+      api_key_owner: schema.nullable(schema.string()),
+      api_key_created_by_user: schema.maybe(schema.nullable(schema.boolean())),
+      consumer: schema.string(),
+      enabled: schema.boolean(),
+      schedule: schema.object({ interval: schema.string() }),
+      created_by: schema.nullable(schema.string()),
+      updated_by: schema.nullable(schema.string()),
+      created_at: schema.string(),
+      updated_at: schema.string(),
+      revision: schema.number(),
     }),
-  }),
-});
+    space_id: schema.string(),
+    initiator: schema.oneOf([
+      schema.literal(backfillInitiator.USER),
+      schema.literal(backfillInitiator.SYSTEM),
+    ]),
+    initiator_id: schema.maybe(schema.string()),
+    start: schema.string(),
+    status: statusSchema,
+    end: schema.maybe(schema.string()),
+    schedule: schema.arrayOf(
+      schema.object({
+        run_at: schema.string(),
+        status: statusSchema,
+        interval: schema.string(),
+      })
+    ),
+  },
+  { meta: { id: 'backfill_response' } }
+);
+
+export const errorResponseSchema = schema.object(
+  {
+    error: schema.object({
+      message: schema.string(),
+      status: schema.maybe(schema.number()),
+      rule: schema.object({
+        id: schema.string(),
+        name: schema.maybe(schema.string()),
+      }),
+    }),
+  },
+  { meta: { id: 'backfill_error_response' } }
+);

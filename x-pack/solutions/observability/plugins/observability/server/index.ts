@@ -83,6 +83,10 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
+  /**
+   * @deprecated Use `xpack.cloud.managed_otlp.url` instead. Kept for back-compat with
+   * deployments whose cloud control plane still writes the observability key.
+   */
   managedOtlpServiceUrl: schema.string({ defaultValue: '' }),
 });
 

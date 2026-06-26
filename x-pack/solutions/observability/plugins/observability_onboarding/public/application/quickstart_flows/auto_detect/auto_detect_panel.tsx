@@ -7,50 +7,33 @@
 
 import React, { useState, useEffect, type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPanel,
-  EuiSteps,
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiSkeletonText,
-  EuiText,
-  EuiButtonEmpty,
-  useGeneratedHtmlId,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiPanel, EuiSteps, useGeneratedHtmlId } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { getAutoDetectCommand } from './get_auto_detect_command';
-import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
-import { ProgressIndicator } from '../shared/progress_indicator';
-import { AccordionWithIcon } from '../shared/accordion_with_icon';
+import { useOnboardingFlow } from './use_onboarding_flow';
 import { EmptyPrompt } from '../shared/empty_prompt';
-import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
-import { GetStartedPanel } from '../shared/get_started_panel';
-import {
-  WiredStreamsIngestionSelector,
-  type IngestionMode,
-} from '../shared/wired_streams_ingestion_selector';
-import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import type { ObservabilityOnboardingContextValue } from '../../../plugin';
-import { SupportedIntegrationsList } from './supported_integrations_list';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
-import { WIRED_ECS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
+import { AutoDetectInstallStep, AutoDetectVisualizeStep } from './steps';
+import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 
 export const AutoDetectPanel: FunctionComponent = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate(
-      'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel',
-      { defaultMessage: 'Elastic Agent: Logs & Metrics' }
-    ),
-  });
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel', {
+      defaultMessage: 'Elastic Agent: Logs & Metrics',
+    })
+  );
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
@@ -97,15 +80,10 @@ export const AutoDetectPanel: FunctionComponent = () => {
     return <EmptyPrompt onboardingFlowType="auto-detect" error={error} onRetryClick={refetch} />;
   }
 
-  const registryIntegrations = installedIntegrations.filter(
-    (integration) => integration.installSource === 'registry'
-  );
-  const customIntegrations = installedIntegrations.filter(
-    (integration) => integration.installSource === 'custom'
-  );
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
-  const assetDetailsLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
+  const assetDetailsLocator =
+    share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -117,59 +95,22 @@ export const AutoDetectPanel: FunctionComponent = () => {
               { defaultMessage: 'Install standalone Elastic Agent on your host' }
             ),
             status: status === 'notStarted' ? 'current' : 'complete',
-            children: command ? (
-              <>
-                <EuiText>
-                  <p>
-                    {metricsOnboardingEnabled
-                      ? i18n.translate(
-                          'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
-                          {
-                            defaultMessage: "We'll scan your host for logs and metrics, including:",
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
-                          {
-                            defaultMessage: "We'll scan your host for logs, including:",
-                          }
-                        )}
-                  </p>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <SupportedIntegrationsList />
-                <EuiSpacer size="xl" />
-                {!isWiredStreamsLoading && (
-                  <>
-                    <WiredStreamsIngestionSelector
-                      ingestionMode={ingestionMode}
-                      onChange={setIngestionMode}
-                      streamsDocLink={docLinks?.links.observability.logsStreams}
-                      isWiredStreamsEnabled={isWiredStreamsEnabled}
-                      isEnabling={isEnabling}
-                      flowType="auto_detect"
-                      onEnableWiredStreams={enableWiredStreams}
-                    />
-                    <EuiSpacer size="xl" />
-                  </>
-                )}
-                {/* Bash syntax highlighting only highlights a few random numbers (badly) so it looks less messy to go with plain text */}
-                <EuiCodeBlock
-                  paddingSize="m"
-                  language="text"
-                  data-test-subj="observabilityOnboardingAutoDetectPanelCodeSnippet"
-                >
-                  {command}
-                </EuiCodeBlock>
-                <EuiSpacer />
-                <CopyToClipboardButton
-                  textToCopy={command}
-                  fill={status === 'notStarted'}
-                  data-onboarding-id={data?.onboardingFlow.id}
-                />
-              </>
-            ) : (
-              <EuiSkeletonText lines={6} />
+            children: (
+              <AutoDetectInstallStep
+                command={command}
+                onboardingFlowId={data?.onboardingFlow.id}
+                status={status}
+                ingestionMode={ingestionMode}
+                onIngestionModeChange={setIngestionMode}
+                isMetricsOnboardingEnabled={metricsOnboardingEnabled}
+                wiredStreamsStatus={{
+                  isEnabled: isWiredStreamsEnabled,
+                  isLoading: isWiredStreamsLoading,
+                  isEnabling,
+                  enableWiredStreams,
+                }}
+                streamsDocLink={docLinks?.links.observability.logsStreams}
+              />
             ),
           },
           {
@@ -184,275 +125,17 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 ? 'current'
                 : 'incomplete',
             children: (
-              <>
-                {status === 'dataReceived' ? (
-                  <ProgressIndicator
-                    iconType="popper"
-                    title={i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.yourDataIsReadyToExploreLabel',
-                      { defaultMessage: 'Your data is ready to explore!' }
-                    )}
-                    isLoading={false}
-                    data-test-subj="observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator"
-                  />
-                ) : status === 'awaitingData' ? (
-                  <ProgressIndicator
-                    title={i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.installingElasticAgentFlexItemLabel',
-                      { defaultMessage: 'Waiting for data to arrive...' }
-                    )}
-                    data-test-subj="observabilityOnboardingAutoDetectPanelAwaitingDataProgressIndicator"
-                  />
-                ) : status === 'inProgress' ? (
-                  <ProgressIndicator
-                    title={i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.lookingForLogFilesFlexItemLabel',
-                      { defaultMessage: 'Waiting for installation to complete...' }
-                    )}
-                    data-test-subj="observabilityOnboardingAutoDetectPanelInProgressProgressIndicator"
-                  />
-                ) : null}
-                {(status === 'awaitingData' || status === 'dataReceived') &&
-                installedIntegrations.length > 0 ? (
-                  <>
-                    <EuiSpacer />
-                    {registryIntegrations
-                      .slice()
-                      /**
-                       * System integration should always be on top
-                       */
-                      .sort((a, b) => (a.pkgName === 'system' ? -1 : 0))
-                      .map((integration) => {
-                        let actionLinks;
-
-                        switch (integration.pkgName) {
-                          case 'system':
-                            actionLinks =
-                              metricsOnboardingEnabled && assetDetailsLocator !== undefined
-                                ? [
-                                    {
-                                      id: 'inventory-host-details',
-                                      title: i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.systemOverviewTitle',
-                                        {
-                                          defaultMessage:
-                                            'Overview your system health within the Hosts Inventory',
-                                        }
-                                      ),
-                                      label: i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.systemOverviewLabel',
-                                        {
-                                          defaultMessage: 'Explore metrics data',
-                                        }
-                                      ),
-                                      href: assetDetailsLocator.getRedirectUrl({
-                                        entityType: 'host',
-                                        entityId: integration.metadata?.hostname,
-                                        assetDetails: {
-                                          dateRange: {
-                                            from: 'now-15m',
-                                            to: 'now',
-                                          },
-                                        },
-                                      }),
-                                    },
-                                  ]
-                                : [
-                                    {
-                                      id: 'inventory-host-details',
-                                      title: i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsTitle',
-                                        {
-                                          defaultMessage: 'View and analyze system logs',
-                                        }
-                                      ),
-                                      label: i18n.translate(
-                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsLabel',
-                                        {
-                                          defaultMessage: 'Explore logs',
-                                        }
-                                      ),
-                                      href:
-                                        logsLocator?.getRedirectUrl({
-                                          dataViewSpec: {
-                                            name: integration.pkgName,
-                                            title: `logs-system*`,
-                                            timeFieldName: '@timestamp',
-                                          },
-                                        }) ?? '',
-                                    },
-                                  ];
-                            break;
-                          default:
-                            actionLinks =
-                              dashboardLocator !== undefined && logsLocator !== undefined
-                                ? integration.kibanaAssets
-                                    .filter((asset) => asset.type === 'dashboard')
-                                    .map((asset) => {
-                                      const dashboard =
-                                        DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
-
-                                      if (
-                                        dashboard.type === 'metrics' &&
-                                        !metricsOnboardingEnabled
-                                      ) {
-                                        return {
-                                          id: asset.id,
-                                          title: i18n.translate(
-                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataDiscoverTitle',
-                                            {
-                                              defaultMessage: 'View and analyze your logs',
-                                            }
-                                          ),
-                                          label: i18n.translate(
-                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDiscoverDataLabel',
-                                            {
-                                              defaultMessage: 'Explore logs',
-                                            }
-                                          ),
-                                          href: logsLocator.getRedirectUrl({
-                                            dataViewSpec: {
-                                              name: integration.pkgName,
-                                              title: `logs-${integration.pkgName}*`,
-                                              timeFieldName: '@timestamp',
-                                            },
-                                          }),
-                                        };
-                                      }
-
-                                      return {
-                                        id: asset.id,
-                                        title:
-                                          dashboard.type === 'metrics'
-                                            ? i18n.translate(
-                                                'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataTitle',
-                                                {
-                                                  defaultMessage:
-                                                    'Overview your metrics data with this pre-made dashboard',
-                                                }
-                                              )
-                                            : i18n.translate(
-                                                'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataTitle',
-                                                {
-                                                  defaultMessage:
-                                                    'Overview your logs data with this pre-made dashboard',
-                                                }
-                                              ),
-                                        label:
-                                          dashboard.type === 'metrics'
-                                            ? i18n.translate(
-                                                'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataLabel',
-                                                {
-                                                  defaultMessage: 'Explore metrics data',
-                                                }
-                                              )
-                                            : i18n.translate(
-                                                'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataLabel',
-                                                {
-                                                  defaultMessage: 'Explore logs data',
-                                                }
-                                              ),
-                                        href: dashboardLocator.getRedirectUrl({
-                                          dashboardId: asset.id,
-                                        }),
-                                      };
-                                    })
-                                : [];
-                        }
-
-                        return (
-                          <AccordionWithIcon
-                            key={integration.pkgName}
-                            id={`${accordionId}_${integration.pkgName}`}
-                            icon={
-                              isSupportedLogo(integration.pkgName) ? (
-                                <LogoIcon size="l" logo={integration.pkgName} />
-                              ) : (
-                                <EuiIcon type="display" size="l" />
-                              )
-                            }
-                            title={i18n.translate(
-                              'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithNginxLabel',
-                              {
-                                defaultMessage: 'Get started with {title}',
-                                values: { title: integration.title },
-                              }
-                            )}
-                            isDisabled={status !== 'dataReceived'}
-                            initialIsOpen
-                          >
-                            <GetStartedPanel
-                              onboardingFlowType="auto-detect"
-                              dataset={integration.pkgName}
-                              onboardingId={data?.onboardingFlow?.id}
-                              telemetryEventContext={{
-                                autoDetect: {
-                                  installSource: integration.installSource,
-                                  pkgVersion: integration.pkgVersion,
-                                  title: integration.title,
-                                },
-                              }}
-                              integration={integration.pkgName}
-                              newTab
-                              isLoading={status !== 'dataReceived'}
-                              actionLinks={actionLinks}
-                            />
-                          </AccordionWithIcon>
-                        );
-                      })}
-                    {customIntegrations.length > 0 && (
-                      <AccordionWithIcon
-                        id={`${accordionId}_custom`}
-                        icon={<EuiIcon type="documents" size="l" />}
-                        title={i18n.translate(
-                          'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithlogLabel',
-                          { defaultMessage: 'Get started with custom .log files' }
-                        )}
-                        isDisabled={status !== 'dataReceived'}
-                        initialIsOpen
-                      >
-                        <ul>
-                          {customIntegrations.map((integration) =>
-                            integration.dataStreams.map((datastream) => (
-                              <li key={`${integration.pkgName}/${datastream.dataset}`}>
-                                <EuiButtonEmpty
-                                  data-test-subj="observabilityOnboardingAutoDetectPanelButton"
-                                  href={
-                                    logsLocator?.getRedirectUrl(
-                                      useWiredStreams
-                                        ? {
-                                            dataViewSpec: WIRED_ECS_DATA_VIEW_SPEC,
-                                            query: {
-                                              language: 'kuery',
-                                              query: `service.name: "${integration.pkgName}"`,
-                                            },
-                                          }
-                                        : {
-                                            dataViewSpec: {
-                                              name: integration.pkgName,
-                                              title: `${datastream.type}-${datastream.dataset}-*`,
-                                              timeFieldName: '@timestamp',
-                                            },
-                                          }
-                                    ) ?? ''
-                                  }
-                                  target="_blank"
-                                  iconType="document"
-                                  isDisabled={status !== 'dataReceived'}
-                                  flush="left"
-                                  size="s"
-                                >
-                                  {integration.pkgName}
-                                </EuiButtonEmpty>
-                              </li>
-                            ))
-                          )}
-                        </ul>
-                      </AccordionWithIcon>
-                    )}
-                  </>
-                ) : null}
-              </>
+              <AutoDetectVisualizeStep
+                status={status}
+                installedIntegrations={installedIntegrations}
+                onboardingFlowId={data?.onboardingFlow?.id}
+                useWiredStreams={useWiredStreams}
+                isMetricsOnboardingEnabled={metricsOnboardingEnabled}
+                accordionId={accordionId}
+                logsLocator={logsLocator}
+                dashboardLocator={dashboardLocator}
+                assetDetailsLocator={assetDetailsLocator}
+              />
             ),
           },
         ]}

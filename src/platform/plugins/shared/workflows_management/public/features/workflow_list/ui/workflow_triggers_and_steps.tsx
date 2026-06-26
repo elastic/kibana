@@ -202,7 +202,7 @@ export const WorkflowTriggersAndSteps = ({ triggers, steps }: Props) => {
                 <EuiFlexGroup
                   key={`${baseType}-${idx}`}
                   alignItems="center"
-                  gutterSize="s"
+                  gutterSize="xs"
                   responsive={false}
                 >
                   <EuiFlexItem grow={false}>

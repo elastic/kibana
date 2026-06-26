@@ -42,6 +42,7 @@ import type {
   PackagePolicyAssetsMap,
   PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
+  ArchiveIterator,
 } from '../../../../common/types';
 
 import {
@@ -270,6 +271,7 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       version,
       status: installStatus,
       dataStreams,
+      rolledBack: integrationSavedObject.attributes.rolled_back,
     };
   });
 
@@ -709,9 +711,11 @@ export async function getPackageDependencies(
   );
 }
 
-interface PackageResponse {
+export interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
+  assetsMap?: AssetsMap;
+  archiveIterator?: ArchiveIterator;
 }
 type GetPackageResponse = PackageResponse | undefined;
 
@@ -767,6 +771,10 @@ export async function getPackageFromSource(options: {
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
     }
+    if (!res && pkgInstallSource === 'bundled') {
+      res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
+    }
   } else {
     try {
       res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
@@ -786,6 +794,8 @@ export async function getPackageFromSource(options: {
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
+    assetsMap: res.assetsMap,
+    archiveIterator: res.archiveIterator,
   };
 }
 

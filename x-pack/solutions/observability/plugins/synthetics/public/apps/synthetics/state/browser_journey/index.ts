@@ -55,7 +55,7 @@ export const browserJourneyReducer = createReducer(initialState, (builder) => {
     .addCase(fetchBlocksAction, (state, action) => {
       state.blocks = {
         ...state.blocks,
-        ...action.payload
+        ...action.payload.hashes
           // there's no need to overwrite existing blocks because the key
           // is either storing a pending req or a cached result
           .filter((b) => !state.blocks[b])

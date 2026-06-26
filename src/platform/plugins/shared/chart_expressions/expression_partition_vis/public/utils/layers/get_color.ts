@@ -202,7 +202,7 @@ export const getColor = (
   const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
 
   const name = column.format
-    ? formatter.deserialize(column.format).convert(categoricalKey) ?? ''
+    ? formatter.deserialize(column.format).convertToText(categoricalKey) ?? ''
     : '';
 
   if (visParams.distinctColors) {

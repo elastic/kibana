@@ -6,9 +6,12 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiTab, EuiTabs, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiSpacer, EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import type { QueryTab, SandboxTabConfig } from './types';
+import type { RuleQuery } from './compose_form_types';
+import type { QueryTab } from './types';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LineNumbersType = monaco.editor.LineNumbersType;
@@ -22,7 +25,7 @@ interface ComposeDiscoverTabsProps {
   onRecoveryBlockChange: (val: string) => void;
   activeTab: QueryTab;
   onTabChange: (tab: QueryTab) => void;
-  tabConfig: SandboxTabConfig;
+  tabs: QueryTab[];
   onAlertEditorMount?: (editor: IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: IStandaloneCodeEditor) => void;
   /**
@@ -37,20 +40,21 @@ interface ComposeDiscoverTabsProps {
 const LOCKED_EDITOR_STYLES: React.CSSProperties = {
   opacity: 0.55,
   pointerEvents: 'none',
-  borderBottom: '1px solid var(--euiColorLightShade)',
 };
 
 interface LockedBaseEditorProps {
   query: string;
 }
 
+const LOCKED_FONT_SIZE = 13;
+const LOCKED_LINE_HEIGHT = 18;
+
 const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
   const lineCount = query.split('\n').length;
-  // 19px per line plus a small buffer so the last line isn't clipped
-  const height = lineCount * 19 + 8;
+  const height = lineCount * LOCKED_LINE_HEIGHT + 4;
 
   return (
-    <div style={LOCKED_EDITOR_STYLES}>
+    <div style={{ ...LOCKED_EDITOR_STYLES, height }}>
       <CodeEditor
         languageId={ESQL_LANG_ID}
         value={query}
@@ -60,9 +64,12 @@ const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
           domReadOnly: true,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
+          scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
           renderLineHighlight: 'none',
           overviewRulerLanes: 0,
-          fontSize: 13,
+          fontSize: LOCKED_FONT_SIZE,
+          lineHeight: LOCKED_LINE_HEIGHT,
+          automaticLayout: true,
         }}
       />
     </div>
@@ -111,23 +118,118 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   );
 };
 
-export const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
-  { id: 'base', label: 'Base query' },
-  { id: 'alert', label: 'Alert query' },
-  { id: 'recovery', label: 'Recovery query' },
-];
-
-export function visibleTabIds(tabConfig: SandboxTabConfig): QueryTab[] {
-  switch (tabConfig.type) {
-    case 'base-alert':
-      return ['base', 'alert'];
-    case 'base-recovery':
-      return ['recovery'];
-    case 'single':
-    default:
-      return [];
+export const ALERT_TAB_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.tabs.alertTabDisabledTooltip',
+  {
+    defaultMessage: 'Define a base query before adding an alert condition',
   }
+);
+
+export const isAlertTabDisabled = (
+  tabs: QueryTab[],
+  baseQueryOrRuleQuery: string | RuleQuery
+): boolean => {
+  if (!tabs.includes('alert')) {
+    return false;
+  }
+
+  if (typeof baseQueryOrRuleQuery === 'string') {
+    return baseQueryOrRuleQuery.trim().length === 0;
+  }
+
+  if (baseQueryOrRuleQuery.format === 'composed') {
+    return baseQueryOrRuleQuery.base.trim().length === 0;
+  }
+
+  const base = baseQueryOrRuleQuery.no_data?.query ?? '';
+  if (base.trim().length > 0) {
+    return false;
+  }
+
+  return baseQueryOrRuleQuery.breach.query.trim().length === 0;
+};
+
+export const resolveActiveQueryTab = (
+  tabs: QueryTab[],
+  activeTab: QueryTab,
+  baseQuery: string
+): QueryTab => {
+  if (tabs.length === 0) return 'alert';
+  if (tabs.includes(activeTab) && !(activeTab === 'alert' && isAlertTabDisabled(tabs, baseQuery))) {
+    return activeTab;
+  }
+  if (tabs.includes('base')) return 'base';
+  return tabs[0] ?? 'alert';
+};
+
+interface QueryTabButtonProps {
+  tab: { id: QueryTab; label: string };
+  isSelected: boolean;
+  onSelect: (tab: QueryTab) => void;
+  baseQuery: string;
+  tabs: QueryTab[];
+  dataTestSubjPrefix: string;
 }
+
+export const QueryTabButton: React.FC<QueryTabButtonProps> = ({
+  tab,
+  isSelected,
+  onSelect,
+  baseQuery,
+  tabs,
+  dataTestSubjPrefix,
+}) => {
+  const disabled = tab.id === 'alert' && isAlertTabDisabled(tabs, baseQuery);
+  const handleSelect = () => {
+    if (disabled) {
+      return;
+    }
+    onSelect(tab.id);
+  };
+  const tabElement = (
+    <EuiTab
+      isSelected={isSelected}
+      onClick={handleSelect}
+      disabled={disabled}
+      data-test-subj={`${dataTestSubjPrefix}-${tab.id}`}
+    >
+      {tab.label}
+    </EuiTab>
+  );
+
+  if (!disabled) {
+    return tabElement;
+  }
+
+  return (
+    <EuiToolTip content={ALERT_TAB_DISABLED_TOOLTIP}>
+      <span tabIndex={0} style={{ display: 'inline-flex' }}>
+        {tabElement}
+      </span>
+    </EuiToolTip>
+  );
+};
+
+export const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
+  {
+    id: 'base',
+    label: i18n.translate('xpack.alertingV2.composeDiscover.tabs.baseQueryLabel', {
+      defaultMessage: 'Base query',
+    }),
+  },
+  {
+    id: 'alert',
+    label: i18n.translate('xpack.alertingV2.composeDiscover.tabs.alertQueryLabel', {
+      defaultMessage: 'Alert query',
+    }),
+  },
+  {
+    id: 'recovery',
+    label: i18n.translate('xpack.alertingV2.composeDiscover.tabs.recoveryQueryLabel', {
+      defaultMessage: 'Recovery query',
+    }),
+  },
+];
 
 export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   baseQuery,
@@ -138,17 +240,15 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   onRecoveryBlockChange,
   activeTab,
   onTabChange,
-  tabConfig,
+  tabs,
   onAlertEditorMount,
   onRecoveryEditorMount,
   hideTabBar = false,
   readOnly = false,
 }) => {
-  const tabIds = visibleTabIds(tabConfig);
-  const visibleTabs = TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
+  const visibleTabs = TAB_DEFINITIONS.filter((t) => tabs.includes(t.id));
 
-  const safeActiveTab: QueryTab =
-    tabIds.length > 0 && tabIds.includes(activeTab) ? activeTab : tabIds[0] ?? 'alert';
+  const safeActiveTab = resolveActiveQueryTab(tabs, activeTab, baseQuery);
 
   useEffect(() => {
     if (safeActiveTab !== activeTab) {
@@ -199,7 +299,10 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
         return (
           <EuiPanel color="subdued" paddingSize="l">
             <EuiText size="s" color="subdued" textAlign="center">
-              No editor available for this tab.
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.tabs.noEditorDescription"
+                defaultMessage="No editor available for this tab."
+              />
             </EuiText>
           </EuiPanel>
         );
@@ -212,14 +315,15 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
         <>
           <EuiTabs>
             {visibleTabs.map((tab) => (
-              <EuiTab
+              <QueryTabButton
                 key={tab.id}
+                tab={tab}
                 isSelected={safeActiveTab === tab.id}
-                onClick={() => onTabChange(tab.id)}
-                data-test-subj={`composeDiscoverTab-${tab.id}`}
-              >
-                {tab.label}
-              </EuiTab>
+                onSelect={onTabChange}
+                baseQuery={baseQuery}
+                tabs={tabs}
+                dataTestSubjPrefix="composeDiscoverTab"
+              />
             ))}
           </EuiTabs>
           <EuiSpacer size="m" />

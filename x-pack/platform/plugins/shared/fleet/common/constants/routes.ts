@@ -113,6 +113,16 @@ export const CLOUD_CONNECTOR_API_ROUTES = {
   USAGE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}/usage`,
 };
 
+export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT = `${API_ROOT}/cloud_onboarding_deployments`;
+
+export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
+  CREATE_PATTERN: CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
+  INFO_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+  BY_CONNECTOR_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/connector/{connectorId}`,
+  UPDATE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+  DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+};
+
 // Kubernetes Manifest API routes
 export const K8S_API_ROUTES = {
   K8S_DOWNLOAD_PATTERN: `${K8S_API_ROOT}/download`,
@@ -260,6 +270,7 @@ export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
 };
 
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
+export const CREATE_MANAGED_OTLP_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_managed_otlp_api_key`;
 
 // Fleet debug routes
 export const FLEET_DEBUG_ROUTES = {

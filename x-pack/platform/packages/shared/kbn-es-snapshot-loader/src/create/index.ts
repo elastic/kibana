@@ -25,7 +25,7 @@ export async function createSnapshot(config: CreateConfig): Promise<CreateResult
     repository.validate();
 
     log.info('Step 1/2: Registering snapshot repository...');
-    await repository.register({ esClient, log, repoName });
+    await repository.register({ esClient, log, repoName, verify: true });
 
     log.info(`Step 2/2: Creating snapshot "${snapshotName}"...`);
     const response = await esClient.snapshot.create({

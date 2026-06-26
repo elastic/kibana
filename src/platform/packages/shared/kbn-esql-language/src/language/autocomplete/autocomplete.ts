@@ -63,10 +63,7 @@ export async function suggest(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  const { innerText, correctedQuery, root, astContext } = getAutocompleteCursorContext(
-    fullText,
-    offset
-  );
+  const { innerText, root, astContext, tokens } = getAutocompleteCursorContext(fullText, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -77,7 +74,7 @@ export async function suggest(
   const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, astForFields),
+    getQueryForFields(innerText, astForFields),
     innerText,
     resourceRetriever
   );
@@ -197,6 +194,7 @@ export async function suggest(
       const rootLevelQuerySuggestions = attachReplacementRanges(innerText, rootLevelSuggestions, {
         fullText,
         offset,
+        tokens,
       });
 
       return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
@@ -253,6 +251,7 @@ export async function suggest(
 
     return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
       commandContext: { columns: await getColumnMapOnce() },
+      tokens,
     });
   }
   return [];
@@ -326,6 +325,7 @@ async function getSuggestionsWithinCommandExpression(
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
+    isTimeseriesSource: isTimeseriesSourceCommand(commands.filter((cmd) => cmd.type === 'command')),
   };
 
   // Wrap getColumnsByType so the fields browser option is injected from context;

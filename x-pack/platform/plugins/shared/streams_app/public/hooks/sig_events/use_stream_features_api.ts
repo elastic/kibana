@@ -12,10 +12,13 @@ import { useKibana } from '../use_kibana';
 import { getLast24HoursTimeRange } from '../../util/time_range';
 
 interface StreamFeaturesApi {
+  /** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead */
   getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
+  /** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead */
   scheduleFeaturesIdentificationTask: () => Promise<void>;
+  /** @deprecated Use POST /internal/streams/{name}/onboarding/_execute with action: 'cancel' instead */
   cancelFeaturesIdentificationTask: () => Promise<void>;
-  deleteFeature: (uuid: string) => Promise<void>;
+  deleteFeature: (id: string) => Promise<void>;
   deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
   excludeFeaturesInBulk: (uuids: string[]) => Promise<void>;
   restoreFeaturesInBulk: (uuids: string[]) => Promise<void>;
@@ -67,43 +70,43 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
           },
         });
       },
-      deleteFeature: async (uuid: string) => {
-        await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+      deleteFeature: async (id: string) => {
+        await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{id}', {
           signal,
           params: {
-            path: { name: streamName, uuid },
+            path: { name: streamName, id },
           },
         });
       },
-      deleteFeaturesInBulk: async (uuids: string[]) => {
+      deleteFeaturesInBulk: async (ids: string[]) => {
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
             path: { name: streamName },
             body: {
-              operations: uuids.map((id) => ({ delete: { id } })),
+              operations: ids.map((id) => ({ delete: { id } })),
             },
           },
         });
       },
-      excludeFeaturesInBulk: async (uuids: string[]) => {
+      excludeFeaturesInBulk: async (ids: string[]) => {
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
             path: { name: streamName },
             body: {
-              operations: uuids.map((id) => ({ exclude: { id } })),
+              operations: ids.map((id) => ({ exclude: { id } })),
             },
           },
         });
       },
-      restoreFeaturesInBulk: async (uuids: string[]) => {
+      restoreFeaturesInBulk: async (ids: string[]) => {
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
             path: { name: streamName },
             body: {
-              operations: uuids.map((id) => ({ restore: { id } })),
+              operations: ids.map((id) => ({ restore: { id } })),
             },
           },
         });

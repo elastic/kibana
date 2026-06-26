@@ -66,6 +66,7 @@ jest.mock('@kbn/test', () => ({
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
   existsSync: jest.fn(),
+  readdirSync: jest.fn(),
 }));
 
 const mockExecaFn = jest.fn();
@@ -81,6 +82,7 @@ const mockExecuteTypeCheckValidation = jest.requireMock('./type_check_validation
 const mockExecuteEslintValidation = jest.requireMock('./eslint/run_eslint_contract')
   .executeEslintValidation as jest.Mock;
 const mockExistsSync = jest.requireMock('fs').existsSync as jest.Mock;
+const mockReaddirSync = jest.requireMock('fs').readdirSync as jest.Mock;
 const mockExeca = mockExecaFn;
 
 let handler: (args: {
@@ -148,6 +150,7 @@ describe('run_check', () => {
       (p: string) =>
         p === '/repo/packages/foo/jest.config.js' || p === '/repo/packages/bar/jest.config.js'
     );
+    mockReaddirSync.mockReturnValue([]);
     mockExecuteEslintValidation.mockResolvedValue({
       fileCount: 3,
       fixedFiles: [],
@@ -289,10 +292,35 @@ describe('run_check', () => {
       },
     });
 
-    mockExistsSync.mockImplementation(
-      (p: string) =>
-        p ===
-        '/repo/x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/playwright.config.ts'
+    mockExistsSync.mockReturnValue(false);
+    mockReaddirSync.mockImplementation((dir: string) =>
+      dir === '/repo/x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api'
+        ? ['playwright.config.ts']
+        : []
+    );
+
+    await handler(createArgs());
+
+    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockRunJestViaMoon).toHaveBeenCalled();
+  });
+
+  it('skips fast path for Scout test files with parallel playwright config', async () => {
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/fullscreen.spec.ts',
+        ],
+      },
+    });
+
+    mockExistsSync.mockReturnValue(false);
+    mockReaddirSync.mockImplementation((dir: string) =>
+      dir === '/repo/src/platform/plugins/shared/discover/test/scout/ui'
+        ? ['parallel.playwright.config.ts']
+        : []
     );
 
     await handler(createArgs());

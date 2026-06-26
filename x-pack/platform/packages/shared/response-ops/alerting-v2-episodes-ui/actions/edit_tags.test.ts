@@ -75,7 +75,6 @@ describe('createEditTagsAction', () => {
     });
 
     expect(flyout.openTagsFlyout).toHaveBeenCalledWith(deps.overlays, deps.rendering, [], {
-      http: deps.http,
       expressions: deps.expressions,
       spaces: deps.spaces,
       queryClient: deps.queryClient,
@@ -101,7 +100,6 @@ describe('createEditTagsAction', () => {
       deps.rendering,
       ['existing', 'tags'],
       {
-        http: deps.http,
         expressions: deps.expressions,
         spaces: deps.spaces,
         queryClient: deps.queryClient,

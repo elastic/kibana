@@ -35,7 +35,7 @@ function FullTraceButton({
       {...(onClick
         ? getEbtProps({
             action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.VIEW_FULL_TRACE,
-            element: TRACE_WATERFALL_EBT_ELEMENTS.SUMMARY_VIEW_FULL_TRACE,
+            element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_VIEW_FULL_TRACE,
           })
         : {})}
       iconType="chartWaterfall"

@@ -17,6 +17,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const security = getService('security');
 
+  /**
+   * Purpose: Filter dashboard by map extent smoke test
+   *
+   * Migration: migrate to scout
+   */
   describe('filter by map extent', () => {
     before(async () => {
       await security.testUser.setRoles(

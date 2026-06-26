@@ -27,6 +27,18 @@ import { SupportedTypeConversion } from './types';
 const SUBPATTERNS_REGEX =
   /%\{[A-Z0-9_@#$%&*+=\-\.]+(?::[A-Za-z0-9_@#$%&*+=\-\.]+)?(?::[A-Za-z]+)?\}/g;
 
+// Matches %{SYNTAX:SEMANTIC} and %{SYNTAX:SEMANTIC:TYPE} tokens for field-name extraction.
+const GROK_FIELD_NAMES_REGEX =
+  /%\{[A-Z0-9_@#$%&*+=\-\.]+:([A-Za-z0-9_@#$%&*+=\-\.]+)(?::[A-Za-z]+)?\}/g;
+
+// Matches manual semantic names in (?<field_name>...) capture groups.
+const MANUAL_FIELD_NAMES_REGEX = /\(\?<([A-Za-z0-9_@#$%&*+=\-\.]+)(?::|>)/g;
+
+export interface GrokFieldUsageSource {
+  getFieldNames(): ReadonlySet<string>;
+  getPatternSlotId?(): string | number | undefined;
+}
+
 // Matches "manual" semantic names in the expression, these are user defined capture groups, e.g. (?<field_name>the pattern here)
 const NESTED_FIELD_NAMES_REGEX =
   /(\(\?<([A-Za-z0-9_@#$%&*+=\-\.]+)(?::([A-Za-z0-9_@#$%&*+=\-\.]+))?(?::([A-Za-z]+))?>)|\(\?:|\(\?>|\(\?!|\(\?<!|\(|\\\(|\\\)|\)|\[|\\\[|\\\]|\]/g;
@@ -62,6 +74,11 @@ export class GrokCollection {
   public readonly customPatternsChanged$ = new Subject<void>();
   // Combination of core and custom patterns.
   private patternKeys: string[] = [];
+  // Stable map of field name -> palette colour. Ensures the same field always gets the same
+  // colour across all patterns within this collection, instead of rotating positionally per
+  // pattern.
+  private fieldColourMap = new Map<string, string>();
+  private readonly fieldUsageSources = new Set<GrokFieldUsageSource>();
   private colourIndex = 0;
 
   // NOTE: Model as async for now with future intent to use the /_ingest/processor/grok endpoint
@@ -158,11 +175,113 @@ export class GrokCollection {
     return provider;
   };
 
-  public getColour = () => {
-    // Loop back to 0 once at the end of the rotations
-    this.colourIndex =
-      this.colourIndex + 1 < EUI_COLOR_PALETTE_VALUES.length ? this.colourIndex + 1 : 0;
-    return EUI_COLOR_PALETTE_VALUES[this.colourIndex];
+  public registerFieldUsageSource = (source: GrokFieldUsageSource): (() => void) => {
+    this.fieldUsageSources.add(source);
+    return () => {
+      this.fieldUsageSources.delete(source);
+    };
+  };
+
+  public parseFieldNames = (expression: string): Set<string> => {
+    const names = new Set<string>();
+
+    GROK_FIELD_NAMES_REGEX.lastIndex = 0;
+    let grokMatch: RegExpExecArray | null;
+    while ((grokMatch = GROK_FIELD_NAMES_REGEX.exec(expression)) !== null) {
+      names.add(grokMatch[1]);
+    }
+
+    MANUAL_FIELD_NAMES_REGEX.lastIndex = 0;
+    let manualMatch: RegExpExecArray | null;
+    while ((manualMatch = MANUAL_FIELD_NAMES_REGEX.exec(expression)) !== null) {
+      names.add(manualMatch[1]);
+    }
+
+    return names;
+  };
+
+  public reconcileFieldUsage = (
+    source: GrokFieldUsageSource,
+    previousFieldNames: ReadonlySet<string>,
+    nextFieldNames: ReadonlySet<string>
+  ) => {
+    if (previousFieldNames.size === 0 && nextFieldNames.size === 0) return;
+
+    const released: string[] = [];
+    for (const name of previousFieldNames) {
+      if (!nextFieldNames.has(name)) released.push(name);
+    }
+    if (released.length !== 1) return;
+
+    const acquired: string[] = [];
+    for (const name of nextFieldNames) {
+      if (!previousFieldNames.has(name)) acquired.push(name);
+    }
+    if (acquired.length !== 1) return;
+
+    const [releasedName] = released;
+    const [acquiredName] = acquired;
+
+    if (this.isFieldNameUsedByOtherSources(releasedName, source)) return;
+
+    // The new name is already registered (e.g. mid-rename now matches a sibling row).
+    // Adopt that colour and free the old name's slot for future rotation.
+    if (this.fieldColourMap.has(acquiredName)) {
+      this.fieldColourMap.delete(releasedName);
+      return;
+    }
+
+    const colour = this.fieldColourMap.get(releasedName);
+    if (colour === undefined) return;
+    this.fieldColourMap.delete(releasedName);
+    this.fieldColourMap.set(acquiredName, colour);
+  };
+
+  /**
+   * Drops colour-map entries for field names that are no longer referenced by any registered
+   * draft.
+   */
+  public flushFieldUsage = () => {
+    const activeFieldNames = new Set<string>();
+    for (const source of this.fieldUsageSources) {
+      for (const name of source.getFieldNames()) activeFieldNames.add(name);
+    }
+    for (const fieldName of this.fieldColourMap.keys()) {
+      if (!activeFieldNames.has(fieldName)) this.fieldColourMap.delete(fieldName);
+    }
+  };
+
+  /**
+   * Returns the colour assigned to a field name, allocating the next palette slot if the
+   * name has never been seen.
+   */
+  public getColour = (fieldName?: string): string => {
+    if (fieldName !== undefined) {
+      const existing = this.fieldColourMap.get(fieldName);
+      if (existing !== undefined) return existing;
+    }
+    const colour = EUI_COLOR_PALETTE_VALUES[this.colourIndex % EUI_COLOR_PALETTE_VALUES.length];
+    this.colourIndex++;
+    if (fieldName !== undefined) this.fieldColourMap.set(fieldName, colour);
+    return colour;
+  };
+
+  /** Read-only colour lookup for UI decoration without advancing the palette. */
+  public lookupAssignedColour = (fieldName: string): string | undefined => {
+    return this.fieldColourMap.get(fieldName);
+  };
+
+  private isFieldNameUsedByOtherSources = (
+    fieldName: string,
+    exclude: GrokFieldUsageSource
+  ): boolean => {
+    const excludeSlotId = exclude.getPatternSlotId?.();
+    for (const source of this.fieldUsageSources) {
+      if (source === exclude) continue;
+      if (excludeSlotId !== undefined && source.getPatternSlotId?.() === excludeSlotId) continue;
+      if (source.getFieldNames().has(fieldName)) return true;
+    }
+    return false;
   };
 
   // Only relevant for Monaco users.
@@ -181,11 +300,8 @@ export class GrokCollection {
     }
     return styles;
   };
-
-  public resetColourIndex = () => {
-    this.colourIndex = 0;
-  };
 }
+
 export class GrokPattern {
   // The raw pattern, this might be a direct Oniguruma expression, or an expression that contains Grok subpatterns.
   // E.g. INT (?:[+-]?(?:[0-9]+)) or MAC (?:%{CISCOMAC}|%{WINDOWSMAC}|%{COMMONMAC})
@@ -206,6 +322,10 @@ export class GrokPattern {
     this.parentCollection = collection;
   }
 
+  public getParentCollection = () => {
+    return this.parentCollection;
+  };
+
   public isResolved() {
     return this.resolvedPattern !== null;
   }
@@ -215,7 +335,6 @@ export class GrokPattern {
       return this.resolvedPattern;
     }
 
-    this.parentCollection.resetColourIndex();
     this.fields.clear();
     this.resolveSubPatterns();
     this.resolveFieldNames();
@@ -269,7 +388,7 @@ export class GrokPattern {
             fieldType && SUPPORTED_TYPE_CONVERSIONS.includes(fieldType as SupportedTypeConversion)
               ? (fieldType as SupportedTypeConversion)
               : null,
-          colour: this.parentCollection.getColour(),
+          colour: this.parentCollection.getColour(fieldName),
           pattern: matched,
         };
         this.fields.set(generatedId, fieldEntry);
@@ -338,14 +457,15 @@ export class GrokPattern {
 
           // This check is so we don't reprocess the field name replacements from resolveSubPatterns
           if (!matched[2].includes('_____GENERATED_CAPTURE_GROUP_____')) {
+            const resolvedFieldName = matched[3] ?? matched[2];
             this.fields.set(generatedId, {
-              name: matched[3] ?? matched[2],
+              name: resolvedFieldName,
               type:
                 matched[4] &&
                 SUPPORTED_TYPE_CONVERSIONS.includes(matched[4] as SupportedTypeConversion)
                   ? (matched[4] as SupportedTypeConversion)
                   : null,
-              colour: this.parentCollection.getColour(),
+              colour: this.parentCollection.getColour(resolvedFieldName),
               pattern: `${CUSTOM_NAMED_CAPTURE_PATTERN_PREFIX} ${escape(
                 String.raw`${matched[1]}`
               )}`,

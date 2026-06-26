@@ -23,7 +23,12 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  decodeApiKeyId,
+  isUiamCredential,
+} from '@kbn/core-security-server';
+import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -248,6 +253,76 @@ export class RulesClientFactory {
     }
   }
 
+  /**
+   * Synchronously invalidates the rule's ES and/or UIAM API keys, bypassing the pending
+   * invalidation queue. Errors are logged but never rethrown so that this cannot break
+   * the surrounding rule delete operation.
+   *
+   * Mirrors the decode logic of {@link bulkMarkApiKeysForInvalidation}: each input is
+   * `base64(id:value)`; for UIAM keys the value is a UIAM credential, for ES keys we
+   * only need the id.
+   */
+  private async invalidateApiKeyNow(
+    request: KibanaRequest,
+    {
+      ruleName,
+      apiKey,
+      uiamApiKey,
+    }: { ruleName: string; apiKey?: string | null; uiamApiKey?: string | null }
+  ): Promise<void> {
+    const esApiKeyId = apiKey ? decodeApiKeyId(apiKey) : undefined;
+    const uiamApiKeyId = uiamApiKey ? decodeApiKeyId(uiamApiKey) : undefined;
+
+    const tasks: Array<Promise<unknown>> = [];
+
+    if (uiamApiKeyId) {
+      tasks.push(
+        (async () => {
+          try {
+            await this.invalidateUiamApiKey(request, ruleName, uiamApiKeyId);
+          } catch (err) {
+            this.logger.error(
+              `Failed to synchronously invalidate UIAM API key for alerting rule : ${ruleName}: ${
+                err instanceof Error ? err.message : String(err)
+              }`,
+              {
+                tags: UIAM_LOGS_INVALIDATE_TAGS,
+                error: { stack_trace: err instanceof Error ? err.stack : undefined },
+              }
+            );
+          }
+        })()
+      );
+    }
+
+    if (esApiKeyId) {
+      tasks.push(
+        (async () => {
+          try {
+            const result: InvalidateAPIKeyResult | null =
+              await this.securityService.authc.apiKeys.invalidate(request, { ids: [esApiKeyId] });
+            if (result && result.error_count > 0) {
+              this.logger.error(
+                `Failed to synchronously invalidate ES API key for alerting rule : ${ruleName}: ${result.error_details
+                  ?.map((error) => error.reason)
+                  .join(', ')}`
+              );
+            }
+          } catch (err) {
+            this.logger.error(
+              `Failed to synchronously invalidate ES API key for alerting rule : ${ruleName}: ${
+                err instanceof Error ? err.message : String(err)
+              }`,
+              { error: { stack_trace: err instanceof Error ? err.stack : undefined } }
+            );
+          }
+        })()
+      );
+    }
+
+    await Promise.all(tasks);
+  }
+
   private async createInternal({
     request,
     savedObjects,
@@ -415,6 +490,9 @@ export class RulesClientFactory {
         return { apiKeysEnabled: false };
       },
       cloneApiKeysOnCreate: options?.cloneApiKeysOnCreate === true,
+      async invalidateApiKeyNow(params) {
+        await factory.invalidateApiKeyNow(request, params);
+      },
       async cloneAPIKey(name: string) {
         const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
           name,

@@ -10,6 +10,7 @@ import type {
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
 import { z } from '@kbn/zod/v4';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
@@ -117,30 +118,28 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
           value:
             `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`` +
             `${validationSection}\n\n` +
-            `Use the workflow edit tools (${workflowTools.insertStep}, ${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}, ${workflowTools.modifyProperty}, ${workflowTools.deleteStep}, ${workflowTools.setYaml}) to modify this workflow.\n` +
-            `When inserting or modifying steps, provide step definitions as structured JSON objects — the tools will generate properly formatted YAML.\n` +
-            `Each edit tool emits a diff attachment and updates this YAML attachment for subsequent edits.`,
+            `Use \`${platformCoreTools.generateWorkflow}\` to create or modify this workflow. It emits a diff card in chat and updates this attachment.\n` +
+            `Use \`${platformCoreTools.executeWorkflow}\` with \`attachmentId\` set to this attachment's id to run this workflow end-to-end (no save required).\n` +
+            `Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.`,
         };
       },
     };
   },
-  getTools: () => Object.values(workflowTools),
+  getTools: () => [
+    ...Object.values(workflowTools),
+    platformCoreTools.generateWorkflow,
+    platformCoreTools.executeWorkflow,
+  ],
   getAgentDescription: () =>
     `${WORKFLOW_YAML_ATTACHMENT_TYPE} attachments represent the current state of an Elastic Workflow YAML document.\n` +
-    `To create a new workflow from scratch (when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists), call ${workflowTools.setYaml} with the full YAML — it will create the attachment automatically. Do NOT use attachments.add or attachment_add to create workflow attachments manually.\n` +
-    `All workflow authoring tools are already available — do NOT load the workflow-authoring skill via filestore.read.\n` +
     `The workflow YAML and any validation errors are shown in the attachment content — do NOT call attachment_read to re-read them.\n\n` +
     `## Editing Rules\n\n` +
-    `- To create a new workflow, use ${workflowTools.setYaml} with the complete YAML. It creates the attachment automatically — do NOT call attachments.add or attachment_add.\n` +
-    `- Use edit tools to propose changes. NEVER paste full YAML into your response text.\n` +
-    `- Each edit tool returns diffAttachmentId, attachmentId, and attachmentVersion\n` +
+    `- To create or modify a workflow, call \`${platformCoreTools.generateWorkflow}\` — it handles both creation and edits, knows all step types and the configured connectors, emits a diff card in chat, and returns \`diffAttachmentId\`, \`attachmentId\`, and \`attachmentVersion\`. Do NOT use attachments.add or attachment_add directly. Do NOT pre-fetch step definitions, examples, or connectors before calling it.\n` +
+    `- NEVER paste full YAML into your response text.\n` +
     `- Render the diff with <render_attachment id="{diffAttachmentId}"/>\n` +
     `- Render the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/> — the version attribute is required so the UI shows the latest content\n` +
-    `- Edit tools auto-validate the result and return a \`validation\` field — no need to call ${workflowTools.validateWorkflow} separately after edits.\n` +
-    `- Prefer surgical edits (${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}) over ${workflowTools.setYaml}\n` +
-    `- **ALWAYS call ${workflowTools.getStepDefinitions} to verify the exact step type ID before changing a step's type or inserting a new step.** Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`). Deprecated steps are excluded from discovery by default; use an exact \`stepType\` lookup or \`includeDeprecated: true\` when maintaining legacy workflows.\n` +
-    `- Use ${workflowTools.getExamples} to find working workflow patterns\n` +
-    `- **Do NOT guess field names.** Discover actual fields in the user's index before writing ES queries. After creating the workflow, call \`${workflowTools.executeStep}\` on every ES query step to verify non-zero results. Zero results -> broaden and investigate.\n` +
+    `- If a legacy/deprecated step type appears in the existing YAML and you need its schema to fix an error, call \`${workflowTools.getStepDefinitions}\` with the exact \`stepType\` ID or \`includeDeprecated: true\`.\n` +
+    `- \`${platformCoreTools.generateWorkflow}\` does not know the user's index schemas. If the user wants to run/save the workflow and it contains an ES query step against a real index, you may call \`${workflowTools.executeStep}\` on that step after generation to verify it returns rows. Do NOT pre-discover index fields before generation.\n` +
     `- The \`if\` step's \`condition\` uses KQL, not Liquid. To check computed values (e.g. array size), use a \`data.set\` step to compute a number, then a KQL comparison like \`steps.set_count.output.count > 0\`.\n\n` +
     `## Rendering\n\n` +
     `- The ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is rendered in chat as a YAML code preview with a Save button.\n` +

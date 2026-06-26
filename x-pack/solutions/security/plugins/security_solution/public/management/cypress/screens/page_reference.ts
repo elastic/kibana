@@ -8,6 +8,7 @@
 import { keyBy } from 'lodash';
 import {
   APP_BLOCKLIST_PATH,
+  APP_ENDPOINT_EXCEPTIONS_PATH,
   APP_ENDPOINTS_PATH,
   APP_EVENT_FILTERS_PATH,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -20,6 +21,7 @@ import {
 export interface EndpointManagementPageMap {
   endpointList: EndpointManagementPage;
   policyList: EndpointManagementPage;
+  endpointExceptions: EndpointManagementPage;
   trustedApps: EndpointManagementPage;
   trustedDevices: EndpointManagementPage;
   eventFilters: EndpointManagementPage;
@@ -31,7 +33,12 @@ export interface EndpointManagementPageMap {
 export type EndpointManagementPageId = keyof EndpointManagementPageMap;
 export type EndpointArtifactPageId = keyof Pick<
   EndpointManagementPageMap,
-  'trustedApps' | 'trustedDevices' | 'eventFilters' | 'hostIsolationExceptions' | 'blocklist'
+  | 'trustedApps'
+  | 'trustedDevices'
+  | 'eventFilters'
+  | 'hostIsolationExceptions'
+  | 'blocklist'
+  | 'endpointExceptions'
 >;
 
 interface EndpointManagementPage {
@@ -54,6 +61,12 @@ export const getEndpointManagementPageList = (): EndpointManagementPage[] => {
       title: 'Policy List page',
       url: APP_POLICIES_PATH,
       pageTestSubj: 'policyListPage',
+    },
+    {
+      id: 'endpointExceptions',
+      title: 'Endpoint Exceptions Page',
+      url: APP_ENDPOINT_EXCEPTIONS_PATH,
+      pageTestSubj: 'endpointExceptionsListPage-container',
     },
     {
       id: 'trustedApps',

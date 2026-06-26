@@ -11,4 +11,5 @@ const alertingTool = (name: string) => `${ALERTING_NAMESPACE}.${name}`;
 
 export const alertingTools = {
   manageRule: alertingTool('manage_rule'),
+  manageActionPolicy: alertingTool('manage_action_policy'),
 } as const;

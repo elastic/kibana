@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
-  - '@kbn/spaces-utils'
   - '@kbn/spaces-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/config-schema'
@@ -53,6 +52,7 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/agent-builder-browser'
   - '@kbn/zod'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

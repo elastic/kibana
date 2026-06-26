@@ -6,24 +6,21 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import type { FormValues } from '../../form/types';
 import type { ComposeFormValues } from './compose_form_types';
 import {
-  transformQueryIn,
-  transformQueryOut,
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
   mapRuleToComposeFormValues,
+  mapYamlFormValuesToComposeFormValues,
 } from './compose_mappers';
 
 // ── fixtures ─────────────────────────────────────────────────────────────────
 
-const QUERY_WITH_STATS_AND_WHERE =
-  'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100';
 const BASE = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
-const ALERT_BLOCK = '| WHERE count > 100';
-const RECOVERY_WITH_STATS_AND_WHERE =
-  'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count < 100';
-const RECOVERY_BLOCK = '| WHERE count < 100';
+const ALERT_SEGMENT = 'WHERE count > 100';
+const RECOVERY_SEGMENT = 'WHERE count < 100';
 
 const baseRuleResponse: RuleResponse = {
   id: 'rule-1',
@@ -32,12 +29,16 @@ const baseRuleResponse: RuleResponse = {
   metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
-  evaluation: { query: { base: QUERY_WITH_STATS_AND_WHERE } },
+  query: {
+    format: 'composed',
+    base: BASE,
+    breach: { segment: ALERT_SEGMENT },
+  },
   createdBy: 'test',
   createdAt: '2026-01-01T00:00:00Z',
   updatedBy: 'test',
   updatedAt: '2026-01-01T00:00:00Z',
-} as RuleResponse;
+};
 
 const baseFormValues: ComposeFormValues = {
   kind: 'alert',
@@ -47,219 +48,11 @@ const baseFormValues: ComposeFormValues = {
   query: {
     format: 'composed',
     base: BASE,
-    blocks: { breach: ALERT_BLOCK },
+    breach: { segment: ALERT_SEGMENT },
   },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
 };
-
-// ── transformQueryIn ─────────────────────────────────────────────────────────
-
-describe('transformQueryIn', () => {
-  it('returns standalone for signal rules', () => {
-    const result = transformQueryIn({
-      kind: 'signal',
-      evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
-    });
-    expect(result).toEqual({ format: 'standalone', breach: 'FROM logs-* | LIMIT 10' });
-  });
-
-  it('ignores recovery_policy for signal rules', () => {
-    const result = transformQueryIn({
-      kind: 'signal',
-      evaluation: { query: { base: 'FROM logs-*' } },
-      recovery_policy: { type: 'query', query: { base: 'FROM logs-* | WHERE ok = true' } },
-    });
-    expect(result).toEqual({ format: 'standalone', breach: 'FROM logs-*' });
-  });
-
-  it('splits alert rule with STATS + WHERE into composed format', () => {
-    const result = transformQueryIn({
-      kind: 'alert',
-      evaluation: { query: { base: QUERY_WITH_STATS_AND_WHERE } },
-    });
-    expect(result).toEqual({
-      format: 'composed',
-      base: BASE,
-      blocks: { breach: ALERT_BLOCK },
-    });
-  });
-
-  it('handles alert rule with STATS but no WHERE', () => {
-    const result = transformQueryIn({
-      kind: 'alert',
-      evaluation: { query: { base: BASE } },
-    });
-    expect(result.format).toBe('composed');
-    expect(result).toHaveProperty('base', BASE);
-    if (result.format === 'composed') {
-      expect(result.blocks.breach).toBe('');
-    }
-  });
-
-  it('extracts recovery block from recovery_policy query', () => {
-    const result = transformQueryIn({
-      kind: 'alert',
-      evaluation: { query: { base: QUERY_WITH_STATS_AND_WHERE } },
-      recovery_policy: { type: 'query', query: { base: RECOVERY_WITH_STATS_AND_WHERE } },
-    });
-    expect(result.format).toBe('composed');
-    if (result.format === 'composed') {
-      expect(result.blocks.recover).toBe(RECOVERY_BLOCK);
-    }
-  });
-
-  it('omits recover for recovery_policy type no_breach', () => {
-    const result = transformQueryIn({
-      kind: 'alert',
-      evaluation: { query: { base: QUERY_WITH_STATS_AND_WHERE } },
-      recovery_policy: { type: 'no_breach' },
-    });
-    expect(result.format).toBe('composed');
-    if (result.format === 'composed') {
-      expect(result.blocks.recover).toBeUndefined();
-    }
-  });
-
-  it('omits recover when recovery_policy is null', () => {
-    const result = transformQueryIn({
-      kind: 'alert',
-      evaluation: { query: { base: QUERY_WITH_STATS_AND_WHERE } },
-      recovery_policy: null,
-    });
-    if (result.format === 'composed') {
-      expect(result.blocks.recover).toBeUndefined();
-    }
-  });
-
-  it('omits recover when recovery_policy is absent', () => {
-    const result = transformQueryIn({
-      kind: 'alert',
-      evaluation: { query: { base: QUERY_WITH_STATS_AND_WHERE } },
-    });
-    if (result.format === 'composed') {
-      expect(result.blocks.recover).toBeUndefined();
-    }
-  });
-});
-
-// ── transformQueryOut ────────────────────────────────────────────────────────
-
-describe('transformQueryOut', () => {
-  it('returns evaluation only for standalone signal with no recovery', () => {
-    const result = transformQueryOut({ format: 'standalone', breach: 'FROM logs-*' }, 'signal');
-    expect(result).toEqual({ evaluation: { query: { base: 'FROM logs-*' } } });
-    expect(result.recovery_policy).toBeUndefined();
-  });
-
-  it('returns no_breach recovery for standalone alert with no recovery', () => {
-    const result = transformQueryOut({ format: 'standalone', breach: 'FROM logs-*' }, 'alert');
-    expect(result.evaluation).toEqual({ query: { base: 'FROM logs-*' } });
-    expect(result.recovery_policy).toEqual({ type: 'no_breach' });
-  });
-
-  it('returns query recovery for standalone with recover string', () => {
-    const result = transformQueryOut(
-      { format: 'standalone', breach: 'FROM logs-*', recover: 'FROM logs-* | WHERE ok' },
-      'alert'
-    );
-    expect(result.recovery_policy).toEqual({
-      type: 'query',
-      query: { base: 'FROM logs-* | WHERE ok' },
-    });
-  });
-
-  it('joins base + breach for composed evaluation', () => {
-    const result = transformQueryOut({
-      format: 'composed',
-      base: BASE,
-      blocks: { breach: ALERT_BLOCK },
-    });
-    expect(result.evaluation.query.base).toBe(`${BASE}\n${ALERT_BLOCK}`);
-  });
-
-  it('returns no_breach when composed has no recover block', () => {
-    const result = transformQueryOut({
-      format: 'composed',
-      base: BASE,
-      blocks: { breach: ALERT_BLOCK },
-    });
-    expect(result.recovery_policy).toEqual({ type: 'no_breach' });
-  });
-
-  it('joins base + recover for composed recovery', () => {
-    const result = transformQueryOut({
-      format: 'composed',
-      base: BASE,
-      blocks: { breach: ALERT_BLOCK, recover: RECOVERY_BLOCK },
-    });
-    expect(result.recovery_policy).toEqual({
-      type: 'query',
-      query: { base: `${BASE}\n${RECOVERY_BLOCK}` },
-    });
-  });
-
-  it('handles composed with empty base', () => {
-    const result = transformQueryOut({
-      format: 'composed',
-      base: '',
-      blocks: { breach: ALERT_BLOCK, recover: RECOVERY_BLOCK },
-    });
-    expect(result.evaluation.query.base).toBe(ALERT_BLOCK);
-    expect(result.recovery_policy).toEqual({
-      type: 'query',
-      query: { base: RECOVERY_BLOCK },
-    });
-  });
-
-  it('treats whitespace-only recover as absent', () => {
-    const result = transformQueryOut({
-      format: 'composed',
-      base: BASE,
-      blocks: { breach: ALERT_BLOCK, recover: '   ' },
-    });
-    expect(result.recovery_policy).toEqual({ type: 'no_breach' });
-  });
-});
-
-// ── round-trip ───────────────────────────────────────────────────────────────
-
-describe('transformQueryIn → transformQueryOut round-trip', () => {
-  it('round-trips a signal rule', () => {
-    const original = { kind: 'signal' as const, evaluation: { query: { base: 'FROM logs-*' } } };
-    const query = transformQueryIn(original);
-    const out = transformQueryOut(query, 'signal');
-    expect(out.evaluation.query.base).toBe(original.evaluation.query.base);
-    expect(out.recovery_policy).toBeUndefined();
-  });
-
-  it('round-trips an alert rule with recovery', () => {
-    const original = {
-      kind: 'alert' as const,
-      evaluation: { query: { base: QUERY_WITH_STATS_AND_WHERE } },
-      recovery_policy: { type: 'query', query: { base: RECOVERY_WITH_STATS_AND_WHERE } },
-    };
-    const query = transformQueryIn(original);
-    const out = transformQueryOut(query, 'alert');
-    expect(out.evaluation.query.base).toBe(QUERY_WITH_STATS_AND_WHERE);
-    expect(out.recovery_policy).toEqual({
-      type: 'query',
-      query: { base: RECOVERY_WITH_STATS_AND_WHERE },
-    });
-  });
-
-  it('round-trips an alert rule without recovery', () => {
-    const original = {
-      kind: 'alert' as const,
-      evaluation: { query: { base: QUERY_WITH_STATS_AND_WHERE } },
-      recovery_policy: { type: 'no_breach' },
-    };
-    const query = transformQueryIn(original);
-    const out = transformQueryOut(query, 'alert');
-    expect(out.evaluation.query.base).toBe(QUERY_WITH_STATS_AND_WHERE);
-    expect(out.recovery_policy).toEqual({ type: 'no_breach' });
-  });
-});
 
 // ── composeFormToCreateRequest ───────────────────────────────────────────────
 
@@ -270,8 +63,55 @@ describe('composeFormToCreateRequest', () => {
     expect(result.metadata).toEqual({ name: 'Test Rule', owner: 'test-owner', tags: ['tag1'] });
     expect(result.time_field).toBe('@timestamp');
     expect(result.schedule).toEqual({ every: '5m', lookback: '2m' });
-    expect(result.evaluation.query.base).toBe(`${BASE}\n${ALERT_BLOCK}`);
-    expect(result.recovery_policy).toEqual({ type: 'no_breach' });
+    expect(result.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: ALERT_SEGMENT },
+    });
+  });
+
+  it('includes recovery with recovery_strategy: query when form has recovery segment', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      query: {
+        format: 'composed',
+        base: BASE,
+        breach: { segment: ALERT_SEGMENT },
+        recovery: { segment: RECOVERY_SEGMENT },
+      },
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: ALERT_SEGMENT },
+      recovery: { segment: RECOVERY_SEGMENT },
+    });
+    expect(result.recovery_strategy).toBe('query');
+  });
+
+  it('omits recovery and recovery_strategy when form has none', () => {
+    const result = composeFormToCreateRequest(baseFormValues);
+    expect(result.query).not.toHaveProperty('recovery');
+    expect(result.recovery_strategy).toBeUndefined();
+  });
+
+  it('maps standalone form values to standalone request', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | WHERE count > 100' },
+        recovery: { query: 'FROM logs-* | WHERE count < 100' },
+      },
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.query).toEqual({
+      format: 'standalone',
+      breach: { query: 'FROM logs-* | WHERE count > 100' },
+      recovery: { query: 'FROM logs-* | WHERE count < 100' },
+    });
+    expect(result.recovery_strategy).toBe('query');
   });
 
   it('omits tags when empty', () => {
@@ -333,6 +173,61 @@ describe('composeFormToCreateRequest', () => {
       expect.objectContaining({ pending_count: 3, pending_timeframe: '10m' })
     );
   });
+
+  it('trims runbook and dashboard artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Runbook steps  ' },
+      ],
+      dashboardArtifacts: [
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+      ],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+    ]);
+  });
+
+  it('removes empty runbook and dashboard artifacts while preserving other artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
+      dashboardArtifacts: [{ id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '' }],
+      artifacts: [{ id: 'other-id', type: 'other', value: 'kept' }],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([{ id: 'other-id', type: 'other', value: 'kept' }]);
+  });
+
+  it('generates missing IDs for runbook and dashboard artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' }],
+      dashboardArtifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      expect.objectContaining({
+        id: expect.stringMatching(/^runbook-/),
+        type: RUNBOOK_ARTIFACT_TYPE,
+        value: 'Runbook steps',
+      }),
+      expect.objectContaining({
+        id: expect.stringMatching(/^dashboard-/),
+        type: DASHBOARD_ARTIFACT_TYPE,
+        value: 'dashboard-123',
+      }),
+    ]);
+  });
 });
 
 // ── composeFormToUpdateRequest ───────────────────────────────────────────────
@@ -347,6 +242,8 @@ describe('composeFormToUpdateRequest', () => {
     const result = composeFormToUpdateRequest(baseFormValues);
     expect(result.grouping).toBeNull();
     expect(result.artifacts).toBeNull();
+    expect(result.recovery_strategy).toBeNull();
+    expect(result.no_data_strategy).toBeNull();
   });
 
   it('preserves grouping when present', () => {
@@ -356,6 +253,40 @@ describe('composeFormToUpdateRequest', () => {
     };
     const result = composeFormToUpdateRequest(values);
     expect(result.grouping).toEqual({ fields: ['host.name'] });
+  });
+
+  it('preserves recovery_strategy and no_data_strategy when present', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      recoveryStrategy: 'no_breach',
+      noDataStrategy: 'emit',
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBe('no_breach');
+    expect(result.no_data_strategy).toBe('emit');
+  });
+
+  it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      query: {
+        format: 'composed',
+        base: BASE,
+        breach: { segment: ALERT_SEGMENT },
+        recovery: { segment: RECOVERY_SEGMENT },
+      },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBe('query');
+  });
+
+  it('nullifies recovery_strategy when user removes recovery from a loaded rule', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      recoveryStrategy: 'query',
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBeNull();
   });
 });
 
@@ -387,35 +318,83 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.schedule.lookback).toBe('1m');
   });
 
-  it('produces a composed query from evaluation', () => {
+  it('maps composed query from rule response', () => {
     const result = mapRuleToComposeFormValues(baseRuleResponse);
     expect(result.query.format).toBe('composed');
     if (result.query.format === 'composed') {
       expect(result.query.base).toBe(BASE);
-      expect(result.query.blocks.breach).toBe(ALERT_BLOCK);
+      expect(result.query.breach.segment).toBe(ALERT_SEGMENT);
     }
   });
 
-  it('extracts recovery block when recovery_policy is query type', () => {
-    const rule = {
+  it('maps recovery segment from composed query when recovery_strategy: query', () => {
+    const rule: RuleResponse = {
       ...baseRuleResponse,
-      recovery_policy: { type: 'query', query: { base: RECOVERY_WITH_STATS_AND_WHERE } },
-    } as RuleResponse;
+      recovery_strategy: 'query',
+      query: {
+        format: 'composed',
+        base: BASE,
+        breach: { segment: ALERT_SEGMENT },
+        recovery: { segment: RECOVERY_SEGMENT },
+      },
+    };
     const result = mapRuleToComposeFormValues(rule);
     if (result.query.format === 'composed') {
-      expect(result.query.blocks.recover).toBe(RECOVERY_BLOCK);
+      expect(result.query.recovery?.segment).toBe(RECOVERY_SEGMENT);
     }
   });
 
-  it('omits recover for no_breach recovery', () => {
-    const rule = {
+  it('omits recovery when absent from query', () => {
+    const result = mapRuleToComposeFormValues(baseRuleResponse);
+    if (result.query.format === 'composed') {
+      expect(result.query.recovery).toBeUndefined();
+    }
+  });
+
+  it('omits recovery when recovery_strategy is no_breach (form does not surface it)', () => {
+    const rule: RuleResponse = {
       ...baseRuleResponse,
-      recovery_policy: { type: 'no_breach' },
-    } as RuleResponse;
+      recovery_strategy: 'no_breach',
+      query: {
+        format: 'composed',
+        base: BASE,
+        breach: { segment: ALERT_SEGMENT },
+      },
+    };
     const result = mapRuleToComposeFormValues(rule);
     if (result.query.format === 'composed') {
-      expect(result.query.blocks.recover).toBeUndefined();
+      expect(result.query.recovery).toBeUndefined();
     }
+  });
+
+  it('maps standalone query from rule response', () => {
+    const rule = {
+      ...baseRuleResponse,
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    } as RuleResponse;
+    const result = mapRuleToComposeFormValues(rule);
+    expect(result.query).toEqual({
+      format: 'standalone',
+      breach: { query: 'FROM logs-* | LIMIT 10' },
+    });
+  });
+
+  it('maps standalone query with recovery', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      recovery_strategy: 'query',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-*' },
+        recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+      },
+    };
+    const result = mapRuleToComposeFormValues(rule);
+    expect(result.query).toEqual({
+      format: 'standalone',
+      breach: { query: 'FROM logs-*' },
+      recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+    });
   });
 
   it('maps grouping when present', () => {
@@ -453,13 +432,23 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransition).toBeUndefined();
   });
 
-  it('maps artifacts when present', () => {
+  it('splits artifacts by field ownership when present', () => {
     const rule = {
       ...baseRuleResponse,
-      artifacts: [{ id: 'a1', type: 'runbook', value: 'steps here' }],
+      artifacts: [
+        { id: 'host-id', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+      ],
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
-    expect(result.artifacts).toEqual([{ id: 'a1', type: 'runbook', value: 'steps here' }]);
+    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', value: 'host-a' }]);
+    expect(result.runbookArtifacts).toEqual([
+      { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+    ]);
+    expect(result.dashboardArtifacts).toEqual([
+      { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+    ]);
   });
 
   it('derives recoveries delay mode from recovering_count', () => {
@@ -469,5 +458,146 @@ describe('mapRuleToComposeFormValues', () => {
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
     expect(result.stateTransitionRecoveryDelayMode).toBe('recoveries');
+  });
+
+  it('preserves recovery_strategy from API response', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      recovery_strategy: 'no_breach',
+    };
+    const result = mapRuleToComposeFormValues(rule);
+    expect(result.recoveryStrategy).toBe('no_breach');
+  });
+
+  it('preserves no_data_strategy from API response', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      no_data_strategy: 'emit',
+    };
+    const result = mapRuleToComposeFormValues(rule);
+    expect(result.noDataStrategy).toBe('emit');
+  });
+
+  it('preserves no_data query block for standalone queries', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      no_data_strategy: 'emit',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | WHERE level == "error"' },
+        no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
+      },
+    };
+    const result = mapRuleToComposeFormValues(rule);
+    expect(result.query).toEqual({
+      format: 'standalone',
+      breach: { query: 'FROM logs-* | WHERE level == "error"' },
+      no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
+    });
+  });
+});
+
+describe('round-trip: non-representable fields survive load → save', () => {
+  it('preserves recovery_strategy: no_breach through load → save cycle', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      recovery_strategy: 'no_breach',
+    };
+    const formValues = mapRuleToComposeFormValues(rule);
+    const request = composeFormToCreateRequest(formValues);
+    expect(request.recovery_strategy).toBe('no_breach');
+  });
+
+  it('preserves no_data_strategy through load → save cycle', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      no_data_strategy: 'emit',
+    };
+    const formValues = mapRuleToComposeFormValues(rule);
+    const request = composeFormToCreateRequest(formValues);
+    expect(request.no_data_strategy).toBe('emit');
+  });
+
+  it('preserves no_data query block through load → save cycle', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      recovery_strategy: 'query',
+      no_data_strategy: 'emit',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | WHERE status == "error"' },
+        recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+        no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
+      },
+    };
+    const formValues = mapRuleToComposeFormValues(rule);
+    const request = composeFormToCreateRequest(formValues);
+    expect(request.query).toEqual({
+      format: 'standalone',
+      breach: { query: 'FROM logs-* | WHERE status == "error"' },
+      recovery: { query: 'FROM logs-* | WHERE status == "ok"' },
+      no_data: { query: 'FROM logs-* | STATS c = COUNT(*)' },
+    });
+    expect(request.recovery_strategy).toBe('query');
+    expect(request.no_data_strategy).toBe('emit');
+  });
+
+  it('does not emit recovery_strategy when not set and no recovery block', () => {
+    const formValues = mapRuleToComposeFormValues(baseRuleResponse);
+    const request = composeFormToCreateRequest(formValues);
+    expect(request.recovery_strategy).toBeUndefined();
+  });
+
+  it('infers recovery_strategy: query when recovery block present and no explicit strategy', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      recovery_strategy: 'query',
+      query: {
+        format: 'composed',
+        base: BASE,
+        breach: { segment: ALERT_SEGMENT },
+        recovery: { segment: RECOVERY_SEGMENT },
+      },
+    };
+    const formValues = mapRuleToComposeFormValues(rule);
+    const request = composeFormToCreateRequest(formValues);
+    expect(request.recovery_strategy).toBe('query');
+  });
+});
+
+describe('mapYamlFormValuesToComposeFormValues', () => {
+  const parsedYaml: FormValues = {
+    kind: 'alert',
+    metadata: { name: 'Test', enabled: true, description: '', tags: [] },
+    timeField: '@timestamp',
+    schedule: { every: '1m', lookback: '5m' },
+    query: {
+      format: 'composed',
+      base: BASE,
+      breach: { segment: `| ${ALERT_SEGMENT}` },
+    },
+    stateTransitionAlertDelayMode: 'immediate',
+    stateTransitionRecoveryDelayMode: 'immediate',
+    artifacts: [],
+  };
+
+  it('passes through composed alert queries', () => {
+    const result = mapYamlFormValuesToComposeFormValues(parsedYaml);
+
+    expect(result.query).toEqual(parsedYaml.query);
+  });
+
+  it('passes through standalone signal queries', () => {
+    const signalQuery = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 10' },
+    };
+    const result = mapYamlFormValuesToComposeFormValues({
+      ...parsedYaml,
+      kind: 'signal',
+      query: signalQuery,
+    });
+
+    expect(result.query).toEqual(signalQuery);
   });
 });

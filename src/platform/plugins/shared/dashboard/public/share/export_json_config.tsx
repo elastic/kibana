@@ -10,12 +10,10 @@
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ExportShareDerivatives } from '@kbn/share-plugin/public';
+import type { ExportShareParameters } from '@kbn/share-plugin/public';
 import { ExportJsonFlyout } from './export_json_flyout';
 
-export const exportJsonConfig: ReturnType<ExportShareDerivatives['config']> extends Promise<infer R>
-  ? R
-  : never = {
+export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
     <EuiButtonEmpty
       size="s"

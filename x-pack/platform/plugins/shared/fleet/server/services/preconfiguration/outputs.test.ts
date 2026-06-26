@@ -1103,6 +1103,50 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
     });
 
+    it('should update output if preconfigured remote ES output exists and otel_exporter_config_yaml changed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-remote-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Remote ES Output 1',
+          type: 'remote_elasticsearch',
+          hosts: ['https:es.co:80'],
+          service_token: 'unsecureServiceToken',
+          kibana_api_key: 'unsecureKibanaApiKey',
+          otel_exporter_config_yaml: 'flush_interval: 10s',
+        } as any,
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+    });
+
+    it('should update output if preconfigured remote ES output exists and otel_disable_beatsauth changed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-remote-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Remote ES Output 1',
+          type: 'remote_elasticsearch',
+          hosts: ['https:es.co:80'],
+          service_token: 'unsecureServiceToken',
+          kibana_api_key: 'unsecureKibanaApiKey',
+          otel_disable_beatsauth: true,
+        } as any,
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+    });
+
     it('should not update output if preconfigured logstash output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

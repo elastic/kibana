@@ -19,7 +19,7 @@ describe('table vis cell', () => {
     const formattedColumns = {
       second: {
         formatter: {
-          reactConvert: jest.fn().mockReturnValue('formatted value'),
+          convertToReact: jest.fn().mockReturnValue('formatted value'),
         },
       },
     } as unknown as FormattedColumns;
@@ -32,6 +32,6 @@ describe('table vis cell', () => {
     const comp = shallow(<Cell {...cellProps} />);
 
     expect(comp).toMatchSnapshot();
-    expect(formattedColumns.second.formatter.reactConvert).toHaveBeenLastCalledWith(2);
+    expect(formattedColumns.second.formatter.convertToReact).toHaveBeenLastCalledWith(2);
   });
 });

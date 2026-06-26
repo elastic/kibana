@@ -23,7 +23,7 @@
     "x-pack/platform/packages/shared/agent-builder": "'agent-builder' should be snake_case",
     "x-pack/platform/packages/shared/ai-assistant": "'ai-assistant' should be snake_case",
     "x-pack/platform/packages/shared/ai-infra": "'ai-infra' should be snake_case",
-    "x-pack/platform/packages/shared/dashboard-agent": "'dashboard-agent' should be snake_case",
+    "x-pack/platform/packages/shared/agent-builder-dashboards": "'agent-builder-dashboards' should be snake_case",
     "x-pack/platform/packages/shared/index-lifecycle-management": "'index-lifecycle-management' should be snake_case",
     "x-pack/platform/packages/shared/index-management": "'index-management' should be snake_case",
     "x-pack/platform/packages/shared/response-ops": "'response-ops' should be snake_case",
@@ -310,7 +310,7 @@
   },
   "@elastic/ml-ui": {
     "x-pack/platform/packages/private/ml/agg_utils": "'agg_utils' should be kebab-case",
-    "x-pack/platform/packages/private/ml/aiops_change_point_detection": "'aiops_change_point_detection' should be kebab-case",
+    "x-pack/platform/packages/shared/ml/aiops_change_point_detection": "'aiops_change_point_detection' should be kebab-case",
     "x-pack/platform/packages/private/ml/aiops_components": "'aiops_components' should be kebab-case",
     "x-pack/platform/packages/private/ml/aiops_test_utils": "'aiops_test_utils' should be kebab-case",
     "x-pack/platform/packages/private/ml/cancellable_search": "'cancellable_search' should be kebab-case",
@@ -414,7 +414,7 @@
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.ts": "'customPolicyResponseFailureEvaluator.ts' should be snake_case",
     "x-pack/solutions/security/test/security_solution_endpoint": "'security_solution_endpoint' should be kebab-case"
   },
-  "@elastic/security-detection-engine": {
+  "@elastic/security-detection-engineering": {
     "x-pack/solutions/security/test/security_solution_api_integration": "'security_solution_api_integration' should be kebab-case",
     "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response": "'detections_response' should be kebab-case",
     "x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/security_detection_engine_packages/mock-empty-security_detection_engine-99.0.0.zip": "'mock-empty-security_detection_engine-99.0.0.zip' should be snake_case",

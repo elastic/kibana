@@ -228,12 +228,15 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
     mockedUpdateEsAssetReferences.mockResolvedValue([]);
   });
 
+  const packageInfo = { policy_templates: [] } as any;
+
   it('is a no-op when there are no data streams', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     await handleNamespaceTemplateRestoreAfterPackageInstall({
       soClient,
       esClient,
       packageName: 'nginx',
+      packageInfo,
       dataStreams: [],
     });
     expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
@@ -249,6 +252,7 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       soClient,
       esClient,
       packageName: 'nginx',
+      packageInfo,
       dataStreams,
     });
 
@@ -266,6 +270,7 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       soClient,
       esClient,
       packageName: 'nginx',
+      packageInfo,
       dataStreams,
     });
 
@@ -288,6 +293,7 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       soClient,
       esClient,
       packageName: 'nginx',
+      packageInfo,
       dataStreams,
     });
 

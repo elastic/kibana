@@ -95,6 +95,7 @@ export function createAlertEventsBatchBuilder({
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
   const source = 'internal';
+  const groupingFields = ruleAttributes.grouping?.fields ?? [];
   let index = 0;
 
   return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
@@ -103,7 +104,7 @@ export function createAlertEventsBatchBuilder({
     for (const rowDoc of batch) {
       const groupHash = buildGroupHash({
         rowDoc,
-        groupKeyFields: ruleAttributes.grouping?.fields ?? [],
+        groupKeyFields: groupingFields,
         get fallbackSeed(): string {
           return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
         },
@@ -150,7 +151,7 @@ export interface BuildRecoveryAlertEventsOpts {
  * Creates `recovered` alert events for groups that were previously in a non-inactive
  * episode state but are no longer present in the current breached set.
  *
- * Used when `recovery_policy.type` is `no_breach` or unset.
+ * Used when no recover query is configured on the rule.
  */
 export function buildRecoveryAlertEvents({
   ruleId,
@@ -197,12 +198,11 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
 }
-
 /**
  * Creates `recovered` alert events by running a custom recovery query.
  *
  * Active groups whose group hash matches a row in the recovery query results
- * are considered recovered. Used when `recovery_policy.type` is `query`.
+ * are considered recovered. Used when the rule has a recover query configured.
  */
 export function buildQueryRecoveryAlertEvents({
   ruleId,
@@ -221,6 +221,7 @@ export function buildQueryRecoveryAlertEvents({
   }
 
   const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}|recovery`);
+  const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const activeGroupHashSet = new Set(activeGroupHashes.map(({ group_hash }) => group_hash));
 
   // Keep the first matching row's data per group hash.
@@ -230,7 +231,7 @@ export function buildQueryRecoveryAlertEvents({
     const rowDoc = rowToDocument(columns, values[i]);
     const groupHash = buildGroupHash({
       rowDoc,
-      groupKeyFields: ruleAttributes.grouping?.fields ?? [],
+      groupKeyFields: groupingFields,
       get fallbackSeed(): string {
         return `${executionUuid}|row:${i}|${stableStringify(rowDoc)}`;
       },

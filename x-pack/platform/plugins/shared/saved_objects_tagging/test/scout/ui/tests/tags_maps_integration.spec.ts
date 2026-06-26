@@ -29,7 +29,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
     const listingPage = new SavedObjectsListingPage(page);
     await listingPage.searchForItemWithName('tag:(tag-1)', { escape: false });
 
-    await listingPage.expectItemsCount('map', 2);
+    await expect(listingPage.getItemLinks('map')).toHaveCount(2);
     const itemNames = await listingPage.getAllItemNames('map');
     for (const expectedName of ['map 3 (tag-1 and tag-3)', 'map 4 (tag-1)']) {
       expect(itemNames).toContain(expectedName);
@@ -40,7 +40,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
     const listingPage = new SavedObjectsListingPage(page);
     await listingPage.selectFilterTags('tag-3');
 
-    await listingPage.expectItemsCount('map', 2);
+    await expect(listingPage.getItemLinks('map')).toHaveCount(2);
     const itemNames = await listingPage.getAllItemNames('map');
     for (const expectedName of ['map 2 (tag-3)', 'map 3 (tag-1 and tag-3)']) {
       expect(itemNames).toContain(expectedName);
@@ -51,7 +51,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
     const listingPage = new SavedObjectsListingPage(page);
     await listingPage.selectFilterTags('tag-2', 'tag-3');
 
-    await listingPage.expectItemsCount('map', 3);
+    await expect(listingPage.getItemLinks('map')).toHaveCount(3);
     const itemNames = await listingPage.getAllItemNames('map');
     for (const expectedName of ['map 1 (tag-2)', 'map 2 (tag-3)', 'map 3 (tag-1 and tag-3)']) {
       expect(itemNames).toContain(expectedName);

@@ -1,5 +1,5 @@
 {
-  "sha1": "9dc53441fe67ec2e748356b780fe0bd2f6935a30",
+  "sha1": "5f41fa4bd0b5e6ed1c06c7eb61a7fc90ecf445d3",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -613,7 +613,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 27,
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "83eb75963c3c731-65a4054c5ce2fae",
+      "title": "Workflow execution - Test runs should show the test execute modal Event tab and trigger events table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
+        "line": 56,
         "column": 7
       }
     },
@@ -627,7 +641,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 52,
+        "line": 83,
         "column": 7
       }
     },
@@ -641,7 +655,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 77,
+        "line": 108,
         "column": 7
       }
     },
@@ -655,7 +669,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 125,
+        "line": 156,
         "column": 7
       }
     },
@@ -669,7 +683,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 157,
+        "line": 188,
         "column": 7
       }
     },

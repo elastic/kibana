@@ -26,4 +26,5 @@ export const config: PluginConfigDescriptor<SLOConfig> = {
   exposeToBrowser: {
     experimental: true,
   },
+  deprecations: ({ unused }) => [unused('experimental.compositeSlo', { level: 'warning' })],
 };

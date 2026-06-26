@@ -33,7 +33,11 @@ import type { ExportFormat } from './use_export_results';
  */
 const LARGE_EXPORT_THRESHOLD = 100_000;
 
-const FORMAT_OPTIONS = [
+const FORMAT_OPTIONS: Array<{
+  value: ExportFormat;
+  inputDisplay: string;
+  dropdownDisplay: string;
+}> = [
   {
     value: 'csv',
     inputDisplay: 'CSV',
@@ -71,18 +75,17 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
   filteredTotal,
   total,
 }) => {
-  const [format, setFormat] = useState<string | undefined>(undefined);
+  // CSV is the deliberate default
+  const [format, setFormat] = useState<ExportFormat>('csv');
   const [exportFiltered, setExportFiltered] = useState(hasActiveFilters);
   const modalTitleId = useGeneratedHtmlId();
 
-  const handleFormatChange = useCallback((value: string) => {
+  const handleFormatChange = useCallback((value: ExportFormat) => {
     setFormat(value);
   }, []);
 
   const handleExport = useCallback(() => {
-    if (format) {
-      onExport(format as ExportFormat, { filtered: exportFiltered });
-    }
+    onExport(format, { filtered: exportFiltered });
   }, [format, onExport, exportFiltered]);
 
   const handleFilteredToggle = useCallback(() => {
@@ -132,13 +135,10 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
             defaultMessage: 'File format',
           })}
         >
-          <EuiSuperSelect
+          <EuiSuperSelect<ExportFormat>
             options={FORMAT_OPTIONS}
             valueOfSelected={format}
             onChange={handleFormatChange}
-            placeholder={i18n.translate('xpack.osquery.exportModal.formatPlaceholder', {
-              defaultMessage: 'Select',
-            })}
             data-test-subj="osqueryExportFormatSelect"
           />
         </EuiFormRow>
@@ -200,7 +200,6 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
           onClick={handleExport}
           fill
           isLoading={isExporting}
-          isDisabled={!format}
           data-test-subj="osqueryExportConfirmButton"
         >
           {exportButtonLabel}

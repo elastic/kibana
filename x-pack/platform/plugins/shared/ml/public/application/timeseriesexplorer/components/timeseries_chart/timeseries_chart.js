@@ -405,7 +405,7 @@ class TimeseriesChartIntl extends Component {
       .append('text')
       .text((d) => {
         if (fieldFormat !== undefined) {
-          return fieldFormat.convert(d, 'text');
+          return fieldFormat.convertToText(d);
         } else {
           return focusYScale.tickFormat()(d);
         }
@@ -570,8 +570,6 @@ class TimeseriesChartIntl extends Component {
       .attr('width', brushWidth)
       .attr('height', focusChartIncoming ?? focusChartHeight);
 
-    fcsGroup.append('g').classed('ml-annotations', true);
-
     // Add border round plot area.
     fcsGroup
       .append('rect')
@@ -614,6 +612,9 @@ class TimeseriesChartIntl extends Component {
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + fcsHeight + ')');
     axes.append('g').attr('class', 'y axis');
+
+    // Appended after axes so that annotation chips paint above the y-axis gridlines.
+    fcsGroup.append('g').classed('ml-annotations', true);
 
     // Create the elements for the metric value line and model bounds area.
     fcsGroup.append('path').attr('class', 'area bounds');
@@ -714,7 +715,7 @@ class TimeseriesChartIntl extends Component {
       (focusForecastData !== undefined && focusForecastData.length > 0)
     ) {
       if (this.fieldFormat !== undefined) {
-        this.focusYAxis.tickFormat((d) => this.fieldFormat.convert(d, 'text'));
+        this.focusYAxis.tickFormat((d) => this.fieldFormat.convertToText(d));
       } else {
         // Use default tick formatter.
         this.focusYAxis.tickFormat(null);

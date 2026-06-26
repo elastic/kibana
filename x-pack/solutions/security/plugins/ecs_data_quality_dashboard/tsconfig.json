@@ -27,6 +27,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-security-common",
     "@kbn/datemath",
+    "@kbn/core-spaces-common",
   ],
   "exclude": [
     "target/**/*",

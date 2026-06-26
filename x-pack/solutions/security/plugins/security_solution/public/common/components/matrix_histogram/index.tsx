@@ -33,7 +33,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
     hideHistogramIfEmpty?: boolean;
     id: string;
     showSpacer?: boolean;
-    sourcererScopeId?: PageScope;
+    pageScope?: PageScope;
     hideQueryToggle?: boolean;
     applyGlobalQueriesAndFilters?: boolean;
     applyPageAndTabsFilters?: boolean;
@@ -73,7 +73,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   stackByOptions,
   startDate,
   subtitle,
-  sourcererScopeId,
+  pageScope,
   title,
   titleSize,
   hideQueryToggle = false,
@@ -204,7 +204,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
           </HeaderSection>
           {toggleStatus ? (
             <VisualizationEmbeddable
-              scopeId={sourcererScopeId}
+              scopeId={pageScope}
               applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
               applyPageAndTabsFilters={applyPageAndTabsFilters}
               data-test-subj="embeddable-matrix-histogram"

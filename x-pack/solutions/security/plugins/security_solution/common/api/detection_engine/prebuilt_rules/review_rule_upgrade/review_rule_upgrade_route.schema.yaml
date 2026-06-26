@@ -1,0 +1,210 @@
+openapi: 3.0.0
+info:
+  title: Review Rule Upgrade API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/prebuilt_rules/upgrade/_review:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ReviewRuleUpgrade
+      summary: Review prebuilt detection rules available for upgrade
+      description: Lists currently installed prebuilt detection rules that have newer versions available.
+      tags:
+        - Prebuilt Rules API
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                page:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                  description: Page number starting from 1.
+                per_page:
+                  type: integer
+                  minimum: 0
+                  maximum: 500
+                  default: 20
+                  description: Rules per page.
+                filter:
+                  description: String filter expression interpreted according to `mode`.
+                  $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'
+                search:
+                  description: Free-text search combined with the KQL `filter`.
+                  $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+                aggregations:
+                  description: |
+                    Aggregation options computed over the filtered + searched set of
+                    upgradeable rules.
+                  $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
+                sort:
+                  description: |
+                    Ordered sort criteria applied to the upgradeable rule set.
+                  $ref: '#/components/schemas/ReviewRuleUpgradeSort'
+                fields:
+                  type: array
+                  description: |
+                    Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
+                  items:
+                    type: string
+                    maxLength: 256
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRuleUpgradeResponseBody'
+components:
+  schemas:
+    ReviewRuleUpgradeSortItem:
+      type: object
+      additionalProperties: false
+      description: Sort field and order pair.
+      required:
+        - field
+        - order
+      properties:
+        field:
+          description: Field to sort by.
+          $ref: '../../rule_management/find_rules/find_rules_route.schema.yaml#/components/schemas/FindRulesSortField'
+        order:
+          description: Sort order.
+          $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+
+    ReviewRuleUpgradeSort:
+      type: array
+      description: |
+        Ordered sort criteria for the upgradeable rule set.
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/ReviewRuleUpgradeSortItem'
+
+    RuleUpgradeStatsForReview:
+      type: object
+      additionalProperties: false
+      description: |
+        Deprecated aggregate info about rules available for upgrade. The fields are kept for
+        backward compatibility but should be treated as informational only. Callers should rely
+        on `get_prebuilt_rules_status` instead.
+      required:
+        - num_rules_to_upgrade_total
+        - num_rules_with_conflicts
+        - num_rules_with_non_solvable_conflicts
+        - tags
+      properties:
+        num_rules_to_upgrade_total:
+          type: integer
+          description: Deprecated. Always 0.
+        num_rules_with_conflicts:
+          type: integer
+          description: Deprecated. Always 0.
+        num_rules_with_non_solvable_conflicts:
+          type: integer
+          description: Deprecated. Always 0.
+        tags:
+          description: Deprecated. Always an empty array.
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'
+
+    PartialThreeWayRuleDiff:
+      type: object
+      description: |
+        Partial three-way diff for a single prebuilt rule. The per-field shape under `fields`
+        is opaque in the OpenAPI spec; the precise TypeScript union lives in
+        `three_way_rule_diff.ts`.
+      additionalProperties: true
+      required:
+        - num_fields_with_updates
+        - num_fields_with_conflicts
+        - num_fields_with_non_solvable_conflicts
+        - fields
+      properties:
+        num_fields_with_updates:
+          type: integer
+          minimum: 0
+        num_fields_with_conflicts:
+          type: integer
+          minimum: 0
+        num_fields_with_non_solvable_conflicts:
+          type: integer
+          minimum: 0
+        fields:
+          type: object
+          description: Map keyed by rule field name, where each value is a per-field three-way diff object.
+          additionalProperties: true
+
+    RuleUpgradeInfoForReview:
+      type: object
+      additionalProperties: false
+      description: Upgrade-review info for a single prebuilt rule.
+      required:
+        - id
+        - rule_id
+        - version
+        - current_rule
+        - target_rule
+        - diff
+        - revision
+        - has_base_version
+      properties:
+        id:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+        rule_id:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+        version:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleVersion'
+        current_rule:
+          description: Currently installed version of the rule.
+          $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        target_rule:
+          description: Target version of the rule available for upgrade.
+          $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        diff:
+          description: Partial three-way diff between current, base, and target rule versions.
+          $ref: '#/components/schemas/PartialThreeWayRuleDiff'
+        revision:
+          type: integer
+          description: Current revision of the installed rule.
+        has_base_version:
+          type: boolean
+          description: Whether the base (originally installed) version of the rule is available for diffing.
+
+    ReviewRuleUpgradeResponseBody:
+      type: object
+      additionalProperties: false
+      required:
+        - page
+        - per_page
+        - total
+        - stats
+        - rules
+      properties:
+        page:
+          type: integer
+          description: Current page number.
+        per_page:
+          type: integer
+          description: Rules per page.
+        total:
+          type: integer
+          description: The total number of rules available for upgrade that match the filter criteria.
+        stats:
+          $ref: '#/components/schemas/RuleUpgradeStatsForReview'
+        rules:
+          type: array
+          description: Info about individual rules; one object per each rule available for upgrade.
+          items:
+            $ref: '#/components/schemas/RuleUpgradeInfoForReview'
+        counts:
+          description: Facet counts per category requested in `aggregations.counts`.
+          $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+        warnings:
+          type: array
+          description: Warnings produced while serving the request.
+          items:
+            $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'

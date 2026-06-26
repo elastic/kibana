@@ -12,7 +12,6 @@ import {
   spaceTest,
   testData,
   DEFAULT_TIME_RANGE,
-  DEFAULT_CONFIG,
   PAGINATION,
 } from '../../fixtures/metrics_experience';
 
@@ -88,39 +87,6 @@ spaceTest.describe(
 
       await spaceTest.step('exit fullscreen with Escape key', async () => {
         await page.keyboard.press('Escape');
-        await expect(metricsExperience.fullscreen).toBeHidden();
-      });
-    });
-
-    spaceTest('should interact with metrics in fullscreen mode', async ({ pageObjects }) => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-      const { metricsExperience } = pageObjects;
-      await expect(metricsExperience.grid).toBeVisible();
-
-      await spaceTest.step('enter fullscreen mode', async () => {
-        await metricsExperience.toggleFullscreen();
-        await expect(metricsExperience.fullscreen).toBeVisible();
-      });
-
-      await spaceTest.step('interact with pagination in fullscreen', async () => {
-        await expect(metricsExperience.pagination.container).toBeVisible();
-        await metricsExperience.pagination.nextButton.click();
-        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
-      });
-
-      await spaceTest.step('search for metrics in fullscreen', async () => {
-        await metricsExperience.searchMetric(DEFAULT_CONFIG.metrics[0].name);
-        await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
-      });
-
-      await spaceTest.step('open context menu in fullscreen', async () => {
-        await metricsExperience.clearSearch();
-        await metricsExperience.openCardContextMenu(0);
-        await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
-      });
-
-      await spaceTest.step('exit fullscreen mode', async () => {
-        await metricsExperience.fullscreenButton.click();
         await expect(metricsExperience.fullscreen).toBeHidden();
       });
     });

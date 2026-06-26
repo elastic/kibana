@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
-  IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { getLatestMappingsVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
@@ -24,17 +22,13 @@ import {
 } from './get_outdated_documents_query';
 import type { InitState } from './state';
 import { buildExcludeUnusedTypesQuery } from './core';
-import { getTempIndexName } from './model/helpers';
 
 export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
-  mustRelocateDocuments: boolean;
   indexTypes: string[];
-  indexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   targetIndexMappings: IndexMapping;
-  preMigrationScript?: string;
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
@@ -43,28 +37,15 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   esCapabilities: ElasticsearchCapabilities;
 }
 
-const TEMP_INDEX_MAPPINGS: IndexMapping = {
-  dynamic: false,
-  properties: {
-    type: { type: 'keyword' },
-    typeMigrationVersion: {
-      type: 'version',
-    },
-  },
-};
-
 /**
  * Construct the initial state for the model
  */
 export const createInitialState = ({
   kibanaVersion,
   waitForMigrationCompletion,
-  mustRelocateDocuments,
   indexTypes,
-  indexTypesMap,
   hashToVersionMap,
   targetIndexMappings,
-  preMigrationScript,
   coreMigrationVersionPerType,
   migrationVersionPerType,
   indexPrefix,
@@ -110,21 +91,14 @@ export const createInitialState = ({
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
-    mustRelocateDocuments,
     indexTypes,
-    indexTypesMap,
     hashToVersionMap,
     indexPrefix,
-    legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: getTempIndexName(indexPrefix, kibanaVersion),
-    tempIndexAlias: getTempIndexName(indexPrefix, kibanaVersion) + '_alias',
     kibanaVersion,
-    preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings,
-    tempIndexMappings: TEMP_INDEX_MAPPINGS,
     outdatedDocumentsQuery,
     retryCount: 0,
     skipRetryReset: false,

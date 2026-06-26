@@ -62,7 +62,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   `;
 
   return (
-    <div css={wrapperStyles}>
+    <div css={wrapperStyles} data-test-subj="agentBuilderConversation">
       <EmbeddableConversationsProvider {...props}>
         <EmbeddableAccessBoundary onClose={onClose}>
           <EuiFlyoutHeader css={headerStyles}>

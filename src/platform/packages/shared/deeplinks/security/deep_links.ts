@@ -73,6 +73,7 @@ export enum SecurityPageName {
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
   rulesAdd = 'rules-add',
+  rulesChangesHistory = 'rules-changes-history',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
@@ -117,4 +118,16 @@ export enum SecurityPageName {
    */
   spaceRulesHealth = 'space-rules-health',
   ruleHealth = 'rule-health',
+
+  /**
+   * external links
+   */
+  externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkDiscover = 'external_link-discover',
+  externalLinkWorkflows = 'external_link-workflows',
+
+  /**
+   * Ingest Hub Onboarding
+   */
+  onboarding = 'onboarding',
 }

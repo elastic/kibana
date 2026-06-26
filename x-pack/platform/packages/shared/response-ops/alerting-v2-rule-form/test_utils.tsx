@@ -15,6 +15,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DELAY_MODE } from './form/types';
 import type { FormValues } from './form/types';
 import { RuleFormProvider, type RuleFormServices, type RuleFormMeta } from './form/contexts';
@@ -36,6 +38,20 @@ export const createTestQueryClient = () =>
   });
 
 /**
+ * Minimal dashboard start contract mock returning an empty find service.
+ * Tests that exercise dashboard resolution override `findDashboardsService`.
+ */
+export const createMockDashboardStart = (): DashboardStart =>
+  ({
+    findDashboardsService: jest.fn().mockResolvedValue({
+      search: jest.fn().mockResolvedValue({ total: 0, dashboards: [] }),
+      findById: jest.fn(),
+      findByIds: jest.fn().mockResolvedValue([]),
+      findByTitle: jest.fn(),
+    }),
+  } as unknown as DashboardStart);
+
+/**
  * Creates mock services for testing.
  */
 export const createMockServices = (): RuleFormServices => ({
@@ -45,6 +61,8 @@ export const createMockServices = (): RuleFormServices => ({
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
+  uiActions: uiActionsPluginMock.createStartContract(),
+  dashboard: createMockDashboardStart(),
 });
 
 /**
@@ -69,14 +87,7 @@ export const defaultTestFormValues: FormValues = {
   },
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: '',
-    },
-  },
-  recoveryPolicy: {
-    type: 'no_breach',
-  },
+  query: { format: 'standalone', breach: { query: '' } },
   stateTransitionAlertDelayMode: DELAY_MODE.immediate,
   stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,
 };

@@ -81,6 +81,7 @@ const MultiselectFilterComponent = <T extends unknown>(props: MultiselectFilterP
         closePopover={closePopover}
         panelPaddingSize="none"
         repositionOnScroll
+        aria-label={title}
       >
         {filterItemElements}
       </EuiPopover>

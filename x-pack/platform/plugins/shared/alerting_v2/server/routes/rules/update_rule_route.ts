@@ -8,11 +8,13 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
-import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
-
-import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_client';
+import {
+  errorResponseSchema,
+  ruleResponseSchema,
+  updateRuleBodySchema,
+  type UpdateRuleBody,
+} from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
@@ -32,21 +34,27 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Update a rule',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(updateRuleDataSchema),
-      params: buildRouteValidationWithZod(ruleIdParamsSchema),
+      body: updateRuleBodySchema,
+      params: ruleIdParamsSchema,
     },
     response: {
       200: {
         body: () => ruleResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the updated rule.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
       404: {
+        body: () => errorResponseSchema,
         description: 'Indicates a rule with the given ID does not exist.',
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the rule was concurrently updated by another caller.',
       },
     },
   };
@@ -59,7 +67,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
-      UpdateRuleData
+      UpdateRuleBody
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
@@ -67,9 +75,12 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
+    const { version, ...data } = this.request.body;
+
     const updated = await this.rulesClient.updateRule({
       id: this.request.params.id,
-      data: this.request.body,
+      data,
+      options: { version },
     });
 
     return this.ctx.response.ok({ body: updated });

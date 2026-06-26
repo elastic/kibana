@@ -17,6 +17,8 @@ import { updateAttackDiscoverySchedule } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 export const UPDATE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY = [
   'PUT',
@@ -29,6 +31,9 @@ interface UpdateAttackDiscoveryScheduleParams {
 }
 
 export const useUpdateAttackDiscoverySchedule = () => {
+  const {
+    services: { telemetry },
+  } = useKibana();
   const { addError, addSuccess } = useAppToasts();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
@@ -50,9 +55,11 @@ export const useUpdateAttackDiscoverySchedule = () => {
         invalidateGetAttackDiscoverySchedule(id);
         invalidateFindAttackDiscoverySchedule();
         addSuccess(i18n.UPDATE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS());
+        telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.UpdateSuccess, {});
       },
       onError: (error) => {
         addError(error, { title: i18n.UPDATE_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
+        telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.UpdateFailed, {});
       },
     }
   );

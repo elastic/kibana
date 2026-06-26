@@ -34,6 +34,12 @@ export interface CloudBasicUrls {
    */
   deploymentUrl?: string;
   /**
+   * This is the path to the Cloud deployment creation page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/deployments/create`
+   */
+  createDeploymentUrl?: string;
+  /**
    * The full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud.
    */
   profileUrl?: string;
@@ -49,6 +55,12 @@ export interface CloudBasicUrls {
    * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
    */
   projectsUrl?: string;
+  /**
+   * This is the path to the Cloud project creation page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/projects/create`
+   */
+  createProjectUrl?: string;
   /**
    * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
    *
@@ -91,6 +103,16 @@ export interface CloudStart extends CloudBasicUrls {
    * Fetches the full URL to the elasticsearch cluster.
    */
   fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
+  /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
   /**
    * Method to retrieve privileged URLs for the Cloud plugin.
    */
@@ -165,6 +187,11 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   csp?: string;
   /**
+   * The cloud region identifier (e.g., `us-east-1`, `europe-west1`, `eastus2`).
+   * Provider-specific region name without the CSP prefix.
+   */
+  region?: string;
+  /**
    * Method to retrieve privileged URLs for the Cloud plugin.
    */
   getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
@@ -190,7 +217,8 @@ export interface CloudSetup extends CloudBasicUrls {
   isCloudEnabled: boolean;
   /**
    * `true` when running on ECE (Elastic Cloud Enterprise).
-   * `false` or `undefined` on ESS or self-managed.
+   * When `isSaasContainer` is missing, cloud-enabled non-serverless deployments are assumed to
+   * be ECE. Self-managed and serverless deployments remain `undefined` unless explicitly set.
    */
   isEce?: boolean;
   /**
@@ -209,6 +237,16 @@ export interface CloudSetup extends CloudBasicUrls {
    * @param contextProvider The React component from the Service Provider.
    */
   registerCloudService: (contextProvider: FC) => void;
+  /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
   /**
    * Onboarding configuration
    */

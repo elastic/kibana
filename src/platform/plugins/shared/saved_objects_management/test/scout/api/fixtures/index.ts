@@ -9,3 +9,4 @@
 
 export { apiTest } from '@kbn/scout';
 export * as testData from './constants';
+export { CUSTOM_ROLES } from './custom_roles';

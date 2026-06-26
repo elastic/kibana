@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/258291
+issues:
+- https://github.com/elastic/security-team/issues/16359
+- https://github.com/elastic/kibana/issues/256491
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- Search and data
+title: Add `secretQueryParams` support to HTTP connector
+description: HTTP connectors can store encrypted query parameters in connector secrets and inject them into every request URL, similar to secret headers.

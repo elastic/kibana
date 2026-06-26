@@ -6,7 +6,9 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../fixtures';
+import { test, testData } from '../fixtures';
+
+const { DYNAMIC_SETTINGS_DEFAULTS } = testData;
 
 test.describe('Uptime missing mappings', { tag: ['@local-stateful-classic'] }, () => {
   const testIndex = 'heartbeat-missing-mappings-test';
@@ -63,7 +65,7 @@ test.describe('Uptime missing mappings', { tag: ['@local-stateful-classic'] }, (
       await kbnClient.request({
         method: 'PUT',
         path: '/api/uptime/settings',
-        body: { heartbeatIndices: 'heartbeat-*' },
+        body: { heartbeatIndices: DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices },
       });
     }
   });

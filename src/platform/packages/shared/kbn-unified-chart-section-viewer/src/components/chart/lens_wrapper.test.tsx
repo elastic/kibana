@@ -7,14 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import '@testing-library/jest-dom';
 import { act, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
+import {
+  ACTION_INSPECT_PANEL,
+  EmbeddableRendererContext,
+  type QuickActionIds,
+} from '@kbn/embeddable-plugin/public';
 import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_VIEW_DETAILS,
+} from '../../common/constants';
 
 // Mock the EmbeddableComponent
 const mockEmbeddableComponent = jest.fn((props) => (
@@ -201,45 +211,94 @@ describe('LensWrapper', () => {
       // The component should be wrapped in the context provider
       expect(getByTestId('embeddable-component')).toBeInTheDocument();
     });
+
+    it('checks if  LensProps fields are passed to EmbeddableComponent', () => {
+      const lensProps = {
+        ...mockLensProps,
+        id: 'chart-1',
+        viewMode: 'view' as const,
+        esqlVariables: [{ key: 'k', value: 'v', type: ESQLVariableType.VALUES }],
+        noPadding: true,
+        searchSessionId: 'session-abc',
+        executionContext: { description: 'test ctx' },
+        lastReloadRequestTime: 123456,
+        userMessages: [{ message: 'test message', type: 'info' }],
+        description: 'A chart description',
+      };
+
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} lensProps={lensProps as any} />
+        </EuiThemeProvider>
+      );
+
+      expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: lensProps.id,
+          viewMode: lensProps.viewMode,
+          timeRange: lensProps.timeRange,
+          attributes: lensProps.attributes,
+          esqlVariables: lensProps.esqlVariables,
+          noPadding: lensProps.noPadding,
+          searchSessionId: lensProps.searchSessionId,
+          executionContext: lensProps.executionContext,
+          lastReloadRequestTime: lensProps.lastReloadRequestTime,
+          userMessages: lensProps.userMessages,
+          description: lensProps.description,
+          title: lensProps.attributes.title,
+        }),
+        expect.anything()
+      );
+    });
   });
 
-  it('checks if  LensProps fields are passed to EmbeddableComponent', () => {
-    const lensProps = {
-      ...mockLensProps,
-      id: 'chart-1',
-      viewMode: 'view' as const,
-      esqlVariables: [{ key: 'k', value: 'v', type: ESQLVariableType.VALUES }],
-      noPadding: true,
-      searchSessionId: 'session-abc',
-      executionContext: { description: 'test ctx' },
-      lastReloadRequestTime: 123456,
-      userMessages: [{ message: 'test message', type: 'info' }],
-      description: 'A chart description',
-    };
+  describe('quick-action view list', () => {
+    function renderAndCaptureViewList(props: Partial<LensWrapperProps>): string[] | undefined {
+      let captured: string[] | undefined;
+      function ContextSnoop() {
+        const value = useContext(EmbeddableRendererContext);
+        captured = value?.quickActions?.view as string[] | undefined;
+        return null;
+      }
 
-    render(
-      <EuiThemeProvider>
-        <LensWrapper {...defaultProps} lensProps={lensProps as any} />
-      </EuiThemeProvider>
-    );
+      mockEmbeddableComponent.mockImplementationOnce(() => <ContextSnoop />);
 
-    expect(mockEmbeddableComponent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: lensProps.id,
-        viewMode: lensProps.viewMode,
-        timeRange: lensProps.timeRange,
-        attributes: lensProps.attributes,
-        esqlVariables: lensProps.esqlVariables,
-        noPadding: lensProps.noPadding,
-        searchSessionId: lensProps.searchSessionId,
-        executionContext: lensProps.executionContext,
-        lastReloadRequestTime: lensProps.lastReloadRequestTime,
-        userMessages: lensProps.userMessages,
-        description: lensProps.description,
-        title: lensProps.attributes.title,
-      }),
-      expect.anything()
-    );
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} {...props} />
+        </EuiThemeProvider>
+      );
+
+      return captured;
+    }
+
+    it('falls back to [Explore, openInspector] when quickActionIds is not provided', () => {
+      const view = renderAndCaptureViewList({});
+
+      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL]);
+    });
+
+    it('uses caller-provided quickActionIds verbatim', () => {
+      const ids: QuickActionIds = [
+        ACTION_EXPLORE_IN_DISCOVER_TAB,
+        ACTION_VIEW_DETAILS,
+        ACTION_COPY_TO_DASHBOARD,
+        ACTION_INSPECT_PANEL,
+      ];
+
+      const view = renderAndCaptureViewList({ quickActionIds: ids });
+
+      expect(view).toEqual(ids);
+    });
+
+    it('does not auto-promote actions to the visible row just because a handler is wired', () => {
+      const view = renderAndCaptureViewList({
+        onCopyToDashboard: jest.fn(),
+        onViewDetails: jest.fn(),
+      });
+
+      expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL]);
+    });
   });
 
   describe('handleExploreInDiscoverTab', () => {

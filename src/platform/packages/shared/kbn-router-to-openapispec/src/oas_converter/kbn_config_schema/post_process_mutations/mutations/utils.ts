@@ -48,7 +48,7 @@ export const processAvailability = (ctx: IContext, schema: OpenAPIV3.SchemaObjec
   if (metaFields.META_FIELD_X_OAS_AVAILABILITY in schema) {
     const state = getXState(
       schema[metaFields.META_FIELD_X_OAS_AVAILABILITY] as {
-        stability?: 'experimental' | 'beta' | 'stable';
+        stability?: 'experimental' | 'stable' | 'tech_preview';
         since?: string;
       },
       ctx.getEnv()
@@ -69,6 +69,15 @@ export const deleteField = (schema: object, field: string): void => {
 
 export const isAnyType = (schema: OpenAPIV3.SchemaObject): boolean => {
   return metaFields.META_FIELD_X_OAS_ANY in schema;
+};
+
+/** OAS 3.0 requires `null` to appear in `enum` when `nullable: true`. */
+export const ensureNullableEnumIncludesNull = (schema: OpenAPIV3.SchemaObject): void => {
+  if (schema.nullable !== true || !schema.enum?.length || schema.enum.includes(null)) {
+    return;
+  }
+
+  schema.enum.push(null);
 };
 
 /** Assumes ref is in the form of "#/components/schemas/my-schema-my-team" */

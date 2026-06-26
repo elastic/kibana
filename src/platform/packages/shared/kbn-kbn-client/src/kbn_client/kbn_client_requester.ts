@@ -118,6 +118,12 @@ interface Options {
   certificateAuthorities?: Buffer[];
 }
 
+// undici's default `connect.timeout` is 10s. FTR talks to a local Kibana that
+// can take longer to accept a connection during heavy load (e.g. while
+// streaming a large multipart upload), and the previous axios-based requester
+// had no equivalent socket-connect cutoff. Restore that headroom.
+const FETCH_CONNECT_TIMEOUT_MS = 60_000;
+
 export class KbnClientRequester {
   // `url` retains any `user:pass@` from the original config - `resolveUrl()` is
   // a public API used by FTR tests (e.g. http connector tests) that pluck
@@ -145,7 +151,13 @@ export class KbnClientRequester {
 
     this.dispatcher =
       parsed.protocol === 'https:'
-        ? new Agent({ connect: { ca: options.certificateAuthorities, rejectUnauthorized: false } })
+        ? new Agent({
+            connect: {
+              ca: options.certificateAuthorities,
+              rejectUnauthorized: false,
+              timeout: FETCH_CONNECT_TIMEOUT_MS,
+            },
+          })
         : null;
   }
 

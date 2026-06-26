@@ -30,11 +30,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import { BehaviorSubject, distinctUntilChanged, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
@@ -109,13 +109,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      const query$ = ((initialState.query
-        ? new BehaviorSubject(initialState.query)
-        : (parentApi as Partial<PublishesUnifiedSearch>)?.query$) ??
+      const query$ = ((parentApi as Partial<PublishesUnifiedSearch>)?.query$ ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
-      const filters$ = ((initialState.filters
-        ? new BehaviorSubject(initialState.filters)
-        : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
+      const filters$ = ((parentApi as Partial<PublishesUnifiedSearch>)?.filters$ ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
 
       const titleManager = initializeTitleManager(initialState);
@@ -126,38 +122,29 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
-      function serializeState() {
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...swimlaneManager.getLatestState(),
-        } as AnomalySwimLaneEmbeddableState;
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<AnomalySwimLaneEmbeddableState>({
+      const stateApi = initializeStateApi<AnomalySwimLaneEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () =>
+          ({
+            ...titleManager.getLatestState(),
+            ...timeRangeManager.getLatestState(),
+            ...swimlaneManager.getLatestState(),
+          } as AnomalySwimLaneEmbeddableState),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
           swimlaneManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...swimLaneComparators,
-            id: 'skip',
-            query: 'skip',
-            refreshConfig: 'skip',
-            filters: 'skip',
-          };
-        },
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) swimlaneManager.reinitializeState(lastSaved);
+        getComparators: () => ({
+          ...titleComparators,
+          ...timeRangeComparators,
+          ...swimLaneComparators,
+        }),
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          swimlaneManager.reinitializeState(nextState);
         },
       });
 
@@ -193,7 +180,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         ...titleManager.api,
         ...timeRangeManager.api,
         ...swimlaneManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         query$,
         filters$,
         interval,
@@ -207,7 +194,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           subscriptions
         ),
         dataLoading$,
-        serializeState,
       });
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,

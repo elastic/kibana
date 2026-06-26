@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFile } from 'fs/promises';
+import { open } from 'fs/promises';
+import type { ReadStream } from 'fs';
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
@@ -78,22 +79,17 @@ export const registerTranslationsRoute = ({
             });
           }
 
-          let body: string;
+          let body: string | ReadStream;
           if (canonicalLocale.toLowerCase() === locale.toLowerCase()) {
             // Default locale: already in memory from server startup
             body = JSON.stringify(i18n.getTranslation());
           } else {
             const files = localeFileMap[canonicalLocale] ?? [];
             if (files.length === 1) {
-              // Single pre-merged file (standard case): inject locale field via string
-              // splice and serve without parsing or caching the content.
-              // Strip the outer braces and only add the comma when inner content exists,
-              // so an empty file ({}) doesn't produce the invalid {"locale":"xx",}.
-              const raw = await readFile(files[0], 'utf8');
-              const inner = raw.trim().slice(1, -1);
-              body = inner
-                ? `{"locale":${JSON.stringify(canonicalLocale)},${inner}}`
-                : `{"locale":${JSON.stringify(canonicalLocale)}}`;
+              // Open before res.ok() so I/O errors surface as 500, not a truncated 200.
+              // autoClose: true (Node default) closes the handle when the stream ends or is destroyed.
+              const fileHandle = await open(files[0], 'r');
+              body = fileHandle.createReadStream();
             } else {
               // Multiple files (external plugin contributed translations): merge via
               // the loader and serve without caching.

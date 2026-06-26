@@ -13,6 +13,7 @@ import { getTimeRangeAsDays } from './metrics';
 import * as i18n from './translations';
 
 interface Props {
+  isSample: boolean;
   attackDiscoveryCount: number;
   attackDiscoveryCountCompare: number;
   from: string;
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const ThreatsDetected: React.FC<Props> = ({
+  isSample,
   attackDiscoveryCount,
   attackDiscoveryCountCompare,
   from,
@@ -31,7 +33,7 @@ export const ThreatsDetected: React.FC<Props> = ({
         min-height: 160px;
       `}
     >
-      <ThreatsDetectedMetric from={from} to={to} />
+      <ThreatsDetectedMetric isSample={isSample} from={from} to={to} />
 
       <ComparePercentage
         currentCount={attackDiscoveryCount}

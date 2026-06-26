@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ApmSynthtracePipelines } from '@kbn/synthtrace-client';
+import { ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
+
+const validPipelines: ApmSynthtracePipelines[] = [
+  ApmSynthtracePipelineSchema.ApmToOtel,
+  ApmSynthtracePipelineSchema.Otel,
+  ApmSynthtracePipelineSchema.Default,
+];
+const parseApmPipeline = (value: unknown): ApmSynthtracePipelines => {
+  if (!value) return ApmSynthtracePipelineSchema.Default;
+
+  if (validPipelines.includes(value as ApmSynthtracePipelines)) {
+    return value as ApmSynthtracePipelines;
+  }
+  return ApmSynthtracePipelineSchema.Default;
+};
+
+export interface ApmPipelineScenarioOpts {
+  pipeline: ApmSynthtracePipelines;
+  numServices?: number;
+}
+
+export const parseApmScenarioOpts = (
+  scenarioOpts: Record<string, unknown> | undefined
+): ApmPipelineScenarioOpts => {
+  const pipeline = parseApmPipeline(scenarioOpts?.pipeline);
+  const numServices = scenarioOpts?.numServices ? Number(scenarioOpts.numServices) : undefined;
+
+  return {
+    ...scenarioOpts,
+    pipeline,
+    numServices,
+  };
+};

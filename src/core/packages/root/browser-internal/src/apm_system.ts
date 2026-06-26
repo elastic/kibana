@@ -64,6 +64,22 @@ export class ApmSystem {
 
     apm.addFilter(ebtSpanFilter);
 
+    // Remove the query params from the URLs (page's URL and refererer)
+    apm.addFilter((payload) => {
+      payload.transactions.forEach((transaction) => {
+        if (transaction.context && transaction.context.page) {
+          const { url, referer } = transaction.context.page;
+          if (url) {
+            transaction.context.page.url = url.split('?')[0];
+          }
+          if (referer) {
+            transaction.context.page.referer = referer.split('?')[0];
+          }
+        }
+      });
+      return payload;
+    });
+
     this.addHttpRequestNormalization(apm);
     this.addRouteChangeNormalization(apm);
 

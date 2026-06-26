@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { LibraryPanel } from '../common/library_panel';
@@ -75,6 +76,7 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
       getItemName={getSkillName}
       disabledItemIdSet={disabledItemIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}
+      ebtEntityType={AGENT_BUILDER_UI_EBT.entity.SKILL}
     />
   );
 };

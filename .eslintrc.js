@@ -459,7 +459,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/observability/plugins/synthetics/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/test/api_integration/profiling/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
@@ -1022,6 +1021,7 @@ module.exports = {
       rules: {
         '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
+        '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
@@ -1940,6 +1940,15 @@ module.exports = {
       ],
     },
     /**
+     * Alerting V2 rule form — require compressed prop on EUI form controls
+     */
+    {
+      files: ['x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/**/*.{ts,tsx}'],
+      rules: {
+        '@kbn/alerting-v2/require_eui_form_compressed': 'error',
+      },
+    },
+    /**
      * Stack Connectors Specs package
      * This package contains common code for public and server side
      */
@@ -2063,6 +2072,53 @@ module.exports = {
     {
       files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
       excludedFiles: ['x-pack/solutions/search/**/*.test.tsx'],
+      rules: {
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+      },
+    },
+
+    /**
+     * Visualization team overrides
+     */
+
+    {
+      files: [
+        // src/platform/plugins
+        'src/platform/plugins/shared/visualizations',
+        'src/platform/plugins/shared/visualization_listing',
+        'src/platform/plugins/shared/data',
+        'src/platform/plugins/shared/expressions',
+        'src/platform/plugins/shared/charts',
+        'src/platform/plugins/shared/vis_types/timeseries',
+        'src/platform/plugins/shared/chart_expressions',
+        'src/platform/plugins/private/vis_types',
+        'src/platform/plugins/private/event_annotation',
+        'src/platform/plugins/private/event_annotation_listing',
+        'src/platform/plugins/private/vis_default_editor',
+
+        // src/platform/packages
+        'src/platform/packages/shared/kbn-visualization-listing-components',
+        'src/platform/packages/shared/kbn-visualizations-common',
+        'src/platform/packages/shared/kbn-visualization-utils',
+        'src/platform/packages/shared/kbn-visualization-ui-components',
+        'src/platform/packages/shared/kbn-palettes',
+        'src/platform/packages/shared/kbn-event-annotation-components',
+        'src/platform/packages/shared/kbn-dom-drag-drop',
+        'src/platform/packages/shared/kbn-coloring',
+        'src/platform/packages/shared/kbn-chart-icons',
+        'src/platform/packages/shared/chart-test-jest-helpers',
+        'src/platform/packages/private/kbn-test-eui-helpers',
+
+        // x-pack/platform/plugins
+        'x-pack/platform/plugins/shared/lens',
+        'x-pack/platform/plugins/private/graph',
+
+        // x-pack/platform/packages
+        'x-pack/platform/packages/private/kbn-random-sampling',
+      ].map(
+        (path) => `${path}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)`
+      ),
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
@@ -2981,7 +3037,8 @@ module.exports = {
      * portable outside Kibana (e.g. Cloud UI). They may only import from the
      * baseline peer deps (`@elastic/eui`, `@emotion/*`, `react`, `react-dom`) plus
      * the `@kbn/*` modules that are stubbed at packaging time. Packaging, tests,
-     * and stories are excluded because they reference Kibana-only tooling.
+     * stories, and Storybook config are excluded because they reference
+     * Kibana-only tooling.
      */
     {
       files: ['src/platform/kbn-ui/**/*.{ts,tsx}'],
@@ -2991,6 +3048,7 @@ module.exports = {
         'src/platform/kbn-ui/**/__stories__/**',
         'src/platform/kbn-ui/**/__tests__/**',
         'src/platform/kbn-ui/**/packaging/**',
+        'src/platform/kbn-ui/storybook-config/**',
         'src/platform/kbn-ui/_tooling/**',
       ],
       rules: {
@@ -3001,8 +3059,8 @@ module.exports = {
               '@kbn/*',
               '!@kbn/i18n',
               '!@kbn/i18n-react',
-              '!@kbn/core-chrome-layout-constants',
-              '!@kbn/core-chrome-layout-utils',
+              '!@kbn/ui-chrome-layout-constants',
+              '!@kbn/ui-chrome-layout-utils',
             ],
           },
         ],
@@ -3014,15 +3072,30 @@ module.exports = {
       // as consumers migrate to the native `fetch` API. Placed last so it wins
       // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
       // security_solution and workflows_management blocks). The trade-off: the
-      // 35 allowlisted files that overlap with those blocks lose their
-      // `*legacy*` pattern check; verified that none of them currently import
-      // any path matching `*legacy*`.
+      // allowlisted files that overlap with those blocks lose their `*legacy*`
+      // pattern check; verified that none of them currently import any path
+      // matching `*legacy*`. The js-yaml freeze is handled separately via
+      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
+      // so it does not interact with this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
         'no-restricted-imports': [
           'error',
           ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
+      },
+    },
+    {
+      // These files are allowed to reference 'npx playwright' — either because they define
+      // the rule itself, test it with invalid-code fixtures, or mention it in an error message
+      // to explain what went wrong.
+      files: [
+        'src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.js',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.test.js',
+      ],
+      rules: {
+        '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
   ],
