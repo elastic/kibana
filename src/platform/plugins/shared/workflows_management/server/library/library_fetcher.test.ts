@@ -195,6 +195,48 @@ describe('LibraryFetcher.listTemplates', () => {
     );
   });
 
+  it("resolves to the runtime's exact minor regardless of manifest order", async () => {
+    // Ascending order: a caret range (`^9.4.0`) would have matched 9.4 first for
+    // a 9.5.x runtime; the tilde range must still pick 9.5.
+    const ascending = {
+      versions: [
+        { id: '9.4', kibana: '9.4.0', active: true },
+        { id: '9.5', kibana: '9.5.0', active: true },
+      ],
+      latest: 'main',
+    };
+    queueRefresh(ascending, sampleCatalog());
+    const fetcher = buildFetcher({ kibanaVersion: '9.5.2' });
+
+    await fetcher.listTemplates();
+
+    expect(mockedFetch).toHaveBeenNthCalledWith(
+      2,
+      `${BASE_URL}/9.5/catalogs/templates.json`,
+      expect.any(Object)
+    );
+  });
+
+  it('falls back to `manifest.latest` when the runtime is newer than every named minor', async () => {
+    const manifest = {
+      versions: [
+        { id: '9.6', kibana: '9.6.0', active: true },
+        { id: '9.5', kibana: '9.5.0', active: true },
+      ],
+      latest: 'main',
+    };
+    queueRefresh(manifest, sampleCatalog());
+    const fetcher = buildFetcher({ kibanaVersion: '9.8.0' });
+
+    await fetcher.listTemplates();
+
+    expect(mockedFetch).toHaveBeenNthCalledWith(
+      2,
+      `${BASE_URL}/main/catalogs/templates.json`,
+      expect.any(Object)
+    );
+  });
+
   it('reuses the cached versionId when the manifest is 304', async () => {
     queueRefresh(sampleManifest, sampleCatalog(), { etag: 'W/"m1"' });
     mockedFetch
@@ -364,7 +406,7 @@ describe('LibraryFetcher.getTemplate', () => {
 
     expect(first).toBe(second);
     expect(first.metadata.slug).toBe('demo');
-    expect(first.consts).toEqual({ k: 'v' });
+    expect(first.body.consts).toEqual({ k: 'v' });
     expect(mockedFetch).toHaveBeenCalledTimes(3);
     expect(mockedFetch).toHaveBeenNthCalledWith(
       3,

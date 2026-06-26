@@ -38,7 +38,7 @@ export class TemplateParseError extends Error {
 
 export interface ParsedTemplate {
   metadata: TemplateMetadata;
-  /** Everything in the YAML root other than `template-metadata`. */
+  /** The workflow YAML, after stripping the `template-metadata` block. */
   body: Record<string, unknown>;
   /** The original YAML text, surfaced unmodified for preview. */
   raw: string;

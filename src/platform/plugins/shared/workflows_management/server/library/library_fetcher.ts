@@ -170,7 +170,8 @@ export class LibraryFetcher {
    *   (`/v1/main/`) — serverless runs Kibana@HEAD and the `main` catalog
    *   tracks its semver.
    * - Stack deployments match against each manifest entry's explicit
-   *   `kibana` semver, finding the closest minor (`^9.5.0` covers `9.5.x`).
+   *   `kibana` semver, matching the same minor (`~9.5.0` = `9.5.x`,
+   *   patch-independent) — order-independent, unlike a caret range.
    * - Unrecognized runtime versions fall back to `manifest.latest` so dev
    *   builds against Kibana@HEAD still get a working catalog.
    */
@@ -179,7 +180,7 @@ export class LibraryFetcher {
       return manifest.latest;
     }
     for (const entry of manifest.versions) {
-      if (semver.satisfies(this.deps.kibanaVersion, `^${entry.kibana}`)) {
+      if (semver.satisfies(this.deps.kibanaVersion, `~${entry.kibana}`)) {
         return entry.id;
       }
     }
@@ -206,21 +207,10 @@ export class LibraryFetcher {
     const url = this.buildUrl(definitionUrl);
     const text = await this.fetchText(url);
     try {
-      const parsed = parseTemplateYaml(text);
-      const body = parsed.body as {
-        consts?: Record<string, unknown>;
-        inputs?: TemplateBody['inputs'];
-        triggers?: unknown[];
-        steps?: unknown[];
-      };
-      return {
-        metadata: parsed.metadata,
-        raw: parsed.raw,
-        consts: body.consts,
-        inputs: body.inputs,
-        triggers: body.triggers,
-        steps: body.steps,
-      };
+      // Passthrough: keep the typed metadata, the full parsed workflow body, and
+      // the raw YAML. No field enumeration so nothing is silently dropped.
+      const { metadata, body, raw } = parseTemplateYaml(text);
+      return { metadata, body, raw };
     } catch (err) {
       if (err instanceof TemplateParseError) {
         throw new LibraryFetchError(

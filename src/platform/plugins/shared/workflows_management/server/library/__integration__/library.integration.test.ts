@@ -116,10 +116,10 @@ describe('Library integration — LibraryFetcher against a local fixture CDN', (
       inputType: 'connector',
       connectorType: '.abuseipdb',
     });
-    expect(body.inputs).toEqual([{ name: 'ip_address', type: 'string', required: true }]);
-    expect(body.triggers).toEqual([{ type: 'manual' }]);
-    expect(body.consts).toEqual({ abuseipdb_api_key: '' });
-    expect(Array.isArray(body.steps)).toBe(true);
+    expect(body.body.inputs).toEqual([{ name: 'ip_address', type: 'string', required: true }]);
+    expect(body.body.triggers).toEqual([{ type: 'manual' }]);
+    expect(body.body.consts).toEqual({ abuseipdb_api_key: '' });
+    expect(Array.isArray(body.body.steps)).toBe(true);
     expect(body.raw).toContain('template-metadata:');
   });
 

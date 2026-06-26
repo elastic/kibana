@@ -42,6 +42,7 @@ const body: TemplateBody = {
     description: 'A demo template',
     categories: ['utility'],
   },
+  body: {},
   raw: '...',
 };
 

@@ -56,8 +56,12 @@ export type KibanaVersionEntry = z.infer<typeof KibanaVersionEntrySchema>;
 export interface TemplateBody {
   /** the parsed `template-metadata` block */
   metadata: TemplateMetadata;
+  /**
+   * The parsed workflow body — everything in the YAML root except
+   * `template-metadata` (consts, inputs, triggers, steps, outputs, settings,
+   * tags, …). Kept as an arbitrary object so no field is dropped.
+   */
+  body: Record<string, unknown>;
   /** Original YAML string, surfaced unmodified for preview. */
   raw: string;
-  /** the parsed workflow yaml body */
-  [key: string]: unknown;
 }
