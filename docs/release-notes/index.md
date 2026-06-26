@@ -638,6 +638,9 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 **Connectivity**:
 * Fixes HTTP connector TLS options when connecting through proxies [#269898]({{kib-pull}}269898).
 
+**Dashboards and Visualizations**:
+* Fixes **Canvas** autoplay not advancing past the first page [#272619]({{kib-pull}}272619).
+
 **Data ingestion and Fleet**:
 * Fixes the agentless enrollment flyout for content connector integrations to show a connector configuration link instead of waiting for incoming data that cannot arrive until the connector is set up [#274832]({{kib-pull}}274832).
 * Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call [#273848]({{kib-pull}}273848).
