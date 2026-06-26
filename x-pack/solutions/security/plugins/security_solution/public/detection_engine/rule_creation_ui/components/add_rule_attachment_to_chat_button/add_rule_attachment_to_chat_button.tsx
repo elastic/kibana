@@ -107,12 +107,16 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         : undefined);
     const linkedRuleId = rule?.id ?? existingRuleId;
 
-    // Rule-details / flyout pathway (a saved RuleResponse, no live form): attach by reference so
-    // the server resolves the current rule. `origin` set ⇒ the chat card reads "Update".
+    // Rule-details / flyout pathway (a saved RuleResponse, no live form): include data so the card
+    // renders immediately, and set `origin` so the card reads "Update" and save targets the live rule.
     if (!isFormBased && linkedRuleId) {
       return {
         attachmentId: SECURITY_RULE_ATTACHMENT_ID,
         attachmentType: SecurityAgentBuilderAttachments.rule,
+        attachmentData: {
+          text: JSON.stringify(formattedRule),
+          attachmentLabel,
+        },
         origin: linkedRuleId,
         attachmentDescription: attachmentLabel,
       };
