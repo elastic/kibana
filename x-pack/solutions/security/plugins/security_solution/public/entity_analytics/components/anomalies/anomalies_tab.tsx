@@ -30,7 +30,7 @@ import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-r
 import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
 import { useKibana } from '../../../common/lib/kibana';
-import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/entity_analytics/anomalies/constants';
+import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
 
 import { useAnomalyOverview } from '../../api/hooks/use_anomaly_overview';
 import {
@@ -107,7 +107,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     () => ({
       from: parseDateWithDefault(
         start,
-        moment().subtract(ENTITY_ANOMALY_DEFAULT_LOOKBACK, 'days')
+        moment().subtract(ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS, 'days')
       ).valueOf(),
       to: parseDateWithDefault(end, moment(), true).valueOf(),
     }),
