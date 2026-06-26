@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -82,8 +83,9 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
   });
 
   const { environment } = useEnvironmentsContext();
-  const { anomalyThreshold } = useAnomalyThreshold();
 
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
+  const { anomalyThreshold } = useAnomalyThreshold();
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txFailureRate
   );
@@ -231,7 +233,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartTheme}
         anomalyTimeseries={
-          preferredAnomalyTimeseries
+          shouldShowAnomalyUi && !!preferredAnomalyTimeseries
             ? {
                 ...preferredAnomalyTimeseries,
                 color: previousPeriodColor,

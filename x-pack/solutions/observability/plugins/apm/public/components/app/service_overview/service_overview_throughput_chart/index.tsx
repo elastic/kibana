@@ -9,6 +9,7 @@ import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elas
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -50,8 +51,9 @@ export function ServiceOverviewThroughputChart({
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
-  const { anomalyThreshold } = useAnomalyThreshold();
 
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
+  const { anomalyThreshold } = useAnomalyThreshold();
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txThroughput
   );
@@ -236,7 +238,7 @@ export function ServiceOverviewThroughputChart({
         yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
         anomalyTimeseries={
-          preferredAnomalyTimeseries
+          shouldShowAnomalyUi && !!preferredAnomalyTimeseries
             ? {
                 ...preferredAnomalyTimeseries,
                 color: previousPeriodColor,

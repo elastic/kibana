@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -76,6 +77,7 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
 
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
   const { anomalyThreshold } = useAnomalyThreshold();
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txLatency
@@ -198,7 +200,7 @@ export function LatencyChart({ height, kuery }: Props) {
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={
-            preferredAnomalyTimeseries
+            shouldShowAnomalyUi && !!preferredAnomalyTimeseries
               ? {
                   ...preferredAnomalyTimeseries,
                   color: anomalyTimeseriesColor,
