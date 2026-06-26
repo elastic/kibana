@@ -36,12 +36,8 @@ const StreamDetailFailureStoreInner = ({
   const { updateFailureStore } = useUpdateFailureStore(definition.stream);
   const { timeState } = useTimefilter();
 
-  const {
-    privileges: {
-      read_failure_store: readFailureStorePrivilege,
-      manage_failure_store: manageFailureStorePrivilege,
-    },
-  } = definition;
+  const readFailureStorePrivilege = definition.privileges?.read_failure_store ?? false;
+  const manageFailureStorePrivilege = definition.privileges?.manage_failure_store ?? false;
 
   const failureStoreConfig = useFailureStoreConfig(definition);
 

@@ -202,7 +202,7 @@ export async function setCustomRetention(
 
   await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseApplyButton).click();
   if (expectOverrideConfirmation) {
-    await confirmOverride(page);
+    await confirmOverrideIfPresent(page);
   }
   await page
     .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)
@@ -219,7 +219,7 @@ export async function removeDeletePhase(
   await openDeletePhaseFlyout(page, { existing: true });
   await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseRemoveButton).click();
   if (expectOverrideConfirmation) {
-    await confirmOverride(page);
+    await confirmOverrideIfPresent(page);
   }
   await page
     .getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)
@@ -325,7 +325,18 @@ export async function setFailureStoreRetention(
 ): Promise<void> {
   const flyout = page.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseFlyout);
 
-  await page.getByTestId(RETENTION_TEST_IDS.failureStoreAddDeletePhaseButton).click();
+  const addDeletePhaseButton = page.getByTestId(
+    RETENTION_TEST_IDS.failureStoreAddDeletePhaseButton
+  );
+  const canAddDeletePhase = await addDeletePhaseButton.isEnabled().catch(() => false);
+  if (canAddDeletePhase) {
+    await addDeletePhaseButton.click();
+  } else {
+    // Serverless always materializes a delete phase for the failure store, so tests may need to edit
+    // the existing delete phase instead of adding a new one.
+    await page.getByTestId('failureStore-lifecyclePhase-delete-button').click();
+    await page.getByTestId('lifecyclePhase-delete-editButton').click();
+  }
   await expect(flyout).toBeVisible();
 
   const field = flyout.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseValue);

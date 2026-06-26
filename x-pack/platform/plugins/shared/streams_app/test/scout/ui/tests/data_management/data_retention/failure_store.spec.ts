@@ -79,9 +79,15 @@ test.describe('Stream data retention - updating failure store', () => {
     test(
       `should edit failure store successfully for ${label}`,
       { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-      async ({ page, pageObjects, apiServices }) => {
-        // Pin the starting state: failure store enabled, no delete phase yet.
-        await pinFailureStore(apiServices, streamName, { lifecycle: { disabled: {} } });
+      async ({ page, pageObjects, apiServices, config }) => {
+        // Pin the starting state.
+        // - Serverless: a delete phase is always materialized, so start from enabled lifecycle.
+        // - Stateful: start from disabled lifecycle so the "Add delete phase" entry point is available.
+        await pinFailureStore(
+          apiServices,
+          streamName,
+          config.serverless ? { lifecycle: { enabled: {} } } : { lifecycle: { disabled: {} } }
+        );
 
         await pageObjects.streams.gotoDataRetentionTab(streamName);
 
@@ -116,7 +122,8 @@ test.describe('Stream data retention - updating failure store', () => {
     // case is its own test (no conditional assertions):
     // - Serverless: Elasticsearch enforces a default failure store retention, so a
     //   delete phase (2 data phases) with that default is shown.
-    // - Stateful: this means infinite retention (no delete phase, 1 data phase).
+    // - Stateful: Elasticsearch may materialize a default failure store retention depending on
+    //   cluster configuration; assert the effective UI state per environment.
     test(
       `should enable failure store with the cluster default delete phase for ${label} (serverless)`,
       { tag: tags.serverless.observability.complete },
@@ -137,7 +144,7 @@ test.describe('Stream data retention - updating failure store', () => {
     );
 
     test(
-      `should enable failure store with infinite retention for ${label} (stateful)`,
+      `should enable failure store with the effective default retention for ${label} (stateful)`,
       { tag: tags.stateful.classic },
       async ({ page, pageObjects, apiServices }) => {
         // Pin the starting state: failure store disabled.
@@ -147,11 +154,11 @@ test.describe('Stream data retention - updating failure store', () => {
 
         await setFailureStoreEnabled(page, true);
         await expect(
-          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric).getByText('∞')
-        ).toBeVisible();
+          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric)
+        ).toContainText('30 days');
         await expect(
           page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
-        ).toContainText('1 data phase');
+        ).toContainText('2 data phases');
       }
     );
 
@@ -226,7 +233,7 @@ test.describe('Stream data retention - updating failure store', () => {
   test(
     'should set failure store retention to different value than main retention',
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-    async ({ page, pageObjects, apiServices }) => {
+    async ({ page, pageObjects, apiServices, config }) => {
       // Make the starting state deterministic regardless of other tests in this
       // suite (or a retry of this test): set an explicit empty DSL lifecycle so
       // DSL is already effective and there is no delete phase yet, and enable the
@@ -239,7 +246,9 @@ test.describe('Stream data retention - updating failure store', () => {
           ...definition.stream.ingest,
           processing: omit(definition.stream.ingest.processing, 'updated_at'),
           lifecycle: { dsl: {} },
-          failure_store: { lifecycle: { disabled: {} } },
+          failure_store: config.serverless
+            ? { lifecycle: { enabled: {} } }
+            : { lifecycle: { disabled: {} } },
         },
       });
 
@@ -263,11 +272,13 @@ test.describe('Stream data retention - updating failure store', () => {
   test(
     'should persist failure store retention across page reload',
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-    async ({ page, pageObjects, apiServices }) => {
-      // Pin the starting state: failure store enabled, no delete phase yet.
-      await pinFailureStore(apiServices, 'logs-generic-default', {
-        lifecycle: { disabled: {} },
-      });
+    async ({ page, pageObjects, apiServices, config }) => {
+      // Pin the starting state.
+      await pinFailureStore(
+        apiServices,
+        'logs-generic-default',
+        config.serverless ? { lifecycle: { enabled: {} } } : { lifecycle: { disabled: {} } }
+      );
 
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 

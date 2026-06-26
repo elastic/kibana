@@ -18,9 +18,7 @@ export const NoFailureStorePanel = ({
   definition: Streams.ingest.all.GetResponse;
   isExternalFlyoutOpen?: boolean;
 }) => {
-  const {
-    privileges: { manage_failure_store: manageFailureStorePrivilege },
-  } = definition;
+  const manageFailureStorePrivilege = definition.privileges?.manage_failure_store ?? false;
   return (
     <EuiPanel
       paddingSize="m"
