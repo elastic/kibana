@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  createRendererTypeRegistry,
-  type RendererTypeRegistry,
-} from './renderer_type_registry';
+import { createRendererTypeRegistry, type RendererTypeRegistry } from './renderer_type_registry';
 import type { RendererServiceSetup, RendererServiceStart } from './types';
 
 export interface RendererService {

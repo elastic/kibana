@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export {
-  createRendererTypeRegistry,
-  type RendererTypeRegistry,
-} from './renderer_type_registry';
+export { createRendererTypeRegistry, type RendererTypeRegistry } from './renderer_type_registry';
 export { type RendererService, createRendererService } from './renderer_service';
 export type { RendererServiceSetup, RendererServiceStart } from './types';
