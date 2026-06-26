@@ -239,6 +239,40 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packBlock.queries.q1.schedule_id).toBe('sched-q1');
   });
 
+  test('migrates a legacy bare-name-keyed wire block to the spaceId--name key and preserves its `shard`', async () => {
+    const scopedClient = createMockScopedClient();
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    // A pre-`spaceId--name` pack keyed by its bare name (`reconcile-pack`), with
+    // a wire-only `shard` set. `policyHasPack` matches via its bare-name
+    // fallback, so the reconciler writes — it must migrate the block to the
+    // modern key AND carry `shard` across (the SO never carried it).
+    const legacyPolicy = buildPackagePolicy('reconcile-pack');
+    legacyPolicy.inputs[0].config.osquery.value.packs['reconcile-pack'].shard = 7;
+    const packagePolicyList = jest.fn().mockResolvedValue({ items: [legacyPolicy] });
+
+    const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
+    const osqueryContext = createMockOsqueryContext({
+      list: packagePolicyList,
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    const updatedPolicy = packagePolicyUpdate.mock.calls[0][3];
+    const packs = updatedPolicy.inputs[0].config.osquery.value.packs;
+    // The legacy key is gone, the modern key holds the migrated block...
+    expect(packs['reconcile-pack']).toBeUndefined();
+    expect(packs['default--reconcile-pack']).toBeDefined();
+    // ...and the `shard` that lived under the legacy key survived the migration.
+    expect(packs['default--reconcile-pack'].shard).toBe(7);
+    expect(packs['default--reconcile-pack'].queries.q1.schedule_id).toBe('sched-q1');
+  });
+
   test('is idempotent — a second run changes no schedule_id', async () => {
     const scopedClient = createMockScopedClient();
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});

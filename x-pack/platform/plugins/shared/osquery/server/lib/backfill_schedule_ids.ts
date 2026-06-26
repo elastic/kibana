@@ -147,13 +147,19 @@ export const reconcileScheduleIdsToWire = async ({
 
           const existingPackBlock = get(pp, packPath) as Record<string, unknown> | undefined;
 
+          const legacyPackBlock = get(
+            pp,
+            `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`
+          ) as Record<string, unknown> | undefined;
+          const existingShard = existingPackBlock?.shard ?? legacyPackBlock?.shard;
+
           // The pack-config block this reconcile run is about to write onto the
           // wire. The write below deletes the existing block
           // (`removePackFromPolicy`) and re-sets exactly this object, so it IS
           // the post-write state — comparing it against the current wire tells
           // us whether the write would change anything.
           const intendedPackBlock = {
-            ...(existingPackBlock?.shard !== undefined ? { shard: existingPackBlock.shard } : {}),
+            ...(existingShard !== undefined ? { shard: existingShard } : {}),
             pack_id: packSO.id,
             ...packDefaults,
             queries: builtQueries,
