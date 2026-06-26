@@ -12,7 +12,6 @@ import { truncatedAnchorCss } from './constants';
 interface AnomalyJobNameProps {
   jobId: string;
   jobName: string;
-  detectorIndex?: number;
   timeRange: { from: string; to: string };
 }
 

@@ -149,12 +149,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         field: 'jobDisplayName',
         sortable: true,
         render: (_: string, item: TableRow) => (
-          <AnomalyJobName
-            jobId={item.jobId}
-            jobName={item.jobDisplayName}
-            detectorIndex={item.detectorIndex}
-            timeRange={timeRange}
-          />
+          <AnomalyJobName jobId={item.jobId} jobName={item.jobDisplayName} timeRange={timeRange} />
         ),
       },
       // Tactic column

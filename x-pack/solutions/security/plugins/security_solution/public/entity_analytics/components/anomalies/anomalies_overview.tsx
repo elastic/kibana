@@ -75,7 +75,6 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
           <AnomalyJobName
             jobId={item.jobId}
             jobName={item.jobName ?? item.jobId}
-            detectorIndex={item.detectorIndex}
             timeRange={{
               from: new Date(data.from).toISOString(),
               to: new Date(data.to).toISOString(),

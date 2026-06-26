@@ -49,19 +49,16 @@ jest.mock('./table/anomaly_job_name', () => ({
   AnomalyJobName: ({
     jobId,
     jobName,
-    detectorIndex,
     timeRange,
   }: {
     jobId: string;
     jobName: string;
-    detectorIndex: number;
     timeRange: { from: string; to: string };
   }) => (
     <span
       data-test-subj="mock-anomaly-job-name"
       data-job-id={jobId}
       data-job-name={jobName}
-      data-detector-index={String(detectorIndex)}
       data-time-range={JSON.stringify(timeRange)}
     />
   ),
@@ -93,7 +90,6 @@ const makeHit = (overrides: Partial<AnomalyOverviewHit> = {}): AnomalyOverviewHi
   jobName: 'Security Job',
   timestamp: '2026-05-19T13:41:58.725Z',
   anomalousValue: '1000 events',
-  detectorIndex: 0,
   ...overrides,
 });
 
@@ -206,8 +202,8 @@ describe('AnomaliesOverview', () => {
       expect(screen.getAllByTestId('mock-anomaly-job-name')).toHaveLength(2);
     });
 
-    it('passes jobId, jobName, and detectorIndex to AnomalyJobName', () => {
-      const hit = makeHit({ jobId: 'my-job', jobName: 'My Job', detectorIndex: 2 });
+    it('passes jobId and jobName to AnomalyJobName', () => {
+      const hit = makeHit({ jobId: 'my-job', jobName: 'My Job' });
       render(
         <AnomaliesOverview
           data={makeData({ recentAnomalies: [hit] })}
