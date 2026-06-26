@@ -204,6 +204,15 @@ describe('WorkflowApi', () => {
         version: VERSION,
       });
     });
+
+    it('should include managed filter when provided', async () => {
+      await api.getAggs({ fields: ['tags'], managed: 'all' });
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/aggs', {
+        query: { fields: ['tags'], managed: 'all' },
+        version: VERSION,
+      });
+    });
   });
 
   describe('getConnectors', () => {

@@ -6,7 +6,7 @@
  */
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { isInternalTool } from '@kbn/agent-builder-common/tools';
+import { isInternalTool, ToolType } from '@kbn/agent-builder-common/tools';
 import type {
   SkillInvocationOrigin,
   SkillSolutionArea,
@@ -30,12 +30,16 @@ function sha256Hex(value: string): string {
   return createHash('sha256').update(value).digest('hex');
 }
 
-function toCustomHashedId(value: string): string {
-  return `${CUSTOM_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
+export function toHashedId(value: string): string {
+  return sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH);
+}
+
+export function toCustomHashedId(value: string): string {
+  return `${CUSTOM_HASH_PREFIX}${toHashedId(value)}`;
 }
 
 function toPluginHashedId(value: string): string {
-  return `${PLUGIN_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
+  return `${PLUGIN_HASH_PREFIX}${toHashedId(value)}`;
 }
 
 /**
@@ -52,13 +56,15 @@ export function normalizeAgentIdForTelemetry(agentId?: string): string | undefin
 
 /**
  * Normalizes tool IDs for telemetry to protect user privacy.
- * Built-in tools (from AGENT_BUILDER_BUILTIN_TOOLS) are reported with their actual ID,
  * custom/user-created tools are reported as a stable hashed label (CUSTOM-<sha256_prefix>).
+ * Pass `toolType` when available; falls back to allow-list for legacy callers that only have a tool ID string.
  */
-export function normalizeToolIdForTelemetry(toolId: string): string {
-  return (BUILTIN_TOOL_IDS as Set<string>).has(toolId) || isInternalTool(toolId)
-    ? toolId
-    : toCustomHashedId(toolId);
+export function normalizeToolIdForTelemetry(toolId: string, toolType?: ToolType | string): string {
+  const isBuiltin =
+    toolType === ToolType.builtin ||
+    (BUILTIN_TOOL_IDS as Set<string>).has(toolId) ||
+    isInternalTool(toolId);
+  return isBuiltin ? toolId : toCustomHashedId(toolId);
 }
 
 /**

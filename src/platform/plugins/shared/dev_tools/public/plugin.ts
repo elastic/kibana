@@ -72,7 +72,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         element.className = devAppWrapperClassName;
 
         const [core] = await getStartServices();
-        const { application, chrome, executionContext } = core;
+        const { application, chrome, executionContext, rendering } = core;
         const { analytics, i18n: i18nStart, theme, userProfile } = core;
         const startServices = { analytics, i18n: i18nStart, theme, userProfile };
 
@@ -93,7 +93,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
           history,
           this.getSortedDevTools(),
           appServices,
-          startServices
+          startServices,
+          rendering
         );
       },
     });
@@ -130,6 +131,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
               id: tool.id,
               title: tool.title as string,
               path: `#/${tool.id}`,
+              visibleIn: ['globalSearch', 'projectSideNav'],
             };
             if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
               throw new Error('Deeplink must be registered in package.');

@@ -19,6 +19,7 @@ const createMockUiSettingsClient = (experimentalFeaturesEnabled = true) => ({
 
 const createMockAgentContextLayer = () => ({
   indexAttachment: jest.fn().mockResolvedValue(undefined),
+  deleteAttachment: jest.fn().mockResolvedValue(undefined),
 });
 
 const createMockGetStartServices = (

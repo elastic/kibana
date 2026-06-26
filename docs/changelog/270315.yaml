@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/270315
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Search and data
+title: Add UI support for conditions in Fleet package policies
+description: Adds support for defining `condition` fields in Fleet package policies at the integration, input, or stream level.

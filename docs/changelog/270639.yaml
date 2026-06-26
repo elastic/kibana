@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/270639
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: Add RRULE-based scheduling API routes with Fleet fan-out
+description: Adds API routes for RRULE-based scheduling and Fleet fan-out support. This feature is currently behind a flag and not yet enabled by default.

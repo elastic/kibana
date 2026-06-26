@@ -8,9 +8,10 @@
 export { OnboardingApiPathsProvider } from './src/api_paths';
 export type { OnboardingApiPaths } from './src/api_paths';
 export { hasSeenOnboarding, markOnboardingSeen } from './src/first_load';
-export { PathStep } from './src/onboarding/path_step';
-export { IngestStep, IngestStepRoute } from './src/onboarding/ingest_step';
-export { SearchStep } from './src/onboarding/search_step';
+export { OnboardingLandingPage } from './src/onboarding/onboarding_landing_page';
+export { IngestStep } from './src/onboarding/steps/ingest_step';
+export { SearchStep } from './src/onboarding/steps/search_step';
+export { ConnectToProject } from './src/connection_details/connect_to_project';
 export { TutorialsPage } from './src/tutorials/tutorials_page';
 export {
   markTutorialComplete,
@@ -18,5 +19,5 @@ export {
   useTutorialProgress,
 } from './src/tutorials/use_tutorial_progress';
 export type { OnboardingServices } from './src/services';
-export { useOnboardingCredentials } from './src/onboarding/use_onboarding_credentials';
-export type { OnboardingCredentials } from './src/onboarding/use_onboarding_credentials';
+export { useOnboardingCredentials } from './src/hooks/use_onboarding_credentials';
+export type { OnboardingCredentials } from './src/hooks/use_onboarding_credentials';

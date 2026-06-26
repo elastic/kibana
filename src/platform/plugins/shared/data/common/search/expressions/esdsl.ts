@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
-import { lastValueFrom } from 'rxjs';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { EsRawResponse } from './es_raw_response';
@@ -40,7 +39,7 @@ export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
 >;
 
 interface EsdslStartDependencies {
-  search: ISearchGeneric;
+  searchService: ISearchMethods;
   uiSettingsClient: UiSettingsCommon;
 }
 
@@ -82,7 +81,7 @@ export const getEsdslFn = ({
       },
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getKibanaRequest }) {
-      const { search, uiSettingsClient } = await getStartDependencies(getKibanaRequest);
+      const { searchService, uiSettingsClient } = await getStartDependencies(getKibanaRequest);
 
       const dsl = JSON.parse(args.dsl);
 
@@ -131,17 +130,13 @@ export const getEsdslFn = ({
       });
 
       try {
-        const { rawResponse, requestParams } = await lastValueFrom(
-          search(
-            {
-              params: {
-                index: args.index,
-                size: args.size,
-                ...dsl,
-              },
-            },
-            { abortSignal }
-          )
+        const { rawResponse, requestParams } = await searchService.dsl(
+          {
+            index: args.index,
+            size: args.size,
+            ...dsl,
+          },
+          { abortSignal }
         );
 
         const stats: RequestStatistics = {};

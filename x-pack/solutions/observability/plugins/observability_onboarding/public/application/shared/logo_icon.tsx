@@ -77,7 +77,7 @@ export const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   logstash: 'logoLogstash',
 };
 
-function useIconForLogo(logo?: SupportedLogo): string | undefined {
+export function useIconForLogo(logo?: SupportedLogo): string | undefined {
   const {
     services: { http },
   } = useKibana();

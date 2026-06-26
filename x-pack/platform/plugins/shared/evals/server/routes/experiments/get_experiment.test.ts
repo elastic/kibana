@@ -85,6 +85,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
             {
               key: 'dataset-1',
               dataset_name: { buckets: [{ key: 'My Dataset' }] },
+              example_count: { value: 5 },
               by_evaluator: {
                 buckets: [
                   {
@@ -112,6 +113,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
       dataset_id: 'dataset-1',
       dataset_name: 'My Dataset',
       evaluator_name: 'correctness',
+      example_count: 5,
       stats: {
         mean: 0.85,
         median: 0.9,

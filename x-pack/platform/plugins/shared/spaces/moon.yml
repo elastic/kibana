@@ -64,9 +64,8 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/ui-theme'
   - '@kbn/core-chrome-browser'
-  - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-browser-mocks'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
   - '@kbn/react-query'
@@ -78,6 +77,12 @@ dependsOn:
   - '@kbn/tour-queue'
   - '@kbn/context-switcher-components'
   - '@kbn/core-http-browser-mocks'
+  - '@kbn/cloud'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/deeplinks-search'
+  - '@kbn/deeplinks-security'
+  - '@kbn/deeplinks-shared'
+  - '@kbn/deeplinks-workplace-ai'
   - '@kbn/core-user-profile-server'
 tags:
   - plugin

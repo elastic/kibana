@@ -360,13 +360,15 @@ describe('AgentExecutionService', () => {
       );
     });
 
-    it('should throw for non-existent execution', async () => {
+    it('should warn and no-op for a non-existent execution', async () => {
       mockExecutionClient.get.mockResolvedValue(undefined);
 
-      await expect(service.abortExecution('exec-1')).rejects.toThrow('Execution exec-1 not found');
+      await expect(service.abortExecution('exec-1')).resolves.toBeUndefined();
+      expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('should throw when trying to abort a completed execution', async () => {
+    it('should quietly no-op for a terminal execution', async () => {
       mockExecutionClient.get.mockResolvedValue({
         executionId: 'exec-1',
         '@timestamp': new Date().toISOString(),
@@ -379,9 +381,9 @@ describe('AgentExecutionService', () => {
         events: [],
       });
 
-      await expect(service.abortExecution('exec-1')).rejects.toThrow(
-        'Cannot abort execution exec-1 with status completed'
-      );
+      await expect(service.abortExecution('exec-1')).resolves.toBeUndefined();
+      expect(mockExecutionClient.updateStatus).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 

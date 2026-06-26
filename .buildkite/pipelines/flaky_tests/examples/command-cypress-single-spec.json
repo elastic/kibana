@@ -1,0 +1,12 @@
+[
+  {
+    "type": "command",
+    "label": "watchlists_page.cy.ts",
+    "workingDirectory": ".",
+    "command": "cd x-pack/solutions/security/test/security_solution_cypress && yarn cypress:entity_analytics:run:ess --spec './cypress/e2e/entity_analytics/watchlists/watchlists_page.cy.ts'",
+    "count": 10,
+    "job": "kibana-security-solution-chrome",
+    "scoutLabel": "watchlists_page.cy.ts",
+    "junitMergeWorkingDirectory": "x-pack/solutions/security/test/security_solution_cypress"
+  }
+]

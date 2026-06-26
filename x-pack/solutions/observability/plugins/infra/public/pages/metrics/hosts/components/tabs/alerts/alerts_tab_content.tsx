@@ -31,6 +31,9 @@ import { AlertFlyout } from '../../../../../../alerting/inventory/components/ale
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
+// Escape characters that would otherwise break out of a quoted KQL literal.
+const escapeKqlLiteral = (value: string): string => value.replace(/[\\"]/g, '\\$&');
+
 export const AlertsTabContent = () => {
   const { featureFlags } = usePluginConfig();
   const { hostNodes } = useHostsViewContext();
@@ -44,7 +47,12 @@ export const AlertsTabContent = () => {
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
-  const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
+  // `host.name: (a or b or c)` compiles to a single terms-style clause, far
+  // cheaper than one `match_phrase` per host at 500-host capacity. Escape the
+  // quoted literals to keep the query well-formed.
+  const hostNamesKuery = hostNodes.length
+    ? `host.name: (${hostNodes.map((host) => `"${escapeKqlLiteral(host.name)}"`).join(' or ')})`
+    : '';
 
   const focusTrapProps = createFocusTrapProps(createAlertRuleButtonRef.current);
 

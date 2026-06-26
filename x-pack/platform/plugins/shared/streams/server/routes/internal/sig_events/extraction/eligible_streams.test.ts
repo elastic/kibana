@@ -83,14 +83,14 @@ describe('classifyStreams', () => {
     intervalHours: 12,
   };
 
-  it('skips unsupported stream types and reports them', () => {
+  it('treats query streams as supported candidates', () => {
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('logs'), makeStream('my-query', { query: true })],
     });
 
-    expect(candidateNames(result)).toEqual(['logs']);
-    expect(result.unsupported).toEqual(['my-query']);
+    expect(candidateNames(result)).toEqual(['logs', 'my-query']);
+    expect(result.unsupported).toEqual([]);
   });
 
   it('excludes streams matching exclude patterns', () => {
@@ -200,5 +200,23 @@ describe('classifyStreams', () => {
     });
 
     expect(candidateNames(result)).toEqual(['new-stream', 'old-stream']);
+  });
+
+  it('orders candidates by oldest onboarding first', () => {
+    const finishedTwelveMinAgo = new Date(Date.now() - 12 * 60_000).toISOString();
+    const finishedTenMinAgo = new Date(Date.now() - 10 * 60_000).toISOString();
+    const result = classifyStreams({
+      ...defaultArgs,
+      intervalHours: 0,
+      // Provide executions newest-first (as the API returns them) to prove the
+      // candidates are reordered by oldest completion, not left in input order.
+      allStreams: [makeStream('recent-stream'), makeStream('older-stream')],
+      executions: [
+        makeExecution('recent-stream', { finishedAt: finishedTenMinAgo }),
+        makeExecution('older-stream', { finishedAt: finishedTwelveMinAgo }),
+      ],
+    });
+
+    expect(candidateNames(result)).toEqual(['older-stream', 'recent-stream']);
   });
 });

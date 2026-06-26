@@ -174,6 +174,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   options.setUserPreferences(chromiumUserPrefs);
   options.setLoggingPrefs(prefs);
   options.set('unexpectedAlertBehaviour', 'accept');
+  options.set('unhandledPromptBehavior', 'accept');
   options.setAcceptInsecureCerts(acceptInsecureCerts);
 
   return options;

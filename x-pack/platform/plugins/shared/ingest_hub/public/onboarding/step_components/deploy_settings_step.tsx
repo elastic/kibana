@@ -1,0 +1,77 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { Suspense, useMemo } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
+import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
+import { AWS_SERVICES_MAP } from '../aws_service_matrix';
+import { getSelectedServicePermissions } from '../service_permissions';
+import { useOnboardingFlow } from '../onboarding_flow_context';
+import { AwsPermissionsViewer } from './aws_permissions_viewer';
+import { useDeploy } from './deploy_settings_step/use_deploy';
+
+interface DeploySettingsStepProps {
+  onContinue: () => void;
+  onBack?: () => void;
+}
+
+export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepProps) {
+  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
+  const { deploySettingsStep, setConnectorId, setStaticKeys, servicesStep } = useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
+
+  const { handleDeploy } = useDeploy({ onContinue });
+
+  const showIdentityFederation = useMemo(() => {
+    if (selectedServiceIds.length === 0) return true;
+    return selectedServiceIds.every(
+      (id) => AWS_SERVICES_MAP.get(id)?.identityFederationSupported === true
+    );
+  }, [selectedServiceIds]);
+
+  const staticKeysPermissions = useMemo(
+    () => getSelectedServicePermissions(selectedServiceIds),
+    [selectedServiceIds]
+  );
+
+  const staticKeysContent = useMemo(
+    () => <AwsPermissionsViewer services={staticKeysPermissions} />,
+    [staticKeysPermissions]
+  );
+
+  return (
+    <div data-test-subj="onboardingStep-deploy-settings">
+      <Suspense
+        fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-deploy-settings-loading" />}
+      >
+        <LazyAwsConnectSetup
+          cloud={services.cloud as CloudSetupForCloudConnector | undefined}
+          initialConnectorId={deploySettingsStep.connectorId}
+          initialStaticKeys={deploySettingsStep.staticKeys}
+          showIdentityFederation={showIdentityFederation}
+          staticKeysContent={staticKeysContent}
+          onBack={onBack}
+          onContinue={() => handleDeploy()}
+          continueButtonLabel={
+            <FormattedMessage
+              id="xpack.ingestHub.deploySettingsStep.continueButton"
+              defaultMessage="Deploy"
+            />
+          }
+          continueButtonIconType="playFilled"
+          onConnectorIdChange={setConnectorId}
+          onStaticKeysChange={setStaticKeys}
+        />
+      </Suspense>
+    </div>
+  );
+}

@@ -229,7 +229,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  const { force, id, package: pkg, ...newPolicy } = request.body;
+  const { force, id, package: pkg, create_dataset_templates, ...newPolicy } = request.body;
   if ('spaceIds' in newPolicy) {
     delete newPolicy.spaceIds;
   }
@@ -287,6 +287,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         id,
         force,
         spaceId,
+        createDatasetTemplates: create_dataset_templates,
       },
       context,
       request

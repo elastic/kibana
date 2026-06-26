@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { errorResponseSchema, ruleTagsResponseSchema } from '@kbn/alerting-v2-schemas';
+import { Request } from '@kbn/core-di-server';
+import type { z } from '@kbn/zod/v4';
+import {
+  errorResponseSchema,
+  ruleTagsParamsSchema,
+  ruleTagsResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -28,6 +34,9 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
     summary: 'Get rule tags',
   } as const;
   static schemas = {
+    request: {
+      query: ruleTagsParamsSchema,
+    },
     response: {
       200: {
         body: () => ruleTagsResponseSchema,
@@ -44,13 +53,15 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(Request)
+    private readonly request: KibanaRequest<unknown, z.infer<typeof ruleTagsParamsSchema>, unknown>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const tags = await this.rulesClient.getTags();
+    const tags = await this.rulesClient.getTags({ filter: this.request.query.filter });
     return this.ctx.response.ok({ body: { tags } });
   }
 }

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import {
@@ -17,7 +15,7 @@ import {
 } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
 import type { Discovery } from '../../sig_events/discoveries';
-import type { Verdict } from '../../sig_events/verdicts';
+import type { Detection } from '../../sig_events/detections';
 import type { SigEvent } from '../../sig_events/events';
 
 /**
@@ -58,32 +56,6 @@ interface SignificantEventsGetResponse {
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
-type SignificantEventsPreviewResponse = Pick<
-  SignificantEventsResponse,
-  'occurrences' | 'change_points' | 'esql'
-> & {
-  /**
-   * For STATS queries only: how many result rows the preview returned.
-   * With a single GROUP BY dimension this equals unique time buckets
-   * that breached the threshold. With multiple dimensions (`multi_group`)
-   * this is the total entity × bucket cells, not unique time buckets.
-   * Absent for match-type queries.
-   */
-  firing_count?: number;
-  /**
-   * True when the STATS preview hit the server-side row limit and the
-   * `firing_count` / sparkline data may be incomplete.
-   */
-  truncated?: boolean;
-  /**
-   * For STATS queries with multiple GROUP BY dimensions (beyond the
-   * temporal bucket): true means the sparkline sums firing cells across
-   * entity groups per bucket, so each y-value represents "how many
-   * entity × bucket cells breached" rather than unique events.
-   */
-  multi_group?: boolean;
-};
-
 export const generatedSignificantEventQuerySchema = z.object({
   type: queryTypeSchema,
   title: z.string(),
@@ -96,13 +68,6 @@ export const generatedSignificantEventQuerySchema = z.object({
 });
 
 type GeneratedSignificantEventQuery = z.infer<typeof generatedSignificantEventQuerySchema>;
-
-type SignificantEventsGenerateResponse = Observable<
-  ServerSentEventBase<
-    'generated_queries',
-    { queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }
-  >
->;
 
 interface SignificantEventsQueriesGenerationResult {
   queries: GeneratedSignificantEventQuery[];
@@ -131,22 +96,20 @@ interface LifecycleDetection {
   rule_name?: string;
   stream_name?: string;
   change_point_type?: string;
-  detected_at: string;
+  kind: Extract<Detection['kind'], 'detection' | 'quiet'>;
+  '@timestamp': string;
 }
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
   discoveries: Discovery[];
-  verdicts: Verdict[];
   events: SigEvent[];
 }
 
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
-  SignificantEventsGenerateResponse,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
   LifecycleDetection,

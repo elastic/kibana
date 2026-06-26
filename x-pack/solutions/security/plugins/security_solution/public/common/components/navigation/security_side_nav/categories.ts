@@ -13,13 +13,21 @@ export const getNavCategories = (
   chatExperience: AIChatExperience,
   enableAlertsAndAttacksAlignment?: boolean,
   isNewEAHomePageEnabled?: boolean,
-  securityClassicNavExternalLinks?: boolean
+  securityClassicNavExternalLinks?: boolean,
+  isAgentBuilderNavAtTop?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
       linkIds: securityClassicNavExternalLinks
-        ? [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards]
+        ? // Agent builder for AI agent chat and at the top
+          chatExperience === AIChatExperience.Agent && isAgentBuilderNavAtTop
+          ? [
+              SecurityPageName.externalLinkAgentBuilder,
+              SecurityPageName.externalLinkDiscover,
+              SecurityPageName.dashboards,
+            ]
+          : [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards]
         : [SecurityPageName.dashboards],
     },
     {
@@ -32,7 +40,7 @@ export const getNavCategories = (
         ...(securityClassicNavExternalLinks
           ? [
               // Agent builder for AI agent chat and not classic AI experience
-              ...(chatExperience === AIChatExperience.Agent
+              ...(chatExperience === AIChatExperience.Agent && !isAgentBuilderNavAtTop
                 ? [SecurityPageName.externalLinkAgentBuilder]
                 : []),
               SecurityPageName.externalLinkWorkflows,

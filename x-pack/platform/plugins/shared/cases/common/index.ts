@@ -66,6 +66,7 @@ export {
   OSQUERY_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
   LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
   MANAGE_TEMPLATES_CAPABILITY,
   ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
   ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
@@ -93,7 +94,6 @@ export {
   isLegacyAttachmentRequest,
   isUnifiedEventAttachment,
   isUnifiedAlertAttachment,
-  assertValidIndexMetadata,
   isIndexMetadata,
   toStringArray,
   toStringOrStringArray,
@@ -104,3 +104,6 @@ export {
 } from './utils/attachments';
 
 export { AttachmentActionType } from './utils/attachment_actions';
+
+export { buildAlertAttachmentPayloadSchema } from './types/domain_zod/attachment/alert/v2';
+export type { AlertAttachmentMetadata } from './types/domain_zod/attachment/alert/v2';

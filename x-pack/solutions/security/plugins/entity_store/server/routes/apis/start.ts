@@ -6,9 +6,9 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
@@ -45,7 +45,7 @@ export function registerStart(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
         },
         options: {
@@ -54,7 +54,11 @@ export function registerStart(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManagerClient: assetManager } = entityStoreCtx;
+        const {
+          logger,
+          assetManagerClient: assetManager,
+          entityMaintainersClient,
+        } = entityStoreCtx;
         const { entityTypes } = req.body;
         logger.debug('Start API invoked');
 
@@ -66,6 +70,10 @@ export function registerStart(router: EntityStorePluginRouter) {
 
         const logsExtraction = await assetManager.getLogExtractionConfig();
         await Promise.all(toStart.map((type) => assetManager.start(req, type, logsExtraction)));
+
+        if (toStart.length > 0) {
+          await entityMaintainersClient.startAll(req);
+        }
 
         return res.ok({
           body: {

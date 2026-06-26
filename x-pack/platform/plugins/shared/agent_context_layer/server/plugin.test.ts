@@ -47,11 +47,16 @@ describe('AgentContextLayerPlugin', () => {
       type: 'dashboard',
       title: `${id}-title`,
       origin_id: `origin-${id}`,
+      origin: { uri: `dashboard://origin-${id}` },
       content: 'content',
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
       spaces: ['default'],
-      permissions: ['saved_object:dashboard/get'],
+      permissions: {
+        kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+        elasticsearch: { indices: [] },
+      },
+      ingestion_method: 'crawled',
     });
 
     const setupPlugin = ({
@@ -70,6 +75,7 @@ describe('AgentContextLayerPlugin', () => {
         getDocuments: getDocumentsImpl,
         getTypeDefinition: jest.fn(),
         indexAttachment: jest.fn(),
+        deleteAttachment: jest.fn(),
         getCrawler: jest.fn(),
         listTypeDefinitions: jest.fn().mockReturnValue([]),
       });

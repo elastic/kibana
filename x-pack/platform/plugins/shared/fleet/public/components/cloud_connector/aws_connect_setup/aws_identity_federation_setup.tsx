@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLink,
+  EuiSkeletonText,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -57,7 +58,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   onReadyChange,
   onConnectorIdChange,
 }) => {
-  const { data: cloudConnectors = [] } = useGetCloudConnectors({
+  const { data: cloudConnectors = [], isLoading: isLoadingConnectors } = useGetCloudConnectors({
     cloudProvider: 'aws',
     accountType,
     packageName,
@@ -123,12 +124,16 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const externalIdInvalid = hasInvalidRequiredVars && !externalId;
   const isCreateDisabled = !roleArn || !externalId || !!getCloudConnectorNameError(connectorName);
 
-  const handleTabClick = useCallback((tab: { id: string }) => {
+  if (isLoadingConnectors) {
+    return <EuiSkeletonText lines={4} data-test-subj="awsIdentityFederationSetup-loading" />;
+  }
+
+  const handleTabClick = (tab: { id: string }) => {
     setSelectedTabId(tab.id);
     if (tab.id === TABS.NEW_CONNECTION) {
       setSelectedConnectorId(undefined);
     }
-  }, []);
+  };
 
   const tabs: CloudConnectorTab[] = [
     {

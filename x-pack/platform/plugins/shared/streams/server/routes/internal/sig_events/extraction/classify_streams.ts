@@ -56,17 +56,19 @@ export const classifyStreams = ({
   const unsupported: string[] = [];
   const eligibleNames = new Set<string>();
   for (const stream of allStreams) {
-    if (
-      !Streams.WiredStream.Definition.is(stream) &&
-      !Streams.ClassicStream.Definition.is(stream)
-    ) {
-      unsupported.push(stream.name);
+    const { name } = stream;
+    const isSupported =
+      Streams.WiredStream.Definition.is(stream) ||
+      Streams.ClassicStream.Definition.is(stream) ||
+      Streams.QueryStream.Definition.is(stream);
+    if (!isSupported) {
+      unsupported.push(name);
       continue;
     }
-    if (matchesExcludePatterns(stream.name, excludePatterns)) {
-      excluded.push(stream.name);
+    if (matchesExcludePatterns(name, excludePatterns)) {
+      excluded.push(name);
     } else {
-      eligibleNames.add(stream.name);
+      eligibleNames.add(name);
     }
   }
 
@@ -103,6 +105,14 @@ export const classifyStreams = ({
       }
     }
   }
+
+  // Prioritize streams whose last onboarding finished longest ago, so older
+  // onboarding is retried before more recent onboarding.
+  candidates.sort(
+    (a, b) =>
+      (a.lastCompletedAt ? new Date(a.lastCompletedAt).getTime() : 0) -
+      (b.lastCompletedAt ? new Date(b.lastCompletedAt).getTime() : 0)
+  );
 
   const noExecutionStreams = [...eligibleNames].filter((name) => !streamsWithExecution.has(name));
   const allCandidates = [

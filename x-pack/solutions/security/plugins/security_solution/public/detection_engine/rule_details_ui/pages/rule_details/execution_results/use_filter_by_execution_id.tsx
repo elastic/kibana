@@ -14,10 +14,7 @@ import { buildFilter, FILTERS } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { PageScope } from '../../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -53,9 +50,7 @@ export const useFilterByExecutionId = (selectAlertsTab: () => void) => {
   } = startServices;
 
   const dispatch = useDispatch();
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView } = useDataView(PageScope.alerts);
   const { addError, addSuccess, remove } = useAppToasts();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -71,11 +66,8 @@ export const useFilterByExecutionId = (selectAlertsTab: () => void) => {
   const successToastId = useRef('');
 
   const uuidDataViewField = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME)
-        : oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
-    [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView.fields]
+    () => dataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME),
+    [dataView]
   );
 
   const resetGlobalQueryState = useCallback(() => {
@@ -113,11 +105,7 @@ export const useFilterByExecutionId = (selectAlertsTab: () => void) => {
 
   return useCallback(
     (executionId: string, executionStart: string) => {
-      const dataViewAsViewBase = newDataViewPickerEnabled
-        ? experimentalDataView
-        : dataViewSpecToViewBase(oldSourcererDataView);
-
-      if (uuidDataViewField == null || !dataViewAsViewBase) {
+      if (uuidDataViewField == null || !dataView) {
         addError(i18n.ACTIONS_FIELD_NOT_FOUND_ERROR, {
           title: i18n.ACTIONS_FIELD_NOT_FOUND_ERROR_TITLE,
         });
@@ -126,7 +114,7 @@ export const useFilterByExecutionId = (selectAlertsTab: () => void) => {
 
       cachedGlobalQueryState.current = { filters, query, timerange };
       const filter = buildFilter(
-        dataViewAsViewBase,
+        dataView,
         uuidDataViewField,
         FILTERS.PHRASE,
         false,
@@ -169,9 +157,7 @@ export const useFilterByExecutionId = (selectAlertsTab: () => void) => {
       ).id;
     },
     [
-      newDataViewPickerEnabled,
-      experimentalDataView,
-      oldSourcererDataView,
+      dataView,
       uuidDataViewField,
       filters,
       query,

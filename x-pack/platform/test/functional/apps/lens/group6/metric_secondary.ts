@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { lens, common } = getPageObjects(['lens', 'common']);
+  const { lens } = getPageObjects(['lens']);
   const lensApi = getService('lens');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -23,10 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lensApi.createMetricChart({ id: BASE_METRIC_ID, title: BASE_METRIC_TITLE });
     });
 
-    const openBaseMetric = async () => {
-      await common.navigateToApp('lens', { hash: `#/edit/${BASE_METRIC_ID}` });
-      await lens.waitForVisualization('mtrVis');
-    };
+    const openBaseMetric = () => lens.openEditor(BASE_METRIC_ID, 'mtrVis');
 
     it('should show a badge for the secondary metric', async () => {
       const CUSTOM_STATIC_COLOR_HEX = '#EE72A6';

@@ -6,21 +6,20 @@
  */
 
 import { isEqual } from 'lodash';
-import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import {
   type Feature,
+  type FeatureUpsert,
   type BaseFeature,
   isDuplicateFeature,
   hasSameFingerprint,
   mergeFeature,
+  normalizeFeatureSlug,
   toBaseFeature,
 } from '@kbn/streams-schema';
 import type { IgnoredFeature } from '@kbn/streams-ai';
-import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../../common/sig_events_tuning_config';
-import { MS_PER_DAY } from './iteration_state';
 
-export const toFeatureSummary = ({ id, title }: Feature) => ({ id, title: title ?? id });
+export const toFeatureSummary = ({ id, title }: BaseFeature) => ({ id, title: title ?? id });
 
 export const toFeatureProjection = ({
   id,
@@ -29,7 +28,7 @@ export const toFeatureProjection = ({
   title,
   description,
   properties,
-}: Feature) => ({
+}: BaseFeature) => ({
   id,
   type,
   subtype,
@@ -38,38 +37,23 @@ export const toFeatureProjection = ({
   properties,
 });
 
-export function createFeatureMetadata({
-  featureTtlDays = DEFAULT_SIG_EVENTS_TUNING_CONFIG.feature_ttl_days,
-  runId,
-}: {
-  featureTtlDays?: number;
-  runId: string;
-}) {
-  const now = Date.now();
-  return {
-    status: 'active' as const,
-    last_seen: new Date(now).toISOString(),
-    expires_at: new Date(now + featureTtlDays * MS_PER_DAY).toISOString(),
-    run_id: runId,
-  };
+export function createFeatureMetadata({ runId }: { runId: string }) {
+  return { run_id: runId };
 }
 
 export function reconcileComputedFeatures({
   computedFeatures,
   streamName,
-  featureTtlDays,
   runId,
 }: {
   computedFeatures: BaseFeature[];
   streamName: string;
-  featureTtlDays?: number;
   runId: string;
-}): Feature[] {
-  const metadata = createFeatureMetadata({ featureTtlDays, runId });
+}): FeatureUpsert[] {
+  const metadata = createFeatureMetadata({ runId });
   return computedFeatures.map((feature) => ({
     ...feature,
     ...metadata,
-    uuid: uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS),
   }));
 }
 
@@ -78,11 +62,11 @@ function filterExcluded(
   excludedFeatures: ReadonlyArray<Feature>,
   logger: Logger
 ): { nonExcluded: BaseFeature[]; codeIgnoredCount: number } {
-  const excludedByLowerId = new Set(excludedFeatures.map((f) => f.id.toLowerCase()));
+  const excludedByLowerId = new Set(excludedFeatures.map((f) => normalizeFeatureSlug(f.id)));
   let codeIgnoredCount = 0;
 
   const nonExcluded = rawFeatures.filter((feature) => {
-    const lowerId = feature.id.toLowerCase();
+    const lowerId = normalizeFeatureSlug(feature.id);
     if (excludedByLowerId.has(lowerId)) {
       codeIgnoredCount++;
       logger.debug(`Dropping inferred feature [${feature.id}] matches excluded feature by ID`);
@@ -110,7 +94,6 @@ export function reconcileInferredFeatures({
   discoveredFeatures,
   ignoredFeatures,
   excludedFeatures,
-  featureTtlDays,
   runId,
   logger,
 }: {
@@ -119,13 +102,12 @@ export function reconcileInferredFeatures({
   discoveredFeatures: ReadonlyArray<Feature>;
   ignoredFeatures: IgnoredFeature[];
   excludedFeatures: ReadonlyArray<Feature>;
-  featureTtlDays?: number;
   runId: string;
   logger: Logger;
-}): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
-  const metadata = createFeatureMetadata({ featureTtlDays, runId });
-  const newFeatures: Feature[] = [];
-  const updatedFeatures: Feature[] = [];
+}): { newFeatures: FeatureUpsert[]; updatedFeatures: FeatureUpsert[]; codeIgnoredCount: number } {
+  const metadata = createFeatureMetadata({ runId });
+  const newFeatures: FeatureUpsert[] = [];
+  const updatedFeatures: FeatureUpsert[] = [];
 
   for (const ignored of ignoredFeatures) {
     logger.debug(
@@ -135,28 +117,28 @@ export function reconcileInferredFeatures({
 
   const { nonExcluded, codeIgnoredCount } = filterExcluded(rawFeatures, excludedFeatures, logger);
 
-  const discoveredSet = new Set(discoveredFeatures.map((f) => f.uuid));
+  const discoveredSet = new Set(discoveredFeatures.map((f) => f.id));
   const byLowerId = new Map<string, Feature>();
   for (const f of allKnownFeatures) {
-    byLowerId.set(f.id.toLowerCase(), f);
+    byLowerId.set(normalizeFeatureSlug(f.id), f);
   }
 
   for (const raw of nonExcluded) {
     const match =
-      byLowerId.get(raw.id.toLowerCase()) ??
+      byLowerId.get(normalizeFeatureSlug(raw.id)) ??
       allKnownFeatures.find((f) => isDuplicateFeature(f, raw));
 
     if (match) {
-      if (!discoveredSet.has(match.uuid)) {
-        updatedFeatures.push({ ...raw, ...metadata, uuid: match.uuid });
+      if (!discoveredSet.has(match.id)) {
+        updatedFeatures.push({ ...raw, ...metadata });
       } else {
         const merged = mergeFeature(match, raw);
         if (!isEqual(merged, toBaseFeature(match))) {
-          updatedFeatures.push({ ...merged, ...metadata, uuid: match.uuid });
+          updatedFeatures.push({ ...merged, ...metadata });
         }
       }
     } else {
-      newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
+      newFeatures.push({ ...raw, ...metadata });
     }
   }
 

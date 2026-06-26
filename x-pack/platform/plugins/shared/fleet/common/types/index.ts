@@ -17,6 +17,7 @@ import type {
 export interface FleetConfigType {
   enabled: boolean;
   isAirGapped?: boolean;
+  productVersionsApiTimeoutMs?: number;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -131,6 +132,7 @@ export interface FleetConfigType {
   };
   unenrollInactiveAgents?: {
     taskInterval?: string;
+    gracePeriodMs?: number;
   };
 }
 

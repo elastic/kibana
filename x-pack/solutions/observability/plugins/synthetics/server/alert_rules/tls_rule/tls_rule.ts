@@ -77,7 +77,7 @@ export const registerSyntheticsTLSCheckRule = (
       >
     ) => {
       const { state: ruleState, params, services, spaceId, previousStartedAt, rule } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -91,7 +91,8 @@ export const registerSyntheticsTLSCheckRule = (
         server,
         syntheticsMonitorClient,
         spaceId,
-        rule.name
+        rule.name,
+        uiSettingsClient
       );
 
       const { foundCerts, certs, absoluteExpirationThreshold, absoluteAgeThreshold, latestPings } =
@@ -101,6 +102,12 @@ export const registerSyntheticsTLSCheckRule = (
         const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
 
         if (!summary.summary || !summary.status) {
+          return;
+        }
+
+        // The TLS rule only evaluates lightweight HTTP/TCP certificates, which
+        // always carry a sha256 fingerprint used as the stable alert id.
+        if (!cert.sha256) {
           return;
         }
 

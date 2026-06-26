@@ -7,6 +7,7 @@
 
 import { getStackAlertAttachmentType } from '.';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import { StackAlertAttachmentPayloadSchema } from '../../../../common/types/domain_zod/attachment/alert/v2';
 
 describe('getStackAlertAttachmentType', () => {
   const registration = getStackAlertAttachmentType();
@@ -15,29 +16,8 @@ describe('getStackAlertAttachmentType', () => {
     expect(registration.id).toBe(STACK_ALERT_ATTACHMENT_TYPE);
   });
 
-  it('exposes a schemaValidator that accepts valid metadata', () => {
-    expect(() =>
-      registration.schemaValidator?.({
-        index: '.alerts',
-        rule: { id: 'rule-1', name: 'Test Rule' },
-      })
-    ).not.toThrow();
-  });
-
-  it('accepts undefined metadata', () => {
-    expect(() => registration.schemaValidator?.(undefined)).not.toThrow();
-  });
-
-  it('accepts null rule', () => {
-    expect(() => registration.schemaValidator?.({ rule: null })).not.toThrow();
-  });
-
-  it('exposes a schemaValidator that rejects invalid metadata', () => {
-    expect(() => registration.schemaValidator?.({ index: 123 })).toThrow();
-  });
-
-  it('rejects metadata with a non-object rule', () => {
-    expect(() => registration.schemaValidator?.({ rule: 'not-an-object' })).toThrow();
+  it('registers the zod payload schema', () => {
+    expect(registration.schema).toBe(StackAlertAttachmentPayloadSchema);
   });
 
   describe('getAttachmentRemovalObject', () => {

@@ -11,7 +11,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { GroupedResourcesNode } from '../../../shared/service_map/grouped_resources_node';
 import type { GroupedNodeData } from '../../../../../common/service_map';
-import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
+import { ServiceMapHighlightProvider } from '../../../shared/service_map/service_map_search_context';
 import { WithSearchHighlight } from './search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
@@ -27,11 +27,11 @@ const meta: Meta<typeof GroupedResourcesNode> = {
   decorators: [
     (Story) => (
       <ReactFlowProvider>
-        <ServiceMapSearchProvider>
+        <ServiceMapHighlightProvider>
           <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
             <Story />
           </div>
-        </ServiceMapSearchProvider>
+        </ServiceMapHighlightProvider>
       </ReactFlowProvider>
     ),
   ],

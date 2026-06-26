@@ -6,12 +6,7 @@
  */
 
 import type { InferenceTaskProviderError } from '@kbn/inference-common';
-import {
-  getConnectorModel,
-  isInferenceProviderError,
-  type InferenceConnector,
-} from '@kbn/inference-common';
-import { createSSEInternalError } from '@kbn/sse-utils';
+import { getConnectorModel, type InferenceConnector } from '@kbn/inference-common';
 
 /**
  * Known error message patterns that indicate context length exceeded errors from various LLM providers.
@@ -76,17 +71,4 @@ export function formatInferenceProviderError(
   ].filter(Boolean);
 
   return lines.join('\n');
-}
-
-/**
- * Creates a user-friendly SSE error with connector information.
- * Use this in catchError handlers for streaming endpoints that call LLM connectors.
- */
-export function createConnectorSSEError(error: Error, connector: InferenceConnector): Error {
-  if (isInferenceProviderError(error)) {
-    return createSSEInternalError(formatInferenceProviderError(error, connector));
-  }
-
-  // For non-provider errors, just return the message
-  return createSSEInternalError(error.message);
 }

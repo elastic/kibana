@@ -18,4 +18,5 @@
 export type {
   EndpointAttachmentMetadata as EndpointMetadata,
   EndpointAttachmentTarget as EndpointTarget,
+  EndpointAttachmentData as EndpointData,
 } from '../../../../common/cases/attachments/endpoint';

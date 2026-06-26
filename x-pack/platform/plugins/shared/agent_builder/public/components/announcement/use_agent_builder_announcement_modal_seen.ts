@@ -70,7 +70,8 @@ export async function getAnnouncementModalSeen(
 
 /**
  * Persists global dismissal in user profile data.
- * No-ops when user profiles are disabled.
+ * Also writes to localStorage immediately so the modal does not reappear on fast
+ * navigation before the async profile update completes.
  */
 export async function setAnnouncementModalSeen(
   userProfile: UserProfileServiceStart
@@ -79,6 +80,9 @@ export async function setAnnouncementModalSeen(
     if (localStorage.getItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY) === 'true') {
       return;
     }
+    // Write synchronously so getAnnouncementModalSeen returns true on the next
+    // page even if the profile update below hasn't finished yet.
+    localStorage.setItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY, 'true');
   } catch {
     // ignore storage access errors
   }
@@ -103,12 +107,7 @@ export async function setAnnouncementModalSeen(
       },
     });
   } catch {
-    // Fall back to localStorage when user profile updates are unavailable (e.g., reverse proxy auth).
-    try {
-      localStorage.setItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY, 'true');
-    } catch {
-      // ignore storage access errors
-    }
+    // localStorage was already written above; nothing more to do.
   }
 }
 
