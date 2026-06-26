@@ -28,7 +28,9 @@ export class Build {
     return this.config.resolveFromRepo(
       'build',
       'default',
-      `kibana${dashSuffix(platform.getVariant())}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
+      `kibana${dashSuffix(
+        platform.getVariant()
+      )}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }
@@ -37,7 +39,9 @@ export class Build {
     const ext = platform.isWindows() ? 'zip' : this.config.getTarZstd() ? 'tar.zst' : 'tar.gz';
     return this.config.resolveFromRepo(
       'target',
-      `${this.name}${dashSuffix(platform.getVariant())}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
+      `${this.name}${dashSuffix(
+        platform.getVariant()
+      )}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
     );
   }
 
