@@ -415,7 +415,7 @@ describe('helpers', () => {
       const insight = getDefaultInsight({
         type: WorkflowInsightType.enum.incompatible_antivirus,
         remediation: { exception_list_items: [] },
-        target: { ids: ['host-id'] },
+        target: { type: WorkflowInsightTargetType.enum.endpoint, ids: ['host-id'] },
       } as Partial<SecurityWorkflowInsight>);
 
       await checkIfRemediationExists({
