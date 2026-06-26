@@ -5,27 +5,52 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type {
   UseApplicationAttachmentStateOptions,
   UseApplicationAttachmentStateResult,
 } from '@kbn/agent-builder-browser';
+import {
+  getActiveConversationSnapshot,
+  getAttachmentLinkStateSnapshot,
+  getPendingAttachmentsSnapshot,
+  scrollToInlineAttachmentFromBridge,
+  subscribeAttachmentLinkState,
+} from './attachment_link_bridge';
 import { attachWithFlightFromBridge } from './attachment_coordinator/coordinator_bridge';
+import { evaluateAttachmentLink } from './evaluate_attachment_link';
 
 export const useApplicationAttachmentState = ({
   getAttachment,
   linkDescriptor,
   iconType,
 }: UseApplicationAttachmentStateOptions): UseApplicationAttachmentStateResult => {
-  const attachment = getAttachment();
-  const canAttach = attachment !== null;
+  const attachmentInput = getAttachment();
+  const canAttach = attachmentInput !== null;
 
-  // Link evaluation is implemented in Checkpoint 4.
-  const isLinked = false;
+  useSyncExternalStore(
+    subscribeAttachmentLinkState,
+    getAttachmentLinkStateSnapshot,
+    getAttachmentLinkStateSnapshot
+  );
+
+  const linkEvaluation = useMemo(
+    () =>
+      evaluateAttachmentLink({
+        attachmentInput,
+        linkDescriptor,
+        pendingAttachments: getPendingAttachmentsSnapshot(),
+        activeConversation: getActiveConversationSnapshot(),
+      }),
+    [attachmentInput, linkDescriptor]
+  );
+
+  const { isLinked, linkedAttachmentId, conversationTitle } = linkEvaluation;
 
   const attach = useCallback(
     async (sourceElement: HTMLElement | null) => {
-      if (isLinked) {
+      if (isLinked && linkedAttachmentId) {
+        scrollToInlineAttachmentFromBridge(linkedAttachmentId);
         return;
       }
 
@@ -40,15 +65,16 @@ export const useApplicationAttachmentState = ({
         iconType,
       });
     },
-    [getAttachment, iconType, isLinked]
+    [getAttachment, iconType, isLinked, linkedAttachmentId]
   );
 
   return useMemo(
     () => ({
       canAttach,
       isLinked,
+      conversationTitle,
       attach,
     }),
-    [attach, canAttach, isLinked]
+    [attach, canAttach, conversationTitle, isLinked]
   );
 };

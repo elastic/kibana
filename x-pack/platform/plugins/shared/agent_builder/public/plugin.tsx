@@ -80,6 +80,10 @@ import {
 } from './agent_workspace/register_agent_workspace';
 import { getWorkspaceAttachmentCallbacks } from './agent_workspace/workspace_attachment_callbacks';
 import { registerAgentFirstAttachmentCoordinatorShell } from './agent_first/register_agent_first_attachment_coordinator';
+import {
+  clearAttachmentLinkEventsService,
+  registerAttachmentLinkEventsService,
+} from './agent_first/attachment_link_bridge';
 
 export class AgentBuilderPlugin
   implements
@@ -183,6 +187,7 @@ export class AgentBuilderPlugin
     );
 
     const eventsService = new EventsService();
+    registerAttachmentLinkEventsService(eventsService);
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
     const docLinksService = new DocLinksService(core.docLinks.links);
@@ -498,6 +503,7 @@ export class AgentBuilderPlugin
   stop() {
     this.unregisterAgentFirstCoordinator?.();
     this.unregisterAgentFirstCoordinator = undefined;
+    clearAttachmentLinkEventsService();
     unregisterAgentWorkspaceSlot();
     this.experimentalDeepLinksSubscription?.unsubscribe();
   }

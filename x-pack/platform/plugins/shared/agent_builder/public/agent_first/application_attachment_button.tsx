@@ -20,9 +20,14 @@ const labels = {
   alreadyAttached: i18n.translate(
     'xpack.agentBuilder.applicationAttachmentButton.alreadyAttached',
     {
-      defaultMessage: 'Already attached',
+      defaultMessage: 'Already attached to this conversation',
     }
   ),
+  alreadyAttachedTo: (title: string) =>
+    i18n.translate('xpack.agentBuilder.applicationAttachmentButton.alreadyAttachedTo', {
+      defaultMessage: 'Already attached to: {title}',
+      values: { title },
+    }),
 };
 
 export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonProps> = ({
@@ -34,7 +39,7 @@ export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonPr
 }) => {
   const { euiTheme } = useEuiTheme();
   const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
-  const { canAttach, isLinked, attach } = useApplicationAttachmentState({
+  const { canAttach, isLinked, conversationTitle, attach } = useApplicationAttachmentState({
     getAttachment,
     linkDescriptor,
     iconType,
@@ -56,7 +61,11 @@ export const ApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonPr
   }, [attach]);
 
   const isDisabled = disabled || (!canAttach && !isLinked);
-  const tooltip = isLinked ? labels.alreadyAttached : labels.attach;
+  const tooltip = isLinked
+    ? conversationTitle
+      ? labels.alreadyAttachedTo(conversationTitle)
+      : labels.alreadyAttached
+    : labels.attach;
   const buttonIconType = isLinked ? 'link' : 'paperClip';
 
   const isAppHeader = displayVariant === 'appHeader';

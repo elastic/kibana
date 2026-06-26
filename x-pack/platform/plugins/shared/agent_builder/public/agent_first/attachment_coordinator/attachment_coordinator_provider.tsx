@@ -20,6 +20,7 @@ import {
 import { playFlightAnimation } from './play_flight_animation';
 import type { AttachWithFlightOptions } from './types';
 import { AgentFirstAttachmentCoordinatorContextProvider } from './use_agent_first_attachment_coordinator';
+import { AttachmentHighlightGlobalStyles } from '../attachment_highlight_global_styles';
 
 const waitForNextPaint = (): Promise<void> =>
   new Promise((resolve) => {
@@ -105,6 +106,7 @@ export const AgentFirstAttachmentCoordinatorProvider: React.FC<
 
   return (
     <AgentFirstAttachmentCoordinatorContextProvider value={value}>
+      <AttachmentHighlightGlobalStyles />
       {children}
     </AgentFirstAttachmentCoordinatorContextProvider>
   );

@@ -13,7 +13,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isString } from 'lodash';
 import {
   useConversationError,
@@ -25,6 +25,7 @@ import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
+import { useConversationStream } from '../../hooks/use_conversation_stream';
 import { useStreamingContext } from '../../context/streaming/streaming_context';
 import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
@@ -48,11 +49,17 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
+import {
+  clearScrollToInlineAttachmentHandler,
+  registerScrollToInlineAttachmentHandler,
+} from '../../../agent_first/attachment_link_bridge';
+import { scrollToInlineAttachment } from '../../../agent_first/scroll_to_inline_attachment';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
+  const { isResponseLoading } = useConversationStream();
   const isAnyStreaming = useIsAnyConversationStreaming();
   const { cancelAllStreams } = useStreamingContext();
   const conversationRounds = useConversationRounds();
@@ -81,14 +88,25 @@ export const Conversation: React.FC<{}> = () => {
     cancelAll: cancelAllStreams,
   });
 
-  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
-  const { showScrollButton, onMessageSent, smoothScrollToBottom, stickToBottom } =
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const { showScrollButton, smoothScrollToBottom, scrollToMostRecentRoundTop, stickToBottom } =
     useConversationScrollActions({
+      isResponseLoading,
       conversationId: conversationId || '',
-      scrollContainer,
+      scrollContainer: scrollContainerRef.current,
     });
 
-  const scrollContainerHeight = scrollContainer?.clientHeight ?? 0;
+  useEffect(() => {
+    registerScrollToInlineAttachmentHandler((attachmentId) => {
+      void scrollToInlineAttachment(attachmentId, scrollContainerRef.current);
+    });
+
+    return () => {
+      clearScrollToInlineAttachmentHandler();
+    };
+  }, []);
+
+  const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
   const stagedAttachmentIds = useMemo(() => {
     const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
@@ -149,7 +167,6 @@ export const Conversation: React.FC<{}> = () => {
     ${useEuiScrollBar()}
     ${useEuiOverflowScroll('y')}
     scrollbar-gutter: stable both-edges;
-    overflow-anchor: none;
   `;
 
   const inputPaddingStyles = css`
@@ -181,7 +198,7 @@ export const Conversation: React.FC<{}> = () => {
           <EuiFlexGroup
             direction="column"
             alignItems="center"
-            ref={setScrollContainer}
+            ref={scrollContainerRef}
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
@@ -205,7 +222,10 @@ export const Conversation: React.FC<{}> = () => {
               onDismiss={() => setDismissStaleAttachments(true)}
             />
           )}
-          <ConversationInput onSubmit={onMessageSent} onEditorFocus={scheduleStaleCheck} />
+          <ConversationInput
+            onSubmit={scrollToMostRecentRoundTop}
+            onEditorFocus={scheduleStaleCheck}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <CanvasFlyout attachmentsService={attachmentsService} />
