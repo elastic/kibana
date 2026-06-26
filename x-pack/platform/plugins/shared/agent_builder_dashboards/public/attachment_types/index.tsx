@@ -159,7 +159,7 @@ export const registerDashboardAttachmentUiDefinition = ({
                 defaultMessage: 'Edit in Dashboards',
               }
             ),
-            icon: 'productDashboard',
+            icon: 'kqlFunction',
             type: ActionButtonType.PRIMARY,
             handler: async () => {
               const { handlePreview } = await import('./async_services');

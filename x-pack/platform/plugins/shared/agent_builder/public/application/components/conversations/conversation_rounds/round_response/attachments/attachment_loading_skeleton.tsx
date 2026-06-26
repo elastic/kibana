@@ -14,9 +14,7 @@ import {
   useEuiTheme,
   useResizeObserver,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
-import { HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
+import { COMPACT_WIDTH_THRESHOLD } from './attachment_header';
 
 /**
  * Loading skeleton for an attachment card, shown during streaming before the
@@ -30,21 +28,10 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
   const { width: headerWidth } = useResizeObserver(headerRef.current);
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
-  const headerStyles = css`
-    min-height: ${isCompact ? 'auto' : `${HEADER_HEIGHT}px`};
-  `;
-
   return (
-    <EuiSplitPanel.Outer
-      grow
-      hasShadow={false}
-      hasBorder={true}
-      css={css`
-        border-radius: ${AB_PANEL_RADIUS}px;
-      `}
-    >
+    <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
       <div ref={headerRef} style={{ width: '100%' }}>
-        <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
+        <EuiSplitPanel.Inner color="subdued" paddingSize="m">
           <EuiFlexGroup
             responsive={false}
             justifyContent="spaceBetween"

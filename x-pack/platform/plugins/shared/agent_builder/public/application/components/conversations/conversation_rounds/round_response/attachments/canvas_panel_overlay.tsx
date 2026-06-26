@@ -232,6 +232,7 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({
   const { attachment, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
+  const headerIcon = header?.icon ?? uiDefinition?.getIcon?.();
 
   return createPortal(
     <div
@@ -240,7 +241,7 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({
       data-test-subj="agentWorkspaceCanvasOverlay"
     >
       <AttachmentHeader
-        icon={header?.icon}
+        icon={headerIcon}
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}

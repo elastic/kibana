@@ -496,6 +496,10 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${containerRadius} !important;
     }
 
+    ${scope} .euiPanel {
+      border-radius: ${controlRadius} !important;
+    }
+
     ${scope} .euiButton {
       border-radius: ${controlRadius} !important;
       border-start-start-radius: ${controlRadius} !important;
