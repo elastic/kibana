@@ -12,7 +12,10 @@ import { layoutLevels } from '@kbn/ui-chrome-layout-constants';
 // Total measured header height (row + thin bottom border), matching the application panel header.
 export const headerHeight = 50;
 
-export const conversationHeaderShellStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+export const conversationHeaderShellStyles = (
+  euiTheme: EuiThemeComputed<{}>,
+  borderless = false
+) => css`
   position: sticky;
   top: 0;
   z-index: ${layoutLevels.applicationTopBar};
@@ -20,8 +23,11 @@ export const conversationHeaderShellStyles = (euiTheme: EuiThemeComputed<{}>) =>
   box-sizing: border-box;
   padding: 0;
   background: ${euiTheme.colors.backgroundBasePlain};
-  border-bottom: ${euiTheme.border.thin};
-  margin-bottom: -${euiTheme.border.width.thin};
+  ${!borderless &&
+  css`
+    border-bottom: ${euiTheme.border.thin};
+    margin-bottom: -${euiTheme.border.width.thin};
+  `}
 `;
 
 export const conversationHeaderRowStyles = (euiTheme: EuiThemeComputed<{}>) => css`

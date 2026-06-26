@@ -66,6 +66,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const headerShellStyles = conversationHeaderShellStyles(euiTheme);
+  const condensedHeaderShellStyles = conversationHeaderShellStyles(euiTheme, true);
   const headerRowStyles = conversationHeaderRowStyles(euiTheme);
   const condensedRowStyles = conversationHeaderCondensedRowStyles(euiTheme);
 
@@ -75,7 +76,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
 
   if (isCondensed) {
     return (
-      <div css={headerShellStyles}>
+      <div css={condensedHeaderShellStyles}>
         <div css={condensedRowStyles}>
           <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
             <EuiButtonIcon
@@ -91,7 +92,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
             <EuiToolTip content={labels.newConversation} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plus"
-                display="base"
+                display="empty"
                 color="text"
                 size="xs"
                 aria-label={labels.newConversation}

@@ -27,7 +27,7 @@ import { ManageSidebarView } from './views/manage_view';
 import { SidebarHeader } from './shared/sidebar_header';
 
 export const SIDEBAR_WIDTH = 300;
-export const CONDENSED_SIDEBAR_WIDTH = 64;
+export const CONDENSED_SIDEBAR_WIDTH = 48;
 
 interface UnifiedSidebarProps {
   isCondensed: boolean;
