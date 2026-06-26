@@ -23,7 +23,7 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { parse } from 'yaml';
@@ -1105,17 +1105,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
 
     // Filter out invalid SOs
-    const newSos = createdObjects.filter((so) => !so.error && so.attributes);
+    const newSos = createdObjects.filter(
+      (so): so is SavedObject<PackagePolicySOAttributes> => !isSavedObjectErrorResult(so)
+    );
 
     packagePoliciesWithIds.forEach((packagePolicy) => {
-      const hasCreatedSO = newSos.find((so) => so.id === packagePolicy.id);
+      const createdObject = createdObjects.find((so) => so.id === packagePolicy.id);
       const hasFailed = failedPolicies.some(
         ({ packagePolicy: failedPackagePolicy }) => failedPackagePolicy.id === packagePolicy.id
       );
-      if (hasCreatedSO?.error && !hasFailed) {
+      if (createdObject && isSavedObjectErrorResult(createdObject) && !hasFailed) {
         failedPolicies.push({
           packagePolicy,
-          error: hasCreatedSO?.error ?? new FleetError('Failed to create package policy.'),
+          error: createdObject.error ?? new FleetError('Failed to create package policy.'),
         });
       }
     });
@@ -1367,7 +1369,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const packagePolicies = packagePolicySO.saved_objects
       .map((so): PackagePolicy | null => {
-        if (so.error) {
+        if (isSavedObjectErrorResult(so)) {
           if (options.ignoreMissing && so.error.statusCode === 404) {
             return null;
           } else if (so.error.statusCode === 404) {
@@ -2196,6 +2198,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
 
     for (const updatedPolicy of updatedPolicies) {
+      if (isSavedObjectErrorResult(updatedPolicy)) {
+        continue;
+      }
       const pkgInfo = packageInfos.get(
         `${updatedPolicy.attributes.package?.name}-${updatedPolicy.attributes.package?.version}`
       )!;
@@ -2286,7 +2291,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, oldPackagePolicies);
 
     updatedPolicies.forEach((policy) => {
-      if (policy.error) {
+      if (isSavedObjectErrorResult(policy)) {
         const hasAlreadyFailed = failedPolicies.some(
           (failedPolicy) => failedPolicy.packagePolicy.id === policy.id
         );
@@ -2300,12 +2305,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     let updatedPoliciesSuccess = updatedPolicies
-      .filter((policy) => !policy.error && policy.attributes)
-      .map((soPolicy) =>
-        mapPackagePolicySavedObjectToPackagePolicy(
-          soPolicy as SavedObject<PackagePolicySOAttributes>
-        )
-      );
+      .filter(
+        (policy): policy is SavedObject<PackagePolicySOAttributes> =>
+          !isSavedObjectErrorResult(policy)
+      )
+      .map((soPolicy) => mapPackagePolicySavedObjectToPackagePolicy(soPolicy));
 
     updatedPoliciesSuccess = (
       await pMap(
