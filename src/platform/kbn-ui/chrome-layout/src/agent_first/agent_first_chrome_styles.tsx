@@ -500,6 +500,11 @@ const agentFirstChromeStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${controlRadius} !important;
     }
 
+    /* Canvas overlay attachment header: flush bottom edge against preview content */
+    ${scope} [data-test-subj='agentWorkspaceCanvasOverlay'] .euiSplitPanel__inner {
+      border-radius: ${controlRadius} ${controlRadius} 0 0 !important;
+    }
+
     ${scope} .euiButton {
       border-radius: ${controlRadius} !important;
       border-start-start-radius: ${controlRadius} !important;
