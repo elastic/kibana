@@ -185,11 +185,11 @@ export const getXDomain = (
 
   const domainMin = dropPartials
     ? buckets?.min ?? baseDomain.min
-    : Math.min(xValues[0], buckets?.min ?? baseDomain.min);
+    : Math.min(isUndefined(xValues[0]) ? Infinity : xValues[0], buckets?.min ?? baseDomain.min);
   const domainMaxValue = dropPartials
     ? buckets?.max ?? baseDomain.max - baseDomain.minInterval
     : Math.max(
-        xValues[xValues.length - 1],
+        isUndefined(xValues[xValues.length - 1]) ? -Infinity : xValues[xValues.length - 1],
         buckets?.max ?? baseDomain.max - baseDomain.minInterval
       );
   const domainMax = hasBars ? domainMaxValue : domainMaxValue + baseDomain.minInterval;
