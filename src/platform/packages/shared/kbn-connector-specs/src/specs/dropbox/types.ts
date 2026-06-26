@@ -124,11 +124,11 @@ export const CreateSharedLinkInputSchema = lazySchema(() =>
         'Path to the file or folder to create a shared link for. Example: "/Documents/report.pdf".'
       ),
     visibility: z
-      .enum(['public', 'team_only', 'password'])
+      .enum(['public', 'team_only'])
       .optional()
       .default('team_only')
       .describe(
-        'Link visibility: "team_only" (Dropbox team members only, default), "public" (anyone with the link), or "password" (requires a password).'
+        'Link visibility: "team_only" (Dropbox team members only, default) or "public" (anyone with the link).'
       ),
   })
 );

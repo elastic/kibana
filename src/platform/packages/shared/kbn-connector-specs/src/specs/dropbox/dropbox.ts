@@ -174,7 +174,7 @@ export const Dropbox: ConnectorSpec = {
       description:
         'Create a shared link for a file or folder in Dropbox. Returns a shareable URL. ' +
         'Use paths from search or listFolder results. ' +
-        'Visibility options: "team_only" (Dropbox team members only, default), "public" (anyone with the link), "password" (requires a password).',
+        'Visibility options: "team_only" (Dropbox team members only, default) or "public" (anyone with the link).',
       input: CreateSharedLinkInputSchema,
       handler: async (ctx, input: CreateSharedLinkInput) => {
         return callToolJson(ctx, 'create_shared_link', {
