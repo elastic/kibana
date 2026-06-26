@@ -30,7 +30,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       // Saving over a saved search requires write access.
       await browserAuth.loginAsPrivilegedUser();
-      await await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.dataGrid.waitUntilSearchingHasFinished();
       await pageObjects.dataGrid.waitForDocTableRendered();
     });

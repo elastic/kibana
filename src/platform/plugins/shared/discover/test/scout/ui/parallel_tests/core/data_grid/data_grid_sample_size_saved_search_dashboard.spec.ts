@@ -31,7 +31,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, scoutSpace }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await await scoutSpace.uiSettings.set({
+      await scoutSpace.uiSettings.set({
         'discover:sampleSize': testData.DEFAULT_SAMPLE_SIZE,
         'discover:rowHeightOption': 0,
         'discover:sampleRowsPerPage': testData.DEFAULT_ROWS_PER_PAGE,
