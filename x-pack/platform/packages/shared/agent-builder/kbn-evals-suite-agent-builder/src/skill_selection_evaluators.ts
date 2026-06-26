@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationResult, Evaluator, TaskOutput } from '@kbn/evals';
-import { getStringMeta } from '@kbn/evals';
+import type { BenchmarkExample } from '../evals/skill_selection/benchmark_dataset';
 
 // Raw step shape returned by the agent-builder converse API.
 interface ConversationStep {
@@ -126,27 +126,24 @@ export const createShouldNotActivateSkillEvaluator = (skillName: string): Evalua
 });
 
 /**
- * A single generic evaluator that reads routing assertions from example metadata and
- * evaluates the conversation output against them.
+ * A single generic evaluator that reads routing assertions from example ground truth
+ * (`expected`, i.e. `example.output`) and evaluates the conversation against them.
  *
- * Metadata keys:
- * - `expectedSkill` (string) — the skill name that must be loaded. Score 1 if loaded.
- * - `shouldNotActivateSkill` (string) — the skill name that must NOT be loaded. Score 1 if absent.
+ * Ground truth keys (in `example.output`, not metadata):
+ * - `expectedSkill` — the skill name that must be loaded. Score 1 if loaded.
+ * - `shouldNotActivateSkill` — the skill name that must NOT be loaded. Score 1 if absent.
  *
  * When neither key is present the example is skipped (score 1, label 'SKIP').
- *
- * This is the recommended evaluator for the skill-selection benchmark spec since it handles
- * all three query types (direct, indirect, distractor) from a single evaluator instance.
  */
 export const skillSelectionEvaluator: Evaluator = {
   name: 'Skill Selection',
   kind: 'CODE',
-  evaluate: async ({ output, metadata }): Promise<EvaluationResult> => {
-    const expectedSkill = getStringMeta(metadata, 'expectedSkill');
-    const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');
+  evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
+    const { expectedSkill, shouldNotActivateSkill } =
+      (expected as BenchmarkExample['output']) ?? {};
 
-    if (!expectedSkill && !shouldNotActivate) {
-      return { score: 1, label: 'SKIP', explanation: 'No skill routing assertion in metadata' };
+    if (!expectedSkill && !shouldNotActivateSkill) {
+      return { score: 1, label: 'SKIP', explanation: 'No skill routing assertion in expected output' };
     }
 
     const loadedNames = getSkillsLoadedFromSteps(output);
@@ -157,29 +154,21 @@ export const skillSelectionEvaluator: Evaluator = {
         score: loaded ? 1 : 0,
         label: loaded ? 'PASS' : 'FAIL',
         explanation: loaded
-          ? `Expected skill '${expectedSkill}' was loaded. Identifiers seen: ${loadedNames.join(
-              ', '
-            )}`
-          : `Expected skill '${expectedSkill}' was NOT loaded. Identifiers seen: ${
-              loadedNames.join(', ') || 'none'
-            }`,
+          ? `Expected skill '${expectedSkill}' was loaded. Identifiers seen: ${loadedNames.join(', ')}`
+          : `Expected skill '${expectedSkill}' was NOT loaded. Identifiers seen: ${loadedNames.join(', ') || 'none'}`,
         metadata: { expectedSkill, loadedNames, loaded },
       };
     }
 
-    const loaded = skillIsPresent(shouldNotActivate!, loadedNames);
+    const loaded = skillIsPresent(shouldNotActivateSkill!, loadedNames);
     const passed = !loaded;
     return {
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
       explanation: passed
-        ? `Skill '${shouldNotActivate}' correctly did not activate. Identifiers seen: ${
-            loadedNames.join(', ') || 'none'
-          }`
-        : `Skill '${shouldNotActivate}' incorrectly activated. Identifiers seen: ${loadedNames.join(
-            ', '
-          )}`,
-      metadata: { shouldNotActivateSkill: shouldNotActivate, loadedNames, loaded },
+        ? `Skill '${shouldNotActivateSkill}' correctly did not activate. Identifiers seen: ${loadedNames.join(', ') || 'none'}`
+        : `Skill '${shouldNotActivateSkill}' incorrectly activated. Identifiers seen: ${loadedNames.join(', ')}`,
+      metadata: { shouldNotActivateSkill, loadedNames, loaded },
     };
   },
 };
