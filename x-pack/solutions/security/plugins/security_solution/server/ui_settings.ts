@@ -452,6 +452,7 @@ export const initUiSettings = (
             }
           },
           minLength: 1,
+          maxLength: 1000,
         }),
         {
           validate: (values) => {
