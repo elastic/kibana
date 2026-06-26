@@ -824,11 +824,11 @@ export function ComposeDiscoverFlyout({
     hasValidationErrors,
   ]);
 
-  // Builder step validate is always synchronous (wraps definition.validate which returns boolean).
   const isBuilderStepValid = useMemo(() => {
     if (!currentStep || !isBuilderConditionStepId(currentStep.id) || !currentStep.validate)
       return true;
-    return currentStep.validate(methods, uiState, baseServices, builderState) as boolean;
+    const result = currentStep.validate(methods, uiState, baseServices, builderState);
+    return typeof result === 'boolean' ? result : true;
   }, [currentStep, methods, uiState, baseServices, builderState]);
 
   const validationCallout = hasValidationErrors ? (

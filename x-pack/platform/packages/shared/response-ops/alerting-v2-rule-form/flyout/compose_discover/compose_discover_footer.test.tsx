@@ -358,6 +358,14 @@ describe('ComposeDiscoverFooter', () => {
       renderFooter({ stateOverrides: { step: 1, childOpen: true } });
       expect(screen.getByTestId('composeDiscoverBack')).toBeDisabled();
     });
+
+    it('does not disable Back when child flyout is open in builder mode', () => {
+      renderFooter({
+        stateOverrides: { step: 1, childOpen: true },
+        propsOverrides: { isBuilderMode: true },
+      });
+      expect(screen.getByTestId('composeDiscoverBack')).not.toBeDisabled();
+    });
   });
 
   describe('Builder mode validation', () => {
