@@ -35,8 +35,7 @@ export function MetricDimensionEditor(
   const currentColorMode = state?.colorMode || ColorMode.None;
   const hasDynamicColoring = currentColorMode !== ColorMode.None;
 
-  const dataBounds = getLegacyMetricDataBounds(accessor, currentData);
-  const currentMinMax = firstRow[accessor] === 0 ? { min: -50, max: 100 } : dataBounds;
+  const currentMinMax = getLegacyMetricDataBounds(accessor, currentData);
 
   const activePalette =
     state?.palette ||
