@@ -6,7 +6,7 @@
  */
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { CustomizablePalette, CUSTOM_PALETTE, applyPaletteParams } from '@kbn/coloring';
+import { CustomizablePalette, applyPaletteParams } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
@@ -143,14 +143,6 @@ export function MetricDimensionEditor(
               activePalette={activePalette}
               dataBounds={currentMinMax}
               setPalette={(newPalette) => {
-                // if the new palette is not custom, replace the rangeMin with the artificial one
-                if (
-                  newPalette.name !== CUSTOM_PALETTE &&
-                  newPalette.params &&
-                  newPalette.params.rangeMin !== currentMinMax.min
-                ) {
-                  newPalette.params.rangeMin = currentMinMax.min;
-                }
                 setState({
                   ...state,
                   palette: newPalette,
