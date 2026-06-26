@@ -96,13 +96,12 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
     return {
       api,
       Component: function AiPanelEmbeddableComponent() {
-        const [prompt, esqlQuery, savedTemplate, isEditFlyoutOpen] =
-          useBatchedPublishingSubjects(
-            prompt$,
-            esqlQuery$,
-            template$,
-            isEditFlyoutOpen$
-          );
+        const [prompt, esqlQuery, savedTemplate, isEditFlyoutOpen] = useBatchedPublishingSubjects(
+          prompt$,
+          esqlQuery$,
+          template$,
+          isEditFlyoutOpen$
+        );
 
         const [generationVersion, setGenerationVersion] = useState(0);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
@@ -148,14 +147,15 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
                 timeRange={timeRange}
                 onSave={(newPrompt, newEsqlQuery, newTemplate) => {
                   const promptChanged = newPrompt !== prompt$.getValue();
-                  const queryChanged = newEsqlQuery !== esqlQuery$.getValue();
                   prompt$.next(newPrompt);
                   esqlQuery$.next(newEsqlQuery);
-                  if (promptChanged || queryChanged) {
-                    // Prompt or query changed — clear template so LLM regenerates.
+                  if (promptChanged) {
+                    // Prompt changed — clear template so LLM regenerates a fresh one.
+                    // Takes priority even if the template was also edited.
                     template$.next(undefined);
                   } else {
-                    // Only template edited — save it directly, re-render without LLM.
+                    // Only query or template edited — save template directly and re-render.
+                    // Changing just the query keeps the existing template (same column schema).
                     template$.next(newTemplate);
                   }
                   setGenerationVersion((v) => v + 1);

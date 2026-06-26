@@ -51,11 +51,9 @@ export function useAiPanelHtml({
   const htmlRef = useRef('');
   htmlRef.current = html;
 
-  const savedTemplateRef = useRef(savedTemplate);
+  // onTemplateChange is stable (useCallback in embeddable) but keep a ref so the
+  // slow-path closure always calls the latest version without adding it to the deps.
   const onTemplateChangeRef = useRef(onTemplateChange);
-  useEffect(() => {
-    savedTemplateRef.current = savedTemplate;
-  }, [savedTemplate]);
   useEffect(() => {
     onTemplateChangeRef.current = onTemplateChange;
   }, [onTemplateChange]);
@@ -71,7 +69,7 @@ export function useAiPanelHtml({
     abortRef.current = controller;
     accRef.current = '';
 
-    const template = savedTemplateRef.current;
+    const template = savedTemplate;
 
     // Fast path — static panel with stored HTML.
     if (template && !esqlQuery) {
@@ -192,8 +190,7 @@ export function useAiPanelHtml({
       stopInterval();
       controller.abort();
     };
-    // savedTemplate intentionally omitted — read via savedTemplateRef to avoid re-triggering.
-  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion]);
+  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate]);
 
   return { html, isLoading, error };
 }

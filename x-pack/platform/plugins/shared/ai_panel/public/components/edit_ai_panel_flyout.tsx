@@ -30,6 +30,7 @@ import {
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { HANDLEBARS_LANG_ID } from '@kbn/code-editor';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
@@ -74,10 +75,6 @@ export const EditAiPanelFlyout = ({
   onClose,
 }: EditAiPanelFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
-  const monoTextAreaCss = css({
-    fontFamily: 'monospace',
-    fontSize: euiTheme.size.m,
-  });
   const [draftPrompt, setDraftPrompt] = useState(prompt);
   const [draftEsqlQuery, setDraftEsqlQuery] = useState(esqlQuery ?? '');
   const [draftTemplate, setDraftTemplate] = useState(template ?? '');
@@ -92,6 +89,7 @@ export const EditAiPanelFlyout = ({
       setDetectedTimeField
     );
   }, [draftEsqlQuery]);
+
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -140,7 +138,7 @@ export const EditAiPanelFlyout = ({
     }) ?? [];
 
   return (
-    <EuiFlyout onClose={onClose} size="m" aria-labelledby="editAiPanelFlyoutTitle">
+    <EuiFlyout onClose={onClose} size="m" type="push" aria-labelledby="editAiPanelFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="editAiPanelFlyoutTitle">
@@ -199,116 +197,115 @@ export const EditAiPanelFlyout = ({
           ))}
         </EuiFlexGroup>
 
-        <EuiSpacer size="l" />
+        {esqlQuery && (
+          <>
+            <EuiSpacer size="l" />
 
-        <EuiAccordion
-          id="editAiPanelEsqlSection"
-          buttonContent={
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="database" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('aiPanel.editFlyout.dataSourceLabel', {
-                      defaultMessage: 'Data source (ES|QL)',
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          initialIsOpen={Boolean(esqlQuery)}
-          paddingSize="s"
-        >
-          <EuiFormRow
-            fullWidth
-            helpText={i18n.translate('aiPanel.editFlyout.esqlHelp', {
-              defaultMessage:
-                'Query results are passed to the AI as context when generating the panel.',
-            })}
-          >
-            <EuiTextArea
-              css={monoTextAreaCss}
-              value={draftEsqlQuery}
-              onChange={(e) => {
-                setDraftEsqlQuery(e.target.value);
-                setPreviewData(null);
-                setPreviewError(null);
-              }}
-              rows={5}
-              fullWidth
-              placeholder="FROM index | STATS total = SUM(value) BY category | SORT total DESC | LIMIT 10"
-            />
-          </EuiFormRow>
+            <EuiAccordion
+              id="editAiPanelEsqlSection"
+              buttonContent={
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="database" aria-hidden={true} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.translate('aiPanel.editFlyout.dataSourceLabel', {
+                          defaultMessage: 'Data source (ES|QL)',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              initialIsOpen={Boolean(esqlQuery)}
+              paddingSize="s"
+            >
+              <ESQLLangEditor
+                query={{ esql: draftEsqlQuery }}
+                onTextLangQueryChange={(q) => {
+                  setDraftEsqlQuery(q.esql ?? '');
+                  setPreviewData(null);
+                  setPreviewError(null);
+                }}
+                onTextLangQuerySubmit={async () => {}}
+                editorIsInline
+                hasOutline
+                hideRunQueryButton
+                hideQueryHistory
+                disableAutoFocus
+                initialState={{ editorHeight: 120 }}
+                errors={[]}
+              />
 
-          <EuiSpacer size="s" />
-
-          {draftEsqlQuery.trim() && !detectedTimeField && (
-            <EuiCallOut
-              size="s"
-              color="primary"
-              title={i18n.translate('aiPanel.editFlyout.timeRangeHint', {
-                defaultMessage:
-                  'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
-              })}
-              announceOnMount
-            />
-          )}
-
-          <EuiSpacer size="s" />
-
-          <EuiButton
-            size="s"
-            fill
-            color="primary"
-            iconType="play"
-            onClick={handlePreview}
-            isLoading={isPreviewLoading}
-            disabled={!draftEsqlQuery.trim()}
-          >
-            {i18n.translate('aiPanel.editFlyout.previewData', {
-              defaultMessage: 'Preview data',
-            })}
-          </EuiButton>
-
-          {previewError && (
-            <>
               <EuiSpacer size="s" />
-              <EuiCallOut color="danger" size="s" title={previewError} announceOnMount />
-            </>
-          )}
 
-          {previewData && previewData.rows.length === 0 && (
-            <>
+              {draftEsqlQuery.trim() && !detectedTimeField && (
+                <EuiCallOut
+                  size="s"
+                  color="primary"
+                  title={i18n.translate('aiPanel.editFlyout.timeRangeHint', {
+                    defaultMessage:
+                      'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
+                  })}
+                />
+              )}
+
               <EuiSpacer size="s" />
-              <EuiCallOut
+
+              <EuiButton
                 size="s"
-                color="warning"
-                title={i18n.translate('aiPanel.editFlyout.noRows', {
-                  defaultMessage: 'Query returned no rows for the current time range.',
+                fill
+                color="primary"
+                iconType="play"
+                onClick={handlePreview}
+                isLoading={isPreviewLoading}
+                disabled={!draftEsqlQuery.trim()}
+              >
+                {i18n.translate('aiPanel.editFlyout.previewData', {
+                  defaultMessage: 'Preview data',
                 })}
-                announceOnMount
-              />
-            </>
-          )}
+              </EuiButton>
 
-          {previewData && previewData.rows.length > 0 && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiBasicTable<Record<string, unknown>>
-                tableCaption={i18n.translate('aiPanel.editFlyout.previewCaption', {
-                  defaultMessage: 'ES|QL query preview',
-                })}
-                items={tableItems}
-                rowHeader="_id"
-                columns={tableColumns}
-                compressed
-              />
-            </>
-          )}
-        </EuiAccordion>
+              {previewError && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiCallOut color="danger" size="s" title={previewError} announceOnMount />
+                </>
+              )}
+
+              {previewData && previewData.rows.length === 0 && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    title={i18n.translate('aiPanel.editFlyout.noRows', {
+                      defaultMessage: 'Query returned no rows for the current time range.',
+                    })}
+                    announceOnMount
+                  />
+                </>
+              )}
+
+              {previewData && previewData.rows.length > 0 && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiBasicTable<Record<string, unknown>>
+                    tableCaption={i18n.translate('aiPanel.editFlyout.previewCaption', {
+                      defaultMessage: 'ES|QL query preview',
+                    })}
+                    items={tableItems}
+                    rowHeader="_id"
+                    columns={tableColumns}
+                    compressed
+                  />
+                </>
+              )}
+            </EuiAccordion>
+          </>
+        )}
 
         <EuiSpacer size="l" />
 
@@ -346,7 +343,7 @@ export const EditAiPanelFlyout = ({
             fullWidth
             helpText={i18n.translate('aiPanel.editFlyout.templateHelp', {
               defaultMessage:
-                'The HTML template uses {{column_name}} placeholders filled with live query data. Changing the prompt or query will regenerate this template.',
+                'The HTML template uses Liquid syntax filled with live query data. Changing the prompt will regenerate this template.',
             })}
           >
             <div
@@ -361,7 +358,7 @@ export const EditAiPanelFlyout = ({
                 value={draftTemplate}
                 onChange={setDraftTemplate}
                 options={{
-                  fontSize: parseInt(euiTheme.size.m, 10),
+                  fontSize: 12,
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
                   wordWrap: 'on',
@@ -398,7 +395,7 @@ export const EditAiPanelFlyout = ({
               }}
             >
               {i18n.translate('aiPanel.editFlyout.save', {
-                defaultMessage: 'Save',
+                defaultMessage: 'Apply and close',
               })}
             </EuiButton>
           </EuiFlexItem>

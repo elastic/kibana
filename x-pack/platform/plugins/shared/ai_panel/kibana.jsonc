@@ -13,7 +13,8 @@
       "embeddable",
       "dashboard",
       "inference",
-      "data"
+      "data",
+      "esql"
     ]
   }
 }
