@@ -26,6 +26,7 @@ import {
   AgentWorkspacePanel,
   AgentWorkspaceSlot,
   AgentFirstAttachmentCoordinatorShell,
+  ApplicationAttachmentHarnessShell,
   ApplicationWorkspaceBootstrap,
   useHasAppMenu,
   useHasChromeAppHeaderContent,
@@ -238,6 +239,7 @@ export class GridLayout implements LayoutService {
 
                 <div id="globalBannerList">{appBannerComponent}</div>
                 {showAgentWorkspace && <ApplicationWorkspaceBootstrap />}
+                {showAgentWorkspace && <ApplicationAttachmentHarnessShell />}
                 <AppWrapper chromeVisible={chromeVisible}>
                   <div id={APP_FIXED_VIEWPORT_ID} />
                   {appComponent}

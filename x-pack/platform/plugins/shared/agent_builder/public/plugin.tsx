@@ -64,6 +64,7 @@ import type {
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
+  ApplicationAttachmentButtonProps,
 } from './types';
 import type { OpenConversationSidebarOptions, OpenSidebarInternalOptions } from './sidebar/types';
 import {
@@ -338,6 +339,20 @@ export class AgentBuilderPlugin
       </React.Suspense>
     ));
 
+    const LazyApplicationAttachmentButton = React.lazy(async () => {
+      const { ApplicationAttachmentButton } = await import('./agent_first/application_attachment_button');
+
+      return { default: ApplicationAttachmentButton };
+    });
+
+    const PublicApplicationAttachmentButton: React.FC<ApplicationAttachmentButtonProps> = (
+      props
+    ) => (
+      <React.Suspense fallback={null}>
+        <LazyApplicationAttachmentButton {...props} />
+      </React.Suspense>
+    );
+
     this.experimentalDeepLinksSubscription = core.uiSettings
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
       .pipe(distinctUntilChanged())
@@ -404,6 +419,7 @@ export class AgentBuilderPlugin
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
+      ApplicationAttachmentButton: PublicApplicationAttachmentButton,
     };
 
     registerAgentWorkspaceSlot({

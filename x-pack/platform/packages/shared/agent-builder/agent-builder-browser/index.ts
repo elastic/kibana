@@ -38,6 +38,10 @@ export type {
   OpenConversationSidebarOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
+  ApplicationAttachmentButtonProps,
+  ApplicationAttachmentLinkDescriptor,
+  UseApplicationAttachmentStateOptions,
+  UseApplicationAttachmentStateResult,
 } from './plugin_contract';
 export { McpClientDetails, McpClientDetailsContent, McpClientLogo } from './oauth_clients';
 export type {
