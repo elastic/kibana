@@ -157,4 +157,3 @@ export const CallToolInputSchema = lazySchema(() =>
   })
 );
 export type CallToolInput = z.infer<typeof CallToolInputSchema>;
-
