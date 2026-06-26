@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EntityToAttach } from '..';
 import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -47,12 +46,10 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
   const { cases } = useKibana().services;
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
-  const attachments: CaseAttachmentsWithoutOwner = generateEntityAttachmentsWithoutOwner(entity);
-
   const menuItemClicked = useCallback(() => {
     onClick();
-    selectCaseModal.open({ getAttachments: () => attachments });
-  }, [attachments, onClick, selectCaseModal]);
+    selectCaseModal.open({ getAttachments: () => generateEntityAttachmentsWithoutOwner(entity) });
+  }, [entity, onClick, selectCaseModal]);
 
   return (
     <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj}>
