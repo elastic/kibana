@@ -51,9 +51,7 @@ interface DailyAggBucket {
 export class HistoricalSummaryClient {
   constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
 
-  async fetch(
-    params: FetchHistoricalSummaryParams,    
-  ): Promise<FetchHistoricalSummaryResponse> {
+  async fetch(params: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse> {
     const dateRangeBySlo = params.list.reduce<
       Record<SLOId, { range: DateRange; queryRange: DateRange }>
     >((acc, { sloId, timeWindow, range }) => {

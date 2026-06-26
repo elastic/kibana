@@ -22,9 +22,7 @@ import type { SLODefinitionRepository } from '../slo_definition_repository';
 import { HistoricalSummaryClient } from '../historical_summary_client';
 
 export interface HistoricalSummaryProvider {
-  fetch(
-    params: FetchHistoricalSummaryParams,    
-  ): Promise<FetchHistoricalSummaryResponse>;
+  fetch(params: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse>;
 }
 
 export class CompositeHistoricalSummaryClient {
@@ -34,7 +32,7 @@ export class CompositeHistoricalSummaryClient {
     esClient: ElasticsearchClient,
     private compositeSloRepository: CompositeSLORepository,
     private sloDefinitionRepository: SLODefinitionRepository,
-    spaceId: string,    
+    spaceId: string,
     historicalSummaryProvider?: HistoricalSummaryProvider
   ) {
     this.historicalSummaryProvider =
@@ -42,7 +40,7 @@ export class CompositeHistoricalSummaryClient {
   }
 
   async fetch(
-    params: FetchCompositeHistoricalSummaryParams,    
+    params: FetchCompositeHistoricalSummaryParams
   ): Promise<FetchCompositeHistoricalSummaryResponse> {
     const compositeDefinitions = await this.compositeSloRepository.findAllByIds(params.list);
 
@@ -54,10 +52,7 @@ export class CompositeHistoricalSummaryClient {
 
     const results = await Promise.all(
       compositeDefinitions.map(async (composite) => {
-        const memberHistoricalData = await this.fetchMemberHistoricalData(
-          composite,
-          memberDefMap,
-        );
+        const memberHistoricalData = await this.fetchMemberHistoricalData(composite, memberDefMap);
         const data = this.computeWeightedHistorical(composite, memberHistoricalData);
         return { compositeId: composite.id, data };
       })
@@ -68,7 +63,7 @@ export class CompositeHistoricalSummaryClient {
 
   private async fetchMemberHistoricalData(
     composite: CompositeSLODefinition,
-    memberDefMap: Map<string, SLODefinition>,
+    memberDefMap: Map<string, SLODefinition>
   ) {
     const activeMembers = composite.members.filter((m) => memberDefMap.has(m.sloId));
     if (activeMembers.length === 0) return [];

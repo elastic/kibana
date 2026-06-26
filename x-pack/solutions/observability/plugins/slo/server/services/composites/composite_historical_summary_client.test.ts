@@ -284,15 +284,14 @@ describe('CompositeHistoricalSummaryClient', () => {
     const client = createClient();
     await client.fetch({ list: [composite.id] });
 
-    expect(mockHistoricalProvider.fetch).toHaveBeenCalledWith(
-      {
-        list: [
-          expect.objectContaining({
-            sloId: sloA.id,
-            budgetingMethod: 'timeslices',
-          }),
-        ],
-      });
+    expect(mockHistoricalProvider.fetch).toHaveBeenCalledWith({
+      list: [
+        expect.objectContaining({
+          sloId: sloA.id,
+          budgetingMethod: 'timeslices',
+        }),
+      ],
+    });
   });
 
   it('handles multiple composites in a single fetch', async () => {
@@ -419,17 +418,16 @@ describe('CompositeHistoricalSummaryClient', () => {
     const client = createClient();
     await client.fetch({ list: [composite.id] });
 
-    expect(mockHistoricalProvider.fetch).toHaveBeenCalledWith(
-      {
-        list: [
-          expect.objectContaining({
-            timeWindow: {
-              duration: new Duration(30, DurationUnit.Day),
-              type: 'rolling',
-            },
-          }),
-        ],
-      });
+    expect(mockHistoricalProvider.fetch).toHaveBeenCalledWith({
+      list: [
+        expect.objectContaining({
+          timeWindow: {
+            duration: new Duration(30, DurationUnit.Day),
+            type: 'rolling',
+          },
+        }),
+      ],
+    });
   });
 
   it('returns VIOLATED status when composite SLI drops below target', async () => {
