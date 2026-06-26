@@ -49,7 +49,7 @@ The Dropbox connector exposes the following actions:
 ### Shared links
 
 `createSharedLink`
-:   Create a shared link for a file or folder. Returns a shareable URL. Defaults to `team_only` visibility (Dropbox team members only). Other options are `public` (anyone with the link) or `password` (requires a password).
+:   Create a shared link for a file or folder. Returns a shareable URL. Defaults to `team_only` visibility (Dropbox team members only). The other option is `public` (anyone with the link).
 
 `listSharedLinks`
 :   List existing shared links in Dropbox. Optionally filter to links for a specific file or folder. Returns URLs, visibility settings, and expiration dates.
