@@ -1,7 +1,7 @@
 # Kibana
 
 ## Setup
-- Use the Node version pinned in `.nvmrc` (matches `engines.node` in `package.json`); a mismatched version fails fast with `Kibana does not support the current Node.js version`. Select it with your version manager (e.g. `nvm use`) before running any `node`/`yarn` command.
+- Use the Node version pinned in `.nvmrc` (matches `engines.node` in `package.json`).
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
 ## Overview
@@ -95,6 +95,5 @@ Follow existing patterns in the target area first; below are common defaults.
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
 - Fix root cause (not band-aid).
 - Make focused changes; avoid unrelated refactors.
-- Before committing, review `git status`/diff and stage only intended files. Never commit generated artifacts (`*.d.ts`, build output), scratch/planning notes, or debug scripts. Keep PRs minimal — unrelated changes trigger extra reviewer churn.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
