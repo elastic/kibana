@@ -41,9 +41,12 @@ export class UserCapabilities {
     return this.application.capabilities[id]?.[capability] === true;
   }
 
-  /** Returns whether the feature's top-level read capability is granted. */
+  /**
+   * Returns whether the user can read the feature. Granted when either the
+   * top-level write/all or read capability is set, since `all` implies `read`.
+   */
   public canRead(feature: AlertingV2Feature): boolean {
-    return this.can(feature, ALERTING_V2_UI_CAPABILITIES[feature].read);
+    return this.canWrite(feature) || this.can(feature, ALERTING_V2_UI_CAPABILITIES[feature].read);
   }
 
   /** Returns whether the feature's top-level write/all capability is granted. */

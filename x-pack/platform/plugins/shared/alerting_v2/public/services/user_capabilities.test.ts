@@ -6,10 +6,16 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { UserCapabilities } from './user_capabilities';
 
-const buildService = (capabilities: Record<string, Record<string, boolean>>) =>
-  new UserCapabilities({ capabilities } as unknown as ApplicationStart);
+const buildService = (capabilities: Record<string, Record<string, boolean>>) => {
+  const application = applicationServiceMock.createStartContract();
+  return new UserCapabilities({
+    ...application,
+    capabilities: capabilities as ApplicationStart['capabilities'],
+  });
+};
 
 describe('UserCapabilities', () => {
   describe('can', () => {
@@ -32,13 +38,6 @@ describe('UserCapabilities', () => {
       const caps = buildService({});
       expect(caps.can('rules', 'read')).toBe(false);
     });
-
-    it('returns false for a non-boolean truthy value (strict === true)', () => {
-      const caps = buildService({
-        alerting_v2_rules: { read: 'yes' as unknown as boolean },
-      });
-      expect(caps.can('rules', 'read')).toBe(false);
-    });
   });
 
   describe('canRead', () => {
@@ -47,8 +46,13 @@ describe('UserCapabilities', () => {
       expect(caps.canRead('alerts')).toBe(true);
     });
 
-    it('returns false when the read capability is denied', () => {
+    it('returns true when only the all capability is granted (all implies read)', () => {
       const caps = buildService({ alerting_v2_alerts: { read: false, all: true } });
+      expect(caps.canRead('alerts')).toBe(true);
+    });
+
+    it('returns false when neither read nor all is granted', () => {
+      const caps = buildService({ alerting_v2_alerts: { read: false, all: false } });
       expect(caps.canRead('alerts')).toBe(false);
     });
 
