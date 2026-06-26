@@ -18,11 +18,13 @@ import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
   AuditService,
+  AUDIT_OTEL_FIELD_RENAMES,
   createLoggingConfig,
   filterEvent,
   getForwardedFor,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
+import type { AppenderConfigType, OtelAppenderConfig } from '@kbn/core-logging-server';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
@@ -578,6 +580,78 @@ describe('#createLoggingConfig', () => {
     );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
+  });
+
+  test('injects audit field renames when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldRenames).toEqual(
+      AUDIT_OTEL_FIELD_RENAMES
+    );
+  });
+
+  test('does not inject field renames for non-OTel appenders', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'console',
+            layout: { type: 'pattern' },
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect(appenders.auditTrailAppender).not.toHaveProperty('fieldRenames');
+  });
+
+  test('merges user-provided fieldRenames with audit renames; audit renames take precedence on conflict', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+            fieldRenames: {
+              'custom.field': 'custom.new_field',
+              // User tries to override an audit rename — audit wins.
+              'kibana.space_id': 'kibana.space.overridden',
+            },
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldRenames).toMatchObject({
+      'custom.field': 'custom.new_field',
+      'kibana.space_id': 'kibana.space.id', // audit rename wins
+    });
   });
 });
 
