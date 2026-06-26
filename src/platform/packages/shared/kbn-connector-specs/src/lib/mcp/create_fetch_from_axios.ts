@@ -31,64 +31,44 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
   let sseReady: Promise<void> | null = null;
   let resolveSseReady: (() => void) | null = null;
 
-  return async (url: string | URL, init?: RequestInit): Promise<Response> => {
-    const urlString = typeof url === 'string' ? url : url.toString();
-    const method = (init?.method ?? 'GET').toUpperCase();
-    const headers: Record<string, string> = {};
+  // Use responseType:'stream' so the SDK's SSE parser reads events as they arrive
+  // rather than buffering the entire (potentially infinite) stream in memory.
+  const callSseGet = async (
+    urlString: string,
+    headers: Record<string, string>,
+    init?: RequestInit
+  ): Promise<Response> => {
+    const res = await axiosInstance.request({
+      url: urlString,
+      method: 'GET',
+      headers: Object.keys(headers).length ? headers : undefined,
+      signal: init?.signal ?? undefined,
+      responseType: 'stream',
+      validateStatus: () => true,
+    });
 
-    if (init?.headers) {
-      if (init.headers instanceof Headers) {
-        init.headers.forEach((value, key) => {
-          headers[key] = value;
-        });
-      } else if (Array.isArray(init.headers)) {
-        for (const [key, value] of init.headers) {
-          headers[key] = value;
-        }
-      } else {
-        Object.assign(headers, init.headers);
-      }
-    }
+    // Signal that the SSE channel is open so waiting POSTs can proceed.
+    resolveSseReady?.();
+    resolveSseReady = null;
 
-    const resHeaders = new Headers();
+    return new Response(createWebStream(res), {
+      status: res.status,
+      statusText: res.statusText ?? '',
+      headers: toWebHeaders(res),
+    });
+  };
 
-    // GET requests open the SSE channel used by MCP servers to push responses back.
-    // Use responseType:'stream' so the SDK's SSE parser reads events as they arrive
-    // rather than buffering the entire (potentially infinite) stream in memory.
-    if (method === 'GET') {
-      const res = await axiosInstance.request({
-        url: urlString,
-        method: 'GET',
-        headers: Object.keys(headers).length ? headers : undefined,
-        signal: init?.signal ?? undefined,
-        responseType: 'stream',
-        validateStatus: () => true,
-      });
-
-      if (res.headers && typeof res.headers === 'object') {
-        for (const [key, value] of Object.entries(res.headers)) {
-          if (value !== undefined && value !== null) {
-            resHeaders.set(key, Array.isArray(value) ? value.join(', ') : String(value));
-          }
-        }
-      }
-
-      // Signal that the SSE channel is open so waiting POSTs can proceed.
-      resolveSseReady?.();
-      resolveSseReady = null;
-
-      const webStream = createWebStream(res);
-      return new Response(webStream, {
-        status: res.status,
-        statusText: res.statusText ?? '',
-        headers: resHeaders,
-      });
-    }
-
+  // All the other SSE methods buffer the response for JSON parsing
+  const callSseWithMethod = async (
+    method: string,
+    urlString: string,
+    headers: Record<string, string>,
+    init?: RequestInit
+  ): Promise<Response> => {
     if (sseReady !== null) {
       // Race sseReady against a timeout and the abort signal so a stuck or
       // out-of-order GET can never cause tool-call POSTs to hang indefinitely.
-      // Whichever wins first, execution falls through to the POST below.
+      // Whichever wins first, execution falls through to the request below.
       const races: Array<Promise<void>> = [
         sseReady,
         new Promise<void>((resolve) => setTimeout(resolve, SSE_READY_TIMEOUT_MS)),
@@ -114,14 +94,6 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       validateStatus: () => true,
     });
 
-    if (res.headers && typeof res.headers === 'object') {
-      for (const [key, value] of Object.entries(res.headers)) {
-        if (value !== undefined && value !== null) {
-          resHeaders.set(key, Array.isArray(value) ? value.join(', ') : String(value));
-        }
-      }
-    }
-
     // A 202 to a POST means the initialized notification was accepted; the SDK fires
     // the GET SSE channel immediately after. Pre-create sseReady here so tool-call
     // POSTs can await it.
@@ -134,9 +106,47 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     return new Response(res.data, {
       status: res.status,
       statusText: res.statusText ?? '',
-      headers: resHeaders,
+      headers: toWebHeaders(res),
     });
   };
+
+  return async (url: string | URL, init?: RequestInit): Promise<Response> => {
+    const urlString = typeof url === 'string' ? url : url.toString();
+    const method = (init?.method ?? 'GET').toUpperCase();
+    const headers: Record<string, string> = {};
+
+    if (init?.headers) {
+      if (init.headers instanceof Headers) {
+        init.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+      } else if (Array.isArray(init.headers)) {
+        for (const [key, value] of init.headers) {
+          headers[key] = value;
+        }
+      } else {
+        Object.assign(headers, init.headers);
+      }
+    }
+
+    if (method === 'GET') {
+      return callSseGet(urlString, headers, init);
+    } else {
+      return callSseWithMethod(method, urlString, headers, init);
+    }
+  };
+}
+
+function toWebHeaders(res: AxiosResponse): Headers {
+  const headers = new Headers();
+  if (res.headers && typeof res.headers === 'object') {
+    for (const [key, value] of Object.entries(res.headers)) {
+      if (value !== undefined && value !== null) {
+        headers.set(key, Array.isArray(value) ? value.join(', ') : String(value));
+      }
+    }
+  }
+  return headers;
 }
 
 /** Converts the Node.js Readable from an Axios `responseType:'stream'` response into the
