@@ -43,7 +43,7 @@ export const upsertFeatureRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: baseFeatureSchema,
+    body: baseFeatureSchema.and(z.object({ expires_at: z.iso.datetime().optional() })),
   }),
   handler: async ({
     params,
@@ -60,7 +60,7 @@ export const upsertFeatureRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const { id, ...baseBody } = params.body;
+    const { id, expires_at, ...baseBody } = params.body;
 
     if (id) {
       const { hits } = await kiClient.getFeatures(params.path.name, { id: [id] });
@@ -80,6 +80,7 @@ export const upsertFeatureRoute = createServerRoute({
             id,
             ...baseBody,
             updated_at: new Date().toISOString(),
+            expires_at,
           },
         },
       },
