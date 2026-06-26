@@ -24,7 +24,7 @@ export const GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID =
 
 export const getInstallableCatalogOverviewSchema = z.object({}).strict();
 
-const TAGS_AGG_SIZE = 200;
+const TAGS_AGG_SIZE = 1000;
 const TAGS_AGG_KEY = 'facet_tags';
 
 interface GetInstallableCatalogOverviewToolDeps {
