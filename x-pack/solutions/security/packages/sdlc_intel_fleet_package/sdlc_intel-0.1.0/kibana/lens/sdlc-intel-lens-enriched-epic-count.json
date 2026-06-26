@@ -1,0 +1,52 @@
+{
+  "attributes": {
+    "description": "Epic project items from enriched ES|QL view",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "layer1": {
+              "columnOrder": ["metric-col"],
+              "columns": {
+                "metric-col": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Epics",
+                  "operationType": "count",
+                  "scale": "ratio",
+                  "sourceField": "Records"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": { "language": "kuery", "query": "is_epic : true" },
+      "visualization": {
+        "layerId": "layer1",
+        "layerType": "data",
+        "metricAccessor": "metric-col"
+      }
+    },
+    "title": "SDLC enriched epic count",
+    "visualizationType": "lnsMetric"
+  },
+  "id": "sdlc-intel-lens-enriched-epic-count",
+  "references": [
+    {
+      "id": "sdlc-project-items-enriched-view",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "sdlc-project-items-enriched-view",
+      "name": "indexpattern-datasource-layer-layer1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}

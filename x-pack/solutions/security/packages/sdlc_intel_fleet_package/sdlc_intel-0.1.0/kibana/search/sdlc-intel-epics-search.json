@@ -1,0 +1,30 @@
+{
+  "attributes": {
+    "columns": [
+      "epic.title",
+      "epic.teams",
+      "release.roadmap_stage",
+      "release.milestone",
+      "rollup.status",
+      "rollup.coverage_pct",
+      "epic.url"
+    ],
+    "description": "Projected epics from sdlc-epic-phases",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["epic.title", "asc"]],
+    "title": "SDLC epics",
+    "version": 1
+  },
+  "id": "sdlc-intel-epics-search",
+  "references": [
+    {
+      "id": "sdlc-epic-phases",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

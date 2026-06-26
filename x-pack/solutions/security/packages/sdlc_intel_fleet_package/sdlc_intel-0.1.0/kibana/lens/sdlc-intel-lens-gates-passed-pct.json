@@ -1,0 +1,52 @@
+{
+  "attributes": {
+    "description": "Average gates passed percentage across epics",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "layer1": {
+              "columnOrder": ["metric-col"],
+              "columns": {
+                "metric-col": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Gates passed %",
+                  "operationType": "average",
+                  "scale": "ratio",
+                  "sourceField": "rollup.gates_passed_pct"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "layerId": "layer1",
+        "layerType": "data",
+        "metricAccessor": "metric-col"
+      }
+    },
+    "title": "SDLC gates passed %",
+    "visualizationType": "lnsMetric"
+  },
+  "id": "sdlc-intel-lens-gates-passed-pct",
+  "references": [
+    {
+      "id": "sdlc-epic-phases",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "sdlc-epic-phases",
+      "name": "indexpattern-datasource-layer-layer1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}

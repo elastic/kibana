@@ -15,6 +15,7 @@ import {
   getEstimatedBase64OutputBytes,
 } from '../../connector_utils';
 import type { ConnectorSpec } from '../../connector_spec';
+import { parseCommaSeparatedIds, parseDriveUrlsFromText } from './google_drive_helpers';
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 const DEFAULT_PAGE_SIZE = 250;
@@ -64,6 +65,34 @@ function throwGoogleDriveError(error: unknown): void {
 const TEXT_EXPORT_DOCS = 'text/markdown';
 const TEXT_EXPORT_SHEETS = 'text/csv';
 const TEXT_EXPORT_DEFAULT = 'text/plain';
+const DRIVE_FILE_LIST_FIELDS =
+  'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink, parents, owners(emailAddress,displayName))';
+
+function buildSharedDriveListParams(input: {
+  q: string;
+  pageSize: number;
+  pageToken?: string;
+  orderBy?: string;
+}): Record<string, string | number | boolean> {
+  const params: Record<string, string | number | boolean> = {
+    q: input.q,
+    pageSize: Math.min(input.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
+    fields: DRIVE_FILE_LIST_FIELDS,
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+  };
+
+  if (input.pageToken) {
+    params.pageToken = input.pageToken;
+  }
+
+  if (input.orderBy) {
+    params.orderBy = input.orderBy;
+  }
+
+  return params;
+}
+
 function resolveExportMimeType(
   sourceMimeType: string,
   responseType: 'arraybuffer' | 'text'
@@ -464,7 +493,10 @@ export const GoogleDriveConnector: ConnectorSpec = {
             typedInput.fileIds.map(async (fileId) => {
               try {
                 const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}`, {
-                  params: { fields: metadataFields },
+                  params: {
+                    fields: metadataFields,
+                    supportsAllDrives: true,
+                  },
                 });
                 return response.data;
               } catch (error: unknown) {
@@ -479,6 +511,124 @@ export const GoogleDriveConnector: ConnectorSpec = {
           throwGoogleDriveError(error);
           throw error;
         }
+      },
+    },
+
+    listFilesIngest: {
+      isTool: false,
+      description:
+        'Paginated shared-drive folder listing for ingest workflows. Lists file metadata in a team folder with modifiedTime watermark support.',
+      input: lazySchema(() =>
+        z.object({
+          folderId: z
+            .string()
+            .min(1)
+            .describe('Shared team folder ID to list. Required for ingest catalog workflows.'),
+          modifiedAfter: z
+            .string()
+            .optional()
+            .describe(
+              "ISO-8601 modifiedTime lower bound for incremental ingest (for example 2024-01-01T00:00:00Z)."
+            ),
+          pageSize: z
+            .number()
+            .max(1000)
+            .default(DEFAULT_PAGE_SIZE)
+            .describe('Number of results to return (default 250, max 1000)'),
+          pageToken: z
+            .string()
+            .optional()
+            .describe('Pagination token from a previous listFilesIngest response.'),
+          orderBy: z
+            .preprocess(
+              (val) => (val === '' ? undefined : val),
+              z.enum(['modifiedTime', 'modifiedTime desc', 'name', 'name desc']).optional()
+            )
+            .optional()
+            .describe('Sort order for results. Defaults to modifiedTime asc for watermark ingest.'),
+        })
+      ),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          folderId: string;
+          modifiedAfter?: string;
+          pageSize: number;
+          pageToken?: string;
+          orderBy?: string;
+        };
+
+        const folderClause = `'${escapeQueryValue(typedInput.folderId)}' in parents`;
+        const modifiedClause =
+          typedInput.modifiedAfter && typedInput.modifiedAfter.trim().length > 0
+            ? ` and modifiedTime > '${escapeQueryValue(typedInput.modifiedAfter.trim())}'`
+            : '';
+        const q = `${folderClause} and trashed=false${modifiedClause}`;
+
+        try {
+          const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
+            params: buildSharedDriveListParams({
+              q,
+              pageSize: typedInput.pageSize,
+              pageToken: typedInput.pageToken,
+              orderBy: typedInput.orderBy ?? 'modifiedTime',
+            }),
+          });
+
+          const nextPageToken = response.data.nextPageToken as string | undefined;
+
+          return {
+            ok: true,
+            files: response.data.files ?? [],
+            nextPageToken,
+            hasMore: Boolean(nextPageToken),
+          };
+        } catch (error: unknown) {
+          throwGoogleDriveError(error);
+          throw error;
+        }
+      },
+    },
+
+    parseDriveUrlsFromText: {
+      isTool: false,
+      description:
+        'Extract Google Drive file IDs and URLs from free text (for example GitHub issue bodies referencing docs.google.com links).',
+      input: lazySchema(() =>
+        z.object({
+          text: z
+            .string()
+            .describe('Text to scan for Google Docs/Drive URLs (issue body, title, comments).'),
+        })
+      ),
+      handler: async (_ctx, input) => {
+        const typedInput = input as { text: string };
+        const links = parseDriveUrlsFromText(typedInput.text);
+
+        return {
+          ok: true,
+          links,
+        };
+      },
+    },
+
+    parseCommaSeparatedIds: {
+      isTool: false,
+      description:
+        'Split comma-separated manifest values (for example roadmap folder IDs) into items for foreach workflows.',
+      input: lazySchema(() =>
+        z.object({
+          value: z
+            .string()
+            .describe('Comma-separated list of IDs (for example Google Drive folder IDs).'),
+        })
+      ),
+      handler: async (_ctx, input) => {
+        const typedInput = input as { value: string };
+
+        return {
+          ok: true,
+          items: parseCommaSeparatedIds(typedInput.value),
+        };
       },
     },
   },

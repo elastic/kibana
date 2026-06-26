@@ -1,0 +1,49 @@
+name: sdlc-project-items-enriched-view
+query: |
+  FROM github-intel-project-items
+  | EVAL
+      org_login = org.login,
+      project_number = project.number,
+      project_title = project.title,
+      ticket_type = hierarchy.ticket_type,
+      epic = hierarchy.epic,
+      parent_issue = hierarchy.parent_issue,
+      issue_number = entity.number,
+      issue_url = entity.url,
+      repo = JSON_EXTRACT(TO_STRING(payload), "content.repository.nameWithOwner"),
+      issue_title = JSON_EXTRACT(TO_STRING(payload), "content.title"),
+      payload_json = TO_STRING(payload)
+  | GROK payload_json """%{DATA}"name":"%{DATA:project_team_a}","field":\{"name":"Team"\}""""
+  | GROK payload_json """%{DATA}"field":\{"name":"Team"\},"name":"%{DATA:project_team_b}""""
+  | GROK payload_json """%{DATA}"name":"%{DATA:product_initiative_a}","field":\{"name":"Product Initiative"\}""""
+  | GROK payload_json """%{DATA}"field":\{"name":"Product Initiative"\},"name":"%{DATA:product_initiative_b}""""
+  | GROK payload_json """%{DATA}"name":"%{DATA:roadmap_stage_a}","field":\{"name":"Product Roadmap Stage"\}""""
+  | GROK payload_json """%{DATA}"field":\{"name":"Product Roadmap Stage"\},"name":"%{DATA:roadmap_stage_b}""""
+  | GROK payload_json """%{DATA}"name":"%{DATA:release_milestone_a}","field":\{"name":"Release Milestone"\}""""
+  | GROK payload_json """%{DATA}"field":\{"name":"Release Milestone"\},"name":"%{DATA:release_milestone_b}""""
+  | GROK payload_json """%{DATA}"name":"Team:%{DATA:team_from_label}""""
+  | EVAL
+      project_team = COALESCE(project_team_a, project_team_b, "unassigned"),
+      product_initiative = COALESCE(product_initiative_a, product_initiative_b),
+      roadmap_stage = COALESCE(roadmap_stage_a, roadmap_stage_b),
+      release_milestone = COALESCE(release_milestone_a, release_milestone_b),
+      github_team_label = CASE(team_from_label IS NOT NULL, CONCAT("Team:", team_from_label), null),
+      is_epic = ticket_type == "Epic"
+  | KEEP
+      @timestamp,
+      org_login,
+      project_number,
+      project_title,
+      ticket_type,
+      epic,
+      parent_issue,
+      project_team,
+      product_initiative,
+      roadmap_stage,
+      release_milestone,
+      github_team_label,
+      issue_number,
+      issue_title,
+      issue_url,
+      repo,
+      is_epic

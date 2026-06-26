@@ -1,0 +1,144 @@
+version: '1'
+name: SDLC GitHub catalog project views
+description: >
+  Tier-1 catalog workflow. Pages GitHub Project v2 saved views via GraphQL (orgCatalog.projectViews)
+  for each project in github-intel-projects and upserts github-intel-project-views. Run
+  github-catalog-projects first.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - catalog
+  - ingest
+  - graphql
+  - project-views
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  projectsIndex: github-intel-projects
+  projectViewsIndex: github-intel-project-views
+  syncSource: github-catalog-project-views
+  entityType: project_view
+  pageSize: 50
+  projectBatchSize: 10
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-github-catalog-project-views
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: load_projects
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.projectsIndex }}'
+      size: '{{ consts.projectBatchSize }}'
+      sort:
+        - project.number:
+            order: asc
+
+  - name: init_stats
+    type: data.set
+    with:
+      projectsProcessed: 0
+      viewsIndexed: 0
+
+  - name: catalog_project_views
+    type: foreach
+    foreach: '${{ steps.load_projects.output.hits.hits | json }}'
+    steps:
+      - name: set_project_context
+        type: data.set
+        with:
+          projectId: '${{ foreach.item._source.project.id }}'
+          projectNumber: '${{ foreach.item._source.project.number }}'
+          viewCursor: ''
+
+      - name: paginate_views
+        type: while
+        condition: 'steps.fetch_views.output.pageInfo.hasNextPage : true'
+        max-iterations: 10
+        steps:
+          - name: fetch_views
+            type: github.runQueryTemplate
+            connector-id: '{{ consts.githubConnectorId }}'
+            with:
+              templateId: orgCatalog.projectViews
+              variables:
+                projectId: '${{ variables.projectId }}'
+              first: '{{ consts.pageSize }}'
+              after: '${{ variables.viewCursor }}'
+
+          - name: backoff_if_needed
+            type: wait
+            if: '{{ steps.fetch_views.output.shouldBackoff }}'
+            with:
+              duration: 60s
+
+          - name: index_views
+            type: foreach
+            foreach: '${{ steps.fetch_views.output.data.node.views.nodes | json }}'
+            steps:
+              - name: upsert_view
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.projectViewsIndex }}'
+                  id: '${{ variables.projectId }}-${{ foreach.item.id }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    project:
+                      id: '${{ variables.projectId }}'
+                      number: '${{ variables.projectNumber }}'
+                    view:
+                      id: '${{ foreach.item.id }}'
+                      number: '${{ foreach.item.number }}'
+                      name: '${{ foreach.item.name }}'
+                      filter: '${{ foreach.item.filter }}'
+                    payload: '${{ foreach.item | json }}'
+
+              - name: increment_views_indexed
+                type: data.set
+                with:
+                  viewsIndexed: '${{ variables.viewsIndexed + 1 }}'
+
+          - name: advance_view_cursor
+            type: data.set
+            with:
+              viewCursor: '${{ steps.fetch_views.output.pageInfo.endCursor }}'
+
+      - name: track_project_progress
+        type: data.set
+        with:
+          projectsProcessed: '${{ variables.projectsProcessed + 1 }}'
+
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        org:
+          login: '{{ consts.orgLogin }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          projects_processed: '${{ variables.projectsProcessed }}'
+          views_indexed: '${{ variables.viewsIndexed }}'

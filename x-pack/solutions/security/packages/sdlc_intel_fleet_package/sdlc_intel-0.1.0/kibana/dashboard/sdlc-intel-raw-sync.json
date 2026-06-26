@@ -1,0 +1,23 @@
+{
+  "attributes": {
+    "description": "GitHub ingest sync health from sdlc-github-raw-summary-view ES|QL view.",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"3\",\"w\":32,\"x\":32,\"y\":0},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"org_login\",\"project_number\",\"page_count\",\"items_fetched\",\"last_fetched\"],\"sort\":[[\"items_fetched\",\"desc\"]]},\"gridData\":{\"h\":18,\"i\":\"4\",\"w\":48,\"x\":0,\"y\":16},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"8.0.0\"}]",
+    "timeRestore": false,
+    "title": "SDLC GitHub sync overview",
+    "version": 1
+  },
+  "id": "sdlc-intel-raw-sync",
+  "references": [
+    { "id": "sdlc-intel-lens-raw-pages-count", "name": "panel_0", "type": "lens" },
+    { "id": "sdlc-intel-lens-raw-items-count", "name": "panel_1", "type": "lens" },
+    { "id": "sdlc-intel-lens-raw-by-project", "name": "panel_2", "type": "lens" },
+    { "id": "sdlc-intel-pipeline-search", "name": "panel_3", "type": "search" },
+    { "id": "sdlc-intel-tag", "name": "tag-ref-sdlc-intel-tag", "type": "tag" }
+  ],
+  "type": "dashboard"
+}

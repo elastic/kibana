@@ -1,0 +1,115 @@
+{
+  "index_patterns": [
+    "salesforce-intel-cases"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "sdlc_intel_retention"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "case": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "keyword"
+            },
+            "subject": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "priority": {
+              "type": "keyword"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "closed_at": {
+              "type": "date"
+            },
+            "last_modified_at": {
+              "type": "date"
+            }
+          }
+        },
+        "account": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "product": {
+          "properties": {
+            "area": {
+              "type": "keyword"
+            }
+          }
+        },
+        "links": {
+          "properties": {
+            "github_issue_url": {
+              "type": "keyword"
+            },
+            "github_issue_repo": {
+              "type": "keyword"
+            },
+            "github_issue_number": {
+              "type": "integer"
+            },
+            "link_source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "feedback": {
+          "properties": {
+            "is_escalated": {
+              "type": "boolean"
+            },
+            "linked_to_sdh": {
+              "type": "boolean"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

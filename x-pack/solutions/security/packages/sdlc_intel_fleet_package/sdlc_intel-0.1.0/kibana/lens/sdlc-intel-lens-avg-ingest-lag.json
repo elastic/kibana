@@ -1,0 +1,52 @@
+{
+  "attributes": {
+    "description": "Average checkpoint lag across GitHub ingest workflows",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "layer1": {
+              "columnOrder": ["metric-col"],
+              "columns": {
+                "metric-col": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Avg lag (hours)",
+                  "operationType": "average",
+                  "scale": "ratio",
+                  "sourceField": "lag_hours"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "layerId": "layer1",
+        "layerType": "data",
+        "metricAccessor": "metric-col"
+      }
+    },
+    "title": "SDLC avg ingest lag",
+    "visualizationType": "lnsMetric"
+  },
+  "id": "sdlc-intel-lens-avg-ingest-lag",
+  "references": [
+    {
+      "id": "sdlc-ingest-health-view",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "sdlc-ingest-health-view",
+      "name": "indexpattern-datasource-layer-layer1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}

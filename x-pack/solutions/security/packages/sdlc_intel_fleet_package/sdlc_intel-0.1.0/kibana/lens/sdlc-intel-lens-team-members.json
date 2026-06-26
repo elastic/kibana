@@ -1,0 +1,81 @@
+{
+  "attributes": {
+    "description": "GitHub org teams by member count",
+    "state": {
+      "datasourceStates": {
+        "indexpattern": {
+          "layers": {
+            "layer1": {
+              "columnOrder": ["bucket-col", "metric-col"],
+              "columns": {
+                "bucket-col": {
+                  "dataType": "string",
+                  "isBucketed": true,
+                  "label": "Team",
+                  "operationType": "terms",
+                  "params": {
+                    "missingBucket": false,
+                    "orderBy": { "columnId": "metric-col", "type": "column" },
+                    "orderDirection": "desc",
+                    "otherBucket": false,
+                    "size": 20
+                  },
+                  "scale": "ordinal",
+                  "sourceField": "org_team.name"
+                },
+                "metric-col": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Members",
+                  "operationType": "max",
+                  "scale": "ratio",
+                  "sourceField": "org_team.members_count"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "axisTitlesVisibilitySettings": { "x": true, "yLeft": true, "yRight": true },
+        "fittingFunction": "None",
+        "gridlinesVisibilitySettings": { "x": true, "yLeft": true, "yRight": true },
+        "layers": [
+          {
+            "accessors": ["metric-col"],
+            "layerId": "layer1",
+            "position": "top",
+            "seriesType": "bar_horizontal",
+            "showGridlines": false,
+            "xAccessor": "bucket-col"
+          }
+        ],
+        "legend": { "isVisible": true, "position": "right" },
+        "preferredSeriesType": "bar_horizontal",
+        "tickLabelsVisibilitySettings": { "x": true, "yLeft": true, "yRight": true },
+        "valueLabels": "hide"
+      }
+    },
+    "title": "SDLC team member counts",
+    "visualizationType": "lnsXY"
+  },
+  "id": "sdlc-intel-lens-team-members",
+  "references": [
+    {
+      "id": "sdlc-team-dimension",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "sdlc-team-dimension",
+      "name": "indexpattern-datasource-layer-layer1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}

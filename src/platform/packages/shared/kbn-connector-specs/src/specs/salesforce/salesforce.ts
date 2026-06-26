@@ -41,6 +41,48 @@ function validateSobjectName(name: string): void {
   }
 }
 
+interface SalesforceQueryResponse {
+  totalSize?: number;
+  done?: boolean;
+  nextRecordsUrl?: string;
+  records?: Array<Record<string, unknown>>;
+}
+
+const executeSalesforceSoql = async (
+  ctx: Parameters<NonNullable<ConnectorSpec['actions']['query']>['handler']>[0],
+  input: { soql: string; nextRecordsUrl?: string }
+): Promise<SalesforceQueryResponse> => {
+  const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+  if (input.nextRecordsUrl) {
+    const url = createPaginationUrl(baseUrl, input.nextRecordsUrl);
+    const response = await ctx.client.get(url, {});
+    return response.data as SalesforceQueryResponse;
+  }
+  const response = await ctx.client.get(
+    `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
+    { params: { q: input.soql } }
+  );
+  return response.data as SalesforceQueryResponse;
+};
+
+const toSoqlIngestResult = (
+  data: SalesforceQueryResponse,
+  raw?: boolean
+): Record<string, unknown> => {
+  if (raw) {
+    return data as Record<string, unknown>;
+  }
+
+  return {
+    ok: true,
+    records: data.records ?? [],
+    nextRecordsUrl: data.nextRecordsUrl,
+    hasMore: Boolean(data.nextRecordsUrl && data.done !== true),
+    done: data.done ?? true,
+    totalSize: data.totalSize ?? 0,
+  };
+};
+
 export const SalesforceConnector: ConnectorSpec = {
   metadata: {
     id: '.salesforce',
@@ -99,17 +141,49 @@ export const SalesforceConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input) => {
         const typedInput = input as { soql: string; nextRecordsUrl?: string };
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
-        if (typedInput.nextRecordsUrl) {
-          const url = createPaginationUrl(baseUrl, typedInput.nextRecordsUrl);
-          const response = await ctx.client.get(url, {});
-          return response.data;
+        return executeSalesforceSoql(ctx, typedInput);
+      },
+    },
+
+    soqlIngest: {
+      isTool: false,
+      description:
+        'Paginated SOQL query for ingest workflows. Returns compact records plus nextRecordsUrl and hasMore for while-loop pagination.',
+      input: lazySchema(() =>
+        z.object({
+          soql: z
+            .string()
+            .describe(
+              'SOQL query for the first page. Omit or leave empty when passing nextRecordsUrl for subsequent pages.'
+            )
+            .optional(),
+          nextRecordsUrl: z
+            .string()
+            .optional()
+            .describe('Pagination path from a previous soqlIngest response (nextRecordsUrl).'),
+          raw: z
+            .boolean()
+            .optional()
+            .describe('Return the full raw Salesforce API response instead of a compact ingest result.'),
+        })
+      ),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          soql?: string;
+          nextRecordsUrl?: string;
+          raw?: boolean;
+        };
+
+        if (!typedInput.nextRecordsUrl && (!typedInput.soql || typedInput.soql.trim().length === 0)) {
+          throw new Error('soqlIngest requires soql on the first page or nextRecordsUrl for pagination.');
         }
-        const response = await ctx.client.get(
-          `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
-          { params: { q: typedInput.soql } }
-        );
-        return response.data;
+
+        const data = await executeSalesforceSoql(ctx, {
+          soql: typedInput.soql ?? '',
+          nextRecordsUrl: typedInput.nextRecordsUrl,
+        });
+
+        return toSoqlIngestResult(data, typedInput.raw);
       },
     },
 

@@ -1,0 +1,5 @@
+- version: 0.1.0
+  changes:
+    - description: Initial release with executive roadmap, phase pipeline, and team dimension dashboards.
+      type: enhancement
+      link: https://github.com/elastic/kibana/pull/0

@@ -1,0 +1,9 @@
+name: sdlc-github-raw-summary-view
+query: |
+  FROM github-intel-raw-project-pages
+  | STATS
+      page_count = COUNT(*),
+      items_fetched = SUM(item_count),
+      last_fetched = MAX(@timestamp)
+    BY org.login, project.number
+  | EVAL org_login = org.login, project_number = project.number

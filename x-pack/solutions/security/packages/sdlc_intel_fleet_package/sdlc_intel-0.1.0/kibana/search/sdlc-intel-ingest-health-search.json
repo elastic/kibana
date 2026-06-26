@@ -1,0 +1,23 @@
+{
+  "attributes": {
+    "description": "Workflow checkpoints with lag hours",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"indexRefName\":\"kibanaSavedObjectMetaSearchSourceIndexPattern\"}"
+    },
+    "sort": [["lag_hours", "desc"]],
+    "title": "SDLC ingest health",
+    "version": 1,
+    "columns": ["sync_source", "entity", "org_login", "lag_hours", "run_status", "last_run_at"],
+    "grid": {}
+  },
+  "id": "sdlc-intel-ingest-health-search",
+  "references": [
+    {
+      "id": "sdlc-ingest-health-view",
+      "name": "kibanaSavedObjectMetaSearchSourceIndexPattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

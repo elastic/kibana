@@ -21,6 +21,16 @@ jest.mock('../../lib/mcp/with_mcp_client', () => ({
   }),
 }));
 
+const mockExecuteGitHubGraphQL = jest.fn();
+const mockGetGitHubQueryTemplate = jest.fn();
+const mockListGitHubQueryTemplates = jest.fn();
+
+jest.mock('./graphql', () => ({
+  executeGitHubGraphQL: (...args: unknown[]) => mockExecuteGitHubGraphQL(...args),
+  getGitHubQueryTemplate: (...args: unknown[]) => mockGetGitHubQueryTemplate(...args),
+  listGitHubQueryTemplates: (...args: unknown[]) => mockListGitHubQueryTemplates(...args),
+}));
+
 // Helper: parse raw input through the action schema the way the framework does,
 // so Zod defaults are applied before the handler receives the input.
 const parse = <K extends keyof typeof GithubConnector.actions>(
@@ -42,6 +52,19 @@ describe('GithubConnector', () => {
     jest.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({ tools: [{ name: 'get_me' }, { name: 'search_code' }] });
+    mockExecuteGitHubGraphQL.mockResolvedValue({
+      data: { viewer: { login: 'octocat' } },
+      rateLimit: { limit: 5000, remaining: 4999, resetAt: '2026-06-24T12:00:00Z' },
+      shouldBackoff: false,
+    });
+    mockGetGitHubQueryTemplate.mockReturnValue({
+      id: 'orgCatalog.repos',
+      query: 'query OrgCatalogRepos { organization(login: "elastic") { id } }',
+      pageInfoPath: 'organization.repositories',
+    });
+    mockListGitHubQueryTemplates.mockReturnValue([
+      { id: 'orgCatalog.repos', description: 'List org repos' },
+    ]);
   });
 
   describe('auth', () => {
@@ -59,7 +82,7 @@ describe('GithubConnector', () => {
         defaults: {
           authorizationUrl: 'https://github.com/login/oauth/authorize',
           tokenUrl: 'https://github.com/login/oauth/access_token',
-          scope: 'repo',
+          scope: 'read:org read:project repo',
         },
       });
     });
@@ -174,17 +197,19 @@ describe('GithubConnector', () => {
           owner: 'elastic',
           repo: 'kibana',
           state: 'open',
+          since: undefined,
           first: 10,
           after: undefined,
         },
       });
     });
 
-    it('passes cursor and state overrides', async () => {
+    it('passes cursor, state overrides, and updatedSince', async () => {
       await GithubConnector.actions.listIssues.handler(mockContext, {
         owner: 'elastic',
         repo: 'kibana',
         state: 'closed',
+        updatedSince: '2026-06-01T00:00:00Z',
         first: 5,
         after: 'cursor123',
       });
@@ -195,6 +220,7 @@ describe('GithubConnector', () => {
           owner: 'elastic',
           repo: 'kibana',
           state: 'closed',
+          since: '2026-06-01T00:00:00Z',
           first: 5,
           after: 'cursor123',
         },
@@ -213,6 +239,7 @@ describe('GithubConnector', () => {
           owner: 'elastic',
           repo: 'kibana',
           state: 'open',
+          since: undefined,
           first: 10,
           after: undefined,
         },
@@ -346,6 +373,25 @@ describe('GithubConnector', () => {
         },
       });
     });
+
+    it('passes get_reviews method', async () => {
+      await GithubConnector.actions.pullRequestRead.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        pullNumber: 42,
+        method: 'get_reviews',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'pull_request_read',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          pullNumber: 42,
+          method: 'get_reviews',
+        },
+      });
+    });
   });
 
   describe('getFileContents action', () => {
@@ -416,6 +462,47 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('graphql ingest actions', () => {
+    it('executes read-only graphqlQuery via the GraphQL client', async () => {
+      const query = 'query Viewer { viewer { login } }';
+      await GithubConnector.actions.graphqlQuery.handler(mockContext, { query });
+
+      expect(mockExecuteGitHubGraphQL).toHaveBeenCalledWith({
+        ctx: mockContext,
+        body: { query, variables: undefined, operationName: undefined },
+      });
+    });
+
+    it('runs a named query template with merged pagination variables', async () => {
+      await GithubConnector.actions.runQueryTemplate.handler(mockContext, {
+        templateId: 'orgCatalog.repos',
+        variables: { org: 'elastic' },
+        first: 50,
+        after: 'cursor123',
+      });
+
+      expect(mockGetGitHubQueryTemplate).toHaveBeenCalledWith('orgCatalog.repos');
+      expect(mockExecuteGitHubGraphQL).toHaveBeenCalledWith({
+        ctx: mockContext,
+        body: {
+          query: 'query OrgCatalogRepos { organization(login: "elastic") { id } }',
+          variables: { org: 'elastic', first: 50, after: 'cursor123' },
+        },
+        pageInfoPath: 'organization.repositories',
+        templateId: 'orgCatalog.repos',
+      });
+    });
+
+    it('lists available query templates', async () => {
+      const result = await GithubConnector.actions.listQueryTemplates.handler(mockContext, {});
+
+      expect(mockListGitHubQueryTemplates).toHaveBeenCalled();
+      expect(result).toEqual({
+        templates: [{ id: 'orgCatalog.repos', description: 'List org repos' }],
+      });
+    });
+  });
+
   describe('callTool action', () => {
     it('calls the named tool with provided arguments', async () => {
       const result = await GithubConnector.actions.callTool.handler(mockContext, {
@@ -441,16 +528,20 @@ describe('GithubConnector', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
+    it('returns ok with MCP and GraphQL connectivity details', async () => {
       if (!GithubConnector.test) {
         throw new Error('test handler not defined');
       }
       const result = await GithubConnector.test.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
+      expect(mockExecuteGitHubGraphQL).toHaveBeenCalled();
       expect(result).toEqual({
         ok: true,
-        message: 'Connected to GitHub MCP server. 2 tools available.',
+        message: 'Connected to GitHub MCP (2 tools) and GraphQL API (viewer: octocat).',
+        mcpToolCount: 2,
+        graphqlViewer: 'octocat',
+        rateLimit: { limit: 5000, remaining: 4999, resetAt: '2026-06-24T12:00:00Z' },
       });
     });
 

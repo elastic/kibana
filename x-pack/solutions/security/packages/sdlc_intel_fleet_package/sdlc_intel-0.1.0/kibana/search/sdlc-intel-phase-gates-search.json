@@ -1,0 +1,31 @@
+{
+  "attributes": {
+    "columns": [
+      "epic.title",
+      "epic.teams",
+      "phases.p4_tickets.total",
+      "phases.p4_tickets.with_prs",
+      "phases.p5_prs.total",
+      "rollup.coverage_pct",
+      "rollup.gates_passed_pct",
+      "rollup.status"
+    ],
+    "description": "Epic phase gate rollups from sdlc-epic-phases",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["rollup.coverage_pct", "desc"]],
+    "title": "SDLC epic phase gates",
+    "version": 1
+  },
+  "id": "sdlc-intel-phase-gates-search",
+  "references": [
+    {
+      "id": "sdlc-epic-phases",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

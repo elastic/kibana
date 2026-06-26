@@ -1,0 +1,103 @@
+{
+  "index_patterns": [
+    "gdrive-intel-documents"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "sdlc_intel_retention"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "file": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "mime_type": {
+              "type": "keyword"
+            },
+            "size": {
+              "type": "long"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "modified_at": {
+              "type": "date"
+            },
+            "web_view_link": {
+              "type": "keyword"
+            },
+            "parent_folder_ids": {
+              "type": "keyword"
+            },
+            "owner_email": {
+              "type": "keyword"
+            },
+            "owner_name": {
+              "type": "keyword"
+            },
+            "shared": {
+              "type": "boolean"
+            },
+            "trashed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "links": {
+          "properties": {
+            "discovered_from_issue_url": {
+              "type": "keyword"
+            },
+            "discovered_from_issue_target": {
+              "type": "keyword"
+            },
+            "source_url": {
+              "type": "keyword"
+            },
+            "catalog_folder_id": {
+              "type": "keyword"
+            },
+            "catalog_source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

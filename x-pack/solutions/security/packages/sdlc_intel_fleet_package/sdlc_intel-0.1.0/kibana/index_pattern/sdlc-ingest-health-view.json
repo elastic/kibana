@@ -1,0 +1,12 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "sdlc-ingest-health-view"
+  },
+  "id": "sdlc-ingest-health-view",
+  "type": "index-pattern",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.0.0"
+}

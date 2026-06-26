@@ -1,0 +1,133 @@
+version: '1'
+name: SDLC agent scope alignment
+description: >
+  Agentic development workflow. Runs the SDLC scope alignment agent over recent pull requests,
+  linked GitHub issues, and parent epics, then persists misalignment findings to sdlc-agent-insights.
+  Read-only analysis (NFR-003).
+enabled: false
+tags:
+  - sdlc
+  - agent
+  - development
+  - scope
+  - alignment
+
+consts:
+  aiConnectorId: REPLACE_WITH_AI_CONNECTOR_ID
+  insightsIndex: sdlc-agent-insights
+  workflowSource: agent-scope-alignment
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-agent-scope-alignment
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 12h
+  - type: manual
+    inputs:
+      properties:
+        lookback_days:
+          type: integer
+          default: 14
+          minimum: 1
+          maximum: 90
+          description: Review pull requests updated within this many days.
+        candidate_limit:
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 50
+          description: Maximum pull requests to analyze per run.
+        connector_id:
+          type: string
+          default: REPLACE_WITH_AI_CONNECTOR_ID
+          description: Inference connector ID for the scope alignment agent.
+      additionalProperties: false
+
+steps:
+  - name: run_scope_alignment_agent
+    type: ai.agent
+    agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-scope-alignment
+    connector-id: REPLACE_WITH_AI_CONNECTOR_ID
+    create-conversation: true
+    with:
+      timeout: 1200s
+      message: |
+        Run SDLC development scope alignment analysis.
+
+        Parameters:
+        - lookback_days: {{ inputs.lookback_days | default: 14 }}
+        - candidate_limit: {{ inputs.candidate_limit | default: 20 }}
+
+        Tasks:
+        1. Query github-intel-pull-requests, github-intel-issues, and sdlc-epic-phases with ES|QL.
+        2. Compare each PR title/body against linked issue and epic planning text.
+        3. Return structured misalignment findings only — no GitHub writes.
+      schema:
+        type: object
+        properties:
+          summary:
+            type: string
+          status:
+            type: string
+            enum: [ready, noData]
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          misalignments:
+            type: array
+            items:
+              type: object
+              properties:
+                pr_url:
+                  type: string
+                verdict:
+                  type: string
+                  enum: [aligned, partial, misaligned, insufficient_context]
+                alignment_score:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                rationale:
+                  type: string
+                scope_gaps:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - pr_url
+                - verdict
+                - rationale
+          scope_claim:
+            type: object
+        required:
+          - summary
+          - status
+          - misalignments
+          - scope_claim
+
+  - name: persist_scope_alignment
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.insightsIndex }}'
+      id: '{{ consts.workflowSource }}-{{ execution.id }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        workflow:
+          execution_id: '{{ execution.id }}'
+          name: SDLC agent scope alignment
+          source: '{{ consts.workflowSource }}'
+        analysis:
+          type: scope_alignment
+          status: '${{ steps.run_scope_alignment_agent.output.status }}'
+          summary: '${{ steps.run_scope_alignment_agent.output.summary }}'
+          confidence: '${{ steps.run_scope_alignment_agent.output.confidence ?? 0.7 }}'
+        misalignments: '${{ steps.run_scope_alignment_agent.output.misalignments | json }}'
+        scope_claim: '${{ steps.run_scope_alignment_agent.output.scope_claim | json }}'
+        payload: '${{ steps.run_scope_alignment_agent.output | json }}'

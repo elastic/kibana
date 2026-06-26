@@ -245,6 +245,52 @@ export async function deleteKibanaAssets({
     logger.debug(`Deleting Kibana assets in namespace: ${namespace}`);
   }
 
+  const workflowAssets = installedObjects.filter(
+    (asset) => asset.type === KibanaSavedObjectType.workflow
+  );
+  const agentAssets = installedObjects.filter(
+    (asset) => asset.type === KibanaSavedObjectType.agent
+  );
+  const savedObjectAssets = installedObjects.filter(
+    (asset) =>
+      asset.type !== KibanaSavedObjectType.workflow && asset.type !== KibanaSavedObjectType.agent
+  );
+
+  const workflowsApi = appContextService.getWorkflowsManagementSetup()?.management;
+  if (workflowAssets.length > 0 && workflowsApi) {
+    const workflowIds = workflowAssets.map((asset) => asset.id);
+    logger.debug(`Deleting ${workflowIds.length} workflow assets via workflowsManagement`);
+    try {
+      await workflowsApi.deleteWorkflows(workflowIds, spaceId, { force: true });
+    } catch (err) {
+      logger.warn(`Failed to delete workflow assets: ${err}`);
+    }
+  } else if (workflowAssets.length > 0) {
+    logger.debug(
+      `Skipping deletion of ${workflowAssets.length} workflow assets: workflowsManagement unavailable`
+    );
+  }
+
+  const agentBuilderApi = appContextService.getAgentBuilderSetup()?.management;
+  if (agentAssets.length > 0 && agentBuilderApi) {
+    logger.debug(`Deleting ${agentAssets.length} agent assets via agentBuilder`);
+    for (const asset of agentAssets) {
+      try {
+        await agentBuilderApi.deletePackageManagedAgent(asset.id, spaceId);
+      } catch (err) {
+        logger.warn(`Failed to delete agent asset ${asset.id}: ${err}`);
+      }
+    }
+  } else if (agentAssets.length > 0) {
+    logger.debug(
+      `Skipping deletion of ${agentAssets.length} agent assets: agentBuilder unavailable`
+    );
+  }
+
+  if (savedObjectAssets.length === 0) {
+    return;
+  }
+
   const minKibana = packageSpecConditions?.kibana?.version
     ? minVersion(packageSpecConditions.kibana.version)
     : null;
@@ -254,10 +300,10 @@ export async function deleteKibanaAssets({
   // and delete the assets directly. Otherwise, we need to resolve the assets
   // which might create high memory pressure if a package has a lot of assets.
   if (minKibana && minKibana.major >= 8) {
-    await bulkDeleteSavedObjects(installedObjects, namespace, savedObjectsClient, logger);
+    await bulkDeleteSavedObjects(savedObjectAssets, namespace, savedObjectsClient, logger);
   } else {
     const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
-      installedObjects,
+      savedObjectAssets,
       { namespace }
     );
 

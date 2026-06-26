@@ -73,6 +73,10 @@ export const ListIssuesInputSchema = lazySchema(() =>
     owner: z.string().min(1).describe('Repository owner (user or org)'),
     repo: z.string().min(1).describe('Repository name'),
     state: z.enum(['open', 'closed', 'all']).optional().default('open'),
+    updatedSince: z
+      .string()
+      .optional()
+      .describe('ISO 8601 timestamp — only issues updated at or after this time (MCP since filter)'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
@@ -87,6 +91,12 @@ export const ListPullRequestsInputSchema = lazySchema(() =>
     owner: z.string().min(1).describe('Repository owner (user or org)'),
     repo: z.string().min(1).describe('Repository name'),
     state: z.enum(['open', 'closed', 'all']).optional().default('open'),
+    updatedSince: z
+      .string()
+      .optional()
+      .describe(
+        'ISO 8601 timestamp — only pull requests updated at or after this time (MCP since filter)'
+      ),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
@@ -172,10 +182,12 @@ export const PullRequestReadInputSchema = lazySchema(() =>
     repo: z.string().min(1).describe('Repository name'),
     pullNumber: z.number().describe('Pull request number'),
     method: z
-      .enum(['get', 'get_diff', 'get_review_comments'])
+      .enum(['get', 'get_diff', 'get_review_comments', 'get_reviews'])
       .optional()
       .default('get')
-      .describe('What to retrieve: full PR details, unified diff, or review comments'),
+      .describe(
+        'What to retrieve: full PR details, unified diff, review comments, or submitted reviews'
+      ),
   })
 );
 export type PullRequestReadInput = z.infer<typeof PullRequestReadInputSchema>;
@@ -221,3 +233,49 @@ export const CallToolInputSchema = lazySchema(() =>
   })
 );
 export type CallToolInput = z.infer<typeof CallToolInputSchema>;
+
+// =============================================================================
+// GraphQL ingest plane (workflow-first, isTool: false)
+// =============================================================================
+
+export const GraphqlQueryInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().min(1).describe('Read-only GraphQL query document'),
+    variables: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe('GraphQL variables passed to the query'),
+    operationName: z.string().optional().describe('GraphQL operation name when multiple are declared'),
+  })
+);
+export type GraphqlQueryInput = z.infer<typeof GraphqlQueryInputSchema>;
+
+export const RunQueryTemplateInputSchema = lazySchema(() =>
+  z.object({
+    templateId: z
+      .string()
+      .min(1)
+      .describe(
+        'Named query template id (e.g. orgCatalog.repos, activity.searchIssues, graph.pullRequestGraph)'
+      ),
+    variables: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe('Template variables (org, owner, repo, number, query, teamSlug, etc.)'),
+    first: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Page size override — merged into variables as "first" when provided'),
+    after: z
+      .string()
+      .optional()
+      .describe('Pagination cursor override — merged into variables as "after" when provided'),
+  })
+);
+export type RunQueryTemplateInput = z.infer<typeof RunQueryTemplateInputSchema>;
+
+export const ListQueryTemplatesInputSchema = lazySchema(() => z.object({}));
+export type ListQueryTemplatesInput = z.infer<typeof ListQueryTemplatesInputSchema>;

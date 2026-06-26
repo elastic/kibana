@@ -296,6 +296,7 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   TypeOf<typeof GetBulkAssetsRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
+  const fleetContext = await context.fleet;
   const { assetIds } = request.body;
   const savedObjectsClient = coreContext.savedObjects.getClient({
     includedHiddenTypes: [
@@ -305,10 +306,47 @@ export const getBulkAssetsHandler: FleetRequestHandler<
     ],
   });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
+  const workflowsApi = appContextService.getWorkflowsManagementSetup()?.management;
+  const agentBuilderApi = appContextService.getAgentBuilderSetup()?.management;
+  const spaceId = fleetContext.spaceId;
+
   const assets = await getBulkAssets(
     savedObjectsClient,
     savedObjectsTypeRegistry,
-    assetIds as AssetSOObject[]
+    assetIds as AssetSOObject[],
+    {
+      externalAssetEnricher: async (externalAssets) => {
+        const metadata: Record<string, { title?: string; description?: string }> = {};
+
+        await Promise.all(
+          externalAssets.map(async ({ id, type }) => {
+            try {
+              if (type === KibanaSavedObjectType.workflow && workflowsApi) {
+                const workflow = await workflowsApi.getWorkflow(id, spaceId);
+                if (workflow) {
+                  metadata[id] = {
+                    title: workflow.name,
+                    description: workflow.description,
+                  };
+                }
+              } else if (type === KibanaSavedObjectType.agent && agentBuilderApi) {
+                const agent = await agentBuilderApi.getAgent(id, request);
+                if (agent) {
+                  metadata[id] = {
+                    title: agent.name,
+                    description: agent.description,
+                  };
+                }
+              }
+            } catch {
+              // Fall back to asset id as the display title.
+            }
+          })
+        );
+
+        return metadata;
+      },
+    }
   );
 
   const body: GetBulkAssetsResponse = {
