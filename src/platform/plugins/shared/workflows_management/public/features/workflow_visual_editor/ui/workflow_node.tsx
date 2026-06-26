@@ -150,7 +150,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
                   )}
                   {node.data.stepExecution?.status === ExecutionStatus.FAILED && (
                     <EuiIcon
-                      type="alert"
+                      type="warning"
                       color={euiTheme.colors.danger}
                       aria-label={i18n.translate(
                         'workflows.workflowNode.failedStatusIconAriaLabel',
