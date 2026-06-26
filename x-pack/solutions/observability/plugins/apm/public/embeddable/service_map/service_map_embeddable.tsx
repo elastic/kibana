@@ -26,7 +26,11 @@ import { EmptyPrompt } from '../../components/app/service_map/empty_prompt';
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
-import { ServiceMapGraph } from '../../components/app/service_map/graph';
+import {
+  ServiceMapGraph,
+  SERVICE_FLYOUT_SOURCES,
+  type ServiceMapFlyoutOptions,
+} from '../../components/app/service_map/graph';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
 import {
   SloOverviewFlyout,
@@ -63,11 +67,15 @@ export interface ServiceMapEmbeddableProps {
   parentQuery?: Query | AggregateQuery;
   viewFilters?: ServiceMapViewFilters;
   onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
+  /** Optional overrides for the service flyout opened from this map. */
+  flyoutOptions?: ServiceMapFlyoutOptions;
   /**
    * When true, shows the quick-filters toggle/menu and minimap even though this is an embed.
    * Set by the dashboard embeddable factory when the panel is maximized in view mode.
    */
   showEmbeddedControls?: boolean;
+  /** Optional overrides for the service flyout opened from this map. */
+  flyoutOptions?: ServiceMapFlyoutOptions;
 }
 
 function LoadingSpinner() {
@@ -103,7 +111,9 @@ export function ServiceMapEmbeddable({
   parentQuery,
   viewFilters,
   onViewFiltersChange,
+  flyoutOptions,
   showEmbeddedControls,
+  flyoutOptions,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -210,6 +220,14 @@ export function ServiceMapEmbeddable({
       anomalySeverityFilter: [],
     };
   }, [viewFilters, badgesStatus]);
+
+  const flyoutOptionsForGraph = useMemo<ServiceMapFlyoutOptions>(
+    () => ({
+      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
+      ...flyoutOptions,
+    }),
+    [flyoutOptions]
+  );
 
   const badgeDependentFiltersActive =
     (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
@@ -352,6 +370,7 @@ export function ServiceMapEmbeddable({
           onMapOrientationChange={onMapOrientationChange}
           viewFilters={viewFiltersForGraph}
           onViewFiltersChange={onViewFiltersChange}
+          flyoutOptions={flyoutOptionsForGraph}
         />
       </div>
       {sloOverviewFlyout && (
