@@ -17,7 +17,7 @@ interface Props {
 export const DestinationRow = ({ destination }: Props) => {
   if (destination.type === 'workflow') {
     return (
-      <EuiBadge color="hollow" iconType="workflow">
+      <EuiBadge color="hollow" iconType="workflow" css={{ alignSelf: 'flex-start' }}>
         <WorkflowDestinationLink id={destination.id} />
       </EuiBadge>
     );
