@@ -7,7 +7,8 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable } from '@elastic/eui';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
@@ -21,7 +22,19 @@ import type {
 import { TimelinesTable } from '../../../timelines/components/open_timeline/timelines_table';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { useEditTimelineBatchActions } from '../../../timelines/components/open_timeline/edit_timeline_batch_actions';
-import { BATCH_ACTIONS } from '../../../timelines/components/open_timeline/translations';
+import {
+  BATCH_ACTIONS,
+  REFRESH,
+  SELECTED_TIMELINES,
+  SHOWING,
+} from '../../../timelines/components/open_timeline/translations';
+import {
+  UtilityBar,
+  UtilityBarAction,
+  UtilityBarGroup,
+  UtilityBarSection,
+  UtilityBarText,
+} from '../../../common/components/utility_bar';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
 import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
@@ -61,12 +74,11 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
     Record<string, JSX.Element>
   >({});
   const [selectedItems, setSelectedItems] = useState<OpenTimelineResult[]>([]);
-  const [isBatchActionsPopoverOpen, setIsBatchActionsPopoverOpen] = useState(false);
 
   const sort = useMemo(() => ({ sortField, sortOrder: sortDirection }), [sortField, sortDirection]);
   const pageInfo = useMemo(() => ({ pageSize, pageIndex }), [pageSize, pageIndex]);
 
-  const { timelines, totalCount, loading } = useGetTimelinesByIds({
+  const { timelines, totalCount, loading, refetch } = useGetTimelinesByIds({
     ids: timelineIds,
     pageInfo,
     search: searchTerm,
@@ -85,8 +97,6 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
   const onSelectionChange = useCallback((items: OpenTimelineResult[]) => {
     setSelectedItems(items);
   }, []);
-
-  const closeBatchActionsPopover = useCallback(() => setIsBatchActionsPopoverOpen(false), []);
 
   const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
     selectedItems,
@@ -120,28 +130,48 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="case-view-timelines">
-      {isSuperTimelineEnabled && selectedItems.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            aria-label={BATCH_ACTIONS}
-            isOpen={isBatchActionsPopoverOpen}
-            closePopover={closeBatchActionsPopover}
-            panelPaddingSize="none"
-            button={
-              <EuiButton
-                iconType="arrowDown"
+      <EuiFlexItem grow={false}>
+        <UtilityBar border>
+          <UtilityBarSection>
+            <UtilityBarGroup>
+              <UtilityBarText data-test-subj="case-view-timelines-showing-count">
+                <>
+                  {SHOWING}{' '}
+                  <FormattedMessage
+                    id="xpack.securitySolution.cases.timelineAttachment.nTimelines"
+                    defaultMessage="{totalCount} {totalCount, plural, =1 {timeline} other {timelines}}"
+                    values={{ totalCount }}
+                  />
+                </>
+              </UtilityBarText>
+            </UtilityBarGroup>
+            <UtilityBarGroup>
+              <UtilityBarText data-test-subj="case-view-timelines-selected-count">
+                {SELECTED_TIMELINES(selectedItems.length)}
+              </UtilityBarText>
+              {isSuperTimelineEnabled && (
+                <UtilityBarAction
+                  dataTestSubj="case-view-timelines-batch-actions-button"
+                  iconSide="right"
+                  iconType="chevronSingleDown"
+                  popoverContent={getBatchItemsPopoverContent}
+                  popoverPanelPaddingSize="none"
+                >
+                  {BATCH_ACTIONS}
+                </UtilityBarAction>
+              )}
+              <UtilityBarAction
+                dataTestSubj="case-view-timelines-refresh-button"
                 iconSide="right"
-                onClick={() => setIsBatchActionsPopoverOpen((prev) => !prev)}
-                data-test-subj="case-view-timelines-batch-actions-button"
+                iconType="refresh"
+                onClick={refetch}
               >
-                {BATCH_ACTIONS}
-              </EuiButton>
-            }
-          >
-            {getBatchItemsPopoverContent(closeBatchActionsPopover)}
-          </EuiPopover>
-        </EuiFlexItem>
-      )}
+                {REFRESH}
+              </UtilityBarAction>
+            </UtilityBarGroup>
+          </UtilityBarSection>
+        </UtilityBar>
+      </EuiFlexItem>
       <EuiFlexItem>
         <TimelinesTable
           actionTimelineToShow={isSuperTimelineEnabled ? ['selectable'] : []}
