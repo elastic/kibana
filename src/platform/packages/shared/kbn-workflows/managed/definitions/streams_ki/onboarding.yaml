@@ -180,7 +180,7 @@ steps:
   #         features whose exclusion must be remembered) not refreshed this
   #         cycle so DSL retention does not physically delete them.
   # -----------------------------------------------------------------------
-  - name: keep_alive_durable
+  - name: keep_alive_persistent
     type: kibana.request
     with:
       method: POST
@@ -205,4 +205,4 @@ steps:
       queriesConnectorUsed: "${{ variables.queriesConnectorUsed }}"
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
-      keepAliveRefreshed: "${{ steps.keep_alive_durable.output.refreshed }}"
+      keepAliveRefreshed: "${{ steps.keep_alive_persistent.output.refreshed }}"
