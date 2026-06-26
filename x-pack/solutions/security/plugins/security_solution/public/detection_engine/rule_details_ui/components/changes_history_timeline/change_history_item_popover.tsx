@@ -66,7 +66,7 @@ export const ChangeHistoryItemPopover = memo(function ChangeHistoryItemPopover({
           items={[
             <EuiContextMenuItem
               key="restore"
-              icon="refresh"
+              icon="undo"
               disabled={isRestoring}
               onClick={() => {
                 closePopover();
