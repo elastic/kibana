@@ -178,6 +178,37 @@ describe('DatatableUtilitiesService', () => {
     });
   });
 
+  describe('getColumnTimeRange', () => {
+    it('should return undefined when there is no applied time range', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: { type: 'date', sourceParams: {} },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getColumnTimeRange(column)).toBeUndefined();
+    });
+
+    it('should return the applied time range regardless of the interval', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          sourceParams: {
+            appliedTimeRange: { from: '2026-01-01', to: '2026-01-02' },
+            params: { used_interval: '6h' },
+          },
+        },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getColumnTimeRange(column)).toEqual({
+        from: '2026-01-01',
+        to: '2026-01-02',
+      });
+    });
+  });
+
   describe('getNumberHistogramInterval', () => {
     it('should return nothing on column from other data source', () => {
       expect(

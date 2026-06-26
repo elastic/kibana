@@ -103,6 +103,10 @@ export class DatatableUtilitiesService {
     };
   }
 
+  getColumnTimeRange(column: DatatableColumn): TimeRange | undefined {
+    return column.meta.sourceParams?.appliedTimeRange as TimeRange | undefined;
+  }
+
   async getDataView(column: DatatableColumn): Promise<DataView | undefined> {
     if (!column.meta.index) {
       return;
