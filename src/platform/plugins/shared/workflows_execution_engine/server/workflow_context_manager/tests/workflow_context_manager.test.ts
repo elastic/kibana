@@ -122,10 +122,8 @@ describe('WorkflowContextManager', () => {
       return exec?.[field];
     };
     const stepIoService = {
-      hasEvictedOutputs: jest.fn().mockReturnValue(false),
       prepareForRead: jest.fn().mockResolvedValue(undefined),
       rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
-      releaseTransientlyRehydratedOutputs: jest.fn(),
       setStepInput: jest.fn((id: string, input: unknown) => stepInputs.set(id, input)),
       setStepOutput: jest.fn((id: string, output: unknown) => stepOutputs.set(id, output)),
       getStepInput: jest.fn((id: string) => readIo(id, 'input')),

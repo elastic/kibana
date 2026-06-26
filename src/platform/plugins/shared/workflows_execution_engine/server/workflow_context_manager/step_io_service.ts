@@ -11,18 +11,15 @@ import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import {
-  extractReferencedStepIds,
-  extractReferencedStepIdsFromVariables,
-} from './extract_referenced_step_ids';
+import type { CacheTier } from './sqlite_cache/cache_tier';
+import { NoopCacheTier } from './sqlite_cache/cache_tier';
 import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_types';
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import { formatBytes, safeOutputSize } from '../step/errors';
+import { safeOutputSize } from '../step/errors';
 import { buildStepExecutionId } from '../utils';
 
 /**
@@ -35,12 +32,16 @@ export interface StepIoServiceInit {
   stepRepository: StepExecutionRepository;
   state: StepIoStateAccessor;
   pinnedStepTypes?: ReadonlySet<string>;
-  /**
-   * Minimum output size in bytes for a completed step to be eligible for eviction.
-   * 0 = evict all completed step outputs. `Infinity` = disable eviction entirely.
-   */
-  evictionMinBytes?: number;
   logger?: Logger;
+  /** Off-heap read cache. Defaults to NoopCacheTier (no-op) when omitted. */
+  cacheTier?: CacheTier;
+  /**
+   * When true and the compiled graph node carries `dataStepDependencies`,
+   * prepareForRead loads only those predecessor outputs instead of all
+   * transitive predecessors. Requires cacheTier.spills=true to have effect.
+   * Default false (conservative fallback — load everything).
+   */
+  selectiveRehydration?: boolean;
 }
 
 export interface PrepareForReadArgs {
@@ -98,12 +99,10 @@ export interface StepIoLifecycle {
   flushStepChanges(): Promise<void>;
   load(): Promise<void>;
   prepareForRead(args: PrepareForReadArgs): Promise<void>;
-  releaseTransientlyRehydratedOutputs(): void;
   evictStaleLoopOutputs(innerStepIds: Iterable<string>): void;
   evictCompletedLoopsOnResume(graph: {
     getInnerStepIds(loopStepId: string): Iterable<string>;
   }): void;
-  hasEvictedOutputs(): boolean;
   getOutputSizeStats(): OutputSizeStats;
 }
 
@@ -119,9 +118,8 @@ export interface StepIoLifecycle {
  * Responsibilities:
  *   - in-memory `input`/`output` storage and reads
  *   - output size accounting for telemetry (`getOutputSizeStats`)
- *   - deferred output eviction (one-cycle deferral after flush)
  *   - immediate input eviction post-flush for terminal steps
- *   - on-demand rehydration of evicted outputs from ES
+ *   - on-demand rehydration from SQLite / ES when spills are enabled
  *   - resume-time output orchestration (`load()`)
  *   - stale-loop iteration cleanup
  *   - bulk-upsert of merged lifecycle + IO partials
@@ -134,8 +132,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly stepRepository: StepExecutionRepository;
   private readonly state: StepIoStateAccessor;
   private readonly pinnedStepTypes: ReadonlySet<string>;
-  private readonly evictionMinBytes: number;
   private readonly logger?: Logger;
+  private readonly cacheTier: CacheTier;
+  private readonly selectiveRehydration: boolean;
 
   // ----- Canonical IO storage ----------------------------------------------
   // These maps are the source of truth for step input/output. State holds
@@ -145,7 +144,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly inputs = new Map<string, JsonValue>();
   /**
    * Per-step output. `null` means FAILED (semantically distinct from absent).
-   * Absent means evicted (or never set yet).
+   * When `cacheTier.spills=false` (RAM-only): absent means never-set.
+   * When `cacheTier.spills=true` (SQLite spill): absent means spilled to
+   * SQLite / ES and not yet rehydrated.
    */
   private readonly outputs = new Map<string, JsonValue | null>();
   /**
@@ -157,40 +158,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   private pendingIoChanges = new Map<string, { input?: JsonValue; output?: JsonValue | null }>();
 
-  /**
-   * Every step execution id whose `output` has been evicted from memory.
-   * Reads against this Set are the authoritative "is this output evicted?"
-   * answer — used by {@link hasEvictedOutputs} and the rehydration filter.
-   */
-  private readonly evictedOutputIds = new Set<string>();
-  /**
-   * Sizes for evicted outputs that we actually measured. Resume-time
-   * deferred outputs land in {@link evictedOutputIds} only — their size is
-   * unknown and *deliberately not* recorded as 0 here, because that would
-   * pollute {@link getOutputSizeStats} with phantom zero-entries.
-   */
-  private readonly evictedOutputSizes = new Map<string, number>();
-  /** Recorded output sizes (Layer 2 enforcement). Used to gate eviction eligibility. */
+  /** Recorded output sizes (Layer 2 enforcement). Used for telemetry. */
   private readonly outputSizes = new Map<string, number>();
   /**
-   * Running sum of every value held in {@link outputSizes} and
-   * {@link evictedOutputSizes}. Maintained in lockstep with the two maps via
-   * {@link setOutputSize} / {@link clearOutputSize} / {@link setEvicted} /
-   * {@link clearEvicted} so {@link getOutputSizeStats} runs in `O(1)`
-   * instead of iterating both maps on every call (the telemetry layer calls
-   * this once per flush).
+   * Step execution IDs whose output was loaded into {@link outputs} by
+   * {@link rehydrateOutputs} (sourced from SQLite / ES, not written via
+   * {@link setStepOutput}). Snapshotted at the start of each flush cycle and
+   * evicted from heap at flush end by {@link evictFlushedTransients}, giving
+   * all steps that execute within the same flush window a chance to read
+   * them without a second SQLite round-trip.
+   *
+   * Only populated when `cacheTier.spills=true`.
+   */
+  private readonly transientIds = new Set<string>();
+  /**
+   * Running sum of every value held in {@link outputSizes}. Maintained in
+   * lockstep with the map via {@link setOutputSize} so
+   * {@link getOutputSizeStats} runs in `O(1)`.
    */
   private totalRecordedBytes = 0;
-  /** IDs queued for eviction on the NEXT flush cycle (one-cycle deferral). */
-  private pendingOutputEvictionIds: ReadonlyArray<string> = [];
-  /**
-   * IDs that the most recent `prepareForRead` had to rehydrate from ES. Used
-   * by `releaseTransientlyRehydratedOutputs` to drop those outputs back to
-   * the evicted state once the consuming step has finished, so resume tasks
-   * don't progressively grow in-memory state by accumulating predecessor
-   * outputs they only briefly needed.
-   */
-  private transientlyRehydratedIds: string[] = [];
 
   /**
    * Per-execution `data.set` output, keyed by step execution id. Populated
@@ -216,8 +202,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     this.stepRepository = init.stepRepository;
     this.state = init.state;
     this.pinnedStepTypes = init.pinnedStepTypes ?? EVICTION_EXEMPT_STEP_TYPES;
-    this.evictionMinBytes = init.evictionMinBytes ?? Infinity;
     this.logger = init.logger;
+    this.cacheTier = init.cacheTier ?? new NoopCacheTier();
+    this.selectiveRehydration = init.selectiveRehydration ?? false;
   }
 
   // ----- IO reads -----------------------------------------------------------
@@ -228,6 +215,16 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   public getStepOutput(stepExecutionId: string): JsonValue | null | undefined {
     if (!this.outputs.has(stepExecutionId)) {
+      // Permanent canary: when spilling is active and an output is accessed but
+      // was not rehydrated, it either means the compile-time allowlist missed a
+      // dependency or a cross-node resume gap. Log at ERROR so it is visible in
+      // logs immediately — this fires regardless of the selectiveRehydration flag.
+      if (this.cacheTier.spills) {
+        this.logger?.error(
+          `Step output accessed but not rehydrated (evicted and not loaded): stepExecutionId=${stepExecutionId}. ` +
+            `Check dataStepDependencies on the compiled graph node for the accessing step, or verify cross-node resume loaded all required outputs.`
+        );
+      }
       return undefined;
     }
     return this.outputs.get(stepExecutionId);
@@ -327,11 +324,6 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     output: JsonValue | null,
     sizeBytes?: number
   ): void {
-    // Fresh in-memory output is authoritative — do not let a subsequent
-    // prepareForRead rehydrate from ES and overwrite with a stale doc
-    // (common when a deferred step completes on resume before flush).
-    this.clearEvicted(stepExecutionId);
-
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
     }
@@ -342,25 +334,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     const existing = this.pendingIoChanges.get(stepExecutionId) ?? {};
     existing.output = output;
     this.pendingIoChanges.set(stepExecutionId, existing);
+    // Off-heap spill (SQLite mode only): fire-and-forget; ES write is always unconditional
+    if (this.cacheTier.spills) {
+      this.cacheTier.put(stepExecutionId, output);
+    }
   }
 
   // ----- Size tracking & telemetry ------------------------------------------
 
   /**
-   * Aggregate output size statistics across active and evicted steps. `O(1)`:
-   * the running counter is maintained in lockstep with every write to
-   * {@link outputSizes} / {@link evictedOutputSizes}, so this is safe
-   * to call from a hot path (e.g. the persistence-loop telemetry tick).
+   * Aggregate output size statistics for telemetry. `O(1)`: the running
+   * counter is maintained in lockstep with every write to {@link outputSizes}
+   * so this is safe to call from a hot path (e.g. the persistence-loop
+   * telemetry tick).
    */
   public getOutputSizeStats(): OutputSizeStats {
     return {
       totalBytes: this.totalRecordedBytes,
-      stepCount: this.outputSizes.size + this.evictedOutputSizes.size,
+      stepCount: this.outputSizes.size,
     };
-  }
-
-  public hasEvictedOutputs(): boolean {
-    return this.evictedOutputIds.size > 0;
   }
 
   /**
@@ -382,41 +374,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     this.totalRecordedBytes -= previous;
   }
 
-  /**
-   * Marks a step output as evicted and, when a size is provided, records it
-   * for the telemetry running total. Pass `undefined` (or omit) to mark a
-   * resume-deferred eviction whose size is genuinely unknown — those are
-   * tracked in {@link evictedOutputIds} only, never as phantom-zero entries
-   * in the size map.
-   */
-  private setEvicted(stepExecutionId: string, sizeBytes?: number): void {
-    this.evictedOutputIds.add(stepExecutionId);
-    if (sizeBytes !== undefined) {
-      const previous = this.evictedOutputSizes.get(stepExecutionId) ?? 0;
-      this.evictedOutputSizes.set(stepExecutionId, sizeBytes);
-      this.totalRecordedBytes += sizeBytes - previous;
-    }
-  }
-
-  /**
-   * Clears the eviction tracking for a step (Set membership + size entry if
-   * we had one). Decrements the running total only when a size had been
-   * recorded.
-   */
-  private clearEvicted(stepExecutionId: string): void {
-    this.evictedOutputIds.delete(stepExecutionId);
-    const previous = this.evictedOutputSizes.get(stepExecutionId);
-    if (previous === undefined) return;
-    this.evictedOutputSizes.delete(stepExecutionId);
-    this.totalRecordedBytes -= previous;
-  }
-
   // ----- Lifecycle (public entry points) -----------------------------------
 
   /**
    * Flushes pending step-doc and workflow-doc changes to Elasticsearch and
-   * runs IO bookkeeping (deferred output eviction + immediate input eviction)
-   * on the freshly-flushed step IDs.
+   * runs IO bookkeeping (output eviction + immediate input eviction) on the
+   * freshly-flushed step IDs.
    */
   public async flush(): Promise<void> {
     await Promise.all([this.state.flushWorkflowDoc(), this.flushStepChanges()]);
@@ -425,23 +388,35 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   /**
    * Step-doc-only flush. Drains state's pending lifecycle partials, merges
    * with this service's IO partials, and runs the combined bulk-upsert. Then
-   * processes the deferred output-eviction cycle and immediate input
-   * eviction. Even when there are no doc changes this still drains the
-   * previous cycle's eviction queue — the deferral is one cycle, not one
-   * bulk-upsert.
+   * processes output eviction (SQLite spill mode only) and immediate input
+   * eviction.
    */
   public async flushStepChanges(): Promise<void> {
-    const flushedIds = await this.persistMergedStepChanges();
-    this.runDeferredEvictionCycle(flushedIds);
+    // Snapshot transient IDs before the async write. Any output rehydrated
+    // by prepareForRead stays in memory until this flush completes — steps
+    // that run in the same ~500 ms window find it in this.outputs without a
+    // second SQLite round-trip. At flush end the snapshot is swept out.
+    const transientSnapshot = this.cacheTier.spills ? new Set(this.transientIds) : undefined;
+
+    const { flushedIds, outputFlushedIds } = await this.persistMergedStepChanges();
+
+    if (this.cacheTier.spills) {
+      this.evictFlushedOutputs(outputFlushedIds);
+      this.evictFlushedTransients(transientSnapshot!);
+    }
+    this.evictCompletedStepInputs(flushedIds);
   }
 
   /**
    * Resume-time entry point. Asks the repository for step metadata without
    * the (potentially large) `output` field, hands it to state, then eagerly
-   * fetches outputs for pinned step types (data.set, waitForInput) so they
-   * are immediately available without rehydration. Non-pinned steps are
-   * marked deferred — their outputs will be rehydrated on demand by
-   * `prepareForRead`.
+   * fetches outputs for a mode-determined set of steps:
+   *
+   * - `spills=false` (RAM-only): all step outputs are loaded into memory so
+   *   nothing is absent after resume — `prepareForRead` is a no-op.
+   * - `spills=true` (SQLite spill): only pinned step types (data.set,
+   *   waitForInput) are loaded; everything else stays absent and is
+   *   rehydrated on demand by `prepareForRead` (SQLite → ES cold fallback).
    */
   public async load(): Promise<void> {
     this.dataSetOutputs.clear();
@@ -465,11 +440,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // wire, but stripping defensively guards against a future caller
     // passing sourceIncludes that re-introduces it.
     //
-    // We also pre-seed `dataSetOutputs` here so the map's insertion order
-    // matches `globalExecutionIndex` order — `foundSteps` is returned in
-    // workflow `stepExecutionIds` order, which is the same order. Values
-    // are set to `null` as a placeholder and overwritten below once the
-    // pinned-doc fetch returns each step's actual `output`.
+    // Pre-seed `dataSetOutputs` in insertion order (= globalExecutionIndex
+    // order) — overwritten below once the eager-fetch returns each step's
+    // actual `output`.
     const metadata: StepExecutionMetadata[] = [];
     for (const step of foundSteps) {
       if (step.input !== undefined) {
@@ -482,13 +455,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
     this.state.ingestLoadedStepDocs(metadata);
 
-    const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
-    if (pinnedIdsToFetch.length > 0) {
-      const pinnedDocs = await this.stepRepository.getStepExecutionsByIds(pinnedIdsToFetch, [
-        'id',
-        'output',
-      ]);
-      for (const doc of pinnedDocs) {
+    const idsToFetch = this.getIdsToEagerLoad(foundSteps);
+    if (idsToFetch.length > 0) {
+      const docs = await this.stepRepository.getStepExecutionsByIds(idsToFetch, ['id', 'output']);
+      for (const doc of docs) {
         const output: JsonValue | null = doc.output ?? null;
         this.outputs.set(doc.id, output);
         if (this.dataSetOutputs.has(doc.id)) {
@@ -545,93 +515,53 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   // ----- Rehydration --------------------------------------------------------
 
   /**
-   * Pre-warms the in-memory state by rehydrating any evicted step outputs
-   * that the upcoming step's context build will need. Targeted via static
-   * template analysis (`extractReferencedStepIds`); falls back to all
-   * predecessors when the analysis is ambiguous (dynamic bracket access,
-   * etc.). Also rehydrates scope-stack entries used by
-   * `enrichStepContextAccordingToStepScope`.
+   * Pre-warms the in-memory state by rehydrating absent step outputs that the
+   * upcoming step's context build will need.
    *
-   * **Deferred-release semantics.** Outputs rehydrated for the *previous*
-   * step are released here, not at the end of the previous step's run.
-   * That lets us keep predecessors resident across consecutive consumers
-   * (fanout pattern: A → B, A → C, A → D — A stays in memory through C and
-   * D instead of being re-fetched each time) and removes the need for a
-   * "skip release on retry" hack: a retry attempt's `prepareForRead` will
-   * recompute the same `neededIds` and naturally retain the same outputs.
-   *
-   * Workflow-end cleanup is handled by `releaseTransientlyRehydratedOutputs`
-   * called from the execution loop's final-flush path.
-   *
-   * No-op (zero ES calls) when nothing is evicted and nothing is transiently
-   * rehydrated from a previous step.
+   * - `spills=false` (RAM-only): no-op — all outputs are already in `outputs`.
+   * - `spills=true` + `selectiveRehydration=false` (default): collects all
+   *   predecessor latest-exec IDs plus active scope-frame IDs, filters to those
+   *   absent from `outputs`, then fetches from SQLite (with ES as a cold-cache
+   *   fallback). Over-fetches deliberately to avoid any analysis-miss risk.
+   * - `spills=true` + `selectiveRehydration=true`: when the compiled graph node
+   *   carries `dataStepDependencies` (a `string[]`), only those stepIds are
+   *   rehydrated — eliminating the O(n²) growth caused by the scope chain making
+   *   every step a transitive successor of every prior step. When
+   *   `dataStepDependencies` is `null` or `undefined` (dynamic refs or unannotated
+   *   node), falls back to the full-predecessor path. Scope-frame loading is
+   *   unchanged in both modes (and is a safe no-op once scope frame types are pinned).
    */
   public async prepareForRead({ node, predecessorsResolver }: PrepareForReadArgs): Promise<void> {
-    const noPriorTransients = this.transientlyRehydratedIds.length === 0;
-    if (!this.hasEvictedOutputs() && noPriorTransients) {
-      return;
+    if (!this.cacheTier.spills) {
+      return; // RAM-only: all outputs are already in memory
     }
 
-    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
+    // Collect latest execution IDs for predecessor nodes.
+    // In selective mode, restrict to the statically-declared data-flow deps;
+    // fall back to all transitive predecessors when deps are unknown.
+    const idsToFetch: string[] = [];
+    const dataDeps = this.selectiveRehydration ? node.dataStepDependencies : undefined;
 
-    // Drop the previous step's transient outputs that this step does not
-    // need. Anything still in `neededIds` stays resident — `rehydrateOutputs`
-    // will then skip those IDs because they are no longer in the evicted map.
-    this.releaseTransientExcept(neededIds);
-
-    // data.set / waitForInput outputs are pinned (never evicted), so they
-    // never appear in evictedOutputIds — rehydrateOutputs filters
-    // out non-evicted IDs cheaply.
-    await this.rehydrateOutputs(Array.from(neededIds));
-  }
-
-  /**
-   * Resolves the set of step execution IDs whose outputs need to be rehydrated
-   * before the upcoming context build. Combines:
-   *
-   * 1. Template-referenced steps. Static analysis returns either:
-   *    - a `Set<string>` of step IDs that the node's templates reference,
-   *    - or `null` when bracket access defeats static analysis.
-   *
-   * 2. Active scope-stack frames consumed by `enrichStepContextAccordingToStepScope`.
-   *
-   * **Conservative fallback.** When the static analysis returns an empty set
-   * but evicted outputs exist among the predecessors, we fall back to
-   * rehydrating all predecessors. This guards against the analysis missing
-   * a template reference (new node shape, unknown configuration key) — a
-   * miss would otherwise produce `undefined` at template render time and
-   * silently corrupt downstream step IO.
-   */
-  private computeRehydrationTargets(
-    node: GraphNodeUnion,
-    predecessorsResolver: PredecessorsResolver
-  ): Set<string> {
-    const neededIds = new Set<string>();
-    const referencedStepIds = extractReferencedStepIds(node);
-
-    const fallbackToPredecessors = (): void => {
-      for (const pred of predecessorsResolver(node)) {
-        const latestExec = this.state.getLatestStepExecution(pred.stepId);
-        if (latestExec) {
-          neededIds.add(latestExec.id);
+    if (dataDeps != null) {
+      // Selective path: only load what templates actually reference
+      for (const stepId of dataDeps) {
+        const latest = this.state.getLatestStepExecution(stepId);
+        if (latest && !this.outputs.has(latest.id)) {
+          idsToFetch.push(latest.id);
         }
       }
-    };
-
-    if (referencedStepIds === null) {
-      // Static analysis ambiguous (dynamic bracket access).
-      fallbackToPredecessors();
     } else {
-      this.addLatestExecutionIdsForStepIds(neededIds, referencedStepIds);
-      // If the analysis found nothing but a predecessor is actually evicted,
-      // the analysis missed a reference. Fall back conservatively rather
-      // than trust an empty set.
-      if (referencedStepIds.size === 0 && this.hasEvictedPredecessor(node, predecessorsResolver)) {
-        fallbackToPredecessors();
+      // Conservative path: load all transitive predecessors
+      for (const pred of predecessorsResolver(node)) {
+        const latest = this.state.getLatestStepExecution(pred.stepId);
+        if (latest && !this.outputs.has(latest.id)) {
+          idsToFetch.push(latest.id);
+        }
       }
     }
 
-    // Scope-stack entries — needed by enrichStepContextAccordingToStepScope.
+    // Also include scope-frame step execution IDs needed by
+    // enrichStepContextAccordingToStepScope
     const executionId = this.state.getWorkflowExecutionId();
     let currentScope = WorkflowScopeStack.fromStackFrames(
       this.state.getWorkflowExecutionScopeStack()
@@ -644,150 +574,95 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         frame.stepId,
         currentScope.stackFrames
       );
-      neededIds.add(scopeStepExecutionId);
-
-      const scopeStepExecution = this.state.getStepExecution(scopeStepExecutionId);
-      if (scopeStepExecution?.stepType === 'foreach') {
-        const scopeInputStepIds = this.extractReferencedStepIdsFromValue(
-          this.getStepInput(scopeStepExecutionId)
-        );
-        if (scopeInputStepIds === null) {
-          fallbackToPredecessors();
-        } else {
-          this.addLatestExecutionIdsForStepIds(neededIds, scopeInputStepIds);
-        }
+      // Only fetch scope frames that have a recorded step execution. Scope
+      // nodes like enterTimeoutZone never call startStep/finishStep and
+      // therefore never write an output; fetching their IDs unconditionally
+      // produces spurious ES round-trips and ERROR-level log noise.
+      if (
+        this.state.getStepExecution(scopeStepExecutionId) &&
+        !this.outputs.has(scopeStepExecutionId)
+      ) {
+        idsToFetch.push(scopeStepExecutionId);
       }
     }
 
-    return neededIds;
-  }
-
-  private addLatestExecutionIdsForStepIds(
-    neededIds: Set<string>,
-    referencedStepIds: ReadonlySet<string>
-  ): void {
-    for (const stepId of referencedStepIds) {
-      const latestExec = this.state.getLatestStepExecution(stepId);
-      if (latestExec) {
-        neededIds.add(latestExec.id);
-      }
+    if (idsToFetch.length > 0) {
+      await this.rehydrateOutputs(idsToFetch);
     }
   }
 
-  private extractReferencedStepIdsFromValue(value: unknown): Set<string> | null {
+  /**
+   * Deletes all SQLite cache rows for this workflow run. Called from
+   * workflow_execution_loop.ts at run end.
+   * Failure is logged and never thrown.
+   */
+  public async disposeCache(): Promise<void> {
+    const runId = this.state.getWorkflowExecutionId();
     try {
-      return extractReferencedStepIdsFromVariables(scanForTemplateVariables(value));
-    } catch {
-      return null;
-    }
-  }
-
-  private hasEvictedPredecessor(
-    node: GraphNodeUnion,
-    predecessorsResolver: PredecessorsResolver
-  ): boolean {
-    for (const pred of predecessorsResolver(node)) {
-      const latestExec = this.state.getLatestStepExecution(pred.stepId);
-      if (latestExec && this.evictedOutputIds.has(latestExec.id)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Releases all transiently-rehydrated outputs unconditionally. Used at
-   * workflow-end (final flush) as a safety net — by that point no further
-   * `prepareForRead` is going to run, so any IDs left in the transient set
-   * are dead weight.
-   *
-   * Memory-only: the doc is already on disk (it was evicted before we
-   * rehydrated), so we just mark it evicted again and clear it from the
-   * outputs map. Idempotent — calling with no transient rehydrations is a
-   * no-op.
-   */
-  public releaseTransientlyRehydratedOutputs(): void {
-    this.releaseTransientExcept(undefined);
-  }
-
-  /**
-   * Releases transiently-rehydrated outputs that are *not* in `keepIds`,
-   * leaving the kept ones resident for the next consumer.
-   *
-   * Called from `prepareForRead` to implement the deferred-release pattern:
-   * the next step computes its `neededIds` first, then we drop only the
-   * previous step's transient IDs that the next step does not need. Pass
-   * `undefined` to release everything (workflow-end cleanup).
-   *
-   * Re-eviction is identical to eviction except the threshold gate does
-   * not apply — the output is known to have been evictable since it came
-   * back from ES. Pinned step types still cannot be re-evicted (guarded
-   * by `isReleaseCandidate`).
-   */
-  private releaseTransientExcept(keepIds: ReadonlySet<string> | undefined): void {
-    if (this.transientlyRehydratedIds.length === 0) {
-      return;
-    }
-
-    const ids = this.transientlyRehydratedIds;
-    const remaining: string[] = [];
-    let releasedCount = 0;
-
-    for (const id of ids) {
-      if (keepIds?.has(id)) {
-        // Keep this output resident; the upcoming step needs it. It will be
-        // re-evaluated for release at the *next* prepareForRead.
-        remaining.push(id);
-      } else if (this.isReleaseCandidate(id)) {
-        const sizeBytes = this.outputSizes.get(id);
-        this.outputs.delete(id);
-        this.clearOutputSize(id);
-        this.setEvicted(id, sizeBytes);
-        releasedCount++;
-      }
-    }
-
-    this.transientlyRehydratedIds = remaining;
-
-    if (releasedCount > 0) {
-      this.logger?.debug(
-        `Released ${releasedCount} transiently rehydrated step output(s); ${remaining.length} kept resident; total evicted: ${this.evictedOutputIds.size}`
+      await this.cacheTier.cleanup(runId);
+    } catch (err) {
+      this.logger?.warn(
+        `SQLite cache cleanup failed for run ${runId}: ${
+          err instanceof Error ? err.message : String(err)
+        }`
       );
     }
   }
 
   /**
-   * Re-fetches evicted output fields from Elasticsearch for the requested
-   * step execution IDs. Only IDs that are actually evicted are fetched; if
-   * none are, this is a no-op with zero ES calls.
+   * Fetches absent step outputs from SQLite (warm path) or Elasticsearch
+   * (cold / cross-node resume fallback) for the requested step execution IDs.
+   * Only IDs not currently in `outputs` are fetched — pinned types and
+   * recently-written steps are skipped automatically.
    *
-   * Defensively removes IDs not returned by ES so we don't loop forever
-   * trying to rehydrate a doc that has been deleted/ILM'd. Logs `error`
-   * (not `warn`) when the workflow is still RUNNING — that's the only
-   * scenario where a missing evicted doc indicates active data loss.
+   * Defensively ignores IDs not returned by either tier so we don't retry
+   * a doc that has been deleted / ILM'd. Logs `error` (not `warn`) when the
+   * workflow is still RUNNING — that's the only scenario where a missing
+   * doc indicates active data loss.
    */
   public async rehydrateOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
-    const idsToRehydrate = stepExecutionIds.filter((id) => this.evictedOutputIds.has(id));
+    const idsToRehydrate = stepExecutionIds.filter((id) => !this.outputs.has(id));
     if (idsToRehydrate.length === 0) {
       return;
     }
 
-    const totalBytes = idsToRehydrate.reduce(
-      (sum, id) => sum + (this.evictedOutputSizes.get(id) ?? 0),
-      0
-    );
-
     const startMs = performance.now();
     const expectedRunId = this.state.getWorkflowExecutionId();
-    const fetched = await this.stepRepository.getStepExecutionsByIds(idsToRehydrate, [
+
+    // --- SQLite cache tier: try local disk before ES mget ---
+    const cacheHits = await this.cacheTier.get(idsToRehydrate, expectedRunId);
+    const cacheElapsedMs = Math.round(performance.now() - startMs);
+    const stillMissingIds: string[] = [];
+    let cacheRestoredCount = 0;
+    for (const id of idsToRehydrate) {
+      if (cacheHits.has(id)) {
+        this.outputs.set(id, cacheHits.get(id) ?? null);
+        this.transientIds.add(id);
+        cacheRestoredCount++;
+        const sz = safeOutputSize(cacheHits.get(id) ?? null);
+        if (sz !== null) this.setOutputSize(id, sz);
+      } else {
+        stillMissingIds.push(id);
+      }
+    }
+    if (cacheRestoredCount > 0) {
+      this.logger?.debug(
+        `Rehydrated ${cacheRestoredCount}/${idsToRehydrate.length} step output(s) from SQLite cache in ${cacheElapsedMs}ms`
+      );
+    }
+    if (stillMissingIds.length === 0) {
+      return;
+    }
+    // ---------------------------------------------------------
+
+    const fetched = await this.stepRepository.getStepExecutionsByIds(stillMissingIds, [
       'id',
       'output',
       'workflowRunId',
     ]);
     // Defensive cross-execution filter: mget targets documents by `_id` only,
     // and step execution IDs are constructed from the workflow execution ID,
-    // so a collision is improbable but not impossible (e.g. someone running
-    // a custom resume path with mis-typed IDs). Drop any doc whose
+    // so a collision is improbable but not impossible. Drop any doc whose
     // workflowRunId disagrees with the current execution rather than
     // restoring foreign output into memory.
     const docs = fetched.filter((doc) => {
@@ -802,60 +677,27 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     let restoredCount = 0;
     for (const doc of docs) {
-      const previousBytes = this.evictedOutputSizes.get(doc.id);
-      this.clearEvicted(doc.id);
-      // The repository normalises absent `output` to `null` at the boundary,
-      // so `doc.output` here is already `JsonValue | null`. FAILED steps are
-      // not eviction candidates, so any rehydrated value was a COMPLETED
-      // output, and `null` only occurs when ES legitimately stored null.
+      // The repository normalises absent `output` to `null` at the boundary.
+      // FAILED steps are not eviction candidates so null here means a
+      // legitimately null COMPLETED output.
       this.outputs.set(doc.id, doc.output ?? null);
-      // Track for transient release: predecessors brought back into memory
-      // for one step's read should not stay there forever.
-      this.transientlyRehydratedIds.push(doc.id);
+      this.transientIds.add(doc.id);
       restoredCount++;
-
-      // Restore size tracking so:
-      //  1. getOutputSizeStats() remains accurate after rehydration
-      //  2. The step is eligible for re-eviction next cycle
-      // For live-execution evictions the original size is preserved; for
-      // resume-path deferred outputs it's genuinely unknown (no entry in
-      // `evictedOutputSizes`), so we measure via `safeOutputSize`.
-      // Non-measurable outputs (`null` from `safeOutputSize`) are deliberately
-      // not tracked rather than recorded as 0 — these came from ES so they
-      // were serialisable when written; getting null here means a
-      // JSON.stringify quirk, not a poison payload.
-      if (previousBytes !== undefined) {
-        this.setOutputSize(doc.id, previousBytes);
-      } else {
-        const sz = safeOutputSize(doc.output);
-        if (sz !== null) {
-          this.setOutputSize(doc.id, sz);
-        }
-      }
-    }
-
-    // Defensive: drop IDs not returned by ES so we don't retry forever.
-    const stillEvictedAfterFetch = idsToRehydrate.filter((id) => this.evictedOutputIds.has(id));
-    for (const id of stillEvictedAfterFetch) {
-      this.clearEvicted(id);
+      const sz = safeOutputSize(doc.output);
+      if (sz !== null) this.setOutputSize(doc.id, sz);
     }
 
     const elapsedMs = Math.round(performance.now() - startMs);
     this.logger?.debug(
-      `Rehydrated ${restoredCount}/${idsToRehydrate.length} step output(s) (${formatBytes(
-        totalBytes
-      )}) from ES in ${elapsedMs}ms, ${this.evictedOutputIds.size} still evicted`
+      `Rehydrated ${restoredCount}/${stillMissingIds.length} step output(s) from ES in ${elapsedMs}ms`
     );
 
-    if (stillEvictedAfterFetch.length > 0) {
+    // Defensive: IDs still absent after both tiers may have been ILM'd.
+    const stillAbsentAfterFetch = stillMissingIds.filter((id) => !this.outputs.has(id));
+    if (stillAbsentAfterFetch.length > 0) {
       const message = `${
-        stillEvictedAfterFetch.length
-      } evicted step output(s) not found in ES during rehydration: ${stillEvictedAfterFetch.join(
-        ', '
-      )}`;
-      // Missing-in-ES on a still-RUNNING workflow indicates active data loss
-      // (a doc that was flushed has disappeared mid-execution). On terminal
-      // workflows it's typically harmless ILM/cleanup.
+        stillAbsentAfterFetch.length
+      } step output(s) not found in ES during rehydration: ${stillAbsentAfterFetch.join(', ')}`;
       if (this.state.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
         this.logger?.error(message);
       } else {
@@ -864,23 +706,72 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
   }
 
+  /**
+   * Evicts rehydrated outputs that were snapshotted at the start of the
+   * current flush cycle. Called by {@link flushStepChanges} after the
+   * bulk-upsert succeeds. Pinned step types are preserved.
+   *
+   * Using a snapshot (taken before the async write) means only transients
+   * that were already resident at flush-start are dropped — any output
+   * rehydrated by a concurrent `prepareForRead` during the await is not
+   * in the snapshot and stays in memory until the following flush.
+   */
+  private evictFlushedTransients(snapshot: ReadonlySet<string>): void {
+    let droppedCount = 0;
+    for (const id of snapshot) {
+      if (!this.transientIds.has(id)) {
+        continue; // already evicted by evictFlushedOutputs (step re-ran after rehydration)
+      }
+      const stepType = this.state.getStepExecution(id)?.stepType;
+      if (stepType !== undefined && this.pinnedStepTypes.has(stepType)) {
+        continue;
+      }
+      this.outputs.delete(id);
+      this.transientIds.delete(id);
+      this.clearOutputSize(id);
+      droppedCount++;
+    }
+    if (droppedCount > 0) {
+      this.logger?.debug(`Re-evicted ${droppedCount} transient step output(s) at flush`);
+    }
+  }
+
   // ----- Internals ----------------------------------------------------------
 
   /**
    * Drains state's pending lifecycle partials, joins them with this service's
-   * IO partials by step id, and runs the bulk-upsert. Returns the set of ids
-   * actually persisted (used by the deferred-eviction cycle).
+   * IO partials by step id, and runs the bulk-upsert.
    *
-   * IO is included in the upsert only when the step had a write since the
-   * last flush — eviction-only events do not re-upsert the output.
+   * Returns two sets:
+   * - `flushedIds`: every step ID written in this batch (lifecycle or IO).
+   *   Used for input eviction and telemetry.
+   * - `outputFlushedIds`: IDs whose `output` field was included in this
+   *   specific batch. Used for output eviction — a step ID may be in
+   *   `flushedIds` because only its lifecycle (e.g. RUNNING) was written
+   *   here, while its output arrives in a later batch. Evicting based on
+   *   `flushedIds` alone would remove the output from the heap before the
+   *   ES document actually contains it (premature-eviction race).
    */
-  private async persistMergedStepChanges(): Promise<ReadonlyArray<string>> {
+  private async persistMergedStepChanges(): Promise<{
+    flushedIds: ReadonlyArray<string>;
+    outputFlushedIds: ReadonlySet<string>;
+  }> {
     const lifecyclePartials = this.state.drainPendingStepChanges();
     const ioPartials = this.pendingIoChanges;
     this.pendingIoChanges = new Map();
 
     if (lifecyclePartials.size === 0 && ioPartials.size === 0) {
-      return [];
+      return { flushedIds: [], outputFlushedIds: new Set() };
+    }
+
+    // Track which IDs had their output field written in this batch.
+    // These are the only IDs whose heap copy can safely be evicted after the
+    // upsert succeeds — for all others, the output has not yet reached ES.
+    const outputFlushedIds = new Set<string>();
+    for (const [id, ioPart] of ioPartials) {
+      if ('output' in ioPart) {
+        outputFlushedIds.add(id);
+      }
     }
 
     const merged = new Map<string, Partial<EsWorkflowStepExecution>>();
@@ -894,45 +785,58 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     const flushedIds = Array.from(merged.keys());
     await this.stepRepository.bulkUpsert(Array.from(merged.values()));
-    return flushedIds;
+    return { flushedIds, outputFlushedIds };
   }
 
   /**
-   * Marks non-pinned step outputs as deferred (rehydrated on demand) and
-   * returns the IDs of pinned step types whose outputs the service should
-   * eagerly mget.
+   * Returns the IDs of step executions whose outputs should be eagerly loaded
+   * from Elasticsearch on resume.
+   *
+   * - `spills=false` (RAM-only): return ALL step execution IDs so that every
+   *   output is in memory after resume and `prepareForRead` is a no-op.
+   * - `spills=true` (SQLite spill): return only pinned step types; everything
+   *   else stays absent and is rehydrated on demand (SQLite → ES fallback).
    */
-  private markDeferredAfterLoad(steps: ReadonlyArray<EsWorkflowStepExecution>): string[] {
-    const pinnedIds: string[] = [];
-    for (const step of steps) {
-      if (step.stepType && this.pinnedStepTypes.has(step.stepType)) {
-        pinnedIds.push(step.id);
-      } else {
-        // Size unknown on resume — tracked in evictedOutputIds only. Size is
-        // measured on first rehydrate; until then it is omitted from
-        // `getOutputSizeStats` rather than polluting it with phantom zero
-        // entries.
-        this.setEvicted(step.id);
+  private getIdsToEagerLoad(steps: ReadonlyArray<EsWorkflowStepExecution>): string[] {
+    if (!this.cacheTier.spills) {
+      return steps.map((s) => s.id);
+    }
+    return steps
+      .filter((s) => s.stepType != null && this.pinnedStepTypes.has(s.stepType))
+      .map((s) => s.id);
+  }
+
+  /**
+   * Drops from RAM all COMPLETED non-pinned step outputs whose `output` field
+   * was confirmed written to ES in the current flush batch. Only called when
+   * `cacheTier.spills=true`.
+   *
+   * The caller passes `outputFlushedIds` — the subset of IDs from
+   * `persistMergedStepChanges` that had their `output` field included in the
+   * bulk-upsert — NOT the full `flushedIds` set. A step may appear in
+   * `flushedIds` because only its lifecycle (e.g. RUNNING state) was written;
+   * evicting its output at that point would remove it from the heap before
+   * the ES document contains it (premature-eviction race).
+   *
+   * Failed steps (`output: null`) and pinned types are never evicted.
+   */
+  private evictFlushedOutputs(outputFlushedIds: ReadonlySet<string>): void {
+    let evictedCount = 0;
+    for (const id of outputFlushedIds) {
+      const step = this.state.getStepExecution(id);
+      const isEvictable =
+        step !== undefined &&
+        step.status === ExecutionStatus.COMPLETED &&
+        this.outputs.has(id) &&
+        !(step.stepType && this.pinnedStepTypes.has(step.stepType));
+      if (isEvictable) {
+        this.outputs.delete(id);
+        this.clearOutputSize(id);
+        evictedCount++;
       }
     }
-    return pinnedIds;
-  }
-
-  /**
-   * Drains the previous cycle's deferred output evictions, queues this
-   * cycle's flushed IDs for next-cycle eviction, and runs immediate input
-   * eviction on terminal steps. Called with `[]` when the flush had no doc
-   * changes — the queue must still be drained on its scheduled cycle.
-   */
-  private runDeferredEvictionCycle(flushedIds: ReadonlyArray<string>): void {
-    if (this.pendingOutputEvictionIds.length > 0) {
-      const toEvict = this.pendingOutputEvictionIds;
-      this.pendingOutputEvictionIds = [];
-      this.evictCompletedStepOutputs(toEvict);
-    }
-    if (flushedIds.length > 0) {
-      this.pendingOutputEvictionIds = flushedIds;
-      this.evictCompletedStepInputs(flushedIds);
+    if (evictedCount > 0) {
+      this.logger?.debug(`Evicted ${evictedCount} flushed step output(s) from memory`);
     }
   }
 
@@ -952,28 +856,6 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     this.clearOutputSize(stepExecutionId);
   }
 
-  private evictCompletedStepOutputs(candidateIds: ReadonlyArray<string>): void {
-    let evictedCount = 0;
-    for (const id of candidateIds) {
-      const step = this.state.getStepExecution(id);
-      if (step && this.isEvictionCandidate(id, step)) {
-        const sizeBytes = this.outputSizes.get(id);
-        this.outputs.delete(id);
-        this.clearOutputSize(id);
-        this.setEvicted(id, sizeBytes);
-        evictedCount++;
-        this.logger?.debug(
-          `Evicted output of step '${step.stepId}' (${formatBytes(sizeBytes ?? 0)}) from memory`
-        );
-      }
-    }
-    if (evictedCount > 0) {
-      this.logger?.debug(
-        `Evicted ${evictedCount} step output(s), total evicted: ${this.evictedOutputIds.size}`
-      );
-    }
-  }
-
   private evictCompletedStepInputs(candidateIds: ReadonlyArray<string>): void {
     let evictedCount = 0;
     for (const id of candidateIds) {
@@ -990,47 +872,6 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     if (evictedCount > 0) {
       this.logger?.debug(`Evicted input from ${evictedCount} completed step(s)`);
     }
-  }
-
-  private isEvictionCandidate(stepExecutionId: string, step: StepExecutionMetadata): boolean {
-    if (this.evictedOutputIds.has(stepExecutionId)) {
-      return false;
-    }
-    // Only evict COMPLETED steps. Failed steps have `output: null` (semantic
-    // "no output") and evicting them would shift the meaning to `undefined`
-    // (semantic "evicted"), which downstream code distinguishes.
-    if (step.status !== ExecutionStatus.COMPLETED) {
-      return false;
-    }
-    // Already cleared by evictStaleLoopOutputs.
-    if (!this.outputs.has(stepExecutionId)) {
-      return false;
-    }
-    if (step.stepType && this.pinnedStepTypes.has(step.stepType)) {
-      return false;
-    }
-    const recordedSize = this.outputSizes.get(stepExecutionId);
-    // No recorded size = not measured by Layer 2 = assumed small.
-    if (recordedSize === undefined || recordedSize < this.evictionMinBytes) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Eligibility check for releasing a transiently rehydrated output back to
-   * the evicted state. Same shape as {@link isEvictionCandidate} minus the
-   * size threshold — the output already met the threshold the first time it
-   * was evicted, so it remains eligible regardless of recorded size.
-   */
-  private isReleaseCandidate(stepExecutionId: string): boolean {
-    const step = this.state.getStepExecution(stepExecutionId);
-    if (!step) return false;
-    if (this.evictedOutputIds.has(stepExecutionId)) return false;
-    if (step.status !== ExecutionStatus.COMPLETED) return false;
-    if (!this.outputs.has(stepExecutionId)) return false;
-    if (step.stepType && this.pinnedStepTypes.has(step.stepType)) return false;
-    return true;
   }
 }
 

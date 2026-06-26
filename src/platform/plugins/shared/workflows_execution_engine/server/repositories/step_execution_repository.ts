@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
@@ -18,7 +18,10 @@ export type StepExecutionField = keyof EsWorkflowStepExecution;
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
 
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger?: Logger
+  ) {}
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -144,6 +147,20 @@ export class StepExecutionRepository {
         { doc: stepExecution, doc_as_upsert: true },
       ]),
     });
+
+    // Diagnostic: log per-item results regardless of the aggregate errors flag.
+    // `result` is "created" / "updated"; a missing or unexpected value here
+    // is the suspected cause of the position-1 data-loss bug.
+    this.logger?.debug(
+      `bulkUpsert items: ${JSON.stringify(
+        bulkResponse.items.map((item) => ({
+          id: item.update?._id,
+          result: item.update?.result,
+          status: item.update?.status,
+          error: item.update?.error,
+        }))
+      )}`
+    );
 
     if (bulkResponse.errors) {
       const erroredDocuments = bulkResponse.items

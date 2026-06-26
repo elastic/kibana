@@ -190,13 +190,6 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
     saveStateSpan?.end();
 
-    // Note: predecessor outputs that `prepareForRead` rehydrated for this
-    // step are released by the *next* step's `prepareForRead` (deferred
-    // release) so that consecutive consumers of the same predecessor reuse
-    // the in-memory copy instead of re-fetching from ES. The execution
-    // loop's final-flush path is responsible for the workflow-end cleanup
-    // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
-
     nodeSpan?.end();
   }
 }

@@ -8,6 +8,10 @@ plugin that triggered the allocation.
 The analyzer is wired up as `node scripts/heap_snapshot_analyzer.js`
 in the repo root.
 
+> Part of the server-side memory investigation workflow. For the full
+> detect → capture → attribute procedure, see
+> [`dev_docs/tutorials/investigating_server_memory.mdx`](../../dev_docs/tutorials/investigating_server_memory.mdx).
+
 ---
 
 ## Capturing an idle snapshot

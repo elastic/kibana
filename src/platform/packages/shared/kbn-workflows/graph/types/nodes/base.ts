@@ -25,6 +25,20 @@ export const GraphNodeSchema = z.object({
   stepId: z.string(),
   stepType: z.string(),
   templateDependencies: z.array(z.unknown()).optional(),
+  /**
+   * Statically-resolved set of predecessor stepIds whose outputs this node's
+   * template expressions directly reference (via `steps.<stepId>.*` paths).
+   *
+   * - `string[]` — static analysis succeeded; `prepareForRead` loads only these.
+   * - `null`     — at least one dynamic ref (`steps[variable]...`) was found;
+   *                `prepareForRead` falls back to loading all transitive predecessors.
+   * - `undefined`— field absent (old compiled graph or unannotated node type);
+   *                treated as `null` (conservative fallback).
+   *
+   * Populated by `extractStepDependencies` at graph compile time.
+   * Do not confuse with `templateDependencies`, which holds raw switch match expressions.
+   */
+  dataStepDependencies: z.array(z.string()).nullable().optional(),
 });
 
 export const AtomicGraphNodeSchema = GraphNodeSchema.extend({

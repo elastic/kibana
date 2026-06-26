@@ -26,6 +26,7 @@ import { WorkflowExecutionRepository } from '../repositories/workflow_execution_
 import { NodesFactory } from '../step/nodes_factory';
 import { setWorkflowEventChainContext } from '../trigger_events/event_context/event_chain_context';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import { SqliteCacheTier } from '../workflow_context_manager/sqlite_cache/sqlite_cache_tier';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -50,7 +51,7 @@ export async function setupDependencies(
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
   const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
-  const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const stepExecutionRepository = new StepExecutionRepository(internalEsClient, logger);
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,
@@ -122,11 +123,16 @@ export async function setupDependencies(
     workflowExecutionRepository
   );
 
+  const cacheTier = dependencies.sqliteCacheClient
+    ? new SqliteCacheTier(dependencies.sqliteCacheClient, workflowExecution.id, logger)
+    : undefined;
+
   const stepIoService = new StepIoService({
     stepRepository: stepExecutionRepository,
     state: workflowExecutionState,
-    evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,
+    cacheTier,
+    selectiveRehydration: config.sqliteCache.selectiveRehydration,
   });
 
   // Create telemetry client

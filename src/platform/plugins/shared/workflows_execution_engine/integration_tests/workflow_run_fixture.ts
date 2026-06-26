@@ -55,10 +55,8 @@ export class WorkflowRunFixture {
       allowedHosts: ['*'],
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb default
-    eviction: {
-      minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb default
-    },
     collectQueueMetrics: false,
+    sqliteCache: { enabled: false, selectiveRehydration: false, compressIpc: false, jsonbStorage: false },
   };
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();

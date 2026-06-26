@@ -113,9 +113,7 @@ describe('runNode', () => {
       workflowExecutionRepository: {
         getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
       },
-      stepIoService: {
-        releaseTransientlyRehydratedOutputs: jest.fn(),
-      },
+      stepIoService: {},
       taskAbortController: new AbortController(),
     } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
   });

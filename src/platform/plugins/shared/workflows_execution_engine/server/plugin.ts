@@ -73,6 +73,7 @@ import {
   buildWorkflowContext,
   type WorkflowExecutionForInputRendering,
 } from './workflow_context_manager/build_workflow_context';
+import { SqliteCacheClient } from './workflow_context_manager/sqlite_cache/sqlite_cache_client';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
 import type {
@@ -127,6 +128,7 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private readonly isDist: boolean;
   private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private coreSetup?: CoreSetup<
@@ -137,10 +139,13 @@ export class WorkflowsExecutionEnginePlugin
   private initializePromise?: Promise<void>;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
+  /** Process-lifetime SQLite cache client. Created in start() only when sqliteCache.enabled=true. */
+  private sqliteCacheClient?: SqliteCacheClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
+    this.isDist = !initializerContext.env.mode.dev;
   }
 
   public setup(
@@ -229,6 +234,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
+                sqliteCacheClient: this.sqliteCacheClient,
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -340,6 +346,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
+                sqliteCacheClient: this.sqliteCacheClient,
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -459,6 +466,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
                 config,
+                sqliteCacheClient: this.sqliteCacheClient,
               };
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -640,6 +648,14 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecutionRepository
     );
 
+    if (this.config.sqliteCache?.enabled) {
+      this.sqliteCacheClient = new SqliteCacheClient(this.logger.get('sqlite-cache'), this.isDist, {
+        compressIpc: this.config.sqliteCache.compressIpc,
+        jsonbStorage: this.config.sqliteCache.jsonbStorage,
+      });
+      this.logger.debug('SQLite IO cache enabled (experimental)');
+    }
+
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
       coreStart,
@@ -647,6 +663,7 @@ export class WorkflowsExecutionEnginePlugin
       taskManager: plugins.taskManager,
       workflowsExtensions: plugins.workflowsExtensions,
       config: this.config,
+      sqliteCacheClient: this.sqliteCacheClient,
     };
 
     // Re-check that a workflow is still enabled right before persisting an
@@ -1353,7 +1370,9 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
-  public stop() {}
+  public async stop() {
+    await this.sqliteCacheClient?.shutdown();
+  }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {

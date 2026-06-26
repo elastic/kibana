@@ -2,6 +2,10 @@
 
 Profile Kibana (or any other Node.js processes) while it's running, and open the CPU or Heap profile in Speedscope.
 
+> Part of the server-side memory investigation workflow. For the full
+> detect → capture → attribute procedure, see
+> [`dev_docs/tutorials/investigating_server_memory.mdx`](../../../../../../dev_docs/tutorials/investigating_server_memory.mdx).
+
 ## Usage
 
 ### Running processes

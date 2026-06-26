@@ -199,9 +199,7 @@ const createBroaderSurfaceContainer = () => {
 
   // IO maps live entirely in the service mock now (state holds metadata only).
   const stepIoService = {
-    hasEvictedOutputs: jest.fn().mockReturnValue(false),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
-    releaseTransientlyRehydratedOutputs: jest.fn(),
     getStepInput: jest.fn().mockReturnValue(undefined),
     getStepOutput: jest.fn(
       (id: string) =>

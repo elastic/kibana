@@ -57,10 +57,8 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
       for (const bytes of sizes.values()) totalBytes += bytes;
       return { totalBytes, stepCount: sizes.size };
     }),
-    hasEvictedOutputs: jest.fn().mockReturnValue(false),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
-    releaseTransientlyRehydratedOutputs: jest.fn(),
   } as unknown as StepIoService;
 }
 

@@ -48,15 +48,6 @@ const configSchema = schema.object({
     ),
   }),
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
-  eviction: schema.object({
-    /**
-     * Minimum output payload size for a completed step to be eligible for eviction
-     * from in-memory state after it has been flushed to Elasticsearch.
-     * Payloads smaller than this threshold stay in memory to avoid ES round-trip latency.
-     * Set to "0b" to evict all completed step outputs, or a very large value to disable eviction.
-     */
-    minPayloadSize: schema.byteSize({ defaultValue: '10kb' }),
-  }),
   collectQueueMetrics: schema.boolean({
     defaultValue: false,
     meta: {
@@ -64,6 +55,51 @@ const configSchema = schema.object({
         'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
+  }),
+  sqliteCache: schema.object({
+    /**
+     * false (default): hold all step IO in V8 memory for the whole run — no eviction,
+     * no rehydration, released at workflow end. Baseline for heap-pressure profiling.
+     *
+     * true: evict step outputs from RAM after each flush; rehydrate on-demand from the
+     * local SQLite cache; fall back to Elasticsearch only on a cold cache (cross-node
+     * resume). node:sqlite is experimental on Node 24.14 — enable with caution.
+     */
+    enabled: schema.boolean({ defaultValue: false }),
+    /**
+     * When true, prepareForRead loads only the predecessor step outputs that the
+     * upcoming step's template expressions statically reference (dataStepDependencies
+     * on the compiled graph node), rather than all transitive predecessors.
+     *
+     * Requires sqliteCache.enabled=true to have any effect — in RAM-only mode
+     * prepareForRead is a no-op regardless.
+     *
+     * Default false: safe rollout path. Enable after verifying that the compiled
+     * graph carries correct dataStepDependencies for your workflow shapes. A
+     * runtime canary in getStepOutput logs ERROR when a step accesses an output
+     * that was not rehydrated, providing immediate visibility into any analysis gap.
+     */
+    selectiveRehydration: schema.boolean({ defaultValue: false }),
+    /**
+     * When true, IPC payloads between the main thread and the SQLite worker are
+     * zstd-compressed (node:zlib zstdCompressSync / zstdDecompressSync, native on
+     * Node 24+). The worker→main return path also switches to Uint8Array transfer
+     * (zero-copy) instead of structured-clone strings, removing the double-copy that
+     * caused the +37% GC regression in Run D.
+     *
+     * Requires sqliteCache.enabled=true. Default false for A/B profiling baseline.
+     */
+    compressIpc: schema.boolean({ defaultValue: false }),
+    /**
+     * When true, step outputs are stored in the SQLite cache as binary JSON (JSONB
+     * via SQLite's jsonb() function) rather than plain text. This lays groundwork for
+     * future json_extract()-based queries at the worker layer. For the current
+     * full-document rehydration path it adds a jsonb()/json() transcode with no query
+     * payoff — forward-looking infra only.
+     *
+     * Requires sqliteCache.enabled=true. Default false for A/B profiling baseline.
+     */
+    jsonbStorage: schema.boolean({ defaultValue: false }),
   }),
 });
 

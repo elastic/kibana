@@ -31,5 +31,6 @@ export const mockContextDependencies = () => ({
       minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
     },
     collectQueueMetrics: false,
+    sqliteCache: { enabled: false, selectiveRehydration: false, compressIpc: false, jsonbStorage: false },
   },
 });

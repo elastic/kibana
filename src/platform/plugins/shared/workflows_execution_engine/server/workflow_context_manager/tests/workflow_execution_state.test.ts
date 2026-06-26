@@ -45,13 +45,11 @@ describe('WorkflowExecutionState', () => {
 
   function buildService(
     state: WorkflowExecutionState,
-    repo: StepExecutionRepository,
-    evictionMinBytes = Infinity
+    repo: StepExecutionRepository
   ): StepIoService {
     return new StepIoService({
       stepRepository: repo,
       state,
-      evictionMinBytes,
     });
   }
 
@@ -518,9 +516,10 @@ describe('WorkflowExecutionState', () => {
       );
     });
 
-    it('should issue secondary fetch with id+output for pinned step types', async () => {
-      // State owns the ES fetch path; the IO service decides which IDs are
-      // pinned. Deferred-output / eviction semantics live in step_io_service.test.ts.
+    it('should issue secondary fetch with id+output for all steps in RAM-only mode (spills=false)', async () => {
+      // RAM-only mode (default NoopCacheTier, spills=false): all step outputs
+      // are eagerly loaded on resume so nothing is absent.
+      // Deferred-output / eviction semantics live in step_io_service.test.ts.
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
       const dataSetOutput = { myVar: 'hello' };
       (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)
@@ -544,8 +543,9 @@ describe('WorkflowExecutionState', () => {
       await ioService.load();
 
       expect(ioService.getStepOutput('22')).toEqual(dataSetOutput);
+      // RAM-only: eager-load ALL step IDs (not just pinned types)
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
-        ['22'],
+        ['11', '22'],
         ['id', 'output']
       );
     });

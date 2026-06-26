@@ -9,6 +9,7 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
+import { extractStepDependencies } from '../../common/utils/extract_step_dependencies/extract_step_dependencies';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -237,12 +238,19 @@ function createLeafStepGraph(
 ): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
+  // Analyze only the `with` block — the allowlisted template-bearing field for
+  // leaf steps. The `if` condition is stripped before this function is reached
+  // (visitAbstractStep dispatches if-steps to createIfGraphForIfStepLevel first).
+  // Child step arrays are not present on leaf steps, so no exclusion is needed.
+  const stepWith = (currentStep as { with?: unknown }).with;
+  const dataStepDependencies = extractStepDependencies(stepWith !== undefined ? [stepWith] : []);
   graph.setNode(stepId, {
     id: stepId,
     type: nodeType,
     stepId,
     stepType: currentStep.type,
     configuration: { ...currentStep },
+    dataStepDependencies,
   });
   return graph;
 }
@@ -260,6 +268,7 @@ export function visitWaitForInputStep(
 ): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
+  const stepWith = (currentStep as { with?: unknown }).with;
   const waitForInputNode: WaitForInputGraphNode = {
     id: stepId,
     type: 'waitForInput',
@@ -268,6 +277,7 @@ export function visitWaitForInputStep(
     configuration: {
       ...currentStep,
     },
+    dataStepDependencies: extractStepDependencies(stepWith !== undefined ? [stepWith] : []),
   };
   graph.setNode(waitForInputNode.id, waitForInputNode);
 
@@ -329,12 +339,14 @@ export function visitWorkflowOutputStep(
 ): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
+  const stepWith = (currentStep as { with?: unknown }).with;
   const workflowOutputNode: WorkflowOutputGraphNode = {
     id: stepId,
     type: 'workflow.output',
     stepId,
     stepType: 'workflow.output',
     configuration: currentStep as WorkflowOutputStep,
+    dataStepDependencies: extractStepDependencies(stepWith !== undefined ? [stepWith] : []),
   };
   graph.setNode(workflowOutputNode.id, workflowOutputNode);
   return graph;

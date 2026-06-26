@@ -13,6 +13,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowRepository } from '@kbn/workflows';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { SqliteCacheClient } from './sqlite_cache/sqlite_cache_client';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowLogEvent } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
@@ -32,6 +33,7 @@ export interface ContextDependencies {
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
   spaceId?: string;
   request?: KibanaRequest;
+  sqliteCacheClient?: SqliteCacheClient;
 }
 
 /**

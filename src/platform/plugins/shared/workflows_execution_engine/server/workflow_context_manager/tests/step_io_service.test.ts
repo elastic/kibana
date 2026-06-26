@@ -22,6 +22,7 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import { buildStepExecutionId } from '../../utils';
+import type { CacheTier } from '../sqlite_cache/cache_tier';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -30,14 +31,22 @@ import { WorkflowExecutionState } from '../workflow_execution_state';
  * the service under test plus the state so suites can seed step docs via
  * the existing `upsertStep` API.
  */
-function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {}) {
+function buildHarness(opts: { cacheTier?: CacheTier; logger?: Logger } = {}) {
   const workflowExecutionRepository = {
     updateWorkflowExecution: jest.fn(),
   } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
   const stepExecutionRepository = {
     bulkUpsert: jest.fn().mockResolvedValue(undefined),
-    getStepExecutionsByIds: jest.fn().mockResolvedValue([]),
+    // Default: flush-verification calls (sourceIncludes=['id']) return ID-matched stubs so the
+    // diagnostic in flushStepChanges sees a successful write. Rehydration calls (wider projection)
+    // return [] to simulate an ES miss — tests that need specific rehydration data override this.
+    getStepExecutionsByIds: jest.fn().mockImplementation(
+      (ids: string[], sourceIncludes?: string[]) =>
+        sourceIncludes?.length === 1 && sourceIncludes[0] === 'id'
+          ? Promise.resolve(ids.map((id) => ({ id }) as EsWorkflowStepExecution))
+          : Promise.resolve([])
+    ),
   } as unknown as jest.Mocked<StepExecutionRepository>;
 
   const fakeWorkflowExecution = {
@@ -55,7 +64,7 @@ function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {})
   const service = new StepIoService({
     stepRepository: stepExecutionRepository,
     state,
-    evictionMinBytes: opts.evictionMinBytes ?? Infinity,
+    cacheTier: opts.cacheTier,
     logger: opts.logger,
   });
 
@@ -108,9 +117,18 @@ function seedCompletedStepWithSize(
   service.setStepOutput(id, output, sizeBytes);
 }
 
-describe('StepIoService', () => {
-  const EVICTION_THRESHOLD = 100; // bytes
+function makeSqliteLikeCacheTier(overrides?: Partial<CacheTier>): CacheTier {
+  return {
+    spills: true,
+    put: jest.fn(),
+    get: jest.fn().mockResolvedValue(new Map()),
+    cleanup: jest.fn().mockResolvedValue(undefined),
+    dispose: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  } as CacheTier;
+}
 
+describe('StepIoService', () => {
   describe('IO reads/writes', () => {
     it('returns step output via service when state owns the doc', () => {
       const { state, service } = buildHarness();
@@ -255,7 +273,7 @@ describe('StepIoService', () => {
 
     it('clears the evicted flag so rehydration does not overwrite fresh output', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: 0,
+        cacheTier: makeSqliteLikeCacheTier(),
       });
       seedCompletedStepWithSize(
         state,
@@ -267,12 +285,10 @@ describe('StepIoService', () => {
         'workflow.execute'
       );
       await service.flushStepChanges();
-      await service.flushStepChanges();
-      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(service.getStepOutput('step-1')).toBeUndefined();
 
       service.setStepOutput('step-1', { health: 'ok' });
 
-      expect(service.hasEvictedOutputs()).toBe(false);
       expect(service.getStepOutput('step-1')).toEqual({ health: 'ok' });
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
@@ -291,8 +307,8 @@ describe('StepIoService', () => {
   });
 
   describe('size threshold (driven through setStepOutput)', () => {
-    it('stores size for later threshold check', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('RAM-only mode: outputs are retained regardless of size', async () => {
+      const { state, service } = buildHarness(); // spills=false
       seedCompletedStepWithSize(
         state,
         service,
@@ -302,11 +318,6 @@ describe('StepIoService', () => {
         50,
         'connector'
       );
-
-      await service.flushStepChanges();
-      await service.flushStepChanges();
-      expect(service.hasEvictedOutputs()).toBe(false);
-
       seedCompletedStepWithSize(
         state,
         service,
@@ -318,8 +329,35 @@ describe('StepIoService', () => {
       );
 
       await service.flushStepChanges();
+
+      expect(service.getStepOutput('step-1')).toBeDefined();
+      expect(service.getStepOutput('step-2')).toBeDefined();
+    });
+
+    it('SQLite spill mode: all completed non-pinned outputs are evicted after flush, regardless of size', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() }); // spills=true
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'something' },
+        50,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-2',
+        'myStep2',
+        { data: 'large' },
+        200,
+        'connector'
+      );
+
       await service.flushStepChanges();
-      expect(service.hasEvictedOutputs()).toBe(true);
+
+      expect(service.getStepOutput('step-1')).toBeUndefined();
       expect(service.getStepOutput('step-2')).toBeUndefined();
     });
   });
@@ -338,29 +376,35 @@ describe('StepIoService', () => {
       expect(service.getOutputSizeStats()).toEqual({ totalBytes: 300, stepCount: 2 });
     });
 
-    it('combines sizes from active and evicted steps', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('in RAM-only mode, all sizes remain after flush', async () => {
+      const { state, service } = buildHarness(); // spills=false
       seedCompletedStepWithSize(state, service, 'step-1', 's1', { data: 'a' }, 150, 'connector');
       seedCompletedStepWithSize(state, service, 'step-2', 's2', { data: 'b' }, 250, 'connector');
 
-      // Drive step-2 through the deferral cycle so it ends up evicted.
-      await service.flushStepChanges();
       await service.flushStepChanges();
 
       const stats = service.getOutputSizeStats();
       expect(stats.totalBytes).toBe(400);
       expect(stats.stepCount).toBe(2);
     });
+
+    it('in SQLite spill mode, evicted outputs are removed from size stats', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() }); // spills=true
+      seedCompletedStepWithSize(state, service, 'step-1', 's1', { data: 'a' }, 150, 'connector');
+      seedCompletedStepWithSize(state, service, 'step-2', 's2', { data: 'b' }, 250, 'connector');
+
+      await service.flushStepChanges();
+
+      // Both completed non-pinned outputs evicted => size cleared
+      const stats = service.getOutputSizeStats();
+      expect(stats.totalBytes).toBe(0);
+      expect(stats.stepCount).toBe(0);
+    });
   });
 
-  describe('hasEvictedOutputs', () => {
-    it('returns false when nothing is evicted', () => {
-      const { service } = buildHarness();
-      expect(service.hasEvictedOutputs()).toBe(false);
-    });
-
-    it('returns true after eviction', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+  describe('RAM-only mode (spills=false)', () => {
+    it('outputs remain in memory after flush', async () => {
+      const { state, service } = buildHarness(); // spills=false
       seedCompletedStepWithSize(
         state,
         service,
@@ -372,84 +416,64 @@ describe('StepIoService', () => {
       );
 
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
-      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(service.getStepOutput('step-1')).toBeDefined();
     });
-  });
 
-  describe('eviction policy', () => {
-    it('evicts output above threshold from completed step', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('cacheTier.put is never called in RAM-only mode', async () => {
+      const cacheTier = makeSqliteLikeCacheTier({ spills: false });
+      const { state, service } = buildHarness({ cacheTier });
       seedCompletedStepWithSize(
         state,
         service,
         'step-1',
         'myStep',
-        { largeData: 'x'.repeat(200) },
+        { data: 'large' },
         250,
         'connector'
       );
 
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
-      expect(service.getStepOutput('step-1')).toBeUndefined();
-      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(cacheTier.put).not.toHaveBeenCalled();
     });
+  });
 
-    it('evicts output exactly at threshold (minPayloadSize is inclusive)', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+  describe('SQLite spill mode (spills=true)', () => {
+    it('COMPLETED non-pinned outputs are dropped after flush', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       seedCompletedStepWithSize(
         state,
         service,
         'step-1',
         'myStep',
-        { data: 'at-boundary' },
-        EVICTION_THRESHOLD,
+        { data: 'large' },
+        250,
         'connector'
       );
 
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
       expect(service.getStepOutput('step-1')).toBeUndefined();
-      expect(service.hasEvictedOutputs()).toBe(true);
     });
 
-    it('retains output below threshold', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      const smallOutput = { key: 'val' };
-      seedCompletedStepWithSize(state, service, 'step-1', 'myStep', smallOutput, 10, 'connector');
-
-      await service.flushStepChanges();
-      await service.flushStepChanges();
-
-      expect(service.getStepOutput('step-1')).toEqual(smallOutput);
-      expect(service.hasEvictedOutputs()).toBe(false);
-    });
-
-    it('retains output from running steps', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('FAILED step outputs (null) are NOT evicted', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
         stepType: 'connector',
-        status: ExecutionStatus.RUNNING,
+        status: ExecutionStatus.FAILED,
       } as Partial<EsWorkflowStepExecution>);
-      // Record an above-threshold size to prove the eviction predicate still
-      // gates on COMPLETED status, not on size alone.
-      service.setStepOutput('step-1', { data: 'x'.repeat(200) }, 250);
+      service.setStepOutput('step-1', null, 250);
 
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
-      expect(service.getStepOutput('step-1')).toBeDefined();
-      expect(service.hasEvictedOutputs()).toBe(false);
+      expect(service.getStepOutput('step-1')).toBeNull();
     });
 
-    it('retains output from data.set steps regardless of size (pinned)', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('pinned types (data.set) are NOT evicted', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       seedCompletedStepWithSize(
         state,
         service,
@@ -461,14 +485,12 @@ describe('StepIoService', () => {
       );
 
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
       expect(service.getStepOutput('step-1')).toBeDefined();
-      expect(service.hasEvictedOutputs()).toBe(false);
     });
 
-    it('retains output from waitForInput steps regardless of size (pinned)', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('pinned types (waitForInput) are NOT evicted', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       seedCompletedStepWithSize(
         state,
         service,
@@ -480,25 +502,100 @@ describe('StepIoService', () => {
       );
 
       await service.flushStepChanges();
+
+      expect(service.getStepOutput('step-1')).toBeDefined();
+    });
+  });
+
+  describe('eviction policy', () => {
+    it('evicts output from completed step after flush (SQLite spill mode)', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { largeData: 'x'.repeat(200) },
+        250,
+        'connector'
+      );
+
+      await service.flushStepChanges();
+
+      expect(service.getStepOutput('step-1')).toBeUndefined();
+    });
+
+    it('evicts output of any size in SQLite spill mode', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
+      const smallOutput = { key: 'val' };
+      seedCompletedStepWithSize(state, service, 'step-1', 'myStep', smallOutput, 10, 'connector');
+
+      await service.flushStepChanges();
+
+      expect(service.getStepOutput('step-1')).toBeUndefined();
+    });
+
+    it('retains output from running steps', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        stepType: 'connector',
+        status: ExecutionStatus.RUNNING,
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepOutput('step-1', { data: 'x'.repeat(200) }, 250);
+
       await service.flushStepChanges();
 
       expect(service.getStepOutput('step-1')).toBeDefined();
     });
 
-    it('skips steps with no recorded size (assumes small)', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, service, 'step-1', 'myStep', { data: 'something' }, 'connector');
-      // No recordOutputSize call
+    it('retains output from data.set steps regardless of size (pinned)', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myDataSet',
+        { largeData: 'x'.repeat(200) },
+        250,
+        'data.set'
+      );
 
-      await service.flushStepChanges();
       await service.flushStepChanges();
 
       expect(service.getStepOutput('step-1')).toBeDefined();
-      expect(service.hasEvictedOutputs()).toBe(false);
+    });
+
+    it('retains output from waitForInput steps regardless of size (pinned)', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'wait',
+        { answer: 'x'.repeat(200) },
+        250,
+        'waitForInput'
+      );
+
+      await service.flushStepChanges();
+
+      expect(service.getStepOutput('step-1')).toBeDefined();
+    });
+
+    it('skips steps with no recorded size (output still evicted if COMPLETED)', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
+      createCompletedStep(state, service, 'step-1', 'myStep', { data: 'something' }, 'connector');
+      // No recordOutputSize call — output is still evicted because COMPLETED non-pinned
+
+      await service.flushStepChanges();
+
+      expect(service.getStepOutput('step-1')).toBeUndefined();
     });
 
     it('does not evict failed steps (output: null is semantic)', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
@@ -510,15 +607,13 @@ describe('StepIoService', () => {
       service.setStepOutput('step-1', null, 250);
 
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
       expect(service.getStepOutput('step-1')).toBeNull();
-      expect(service.hasEvictedOutputs()).toBe(false);
     });
 
     it('does not add to stepDocumentsChanges when evicting', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier(),
       });
       seedCompletedStepWithSize(
         state,
@@ -530,11 +625,11 @@ describe('StepIoService', () => {
         'connector'
       );
 
-      // Cycle 1: persists + queues for eviction.
+      // Flush persists + evicts in one cycle.
       await service.flushStepChanges();
       jest.clearAllMocks();
 
-      // Cycle 2: drains eviction; no new doc change should be sent.
+      // Second flush: no new changes, no upsert.
       await service.flushStepChanges();
       expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
     });
@@ -543,7 +638,7 @@ describe('StepIoService', () => {
   describe('rehydrateOutputs', () => {
     it('calls repository and restores output', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier(),
       });
       const originalOutput = { restored: true, data: 'x'.repeat(200) };
       seedCompletedStepWithSize(
@@ -557,7 +652,6 @@ describe('StepIoService', () => {
       );
 
       await service.flushStepChanges();
-      await service.flushStepChanges();
       expect(service.getStepOutput('step-1')).toBeUndefined();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
@@ -565,20 +659,20 @@ describe('StepIoService', () => {
           id: 'step-1',
           stepId: 'myStep',
           output: originalOutput,
+          workflowRunId: 'test-workflow-execution-id',
         } as unknown as EsWorkflowStepExecution,
       ]);
 
       await service.rehydrateOutputs(['step-1']);
 
       expect(service.getStepOutput('step-1')).toEqual(originalOutput);
-      expect(service.hasEvictedOutputs()).toBe(false);
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['step-1'],
         ['id', 'output', 'workflowRunId']
       );
     });
 
-    it('is a no-op when no requested IDs are evicted', async () => {
+    it('is a no-op when no requested IDs are absent from outputs', async () => {
       const { state, service, stepExecutionRepository } = buildHarness();
       createCompletedStep(state, service, 'step-1', 'myStep', { data: 'small' }, 'connector');
 
@@ -589,7 +683,7 @@ describe('StepIoService', () => {
 
     it('handles missing documents from ES gracefully', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier(),
       });
       seedCompletedStepWithSize(
         state,
@@ -601,19 +695,17 @@ describe('StepIoService', () => {
         'connector'
       );
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([]);
 
       await service.rehydrateOutputs(['step-1']);
 
-      expect(service.hasEvictedOutputs()).toBe(false);
       expect(service.getStepOutput('step-1')).toBeUndefined();
     });
 
     it('drops cross-execution docs returned by mget instead of restoring foreign output', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier(),
       });
       seedCompletedStepWithSize(
         state,
@@ -624,7 +716,6 @@ describe('StepIoService', () => {
         250,
         'connector'
       );
-      await service.flushStepChanges();
       await service.flushStepChanges();
 
       // ES returns a doc for the same `_id` but a different workflowRunId.
@@ -643,13 +734,12 @@ describe('StepIoService', () => {
       await service.rehydrateOutputs(['step-1']);
 
       expect(service.getStepOutput('step-1')).toBeUndefined();
-      expect(service.hasEvictedOutputs()).toBe(false);
     });
 
     it('logs missing-doc as warn (not error) when workflow is in a terminal status', async () => {
       const logger = loggerMock.create();
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier(),
         logger,
       });
 
@@ -662,7 +752,6 @@ describe('StepIoService', () => {
         250,
         'connector'
       );
-      await service.flushStepChanges();
       await service.flushStepChanges();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([]);
@@ -679,7 +768,7 @@ describe('StepIoService', () => {
     it('logs missing-doc as error when workflow is still RUNNING (active data loss)', async () => {
       const logger = loggerMock.create();
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier(),
         logger,
       });
 
@@ -692,7 +781,6 @@ describe('StepIoService', () => {
         250,
         'connector'
       );
-      await service.flushStepChanges();
       await service.flushStepChanges();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([]);
@@ -707,143 +795,140 @@ describe('StepIoService', () => {
     });
   });
 
-  describe('releaseTransientlyRehydratedOutputs', () => {
-    it('re-evicts outputs that were transiently rehydrated, without an ES call', async () => {
+  describe('prepareForRead in SQLite spill mode', () => {
+    it('fetches absent predecessors from cacheTier.get when spills=true', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier({
+          get: jest.fn().mockResolvedValue(new Map([['exec-b', { v: 'b' }]])),
+        }),
       });
-      const originalOutput = { restored: true, data: 'x'.repeat(200) };
-      seedCompletedStepWithSize(
-        state,
-        service,
-        'step-1',
-        'myStep',
-        originalOutput,
-        250,
-        'connector'
-      );
+      const workflow = {
+        name: 'Test',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          { name: 'step_a', type: 'console', with: { message: 'A' } } as ConnectorStep,
+          {
+            name: 'step_b',
+            type: 'console',
+            with: { message: '{{steps.step_a.output}}' },
+          } as ConnectorStep,
+          {
+            name: 'step_c',
+            type: 'console',
+            with: { message: '{{steps.step_b.output}}' },
+          } as ConnectorStep,
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const stepCNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'step_c')!;
 
-      // Get to evicted state.
-      await service.flushStepChanges();
-      await service.flushStepChanges();
-      expect(service.getStepOutput('step-1')).toBeUndefined();
+      seedCompletedStepWithSize(state, service, 'exec-b', 'step_b', { v: 'b' }, 1, 'connector');
+      await service.flushStepChanges(); // evicts exec-b immediately
+      expect(service.getStepOutput('exec-b')).toBeUndefined();
 
-      // Rehydrate.
-      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'step-1', output: originalOutput } as unknown as EsWorkflowStepExecution,
-      ]);
-      await service.rehydrateOutputs(['step-1']);
-      expect(service.getStepOutput('step-1')).toEqual(originalOutput);
-      expect(service.hasEvictedOutputs()).toBe(false);
-      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      await service.prepareForRead({
+        node: stepCNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
 
-      // Release should drop back to evicted with no ES round-trip.
-      service.releaseTransientlyRehydratedOutputs();
-      expect(service.getStepOutput('step-1')).toBeUndefined();
-      expect(service.hasEvictedOutputs()).toBe(true);
+      // Was found in cacheTier.get, not ES
+      expect(service.getStepOutput('exec-b')).toEqual({ v: 'b' });
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
-    it('is a no-op when nothing was transiently rehydrated', () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, service, 'step-1', 'myStep', { data: 'x' }, 'connector');
-
-      service.releaseTransientlyRehydratedOutputs();
-      expect(service.getStepOutput('step-1')).toEqual({ data: 'x' });
-    });
-
-    it('does not release pinned step types', async () => {
+    it('falls back to ES when cacheTier.get misses', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier(),
       });
-      // Pinned types are never evicted, so rehydrateOutputs would be a no-op
-      // for them — but if a future code path mistakenly added them to the
-      // transient set, release must guard against re-evicting them.
-      seedCompletedStepWithSize(state, service, 'step-1', 'pinnedStep', { v: 1 }, 250, 'data.set');
+      const workflow = {
+        name: 'Test',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          { name: 'step_a', type: 'console', with: { message: 'A' } } as ConnectorStep,
+          {
+            name: 'step_b',
+            type: 'console',
+            with: { message: '{{steps.step_a.output}}' },
+          } as ConnectorStep,
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const stepBNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'step_b')!;
 
-      await service.flushStepChanges();
-      await service.flushStepChanges();
-      // data.set is pinned — output is still present.
-      expect(service.getStepOutput('step-1')).toEqual({ v: 1 });
+      seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
+      await service.flushStepChanges(); // evicts exec-a
+      expect(service.getStepOutput('exec-a')).toBeUndefined();
 
-      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([]);
-      await service.rehydrateOutputs(['step-1']); // no-op, ID isn't evicted
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'exec-a',
+          output: { v: 'a' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
 
-      service.releaseTransientlyRehydratedOutputs();
-      expect(service.getStepOutput('step-1')).toEqual({ v: 1 });
-      expect(service.hasEvictedOutputs()).toBe(false);
-    });
-
-    it('releases everything when called with no surviving consumer (workflow-end cleanup)', async () => {
-      // Mirrors the workflow-end safety release in workflow_execution_loop:
-      // after the last step, no further prepareForRead is going to run, so a
-      // direct call to releaseTransientlyRehydratedOutputs must drop any
-      // outputs left in the transient set.
-      const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+      await service.prepareForRead({
+        node: stepBNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
-      const originalOutput = { restored: true, data: 'x'.repeat(200) };
-      seedCompletedStepWithSize(
-        state,
-        service,
-        'step-1',
-        'myStep',
-        originalOutput,
-        250,
-        'connector'
+
+      expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['exec-a'],
+        ['id', 'output', 'workflowRunId']
       );
-      await service.flushStepChanges();
-      await service.flushStepChanges();
-
-      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'step-1', output: originalOutput } as unknown as EsWorkflowStepExecution,
-      ]);
-      await service.rehydrateOutputs(['step-1']);
-      expect(service.getStepOutput('step-1')).toEqual(originalOutput);
-
-      service.releaseTransientlyRehydratedOutputs();
-      expect(service.getStepOutput('step-1')).toBeUndefined();
-      expect(service.hasEvictedOutputs()).toBe(true);
     });
 
-    it('clears the transient set after release (idempotent)', async () => {
-      const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+    it('prepareForRead is a no-op in RAM-only mode (no cacheTier.get calls)', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness(); // spills=false
+      const workflow = {
+        name: 'Test',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          { name: 'step_a', type: 'console', with: { message: 'A' } } as ConnectorStep,
+          {
+            name: 'step_b',
+            type: 'console',
+            with: { message: '{{steps.step_a.output}}' },
+          } as ConnectorStep,
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const stepBNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'step_b')!;
+
+      seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
+      await service.flushStepChanges(); // RAM-only: output still in memory
+
+      expect(service.getStepOutput('exec-a')).toBeDefined(); // still in RAM
+
+      await service.prepareForRead({
+        node: stepBNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
-      seedCompletedStepWithSize(
-        state,
-        service,
-        'step-1',
-        'myStep',
-        { data: 'x'.repeat(200) },
-        250,
-        'connector'
-      );
-      await service.flushStepChanges();
-      await service.flushStepChanges();
 
-      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'step-1', output: { data: 'x'.repeat(200) } } as unknown as EsWorkflowStepExecution,
-      ]);
-      await service.rehydrateOutputs(['step-1']);
-
-      service.releaseTransientlyRehydratedOutputs();
-      expect(service.getStepOutput('step-1')).toBeUndefined();
-
-      // Rehydrate again, then release — second cycle should still work.
-      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'step-1', output: { data: 'x'.repeat(200) } } as unknown as EsWorkflowStepExecution,
-      ]);
-      await service.rehydrateOutputs(['step-1']);
-      expect(service.getStepOutput('step-1')).toBeDefined();
-      service.releaseTransientlyRehydratedOutputs();
-      expect(service.getStepOutput('step-1')).toBeUndefined();
+      // No ES call since it's RAM-only
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
   });
 
-  describe('deferred output eviction via flushStepChanges', () => {
-    it('does NOT evict output on the flush that persists it', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+  describe('output eviction via flushStepChanges', () => {
+    it('evicts output on the FIRST flush (immediate, not deferred)', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       seedCompletedStepWithSize(
         state,
         service,
@@ -854,33 +939,13 @@ describe('StepIoService', () => {
         'connector'
       );
 
-      await service.flushStepChanges();
-
-      expect(service.getStepOutput('step-1')).toBeDefined();
-      expect(service.hasEvictedOutputs()).toBe(false);
-    });
-
-    it('evicts output on the second flush', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      seedCompletedStepWithSize(
-        state,
-        service,
-        'step-1',
-        'myStep',
-        { data: 'x'.repeat(200) },
-        250,
-        'connector'
-      );
-
-      await service.flushStepChanges();
       await service.flushStepChanges();
 
       expect(service.getStepOutput('step-1')).toBeUndefined();
-      expect(service.hasEvictedOutputs()).toBe(true);
     });
 
-    it('does not evict small outputs even after two flushes', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('does NOT evict output in RAM-only mode even after multiple flushes', async () => {
+      const { state, service } = buildHarness(); // spills=false
       const smallOutput = { key: 'val' };
       seedCompletedStepWithSize(state, service, 'step-1', 'myStep', smallOutput, 10, 'connector');
 
@@ -888,11 +953,10 @@ describe('StepIoService', () => {
       await service.flushStepChanges();
 
       expect(service.getStepOutput('step-1')).toEqual(smallOutput);
-      expect(service.hasEvictedOutputs()).toBe(false);
     });
 
-    it('evicts previous batch and queues new batch on successive flushes', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('evicts successive batches on successive flushes', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       seedCompletedStepWithSize(
         state,
         service,
@@ -903,6 +967,7 @@ describe('StepIoService', () => {
         'connector'
       );
       await service.flushStepChanges();
+      expect(service.getStepOutput('step-a')).toBeUndefined();
 
       seedCompletedStepWithSize(
         state,
@@ -914,36 +979,11 @@ describe('StepIoService', () => {
         'connector'
       );
       await service.flushStepChanges();
-
-      expect(service.getStepOutput('step-a')).toBeUndefined();
-      expect(service.getStepOutput('step-b')).toBeDefined();
-
-      await service.flushStepChanges();
       expect(service.getStepOutput('step-b')).toBeUndefined();
     });
 
-    it('processes pending eviction on empty flush (no new changes)', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      seedCompletedStepWithSize(
-        state,
-        service,
-        'step-1',
-        'myStep',
-        { data: 'x'.repeat(200) },
-        250,
-        'connector'
-      );
-
-      await service.flushStepChanges();
-      expect(service.getStepOutput('step-1')).toBeDefined();
-
-      await service.flushStepChanges();
-      expect(service.getStepOutput('step-1')).toBeUndefined();
-      expect(service.hasEvictedOutputs()).toBe(true);
-    });
-
-    it('does not evict data.set outputs even after deferral', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('does not evict data.set outputs even in SQLite spill mode', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       seedCompletedStepWithSize(
         state,
         service,
@@ -955,10 +995,64 @@ describe('StepIoService', () => {
       );
 
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
       expect(service.getStepOutput('step-1')).toBeDefined();
-      expect(service.hasEvictedOutputs()).toBe(false);
+    });
+
+    it('does NOT evict output that completed during the bulkUpsert async window (premature-eviction race)', async () => {
+      // Regression test for: step completes DURING the bulkUpsert await, so its
+      // output arrives in pendingIoChanges AFTER the drain. The output is in
+      // this.outputs (in-memory) and the step is COMPLETED by the time
+      // evictFlushedOutputs runs — but the ES doc only has the RUNNING lifecycle
+      // write, not the output. Old code evicted by checking flushedIds (lifecycle-
+      // flushed), causing the output to be removed from heap before reaching ES.
+      // New code uses outputFlushedIds (IO-flushed) so only IDs whose output was
+      // in the drained ioPartials batch are evicted.
+
+      let resolveUpsert!: () => void;
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
+
+      // Intercept bulkUpsert so we can simulate a step completing during the write.
+      stepExecutionRepository.bulkUpsert.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveUpsert = resolve;
+          })
+      );
+
+      // Seed step as RUNNING + put a lifecycle change in pendingStepChanges.
+      state.upsertStep({ id: 'step-x', stepId: 'sX', stepType: 'connector', status: ExecutionStatus.RUNNING });
+
+      // Start a flush — this drains pendingStepChanges (RUNNING lifecycle only,
+      // no IO yet) and calls bulkUpsert which is now blocked.
+      const flushPromise = service.flushStepChanges();
+
+      // While the upsert is in flight, the step completes and its output is written.
+      state.upsertStep({ id: 'step-x', stepId: 'sX', status: ExecutionStatus.COMPLETED });
+      service.setStepOutput('step-x', { result: 'value' });
+
+      // Unblock the upsert.
+      resolveUpsert();
+      await flushPromise;
+
+      // The output must still be in memory: it was NOT in the ioPartials that
+      // were drained before the bulkUpsert, so eviction must not have fired.
+      expect(service.getStepOutput('step-x')).toEqual({ result: 'value' });
+    });
+
+    it('evicts output that completed before the flush drain (no race)', async () => {
+      // Complementary test: when the step completes BEFORE the drain, the output
+      // IS in the ioPartials of that flush and SHOULD be evicted after the write.
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
+
+      state.upsertStep({ id: 'step-y', stepId: 'sY', stepType: 'connector', status: ExecutionStatus.COMPLETED });
+      service.setStepOutput('step-y', { result: 'value' });
+
+      await service.flushStepChanges();
+
+      expect(service.getStepOutput('step-y')).toBeUndefined();
     });
   });
 
@@ -1044,8 +1138,8 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
     });
 
-    it('evicts input immediately and output on the next flush', async () => {
-      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+    it('evicts input immediately and output on flush', async () => {
+      const { state, service } = buildHarness({ cacheTier: makeSqliteLikeCacheTier() });
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
@@ -1057,18 +1151,14 @@ describe('StepIoService', () => {
 
       await service.flushStepChanges();
       expect(service.getStepInput('step-1')).toBeUndefined();
-      expect(service.getStepOutput('step-1')).toBeDefined();
-
-      await service.flushStepChanges();
       expect(service.getStepOutput('step-1')).toBeUndefined();
-      expect(service.hasEvictedOutputs()).toBe(true);
     });
   });
 
   describe('interaction with evictStaleLoopOutputs', () => {
     it('handles both eviction systems acting on the same step', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
-        evictionMinBytes: EVICTION_THRESHOLD,
+        cacheTier: makeSqliteLikeCacheTier(),
       });
       state.upsertStep({
         id: 'iter-1',
@@ -1091,11 +1181,8 @@ describe('StepIoService', () => {
       expect(service.getStepOutput('iter-1')).toBeUndefined();
       expect(service.getStepOutput('iter-2')).toBeDefined();
 
-      // Run the deferral cycle on both — iter-1 won't be added to evicted set
-      // (output already undefined), iter-2 will.
+      // First flush: iter-2 will be evicted immediately (SQLite spill mode).
       await service.flushStepChanges();
-      await service.flushStepChanges();
-      expect(service.hasEvictedOutputs()).toBe(true);
       expect(service.getStepOutput('iter-2')).toBeUndefined();
 
       // iter-2 can be rehydrated from ES.
@@ -1212,39 +1299,44 @@ describe('StepIoService', () => {
   describe('load (resume-time deferred outputs)', () => {
     /**
      * Drives the public `service.load()` path with mocked repository
-     * responses, exercising the same deferred/eager registration logic
-     * `markDeferredAfterLoad` does internally.
+     * responses. In SQLite spill mode, non-pinned outputs stay absent
+     * after load (deferred to on-demand rehydration). In RAM-only mode,
+     * all outputs are eagerly loaded.
      */
     async function driveLoad(
       steps: EsWorkflowStepExecution[],
-      pinnedOutputs: Array<{ id: string; output: unknown }> = []
+      pinnedOutputs: Array<{ id: string; output: unknown }> = [],
+      cacheTier?: CacheTier
     ) {
-      const harness = buildHarness();
+      const harness = buildHarness({ cacheTier });
       harness.state.updateWorkflowExecution({ stepExecutionIds: steps.map((s) => s.id) });
       const calls = harness.stepExecutionRepository.getStepExecutionsByIds as jest.Mock;
       calls.mockReset();
       // First call: load without outputs.
       calls.mockResolvedValueOnce(steps);
-      // Second call (only if pinned IDs are returned): eager output fetch.
-      if (pinnedOutputs.length > 0) {
-        calls.mockResolvedValueOnce(
-          pinnedOutputs.map((p) => ({ id: p.id, output: p.output } as EsWorkflowStepExecution))
-        );
-      }
+      // Second call: eager output fetch. In SQLite spill mode only pinned steps
+      // are fetched; in RAM-only mode all steps are fetched.
+      calls.mockResolvedValueOnce(
+        pinnedOutputs.map((p) => ({ id: p.id, output: p.output } as EsWorkflowStepExecution))
+      );
       await harness.service.load();
       return harness;
     }
 
-    it('marks non-pinned step outputs as deferred', async () => {
-      const { service } = await driveLoad([
-        {
-          id: '11',
-          stepId: 'connectorStep',
-          stepType: 'connector',
-          status: ExecutionStatus.COMPLETED,
-        } as EsWorkflowStepExecution,
-      ]);
-      expect(service.hasEvictedOutputs()).toBe(true);
+    it('marks non-pinned step outputs as absent (deferred) in SQLite spill mode', async () => {
+      const { service } = await driveLoad(
+        [
+          {
+            id: '11',
+            stepId: 'connectorStep',
+            stepType: 'connector',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ],
+        [],
+        makeSqliteLikeCacheTier()
+      );
+      expect(service.getStepOutput('11')).toBeUndefined();
     });
 
     it('eagerly fetches outputs for data.set step types', async () => {
@@ -1259,7 +1351,7 @@ describe('StepIoService', () => {
         ],
         [{ id: '11', output: { v: 1 } }]
       );
-      expect(service.hasEvictedOutputs()).toBe(false);
+      expect(service.getStepOutput('11')).not.toBeUndefined();
       expect(service.getStepOutput('11')).toEqual({ v: 1 });
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenNthCalledWith(
         2,
@@ -1280,19 +1372,23 @@ describe('StepIoService', () => {
         ],
         [{ id: '11', output: { reply: 'ok' } }]
       );
-      expect(service.hasEvictedOutputs()).toBe(false);
+      expect(service.getStepOutput('11')).not.toBeUndefined();
       expect(service.getStepOutput('11')).toEqual({ reply: 'ok' });
     });
 
-    it('treats undefined stepType as non-pinned', async () => {
-      const { service } = await driveLoad([
-        {
-          id: '11',
-          stepId: 'legacyStep',
-          status: ExecutionStatus.COMPLETED,
-        } as EsWorkflowStepExecution,
-      ]);
-      expect(service.hasEvictedOutputs()).toBe(true);
+    it('treats undefined stepType as non-pinned in SQLite spill mode', async () => {
+      const { service } = await driveLoad(
+        [
+          {
+            id: '11',
+            stepId: 'legacyStep',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ],
+        [],
+        makeSqliteLikeCacheTier()
+      );
+      expect(service.getStepOutput('11')).toBeUndefined();
     });
   });
 
@@ -1347,9 +1443,10 @@ describe('StepIoService', () => {
           status: ExecutionStatus.WAITING_FOR_CHILD,
         } as EsWorkflowStepExecution,
       ]);
+      // Provide second mock call for eager load (RAM-only mode loads all)
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValueOnce([]);
       await service.load();
 
-      expect(service.hasEvictedOutputs()).toBe(true);
       expect(service.getStepOutput('exec-child')).toBeUndefined();
 
       state.upsertStep({
@@ -1403,21 +1500,30 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
-    it('rehydrates only the step IDs referenced in template expressions', async () => {
-      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+    it('rehydrates all absent predecessor IDs (no template analysis in new prepareForRead)', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
       const { graph, stepCNode } = buildGraphWorkflow();
 
-      // Seed two completed predecessors and drive them through the deferred
-      // eviction cycle so they end up in the evicted-outputs map.
+      // Seed two completed predecessors and drive them through eviction.
       seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
       seedCompletedStepWithSize(state, service, 'exec-b', 'step_b', { v: 'b' }, 1, 'connector');
       await service.flushStepChanges();
-      await service.flushStepChanges();
-      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(service.getStepOutput('exec-b')).toBeUndefined();
       stepExecutionRepository.bulkUpsert.mockClear();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'exec-b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-a',
+          output: { v: 'a' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-b',
+          output: { v: 'b' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
       ]);
 
       await service.prepareForRead({
@@ -1425,11 +1531,10 @@ describe('StepIoService', () => {
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
 
-      // Only step_b is referenced by step_c — exec-a should not be rehydrated.
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
-        ['exec-b'],
-        ['id', 'output', 'workflowRunId']
-      );
+      // Both predecessors are absent and fetched (new code fetches ALL absent predecessors)
+      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-a', 'exec-b']));
+      expect(rehydratedIds).toHaveLength(2);
     });
 
     it('rehydrates outputs referenced by the active foreach source expression', async () => {
@@ -1471,7 +1576,9 @@ describe('StepIoService', () => {
         .map((nodeId) => graph.getNode(nodeId))
         .find((n) => n.stepId === 'add_alert_to_case')!;
 
-      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
       const alertsOutput = { hits: { hits: [{ _id: 'alert-1' }] } };
       seedCompletedStepWithSize(
         state,
@@ -1491,7 +1598,6 @@ describe('StepIoService', () => {
         1,
         'connector'
       );
-      await service.flushStepChanges();
       await service.flushStepChanges();
 
       const scopeStack: StackFrame[] = [
@@ -1524,8 +1630,16 @@ describe('StepIoService', () => {
       });
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
-        { id: 'exec-case', output: { id: 'case-1' } } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-alerts',
+          output: alertsOutput,
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-case',
+          output: { id: 'case-1' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
       ]);
 
       await service.prepareForRead({
@@ -1534,8 +1648,8 @@ describe('StepIoService', () => {
       });
 
       const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      // Both exec-alerts and exec-case are absent (evicted) and should be rehydrated
       expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-case']));
-      expect(rehydratedIds).toHaveLength(2);
     });
 
     it('rehydrates outputs referenced by nested active foreach source expressions', async () => {
@@ -1589,7 +1703,9 @@ describe('StepIoService', () => {
         .map((nodeId) => graph.getNode(nodeId))
         .find((n) => n.stepId === 'deep_step')!;
 
-      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
       const outerOutput = { items: [{ group: 'a' }] };
       const innerOutput = { items: [{ _id: 'alert-1' }] };
       seedCompletedStepWithSize(
@@ -1619,7 +1735,6 @@ describe('StepIoService', () => {
         1,
         'connector'
       );
-      await service.flushStepChanges();
       await service.flushStepChanges();
 
       const outerFrame: StackFrame = {
@@ -1673,9 +1788,21 @@ describe('StepIoService', () => {
       });
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'exec-outer-source', output: outerOutput } as unknown as EsWorkflowStepExecution,
-        { id: 'exec-inner-source', output: innerOutput } as unknown as EsWorkflowStepExecution,
-        { id: 'exec-case', output: { id: 'case-1' } } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-outer-source',
+          output: outerOutput,
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-inner-source',
+          output: innerOutput,
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-case',
+          output: { id: 'case-1' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
       ]);
 
       await service.prepareForRead({
@@ -1684,10 +1811,10 @@ describe('StepIoService', () => {
       });
 
       const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      // All three evicted source steps should be rehydrated
       expect(rehydratedIds).toEqual(
         expect.arrayContaining(['exec-outer-source', 'exec-inner-source', 'exec-case'])
       );
-      expect(rehydratedIds).toHaveLength(3);
     });
 
     it('rehydrates outputs referenced by switch case match templates', async () => {
@@ -1735,11 +1862,14 @@ describe('StepIoService', () => {
         ],
       } as unknown as WorkflowYaml;
       const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      // In the current graph implementation, switch steps produce an atomic node.
       const switchNode = graph.topologicalOrder
         .map((nodeId) => graph.getNode(nodeId))
-        .find((n) => n.stepId === 'choose_branch' && n.type === 'enter-switch')!;
+        .find((n) => n.stepId === 'choose_branch')!;
 
-      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
       const alertsOutput = { hits: { total: { relation: 'eq' } } };
       seedCompletedStepWithSize(
         state,
@@ -1760,11 +1890,18 @@ describe('StepIoService', () => {
         'connector'
       );
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
-        { id: 'exec-relation', output: 'eq' } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-alerts',
+          output: alertsOutput,
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-relation',
+          output: 'eq',
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
       ]);
 
       await service.prepareForRead({
@@ -1811,11 +1948,14 @@ describe('StepIoService', () => {
         ],
       } as unknown as WorkflowYaml;
       const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
-      const exitWhileNode = graph.topologicalOrder
+      // In the current graph implementation, while steps produce an atomic node.
+      const whileNode = graph.topologicalOrder
         .map((nodeId) => graph.getNode(nodeId))
-        .find((n) => n.stepId === 'check_while' && n.type === 'exit-while')!;
+        .find((n) => n.stepId === 'check_while')!;
 
-      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
       const alertsOutput = { hits: { total: { value: 5 } } };
       seedCompletedStepWithSize(
         state,
@@ -1836,19 +1976,24 @@ describe('StepIoService', () => {
         'connector'
       );
       await service.flushStepChanges();
-      await service.flushStepChanges();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-alerts',
+          output: alertsOutput,
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
       ]);
 
       await service.prepareForRead({
-        node: exitWhileNode,
+        node: whileNode,
         predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
       });
 
+      // Both exec-alerts and exec-case are predecessors of check_while;
+      // the new prepareForRead fetches ALL absent predecessors.
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
-        ['exec-alerts'],
+        expect.arrayContaining(['exec-alerts']),
         ['id', 'output', 'workflowRunId']
       );
     });
@@ -1874,14 +2019,19 @@ describe('StepIoService', () => {
         .map((nodeId) => graph.getNode(nodeId))
         .find((n) => n.stepId === 'step_b')!;
 
-      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
       seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
       await service.flushStepChanges();
-      await service.flushStepChanges();
-      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(service.getStepOutput('exec-a')).toBeUndefined();
 
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'exec-a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+        {
+          id: 'exec-a',
+          output: { v: 'a' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
       ]);
 
       await service.prepareForRead({
@@ -1937,17 +2087,22 @@ describe('StepIoService', () => {
       }
 
       it('rehydrates a shared predecessor only on the first consumer', async () => {
-        const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+        const { state, service, stepExecutionRepository } = buildHarness({
+          cacheTier: makeSqliteLikeCacheTier(),
+        });
         const { graph, stepBNode, stepCNode, stepDNode } = buildFanoutWorkflow();
 
-        // Seed step_a, drive through deferred eviction so it ends up evicted.
+        // Seed step_a, drive through eviction so it ends up absent from RAM.
         seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
         await service.flushStepChanges();
-        await service.flushStepChanges();
-        expect(service.hasEvictedOutputs()).toBe(true);
+        expect(service.getStepOutput('exec-a')).toBeUndefined();
 
         stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-          { id: 'exec-a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+          {
+            id: 'exec-a',
+            output: { v: 'a' },
+            workflowRunId: 'test-workflow-execution-id',
+          } as unknown as EsWorkflowStepExecution,
         ]);
 
         // Step B reads step_a — first rehydration.
@@ -1973,10 +2128,9 @@ describe('StepIoService', () => {
         expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
       });
 
-      it('releases a transient predecessor that the next step does not need', async () => {
-        // Workflow: step_a -> step_b, step_a -> step_c. step_b reads step_a,
-        // step_c does not. After step_c's prepareForRead, step_a should be
-        // re-evicted (it was transient for step_b, not needed by step_c).
+      it('rehydrated outputs remain resident until evicted by another mechanism', async () => {
+        // In the new prepareForRead, there is no "transient release" mechanism.
+        // Once an output is rehydrated, it stays in memory.
         const workflow: WorkflowYaml = {
           name: 'Selective release',
           version: '1',
@@ -2005,13 +2159,18 @@ describe('StepIoService', () => {
           .map((nodeId) => graph.getNode(nodeId))
           .find((n) => n.stepId === 'step_c')!;
 
-        const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+        const { state, service, stepExecutionRepository } = buildHarness({
+          cacheTier: makeSqliteLikeCacheTier(),
+        });
         seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
-        await service.flushStepChanges();
         await service.flushStepChanges();
 
         stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-          { id: 'exec-a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+          {
+            id: 'exec-a',
+            output: { v: 'a' },
+            workflowRunId: 'test-workflow-execution-id',
+          } as unknown as EsWorkflowStepExecution,
         ]);
 
         // step_b rehydrates step_a.
@@ -2022,15 +2181,16 @@ describe('StepIoService', () => {
         expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
 
         stepExecutionRepository.getStepExecutionsByIds.mockClear();
-        // step_c does not reference step_a — release should kick in.
+        // step_c does not reference step_a, but exec-a IS in memory now.
+        // The new prepareForRead does NOT release it — it stays resident.
         await service.prepareForRead({
           node: stepCNode,
           predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
         });
 
-        expect(service.getStepOutput('exec-a')).toBeUndefined();
-        expect(service.hasEvictedOutputs()).toBe(true);
-        // step_c didn't need step_a, so no rehydration was triggered.
+        // exec-a is still in memory (no transient release in new code)
+        expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
+        // step_c has no absent predecessors, so no ES call
         expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
       });
 
@@ -2038,15 +2198,20 @@ describe('StepIoService', () => {
         // Retry semantics: when a step fails and retries, its predecessors are
         // already resident from the first attempt's prepareForRead. The second
         // call must compute the same neededIds, not re-evict-then-rehydrate.
-        const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+        const { state, service, stepExecutionRepository } = buildHarness({
+          cacheTier: makeSqliteLikeCacheTier(),
+        });
         const { graph, stepBNode } = buildFanoutWorkflow();
 
         seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
         await service.flushStepChanges();
-        await service.flushStepChanges();
 
         stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-          { id: 'exec-a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+          {
+            id: 'exec-a',
+            output: { v: 'a' },
+            workflowRunId: 'test-workflow-execution-id',
+          } as unknown as EsWorkflowStepExecution,
         ]);
 
         // Attempt 1.
@@ -2063,6 +2228,201 @@ describe('StepIoService', () => {
         });
         expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('flush-time transient eviction', () => {
+    it('evicts a rehydrated output on the next flush, not immediately after the step', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
+
+      seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 100, 'connector');
+      await service.flushStepChanges(); // evicts exec-a from outputs (evictFlushedOutputs)
+      expect(service.getStepOutput('exec-a')).toBeUndefined();
+
+      // Simulate prepareForRead rehydrating exec-a for the next step
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'exec-a',
+          output: { v: 'a' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['exec-a']);
+      expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' }); // back in memory
+
+      // exec-a is NOT evicted yet — it stays until the next flush
+      expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
+
+      // Next flush sweeps out the transient snapshot taken at flush start
+      createCompletedStep(state, service, 'exec-b', 'step_b', { v: 'b' }, 'connector');
+      await service.flushStepChanges();
+
+      expect(service.getStepOutput('exec-a')).toBeUndefined(); // transient swept out
+    });
+
+    it('rehydrated output is reusable by multiple steps within the same flush window', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
+
+      seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 100, 'connector');
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'exec-a',
+          output: { v: 'a' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['exec-a']); // first step loads it
+
+      // Second step in the same flush window calls rehydrateOutputs for the same ID
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      await service.rehydrateOutputs(['exec-a']); // exec-a already in outputs — no IPC needed
+
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+      expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
+    });
+
+    it('is a no-op in RAM-only mode (spills=false) — outputs are never evicted', async () => {
+      const { state, service } = buildHarness(); // no cacheTier → spills=false
+
+      createCompletedStep(state, service, 'exec-a', 'step_a', { v: 'a' }, 'connector');
+      await service.flushStepChanges(); // eviction block is skipped in RAM-only mode
+
+      // In RAM-only mode outputs stay resident for the entire workflow run
+      expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
+    });
+
+    it('updates size stats when a transient output is evicted at flush', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
+
+      seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 500, 'connector');
+      await service.flushStepChanges(); // exec-a evicted; size cleared
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        {
+          id: 'exec-a',
+          output: { v: 'a' },
+          workflowRunId: 'test-workflow-execution-id',
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['exec-a']);
+      const rehydratedSize = service.getOutputSizeStats().totalBytes;
+      expect(rehydratedSize).toBeGreaterThan(0); // size recomputed on rehydration
+
+      // Next flush evicts the transient and clears its size
+      createCompletedStep(state, service, 'exec-b', 'step_b', { v: 'b' }, 'connector');
+      await service.flushStepChanges();
+
+      expect(service.getOutputSizeStats().totalBytes).toBe(0);
+      expect(service.getOutputSizeStats().stepCount).toBe(0);
+    });
+
+    it('allows re-rehydration after the transient is swept — shared predecessor across flush boundaries', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
+
+      seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 100, 'connector');
+      await service.flushStepChanges();
+
+      const rehydrateA = () =>
+        stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+          {
+            id: 'exec-a',
+            output: { v: 'a' },
+            workflowRunId: 'test-workflow-execution-id',
+          } as unknown as EsWorkflowStepExecution,
+        ]);
+
+      // First flush window: rehydrate and sweep
+      rehydrateA();
+      await service.rehydrateOutputs(['exec-a']);
+      expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
+      createCompletedStep(state, service, 'exec-b', 'step_b', { v: 'b' }, 'connector');
+      await service.flushStepChanges(); // exec-a swept out
+      expect(service.getStepOutput('exec-a')).toBeUndefined();
+
+      // Second flush window: exec-a must be re-rehydratable
+      rehydrateA();
+      await service.rehydrateOutputs(['exec-a']);
+      expect(service.getStepOutput('exec-a')).toEqual({ v: 'a' });
+    });
+  });
+
+  describe('scope-frame rehydration guard', () => {
+    it('does NOT fetch scope-frame IDs when no step execution exists (timeout zone pattern)', async () => {
+      // Regression: enterTimeoutZone nodes never call startStep/finishStep so their
+      // step execution is never recorded in state. The scope-frame path in
+      // prepareForRead must not add those IDs to idsToFetch — doing so causes
+      // spurious ES round-trips and ERROR log noise.
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
+
+      // Simulate a workflow_level_timeout scope frame (as enterTimeoutZone pushes onto scope)
+      const timeoutScopeFrame: StackFrame = {
+        stepId: 'workflow_level_timeout',
+        nestedScopes: [
+          { nodeId: 'enterTimeoutZone_workflow_level_timeout', nodeType: 'enter-timeout-zone', scopeId: '' },
+        ],
+      };
+      state.updateWorkflowExecution({ scopeStack: [timeoutScopeFrame] });
+
+      // No step execution is registered for the timeout node (it never calls startStep)
+
+      const fakeNode = { id: 'some_step', stepId: 'some_step', stepType: 'connector' };
+
+      await service.prepareForRead({
+        node: fakeNode as Parameters<typeof service.prepareForRead>[0]['node'],
+        predecessorsResolver: () => [],
+      });
+
+      // No ES fetch should have been made — the timeout-zone scope frame had no
+      // step execution in state so it must be silently skipped.
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+    });
+
+    it('DOES fetch scope-frame IDs when a step execution exists and output was evicted (foreach pattern)', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        cacheTier: makeSqliteLikeCacheTier(),
+      });
+
+      const foreachScopeFrame: StackFrame = {
+        stepId: 'my_loop',
+        nestedScopes: [
+          { nodeId: 'enterForeach_my_loop', nodeType: 'enter-foreach', scopeId: '0' },
+        ],
+      };
+      state.updateWorkflowExecution({ scopeStack: [foreachScopeFrame] });
+
+      const foreachExecId = buildStepExecutionId(state.getWorkflowExecutionId(), 'my_loop', []);
+      // Register the step execution (startStep equivalent)
+      state.upsertStep({
+        id: foreachExecId,
+        stepId: 'my_loop',
+        stepType: 'foreach',
+        status: ExecutionStatus.RUNNING,
+      } as Partial<EsWorkflowStepExecution>);
+      // Output is absent from this.outputs (no setStepOutput call) → should be fetched
+
+      const fakeNode = { id: 'inner_step', stepId: 'inner_step', stepType: 'connector' };
+      await service.prepareForRead({
+        node: fakeNode as Parameters<typeof service.prepareForRead>[0]['node'],
+        predecessorsResolver: () => [],
+      });
+
+      // The foreach scope frame SHOULD be fetched because its step execution exists
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        expect.arrayContaining([foreachExecId]),
+        expect.arrayContaining(['output'])
+      );
     });
   });
 });

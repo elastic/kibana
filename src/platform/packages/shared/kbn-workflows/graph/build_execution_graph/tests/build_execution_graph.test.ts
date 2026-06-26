@@ -87,6 +87,7 @@ describe('convertToWorkflowGraph', () => {
           connectorId: 'slack',
           with: { message: 'Hello from atomic step 1' },
         },
+        dataStepDependencies: [],
       } as AtomicGraphNode);
     });
   });
@@ -149,6 +150,7 @@ describe('convertToWorkflowGraph', () => {
           type: 'wait',
           with: { duration: '1s' },
         },
+        dataStepDependencies: [],
       } as WaitGraphNode);
     });
   });
@@ -246,6 +248,7 @@ describe('convertToWorkflowGraph', () => {
             size: 10,
           },
         },
+        dataStepDependencies: [],
       } as ElasticsearchGraphNode);
     });
 
@@ -323,6 +326,7 @@ describe('convertToWorkflowGraph', () => {
             severity: 'medium',
           },
         },
+        dataStepDependencies: [],
       } as KibanaGraphNode);
     });
 
