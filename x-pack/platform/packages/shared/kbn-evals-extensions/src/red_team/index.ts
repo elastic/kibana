@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { createRedTeamOrchestrator, runRedTeam } from './orchestrator';
+export { createRedTeamOrchestrator } from './orchestrator';
 export type { RedTeamOrchestratorOptions } from './orchestrator';
 
 export { RED_TEAM_MODULE_IDS } from './types';
