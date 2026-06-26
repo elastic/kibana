@@ -27,9 +27,9 @@ export const isAutomatedVersionBumpPR = async (
   changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null
 ) => {
   const branch = process.env.GITHUB_PR_BRANCH ?? '';
-  const prHeadUser = process.env.GITHUB_PR_HEAD_USER ?? '';
+  const prUser = process.env.GITHUB_PR_USER ?? '';
 
-  if (!VERSION_BUMP_BRANCH_RE.test(branch) || prHeadUser !== ELASTIC_LOGIN) {
+  if (!VERSION_BUMP_BRANCH_RE.test(branch) || prUser !== ELASTIC_LOGIN) {
     return false;
   }
 
