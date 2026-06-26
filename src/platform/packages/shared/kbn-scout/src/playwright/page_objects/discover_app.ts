@@ -21,7 +21,7 @@ const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
-  queryMode?: DiscoverQueryMode;
+  queryMode: DiscoverQueryMode;
 }
 
 export interface DataViewOptions {
@@ -40,8 +40,8 @@ export class DiscoverApp {
     this.dataGrid = new DataGrid(page);
   }
 
-  async goto(options: DiscoverGotoOptions = {}) {
-    if (options.queryMode) await this.setQueryMode(options.queryMode);
+  async goto(options: DiscoverGotoOptions) {
+    await this.setQueryMode(options.queryMode);
 
     await this.page.gotoApp('discover');
     await this.waitForDiscoverPage();
@@ -84,7 +84,7 @@ export class DiscoverApp {
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = this.page.testSubj
       .locator('indexPattern-switcher')
-      .locator(`[title="${name}"]`);
+      .locator(`[data-test-subj="dataView-${name}"]`);
     if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
