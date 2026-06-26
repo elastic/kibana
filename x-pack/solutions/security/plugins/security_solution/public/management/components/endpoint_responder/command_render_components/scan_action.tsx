@@ -20,25 +20,23 @@ export const ScanActionResult = memo<
   const actionCreator = useSendScanRequest();
 
   const actionRequestBody = useMemo<undefined | ScanActionRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { path, comment } = command.args.args;
-    const agentType = command.commandDefinition?.meta?.agentType;
 
-    return endpointId
+    return endpointId && apiReqBodyBase
       ? {
-          agent_type: agentType,
-          endpoint_ids: endpointId,
+          ...apiReqBodyBase,
           comment: comment?.[0],
           parameters: {
             path: path[0],
           },
         }
       : undefined;
-  }, [
-    command.args.args,
-    command.commandDefinition?.meta?.agentType,
-    command.commandDefinition?.meta?.endpointId,
-  ]);
+  }, [command.args.args, command.commandDefinition?.meta]);
+
+  if (!actionRequestBody) {
+    throw new Error('Command definition missing `apiReqBodyBase`!!');
+  }
 
   return useConsoleActionSubmitter<ScanActionRequestBody>({
     ResultComponent,

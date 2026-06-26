@@ -559,6 +559,10 @@ const fetchAgentIdsForIntegrations = async ({
     integrationPolicy.policy_ids.forEach((policyId) => agentPolicyIds.add(policyId));
   }
 
+  if (agentPolicyIds.size === 0) {
+    return response;
+  }
+
   // FIXME:PT listAgents below needs to use PIT and do pagination in order to be more efficient (maybe use aysnc iterator)
 
   const listAgentsOptions: Parameters<AgentClient['listAgents']>[0] = {

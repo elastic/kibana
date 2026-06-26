@@ -32,18 +32,17 @@ export const MemoryDumpActionResult = memo<
   >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendMemoryDumpRequest();
-  const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
 
   const actionRequestBody = useMemo<undefined | MemoryDumpActionRequestBody>(() => {
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { comment, kernel, pid, entityId } = command.args.args;
 
-    if (!endpointId) {
+    if (!endpointId || !apiReqBodyBase) {
       return;
     }
 
     const reqBody: MemoryDumpActionRequestBody = {
-      agent_type: agentType,
-      endpoint_ids: endpointId,
+      ...apiReqBodyBase,
       ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters: {
         type: kernel?.[0] ? 'kernel' : 'process',
@@ -53,7 +52,11 @@ export const MemoryDumpActionResult = memo<
     };
 
     return reqBody;
-  }, [agentType, command.args.args, endpointId]);
+  }, [command.args.args, command.commandDefinition?.meta]);
+
+  if (!actionRequestBody) {
+    throw new Error('Command definition missing `apiReqBodyBase`!!');
+  }
 
   const { result, actionDetails } = useConsoleActionSubmitter<
     MemoryDumpActionRequestBody,
@@ -75,7 +78,7 @@ export const MemoryDumpActionResult = memo<
       <ResultComponent>
         <MemoryDumpResponseActionOutputResult
           action={actionDetails}
-          agentId={endpointId}
+          agentId={command.commandDefinition?.meta?.endpointId}
           data-test-subj="memoryDumpResult"
         />
       </ResultComponent>

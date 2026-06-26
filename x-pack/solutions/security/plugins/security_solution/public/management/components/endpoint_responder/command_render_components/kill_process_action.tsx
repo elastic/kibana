@@ -18,18 +18,21 @@ export const KillProcessActionResult = memo<
   const actionCreator = useSendKillProcessRequest();
 
   const actionRequestBody = useMemo<undefined | KillProcessRequestBody>(() => {
-    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const parameters = parsedKillOrSuspendParameter(command.args.args);
 
-    return endpointId
+    return endpointId && apiReqBodyBase
       ? {
-          agent_type: agentType,
-          endpoint_ids: endpointId,
+          ...apiReqBodyBase,
           comment: command.args.args?.comment?.[0],
           parameters,
         }
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta]);
+
+  if (!actionRequestBody) {
+    throw new Error('Command definition missing `apiReqBodyBase`!!');
+  }
 
   return useConsoleActionSubmitter<KillProcessRequestBody>({
     ResultComponent,

@@ -29,16 +29,15 @@ export const UploadActionResult = memo<
   const actionCreator = useSendUploadEndpointRequest();
 
   const actionRequestBody = useMemo<undefined | UploadActionUIRequestBody>(() => {
-    const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { comment, overwrite, file } = command.args.args;
 
-    if (!endpointId) {
+    if (!endpointId || !apiReqBodyBase) {
       return;
     }
 
     const reqBody: UploadActionUIRequestBody = {
-      agent_type: agentType,
-      endpoint_ids: endpointId,
+      ...apiReqBodyBase,
       ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters:
         overwrite !== undefined
@@ -51,6 +50,10 @@ export const UploadActionResult = memo<
 
     return reqBody;
   }, [command.args.args, command.commandDefinition?.meta]);
+
+  if (!actionRequestBody) {
+    throw new Error('Command definition missing `apiReqBodyBase`!!');
+  }
 
   const { result, actionDetails } = useConsoleActionSubmitter<
     UploadActionUIRequestBody,

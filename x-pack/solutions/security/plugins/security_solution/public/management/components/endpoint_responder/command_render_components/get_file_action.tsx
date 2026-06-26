@@ -23,13 +23,12 @@ export const GetFileActionResult = memo<
   const actionCreator = useSendGetFileRequest();
 
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
-    const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { path, comment } = command.args.args;
 
-    return endpointId
+    return endpointId && apiReqBodyBase
       ? {
-          agent_type: agentType,
-          endpoint_ids: endpointId,
+          ...apiReqBodyBase,
           comment: comment?.[0],
           parameters: {
             path: path[0],
@@ -37,6 +36,10 @@ export const GetFileActionResult = memo<
         }
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta]);
+
+  if (!actionRequestBody) {
+    throw new Error('Command definition missing `apiReqBodyBase`!!');
+  }
 
   const { result, actionDetails } = useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({
     ResultComponent,

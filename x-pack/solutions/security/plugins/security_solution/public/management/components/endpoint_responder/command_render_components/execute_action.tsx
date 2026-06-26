@@ -32,14 +32,13 @@ export const ExecuteActionResult = memo<
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
-    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
 
-    if (!endpointId) {
+    if (!endpointId || !apiReqBodyBase) {
       return;
     }
     return {
-      agent_type: agentType,
-      endpoint_ids: endpointId,
+      ...apiReqBodyBase,
       parameters: {
         command: command.args.args.command[0],
         timeout: parsedExecuteTimeout(command.args.args.timeout?.[0]),
@@ -52,6 +51,10 @@ export const ExecuteActionResult = memo<
     command.args.args.timeout,
     command.args.args?.comment,
   ]);
+
+  if (!actionRequestBody) {
+    throw new Error('Command definition missing `apiReqBodyBase`!!');
+  }
 
   const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
     ExecuteActionRequestBody,

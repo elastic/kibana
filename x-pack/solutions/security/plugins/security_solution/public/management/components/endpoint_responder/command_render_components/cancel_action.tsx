@@ -21,14 +21,12 @@ export const CancelActionResult = memo<
   const actionCreator = useSendCancelRequest();
 
   const actionRequestBody = useMemo<undefined | CancelActionRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { action, comment, force } = command.args.args;
-    const agentType = command.commandDefinition?.meta?.agentType;
 
-    return endpointId
+    return endpointId && apiReqBodyBase
       ? {
-          agent_type: agentType,
-          endpoint_ids: endpointId,
+          ...apiReqBodyBase,
           comment: comment?.[0],
           parameters: {
             id: action[0],
@@ -36,11 +34,11 @@ export const CancelActionResult = memo<
           },
         }
       : undefined;
-  }, [
-    command.args.args,
-    command.commandDefinition?.meta?.agentType,
-    command.commandDefinition?.meta?.endpointId,
-  ]);
+  }, [command.args.args, command.commandDefinition?.meta]);
+
+  if (!actionRequestBody) {
+    throw new Error('Command definition missing `apiReqBodyBase`!!');
+  }
 
   return useConsoleActionSubmitter<CancelActionRequestBody>({
     ResultComponent,

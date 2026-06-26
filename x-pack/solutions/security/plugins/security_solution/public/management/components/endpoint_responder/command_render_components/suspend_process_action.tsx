@@ -23,20 +23,23 @@ export const SuspendProcessActionResult = memo<
   const actionCreator = useSendSuspendProcessRequest();
 
   const actionRequestBody = useMemo<undefined | SuspendProcessRequestBody>(() => {
-    const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const parameters = parsedKillOrSuspendParameter(command.args.args) as
       | ResponseActionParametersWithPid
       | ResponseActionParametersWithEntityId;
 
-    return endpointId
+    return endpointId && apiReqBodyBase
       ? {
-          agent_type: agentType,
-          endpoint_ids: endpointId,
+          ...apiReqBodyBase,
           comment: command.args.args?.comment?.[0],
           parameters,
         }
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta]);
+
+  if (!actionRequestBody) {
+    throw new Error('Command definition missing `apiReqBodyBase`!!');
+  }
 
   return useConsoleActionSubmitter<SuspendProcessRequestBody, SuspendProcessActionOutputContent>({
     ResultComponent,

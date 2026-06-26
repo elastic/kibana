@@ -23,7 +23,7 @@ export const IsolateActionResult = memo<ActionRequestComponentProps>(
     }, [command.args.args?.comment, command.commandDefinition?.meta]);
 
     if (!actionRequestBody) {
-      throw new Error('Command defintion missing `apiReqBodyBase`!!');
+      throw new Error('Command definition missing `apiReqBodyBase`!!');
     }
 
     return useConsoleActionSubmitter({

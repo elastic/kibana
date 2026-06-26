@@ -15,19 +15,18 @@ import type { ActionRequestComponentProps } from '../types';
 
 export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
-    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
-    const comment = command.args.args?.comment?.[0];
     const actionCreator = useSendGetEndpointProcessesRequest();
 
     const actionRequestBody = useMemo(() => {
-      return endpointId
-        ? {
-            endpoint_ids: endpointId,
-            comment,
-            agent_type: agentType,
-          }
-        : undefined;
-    }, [endpointId, comment, agentType]);
+      const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+      const comment = command.args.args?.comment?.[0];
+
+      return endpointId && apiReqBodyBase ? { ...apiReqBodyBase, comment } : undefined;
+    }, [command.args.args?.comment, command.commandDefinition?.meta]);
+
+    if (!actionRequestBody) {
+      throw new Error('Command definition missing `apiReqBodyBase`!!');
+    }
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
       GetProcessesRequestBody,

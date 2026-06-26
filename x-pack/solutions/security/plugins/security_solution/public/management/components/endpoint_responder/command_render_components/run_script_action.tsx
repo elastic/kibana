@@ -61,9 +61,9 @@ export const RunScriptActionResult = memo<
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendRunScriptEndpoint();
   const actionRequestBody = useMemo<undefined | RunScriptActionRequestBody>(() => {
-    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
+    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
 
-    if (!endpointId) {
+    if (!endpointId || !apiReqBodyBase) {
       return {} as unknown as RunScriptActionRequestBody;
     }
 
@@ -124,8 +124,7 @@ export const RunScriptActionResult = memo<
     };
 
     return {
-      agent_type: agentType,
-      endpoint_ids: endpointId,
+      ...apiReqBodyBase,
       parameters: getParams(),
       comment: command.args.args?.comment?.[0],
     } as unknown as RunScriptActionRequestBody;
