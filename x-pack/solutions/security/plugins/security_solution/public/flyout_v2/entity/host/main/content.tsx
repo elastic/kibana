@@ -15,6 +15,7 @@ import { EntityInsight } from '../../../../cloud_security_posture/components/ent
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import type { EntityRiskScoresState } from '../../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -31,6 +32,8 @@ export interface ContentProps {
   observedHost: ObservedHostData;
   /** Current risk score state for the host. */
   riskScoreState: RiskScoreState<EntityType.host>;
+  /** Base + resolution entity risk scores (Entity Store v2). */
+  entityRiskScores: EntityRiskScoresState<EntityType.host>;
   /** Unique context ID passed to child queries. */
   contextID: string;
   /** Scope ID for the timeline or table that opened this flyout. */
@@ -62,6 +65,7 @@ export const Content = ({
   identityFields,
   observedHost,
   riskScoreState,
+  entityRiskScores,
   recalculatingScore,
   contextID,
   scopeId,
@@ -95,6 +99,7 @@ export const Content = ({
             <FlyoutRiskSummary
               entityType={EntityType.host}
               riskScoreData={riskScoreState}
+              entityRiskScores={entityRiskScores}
               recalculatingScore={recalculatingScore}
               queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
               openDetailsPanel={openDetailsPanel}

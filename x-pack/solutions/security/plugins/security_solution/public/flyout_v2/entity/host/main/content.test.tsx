@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { RESOLUTION_SECTION_TEST_ID } from '../../../../entity_analytics/components/entity_resolution/test_ids';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { Content } from './content';
+import { mockHostEntityRiskScores } from '../../../../flyout/entity_details/mocks';
 
 jest.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
   ResolutionSection: () => <div data-test-subj="securitySolutionFlyoutResolutionSection" />,
@@ -50,6 +51,7 @@ const defaultProps = {
   identityFields: { 'host.name': 'host-1' },
   observedHost: { details: {}, isLoading: false } as never,
   riskScoreState: { hasEngineBeenInstalled: false, data: [], loading: false } as never,
+  entityRiskScores: mockHostEntityRiskScores,
   recalculatingScore: false,
   contextID: 'test',
   scopeId: 'test',

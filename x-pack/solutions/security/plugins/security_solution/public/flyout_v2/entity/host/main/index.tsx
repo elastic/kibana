@@ -16,9 +16,9 @@ import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-st
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import { RISK_INPUTS_TAB_QUERY_ID } from '../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../../common/types';
-import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
+import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
+import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/components/home/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -174,27 +174,36 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const { inspect: inspectRiskScore, refetch, loading } = riskScoreState;
 
-  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
-  const refetchRiskScore = useCallback(() => {
-    refetch();
-    (refetchRiskInputsTab as Refetch | null)?.();
-  }, [refetch, refetchRiskInputsTab]);
-
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.host,
-    hostName,
-    { onSuccess: refetchRiskScore }
-  );
-
-  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
-    onSuccess: calculateEntityRiskScore,
-  });
-
   const observedHost = useObservedHost(
     hostName,
     scopeId,
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
+
+  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
+  const onRecalculation = useCallback(() => {
+    (refetchEntitiesTable as Refetch | null)?.();
+  }, [refetchEntitiesTable]);
+
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.host,
+      identifier: hostName,
+      entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined,
+      entityStoreV2Enabled,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
+
+  const onAssetCriticalityChanged = useCallback(() => {
+    (refetchEntitiesTable as Refetch | null)?.();
+    calculateEntityRiskScore();
+  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
+    onSuccess: onAssetCriticalityChanged,
+  });
 
   const panelDisplayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
@@ -372,11 +381,12 @@ export const Host: FC<HostProps> = memo(function Host({
             identityFields={documentEntityIdentifiers}
             observedHost={observedHost}
             riskScoreState={effectiveRiskScoreState}
+            entityRiskScores={entityRiskScores}
             contextID={safeContextID}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             recalculatingScore={recalculatingScore}
-            onAssetCriticalityChange={calculateEntityRiskScore}
+            onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}

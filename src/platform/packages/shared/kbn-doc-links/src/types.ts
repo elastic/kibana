@@ -321,6 +321,7 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
+    readonly attacksPage: string;
   };
   readonly server: {
     readonly protocol: string;
