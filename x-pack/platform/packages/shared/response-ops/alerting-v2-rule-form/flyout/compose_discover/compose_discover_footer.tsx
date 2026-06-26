@@ -19,6 +19,8 @@ import { useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from './types';
 import { isAlertConditionStepId } from './types';
 import type { ComposeFormValues } from './compose_form_types';
+import { getBreachQuery } from './compose_form_types';
+import { getEsqlSummaryState } from './compose_discover_form/esql_query_summary_section';
 
 const CREATE_RULE_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.createButtonLabel',
@@ -50,14 +52,22 @@ const NEXT_DISABLED_TOOLTIP = i18n.translate(
   { defaultMessage: 'Define a query in the editor before continuing' }
 );
 
+const NO_ALERT_CONDITION_NEXT_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.noAlertConditionNextTooltip',
+  { defaultMessage: 'Add an alert condition to the query before continuing' }
+);
+
+const SPLIT_FAILED_NEXT_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.splitFailedNextTooltip',
+  {
+    defaultMessage:
+      'Review your query or separate the base query and alert condition before continuing',
+  }
+);
+
 const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.validationErrorsNextTooltip',
   { defaultMessage: 'Resolve ES|QL control placeholders before continuing' }
-);
-
-const ALERT_CONDITION_REQUIRED_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.alertConditionRequiredTooltip',
-  { defaultMessage: 'Define an alert condition in the query editor before continuing' }
 );
 
 export interface ComposeDiscoverFooterProps {
@@ -96,29 +106,59 @@ export const ComposeDiscoverFooter = ({
 
   const isConditionStep = currentStep ? isAlertConditionStepId(currentStep.id) : false;
 
-  const missingBreachQuery =
-    currentStep?.id === 'alertCondition' &&
-    isAlert &&
-    uiState.queryCommitted &&
-    watchedQuery.format === 'composed' &&
-    !watchedQuery.breach.segment.trim();
+  /*
+   * Per #621/#623: when authoring an alert via the heuristic-split flow, step 1
+   * can only advance once the query has a valid alert condition (composed base +
+   * alert segment). no_where, split-failed and empty all block Next.
+   */
+  const alertConditionState =
+    currentStep?.id === 'alertCondition' && isAlert
+      ? getEsqlSummaryState(uiState.queryCommitted, watchedQuery)
+      : undefined;
+  /*
+   * Only a clean auto-split ('success') lets an alert rule advance. This blocks
+   * 'no_alert_condition', 'empty', and 'split_failed'. Note #622's table shows
+   * 'split_failed' as Next-enabled, but that assumes the manual-split CTA (#624)
+   * exists to resolve the split; until #624 lands we block it (per #623) to avoid
+   * dead-ending users at Create with an unresolvable query.
+   */
+  const invalidAlertCondition =
+    alertConditionState !== undefined && alertConditionState !== 'success';
 
   const nextDisabled =
     uiState.childOpen ||
     hasValidationErrors ||
     (isConditionStep && !uiState.queryCommitted) ||
-    missingBreachQuery;
+    invalidAlertCondition;
 
   const getNextTooltip = (): string | undefined => {
     if (hasValidationErrors) return VALIDATION_ERRORS_NEXT_TOOLTIP;
     if (isConditionStep && !uiState.queryCommitted) return NEXT_DISABLED_TOOLTIP;
-    if (missingBreachQuery) return ALERT_CONDITION_REQUIRED_TOOLTIP;
+    if (alertConditionState === 'no_alert_condition') return NO_ALERT_CONDITION_NEXT_TOOLTIP;
+    if (alertConditionState === 'split_failed') return SPLIT_FAILED_NEXT_TOOLTIP;
+    if (invalidAlertCondition) return NEXT_DISABLED_TOOLTIP;
     return undefined;
   };
 
+  const isQueryValidForSubmit = (): boolean => {
+    if (!uiState.queryCommitted) {
+      return false;
+    }
+    if (isAlert) {
+      return getEsqlSummaryState(uiState.queryCommitted, watchedQuery) === 'success';
+    }
+    return getBreachQuery(watchedQuery).trim().length > 0;
+  };
+
+  const submitDisabled = hasValidationErrors || !isQueryValidForSubmit();
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {
+    /*
+     * Gate YAML Save on validity only, not the form-shape `submitDisabled`, so
+     * non-representable rules (e.g. alert + standalone) stay savable — they never
+     * produce a 'success' summary state.
+     */
     const yamlSaveDisabled = hasValidationErrors || yamlHasErrors;
     const yamlSaveDisabledTooltip = yamlHasErrors
       ? i18n.translate('xpack.alertingV2.composeDiscover.flyout.yamlSaveDisabledTooltip', {
@@ -179,7 +219,7 @@ export const ComposeDiscoverFooter = ({
                 <EuiButton
                   fill
                   isLoading={isSaving}
-                  isDisabled={hasValidationErrors}
+                  isDisabled={submitDisabled}
                   onClick={onFinalSubmit}
                   data-test-subj="composeDiscoverSubmit"
                 >
