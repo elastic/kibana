@@ -115,7 +115,7 @@ export function renderMustacheObject<Params>(
 // the dotted and nested representations at the same node, so rendered output is
 // unaffected.
 function augmentObjectVariables(variables: Variables): Variables {
-  const result = structuredClone(variables);
+  const result = JSON.parse(JSON.stringify(variables));
   expandDottedKeys(result);
   addToStringDeep(result);
   return result;
