@@ -59,6 +59,8 @@ interface AttachmentHeaderProps {
    * - previewing: show "Close preview" button and hide action buttons
    */
   previewBadgeState?: 'none' | 'preview_available' | 'previewing';
+  /** Square bottom corners for headers flush with content below (e.g. canvas overlay). */
+  squareBottomCorners?: boolean;
 }
 
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
@@ -70,6 +72,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   onClose,
   onClosePreview,
   previewBadgeState = 'none',
+  squareBottomCorners = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -94,6 +97,10 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     position: relative;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
+    ${squareBottomCorners &&
+    css`
+      border-radius: ${euiTheme.size.s} ${euiTheme.size.s} 0 0 !important;
+    `}
   `;
 
   const badgeStyles = css`

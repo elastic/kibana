@@ -248,6 +248,7 @@ export const CanvasPanelOverlay: React.FC<CanvasPanelOverlayProps> = ({
         actionButtons={canvasHeaderActionButtons}
         onClose={handleClose}
         previewBadgeState="preview_available"
+        squareBottomCorners={true}
       />
       <div css={bodyStyles}>
         <React.Fragment key={`${attachment.id}:${attachment.version ?? 'latest'}`}>

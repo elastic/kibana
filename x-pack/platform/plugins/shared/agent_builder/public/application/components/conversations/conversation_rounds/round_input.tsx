@@ -75,7 +75,7 @@ export const RoundInput = ({
       >
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiText size="m">
+            <EuiText size="s">
               <CommandBadgeText text={input} />
             </EuiText>
           </EuiFlexItem>
