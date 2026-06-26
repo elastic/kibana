@@ -39,7 +39,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./snapshot_restore'));
     loadTestFile(require.resolve('./query_streams'));
     loadTestFile(require.resolve('./deferred_data_stream'));
-    loadTestFile(require.resolve('./draft_streams'));
+    loadTestFile(require.resolve('./otel_metrics_processing'));
     loadTestFile(require.resolve('./otel_metrics_processing'));
   });
 }
