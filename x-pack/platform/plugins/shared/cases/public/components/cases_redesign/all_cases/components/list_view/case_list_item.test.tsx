@@ -180,6 +180,15 @@ describe('CaseListItem', () => {
     expect(screen.getByTestId('mock-action-column')).toBeInTheDocument();
   });
 
+  it('renders as a real anchor with href and aria-label', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+
+    const link = screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`);
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', '/cases/test-id');
+    expect(link).toHaveAttribute('aria-label', `click to visit case with title ${mockCase.title}`);
+  });
+
   it('navigates to case view when the card is clicked', async () => {
     renderWithTestingProviders(<CaseListItem {...defaultProps} />);
 

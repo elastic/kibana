@@ -12,6 +12,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiText,
   useEuiTheme,
@@ -29,6 +30,7 @@ import { FormattedRelativePreferenceDate } from '../../../../formatted_date';
 import { useCaseViewNavigation } from '../../../../../common/navigation/hooks';
 import { ActionColumnComponent as ActionColumn } from '../../../../all_cases/use_actions';
 import { severities } from '../../../../severity/config';
+import { CASE_DETAILS_LINK_ARIA } from '../../../../links/translations';
 import * as i18n from '../../translations';
 
 const LIST_ITEM_HEIGHT = 80;
@@ -41,15 +43,20 @@ export const CaseListItem: React.FC<{
   selectedFields: CasesColumnSelection[];
 }> = React.memo(({ theCase, userProfiles, disableActions, selectedFields }) => {
   const { euiTheme } = useEuiTheme();
-  const { navigateToCaseView } = useCaseViewNavigation();
+  const { navigateToCaseView, getCaseViewUrl } = useCaseViewNavigation();
+
+  const caseUrl = getCaseViewUrl({ detailName: theCase.id });
 
   const handleCardClick = useCallback(
     (e: React.MouseEvent | React.KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest('a') || target.closest('button')) {
+      if (target.closest('button')) {
         return;
       }
       if ('key' in e && e.key !== 'Enter' && e.key !== ' ') {
+        return;
+      }
+      if ('button' in e && (e.button === 1 || e.metaKey || e.ctrlKey)) {
         return;
       }
       e.preventDefault();
@@ -110,12 +117,12 @@ export const CaseListItem: React.FC<{
   const reporterName = theCase.createdBy.fullName ?? theCase.createdBy.username ?? i18n.UNKNOWN;
 
   return (
-    <div
-      role="link"
-      tabIndex={0}
+    <EuiLink
+      href={caseUrl}
       onClick={handleCardClick}
       onKeyDown={handleCardClick}
       css={styles.cardLink}
+      aria-label={CASE_DETAILS_LINK_ARIA(theCase.title)}
       data-test-subj={`cases-list-item-clickable-${theCase.id}`}
     >
       <EuiPanel
@@ -250,7 +257,7 @@ export const CaseListItem: React.FC<{
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    </div>
+    </EuiLink>
   );
 });
 
