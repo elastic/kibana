@@ -18,10 +18,7 @@ jest.mock('../components/ai_summary_section', () => ({
 
 jest.mock('../components/visualizations_section', () => ({
   VisualizationsSection: ({ hit }: { hit: DataTableRecord }) => (
-    <div
-      data-test-subj="mock-visualizations-section"
-      data-hit-id={(hit as { id: string }).id}
-    />
+    <div data-test-subj="mock-visualizations-section" data-hit-id={(hit as { id: string }).id} />
   ),
 }));
 
@@ -64,16 +61,12 @@ describe('<OverviewTab />', () => {
   });
 
   it('renders VisualizationsSection', () => {
-    render(
-      <OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
-    );
+    render(<OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />);
     expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
   });
 
   it('renders both AISummarySection and VisualizationsSection', () => {
-    render(
-      <OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
-    );
+    render(<OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />);
     expect(screen.getByTestId('mock-ai-summary-section')).toBeInTheDocument();
     expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
   });
