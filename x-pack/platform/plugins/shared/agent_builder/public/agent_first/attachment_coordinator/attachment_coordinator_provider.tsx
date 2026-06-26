@@ -11,6 +11,7 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   setAttachWithFlightHandler,
   triggerCartPulse,
+  triggerCartReceiving,
   getAgentCartButtonElement,
   getApplicationAttachButtonElement,
   registerAgentCartButtonElement,
@@ -19,6 +20,13 @@ import {
 import { playFlightAnimation } from './play_flight_animation';
 import type { AttachWithFlightOptions } from './types';
 import { AgentFirstAttachmentCoordinatorContextProvider } from './use_agent_first_attachment_coordinator';
+
+const waitForNextPaint = (): Promise<void> =>
+  new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
 
 interface AgentFirstAttachmentCoordinatorProviderProps {
   agentBuilder: AgentBuilderPluginStart;
@@ -57,14 +65,23 @@ export const AgentFirstAttachmentCoordinatorProvider: React.FC<
         return;
       }
 
-      await playFlightAnimation({
-        fromRect,
-        toRect,
-        iconType,
-      });
+      triggerCartReceiving(true);
 
-      agentBuilder.addAttachment(attachment);
-      pulseCartButton();
+      try {
+        await playFlightAnimation({
+          fromRect,
+          toRect,
+          iconType,
+        });
+
+        triggerCartReceiving(false);
+        await waitForNextPaint();
+
+        agentBuilder.addAttachment(attachment);
+        pulseCartButton();
+      } catch {
+        triggerCartReceiving(false);
+      }
     },
     [agentBuilder, pulseCartButton]
   );
