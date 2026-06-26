@@ -14,7 +14,7 @@ import {
   type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
-import { getFormattedError } from '../../../../util/errors';
+import { getFormattedError, isAbortError } from '../../../../util/errors';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 interface Props {
@@ -69,7 +69,18 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingState.status);
 
   const fetchStatus = useCallback(async () => {
-    const state = await getOnboardingStatus(streamName);
+    let state: StreamsKIsOnboardingStatusResult;
+    try {
+      state = await getOnboardingStatus(streamName);
+    } catch (error) {
+      // The request signal is aborted when the component unmounts (e.g. on
+      // navigation). Surface the last known state instead of an error so the
+      // aborted poll is treated as an expected cancellation.
+      if (isAbortError(error) && onboardingState !== null) {
+        return onboardingState;
+      }
+      throw error;
+    }
 
     // Preserve the optimistic BeingCanceled state while the engine
     // still reports InProgress — the cancel request was sent but the
@@ -114,7 +125,7 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     previousStatusRef.current = state.status;
 
     return state;
-  }, [getOnboardingStatus, streamName, onComplete, onError]);
+  }, [getOnboardingStatus, streamName, onComplete, onError, onboardingState]);
 
   useQuery<StreamsKIsOnboardingStatusResult, Error>({
     queryKey: ['knowledgeIndicatorsOnboardingStatus', streamName],

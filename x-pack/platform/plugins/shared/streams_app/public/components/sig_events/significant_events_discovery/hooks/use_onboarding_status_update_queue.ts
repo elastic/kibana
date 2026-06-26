@@ -11,6 +11,7 @@ import {
 } from '@kbn/streams-schema';
 import { useCallback, useRef } from 'react';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
+import { isAbortError } from '../../../../util/errors';
 
 type StreamOnboardingStatusUpdateCallback = (
   streamName: string,
@@ -32,7 +33,18 @@ export function useOnboardingStatusUpdateQueue(
 
     const streamNames = [...queue.current];
 
-    const statuses = await getOnboardingStatuses(streamNames);
+    let statuses: Awaited<ReturnType<typeof getOnboardingStatuses>>;
+    try {
+      statuses = await getOnboardingStatuses(streamNames);
+    } catch (error) {
+      // The request signal is aborted when the component unmounts (e.g. on
+      // navigation). Treat this as an expected cancellation and stop polling
+      // rather than surfacing an unhandled rejection.
+      if (isAbortError(error)) {
+        return;
+      }
+      throw error;
+    }
 
     for (const streamName of streamNames) {
       const statusResult = statuses[streamName];

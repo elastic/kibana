@@ -41,3 +41,11 @@ export const getFormattedError = (error: unknown): Error => {
 
   return new Error('Unknown error');
 };
+
+/**
+ * Returns true when an error originates from an aborted request (e.g. an
+ * `AbortController` signal firing on component unmount / navigation). These are
+ * expected cancellations rather than real failures and should be swallowed.
+ */
+export const isAbortError = (error: unknown): boolean =>
+  isRecord(error) && error.name === 'AbortError';
