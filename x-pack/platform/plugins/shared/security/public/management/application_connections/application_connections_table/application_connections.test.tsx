@@ -145,6 +145,54 @@ describe('ApplicationConnections', () => {
     expect(queryByText('Unused MCP app')).not.toBeInTheDocument();
   });
 
+  it('hides clients with zero connections when a status filter is applied', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [
+          { id: 'client-with-conn', client_name: 'Connected app', resource: 'cluster:elastic' },
+          { id: 'client-without-conn', client_name: 'Unused MCP app', resource: 'cluster:elastic' },
+        ],
+      },
+      connections: {
+        connections: [{ id: 'conn-1', client_id: 'client-with-conn', resource: 'cluster:elastic' }],
+      },
+    });
+
+    const { findByText, findByRole, getByRole, getByText, queryByText } = renderPage(coreStart);
+
+    expect(await findByText('Unused MCP app')).toBeInTheDocument();
+    expect(await findByText('Connected app')).toBeInTheDocument();
+
+    fireEvent.click(getByRole('button', { name: /Status Selection/ }));
+    fireEvent.click(await findByRole('option', { name: /Connected/ }));
+
+    await waitFor(() => {
+      expect(queryByText('Unused MCP app')).not.toBeInTheDocument();
+    });
+    expect(getByText('Connected app')).toBeInTheDocument();
+  });
+
+  it('disables selection for clients with zero connections with an explanatory message', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [
+          { id: 'client-with-conn', client_name: 'Connected app', resource: 'cluster:elastic' },
+          { id: 'client-without-conn', client_name: 'Unused MCP app', resource: 'cluster:elastic' },
+        ],
+      },
+      connections: {
+        connections: [{ id: 'conn-1', client_id: 'client-with-conn', resource: 'cluster:elastic' }],
+      },
+    });
+
+    const { findByText, getByLabelText } = renderPage(coreStart);
+
+    expect(await findByText('Unused MCP app')).toBeInTheDocument();
+
+    const emptyClientCheckbox = getByLabelText('This client has no connections yet');
+    expect(emptyClientCheckbox).toBeDisabled();
+  });
+
   it('renders clients grouped with their connections', async () => {
     setupHttpResponses(coreStart, {
       clients: {
