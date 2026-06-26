@@ -13,7 +13,6 @@ export const REACT_FATAL_ERROR_EVENT_TYPE = 'fatal-error-react';
 /** @internal */
 export interface ReactFatalError {
   component_name: string;
-  error_message: string;
 }
 
 /** @internal */
@@ -45,13 +44,6 @@ export const reactFatalErrorSchema = {
     _meta: {
       description:
         'Indicates if navigation occurred within the transient window (e.g. first 250ms) after the error occurred. This helps identify transient errors, successfully followed by a navigation, that users may not have seen.',
-      optional: false as const,
-    },
-  },
-  error_message: {
-    type: 'keyword' as const,
-    _meta: {
-      description: 'Message from the error',
       optional: false as const,
     },
   },

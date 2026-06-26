@@ -110,7 +110,6 @@ describe('KibanaErrorBoundary Error Service', () => {
       expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
       expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
         component_name: 'OutrageousMaker',
-        error_message: 'Error: This is an outrageous and fatal error',
         has_transient_navigation: false,
       });
 

@@ -220,7 +220,6 @@ export class KibanaErrorService {
         this.analytics.reportEvent(REACT_FATAL_ERROR_EVENT_TYPE, {
           component_name: enqueuedError.name,
           component_stack: enqueuedError.errorInfo?.componentStack || '',
-          error_message: enqueuedError.error.toString(),
           error_stack:
             typeof enqueuedError.error.stack === 'string' ? enqueuedError.error.stack : '',
           component_render_min_duration_ms:
