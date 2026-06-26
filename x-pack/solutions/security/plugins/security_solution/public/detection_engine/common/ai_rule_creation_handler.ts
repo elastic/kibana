@@ -9,8 +9,6 @@ import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { TelemetryServiceStart } from '../../common/lib/telemetry';
-import { RuleCreationEventTypes } from '../../common/lib/telemetry/types';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -72,12 +70,10 @@ export const createAiRuleCreationHandler = ({
   aiRuleCreation,
   notifications,
   agentBuilder,
-  telemetry,
 }: {
   aiRuleCreation: AiRuleCreationService;
   notifications: NotificationsStart;
   agentBuilder?: AgentBuilderPluginStart;
-  telemetry: TelemetryServiceStart;
 }): Subscription => {
   let activeConversationId: string | undefined;
   const conversationIdSub = agentBuilder?.events.ui.activeConversation$.subscribe((change) => {
@@ -125,17 +121,6 @@ export const createAiRuleCreationHandler = ({
               })
         );
 
-        const session = aiRuleCreation.getSession();
-        if (session) {
-          telemetry.reportEvent(RuleCreationEventTypes.AiSaved, {
-            ruleId: saved.id,
-            isUpdate,
-            sessionId: session.sessionId,
-            applyCount: session.applyCount,
-            durationSinceSessionStartMs: Date.now() - session.startTimestamp,
-          });
-        }
-
         aiRuleCreation.clearSaving();
         // Deactivate so a post-save form edit can't clobber the attachment before the next AI
         // round reactivates sync.
@@ -144,32 +129,6 @@ export const createAiRuleCreationHandler = ({
         const targetAttachmentId = attachmentId ?? SECURITY_RULE_ATTACHMENT_ID;
 
         const convId = activeConversationId;
-        if (convId) {
-          agentBuilder
-            ?.updateAttachment(convId, targetAttachmentId, {
-              data: {
-                text: JSON.stringify(stripServerFields(saved)),
-                attachmentLabel: saved.name,
-              },
-            })
-            .catch(() => {
-              notifications.toasts.addWarning({
-                title: i18n.translate(
-                  'xpack.securitySolution.saveRuleHandler.syncConversationFailedTitle',
-                  {
-                    defaultMessage: 'Rule saved, but the assistant view could not be synced',
-                  }
-                ),
-                text: i18n.translate(
-                  'xpack.securitySolution.saveRuleHandler.syncConversationFailedText',
-                  {
-                    defaultMessage:
-                      'The rule was saved successfully. Refreshing the page may show the rule as not yet saved in the assistant.',
-                  }
-                ),
-              });
-            });
-        }
 
         securitySolutionQueryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
           exact: false,

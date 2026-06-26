@@ -68,8 +68,6 @@ const makeNotifications = () => ({
   },
 });
 
-const makeTelemetry = () => ({ reportEvent: jest.fn() });
-
 const makeAgentBuilder = (convId?: string) => ({
   events: {
     ui: {
@@ -81,7 +79,6 @@ const makeAgentBuilder = (convId?: string) => ({
       },
     },
   },
-  updateAttachment: jest.fn().mockResolvedValue(undefined),
   addAttachment: jest.fn(),
 });
 
@@ -101,7 +98,6 @@ describe('createAiRuleCreationHandler', () => {
       createAiRuleCreationHandler({
         aiRuleCreation: service,
         notifications: notifications as never,
-        telemetry: makeTelemetry() as never,
       });
 
       emit(service as never, { rule: { name: 'bad' } }); // missing required fields
@@ -125,7 +121,6 @@ describe('createAiRuleCreationHandler', () => {
         aiRuleCreation: service,
         notifications: notifications as never,
         agentBuilder: agentBuilder as never,
-        telemetry: makeTelemetry() as never,
       });
 
       emit(service as never, { rule: makeRule() });
@@ -146,7 +141,6 @@ describe('createAiRuleCreationHandler', () => {
         aiRuleCreation: service,
         notifications: makeNotifications() as never,
         agentBuilder: makeAgentBuilder('conv-1') as never,
-        telemetry: makeTelemetry() as never,
       });
 
       emit(service as never, { rule: makeRule(), updateOrigin });
@@ -163,7 +157,6 @@ describe('createAiRuleCreationHandler', () => {
       createAiRuleCreationHandler({
         aiRuleCreation: service,
         notifications: makeNotifications() as never,
-        telemetry: makeTelemetry() as never,
         // no agentBuilder → no active conversation
       });
 
@@ -184,7 +177,6 @@ describe('createAiRuleCreationHandler', () => {
         aiRuleCreation: service,
         notifications: makeNotifications() as never,
         agentBuilder: makeAgentBuilder('conv-1') as never,
-        telemetry: makeTelemetry() as never,
       });
 
       emit(service as never, { rule: makeRule({ id: 'saved-id-1' }), updateOrigin });
@@ -202,7 +194,6 @@ describe('createAiRuleCreationHandler', () => {
       createAiRuleCreationHandler({
         aiRuleCreation: service,
         notifications: makeNotifications() as never,
-        telemetry: makeTelemetry() as never,
       });
 
       emit(service as never, { rule: makeRule({ id: 'saved-id-1' }) });
@@ -221,7 +212,6 @@ describe('createAiRuleCreationHandler', () => {
       createAiRuleCreationHandler({
         aiRuleCreation: service,
         notifications: notifications as never,
-        telemetry: makeTelemetry() as never,
       });
 
       emit(service as never, { rule: makeRule() });
@@ -231,29 +221,6 @@ describe('createAiRuleCreationHandler', () => {
       expect(notifications.toasts.addDanger).toHaveBeenCalledWith(
         expect.objectContaining({ text: 'Server error' })
       );
-    });
-  });
-
-  describe('updateAttachment failure', () => {
-    it('is non-fatal and shows a warning toast', async () => {
-      mockCreateRule.mockResolvedValue(savedRule);
-      const agentBuilder = makeAgentBuilder('conv-1');
-      (agentBuilder.updateAttachment as jest.Mock).mockRejectedValue(new Error('network'));
-      const notifications = makeNotifications();
-      const service = makeService();
-
-      createAiRuleCreationHandler({
-        aiRuleCreation: service,
-        notifications: notifications as never,
-        agentBuilder: agentBuilder as never,
-        telemetry: makeTelemetry() as never,
-      });
-
-      emit(service as never, { rule: makeRule() });
-      await flush();
-
-      expect(notifications.toasts.addWarning).toHaveBeenCalled();
-      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
     });
   });
 });
