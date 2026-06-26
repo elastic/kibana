@@ -8,12 +8,15 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { CasesServerSetupDependencies } from '../types';
 import type { CasesClient } from '../client';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 
 import { casesStepRegistry } from './registry';
 
 export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
-  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
+  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
+  isCasesAttachmentsEnabled: boolean
 ) {
   if (!workflowsExtensions) {
     return;
