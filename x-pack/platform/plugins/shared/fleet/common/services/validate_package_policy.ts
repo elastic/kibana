@@ -434,7 +434,7 @@ export const validatePackagePolicy = (
   }, {});
 
   // Validate each package policy input with either its own var fields and stream vars
-  packagePolicy.inputs.forEach((input) => {
+  (packagePolicy.inputs ?? []).forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
