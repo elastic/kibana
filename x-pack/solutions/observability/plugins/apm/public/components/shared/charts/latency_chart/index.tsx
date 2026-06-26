@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { getAnomalyThreshold } from '../../../../../common/anomaly_detection/anomaly_threshold';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -30,6 +31,7 @@ import { LatencyAggregationTypeSelect } from './latency_aggregation_type_select'
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
+import { AnomalyThresholdSelect } from './anomaly_threshold_select';
 
 interface Props {
   height?: number;
@@ -49,7 +51,14 @@ export function LatencyChart({ height, kuery }: Props) {
   const license = useLicenseContext();
 
   const {
-    query: { comparisonEnabled, latencyAggregationType, offset, rangeFrom, rangeTo },
+    query: {
+      comparisonEnabled,
+      latencyAggregationType,
+      anomalyThreshold: anomalyThresholdRaw,
+      offset,
+      rangeFrom,
+      rangeTo,
+    },
     query,
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -76,10 +85,12 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
 
+  const anomalyThreshold = getAnomalyThreshold(anomalyThresholdRaw);
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txLatency
   );
   const anomalyTimeseriesColor = previousPeriod?.color as string;
+  const hasValidMlLicense = license?.getFeature('ml').isAvailable;
 
   const timeseries = [
     currentPeriod,
@@ -139,6 +150,21 @@ export function LatencyChart({ height, kuery }: Props) {
                   }}
                 />
               </EuiFlexItem>
+              {hasValidMlLicense && (
+                <EuiFlexItem grow={false}>
+                  <AnomalyThresholdSelect
+                    anomalyThreshold={anomalyThreshold}
+                    kuery={kuery}
+                    onChange={(value) => {
+                      urlHelpers.push(history, {
+                        query: {
+                          anomalyThreshold: value,
+                        },
+                      });
+                    }}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -146,7 +172,7 @@ export function LatencyChart({ height, kuery }: Props) {
               <EuiFlexItem grow={false}>
                 <OpenAnomalies
                   dataTestSubj="apmLatencyChartOpenAnomalies"
-                  hasValidMlLicense={license?.getFeature('ml').isAvailable}
+                  hasValidMlLicense={hasValidMlLicense}
                   mlJobId={preferredAnomalyTimeseries?.jobId}
                   detectorType={AnomalyDetectorType.txLatency}
                 />
