@@ -144,6 +144,21 @@ describe('AnnouncementBanner', () => {
       );
     });
 
+    it('renders a standalone primary action button', () => {
+      const { queryByTestId, getByTestId } = renderWithEuiTheme(
+        <AnnouncementBanner
+          {...requiredProps}
+          actionProps={{
+            primary: { children: 'Primary action', onClick: () => {} },
+          }}
+        />
+      );
+
+      expect(getByTestId('announcementBanner-primaryAction')).toBeInTheDocument();
+      expect(getByTestId('announcementBanner-primaryAction')).toHaveTextContent('Primary action');
+      expect(queryByTestId('announcementBanner-secondaryAction')).not.toBeInTheDocument();
+    });
+
     it('does not render a standalone secondary action button', () => {
       const { queryByTestId } = renderWithEuiTheme(
         <AnnouncementBanner

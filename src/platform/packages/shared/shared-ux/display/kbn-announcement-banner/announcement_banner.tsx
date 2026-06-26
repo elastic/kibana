@@ -40,7 +40,7 @@ export type AnnouncementBannerProps = Omit<EuiBannerProps, 'announceOnMount'>;
 export const AnnouncementBanner = (props: AnnouncementBannerProps) => {
   const { 'data-test-subj': dataTestSubj = 'announcementBanner', actionProps, ...rest } = props;
 
-  const hasActions = Boolean(actionProps?.primary) && Boolean(actionProps?.secondary);
+  const hasActions = Boolean(actionProps?.primary);
 
   return (
     <EuiBanner
