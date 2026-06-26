@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.18>>
 * <<release-notes-8.19.17>>
 * <<release-notes-8.19.16>>
 * <<release-notes-8.19.15>>
@@ -123,6 +124,28 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.18]]
+== {kib} 8.19.18
+
+The 8.19.18 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.18]]
+=== Fixes
+Alerting and cases::
+* Fixes pushing a case to an external service so that all attachments are marked as pushed and the alert count comment is no longer duplicated on each push ({kibana-pull}274451[#274451]).
+Data ingestion and Fleet::
+* Fixes a crash in the **Integrations** UI when a package image is missing ({kibana-pull}273191[#273191]).
+Developer tools::
+* Fixes autocomplete in filter context to suggest the query DSL instead of the obsolete Elasticsearch 1.x filter DSL in **Console** ({kibana-pull}272907[#272907]).
+Elastic Observability solution::
+For the Elastic Observability 8.19.18 release information, refer to {observability-guide}/release-notes.html[_Elastic Observability Release Notes_].
+Elastic Security solution::
+For the Elastic Security 8.19.18 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes the Files plugin blob download route to return a file matching the requested file kind ({kibana-pull}274783[#274783]).
+* Fixes the JSON logger expanding scalar metadata fields into a large number of numbered keys (for example, `{ "1": "s", "2": "t" }`) ({kibana-pull}256233[#256233]).
 
 [[release-notes-8.19.17]]
 == {kib} 8.19.17
