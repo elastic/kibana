@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { CaseDetailsAppHeader } from './case_details_app_header';
 import { renderWithTestingProviders } from '../../../../../common/mock';
@@ -24,6 +23,15 @@ jest.mock('../../../../actions/status/use_status_action');
 jest.mock('../../../../../common/navigation/hooks');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../case_view/use_on_refresh_case_view_page');
+
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({ title, badges, menu }: { title: string; badges: unknown[]; menu: unknown }) => (
+    <div data-test-subj="app-header">
+      <span data-test-subj="app-header-title">{title}</span>
+      <span data-test-subj="app-header-badges">{JSON.stringify(badges)}</span>
+    </div>
+  ),
+}));
 
 jest.mock('../../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
@@ -60,21 +68,23 @@ describe('CaseDetailsAppHeader', () => {
   it('renders the app header with case title', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(basicCase.title);
+    expect(await screen.findByTestId('app-header')).toBeInTheDocument();
+    expect(screen.getByTestId('app-header-title')).toHaveTextContent(basicCase.title);
   });
 
   it('renders badges in the header', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    expect(await screen.findByTestId('case-view-severity-badge')).toBeInTheDocument();
-    expect(screen.getByTestId('case-view-status-badge')).toBeInTheDocument();
+    const badges = await screen.findByTestId('app-header-badges');
+    expect(badges).toBeInTheDocument();
+    expect(badges.textContent).toContain('case-view-severity-badge');
+    expect(badges.textContent).toContain('case-view-status-badge');
   });
 
   it('does not render delete modal by default', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
+    await screen.findByTestId('app-header');
 
     expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
   });
@@ -82,7 +92,7 @@ describe('CaseDetailsAppHeader', () => {
   it('does not render settings popover by default', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
+    await screen.findByTestId('app-header');
 
     expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument();
   });
@@ -107,7 +117,7 @@ describe('CaseDetailsAppHeader', () => {
       },
     });
 
-    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
+    await screen.findByTestId('app-header');
 
     await waitFor(() => {
       expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument();
