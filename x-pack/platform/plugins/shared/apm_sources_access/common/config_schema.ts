@@ -6,33 +6,42 @@
  */
 
 import { type TypeOf, schema } from '@kbn/config-schema';
+import {
+  APM_INDEX_PATTERN_MAX_LENGTH,
+  type ApmIndexSettingKey,
+  validateApmIndexSetting,
+} from './apm_indices_validation';
 
-// APM settings store comma-separated index-pattern expressions, so keep their bound
-// aligned with Kibana's broader index-pattern (index_management) `maxLength` adoption.
-export const APM_INDEX_PATTERN_MAX_LENGTH = 1000;
+export { APM_INDEX_PATTERN_MAX_LENGTH } from './apm_indices_validation';
+
+export const createApmIndexStringSchema = (
+  setting: ApmIndexSettingKey,
+  options: { defaultValue?: string } = {}
+) =>
+  schema.string({
+    ...options,
+    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+    validate: (value) => validateApmIndexSetting(setting, value),
+  });
 
 /**
  * Schema for APM indices
  */
 export const indicesSchema = schema.object({
-  transaction: schema.string({
+  transaction: createApmIndexStringSchema('transaction', {
     defaultValue: 'traces-apm*,apm-*,traces-*.otel-*',
-    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
   }), // TODO: remove apm-* pattern in 9.0
-  span: schema.string({
+  span: createApmIndexStringSchema('span', {
     defaultValue: 'traces-apm*,apm-*,traces-*.otel-*',
-    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
   }),
-  error: schema.string({
+  error: createApmIndexStringSchema('error', {
     defaultValue: 'logs-apm*,apm-*,logs-*.otel-*',
-    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
   }),
-  metric: schema.string({
+  metric: createApmIndexStringSchema('metric', {
     defaultValue: 'metrics-apm*,apm-*,metrics-*.otel-*',
-    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
   }),
-  onboarding: schema.string({ defaultValue: 'apm-*', maxLength: APM_INDEX_PATTERN_MAX_LENGTH }), // Unused: to be deleted
-  sourcemap: schema.string({ defaultValue: 'apm-*', maxLength: APM_INDEX_PATTERN_MAX_LENGTH }), // Unused: to be deleted
+  onboarding: createApmIndexStringSchema('onboarding', { defaultValue: 'apm-*' }), // Unused: to be deleted
+  sourcemap: createApmIndexStringSchema('sourcemap', { defaultValue: 'apm-*' }), // Unused: to be deleted
 });
 
 /**
