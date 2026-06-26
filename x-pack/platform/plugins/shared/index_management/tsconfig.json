@@ -79,7 +79,6 @@
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/app-header",
-    "@kbn/core-chrome-browser-context",
   ],
   "exclude": ["target/**/*"]
 }
