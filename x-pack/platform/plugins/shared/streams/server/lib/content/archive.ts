@@ -29,7 +29,7 @@ import { Streams } from '@kbn/streams-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import type { Readable } from 'stream';
-import { compact, omit, pick, uniqBy } from 'lodash';
+import { compact, pick, uniqBy } from 'lodash';
 import { InvalidContentPackError } from './error';
 
 const ARCHIVE_ENTRY_MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1MB
@@ -43,9 +43,8 @@ const wiredUpsertRequestSchema = DeepStrict(Streams.WiredStream.UpsertRequest.ri
  * Content-pack stream entries match the wired stream upsert request. Significant-event
  * queries are not part of content packs (they are managed via the dedicated
  * `/api/streams/{name}/queries` endpoints), so this guard validates the strict wired upsert
- * shape. `extractEntries` calls `stripQueriesOrReject` first, so an absent or empty
- * `queries: []` is stripped before this guard runs and any other `queries` value is rejected
- * upfront.
+ * shape. `extractEntries` calls `rejectStreamQueries` first, so any entry that still carries a
+ * `queries` field is rejected upfront and this guard only ever sees a queries-free request.
  */
 export function isContentPackStreamRequest(value: unknown): value is ContentPackStreamRequest {
   return wiredUpsertRequestSchema.safeParse(value).success;
@@ -53,25 +52,20 @@ export function isContentPackStreamRequest(value: unknown): value is ContentPack
 
 /**
  * Significant-event queries are not part of content packs; they are managed via the dedicated
- * `/api/streams/{name}/queries` endpoints. Reject a stream entry that still carries queries so
- * detections are never silently dropped on import. Only an absent field or an empty
- * `queries: []` is allowed (and stripped); any other value is rejected regardless of its shape
- * (non-empty array, object, etc.). Returns the request with the `queries` key removed.
+ * `/api/streams/{name}/queries` endpoints. Content packs are tech preview, so rather than
+ * half-supporting a legacy shape we reject any stream entry that carries a `queries` field at
+ * all (including an empty `queries: []`) so detections are never silently dropped on import.
  */
-export function stripQueriesOrReject(
+export function rejectStreamQueries(
   streamName: string | undefined,
   entryName: string,
   request: Record<string, unknown>
-): Record<string, unknown> {
-  const queries = request.queries;
-  const isAbsentOrEmpty = queries === undefined || (Array.isArray(queries) && queries.length === 0);
-  if (!isAbsentOrEmpty) {
+): void {
+  if (request.queries !== undefined) {
     throw new InvalidContentPackError(
       `Stream [${streamName}] in entry [${entryName}] contains significant-event queries, which are not supported by content packs. Manage them via the /api/streams/{name}/queries endpoints.`
     );
   }
-
-  return omit(request, 'queries');
 }
 
 export async function parseArchive(archive: Readable): Promise<ContentPack> {
@@ -199,9 +193,11 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
                 ? parsed.request
                 : undefined;
 
-            const request = requestObject
-              ? stripQueriesOrReject(parsed.name, entry.entryName, requestObject)
-              : parsed.request;
+            if (requestObject) {
+              rejectStreamQueries(parsed.name, entry.entryName, requestObject);
+            }
+
+            const request = parsed.request;
             if (!parsed.name || !isContentPackStreamRequest(request)) {
               throw new InvalidContentPackError(
                 `Invalid stream definition in entry [${entry.entryName}]`

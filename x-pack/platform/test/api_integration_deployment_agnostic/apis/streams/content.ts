@@ -656,7 +656,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await getStream(apiClient, 'logs.otel.branch_e.detector', 404);
       });
 
-      it('strips an empty `queries: []` and imports structure', async () => {
+      it('rejects an empty `queries: []` carried by a pack', async () => {
         const archive = await generateArchive(
           {
             name: 'empty_queries_pack',
@@ -664,8 +664,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             version: '1.0.0',
           },
           [
-            // An empty `queries: []` is harmless and must be stripped (not rejected) so the pack
-            // still imports as structure-only. Cast past the type that no longer allows `queries`.
+            // Content packs are structural-only and tech preview, so import hard-fails on any
+            // `queries` field rather than half-supporting a legacy shape; even an empty
+            // `queries: []` is rejected. Cast past the type that no longer allows `queries`.
             {
               type: 'stream',
               name: ROOT_STREAM_ID,
@@ -711,14 +712,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await putStream(apiClient, 'logs.otel.branch_f', upsertRequest({}));
 
-        const importResponse = await importContent(apiClient, 'logs.otel.branch_f', {
-          include: { objects: { all: {} } },
-          content: Readable.from(archive),
-          filename: 'empty_queries_pack-1.0.0.zip',
-        });
-        expect(importResponse.result.created).to.eql(['logs.otel.branch_f.child']);
+        const response = await importContent(
+          apiClient,
+          'logs.otel.branch_f',
+          {
+            include: { objects: { all: {} } },
+            content: Readable.from(archive),
+            filename: 'empty_queries_pack-1.0.0.zip',
+          },
+          400
+        );
 
-        await getStream(apiClient, 'logs.otel.branch_f.child');
+        expect((response as unknown as { message: string }).message).to.contain(
+          'contains significant-event queries'
+        );
+
+        // the rejected import must not partially create any streams
+        await getStream(apiClient, 'logs.otel.branch_f.child', 404);
       });
 
       it('rejects significant-event queries at preview time', async () => {
