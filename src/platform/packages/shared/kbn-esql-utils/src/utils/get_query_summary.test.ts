@@ -129,6 +129,13 @@ describe('getQuerySummary', () => {
     expect(result.newColumns).toEqual(new Set(['ABS(x)']));
   });
 
+  it('handles parenthesized EVAL expressions without assignment', () => {
+    const query = 'FROM logs* | EVAL (ABS(x))';
+    const result = getQuerySummary(query);
+
+    expect(result.newColumns).toEqual(new Set(['ABS(x)']));
+  });
+
   it('handles multiple EVAL commands', () => {
     const query = 'FROM logs* | EVAL col1 = ABS(x), col2 = SQRT(y)';
     const result = getQuerySummary(query);
@@ -156,6 +163,27 @@ describe('getQuerySummary', () => {
     const result = getQuerySummary(query);
 
     expect(result.newColumns).toEqual(new Set(['count()', 'avg(price)', 'max(@timestamp)']));
+  });
+
+  it('handles parenthesized STATS aggregations and grouping expressions', () => {
+    const query = 'FROM logs* | STATS (avg(price)) BY (category)';
+    const result = getQuerySummary(query);
+
+    expect(result.newColumns).toEqual(new Set(['avg(price)']));
+    expect(result.aggregates).toEqual(
+      new Set([
+        expect.objectContaining({
+          field: 'avg(price)',
+        }),
+      ])
+    );
+    expect(result.grouping).toEqual(
+      new Set([
+        expect.objectContaining({
+          field: 'category',
+        }),
+      ])
+    );
   });
 
   it('handles WHERE command (no user-defined columns)', () => {
@@ -233,5 +261,20 @@ describe('getQuerySummaryPerCommandType', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].newColumns).toEqual(new Set(['computed']));
+  });
+
+  it('handles parenthesized expressions in the returned command summaries', () => {
+    const query = 'FROM logs* | STATS (avg(price)) BY (category)';
+    const result = getQuerySummaryPerCommandType(query, 'stats');
+
+    expect(result).toHaveLength(1);
+    expect(result[0].newColumns).toEqual(new Set(['avg(price)']));
+    expect(result[0].grouping).toEqual(
+      new Set([
+        expect.objectContaining({
+          field: 'category',
+        }),
+      ])
+    );
   });
 });

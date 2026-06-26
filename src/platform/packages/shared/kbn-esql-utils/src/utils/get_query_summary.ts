@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstCommand } from '@elastic/esql/types';
+import type { ESQLAstCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
 import { Parser } from '@elastic/esql';
-import { esqlCommandRegistry, type ESQLCommandSummary } from '@kbn/esql-language';
+import {
+  esqlCommandRegistry,
+  unwrapExpressionParens,
+  type ESQLCommandSummary,
+} from '@kbn/esql-language';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
 
 function processCommand(
@@ -58,6 +62,7 @@ function processCommand(
  */
 export function getQuerySummary(query: string): ESQLCommandSummary {
   const { root } = Parser.parse(query);
+  unwrapExpressionParens(root);
 
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
@@ -93,6 +98,7 @@ export function getQuerySummaryPerCommandType(
   commandType: string
 ): ESQLCommandSummary[] {
   const { root } = Parser.parseQuery(query);
+  unwrapExpressionParens(root);
   const summaries: ESQLCommandSummary[] = [];
 
   for (const command of root.commands) {
@@ -130,6 +136,8 @@ export function getQuerySummaryPerCommandType(
  * Analyzes a specific command within an ES|QL query and returns a summary of it.
  */
 export function getSummaryPerCommand(query: string, command: ESQLAstCommand): ESQLCommandSummary {
+  unwrapExpressionParens({ commands: [command] } as ESQLAstQueryExpression);
+
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
   const allMetadataColumns = new Set<string>();
