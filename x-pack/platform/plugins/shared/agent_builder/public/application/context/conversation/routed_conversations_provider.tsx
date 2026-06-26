@@ -24,6 +24,11 @@ import {
   clearWorkspaceAttachmentCallbacks,
   registerWorkspaceAttachmentCallbacks,
 } from '../../../agent_workspace/workspace_attachment_callbacks';
+import {
+  clearPendingAttachmentsGetter,
+  notifyAttachmentLinkStateChange,
+  registerPendingAttachmentsGetter,
+} from '../../../agent_first/attachment_link_bridge';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -125,6 +130,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     registerWorkspaceAttachmentCallbacks({
       addAttachment: (attachment) => {
         upsertAttachments([attachment]);
+        notifyAttachmentLinkStateChange();
       },
     });
 
@@ -132,6 +138,16 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       clearWorkspaceAttachmentCallbacks();
     };
   }, [upsertAttachments]);
+
+  useEffect(() => {
+    registerPendingAttachmentsGetter(() => attachments);
+    notifyAttachmentLinkStateChange();
+
+    return () => {
+      clearPendingAttachmentsGetter();
+      notifyAttachmentLinkStateChange();
+    };
+  }, [attachments]);
 
   const contextValue = useMemo(
     () => ({

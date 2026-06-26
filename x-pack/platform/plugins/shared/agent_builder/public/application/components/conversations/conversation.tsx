@@ -49,6 +49,11 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
+import {
+  clearScrollToInlineAttachmentHandler,
+  registerScrollToInlineAttachmentHandler,
+} from '../../../agent_first/attachment_link_bridge';
+import { scrollToInlineAttachment } from '../../../agent_first/scroll_to_inline_attachment';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -90,6 +95,16 @@ export const Conversation: React.FC<{}> = () => {
       conversationId: conversationId || '',
       scrollContainer: scrollContainerRef.current,
     });
+
+  useEffect(() => {
+    registerScrollToInlineAttachmentHandler((attachmentId) => {
+      void scrollToInlineAttachment(attachmentId, scrollContainerRef.current);
+    });
+
+    return () => {
+      clearScrollToInlineAttachmentHandler();
+    };
+  }, []);
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 

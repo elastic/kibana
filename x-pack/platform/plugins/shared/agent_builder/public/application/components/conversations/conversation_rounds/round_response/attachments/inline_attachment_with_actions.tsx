@@ -171,6 +171,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       grow
       hasShadow={false}
       hasBorder={true}
+      data-test-subj={`agentBuilderInlineAttachment-${attachment.id}`}
       css={css`
         overflow: visible; // allow vis actions to overflow
         ${maxWidth !== undefined ? `max-width: ${maxWidth}px;` : ''}

@@ -152,6 +152,7 @@ export interface UseApplicationAttachmentStateOptions {
 export interface UseApplicationAttachmentStateResult {
   canAttach: boolean;
   isLinked: boolean;
+  conversationTitle?: string;
   attach: (sourceElement: HTMLElement | null) => Promise<void>;
 }
 
