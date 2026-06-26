@@ -44,13 +44,12 @@ export const useAdhocDataView = ({ index }: { index: string | null }) => {
         setDataView(_dataView);
       } catch (e) {
         setError(errorMessage);
-        const err = e as Error;
-        reportFetchError({ error: err, operationId: CREATE_ADHOC_DATA_VIEW_OPERATION_ID });
+        reportFetchError({ error: e, operationId: CREATE_ADHOC_DATA_VIEW_OPERATION_ID });
         core.notifications.toasts.add({
           color: 'danger',
           iconType: 'error',
           title: errorMessage,
-          text: err.message,
+          text: e instanceof Error ? e.message : String(e),
         });
       } finally {
         setLoading(false);
