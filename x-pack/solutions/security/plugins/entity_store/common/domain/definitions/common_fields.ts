@@ -64,16 +64,13 @@ export const getCommonFieldDescriptions = (
   newestValue({ source: 'asset.criticality' }),
   newestValue({ source: 'asset.business_unit' }),
   managedValue({
-    source: `${ecsField}.risk.calculated_level`,
     destination: 'entity.risk.calculated_level',
   }),
   managedValue({
-    source: `${ecsField}.risk.calculated_score`,
     destination: 'entity.risk.calculated_score',
     mapping: { type: 'float' },
   }),
   managedValue({
-    source: `${ecsField}.risk.calculated_score_norm`,
     destination: 'entity.risk.calculated_score_norm',
     mapping: { type: 'float' },
   }),
@@ -93,7 +90,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
 
     // ATTRIBUTES ------------------------------------------------------------
     managedValue({
-      source: `${prefix}.attributes.watchlists`,
       destination: 'entity.attributes.watchlists',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
@@ -164,13 +160,11 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     // The current reset implementation only resets lists and strings
     // if we ever add a boolean, reset via snapshot needs to be updated
     managedValue({
-      source: `${prefix}.behaviors.rule_names`,
       destination: 'entity.behaviors.rule_names',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     managedValue({
-      source: `${prefix}.behaviors.anomaly_job_ids`,
       destination: 'entity.behaviors.anomaly_job_ids',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
@@ -196,25 +190,21 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       }),
     ]),
     managedValue({
-      source: `${prefix}.relationships.resolution.resolved_to`,
       destination: 'entity.relationships.resolution.resolved_to',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     managedValue({
-      source: `${prefix}.relationships.resolution.risk.calculated_level`,
       destination: 'entity.relationships.resolution.risk.calculated_level',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     managedValue({
-      source: `${prefix}.relationships.resolution.risk.calculated_score`,
       destination: 'entity.relationships.resolution.risk.calculated_score',
       mapping: { type: 'float' },
       allowAPIUpdate: true,
     }),
     managedValue({
-      source: `${prefix}.relationships.resolution.risk.calculated_score_norm`,
       destination: 'entity.relationships.resolution.risk.calculated_score_norm',
       mapping: { type: 'float' },
       allowAPIUpdate: true,

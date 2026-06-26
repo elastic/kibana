@@ -13,6 +13,8 @@ type Operation = Omit<EntityField, 'retention' | 'destination'> & {
   destination?: string;
 };
 
+type ManagedOperation = Omit<EntityField, 'retention' | 'source'>;
+
 export const collectValues = ({
   destination,
   source,
@@ -54,17 +56,17 @@ export const oldestValue = ({
 /**
  * Declares an API-/maintainer-managed field: its value is written only via the
  * CRUD API or a maintainer dual-write, never derived from log extraction. The
- * field participates in index mappings but is excluded from extraction - it is
- * simply stored.
+ * field is excluded from extraction everywhere, so it has no meaningful source;
+ * `source` is set equal to `destination` purely to satisfy the shared EntityField
+ * shape (it is never read for managed fields).
  */
 export const managedValue = ({
   destination,
-  source,
   mapping = { type: 'keyword' },
   allowAPIUpdate = false,
-}: Operation): EntityField => ({
-  destination: destination ?? source,
-  source,
+}: ManagedOperation): EntityField => ({
+  destination,
+  source: destination,
   retention: { operation: 'managed' },
   mapping,
   allowAPIUpdate,
