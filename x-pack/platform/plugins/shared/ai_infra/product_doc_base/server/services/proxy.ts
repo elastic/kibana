@@ -19,15 +19,39 @@ interface RequestInitWithDispatcher extends RequestInit {
 
 type GetProxyDispatcherParams = ArtifactRepositoryProxySettings & { targetUrl: string };
 
+function getProxyHeaders(options: GetProxyDispatcherParams): Record<string, string> | undefined {
+  if (options.proxyHeaders) {
+    return options.proxyHeaders;
+  }
+
+  if (options.targetUrl.startsWith('https:')) {
+    const endpointParsed = new URL(options.targetUrl);
+    return {
+      // the proxied URL's host is put in the header instead of the server's actual host
+      Host: endpointParsed.host,
+    };
+  }
+
+  return undefined;
+}
+
 function getProxyDispatcher(options: GetProxyDispatcherParams): ProxyAgent {
+  const proxyParsed = new URL(options.proxyUrl);
+  const authValue = proxyParsed.username
+    ? `${proxyParsed.username}:${proxyParsed.password}`
+    : undefined;
+
   const tlsOptions =
     options.proxyRejectUnauthorizedCertificates === false
       ? { rejectUnauthorized: false as const }
       : undefined;
 
+  const headers = getProxyHeaders(options);
+
   return new ProxyAgent({
     uri: options.proxyUrl,
-    ...(options.proxyHeaders ? { headers: options.proxyHeaders } : {}),
+    ...(authValue ? { auth: authValue } : {}),
+    ...(headers ? { headers } : {}),
     ...(tlsOptions ? { proxyTls: tlsOptions, requestTls: tlsOptions } : {}),
   });
 }

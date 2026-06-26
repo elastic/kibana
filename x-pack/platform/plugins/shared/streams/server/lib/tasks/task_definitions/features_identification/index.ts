@@ -15,7 +15,8 @@ import { isInferenceProviderError, type InferenceConnector } from '@kbn/inferenc
 import {
   type IdentifyFeaturesResult,
   type IterationResult,
-  type Feature,
+  type FeatureUpsert,
+  getStreamSamplingSource,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
@@ -36,6 +37,7 @@ import {
   identifyInferredFeatures,
   identifyComputedFeatures,
 } from '../../../sig_events/features';
+import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 export interface FeaturesIdentificationTaskParams {
   start: number;
@@ -83,22 +85,6 @@ async function runFeaturesIdentification(
   const taskDurationMs = () => Date.now() - new Date(_task.created_at).getTime();
 
   const runId = uuid();
-  const emptyTelemetryCtx = {
-    run_id: runId,
-    iteration: 0,
-    stream_name: streamName,
-    stream_type: 'unknown' as const,
-    docs_count: 0,
-    excluded_features_count: 0,
-    total_filters: 0,
-    filters_capped: false,
-    has_filtered_documents: false,
-  };
-  const trackEmptyTelemetry = (telemetryState: 'canceled' | 'failure') => {
-    taskContext.telemetry.trackFeaturesIdentified(
-      buildTelemetry(emptyTelemetryCtx, 0, { state: telemetryState })
-    );
-  };
 
   const {
     taskClient,
@@ -125,9 +111,27 @@ async function runFeaturesIdentification(
   ]);
   taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
+  const emptyTelemetryCtx = {
+    run_id: runId,
+    connector_id: connectorId,
+    iteration: 0,
+    stream_name: streamName,
+    stream_type: 'unknown' as const,
+    docs_count: 0,
+    excluded_features_count: 0,
+    total_filters: 0,
+    filters_capped: false,
+    has_filtered_documents: false,
+  };
+  const trackEmptyTelemetry = (telemetryState: 'canceled' | 'failure') => {
+    taskContext.telemetry.trackFeaturesIdentified(
+      buildTelemetry(emptyTelemetryCtx, 0, { state: telemetryState })
+    );
+  };
+
   let hasTrackedIteration = false;
   const iterationResults: IterationResult[] = [];
-  let discoveredFeatures: Feature[] = [];
+  let discoveredFeatures: FeatureUpsert[] = [];
 
   try {
     const stream = await streamsClient.getStream(streamName);
@@ -157,6 +161,12 @@ async function runFeaturesIdentification(
     // inferred-features loop below throws before we reach the `await`. An
     // unhandled rejection on this promise (e.g. `index_not_found_exception`
     // when a wired stream has no backing data stream yet) crashes Kibana.
+    const codeGroundingEnabled =
+      Boolean(taskContext.server.agentBuilder?.tools) &&
+      (await isSignificantEventsSemanticCodeSearchGroundingEnabled(
+        taskContext.server.core.featureFlags
+      ));
+
     const computedFeaturesPromise = identifyComputedFeatures({
       stream,
       streamName: stream.name,
@@ -166,6 +176,13 @@ async function runFeaturesIdentification(
       kiClient,
       logger: taskLogger,
       runId,
+      ...(codeGroundingEnabled
+        ? {
+            agentBuilderTools: taskContext.server.agentBuilder?.tools,
+            request: fakeRequest,
+            telemetry: taskContext.telemetry,
+          }
+        : {}),
     }).catch((err) => {
       // Computed features generation is not expected to fail; surface it as
       // an error so it's actionable, but swallow the rejection so it cannot
@@ -195,9 +212,11 @@ async function runFeaturesIdentification(
         kiClient,
         soClient,
         inferenceClient: boundInferenceClient,
+        connectorId,
         logger: taskLogger,
         signal: runContext.abortController.signal,
         streamName: stream.name,
+        samplingSource: getStreamSamplingSource(stream),
         streamType,
         start,
         end,
