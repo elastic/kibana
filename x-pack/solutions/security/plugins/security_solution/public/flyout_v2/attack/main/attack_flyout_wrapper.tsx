@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -28,25 +28,40 @@ export interface AttackFlyoutWrapperProps {
    */
   indexName: string;
   /**
-   * Callback invoked after attack mutations to refresh related views.
+   * Callback invoked after attack mutations to refresh related views (e.g. the
+   * surface that opened the flyout). The wrapper additionally refetches the
+   * attack document so the flyout itself reflects the mutation without the user
+   * having to close and re-open it.
    */
   onAttackUpdated: () => void;
 }
 
 /**
- * Wrapper for AttackFlyout that fetches the attack document by ID and index,
- * managing loading and error states before passing the hit to AttackFlyout.
+ * Wrapper for AttackFlyout that owns the single fetch of the attack document
+ * for the flyout. It builds the `hit` from the fetched search hit, and exposes
+ * a refreshing `onAttackUpdated` callback to children so that any in-flyout
+ * mutation (status, assignees, tags, ...) is reflected without re-opening
+ * the flyout.
  */
 export const AttackFlyoutWrapper = memo(
   ({ attackId, indexName, onAttackUpdated }: AttackFlyoutWrapperProps) => {
-    const { loading, searchHit } = useAttackDetails({ attackId, indexName });
+    const { loading, searchHit, refetch } = useAttackDetails({ attackId, indexName });
 
     const hit = useMemo(
       () => (searchHit ? buildDataTableRecord(searchHit as EsHitRecord) : null),
       [searchHit]
     );
 
-    if (loading) {
+    const handleAttackUpdated = useCallback(() => {
+      onAttackUpdated();
+      refetch();
+    }, [onAttackUpdated, refetch]);
+
+    // Only render the full-flyout loading state on the initial fetch (no hit yet).
+    // Subsequent refetches (e.g. after a mutation) keep the flyout visible so the
+    // header does not flicker; child components can render their own loading state
+    // if needed.
+    if (loading && !hit) {
       return <FlyoutLoading data-test-subj="attack-flyout-wrapper-loading" />;
     }
 
@@ -62,7 +77,7 @@ export const AttackFlyoutWrapper = memo(
       );
     }
 
-    return <AttackFlyout hit={hit} onAttackUpdated={onAttackUpdated} />;
+    return <AttackFlyout hit={hit} onAttackUpdated={handleAttackUpdated} />;
   }
 );
 
