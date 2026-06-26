@@ -75,9 +75,44 @@ describe('TriggerRegistry', () => {
 
     it('accepts valid id formats', () => {
       registry.register(createValidDefinition({ id: 'cases.updated' }));
-      registry.register(createValidDefinition({ id: 'alerts.severity_high' }));
-      registry.register(createValidDefinition({ id: 'my_plugin.my_event' }));
+      registry.register(createValidDefinition({ id: 'alerts.severityHigh' }));
+      registry.register(createValidDefinition({ id: 'my-namespace.myEvent' }));
       expect(registry.list()).toHaveLength(3);
+    });
+
+    it('rejects snake_case namespace or event segments', () => {
+      expect(() => {
+        registry.register(createValidDefinition({ id: 'my_plugin.myEvent' }));
+      }).toThrow('must follow namespaced format');
+
+      expect(() => {
+        registry.register(createValidDefinition({ id: 'my-namespace.my_event' }));
+      }).toThrow('must follow namespaced format');
+    });
+
+    it('accepts kebab-case namespace ids from naming conventions', () => {
+      const idsFromDocs = [
+        'my-namespace.customTrigger',
+        'cases.updated',
+        'custom-feature.alertFired',
+        'my-plugin.myTrigger',
+        'alertingV2.episodeAssigned',
+      ];
+
+      for (const id of idsFromDocs) {
+        registry.register(createValidDefinition({ id }));
+      }
+
+      expect(registry.list()).toHaveLength(idsFromDocs.length);
+      for (const id of idsFromDocs) {
+        expect(registry.has(id)).toBe(true);
+      }
+    });
+
+    it('rejects event segment with dashes (event must be camelCase)', () => {
+      expect(() => {
+        registry.register(createValidDefinition({ id: 'my-namespace.custom-trigger' }));
+      }).toThrow('must follow namespaced format');
     });
 
     it('throws if eventSchema is null', () => {

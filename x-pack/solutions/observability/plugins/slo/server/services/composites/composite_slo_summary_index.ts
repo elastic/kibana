@@ -6,43 +6,51 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { CompositeSLOMemberSummary, CompositeSLOSummary } from '@kbn/slo-schema';
-import { storedCompositeSloSummarySchema } from '@kbn/slo-schema';
+import type { CompositeSLOSummaryDocument } from '@kbn/slo-schema';
+import { compositeSloSummaryDocumentSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 
-export interface PersistedCompositeSummary {
-  summary: CompositeSLOSummary;
-  members?: CompositeSLOMemberSummary[];
-}
+export type PersistedCompositeSummary = Pick<CompositeSLOSummaryDocument, 'summary' | 'members'>;
 
 export function buildCompositeSloSummaryDocId(spaceId: string, compositeId: string): string {
   return `${spaceId}:${compositeId}`;
 }
 
+/**
+ * Member summaries used to be persisted with an `id` field; they now use `sloId` to mirror the
+ * definition member shape. Normalise legacy docs so they keep decoding until the background task
+ * rewrites them.
+ *
+ * Documents persisted with flat top-level summary fields (the pre-nested-`summary` shape) are not
+ * normalised: they fail to decode and are treated as missing until the hourly task rewrites them.
+ */
+function normalizeLegacyMemberIds(source: unknown): unknown {
+  if (typeof source !== 'object' || source === null || !('members' in source)) {
+    return source;
+  }
+  const { members } = source as { members?: unknown };
+  if (!Array.isArray(members)) {
+    return source;
+  }
+  const normalizedMembers = members.map((member) => {
+    if (typeof member !== 'object' || member === null) {
+      return member;
+    }
+    const { id, sloId, ...rest } = member as Record<string, unknown>;
+    return { ...rest, sloId: sloId ?? id };
+  });
+  return { ...source, members: normalizedMembers };
+}
+
 export function mapCompositeSummaryIndexSource(
   source: unknown
 ): PersistedCompositeSummary | undefined {
-  const decoded = storedCompositeSloSummarySchema.safeParse(source);
+  const decoded = compositeSloSummaryDocumentSchema.safeParse(normalizeLegacyMemberIds(source));
   if (!decoded.success) {
     return undefined;
   }
-  const f = decoded.data;
-  return {
-    summary: {
-      sliValue: f.sliValue,
-      status: f.status,
-      errorBudget: {
-        initial: f.errorBudgetInitial,
-        consumed: f.errorBudgetConsumed,
-        remaining: f.errorBudgetRemaining,
-        isEstimated: f.errorBudgetIsEstimated,
-      },
-      fiveMinuteBurnRate: f.fiveMinuteBurnRate,
-      oneHourBurnRate: f.oneHourBurnRate,
-      oneDayBurnRate: f.oneDayBurnRate,
-    },
-    members: f.members,
-  };
+  const { summary, members } = decoded.data;
+  return { summary, members };
 }
 
 export async function fetchCompositeSloSummariesFromIndex(

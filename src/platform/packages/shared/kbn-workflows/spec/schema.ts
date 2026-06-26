@@ -90,12 +90,44 @@ export const ConcurrencySettingsSchema = z.object({
 });
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
 
+export const LIQUID_PARSE_LIMIT_MAX = 600_000;
+export const LIQUID_RENDER_LIMIT_MAX = 2_000;
+export const LIQUID_MEMORY_LIMIT_MAX = 60_000_000;
+
+export const LiquidSettingsSchema = z.object({
+  parseLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_PARSE_LIMIT_MAX)
+    .optional()
+    .describe('Liquid parse character limit. Defaults to 150000; maximum is 600000.'),
+  renderLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_RENDER_LIMIT_MAX)
+    .optional()
+    .describe('Liquid render time limit in milliseconds. Defaults to 1000; maximum is 2000.'),
+  memoryLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_MEMORY_LIMIT_MAX)
+    .optional()
+    .describe(
+      'Liquid memory operation limit for array and string operations. Defaults to 15000000; maximum is 60000000.'
+    ),
+});
+export type LiquidSettings = z.infer<typeof LiquidSettingsSchema>;
+
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
   concurrency: ConcurrencySettingsSchema.optional(),
   'max-step-size': ByteSizeSchema.optional(), // e.g., '10mb', '15MB', '1gb'
+  liquid: LiquidSettingsSchema.optional(),
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -243,6 +275,12 @@ export const FetcherConfigSchema = z
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
 
+// Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
+// valid values). Reused by the connector schema (editor + validation) and the runtime guard so
+// the editor and runtime can never accept/reject different methods.
+export const KibanaHttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
+export const KibanaHttpMethodSchema = z.enum(KibanaHttpMethods);
+
 export const ElasticsearchStepInputSchema = z.union([
   // Raw API format - like Dev Console
   z.object({
@@ -298,7 +336,7 @@ export const KibanaStepInputSchema = z.union([
   // Raw API format - direct HTTP API calls
   z.object({
     request: z.object({
-      method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+      method: KibanaHttpMethodSchema.optional().default('GET'),
       path: z.string().min(1),
       body: z.any().optional(),
       headers: z.record(z.string(), z.string()).optional(),
@@ -805,6 +843,15 @@ export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.t
 // Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
 export { WorkflowSchemaForAutocompleteBase };
 
+// Canonical shape for normalized LLM token usage. The `WorkflowTokenUsage` type
+// in `types/v1.ts` is derived from this schema, so there is a single source of
+// truth shared by runtime validation (workflow context) and the TS types.
+export const WorkflowTokenUsageSchema = z.object({
+  inputTokens: z.number().describe('Total input (prompt) tokens consumed.'),
+  outputTokens: z.number().describe('Total output (completion) tokens produced.'),
+  totalTokens: z.number().describe('Sum of input and output tokens.'),
+});
+
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),
@@ -812,6 +859,7 @@ export const WorkflowExecutionContextSchema = z.object({
   url: z.string(),
   executedBy: z.string().optional(),
   triggeredBy: z.string().optional(),
+  usage: WorkflowTokenUsageSchema.optional(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 

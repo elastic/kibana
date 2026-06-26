@@ -18,6 +18,8 @@ import type {
   PublicStepDefinition,
   WorkflowsExtensionsPublicPluginStart,
 } from '@kbn/workflows-extensions/public';
+import { getBaseConnectorType } from './get_base_connector_type';
+import { getConnectorSpecIcon } from './get_connector_spec_icon';
 import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -85,6 +87,16 @@ export const StepIcon = React.memo(
         );
       }
 
+      const connectorSpecIcon = getConnectorSpecIcon(stepType);
+      if (connectorSpecIcon) {
+        return withTooltip(
+          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+            <EuiIcon type={connectorSpecIcon} size="m" {...rest} aria-hidden={true} />
+          </Suspense>,
+          title
+        );
+      }
+
       const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
       if (actionTypeIcon) {
         return withTooltip(
@@ -95,7 +107,7 @@ export const StepIcon = React.memo(
         );
       }
 
-      iconType = getStepIconType(stepType);
+      iconType = getStepIconType(getBaseConnectorType(stepType));
     }
 
     if (typeof iconType === 'string' && iconType.startsWith('data:')) {

@@ -15,6 +15,7 @@ import { formatMillisecond } from '../../step_details_page/common/network_data/d
 import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { IMAGE_UN_AVAILABLE } from '../../step_details_page/step_screenshot/last_successful_screenshot';
 import { fetchLastSuccessfulCheck } from '../../../state';
+import { useGetUrlParams } from '../../../hooks';
 
 export const ResultDetailsSuccessful = ({
   isExpanded,
@@ -30,17 +31,20 @@ export const ResultDetailsSuccessful = ({
   const stepIndex = Number(step.synthetics.step?.index);
   const location = step.observer?.geo?.name;
 
+  const { remoteName } = useGetUrlParams();
+
   const { data, loading } = useFetcher(() => {
     return fetchLastSuccessfulCheck({
       timestamp,
       monitorId,
       stepIndex,
       location,
+      remoteName,
     });
     // FIXME: Dario is not sure what step._id is being used for,
     // so he'll leave it in place
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timestamp, monitorId, stepIndex, location, step._id]);
+  }, [timestamp, monitorId, stepIndex, location, step._id, remoteName]);
 
   const { currentStep } = useJourneySteps(
     data?.monitor.check_group,

@@ -36,6 +36,18 @@ const compositeSloMemberSchema = z.object({
   instanceId: z.string().optional(),
 });
 
+const compositeSloMembersSchema = z
+  .array(compositeSloMemberSchema)
+  .min(COMPOSITE_SLO_MIN_MEMBERS)
+  .max(COMPOSITE_SLO_MAX_MEMBERS)
+  .refine(
+    (members) => {
+      const keys = members.map(({ sloId, instanceId }) => `${sloId}:${instanceId ?? ''}`);
+      return new Set(keys).size === keys.length;
+    },
+    { message: 'Composite SLO members must be unique by sloId and instanceId' }
+  );
+
 const compositeMethodSchema = z.literal('weightedAverage');
 
 const compositeErrorBudgetSchema = z.object({
@@ -78,10 +90,11 @@ const compositeSloDefinitionSchema = compositeSloBaseDefinitionSchema.extend({
 
 const storedCompositeSloDefinitionSchema = compositeSloDefinitionSchema;
 
-const compositeSloMemberSummarySchema = z.object({
-  id: z.string(),
+// A member summary extends the plain definition member (`sloId`, `weight`, `instanceId`)
+// with the computed per-member health, so a `CompositeSLOMemberWithSummary` is assignable to
+// a `CompositeSLOMember`.
+const compositeSloMemberWithSummarySchema = compositeSloMemberSchema.extend({
   name: z.string(),
-  weight: z.number(),
   normalisedWeight: z.number(),
   sliValue: z.number(),
   status: compositeStatusSchema,
@@ -89,7 +102,6 @@ const compositeSloMemberSummarySchema = z.object({
   fiveMinuteBurnRate: z.number().optional(),
   oneHourBurnRate: z.number().optional(),
   oneDayBurnRate: z.number().optional(),
-  instanceId: z.string().optional(),
 });
 
 const compositeSloSummarySchema = z.object({
@@ -101,12 +113,26 @@ const compositeSloSummarySchema = z.object({
   oneDayBurnRate: z.number(),
 });
 
-type CompositeSLOMember = z.infer<typeof compositeSloMemberSchema>;
-type CompositeMethod = z.infer<typeof compositeMethodSchema>;
-type CompositeSLOMemberSummary = z.infer<typeof compositeSloMemberSummarySchema>;
-type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
+const compositeSloDefinitionResponseSchema = compositeSloDefinitionSchema;
 
-export type { CompositeSLOMember, CompositeMethod, CompositeSLOMemberSummary, CompositeSLOSummary };
+// The summary response strictly extends the definition response: it keeps every definition
+// field (including `members`, now widened to member summaries) and adds the composite `summary`.
+const compositeSloWithSummaryResponseSchema = compositeSloDefinitionSchema.extend({
+  summary: compositeSloSummarySchema,
+  members: z.array(compositeSloMemberWithSummarySchema),
+});
+
+type CompositeSLOMemberWithSummary = z.infer<typeof compositeSloMemberWithSummarySchema>;
+type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
+type CompositeSLODefinitionResponse = z.infer<typeof compositeSloDefinitionResponseSchema>;
+type CompositeSLOWithSummaryResponse = z.infer<typeof compositeSloWithSummaryResponseSchema>;
+
+export type {
+  CompositeSLOMemberWithSummary,
+  CompositeSLOSummary,
+  CompositeSLODefinitionResponse,
+  CompositeSLOWithSummaryResponse,
+};
 
 export {
   COMPOSITE_SLO_MIN_MEMBERS,
@@ -117,12 +143,15 @@ export {
   compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
   compositeSloMemberSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
   compositeErrorBudgetSchema,
   compositeStatusSchema,
   compositeSloBaseDefinitionSchema,
   compositeSloDefinitionSchema,
   storedCompositeSloDefinitionSchema,
-  compositeSloMemberSummarySchema,
+  compositeSloMemberWithSummarySchema,
   compositeSloSummarySchema,
+  compositeSloDefinitionResponseSchema,
+  compositeSloWithSummaryResponseSchema,
 };

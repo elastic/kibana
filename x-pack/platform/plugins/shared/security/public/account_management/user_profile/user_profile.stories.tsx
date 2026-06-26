@@ -58,6 +58,7 @@ const makeInitialValues = (storedLocale: LocaleValue): UserProfileFormValues => 
       darkMode: 'system',
       contrastMode: 'system',
       locale: storedLocale,
+      rememberSelectedSpace: false,
     },
   },
   avatarType: 'initials',

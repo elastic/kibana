@@ -336,6 +336,7 @@ describe('useWorkflowBulkActions', () => {
         expect.objectContaining({
           id: 'wf-disabled',
           workflow: { enabled: true },
+          workflowDefinition: disabledWorkflow.definition,
         }),
         expect.any(Object)
       );
@@ -372,6 +373,7 @@ describe('useWorkflowBulkActions', () => {
         expect.objectContaining({
           id: 'wf-enabled',
           workflow: { enabled: false },
+          workflowDefinition: enabledWorkflow.definition,
         }),
         expect.any(Object)
       );

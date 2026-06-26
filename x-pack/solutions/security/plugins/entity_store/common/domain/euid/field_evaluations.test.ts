@@ -11,6 +11,7 @@ import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   applyFieldEvaluations,
   getFieldEvaluationsFromDefinition,
+  getIdentityFieldEvaluationsFromDefinition,
   getFieldValue,
   getSourceMatchSpec,
 } from './field_evaluations';
@@ -294,15 +295,31 @@ describe('getFieldEvaluationsFromDefinition', () => {
     );
   });
 
-  it('should include both shared and identity field evaluations for calculated identities', () => {
+  it('should return only shared field evaluations for calculated identities (identity evals are separate)', () => {
     const userDefinition = getEntityDefinitionWithoutId('user');
 
     expect(getFieldEvaluationsFromDefinition(userDefinition)).toHaveLength(
-      (userDefinition.fieldEvaluations?.length ?? 0) +
-        ('fieldEvaluations' in userDefinition.identityField
-          ? userDefinition.identityField.fieldEvaluations?.length ?? 0
-          : 0)
+      userDefinition.fieldEvaluations?.length ?? 0
     );
+    expect(getFieldEvaluationsFromDefinition(userDefinition)).toEqual(
+      userDefinition.fieldEvaluations
+    );
+  });
+});
+
+describe('getIdentityFieldEvaluationsFromDefinition', () => {
+  it('returns empty array for single-field identities (service)', () => {
+    const serviceDefinition = getEntityDefinitionWithoutId('service');
+
+    expect(getIdentityFieldEvaluationsFromDefinition(serviceDefinition)).toEqual([]);
+  });
+
+  it('returns identity-specific evaluations for calculated identities (user)', () => {
+    const userDefinition = getEntityDefinitionWithoutId('user');
+    const identityEvals = getIdentityFieldEvaluationsFromDefinition(userDefinition);
+
+    expect(identityEvals.length).toBeGreaterThan(0);
+    expect(identityEvals.map((e) => e.destination)).toContain('entity.namespace');
   });
 });
 

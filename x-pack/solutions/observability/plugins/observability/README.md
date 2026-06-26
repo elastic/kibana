@@ -47,21 +47,26 @@ open target/coverage/jest/index.html
 
 ## API integration testing
 
-API tests run under a trial license (the equivalent of gold+). Basic-license behavior is covered by unit tests (see `server/lib/annotations/create_annotations_client.test.ts`).
+API tests run under a trial license (the equivalent of gold+) and have been migrated to Scout. Basic-license behavior is covered by unit tests (see `server/lib/annotations/create_annotations_client.test.ts`).
 
-### Trial
+### Scout API tests
+
+The API tests are located in `test/scout/api/tests`. For fast iteration, start a server once and run Playwright directly against it:
 
 ```
-# Start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/observability_api_integration/trial/config.ts
+# Start a stateful server once (in a separate terminal)
+node scripts/scout.js start-server --arch stateful --domain classic
 
-# Run tests
-node scripts/functional_test_runner --config x-pack/solutions/observability/test/observability_api_integration/trial/config.ts
+# Run the API tests against the running server
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability/test/scout/api/playwright.config.ts --project=local
 ```
 
-The API tests for "trial" are located in `x-pack/solutions/observability/test/observability_api_integration/trial/tests`.
+Alternatively, let Scout start and stop its own servers:
+
+```
+node scripts/scout.js run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/observability/test/scout/api/playwright.config.ts
+```
 
 ### API test tips
 
-- For debugging access Elasticsearch on `http://localhost:9220` (elastic/changeme)
-- To update snapshots append `--updateSnapshots` to the functional_test_runner command
+- For debugging, access Elasticsearch on `http://localhost:9220` (elastic/changeme).

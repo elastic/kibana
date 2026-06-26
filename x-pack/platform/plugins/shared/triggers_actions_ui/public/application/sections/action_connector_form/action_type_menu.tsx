@@ -45,6 +45,7 @@ interface Props {
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   searchValue?: string;
+  selectedFeatureIds?: string[];
 }
 
 interface RegisteredActionType {
@@ -56,16 +57,35 @@ interface RegisteredActionType {
   isDeprecated: boolean;
 }
 
-const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
-  if (isEmpty(searchValue)) {
+const filterActionTypes = (
+  actionTypes: RegisteredActionType[],
+  searchValue: string,
+  selectedFeatureIds: string[]
+) => {
+  const hasSearch = !isEmpty(searchValue);
+  const hasFeatureFilter = selectedFeatureIds.length > 0;
+
+  if (!hasSearch && !hasFeatureFilter) {
     return actionTypes;
   }
+
+  const searchValueLowerCase = searchValue.toLowerCase();
+
   return actionTypes.filter((actionType) => {
+    if (hasFeatureFilter) {
+      const supported = actionType.actionType?.supportedFeatureIds ?? [];
+      if (!supported.some((id) => selectedFeatureIds.includes(id))) {
+        return false;
+      }
+    }
+
+    if (!hasSearch) {
+      return true;
+    }
+
     const searchTargets = [actionType.name, actionType.selectMessage, actionType.actionType?.name]
       .filter(Boolean)
       .map((text) => text.toLowerCase());
-
-    const searchValueLowerCase = searchValue.toLowerCase();
 
     return searchTargets.some((searchTarget) => searchTarget.includes(searchValueLowerCase));
   });
@@ -87,6 +107,7 @@ export const ActionTypeMenu = ({
   setAllActionTypes,
   actionTypeRegistry,
   searchValue = '',
+  selectedFeatureIds = [],
 }: Props) => {
   const {
     http,
@@ -180,8 +201,8 @@ export const ActionTypeMenu = ({
     });
 
   const filteredConnectors = useMemo(
-    () => filterActionTypes(registeredActionTypes, searchValue),
-    [registeredActionTypes, searchValue]
+    () => filterActionTypes(registeredActionTypes, searchValue, selectedFeatureIds),
+    [registeredActionTypes, searchValue, selectedFeatureIds]
   );
 
   const cardNodes = filteredConnectors

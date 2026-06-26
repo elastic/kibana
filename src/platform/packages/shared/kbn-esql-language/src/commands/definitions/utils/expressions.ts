@@ -19,14 +19,17 @@ import {
 } from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { InlineCastingType, PromQLFunctionParamType, SupportedDataType } from '../types';
-import { getFunctionDefinition, getFunctionForInlineCast } from './functions';
+import {
+  getFunctionDefinition,
+  getFunctionForInlineCast,
+  isTypeConversionFunction,
+} from './functions';
 import { getMatchingSignatures } from './signatures';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { UnmappedFieldsStrategy } from '../../registry/types';
 import { inOperators } from '../all_operators';
 import { TIME_SYSTEM_PARAMS } from './literals';
-import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
 import { getPromqlFunctionDefinition } from './promql';
 
@@ -153,7 +156,7 @@ export function getExpressionType(
       fnDefinition.signatures,
       argTypes,
       literalMask,
-      false
+      isTypeConversionFunction(fnDefinition.name)
     );
 
     if (matchingSignatures.length > 0 && argTypes.includes('null')) {
@@ -200,6 +203,10 @@ export function resolveArgumentTypes(
     argTypes: args.map((arg) => getExpressionType(arg, columns, unmappedFieldsStrategy)),
     literalMask: args.map((arg) => {
       const unwrapped = Array.isArray(arg) ? arg[0] : arg;
+
+      if (!Array.isArray(unwrapped) && unwrapped.type === 'list') {
+        return unwrapped.values.length > 0 && unwrapped.values.every(isLiteral);
+      }
 
       return isLiteral(unwrapped);
     }),
@@ -292,7 +299,7 @@ export function getBinaryExpressionOperand(
 }
 
 /**
- * Extracts a valid expression root from an assignment, handling arrays and marker nodes.
+ * Extracts a valid expression root from an assignment, handling array operands.
  */
 export function getAssignmentExpressionRoot(
   assignment: ESQLFunction
@@ -300,7 +307,7 @@ export function getAssignmentExpressionRoot(
   const rhs = getBinaryExpressionOperand(assignment, 'right');
   const root = Array.isArray(rhs) ? rhs[0] : rhs;
 
-  if (!root || isMarkerNode(root)) {
+  if (!root) {
     return undefined;
   }
 

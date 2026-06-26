@@ -28,6 +28,7 @@ module.exports = {
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',
   ],
   setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disallow_code_generation.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/after_env.integration.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.moment_timezone.js',
   ],

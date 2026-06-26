@@ -15,9 +15,15 @@ import {
   useOpenContentEditor,
   type OpenContentEditorParams,
 } from '@kbn/content-management-content-editor';
-import { useContentListConfig } from '@kbn/content-list-provider';
+import {
+  CREATED_BY_FILTER_ID,
+  type FindItemsParams,
+  TAG_FILTER_ID,
+  useContentListConfig,
+} from '@kbn/content-list-provider';
 import { ContentListClientProvider } from './provider';
 import type { ContentListClientProviderProps } from './provider';
+import { defineContentListFilter } from './filters';
 import type {
   TableListViewFindItemsFn,
   ContentListClientServices,
@@ -62,6 +68,32 @@ describe('ContentListClientProvider', () => {
     } as unknown as ContentListKibanaCore);
 
   const createMockServices = (): ContentListClientServices => ({});
+
+  const createContentTypeFilter = (queryField?: string) =>
+    defineContentListFilter({
+      id: 'contentType',
+      ...(queryField ? { queryField } : {}),
+      title: 'Content type',
+      getItemValue: (item: UserContentCommonSchema) => item.type,
+      options: [
+        { value: 'dashboard', label: 'Dashboard' },
+        { value: 'visualization', label: 'Visualization' },
+      ],
+    });
+
+  const findIds = async (
+    dataSource: ReturnType<typeof useContentListConfig>['dataSource'],
+    params: Pick<FindItemsParams, 'filters'> & Partial<Pick<FindItemsParams, 'sort'>>
+  ) => {
+    const response = await dataSource.findItems({
+      searchQuery: '',
+      filters: params.filters,
+      sort: params.sort,
+      page: { index: 0, size: 20 },
+    });
+
+    return response.items.map(({ id }) => id);
+  };
 
   const createWrapper = (props?: Partial<ContentListClientProviderProps>) => {
     const defaultFindItems = createMockFindItems([createMockItem('1')]);
@@ -192,6 +224,169 @@ describe('ContentListClientProvider', () => {
 
       expect(result.current.features.pagination).toBe(false);
       expect(result.current.supports.pagination).toBe(false);
+    });
+
+    it('registers and applies updater-defined custom filters', async () => {
+      const findItems = createMockFindItems([
+        createMockItem('1'),
+        { ...createMockItem('2'), type: 'visualization' },
+      ]);
+      const typeFilter = createContentTypeFilter();
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          findItems,
+          features: {
+            filters: (defaults) => ({ ...defaults, contentType: typeFilter }),
+          },
+        }),
+      });
+
+      expect(result.current.features.fields).toEqual([
+        expect.objectContaining({ fieldName: 'contentType' }),
+      ]);
+      expect(result.current.features.toolbarFilters?.contentType).toMatchObject({
+        type: 'custom_component',
+      });
+      await expect(
+        findIds(result.current.dataSource, {
+          filters: { contentType: { include: ['visualization'] } },
+        })
+      ).resolves.toEqual(['2']);
+    });
+
+    it('applies custom filters by query field when it differs from the filter id', async () => {
+      const findItems = createMockFindItems([
+        createMockItem('1'),
+        { ...createMockItem('2'), type: 'visualization' },
+      ]);
+      const typeFilter = createContentTypeFilter('type');
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          findItems,
+          features: {
+            filters: {
+              contentType: typeFilter,
+            },
+          },
+        }),
+      });
+
+      expect(result.current.features.fields).toEqual([
+        expect.objectContaining({ fieldName: 'type' }),
+      ]);
+      await expect(
+        findIds(result.current.dataSource, {
+          filters: { type: { include: ['visualization'] } },
+        })
+      ).resolves.toEqual(['2']);
+    });
+
+    it('registers and applies updater-defined custom sort fields', async () => {
+      const findItems = createMockFindItems([createMockItem('1'), createMockItem('2')]);
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          findItems,
+          features: {
+            sorting: {
+              fields: (defaults) => ({
+                ...defaults,
+                priority: {
+                  id: 'priority',
+                  title: 'Priority',
+                  getValue: (item) => (item.id === '1' ? 2 : 1),
+                },
+              }),
+            },
+          },
+        }),
+      });
+
+      expect(result.current.features.sorting).toMatchObject({
+        fields: expect.arrayContaining([expect.objectContaining({ field: 'priority' })]),
+      });
+      await expect(
+        findIds(result.current.dataSource, {
+          filters: {},
+          sort: { field: 'priority', direction: 'asc' },
+        })
+      ).resolves.toEqual(['2', '1']);
+    });
+
+    it('preserves default sort fields when custom sort fields are keyed', () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          features: {
+            sorting: {
+              fields: {
+                priority: { id: 'priority', title: 'Priority' },
+              },
+            },
+          },
+        }),
+      });
+
+      expect(result.current.features.sorting).toMatchObject({
+        fields: expect.arrayContaining([
+          expect.objectContaining({ field: 'title' }),
+          expect.objectContaining({ field: 'updatedAt' }),
+          expect.objectContaining({ field: 'priority' }),
+        ]),
+      });
+    });
+
+    it('applies built-in tag filters through shared filter dimensions', async () => {
+      const taggedItem = {
+        ...createMockItem('1'),
+        references: [{ type: 'tag', id: 'tag-1', name: 'tag-1' }],
+      };
+      const untaggedItem = {
+        ...createMockItem('2'),
+        references: [{ type: 'tag', id: 'tag-2', name: 'tag-2' }],
+      };
+      const tags = {
+        getTagList: () => [
+          { id: 'tag-1', name: 'Production' },
+          { id: 'tag-2', name: 'Development' },
+        ],
+      } as ContentListClientServices['tags'];
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          findItems: createMockFindItems([taggedItem, untaggedItem]),
+          services: { tags },
+        }),
+      });
+
+      await expect(
+        findIds(result.current.dataSource, {
+          filters: { [TAG_FILTER_ID]: { include: ['tag-1'] } },
+        })
+      ).resolves.toEqual(['1']);
+    });
+
+    it('applies built-in creator filters through shared filter dimensions', async () => {
+      const janeItem = { ...createMockItem('1'), createdBy: 'u_jane' };
+      const maxItem = { ...createMockItem('2'), createdBy: 'u_max' };
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          findItems: createMockFindItems([janeItem, maxItem]),
+          services: {
+            userProfiles: {
+              bulkResolve: jest.fn().mockResolvedValue([]),
+            },
+          },
+        }),
+      });
+
+      await expect(
+        findIds(result.current.dataSource, {
+          filters: { [CREATED_BY_FILTER_ID]: { include: ['u_jane'] } },
+        })
+      ).resolves.toEqual(['1']);
     });
   });
 

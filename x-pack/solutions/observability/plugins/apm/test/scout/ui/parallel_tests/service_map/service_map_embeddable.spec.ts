@@ -21,6 +21,7 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let dataViewId: string;
+    let savedDashboardId: string | undefined;
 
     test.beforeAll(async ({ apiServices }) => {
       const { data } = await apiServices.dataViews.create({
@@ -36,10 +37,20 @@ test.describe(
       await uiSettings.set({ defaultIndex: dataViewId });
     });
 
-    test.afterAll(async ({ apiServices, uiSettings }) => {
+    test.afterAll(async ({ apiServices, uiSettings, kbnClient, log }) => {
       await uiSettings.unset('defaultIndex');
       if (dataViewId) {
         await apiServices.dataViews.delete(dataViewId);
+      }
+      if (savedDashboardId) {
+        await kbnClient.savedObjects
+          .delete({ type: 'dashboard', id: savedDashboardId })
+          .catch((error) => {
+            // A 404 is expected if the dashboard was never persisted; surface anything else.
+            if (error?.status !== 404) {
+              log.warning(`Failed to delete dashboard saved object: ${error?.message}`);
+            }
+          });
       }
     });
 
@@ -64,12 +75,10 @@ test.describe(
       });
 
       await test.step('add Service map panel without filters', async () => {
-        // Add the panel first with no filters. The Service Map embeddable
-        // factory always initializes panels with a custom
-        // `time_range: { from: 'now-15m', to: 'now' }` and that range cannot
-        // be configured from the editor flyout, so we need the panel to
-        // exist before we can widen its time range via the Customize panel
-        // flow below.
+        // Add the panel first with no filters. The panel inherits the dashboard's
+        // global time range by default (no panel-level `time_range`), so we add it
+        // first and then opt into a custom panel time range via the Customize panel
+        // flow below — which also widens the suggestions window for the editor.
         await expect(page.getByRole('heading', { name: 'Add to Dashboard' })).toBeVisible();
 
         const serviceMapMenuItem = page.getByRole('menuitem', {
@@ -85,18 +94,18 @@ test.describe(
         await pageObjects.serviceMapPage.serviceMapEditorSaveButton.click();
       });
 
-      await test.step('verify panel was added with the default custom time range', async () => {
+      await test.step('verify panel was added and inherits the dashboard time range', async () => {
         await pageObjects.dashboard.waitForPanelsToLoad(1);
         expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
         await expect(pageObjects.serviceMapPage.serviceMapEmbeddable).toBeVisible();
-        await pageObjects.dashboard.expectTimeRangeBadgeExists();
+        // No panel-level custom time range by default → no "Customize time range" badge.
+        await pageObjects.dashboard.expectTimeRangeBadgeMissing();
       });
 
-      await test.step('widen the panel custom time range to last 24 hours', async () => {
-        // Bump the panel's custom time range from the default 15 minutes to
-        // 24 hours so it (and the suggestions endpoint when we re-open the
-        // editor below) covers the synth window even with significant delay
-        // between global setup and this test running.
+      await test.step('set a custom panel time range of last 24 hours', async () => {
+        // Opt into a panel-level custom time range (24h) so the panel — and the
+        // suggestions endpoint when we re-open the editor below — covers the synth
+        // window even with significant delay between global setup and this test.
         await pageObjects.dashboard.openCustomizePanel();
         await pageObjects.dashboard.enableCustomTimeRange();
         await pageObjects.dashboard.openDatePickerQuickMenu();
@@ -240,6 +249,148 @@ test.describe(
         await expect(page).toHaveURL(
           new RegExp(`/app/apm/services/${SERVICE_MAP_TEST_SERVICE}/service-map`)
         );
+      });
+    });
+
+    test('adds a Service map panel with filters + sync toggle and saves the dashboard', async ({
+      page,
+      pageObjects,
+    }) => {
+      const dashboardTitle = `Service map filters save test ${Date.now()}`;
+
+      await test.step('open a new dashboard with a 24h time range', async () => {
+        await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT * 2 });
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await page.getByTestId('dateRangePickerControlButton').blur();
+      });
+
+      await test.step('add a Service map panel', async () => {
+        await pageObjects.dashboard.openAddPanelFlyout({ timeout: EXTENDED_TIMEOUT });
+        const serviceMapMenuItem = page.getByRole('menuitem', { name: 'Service map', exact: true });
+        await expect(serviceMapMenuItem).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+        await serviceMapMenuItem.click();
+        await expect(
+          page.getByRole('heading', { name: 'Create service map panel', level: 2 })
+        ).toBeVisible();
+        await pageObjects.serviceMapPage.serviceMapEditorSaveButton.click();
+        await pageObjects.dashboard.waitForPanelsToLoad(1);
+      });
+
+      await test.step('set a custom panel time range so editor suggestions resolve', async () => {
+        await pageObjects.dashboard.openCustomizePanel();
+        await pageObjects.dashboard.enableCustomTimeRange();
+        await pageObjects.dashboard.openDatePickerQuickMenu();
+        await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_24 hours');
+        await pageObjects.dashboard.saveCustomizePanel();
+      });
+
+      await test.step('edit the panel: set service/env/KQL filters and enable filter sync', async () => {
+        await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await expect(
+          page.getByRole('heading', { name: 'Edit service map', level: 2 })
+        ).toBeVisible();
+
+        await expect
+          .poll(() => pageObjects.serviceMapPage.getServiceMapEditorComboBoxLoadingCount(), {
+            timeout: EXTENDED_TIMEOUT,
+          })
+          .toBe(0);
+
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSingleOption(
+          SERVICE_MAP_TEST_SERVICE,
+          { useFill: true, settleTimeoutMs: EXTENDED_TIMEOUT }
+        );
+        await pageObjects.serviceMapPage.selectServiceMapEditorEnvironment(
+          SERVICE_MAP_TEST_ENVIRONMENT_STAGING
+        );
+        await pageObjects.serviceMapPage.serviceMapEditorKueryInput.fill(
+          'transaction.name: "GET /api/staging"'
+        );
+
+        // Enable "Sync with dashboard filters" — this writes the
+        // `sync_with_dashboard_filters` field that previously broke dashboard saves.
+        await page.getByTestId('apmServiceMapEditorSyncFiltersToggle').click();
+
+        await pageObjects.serviceMapPage.serviceMapEditorSaveButton.click();
+      });
+
+      await test.step('save the dashboard and verify it persists without error', async () => {
+        await pageObjects.dashboard.saveDashboard(dashboardTitle);
+
+        // A failed save (e.g. schema validation rejecting the panel config) shows an
+        // error toast and keeps the dashboard dirty; assert success instead.
+        await expect(page.getByTestId('errorToastMessage')).toBeHidden();
+        await expect(page).toHaveURL(/\/app\/dashboards#\/view\//);
+
+        const dashboardUrlMatch = page.url().match(/\/view\/([^/?]+)/);
+        savedDashboardId = dashboardUrlMatch?.[1];
+
+        await pageObjects.dashboard.waitForPanelsToLoad(1);
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+        await expect(pageObjects.serviceMapPage.serviceMapEmbeddable).toBeVisible();
+      });
+
+      await test.step('reload the saved dashboard and verify the panel state persisted', async () => {
+        await page.reload();
+        await pageObjects.dashboard.waitForPanelsToLoad(1);
+        await expect(pageObjects.serviceMapPage.serviceMapEmbeddable).toBeVisible();
+
+        // Re-open the editor and confirm the sync toggle stayed on after save + reload.
+        await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await expect(
+          page.getByRole('heading', { name: 'Edit service map', level: 2 })
+        ).toBeVisible();
+        await expect(page.getByTestId('apmServiceMapEditorSyncFiltersToggle')).toBeChecked();
+
+        // Close the editor without changing anything so the dashboard query bar is interactable.
+        await page.getByTestId('apmServiceMapEditorCancelButton').click();
+        await expect(
+          page.getByRole('heading', { name: 'Edit service map', level: 2 })
+        ).toBeHidden();
+      });
+
+      const serviceNode = pageObjects.serviceMapPage.getServiceNodeRoot(SERVICE_MAP_TEST_SERVICE);
+
+      await test.step('with sync on, the panel respects a new dashboard KQL filter', async () => {
+        // Baseline: the panel's own filters (service/env/kuery) still resolve the node.
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+
+        // A dashboard-level KQL query that matches no documents is AND-ed with the panel's
+        // own filters when sync is enabled, so the map should empty out.
+        await pageObjects.queryBar.setQuery('service.name : "non-existent-service-xyz"');
+        await page.getByTestId('querySubmitButton').click();
+        await expect(serviceNode).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+
+        // Clearing the dashboard query brings the node back — proving the panel reacts to
+        // the dashboard filter rather than ignoring it.
+        await pageObjects.queryBar.clearQuery();
+        await page.getByTestId('querySubmitButton').click();
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      });
+
+      await test.step('the panel reflects dashboard global time range changes', async () => {
+        // The dashboard's global time isn't stored with the saved object, so pin it to a
+        // window that covers the synth data before the panel starts inheriting it.
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await page.getByTestId('dateRangePickerControlButton').blur();
+
+        // Drop the panel-level custom time range so the panel inherits the dashboard's
+        // global time (no `time_range` published -> fetch$ falls back to dashboard time).
+        await pageObjects.dashboard.openCustomizePanel();
+        await pageObjects.dashboard.disableCustomTimeRange();
+        await pageObjects.dashboard.saveCustomizePanel();
+        await pageObjects.dashboard.expectTimeRangeBadgeMissing();
+
+        // Still last 24h at the dashboard level (inherited) -> node present.
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+
+        // Move the dashboard's global time to a window with no APM data -> map empties,
+        // confirming the panel honors the dashboard time range change once it inherits it.
+        await pageObjects.datePicker.setAbsoluteRange({
+          from: 'Sep 22, 2015 @ 00:00:00.000',
+          to: 'Sep 23, 2015 @ 00:00:00.000',
+        });
+        await expect(serviceNode).toBeHidden({ timeout: EXTENDED_TIMEOUT });
       });
     });
   }

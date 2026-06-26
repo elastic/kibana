@@ -92,10 +92,6 @@ export const calendarPanelTexts = {
   applyButton: i18n.translate('sharedUXPackages.dateRangePicker.calendarPanel.applyButton', {
     defaultMessage: 'Apply',
   }),
-  selectEndDateTooltip: i18n.translate(
-    'sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip',
-    { defaultMessage: 'Select an end date to apply' }
-  ),
 };
 
 export const documentationPanelTexts = {

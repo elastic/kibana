@@ -134,9 +134,6 @@ export const INPUT_ERRORS = {
   name: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameRequired', {
     defaultMessage: 'Trusted device name is required',
   }),
-  entries: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesRequired', {
-    defaultMessage: 'At least one condition is required',
-  }),
   invalidHash: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.invalidHash', {
     defaultMessage: 'Invalid hash value',
   }),
@@ -165,12 +162,11 @@ export const INPUT_ERRORS = {
       defaultMessage: 'Condition value cannot be empty',
     }
   ),
-  entriesAtLeastOne: i18n.translate(
-    'xpack.securitySolution.trustedDevices.form.errors.entriesAtLeastOne',
-    {
-      defaultMessage: 'At least one condition must be specified',
-    }
-  ),
+  noDuplicateField: (field: TrustedDeviceConditionEntryField) =>
+    i18n.translate('xpack.securitySolution.trustedDevices.form.errors.conditionFieldDuplicated', {
+      defaultMessage: '{field} cannot be added more than once',
+      values: { field: CONDITION_FIELD_TITLE[field] },
+    }),
 };
 
 export const VALIDATION_WARNINGS = {
@@ -181,3 +177,24 @@ export const VALIDATION_WARNINGS = {
     }
   ),
 };
+
+export const AND_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.andButtonLabel',
+  {
+    defaultMessage: 'AND',
+  }
+);
+
+export const REMOVE_ENTRY_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.removeEntryAriaLabel',
+  {
+    defaultMessage: 'Remove entry',
+  }
+);
+
+export const VALUE_INPUT_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.valueInputPlaceholder',
+  {
+    defaultMessage: 'Enter or select value',
+  }
+);

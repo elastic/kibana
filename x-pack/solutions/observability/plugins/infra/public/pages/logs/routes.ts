@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { AppDeepLinkLocations } from '@kbn/core/public';
 import { logsAnomaliesTitle, logCategoriesTitle } from '../../translations';
 
 export interface LogsRoute {
   id: string;
   title: string;
   path: string;
+  visibleIn?: AppDeepLinkLocations[];
 }
 
 export interface LogsAppRoutes {
@@ -24,11 +26,13 @@ export const getLogsAppRoutes = () => {
       id: 'anomalies',
       title: logsAnomaliesTitle,
       path: '/anomalies',
+      visibleIn: ['globalSearch', 'projectSideNav'],
     },
     logsCategories: {
       id: 'log-categories',
       title: logCategoriesTitle,
       path: '/log-categories',
+      visibleIn: ['globalSearch', 'projectSideNav'],
     },
   };
 

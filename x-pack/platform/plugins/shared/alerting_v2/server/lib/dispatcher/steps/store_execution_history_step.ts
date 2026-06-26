@@ -139,11 +139,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       policyRef({ id: summary.policyId, spaceId: summary.spaceId }),
       ...capped.map((id) => {
         const rule = rules?.get(id);
-        return ruleRef({
-          id,
-          spaceId: rule?.spaceId ?? summary.spaceId,
-          kind: rule?.kind,
-        });
+        return ruleRef({ id, spaceId: rule?.spaceId ?? summary.spaceId });
       }),
     ];
 
@@ -188,7 +184,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
         executionUuid,
         action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
         spaceId: rule?.spaceId ?? 'default',
-        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId, kind: rule?.kind })],
+        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId })],
         dispatcherFields: {
           episode_count: episodeIds.size,
           episode_ids: Array.from(episodeIds),
@@ -247,18 +243,10 @@ function aggregateUnmatchedByRule(
   return byRule;
 }
 
-function ruleRef({
-  id,
-  spaceId,
-  kind,
-}: {
-  id: string;
-  spaceId: string | undefined;
-  kind: Rule['kind'] | undefined;
-}): SavedObjectRef {
+function ruleRef({ id, spaceId }: { id: string; spaceId: string | undefined }): SavedObjectRef {
   return {
     type: RULE_SAVED_OBJECT_TYPE,
-    type_id: kind,
+    type_id: 'alert',
     id,
     rel: SAVED_OBJECT_REL_PRIMARY,
     namespace: spaceId === 'default' ? undefined : spaceId,

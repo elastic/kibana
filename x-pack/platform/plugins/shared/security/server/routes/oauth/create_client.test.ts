@@ -7,19 +7,20 @@
 
 import Boom from '@hapi/boom';
 
-import type { ObjectType } from '@kbn/config-schema';
-import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { UiamOAuthType } from '@kbn/core-security-server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineCreateOAuthClientRoute } from './create_client';
+import { createClientBodySchema } from './schemas';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 const RESOURCE = 'https://test-project.kb.us-central1.gcp.elastic.cloud';
+const PROJECT_ID = 'mock-project-id';
 
 const mcpConfig = {
   mcp: {
@@ -45,34 +46,37 @@ describe('Create OAuth Client route', () => {
     });
   }
 
-  function setup(rawConfig: Record<string, unknown> = mcpConfig) {
+  function setup(
+    rawConfig: Record<string, unknown> = mcpConfig,
+    options: { serverlessProjectId?: string } = {}
+  ) {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create(rawConfig, {
       serverless: true,
     });
+    mockRouteDefinitionParams.serverlessProjectId =
+      'serverlessProjectId' in options ? options.serverlessProjectId : PROJECT_ID;
     const authcMock = authenticationServiceMock.createStart();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authcMock);
 
     defineCreateOAuthClientRoute(mockRouteDefinitionParams);
 
-    const [config, handler] = mockRouteDefinitionParams.router.post.mock.calls.find(
+    const [, handler] = mockRouteDefinitionParams.router.post.mock.calls.find(
       ([{ path }]) => path === '/internal/security/oauth/clients'
     )!;
 
     return {
-      routeConfig: config as RouteConfig<any, any, any, any>,
       routeHandler: handler as RequestHandler<any, any, any, any>,
       authc: authcMock,
       oauthMock: authcMock.oauth as jest.Mocked<UiamOAuthType>,
     };
   }
 
-  let routeConfig: RouteConfig<any, any, any, any>;
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let oauthMock: jest.Mocked<UiamOAuthType>;
 
   beforeEach(() => {
-    ({ routeConfig, routeHandler, authc, oauthMock } = setup());
+    ({ routeHandler, authc, oauthMock } = setup());
   });
 
   it('returns result of license checker', async () => {
@@ -87,7 +91,7 @@ describe('Create OAuth Client route', () => {
     expect(response.payload).toEqual({ message: 'test forbidden message' });
   });
 
-  it('injects the configured resource and returns the created client on success', async () => {
+  it('injects the configured resource and serverless project id and returns the created client on success', async () => {
     const mockClient = {
       id: 'client-1',
       resource: RESOURCE,
@@ -106,17 +110,65 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
       client_name: 'Test',
       resource: RESOURCE,
+      project_id: PROJECT_ID,
     });
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockClient);
   });
 
   it('rejects unknown body fields (including `resource`) at the schema layer', () => {
-    const bodySchema = (routeConfig.validate as any).body as ObjectType;
-
     expect(() =>
-      bodySchema.validate({ client_name: 'Test', resource: 'https://attacker.example.com' })
+      createClientBodySchema.validate({
+        client_name: 'Test',
+        resource: 'https://attacker.example.com',
+      })
     ).toThrow(/resource/);
+  });
+
+  it('rejects a body-supplied `project_id` at the schema layer', () => {
+    expect(() =>
+      createClientBodySchema.validate({ client_name: 'Test', project_id: 'attacker-project' })
+    ).toThrow(/project_id/);
+  });
+
+  describe('client_name length validation aligned with UIAM (128)', () => {
+    it('accepts a client_name at the 128-character limit', () => {
+      expect(() => createClientBodySchema.validate({ client_name: 'a'.repeat(128) })).not.toThrow();
+    });
+
+    it('rejects a client_name over the 128-character limit', () => {
+      expect(() => createClientBodySchema.validate({ client_name: 'a'.repeat(129) })).toThrow(
+        /client_name/
+      );
+    });
+  });
+
+  describe('redirect_uris size validation aligned with UIAM (1-20)', () => {
+    const uri = 'https://example.com/cb';
+
+    it('rejects an empty redirect_uris array', () => {
+      expect(() =>
+        createClientBodySchema.validate({ client_name: 'Test', redirect_uris: [] })
+      ).toThrow(/redirect_uris/);
+    });
+
+    it('accepts 20 redirect URIs', () => {
+      expect(() =>
+        createClientBodySchema.validate({
+          client_name: 'Test',
+          redirect_uris: Array.from({ length: 20 }, () => uri),
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects 21 redirect URIs', () => {
+      expect(() =>
+        createClientBodySchema.validate({
+          client_name: 'Test',
+          redirect_uris: Array.from({ length: 21 }, () => uri),
+        })
+      ).toThrow(/redirect_uris/);
+    });
   });
 
   it('overrides any body-supplied `resource` with the configured value as defense-in-depth', async () => {
@@ -135,7 +187,43 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
       client_name: 'Test',
       resource: RESOURCE,
+      project_id: PROJECT_ID,
     });
+  });
+
+  it('overrides any body-supplied `project_id` with the serverless project id as defense-in-depth', async () => {
+    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
+
+    // Bypass schema validation by handing the handler an "already validated" body
+    // that still contains a `project_id` field; the handler must not honor it.
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: { client_name: 'Test', project_id: 'attacker-project' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
+      client_name: 'Test',
+      resource: RESOURCE,
+      project_id: PROJECT_ID,
+    });
+  });
+
+  it('returns 404 when the serverless project id is not configured', async () => {
+    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectId: undefined }));
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: { client_name: 'Test' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(oauthMock.createClient).not.toHaveBeenCalled();
   });
 
   it('returns 404 when OAuth is not available', async () => {

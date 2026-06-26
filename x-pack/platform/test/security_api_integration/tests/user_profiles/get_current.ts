@@ -377,5 +377,25 @@ export default function ({ getService }: FtrProviderContext) {
       `);
       expect(userWithProfileId.profile_uid).toBeUndefined(); // The /me endpoint is only applicable with an active session
     });
+
+    it('returns 404 with basic auth when es-security-runas-user header is present', async () => {
+      const authHeaderValue = `Basic ${Buffer.from(`${testUserName}:${testUserPassword}`).toString(
+        'base64'
+      )}`;
+
+      await supertestWithoutAuth
+        .get('/internal/security/user_profile')
+        .set('Authorization', authHeaderValue)
+        .set('es-security-runas-user', testUserName)
+        .expect(404);
+    });
+
+    it('returns 404 with API key when es-security-runas-user header is present', async () => {
+      await supertestWithoutAuth
+        .get('/internal/security/user_profile')
+        .set('Authorization', `apikey ${apiKey.encoded}`)
+        .set('es-security-runas-user', testUserName)
+        .expect(404);
+    });
   });
 }

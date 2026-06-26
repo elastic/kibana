@@ -21,6 +21,8 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-http-server'
+  - '@kbn/inference-tracing'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/logging'
   - '@kbn/utility-types'
@@ -28,6 +30,8 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
   - '@kbn/palettes'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/esql-server-utils'
 tags:
   - shared-server
   - package

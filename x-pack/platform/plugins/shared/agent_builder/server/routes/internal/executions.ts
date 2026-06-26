@@ -63,4 +63,29 @@ export function registerInternalExecutionRoutes({
       });
     })
   );
+
+  router.post(
+    {
+      path: `${internalApiPath}/executions/{executionId}/abort`,
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+        },
+      },
+      options: { access: 'internal' },
+      validate: {
+        params: schema.object({
+          executionId: schema.string(),
+        }),
+      },
+    },
+    wrapHandler(async (context, request, response) => {
+      const { execution: executionService } = getInternalServices();
+      const { executionId } = request.params;
+
+      await executionService.abortExecution(executionId);
+
+      return response.ok({ body: { acknowledged: true } });
+    })
+  );
 }

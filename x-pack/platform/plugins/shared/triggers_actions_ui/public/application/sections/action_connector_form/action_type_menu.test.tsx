@@ -290,6 +290,44 @@ describe('connector_add_flyout', () => {
       expect(screen.queryByTestId('action-type-2-card')).not.toBeInTheDocument();
     });
 
+    it('Filters connectors based on selected feature ids', async () => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType1.id,
+          enabled: true,
+          name: 'Jira',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: actionType2.id,
+          enabled: true,
+          name: 'Webhook',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['cases'],
+        },
+      ]);
+
+      actionTypeRegistry.get.mockImplementation((id) =>
+        id === actionType1.id ? actionType1 : actionType2
+      );
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+          selectedFeatureIds={['cases']}
+        />
+      );
+
+      expect(await screen.findByTestId('action-type-2-card')).toBeInTheDocument();
+      expect(screen.queryByTestId('action-type-1-card')).not.toBeInTheDocument();
+    });
+
     it('Filters connectors based on selectMessage search', async () => {
       loadActionTypes.mockResolvedValue([
         {

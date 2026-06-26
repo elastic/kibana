@@ -11,11 +11,17 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import type { DomainEvent, EventBus, Subscription } from './types';
+import type {
+  DomainEvent,
+  EventBus,
+  EventBusContextRest,
+  EventBusHandlerArgs,
+  Subscription,
+} from './types';
 
-const ASYNC_RESOURCE_NAME = 'AlertingDomainEventBus';
+const ASYNC_RESOURCE_NAME = 'AsyncDomainEventBus';
 
-type AnyHandler = (event: DomainEvent) => Promise<void> | void;
+type AnyHandler = (event: DomainEvent, ...extra: unknown[]) => Promise<void> | void;
 
 type EventBusErrorCode = 'EVENT_BUS_HANDLER_FAILURE' | 'EVENT_BUS_EMITTER_ERROR';
 
@@ -70,10 +76,18 @@ const RESERVED_EVENT_TYPES: ReadonlySet<string> = new Set([
  *  - The bus owns no per-event state. Replays/persistence are out of scope.
  *  - The default `EventEmitter` listener-limit warning (10 per event) is
  *    kept intentionally. It is a useful memory-leak signal.
+ *
+ * `TContext` (default `void`) lets a caller-supplied value travel from
+ * `publish` to every subscribed handler unchanged. The bus does not
+ * inspect, log, or persist the context. It is propagated by reference
+ * through Node's `EventEmitter.emit` extra-arg mechanism. Callers that
+ * want to thread, for example, a `KibanaRequest` from a route handler
+ * to a workflow subscriber bind `TContext` accordingly. The bus stays
+ * domain-agnostic.
  */
 @injectable()
-export class AlertingDomainEventBus<TEvent extends DomainEvent = DomainEvent>
-  implements EventBus<TEvent>
+export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TContext = void>
+  implements EventBus<TEvent, TContext>
 {
   readonly #emitter = new EventEmitterAsyncResource({
     captureRejections: true,
@@ -90,7 +104,7 @@ export class AlertingDomainEventBus<TEvent extends DomainEvent = DomainEvent>
     );
   }
 
-  public publish<E extends TEvent>(event: E): void {
+  public publish<E extends TEvent>(event: E, ...rest: EventBusContextRest<TContext>): void {
     if (!event || typeof event.type !== 'string') {
       this.logger.debug({
         message: () =>
@@ -110,17 +124,27 @@ export class AlertingDomainEventBus<TEvent extends DomainEvent = DomainEvent>
       return;
     }
 
-    this.#emitter.emit(event.type, event);
+    // `rest` is `[]` for context-less buses and `[context]` otherwise.
+    // Forward only the args we received so a context-less listener is
+    // invoked with `(event)` rather than `(event, undefined)`.
+    if (rest.length > 0) {
+      this.#emitter.emit(event.type, event, rest[0]);
+    } else {
+      this.#emitter.emit(event.type, event);
+    }
+    this.logger.debug({
+      message: () => `[alerting_v2.EventBus] Emitted ${event.type} with ${JSON.stringify(event)} `,
+    });
   }
 
   public subscribe<E extends TEvent>(
     type: E['type'],
-    handler: (event: E) => Promise<void> | void
+    handler: (...args: EventBusHandlerArgs<E, TContext>) => Promise<void> | void
   ): Subscription {
-    const wrapped: AnyHandler = (event) => {
+    const wrapped: AnyHandler = (event, ...extra) => {
       setImmediate(async () => {
         try {
-          await handler(event as E);
+          await (handler as (...args: unknown[]) => Promise<void> | void)(event, ...extra);
         } catch (err) {
           this.#logError(err, { code: 'EVENT_BUS_HANDLER_FAILURE', scope: event.type });
         }

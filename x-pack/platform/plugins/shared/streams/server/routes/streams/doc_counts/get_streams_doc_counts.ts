@@ -11,6 +11,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamDocsStat } from '../../../../common';
 import {
@@ -44,7 +45,12 @@ export async function getDocCountsForStreams(options: {
   const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName } = options;
 
   const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
+    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
+        if (isNotFoundError(error)) {
+          return { data_streams: [] };
+        }
+        throw error;
+      })
     : await esClient.indices.getDataStream();
   if (!streams.length) {
     return [];
@@ -132,7 +138,12 @@ export async function getDegradedDocCountsForStreams(options: {
   const { esClient, streamName } = options;
 
   const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
+    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
+        if (isNotFoundError(error)) {
+          return { data_streams: [] };
+        }
+        throw error;
+      })
     : await esClient.indices.getDataStream();
 
   if (!streams.length) {
@@ -235,7 +246,12 @@ export async function getFailedDocCountsForStreams(options: {
   const { esClient, start, end, streamName } = options;
 
   const { data_streams: streams } = streamName
-    ? await esClient.indices.getDataStream({ name: streamName })
+    ? await esClient.indices.getDataStream({ name: streamName }).catch((error) => {
+        if (isNotFoundError(error)) {
+          return { data_streams: [] };
+        }
+        throw error;
+      })
     : await esClient.indices.getDataStream();
 
   if (!streams.length) {

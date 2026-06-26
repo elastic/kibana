@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiComboBox,
   EuiConfirmModal,
   EuiFieldSearch,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -31,10 +34,11 @@ import {
   useEuiTheme,
   transparentize,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
+import { diffLines } from 'diff';
+import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import {
   useMemoryTree,
   useMemorySearch,
@@ -45,6 +49,8 @@ import {
   useRecentChanges,
   useScrapeConversations,
   useConsolidateMemory,
+  useSynthesizeMemory,
+  useDetectGaps,
 } from './use_memory';
 import type { MemoryCategoryNode, MemoryVersionRecord } from './types';
 
@@ -52,6 +58,11 @@ export function MemoryTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [showCreateFlyout, setShowCreateFlyout] = useState(false);
+
+  const {
+    ui: { manage: canManage },
+  } = useStreamsPrivileges();
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
@@ -60,12 +71,31 @@ export function MemoryTab() {
 
   const scrapeConversations = useScrapeConversations();
   const consolidateMemory = useConsolidateMemory();
+  const synthesizeMemory = useSynthesizeMemory();
+  const detectGaps = useDetectGaps();
 
   const isSearchActive = searchQuery.length >= 2;
 
   const treeItems = useMemo(() => {
-    if (!treeData?.tree) return [];
-    return toTreeItems(treeData.tree, setSelectedEntryId);
+    if (!treeData) return [];
+    const items = toTreeItems(treeData.tree, setSelectedEntryId);
+    if (treeData.uncategorized.length > 0) {
+      items.push({
+        id: '__uncategorized__',
+        label: (
+          <EuiText size="s">
+            {i18n.translate('xpack.streams.memory.uncategorized', {
+              defaultMessage: 'Uncategorized',
+            })}
+          </EuiText>
+        ),
+        children: treeData.uncategorized.map((page) => ({
+          id: page.id,
+          label: <EuiLink onClick={() => setSelectedEntryId(page.id)}>{page.title}</EuiLink>,
+        })),
+      });
+    }
+    return items;
   }, [treeData]);
 
   const handleCloseFlyout = useCallback(() => {
@@ -101,8 +131,13 @@ export function MemoryTab() {
                 size="s"
                 iconType="refresh"
                 isLoading={scrapeConversations.isLoading}
+                isDisabled={!canManage}
                 onClick={() => scrapeConversations.mutate()}
                 data-test-subj="streamsMemoryScrapeButton"
+                title={i18n.translate('xpack.streams.memory.scrapeButtonTitle', {
+                  defaultMessage:
+                    'Scrape agent conversations and extract durable knowledge into memory pages.',
+                })}
               >
                 {i18n.translate('xpack.streams.memory.scrapeButton', {
                   defaultMessage: 'Scrape Conversations',
@@ -114,14 +149,62 @@ export function MemoryTab() {
                 size="s"
                 iconType="broom"
                 isLoading={consolidateMemory.isLoading}
+                isDisabled={!canManage}
                 onClick={() => consolidateMemory.mutate()}
                 data-test-subj="streamsMemoryConsolidateButton"
+                title={i18n.translate('xpack.streams.memory.consolidateButtonTitle', {
+                  defaultMessage:
+                    'Merge duplicate pages, remove stale entries, and improve categorization.',
+                })}
               >
                 {i18n.translate('xpack.streams.memory.consolidateButton', {
                   defaultMessage: 'Consolidate Memory',
                 })}
               </EuiButton>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="sparkles"
+                isLoading={synthesizeMemory.isLoading}
+                isDisabled={!canManage}
+                onClick={() => synthesizeMemory.mutate()}
+                data-test-subj="streamsMemorySynthesizeButton"
+                title={i18n.translate('xpack.streams.memory.synthesizeButtonTitle', {
+                  defaultMessage:
+                    'Synthesize significant events knowledge indicators into new wiki pages.',
+                })}
+              >
+                {i18n.translate('xpack.streams.memory.synthesizeButton', {
+                  defaultMessage: 'Synthesize Memory',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="inspect"
+                isLoading={detectGaps.isLoading}
+                onClick={() => detectGaps.mutate()}
+                data-test-subj="streamsMemoryDetectGapsButton"
+              >
+                {i18n.translate('xpack.streams.memory.detectGapsButton', {
+                  defaultMessage: 'Detect Gaps',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            {canManage && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="plusInCircle"
+                  aria-label={i18n.translate('xpack.streams.memory.newEntryButton', {
+                    defaultMessage: 'New memory entry',
+                  })}
+                  onClick={() => setShowCreateFlyout(true)}
+                  data-test-subj="streamsMemoryNewEntryButton"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiFieldSearch
@@ -246,6 +329,15 @@ export function MemoryTab() {
           onBack={() => setShowHistory(false)}
         />
       )}
+      {showCreateFlyout && (
+        <CreateEntryFlyout
+          onClose={() => setShowCreateFlyout(false)}
+          onCreated={(id) => {
+            setShowCreateFlyout(false);
+            setSelectedEntryId(id);
+          }}
+        />
+      )}
     </>
   );
 }
@@ -286,29 +378,63 @@ function EntryFlyout({
   onShowHistory: () => void;
 }) {
   const { data: entry, isLoading } = useMemoryEntry(entryId);
+  const { data: treeData } = useMemoryTree();
   const { updateEntry, deleteEntry } = useMemoryMutations();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
+  const [editCategories, setEditCategories] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [editTags, setEditTags] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
+
+  const categoryOptions = useMemo(() => {
+    const paths = new Set<string>();
+    const collect = (nodes: MemoryCategoryNode[]) => {
+      for (const node of nodes) {
+        paths.add(node.category);
+        collect(node.children);
+      }
+    };
+    collect(treeData?.tree ?? []);
+    return Array.from(paths).map((p) => ({ label: p }));
+  }, [treeData]);
+
+  const editCategoryLabels = editCategories.map((c) => c.label);
+  const editTagLabels = editTags.map((t) => t.label);
+  const isDirty =
+    isEditing &&
+    !!entry &&
+    (editContent !== entry.content ||
+      editCategoryLabels.length !== entry.categories.length ||
+      editCategoryLabels.some((cat, i) => cat !== entry.categories[i]) ||
+      editTagLabels.length !== entry.tags.length ||
+      editTagLabels.some((tag, i) => tag !== entry.tags[i]));
 
   const handleEdit = useCallback(() => {
     if (entry) {
       setEditContent(entry.content);
+      setEditCategories(entry.categories.map((cat) => ({ label: cat })));
+      setEditTags(entry.tags.map((tag) => ({ label: tag })));
       setIsEditing(true);
     }
   }, [entry]);
 
   const handleSave = useCallback(() => {
-    if (entry && editContent !== entry.content) {
+    if (entry && isDirty) {
       updateEntry.mutate(
-        { id: entry.id, content: editContent, change_summary: 'Manual edit via UI' },
+        {
+          id: entry.id,
+          content: editContent,
+          categories: editCategoryLabels,
+          tags: editTagLabels,
+          change_summary: 'Manual edit via UI',
+        },
         { onSuccess: () => setIsEditing(false) }
       );
     } else {
       setIsEditing(false);
     }
-  }, [entry, editContent, updateEntry]);
+  }, [entry, isDirty, editContent, editCategoryLabels, editTagLabels, updateEntry]);
 
   const handleDelete = useCallback(() => {
     if (entry) {
@@ -317,12 +443,12 @@ function EntryFlyout({
   }, [entry, deleteEntry, onClose]);
 
   const handleClose = useCallback(() => {
-    if (isEditing && entry && editContent !== entry.content) {
+    if (isDirty) {
       setShowDiscardModal(true);
     } else {
       onClose();
     }
-  }, [isEditing, entry, editContent, onClose]);
+  }, [isDirty, onClose]);
 
   const handleConfirmDiscard = useCallback(() => {
     setShowDiscardModal(false);
@@ -389,6 +515,51 @@ function EntryFlyout({
                   fullWidth
                   rows={20}
                   data-test-subj="streamsMemoryEditArea"
+                />
+                <EuiSpacer size="s" />
+                <EuiTitle size="xxs">
+                  <h4>
+                    {i18n.translate('xpack.streams.memory.categoriesLabel', {
+                      defaultMessage: 'Categories',
+                    })}
+                  </h4>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiComboBox
+                  options={categoryOptions}
+                  selectedOptions={editCategories}
+                  onChange={setEditCategories}
+                  onCreateOption={(searchValue) =>
+                    setEditCategories((prev) => [...prev, { label: searchValue }])
+                  }
+                  isClearable
+                  fullWidth
+                  placeholder={i18n.translate('xpack.streams.memory.categoriesPlaceholder', {
+                    defaultMessage: 'e.g. infrastructure/kubernetes',
+                  })}
+                  data-test-subj="streamsMemoryEditCategories"
+                />
+                <EuiSpacer size="s" />
+                <EuiTitle size="xxs">
+                  <h4>
+                    {i18n.translate('xpack.streams.memory.tagsLabel', {
+                      defaultMessage: 'Tags',
+                    })}
+                  </h4>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiComboBox
+                  selectedOptions={editTags}
+                  onChange={setEditTags}
+                  onCreateOption={(searchValue) =>
+                    setEditTags((prev) => [...prev, { label: searchValue }])
+                  }
+                  isClearable
+                  fullWidth
+                  placeholder={i18n.translate('xpack.streams.memory.tagsEditPlaceholder', {
+                    defaultMessage: 'Add tags',
+                  })}
+                  data-test-subj="streamsMemoryEditTags"
                 />
                 <EuiSpacer size="m" />
                 <EuiFlexGroup gutterSize="s">
@@ -646,8 +817,18 @@ function HistoryFlyout({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <MemoryDiffViewer
-                  originalContent={previousRecord?.content ?? ''}
-                  modifiedContent={selectedRecord.content}
+                  original={{
+                    title: previousRecord?.title ?? '',
+                    content: previousRecord?.content ?? '',
+                    tags: previousRecord?.tags ?? [],
+                    categories: previousRecord?.categories ?? [],
+                  }}
+                  modified={{
+                    title: selectedRecord.title,
+                    content: selectedRecord.content,
+                    tags: selectedRecord.tags ?? [],
+                    categories: selectedRecord.categories ?? [],
+                  }}
                 />
               </>
             )}
@@ -658,84 +839,265 @@ function HistoryFlyout({
   );
 }
 
+interface MemorySnapshot {
+  title: string;
+  content: string;
+  tags: string[];
+  categories: string[];
+}
+
 function MemoryDiffViewer({
-  originalContent,
-  modifiedContent,
+  original,
+  modified,
 }: {
-  originalContent: string;
-  modifiedContent: string;
+  original: MemorySnapshot;
+  modified: MemorySnapshot;
 }) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<monaco.editor.IDiffEditor | null>(null);
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
-  useLayoutEffect(() => {
-    if (!wrapperRef.current) return;
-
-    const oldModel = monaco.editor.createModel(originalContent, 'markdown');
-    const newModel = monaco.editor.createModel(modifiedContent, 'markdown');
-
-    if (!editorRef.current) {
-      editorRef.current = monaco.editor.createDiffEditor(wrapperRef.current, {
-        automaticLayout: true,
-        theme: CODE_EDITOR_DEFAULT_THEME_ID,
-      });
-    }
-
-    editorRef.current.setModel({ original: oldModel, modified: newModel });
-
-    const commonOptions: monaco.editor.IEditorOptions = {
-      fontSize: 12,
-      lineNumbers: 'off',
-      minimap: { enabled: false },
-      overviewRulerBorder: false,
-      readOnly: true,
-      scrollbar: {
-        alwaysConsumeMouseWheel: false,
-        useShadows: false,
-      },
-      scrollBeyondLastLine: false,
-      wordWrap: 'on',
-      wrappingIndent: 'indent',
-      renderLineHighlight: 'none',
-      contextmenu: false,
-    };
-
-    editorRef.current.updateOptions({
-      ...commonOptions,
-      renderSideBySide: false,
-    });
-    editorRef.current.getOriginalEditor().updateOptions(commonOptions);
-    editorRef.current.getModifiedEditor().updateOptions(commonOptions);
-
-    return () => {
-      oldModel.dispose();
-      newModel.dispose();
-    };
-  }, [originalContent, modifiedContent]);
-
-  useEffect(() => {
-    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
-      monaco.editor.defineTheme(themeId, themeResolver(euiTheme));
-    });
-  }, [euiTheme]);
-
-  useEffect(() => {
-    return () => {
-      editorRef.current?.dispose();
-      editorRef.current = null;
-    };
-  }, []);
+  const sections = [
+    {
+      label: i18n.translate('xpack.streams.memory.diffTitleLabel', { defaultMessage: 'Title' }),
+      originalText: original.title,
+      modifiedText: modified.title,
+    },
+    {
+      label: i18n.translate('xpack.streams.memory.diffCategoriesLabel', {
+        defaultMessage: 'Categories',
+      }),
+      originalText: original.categories.join('\n'),
+      modifiedText: modified.categories.join('\n'),
+    },
+    {
+      label: i18n.translate('xpack.streams.memory.diffTagsLabel', { defaultMessage: 'Tags' }),
+      originalText: original.tags.join('\n'),
+      modifiedText: modified.tags.join('\n'),
+    },
+    {
+      label: i18n.translate('xpack.streams.memory.diffContentLabel', {
+        defaultMessage: 'Content',
+      }),
+      originalText: original.content,
+      modifiedText: modified.content,
+      alwaysShow: true,
+    },
+  ].filter((s) => s.alwaysShow || s.originalText !== s.modifiedText);
 
   return (
-    <div
-      ref={wrapperRef}
-      data-test-subj="streamsMemoryDiffViewer"
-      className={css`
-        width: 100%;
-        height: 400px;
-      `}
-    />
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="streamsMemoryDiffViewer">
+      {sections.map((section) => {
+        const parts = diffLines(section.originalText, section.modifiedText);
+        return (
+          <EuiFlexItem key={section.label}>
+            <EuiText
+              size="xs"
+              color="subdued"
+              className={css`
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-bottom: 4px;
+              `}
+            >
+              {section.label}
+            </EuiText>
+            <pre
+              className={css`
+                font-family: ${euiTheme.font.familyCode};
+                font-size: 12px;
+                white-space: pre-wrap;
+                word-break: break-word;
+                margin: 0;
+                padding: 8px;
+                background: ${euiTheme.colors.lightestShade};
+                border-radius: ${euiTheme.border.radius.small};
+              `}
+            >
+              {parts.map((part, idx) => (
+                <span
+                  key={idx}
+                  className={css`
+                    background: ${part.added
+                      ? euiTheme.colors.success + '33'
+                      : part.removed
+                      ? euiTheme.colors.danger + '33'
+                      : 'transparent'};
+                    text-decoration: ${part.removed ? 'line-through' : 'none'};
+                  `}
+                >
+                  {part.value}
+                </span>
+              ))}
+            </pre>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+}
+
+function CreateEntryFlyout({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: (id: string) => void;
+}) {
+  const { createEntry } = useMemoryMutations();
+  const { data: treeData } = useMemoryTree();
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [tags, setTags] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [categories, setCategories] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+
+  const categoryOptions = useMemo(() => {
+    const paths = new Set<string>();
+    const collect = (nodes: MemoryCategoryNode[]) => {
+      for (const node of nodes) {
+        paths.add(node.category);
+        collect(node.children);
+      }
+    };
+    collect(treeData?.tree ?? []);
+    return Array.from(paths).map((p) => ({ label: p }));
+  }, [treeData]);
+
+  const handleCreate = useCallback(() => {
+    if (!title.trim()) return;
+    const name =
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_|_$/g, '') || `entry_${Date.now()}`;
+    createEntry.mutate(
+      {
+        name,
+        title: title.trim(),
+        content,
+        tags: tags.map((t) => t.label),
+        categories: categories.map((c) => c.label),
+      },
+      { onSuccess: (entry) => onCreated(entry.id) }
+    );
+  }, [title, content, tags, categories, createEntry, onCreated]);
+
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      data-test-subj="streamsMemoryCreateFlyout"
+      aria-label={i18n.translate('xpack.streams.memory.createFlyoutAriaLabel', {
+        defaultMessage: 'Create memory entry',
+      })}
+    >
+      <EuiFlyoutHeader hasBorder={false}>
+        <EuiTitle size="m">
+          <h2>
+            {i18n.translate('xpack.streams.memory.createFlyoutTitle', {
+              defaultMessage: 'New memory entry',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.streams.memory.titleLabel', { defaultMessage: 'Title' })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiFieldText
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              fullWidth
+              data-test-subj="streamsMemoryCreateTitle"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.streams.memory.contentLabel', {
+                  defaultMessage: 'Content',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiTextArea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              fullWidth
+              rows={12}
+              data-test-subj="streamsMemoryCreateContent"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.streams.memory.categoriesLabel', {
+                  defaultMessage: 'Categories',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiComboBox
+              options={categoryOptions}
+              selectedOptions={categories}
+              onChange={setCategories}
+              onCreateOption={(searchValue) =>
+                setCategories((prev) => [...prev, { label: searchValue }])
+              }
+              isClearable
+              fullWidth
+              placeholder={i18n.translate('xpack.streams.memory.categoriesPlaceholder', {
+                defaultMessage: 'e.g. infrastructure/kubernetes',
+              })}
+              data-test-subj="streamsMemoryCreateCategories"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('xpack.streams.memory.tagsLabel', { defaultMessage: 'Tags' })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiComboBox
+              options={[]}
+              selectedOptions={tags}
+              onChange={setTags}
+              onCreateOption={(searchValue) => setTags((prev) => [...prev, { label: searchValue }])}
+              isClearable
+              fullWidth
+              noSuggestions
+              data-test-subj="streamsMemoryCreateTags"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={handleCreate}
+              isLoading={createEntry.isLoading}
+              isDisabled={!title.trim()}
+              data-test-subj="streamsMemoryCreateSaveButton"
+            >
+              {i18n.translate('xpack.streams.memory.createSaveButton', {
+                defaultMessage: 'Create',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose}>
+              {i18n.translate('xpack.streams.memory.cancelButton', { defaultMessage: 'Cancel' })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 }
 

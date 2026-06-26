@@ -10,9 +10,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import type { UserProfile } from '@kbn/core-user-profile-common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import type { UserProfile } from './user_profile';
 import { UserProfilesPopover } from './user_profiles_popover';
 
 const userProfiles: UserProfile[] = [

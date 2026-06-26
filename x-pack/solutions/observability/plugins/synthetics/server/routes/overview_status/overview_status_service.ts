@@ -6,21 +6,25 @@
  */
 
 import moment from 'moment/moment';
+import datemath from '@kbn/datemath';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import type { OverviewStatusQuery } from '../common';
-import { getMonitorFilters } from '../common';
+import type { OverviewStatusQuery, OverviewStatusStaleBody } from '../common';
+import { getMonitorFilters, MONITOR_STATUS_PING_SEARCH_FIELDS } from '../common';
 import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import type { RouteContext } from '../types';
 import type {
   EncryptedSyntheticsMonitorAttributes,
+  OverviewStaleStatus,
+  OverviewStalePriorRun,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
+import { isRunStale } from '../../../common/lib';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   FINAL_SUMMARY_FILTER,
@@ -60,6 +64,29 @@ type LocationStatus = LocationStatusEntry[];
 
 export const SUMMARIES_PAGE_SIZE = 5000;
 
+// A monitor/location whose most recent run inside a *live* date-range window
+// (one that ends at ~now) is older than ~2 schedule intervals — with a
+// 15-minute floor — is surfaced as `stale` rather than its last-known
+// up/down. Without this, a monitor that stopped reporting would keep showing a
+// stale, falsely-healthy status until it aged out of the window. `stale`
+// (had a run, stopped reporting) is deliberately distinct from `pending` (no
+// run found in the window at all, e.g. a brand-new first-run monitor). This
+// only applies to the windowed overview view; the default (no-range) view
+// enforces freshness through the `monitor.timespan` filter instead. The
+// schedule-aware threshold itself lives in `isRunStale` (common/lib) so the
+// server and client can't drift.
+//
+// How close a window's end must be to `now` for the freshness guard to kick in.
+// Windows that end clearly in the past are treated as historical, where the
+// latest in-window run is exactly the status the user asked to see.
+const LIVE_WINDOW_TOLERANCE_MINUTES = 5;
+// How far back the supplementary "stale before the window" lookup scans for a
+// monitor's last-known run. Bounds the query cost and keeps monitors that have
+// been dead far longer than anyone would call them "stale" out of the
+// promotion — they stay `pending` rather than reaching back through all of
+// history.
+const STALE_BEFORE_WINDOW_LOOKBACK_DAYS = 30;
+
 export class OverviewStatusService {
   filterData: {
     locationIds?: string[] | string;
@@ -72,12 +99,16 @@ export class OverviewStatusService {
   async getOverviewStatus() {
     this.filterData = await getMonitorFilters(this.routeContext);
 
-    const [allConfigs, statusResult] = await Promise.all([
+    const [rawConfigs, statusResult] = await Promise.all([
       this.getMonitorConfigs(),
       this.getQueryResult(),
     ]);
 
-    return this.buildOverviewStatusResult(allConfigs, statusResult);
+    // Every configured monitor is always returned rather than dropped, so the
+    // overview never silently hides one. Monitors with no run in the queried
+    // window surface as `pending`; in a live window, monitors whose latest run
+    // went stale surface as `stale` (see `processOverviewStatus`).
+    return this.buildOverviewStatusResult(rawConfigs, statusResult);
   }
 
   /**
@@ -100,8 +131,17 @@ export class OverviewStatusService {
     >,
     statusResult: Map<string, LocationStatus>
   ) {
-    const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
-      this.processOverviewStatus(allConfigs, statusResult);
+    const {
+      up,
+      down,
+      pending,
+      stale,
+      upConfigs,
+      downConfigs,
+      pendingConfigs,
+      staleConfigs,
+      disabledConfigs,
+    } = this.processOverviewStatus(allConfigs, statusResult);
 
     const {
       enabledMonitorQueryIds,
@@ -123,14 +163,90 @@ export class OverviewStatusService {
       up,
       down,
       pending,
+      stale,
       upConfigs,
       downConfigs,
       pendingConfigs,
+      staleConfigs,
       disabledConfigs,
     };
   }
 
-  getEsDataFilters() {
+  /**
+   * Supplementary lookup that lets the client promote `pending` monitors which
+   * actually stopped reporting *before* the overview window started.
+   *
+   * The main overview query scopes status to the window, so a monitor whose last
+   * run predates the window has no in-window data and is reported as `pending`
+   * (indistinguishable from a brand-new monitor). The client calls this for the
+   * pending monitors (passing their `monitorQueryIds`) to find each one's latest
+   * run before the window.
+   *
+   * It deliberately returns only the raw "latest run before the window" facts
+   * (timestamp + last status per monitor/location) and does *not* reload saved
+   * objects or apply the staleness threshold here: a single bounded `terms`
+   * query over the requested monitor ids scales regardless of how many monitors
+   * are pending, whereas reloading SOs via an `id:(…)` filter would blow past
+   * Elasticsearch's `max_clause_count` once the pending set grows. The client
+   * applies {@link isRunStale} and rebuilds the metadata from the `pending`
+   * config it already holds.
+   *
+   * Only runs for live windows (staleness is a "stopped reporting as of now"
+   * concept) and is bounded to the requested monitors so it stays cheap.
+   */
+  async getStaleStatusBeforeWindow(): Promise<OverviewStaleStatus> {
+    this.filterData = await getMonitorFilters(this.routeContext);
+
+    if (!this.shouldApplyFreshnessGuard()) {
+      return { priorRuns: [] };
+    }
+
+    const { monitorQueryIds } =
+      (this.routeContext.request.body as OverviewStatusStaleBody | undefined) ??
+      this.routeContext.request.query ??
+      {};
+    const monitorIds = (
+      Array.isArray(monitorQueryIds) ? monitorQueryIds : monitorQueryIds ? [monitorQueryIds] : []
+    ).filter(Boolean);
+    if (monitorIds.length === 0) {
+      return { priorRuns: [] };
+    }
+
+    const { from } = this.getStatusQueryRange();
+
+    const statusData = await this.getQueryResult({
+      // Latest final summary strictly before the window start, capped to a
+      // bounded lookback so the promotion doesn't reach back through all of
+      // history (a monitor dead longer than this stays `pending`).
+      rangeFilter: {
+        range: {
+          '@timestamp': { gte: `now-${STALE_BEFORE_WINDOW_LOOKBACK_DAYS}d`, lt: from },
+        },
+      },
+      monitorIds,
+    });
+
+    const queryLocIds = this.filterData?.locationIds;
+    const priorRuns: OverviewStalePriorRun[] = [];
+
+    statusData.forEach((locStatuses, monitorQueryId) => {
+      locStatuses.forEach((loc) => {
+        if (!isEmpty(queryLocIds) && !queryLocIds?.includes(loc.locationId)) {
+          return;
+        }
+        priorRuns.push({
+          monitorQueryId,
+          locationId: loc.locationId,
+          timestamp: loc.timestamp,
+          status: loc.status,
+        });
+      });
+    });
+
+    return { priorRuns };
+  }
+
+  async getEsDataFilters() {
     const { spaceId, request } = this.routeContext;
     const params = request.query || {};
     const {
@@ -139,9 +255,11 @@ export class OverviewStatusService {
       tags,
       monitorTypes,
       projects,
+      remoteNames,
       showFromAllSpaces,
     } = params;
     const { locationIds } = this.filterData;
+    const ccsEnabled = isCCSEnabled(this.routeContext.server);
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -163,40 +281,38 @@ export class OverviewStatusService {
         },
       ];
     };
-    // Local pings must always honour the active space, otherwise a monitor in
-    // a different local space would surface as a remote-rendered entry on the
-    // Overview. Remote-cluster pings (with `_index` like
-    // "cluster1:.ds-synthetics-*") carry the *remote* cluster's
-    // `meta.space_id`, so applying the local space terms there would
-    // over-filter them — accept them regardless of space via a `wildcard`
-    // match on the cluster-alias prefix in `_index`. Note: `regexp` is not
-    // allowed on `_index`; `wildcard` is.
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
-    const skipSpaceFilter = showFromAllSpaces || !spaceId || spaceId === ALL_SPACES_ID;
-    const localSpaceTerms: QueryDslQueryContainer = {
-      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
-    };
-    const spaceFilter: QueryDslQueryContainer = ccsEnabled
-      ? {
-          bool: {
-            should: [localSpaceTerms, { wildcard: { _index: '*:*' } }],
-            minimum_should_match: 1,
-          },
-        }
-      : localSpaceTerms;
-
     const filters: QueryDslQueryContainer[] = [
-      ...(skipSpaceFilter ? [] : [spaceFilter]),
+      ...(await this.getSpaceFilters(spaceId, Boolean(showFromAllSpaces))),
       ...getTermFilter('monitor.type', monitorTypes),
       ...getTermFilter('tags', tags),
       ...getTermFilter('monitor.project.id', projects),
     ];
 
+    // `remoteNames` filters pings to those originating from the selected
+    // remote clusters. Cluster alias is encoded in the `_index` metadata field
+    // as `<alias>:<index>` (CCS convention). `_index` does not support
+    // `terms`/`regexp`, so we use a `bool.should` of `wildcard` filters — one
+    // per selected alias.
+    if (ccsEnabled && remoteNames?.length) {
+      const aliases = Array.isArray(remoteNames) ? remoteNames : [remoteNames];
+      filters.push({
+        bool: {
+          should: aliases.map((alias) => ({ wildcard: { _index: `${alias}:*` } })),
+          minimum_should_match: 1,
+        },
+      });
+    }
+
     if (query) {
       filters.push({
         simple_query_string: {
           query,
-          fields: ['monitor.name', 'tags', 'url.full', 'monitor.project.id'],
+          // Mirror the saved-object search fields so a monitor matched by the
+          // list query keeps its ping data here. A narrower field set would
+          // list a monitor (e.g. by location or host) while excluding its
+          // pings, stripping its status — a `stale` monitor would read as
+          // `pending` and change color once a search filter is applied.
+          fields: MONITOR_STATUS_PING_SEARCH_FIELDS,
           default_operator: 'OR',
         },
       });
@@ -212,15 +328,157 @@ export class OverviewStatusService {
     return filters;
   }
 
-  async getQueryResult() {
+  /**
+   * Build the `meta.space_id` scoping for the status query.
+   *
+   * Local pings are already bounded by the saved-object query, which fetches
+   * monitors with `namespaces: ['*']` intersected with the user's permitted
+   * spaces; any local ping without a matching saved object is dropped during
+   * reconciliation. So local pings never need a `meta.space_id` constraint here.
+   *
+   * Remote (CCS) pings have *no* local saved object to join against, so they are
+   * the only pings that can leak across spaces. We therefore tie remote pings to
+   * the active space's `meta.space_id` (plus `*`). The one exception is a user
+   * who can read synthetics in *all* spaces — they are allowed to see remote
+   * pings from every space, so the constraint is dropped entirely for them.
+   */
+  private async getSpaceFilters(
+    spaceId: string,
+    showFromAllSpaces: boolean
+  ): Promise<QueryDslQueryContainer[]> {
+    if (!spaceId || spaceId === ALL_SPACES_ID) {
+      return [];
+    }
+
+    const activeSpaceTerms: QueryDslQueryContainer = {
+      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
+    };
+
+    // Single-space view: both local and remote pings are tied to the active space.
+    if (!showFromAllSpaces) {
+      return [activeSpaceTerms];
+    }
+
+    // "All permitted spaces" on a local-only cluster: there are no remote pings,
+    // and local pings are bounded by the SO join, so nothing to add. Checked
+    // before the privilege lookup below so non-CCS deployments short-circuit
+    // without an authz round-trip.
+    if (!isCCSEnabled(this.routeContext.server)) {
+      return [];
+    }
+
+    // "All permitted spaces" + the user can read synthetics everywhere: no
+    // scoping at all (local via the SO join, remote unbounded across clusters).
+    if (await this.hasAllSpacesReadAccess()) {
+      return [];
+    }
+
+    // "All permitted spaces" without all-spaces access: keep local pings
+    // unconstrained (bounded by the SO join) while tying remote pings to the
+    // active space so they cannot leak in from spaces the user isn't viewing.
+    return [
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            // Local pings have no cluster-alias prefix in `_index` → any space.
+            { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
+            // Remote pings carry a cluster-alias prefix → tied to the active space.
+            { bool: { filter: [{ wildcard: { _index: '*:*' } }, activeSpaceTerms] } },
+          ],
+        },
+      },
+    ];
+  }
+
+  /**
+   * Whether the current user can read synthetics in every space (current and
+   * future). Mirrors the saved-object query's permitted-spaces semantics for the
+   * remote-ping path, which has no saved-object join to rely on.
+   */
+  private async hasAllSpacesReadAccess(): Promise<boolean> {
+    const { server, request } = this.routeContext;
+    const { authz } = server.security;
+    if (!authz.mode.useRbacForRequest(request)) {
+      return true;
+    }
+    const { hasAllRequested } = await authz
+      .checkPrivilegesWithRequest(request)
+      .globally({ kibana: [authz.actions.api.get('uptime-read')] });
+    return hasAllRequested;
+  }
+
+  /**
+   * Compute the `[from, to]` window we use to pull final-summary docs. The
+   * overview page always sends the date picker's range, so we honor it whenever
+   * it's present. Callers that don't pass a range (e.g. the diagnostics bundle
+   * or embeddables) fall back to a 4h+20m look-back, which always captures the
+   * latest summary for every enabled monitor (max schedule is 4h) — preserving
+   * the legacy "current status" behavior for those consumers.
+   */
+  getStatusQueryRange(): { from: string; to: string } {
+    const params = this.routeContext.request.query || {};
+    const { dateRangeStart, dateRangeEnd } = params;
+    const defaultFrom = moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString();
+
+    if (!dateRangeStart || !dateRangeEnd) {
+      return { from: defaultFrom, to: 'now' };
+    }
+
+    // Datemath returns undefined on bad input; fall back to defaults rather
+    // than failing the query.
+    const fromDate = datemath.parse(dateRangeStart);
+    const toDate = datemath.parse(dateRangeEnd, { roundUp: true });
+    if (!fromDate?.isValid() || !toDate?.isValid()) {
+      return { from: defaultFrom, to: 'now' };
+    }
+
+    return {
+      from: fromDate.toISOString(),
+      to: toDate.toISOString(),
+    };
+  }
+
+  /**
+   * Whether the status freshness guard should run. It only applies to the
+   * windowed overview view (both picker bounds present) whose window ends at
+   * ~now — i.e. a live "what's happening right now" view. Historical windows and
+   * the default no-range view (which relies on the `monitor.timespan` filter)
+   * are left untouched.
+   */
+  shouldApplyFreshnessGuard(): boolean {
+    const { dateRangeStart, dateRangeEnd } = this.routeContext.request.query || {};
+    if (!dateRangeStart || !dateRangeEnd) {
+      return false;
+    }
+    const toDate = datemath.parse(dateRangeEnd, { roundUp: true });
+    if (!toDate?.isValid()) {
+      return false;
+    }
+    return toDate.isSameOrAfter(moment().subtract(LIVE_WINDOW_TOLERANCE_MINUTES, 'minutes'));
+  }
+
+  /**
+   * A run is "stale" when its latest summary in a live window is older than
+   * ~2 schedule intervals (15-minute floor) — the monitor has effectively
+   * stopped reporting and its last status can no longer be trusted as current.
+   */
+  isStaleRun(timestamp: string | undefined, scheduleMinutes: number): boolean {
+    return isRunStale(timestamp, scheduleMinutes);
+  }
+
+  async getQueryResult(options?: {
+    // Overrides the default `[from, to]` window. Used by the stale-before-window
+    // lookup to fetch the latest run *before* the overview window starts.
+    rangeFilter?: QueryDslQueryContainer;
+    // Restricts the aggregation to specific `monitor.id`s so the supplementary
+    // lookup stays cheap (scoped to the pending monitors being probed).
+    monitorIds?: string[];
+  }) {
     const ccsEnabled = isCCSEnabled(this.routeContext.server);
 
     return withApmSpan('monitor_status_data', async () => {
-      const range = {
-        // max monitor schedule period is 4 hours, 20 minute subtraction is to be on safe side
-        from: moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString(),
-        to: 'now',
-      };
+      const range = this.getStatusQueryRange();
 
       let hasMoreData = true;
       const monitorByIds = new Map<string, LocationStatus>();
@@ -249,6 +507,21 @@ export class OverviewStatusService {
           : []),
       ];
 
+      // The `timespan` filter is a "currently fresh" constraint anchored to
+      // `now`. When the caller passes an explicit date range (the overview page
+      // always does) we drop it, otherwise older summaries inside the window
+      // would be filtered out unfairly. Callers without a range keep it so they
+      // still get a "current status" snapshot.
+      const { dateRangeStart, dateRangeEnd } = this.routeContext.request.query || {};
+      const isUserSelectedRange = Boolean(dateRangeStart && dateRangeEnd);
+
+      const rangeFilter =
+        options?.rangeFilter ?? getRangeFilter({ from: range.from, to: range.to });
+      const monitorIdsFilter: QueryDslQueryContainer[] =
+        options?.monitorIds && options.monitorIds.length
+          ? [{ terms: { 'monitor.id': options.monitorIds } }]
+          : [];
+
       do {
         const result = await this.routeContext.syntheticsEsClient.search(
           {
@@ -257,9 +530,15 @@ export class OverviewStatusService {
               bool: {
                 filter: [
                   FINAL_SUMMARY_FILTER,
-                  getRangeFilter({ from: range.from, to: range.to }),
-                  getTimespanFilter({ from: 'now-15m', to: 'now' }),
-                  ...this.getEsDataFilters(),
+                  rangeFilter,
+                  // The "currently fresh" timespan guard is anchored to `now`,
+                  // so it must be dropped whenever the caller scopes to an
+                  // explicit window (user range) or looks before it (override).
+                  ...(options?.rangeFilter || isUserSelectedRange
+                    ? []
+                    : [getTimespanFilter({ from: 'now-15m', to: 'now' })]),
+                  ...monitorIdsFilter,
+                  ...(await this.getEsDataFilters()),
                 ] as QueryDslQueryContainer[],
               },
             },
@@ -450,12 +729,17 @@ export class OverviewStatusService {
     const upConfigs: Record<string, OverviewStatusMetaData> = {};
     const downConfigs: Record<string, OverviewStatusMetaData> = {};
     const pendingConfigs: Record<string, OverviewStatusMetaData> = {};
+    const staleConfigs: Record<string, OverviewStatusMetaData> = {};
     const disabledConfigs: Record<string, OverviewStatusMetaData> = {};
 
     const enabledMonitors = monitors.filter((monitor) => monitor.attributes[ConfigKey.ENABLED]);
     const disabledMonitors = monitors.filter((monitor) => !monitor.attributes[ConfigKey.ENABLED]);
 
     const queryLocIds = this.filterData?.locationIds;
+
+    // In a live windowed view, demote monitors that stopped reporting to
+    // `stale` so a stale last-known status can't look falsely healthy.
+    const applyFreshnessGuard = this.shouldApplyFreshnessGuard();
 
     // Track which monitor IDs have been processed via local saved objects
     const processedMonitorIds = new Set<string>();
@@ -506,17 +790,26 @@ export class OverviewStatusService {
         const remote = locData?.index
           ? getRemoteMonitorInfo(locData.index, locData.kibanaUrl)
           : undefined;
-        const status = locData?.status || MONITOR_STATUS_ENUM.PENDING;
+        const scheduleMinutes = Number(monitor.attributes[ConfigKey.SCHEDULE]?.number) || 0;
+        const status =
+          applyFreshnessGuard && this.isStaleRun(locData?.timestamp, scheduleMinutes)
+            ? MONITOR_STATUS_ENUM.STALE
+            : locData?.status || MONITOR_STATUS_ENUM.PENDING;
         // Only attach `error` / `downSince` when this location is currently
         // down — otherwise we'd carry stale error text from the previous
         // failure which is misleading on the overview row.
         const isDown = status === MONITOR_STATUS_ENUM.DOWN;
+        // When the freshness guard demotes this location to `stale`, keep the
+        // stale last-known up/down so the UI can optionally surface the last run
+        // without a refetch.
+        const isStale = status === MONITOR_STATUS_ENUM.STALE;
         const location = {
           status,
           id: monLocation.id,
           label: monLocation.label,
           ...(isDown && locData?.error ? { error: locData.error } : {}),
           ...(isDown && locData?.downSince ? { downSince: locData.downSince } : {}),
+          ...(isStale && locData?.status ? { lastStatus: locData.status } : {}),
         };
         const meta = {
           ...metaInfo,
@@ -602,6 +895,23 @@ export class OverviewStatusService {
       }
     }
 
+    // Split the "no status in window" catch-all. At this point pendingConfigs
+    // holds only monitors with no up/down location, so each location is either
+    // `pending` (never ran in the window) or `stale` (ran, then went stale).
+    // A monitor with at least one stale location stopped reporting → surface it
+    // as `stale`; monitors that are purely first-run stay `pending`. Inspect
+    // the locations directly (rather than the incrementally-built
+    // `overallStatus`) so classification is deterministic regardless of the
+    // order ES returned the buckets in.
+    for (const [id, meta] of Object.entries(pendingConfigs)) {
+      if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.STALE)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.STALE;
+        meta.locations = movePendingToEnd(meta.locations);
+        staleConfigs[id] = meta;
+        delete pendingConfigs[id];
+      }
+    }
+
     // Process remote-only monitors: pings from CCS indices that have no local saved object.
     // These monitors exist only on remote clusters and are discovered purely from ping data.
     if (isCCSEnabled(this.routeContext.server)) {
@@ -625,17 +935,27 @@ export class OverviewStatusService {
           }
 
           const configId = locData.configId || monitorId;
-          const status = locData.status;
+          const scheduleMinutes = locData.monitorIntervalSeconds
+            ? locData.monitorIntervalSeconds / 60
+            : 0;
+          const status =
+            applyFreshnessGuard && this.isStaleRun(locData.timestamp, scheduleMinutes)
+              ? MONITOR_STATUS_ENUM.STALE
+              : locData.status;
           // Mirror local-monitor handling: only attach `error` / `downSince`
           // for currently-down locations to avoid surfacing stale failure
           // text from a previous run.
           const isDown = status === MONITOR_STATUS_ENUM.DOWN;
+          // Keep the stale last-known status when demoted to `stale` so the
+          // "show last run" toggle can render it without a refetch.
+          const isStale = status === MONITOR_STATUS_ENUM.STALE;
           const location = {
             id: locData.locationId,
             label: locData.locationLabel || locData.locationId,
             status,
             ...(isDown && locData.error ? { error: locData.error } : {}),
             ...(isDown && locData.downSince ? { downSince: locData.downSince } : {}),
+            ...(isStale && locData.status ? { lastStatus: locData.status } : {}),
           };
           const meta: OverviewStatusMetaData = {
             monitorQueryId: monitorId,
@@ -666,6 +986,8 @@ export class OverviewStatusService {
           } else if (status === MONITOR_STATUS_ENUM.UP) {
             up += 1;
             upConfigs[monLocId] = meta;
+          } else if (status === MONITOR_STATUS_ENUM.STALE) {
+            staleConfigs[monLocId] = { ...meta, overallStatus: MONITOR_STATUS_ENUM.STALE };
           } else {
             pendingConfigs[monLocId] = { ...meta, overallStatus: MONITOR_STATUS_ENUM.PENDING };
           }
@@ -677,22 +999,34 @@ export class OverviewStatusService {
       up,
       down,
       pending: Object.values(pendingConfigs).length,
+      stale: Object.values(staleConfigs).length,
       upConfigs,
       downConfigs,
       pendingConfigs,
+      staleConfigs,
       disabledConfigs,
     };
   }
 
   async getMonitorConfigs() {
-    const { request } = this.routeContext;
-    const { query, showFromAllSpaces } = request.query || {};
+    const { request, server } = this.routeContext;
+    const { query, showFromAllSpaces, remoteNames } = request.query || {};
     /**
      * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
      *
      * Track max period to make sure the snapshot query should reach back far enough to catch
      * latest ping for all enabled monitors.
      */
+
+    // When the user has narrowed the overview to specific remote clusters,
+    // skip the local saved-object lookup entirely. Local monitors don't belong
+    // to any remote cluster, so a remote-cluster filter implies "remote-only".
+    // Returning an empty list here also avoids dragging local monitors through
+    // `processOverviewStatus`, where the filtered ping query has no rows for
+    // them and they would otherwise surface as misleading "Pending" entries.
+    if (isCCSEnabled(server) && remoteNames?.length) {
+      return [];
+    }
 
     const { filtersStr } = this.filterData;
 
@@ -742,7 +1076,7 @@ export class OverviewStatusService {
   }
 }
 
-function movePendingToEnd(locations: Array<{ id: string; label: string; status: string }>) {
+function movePendingToEnd<T extends { status: string }>(locations: T[]): T[] {
   return locations.sort((a, b) => {
     if (a.status === MONITOR_STATUS_ENUM.PENDING && b.status !== MONITOR_STATUS_ENUM.PENDING) {
       return 1;

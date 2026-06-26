@@ -154,7 +154,8 @@ describe(
       });
     });
 
-    describe('OR operator', { tags: ['@ess', '@serverless'] }, () => {
+    // Skipped in Serverless MKI due to interactions with internal indices
+    describe('OR operator', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
       let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
       const artifactNameActions: FormAction[] = [

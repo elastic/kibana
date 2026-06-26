@@ -250,6 +250,7 @@ describe('types/utils', () => {
       summary: 'HTTP',
       description: 'HTTP connector',
       actionTypeId: '.http',
+      displayName: 'HTTP',
       instances: [],
     };
 

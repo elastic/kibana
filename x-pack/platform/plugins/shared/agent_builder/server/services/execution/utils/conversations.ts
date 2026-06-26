@@ -42,9 +42,14 @@ export const createConversation$ = ({
         title,
         agent_id: agentId,
         state: roundCompletedEvent.data.conversation_state,
+        status: roundCompletedEvent.data.round.status,
+        read: false,
         rounds: [roundCompletedEvent.data.round],
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
+          : {}),
+        ...(roundCompletedEvent.data.workspace_id
+          ? { workspace_id: roundCompletedEvent.data.workspace_id }
           : {}),
       });
     }),
@@ -82,14 +87,23 @@ export const updateConversation$ = ({
         ? [...conversation.rounds.slice(0, -1), round]
         : [...conversation.rounds, round];
 
+      // Only set workspace_id if it's new (once set it should not change).
+      const newWorkspaceId =
+        roundCompletedEvent.data.workspace_id && !conversation.workspace_id
+          ? roundCompletedEvent.data.workspace_id
+          : undefined;
+
       return conversationClient.update({
         id: conversation.id,
         title,
         rounds: updatedRound,
         state: conversation_state,
+        status: round.status,
+        read: false,
         ...(roundCompletedEvent.data.attachments !== undefined
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
+        ...(newWorkspaceId ? { workspace_id: newWorkspaceId } : {}),
       });
     }),
     switchMap((updatedConversation) => {

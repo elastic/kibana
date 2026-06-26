@@ -148,6 +148,20 @@ const getChildDescriptions = (description: Joi.Description): Joi.Description[] =
   ];
 };
 
+const applyNullableDefault = (
+  description: Joi.Description,
+  openApiSchema: OpenAPIV3.SchemaObject
+): void => {
+  if (!openApiSchema.anyOf && !openApiSchema.oneOf) {
+    return;
+  }
+
+  const defaultValue = (description.flags as { default?: unknown } | undefined)?.default;
+  if (defaultValue === null) {
+    openApiSchema.default = null;
+  }
+};
+
 const applyPropertyRuntimeMetadata = (
   description: Joi.Description,
   openApiSchema: Schema
@@ -158,6 +172,8 @@ const applyPropertyRuntimeMetadata = (
     }
     return;
   }
+
+  applyNullableDefault(description, openApiSchema);
 
   const { keys, items, matches, rules, whens } = description as DescriptionWithContainers;
   if (keys && openApiSchema.properties) {

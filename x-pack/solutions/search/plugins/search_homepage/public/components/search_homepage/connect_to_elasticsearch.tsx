@@ -10,8 +10,9 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiShowFor,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -78,21 +79,31 @@ export const ConnectToElasticsearch = () => {
         </EuiFlexItem>
       </EuiShowFor>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          display="base"
-          size="s"
-          iconSize="m"
-          iconType="plugs"
-          onClick={() => openWiredConnectionDetails()}
-          data-test-subj="searchHomepageConnectToElasticsearchConnectionDetailsButton"
-          color="text"
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.searchHomepage.searchHomepagePage.euiButtonIcon.connectionDetailsPressToLabel',
             {
               defaultMessage: 'Show connection details for connecting to the Elasticsearch API',
             }
           )}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            display="base"
+            size="s"
+            iconSize="m"
+            iconType="plugs"
+            onClick={() => openWiredConnectionDetails()}
+            data-test-subj="searchHomepageConnectToElasticsearchConnectionDetailsButton"
+            color="text"
+            aria-label={i18n.translate(
+              'xpack.searchHomepage.searchHomepagePage.euiButtonIcon.connectionDetailsPressToLabel',
+              {
+                defaultMessage: 'Show connection details for connecting to the Elasticsearch API',
+              }
+            )}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

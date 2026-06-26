@@ -8,7 +8,7 @@
  */
 import { within } from '@elastic/esql';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '@elastic/esql/types';
-import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
+import { getBracketsToClose } from '../../definitions/utils/ast';
 import { getPreGroupedAggregationName } from '../../definitions/utils/promql';
 import { getTrailingIdentifier } from '../../definitions/utils/shared';
 
@@ -173,10 +173,8 @@ function getPromqlQuerySlice(
     return undefined;
   }
 
-  const text = correctPromqlQuerySyntax(rawText);
-
-  // Keep original length to clamp cursor (cursor shouldn't appear on added brackets)
-  return { text, start: queryBounds.queryStart, originalLength: rawText.length };
+  // Keep original length to clamp cursor after the query parser adds syntax fixups.
+  return { text: rawText, start: queryBounds.queryStart, originalLength: rawText.length };
 }
 
 function getPromqlQueryBounds(

@@ -11,6 +11,7 @@ import type { monaco } from '@kbn/monaco';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { stepSchemas } from '../../../../../common/step_schemas';
+import { getExtensionStepStability } from '../get_stability_note';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 
 /**
@@ -51,7 +52,7 @@ export class CustomMonacoStepHandler extends BaseMonacoConnectorHandler {
         return null;
       }
 
-      const content = [
+      const bodyLines = [
         `**Workflow step**: \`${stepDefinition.label}\``,
         '',
         `**Type**: \`${stepDefinition.id}\``,
@@ -59,18 +60,20 @@ export class CustomMonacoStepHandler extends BaseMonacoConnectorHandler {
         `**Summary**: ${stepDefinition.description}`,
       ];
       if (stepDefinition.documentation?.details) {
-        content.push('', `**Description**: ${stepDefinition.documentation.details}`);
+        bodyLines.push('', `**Description**: ${stepDefinition.documentation.details}`);
       }
       if (stepDefinition.documentation?.url) {
-        content.push('', `**Documentation**: ${stepDefinition.documentation.url}`);
+        bodyLines.push('', `**Documentation**: ${stepDefinition.documentation.url}`);
       }
       if (stepDefinition.documentation?.examples) {
-        content.push('', '**Examples**:', stepDefinition.documentation.examples.join('\n'));
+        bodyLines.push('', '**Examples**:', stepDefinition.documentation.examples.join('\n'));
       }
 
-      content.push('', '_💡 Tip: Check the step documentation for specific parameter details_');
+      bodyLines.push('', '_💡 Tip: Check the step documentation for specific parameter details_');
 
-      return this.createMarkdownContent(content.join('\n'));
+      return this.createMarkdownContent(
+        this.prependStabilityBadgeToContent(getExtensionStepStability(stepDefinition), bodyLines)
+      );
     } catch (error) {
       // console.warn('GenericMonacoConnectorHandler: Error generating hover content', error);
       return null;

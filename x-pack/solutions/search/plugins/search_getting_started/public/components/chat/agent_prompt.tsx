@@ -21,7 +21,7 @@ export const GettingStartedAgentPrompt = () => {
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h5>
-              {i18n.translate('xpack.search.gettingStarted.chat.agentPrompt.title', {
+              {i18n.translate('xpack.searchGettingStarted.chat.agentPrompt.title', {
                 defaultMessage: 'Prompt your agent',
               })}
             </h5>
@@ -30,7 +30,7 @@ export const GettingStartedAgentPrompt = () => {
         <EuiFlexItem>
           <EuiText color="subdued" size="xs">
             <p>
-              {i18n.translate('xpack.search.gettingStarted.chat.agentPrompt.description', {
+              {i18n.translate('xpack.searchGettingStarted.chat.agentPrompt.description', {
                 defaultMessage:
                   'Set up our official optimized Elasticsearch skills in your preferred agentic code workflow.',
               })}
@@ -47,7 +47,7 @@ export const GettingStartedAgentPrompt = () => {
               size="s"
               data-test-subj="chatFirstAgentInstallBtn"
             >
-              {i18n.translate('xpack.search.gettingStarted.chat.agentPrompt.cta', {
+              {i18n.translate('xpack.searchGettingStarted.chat.agentPrompt.cta', {
                 defaultMessage: 'Copy prompt',
               })}
             </EuiButton>
