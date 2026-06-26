@@ -22,6 +22,7 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
+  closePopover,
   ...props
 }: ActionsMenuPopoverProps) {
   return (
@@ -33,6 +34,8 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
       hasArrow={false}
       display="block"
       initialFocus="[name='actions-menu-search']"
+      panelStyle={{ width: '1085px', maxWidth: 'none', maxHeight: 'none' }}
+      closePopover={closePopover}
       {...props}
     >
       <ActionsMenu
@@ -41,6 +44,7 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={onCommandSelected}
         onJumpToStep={onJumpToStep}
+        onClose={closePopover}
       />
     </EuiPopover>
   );
