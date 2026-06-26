@@ -29,7 +29,6 @@ import type {
   ConversationTurn,
   GuardrailRule,
   ModuleReport,
-  PassRateCheckResult,
   RedTeamConfig,
   RedTeamReport,
   Severity,
@@ -53,10 +52,6 @@ export interface RedTeamOrchestratorOptions {
 
 interface RedTeamOrchestrator {
   run: (task: ExperimentTask<any, any>) => Promise<RedTeamReport>;
-  scanExistingRun: (
-    outputs: Array<{ output: TaskOutput; module: string; strategy: string }>
-  ) => AttackResult[];
-  checkPassRates: (report: RedTeamReport) => PassRateCheckResult;
 }
 
 const buildDefaultEvaluators = (
@@ -551,118 +546,5 @@ export const createRedTeamOrchestrator = (
     };
   };
 
-  const scanExistingRun = (
-    outputs: Array<{ output: TaskOutput; module: string; strategy: string }>
-  ): AttackResult[] => {
-    return outputs.map(({ output, module: moduleName, strategy: strategyName }) => {
-      const guardrailViolations = scanWithGuardrails(output, guardrailRules);
-      const severity = classifySeverity([], guardrailViolations, config.severityThresholds);
-
-      return {
-        example: {},
-        namedScores: [],
-        responseExcerpt: extractTextFromOutput(output, 500),
-        guardrailViolations,
-        severity,
-        owaspCategory: '',
-        attackModule: moduleName,
-        strategy: strategyName,
-      };
-    });
-  };
-
-  const checkPassRates = (report: RedTeamReport): PassRateCheckResult => {
-    const failures: PassRateCheckResult['failures'] = [];
-
-    // Check per-module thresholds
-    if (config.moduleMinPassRates) {
-      for (const moduleReport of report.modules) {
-        const required = config.moduleMinPassRates[moduleReport.module];
-        if (required !== undefined) {
-          const passRate =
-            moduleReport.total > 0 ? (moduleReport.passed / moduleReport.total) * 100 : 100;
-          if (passRate < required) {
-            failures.push({ module: moduleReport.module, passRate, required });
-          }
-        }
-      }
-    }
-
-    // Check overall threshold
-    if (config.minPassRate !== undefined) {
-      if (report.overallPassRate < config.minPassRate) {
-        failures.push({
-          module: 'overall',
-          passRate: report.overallPassRate,
-          required: config.minPassRate,
-        });
-      }
-    }
-
-    return { passed: failures.length === 0, failures };
-  };
-
-  return { run, scanExistingRun, checkPassRates };
-};
-
-/**
- * Convenience function for running a red-team evaluation with a minimal setup.
- * Uses a no-op task and in-memory executor — suitable for template-only runs and tests.
- */
-export const runRedTeam = async (config: RedTeamConfig): Promise<RedTeamReport> => {
-  const noopExecutorClient: EvalsExecutorClient = {
-    runExperiment: async (options) => {
-      const { datasets, task } = options;
-      const [dataset] = datasets;
-      const runs: DatasetRunResult['runs'] = {};
-      for (let i = 0; i < dataset.examples.length; i++) {
-        const example = dataset.examples[i];
-        const runKey = `${i}-0-noop`;
-        const output = await task(example);
-        runs[runKey] = {
-          exampleIndex: i,
-          repetition: 0,
-          input: example.input,
-          expected: example.output,
-          metadata: example.metadata,
-          output,
-        };
-      }
-      return [
-        {
-          id: 'noop',
-          experimentName: dataset.name,
-          datasetId: 'noop-dataset',
-          datasetName: dataset.name,
-          runs,
-          evaluationRuns: [],
-          experimentMetadata: options.metadata,
-        },
-      ] as DatasetRunResult[];
-    },
-    getDatasetRunResults: async () => [],
-  };
-
-  const log: import('@kbn/tooling-log').ToolingLog = {
-    info: () => {},
-    warning: () => {},
-    warn: () => {},
-    error: () => {},
-    debug: () => {},
-    verbose: () => {},
-    success: () => {},
-    write: () => {},
-    getWritten: () => ({ log: [], error: [] }),
-    indent: () => {},
-    get: () => ({} as any),
-  } as unknown as import('@kbn/tooling-log').ToolingLog;
-
-  const orchestrator = createRedTeamOrchestrator({
-    config,
-    executorClient: noopExecutorClient,
-    log,
-  });
-
-  const noopTask = async () => '';
-  return orchestrator.run(noopTask);
+  return { run };
 };

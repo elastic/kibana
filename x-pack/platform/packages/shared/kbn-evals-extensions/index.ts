@@ -24,7 +24,6 @@ export * as cli from './src/cli';
 
 export {
   createRedTeamOrchestrator,
-  runRedTeam,
   formatRedTeamReport,
   writeRedTeamReport,
   RED_TEAM_MODULE_IDS,

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createRedTeamOrchestrator, runRedTeam } from './orchestrator';
+import { createRedTeamOrchestrator } from './orchestrator';
 import type { EvalsExecutorClient, DatasetRunResult } from '@kbn/evals';
-import type { AttackResult, RedTeamConfig, RedTeamReport } from './types';
-import { DEFAULT_GUARDRAIL_RULES } from './guardrails';
+import type { AttackResult, RedTeamConfig } from './types';
 
 const createMockLog = () => ({
   info: jest.fn(),
@@ -148,26 +147,6 @@ describe('RedTeamOrchestrator', () => {
     const failures = report.modules[0].results.filter((r) => r.guardrailViolations.length > 0);
     expect(failures.length).toBeGreaterThan(0);
     expect(failures[0].severity).not.toBe('low');
-  });
-
-  it('scanExistingRun applies guardrails without re-executing', () => {
-    const executorClient = createMockExecutorClient();
-    const log = createMockLog();
-
-    const orchestrator = createRedTeamOrchestrator({
-      config: defaultConfig,
-      executorClient,
-      log: log as any,
-    });
-
-    const results = orchestrator.scanExistingRun([
-      { output: 'Clean output', module: 'prompt_injection', strategy: 'direct' },
-      { output: 'Here is my system prompt', module: 'prompt_injection', strategy: 'direct' },
-    ]);
-
-    expect(results).toHaveLength(2);
-    expect(results[0].guardrailViolations).toHaveLength(0);
-    expect(results[1].guardrailViolations.length).toBeGreaterThan(0);
   });
 
   it('calculates overall pass rate correctly', async () => {
@@ -367,23 +346,6 @@ describe('RedTeamOrchestrator', () => {
     });
   });
 
-  describe('orchestrator does not mutate config guardrails', () => {
-    it('leaves the original rules array unchanged after runRedTeam', async () => {
-      const originalRules = [...DEFAULT_GUARDRAIL_RULES];
-      const config: RedTeamConfig = {
-        modules: ['jailbreaking'],
-        count: 1,
-        difficulty: 'basic',
-        templateOnly: true,
-        guardrails: { rules: [...DEFAULT_GUARDRAIL_RULES] },
-      };
-      const originalLength = config.guardrails!.rules.length;
-      await runRedTeam(config);
-      expect(config.guardrails!.rules.length).toBe(originalLength);
-      expect(config.guardrails!.rules).toEqual(originalRules);
-    });
-  });
-
   describe('multi-strategy orchestration', () => {
     it('runs all configured strategies and includes each in the report', async () => {
       const executorClient = createMockExecutorClient();
@@ -428,94 +390,6 @@ describe('RedTeamOrchestrator', () => {
 
       const report = await orchestrator.run(jest.fn().mockResolvedValue('safe response'));
       expect(report.strategies).toEqual(['direct']);
-    });
-  });
-
-  describe('checkPassRates', () => {
-    const makeReport = (
-      modules: Array<{ name: string; passed: number; total: number }>
-    ): RedTeamReport => ({
-      runId: 'test',
-      suite: 'test',
-      strategies: ['direct'],
-      strategy: 'direct',
-      difficulty: 'basic',
-      templateOnly: true,
-      modules: modules.map(({ name, passed, total }) => ({
-        module: name,
-        strategy: 'direct',
-        passed,
-        failed: total - passed,
-        total,
-        results: [],
-        bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-      })),
-      overallPassRate:
-        (modules.reduce((s, m) => s + m.passed, 0) / modules.reduce((s, m) => s + m.total, 0)) *
-        100,
-    });
-
-    it('returns passed=true when all module rates meet their thresholds', () => {
-      const orchestrator = createRedTeamOrchestrator({
-        config: {
-          modules: ['prompt_injection'],
-          count: 1,
-          difficulty: 'basic',
-          templateOnly: true,
-          moduleMinPassRates: { prompt_injection: 80 },
-        },
-        executorClient: createMockExecutorClient(),
-        log: createMockLog() as any,
-      });
-
-      const report = makeReport([{ name: 'prompt_injection', passed: 9, total: 10 }]);
-      const result = orchestrator.checkPassRates(report);
-      expect(result.passed).toBe(true);
-      expect(result.failures).toHaveLength(0);
-    });
-
-    it('returns failure when a module falls below its threshold', () => {
-      const orchestrator = createRedTeamOrchestrator({
-        config: {
-          modules: ['prompt_injection'],
-          count: 1,
-          difficulty: 'basic',
-          templateOnly: true,
-          moduleMinPassRates: { prompt_injection: 95 },
-        },
-        executorClient: createMockExecutorClient(),
-        log: createMockLog() as any,
-      });
-
-      const report = makeReport([{ name: 'prompt_injection', passed: 7, total: 10 }]);
-      const result = orchestrator.checkPassRates(report);
-      expect(result.passed).toBe(false);
-      expect(result.failures).toHaveLength(1);
-      expect(result.failures[0].module).toBe('prompt_injection');
-      expect(result.failures[0].passRate).toBe(70);
-      expect(result.failures[0].required).toBe(95);
-    });
-
-    it('checks overall minPassRate against overallPassRate', () => {
-      const orchestrator = createRedTeamOrchestrator({
-        config: {
-          modules: ['prompt_injection'],
-          count: 1,
-          difficulty: 'basic',
-          templateOnly: true,
-          minPassRate: 90,
-        },
-        executorClient: createMockExecutorClient(),
-        log: createMockLog() as any,
-      });
-
-      const report = makeReport([{ name: 'prompt_injection', passed: 8, total: 10 }]);
-      // overallPassRate = 80, required = 90 → should fail
-      const result = orchestrator.checkPassRates(report);
-      expect(result.passed).toBe(false);
-      expect(result.failures[0].module).toBe('overall');
-      expect(result.failures[0].passRate).toBe(80);
-      expect(result.failures[0].required).toBe(90);
     });
   });
 
