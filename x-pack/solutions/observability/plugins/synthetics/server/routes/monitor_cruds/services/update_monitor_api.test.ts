@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ConfigKey, ScheduleUnit } from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  FormMonitorType,
+  MonitorTypeEnum,
+  ScheduleUnit,
+} from '../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { UpdateMonitorAPI } from './update_monitor_api';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
@@ -29,6 +35,7 @@ jest.mock('../monitor_locations_utils', () => ({
 
 jest.mock('../monitor_validation', () => ({
   validateMonitor: jest.fn(),
+  normalizeAPIConfig: jest.fn(),
 }));
 
 jest.mock('../../../synthetics_service/utils/secrets', () => ({
@@ -45,6 +52,14 @@ jest.mock('../../../synthetics_service/utils/secrets', () => ({
 jest.mock('../../common', () => ({
   getSavedObjectKqlFilter: jest.fn(() => 'mock-filter'),
 }));
+
+/**
+ * Build the `{ updates: [{ id, attributes }] }` shape from an id list and a
+ * single shared patch — keeps these tests (which mostly apply a uniform patch)
+ * concise while exercising the per-item API contract.
+ */
+const updatesFor = (ids: string[], attributes: Record<string, unknown>) =>
+  ids.map((id) => ({ id, attributes }));
 
 const mockDecryptedMonitor = (overrides: Partial<Record<string, unknown>> = {}) => {
   const id = (overrides.id as string) ?? 'mon-1';
@@ -104,8 +119,10 @@ describe('UpdateMonitorAPI', () => {
      */
     jest.clearAllMocks();
 
-    const { validateMonitor } = jest.requireMock('../monitor_validation');
+    const { validateMonitor, normalizeAPIConfig } = jest.requireMock('../monitor_validation');
     validateMonitor.mockImplementation((m: Record<string, unknown>) => mockValidationResultFor(m));
+    // Default: no unsupported keys. Tests that care override this.
+    normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => ({ formattedConfig: m }));
 
     const { validateLocationPermissions } = jest.requireMock('../edit_monitor');
     validateLocationPermissions.mockResolvedValue({
@@ -130,7 +147,7 @@ describe('UpdateMonitorAPI', () => {
       mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      const result = await api.execute({ ids: ['mon-1'], attributes: { enabled: false } });
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
 
       expect(result.perIdErrors).toEqual({});
       expect(result.survivors).toHaveLength(1);
@@ -153,7 +170,7 @@ describe('UpdateMonitorAPI', () => {
       mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      const result = await api.execute({ ids: ['mon-1'], attributes: { enabled: false } });
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
 
       const attrs = result.survivors[0].monitorWithRevision as Record<string, unknown>;
       expect(attrs.name).toBe('My Monitor');
@@ -171,7 +188,9 @@ describe('UpdateMonitorAPI', () => {
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      const result = await api.execute({ ids: ['mon-1', 'mon-2'], attributes: { enabled: false } });
+      const result = await api.execute({
+        updates: updatesFor(['mon-1', 'mon-2'], { enabled: false }),
+      });
 
       expect(mocks.findDecryptedMonitors).toHaveBeenCalledTimes(1);
       expect(result.survivors).toHaveLength(2);
@@ -189,8 +208,7 @@ describe('UpdateMonitorAPI', () => {
 
       const api = new UpdateMonitorAPI(routeContext);
       const result = await api.execute({
-        ids: ['mon-1', 'missing-1', 'missing-2'],
-        attributes: { enabled: false },
+        updates: updatesFor(['mon-1', 'missing-1', 'missing-2'], { enabled: false }),
       });
 
       expect(result.survivors).toHaveLength(1);
@@ -208,7 +226,7 @@ describe('UpdateMonitorAPI', () => {
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      const result = await api.execute({ ids: ['mon-1'], attributes: { enabled: false } });
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
 
       expect(result.survivors).toHaveLength(0);
       expect(result.perIdErrors['mon-1'].code).toBe('invalid_origin');
@@ -223,7 +241,7 @@ describe('UpdateMonitorAPI', () => {
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      await api.execute({ ids: ['mon-1'], attributes: { enabled: false } });
+      await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
 
       expect(validateMonitor).not.toHaveBeenCalled();
     });
@@ -244,8 +262,9 @@ describe('UpdateMonitorAPI', () => {
 
       const api = new UpdateMonitorAPI(routeContext);
       const result = await api.execute({
-        ids: ['mon-1'],
-        attributes: { schedule: { number: '7', unit: ScheduleUnit.MINUTES } },
+        updates: updatesFor(['mon-1'], {
+          schedule: { number: '7', unit: ScheduleUnit.MINUTES },
+        }),
       });
 
       expect(result.survivors).toHaveLength(0);
@@ -266,7 +285,7 @@ describe('UpdateMonitorAPI', () => {
       mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      const result = await api.execute({ ids: ['mon-1'], attributes: { enabled: false } });
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
 
       expect(result.survivors).toHaveLength(0);
       expect(result.perIdErrors['mon-1']).toEqual({
@@ -287,7 +306,7 @@ describe('UpdateMonitorAPI', () => {
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      const result = await api.execute({ ids: ['mon-1'], attributes: { enabled: false } });
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
 
       expect(result.survivors).toHaveLength(0);
       expect(result.perIdErrors['mon-1'].code).toBe('forbidden');
@@ -321,8 +340,7 @@ describe('UpdateMonitorAPI', () => {
        * private-locations fetch — see `maybeLoadPrivateLocations`.
        */
       const result = await api.execute({
-        ids: ['mon-1'],
-        attributes: { [ConfigKey.KIBANA_SPACES]: ['default', 'team-b'] },
+        updates: updatesFor(['mon-1'], { [ConfigKey.KIBANA_SPACES]: ['default', 'team-b'] }),
       });
 
       expect(result.survivors).toHaveLength(0);
@@ -355,8 +373,9 @@ describe('UpdateMonitorAPI', () => {
 
       const api = new UpdateMonitorAPI(routeContext);
       const result = await api.execute({
-        ids: ['mon-ok', 'mon-project', 'mon-bad', 'mon-missing'],
-        attributes: { enabled: false },
+        updates: updatesFor(['mon-ok', 'mon-project', 'mon-bad', 'mon-missing'], {
+          enabled: false,
+        }),
       });
 
       expect(result.survivors).toHaveLength(1);
@@ -380,8 +399,7 @@ describe('UpdateMonitorAPI', () => {
 
       const api = new UpdateMonitorAPI(routeContext);
       const result = await api.execute({
-        ids: ['mon-1', 'mon-2', 'mon-3'],
-        attributes: { enabled: false },
+        updates: updatesFor(['mon-1', 'mon-2', 'mon-3'], { enabled: false }),
       });
 
       expect(result.survivors).toHaveLength(3);
@@ -400,7 +418,7 @@ describe('UpdateMonitorAPI', () => {
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      await api.execute({ ids: ['mon-1'], attributes: { enabled: false } });
+      await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
 
       expect(validateLocationPermissions).not.toHaveBeenCalled();
     });
@@ -427,8 +445,7 @@ describe('UpdateMonitorAPI', () => {
 
       const api = new UpdateMonitorAPI(routeContext);
       const result = await api.execute({
-        ids: ['mon-1', 'mon-2', 'mon-3'],
-        attributes: { enabled: false },
+        updates: updatesFor(['mon-1', 'mon-2', 'mon-3'], { enabled: false }),
       });
 
       expect(result.survivors).toHaveLength(3);
@@ -447,7 +464,7 @@ describe('UpdateMonitorAPI', () => {
       mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      await api.execute({ ids: ['mon-1'], attributes: { enabled: false, tags: ['x'] } });
+      await api.execute({ updates: updatesFor(['mon-1'], { enabled: false, tags: ['x'] }) });
 
       expect(getPrivateLocations).not.toHaveBeenCalled();
     });
@@ -465,26 +482,141 @@ describe('UpdateMonitorAPI', () => {
 
       const api = new UpdateMonitorAPI(routeContext);
       await api.execute({
-        ids: ['mon-1', 'mon-2'],
-        attributes: {
+        updates: updatesFor(['mon-1', 'mon-2'], {
           locations: [{ id: 'us_central', label: 'US Central', isServiceManaged: true }],
-        },
+        }),
       });
 
       expect(getPrivateLocations).toHaveBeenCalledTimes(1);
     });
   });
 
+  describe('per-id patches', () => {
+    it('applies a different patch to each id', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({ id: 'mon-1' }),
+        mockDecryptedMonitor({ id: 'mon-2' }),
+      ]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: [
+          { id: 'mon-1', attributes: { enabled: false } },
+          { id: 'mon-2', attributes: { tags: ['only-mon-2'] } },
+        ],
+      });
+
+      expect(result.survivors).toHaveLength(2);
+      const byId = (id: string) =>
+        result.survivors.find((s) => s.decryptedPreviousMonitor.id === id)!
+          .monitorWithRevision as Record<string, unknown>;
+      // mon-1 got enabled:false but kept its original tags
+      expect(byId('mon-1').enabled).toBe(false);
+      expect(byId('mon-1').tags).toEqual(['tag-a']);
+      // mon-2 got new tags but kept enabled:true
+      expect(byId('mon-2').tags).toEqual(['only-mon-2']);
+      expect(byId('mon-2').enabled).toBe(true);
+    });
+  });
+
   describe('empty input', () => {
-    it('returns empty result for empty ids without calling SO client', async () => {
+    it('returns empty result for empty updates without calling SO client', async () => {
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      const result = await api.execute({ ids: [], attributes: { enabled: false } });
+      const result = await api.execute({ updates: [] });
 
       expect(result.survivors).toEqual([]);
       expect(result.perIdErrors).toEqual({});
+    });
+  });
+
+  /*
+   * Other tests stub `validateMonitor` / `normalizeAPIConfig`. Here we run the
+   * REAL merge + unsupported-key + io-ts validation gate end-to-end to prove
+   * the bulk path enforces it: the patch is applied to a full valid monitor,
+   * and the *merged* result is validated.
+   */
+  describe('real validation gate (end-to-end)', () => {
+    beforeEach(() => {
+      const { validateMonitor, normalizeAPIConfig } = jest.requireMock('../monitor_validation');
+      const { validateMonitor: realValidateMonitor, normalizeAPIConfig: realNormalizeAPIConfig } =
+        jest.requireActual('../monitor_validation');
+      validateMonitor.mockImplementation(realValidateMonitor);
+      normalizeAPIConfig.mockImplementation(realNormalizeAPIConfig);
+    });
+
+    /*
+     * Built from DEFAULT_FIELDS so every key is a supported monitor field (no
+     * `secrets`/foreign keys) — i.e. the shape `normalizeSecrets` yields in
+     * production, which `normalizeAPIConfig` accepts without flagging.
+     */
+    const validHttpMonitor = (id = 'mon-1') => ({
+      id,
+      type: 'synthetics-monitor-multi-space',
+      references: [],
+      score: 1,
+      namespaces: ['default'],
+      attributes: {
+        ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+        [ConfigKey.CONFIG_ID]: id,
+        [ConfigKey.NAME]: 'Valid HTTP',
+        [ConfigKey.URLS]: 'https://example.com',
+        [ConfigKey.SCHEDULE]: { number: '5', unit: ScheduleUnit.MINUTES },
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'us_central',
+            label: 'US Central',
+            isServiceManaged: true,
+            geo: { lat: 0, lon: 0 },
+          },
+        ],
+        [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
+      },
+    });
+
+    it('lets a valid partial patch through', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([validHttpMonitor()]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+
+      expect(result.perIdErrors).toEqual({});
+      expect(result.survivors).toHaveLength(1);
+      expect((result.survivors[0].monitorWithRevision as Record<string, unknown>).enabled).toBe(
+        false
+      );
+    });
+
+    it('rejects a patch with an out-of-range value on a known field', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([validHttpMonitor()]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: updatesFor(['mon-1'], { schedule: { number: '4', unit: ScheduleUnit.MINUTES } }),
+      });
+
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-1'].code).toBe('validation_failed');
+    });
+
+    it('rejects a patch that introduces an unknown/unsupported field', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([validHttpMonitor()]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: [{ id: 'mon-1', attributes: { enabled: false, notARealField: 'x' } as never }],
+      });
+
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-1'].code).toBe('validation_failed');
+      expect(result.perIdErrors['mon-1'].message).toMatch(/Invalid monitor key/i);
     });
   });
 });

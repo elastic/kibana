@@ -28,9 +28,12 @@ const mockResponse = () => {
   return { ok, badRequest, customError };
 };
 
+const updatesFor = (ids: string[], attributes: Record<string, unknown>) =>
+  ids.map((id) => ({ id, attributes }));
+
 const mockRouteContext = (response = mockResponse()) =>
   ({
-    request: { body: { ids: [], attributes: {} } } as any,
+    request: { body: { updates: [] } } as any,
     response,
     spaceId: 'default',
     server: {
@@ -81,60 +84,98 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
   describe('body schema', () => {
     const bodySchema = (route.validation as { request: { body: Type<unknown> } }).request.body;
 
-    it('accepts a non-empty ids array and an attributes object', () => {
+    it('accepts a non-empty updates array of { id, attributes }', () => {
       expect(() =>
         bodySchema.validate({
-          ids: ['monitor-id-1', 'monitor-id-2'],
-          attributes: { enabled: false },
+          updates: [
+            { id: 'monitor-id-1', attributes: { enabled: false } },
+            { id: 'monitor-id-2', attributes: { tags: ['x'] } },
+          ],
         })
       ).not.toThrow();
     });
 
-    it('allows unknown keys inside attributes (treated as Partial<Monitor>)', () => {
+    it('allows unknown keys inside an update attributes (treated as Partial<Monitor>)', () => {
       expect(() =>
         bodySchema.validate({
-          ids: ['monitor-id-1'],
-          attributes: { enabled: false, tags: ['critical'], schedule: { number: '5', unit: 'm' } },
+          updates: [
+            {
+              id: 'monitor-id-1',
+              attributes: {
+                enabled: false,
+                tags: ['critical'],
+                schedule: { number: '5', unit: 'm' },
+              },
+            },
+          ],
         })
       ).not.toThrow();
     });
 
-    it('rejects an empty ids array', () => {
-      expect(() => bodySchema.validate({ ids: [], attributes: {} })).toThrow(
+    it('rejects an empty updates array', () => {
+      expect(() => bodySchema.validate({ updates: [] })).toThrow(
         /array size is \[0\], but cannot be smaller than \[1\]/
       );
     });
 
-    it('rejects a missing ids field', () => {
-      expect(() => bodySchema.validate({ attributes: {} })).toThrow(
-        /\[ids\]: expected value of type \[array\] but got \[undefined\]/
+    it('rejects a missing updates field', () => {
+      expect(() => bodySchema.validate({})).toThrow(
+        /\[updates\]: expected value of type \[array\] but got \[undefined\]/
+      );
+    });
+
+    it('rejects an update item missing id', () => {
+      expect(() => bodySchema.validate({ updates: [{ attributes: { enabled: false } }] })).toThrow(
+        /\[updates\.0\.id\]: expected value of type \[string\] but got \[undefined\]/
+      );
+    });
+
+    it('rejects an update item with an empty id', () => {
+      expect(() =>
+        bodySchema.validate({ updates: [{ id: '', attributes: { enabled: false } }] })
+      ).toThrow(
+        /\[updates\.0\.id\]: value has length \[0\] but it must have a minimum length of \[1\]/
+      );
+    });
+
+    it('rejects an update item with a non-string id', () => {
+      expect(() => bodySchema.validate({ updates: [{ id: 1, attributes: {} }] })).toThrow(
+        /\[updates\.0\.id\]: expected value of type \[string\]/
       );
     });
 
     it('treats a missing attributes field as an empty update — handler enforces non-empty', () => {
-      const value = bodySchema.validate({ ids: ['monitor-id-1'] }) as {
-        ids: string[];
-        attributes: Record<string, unknown>;
+      const value = bodySchema.validate({ updates: [{ id: 'monitor-id-1' }] }) as {
+        updates: Array<{ id: string; attributes: Record<string, unknown> }>;
       };
-      expect(value.attributes).toEqual({});
-    });
-
-    it('rejects non-string ids', () => {
-      expect(() => bodySchema.validate({ ids: [1, 2, 3], attributes: {} })).toThrow(
-        /\[ids\.0\]: expected value of type \[string\]/
-      );
+      expect(value.updates[0].attributes).toEqual({});
     });
   });
 
   describe('handler', () => {
-    it('returns 400 when attributes is empty', async () => {
+    it('returns 400 when an update has empty attributes', async () => {
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1'], attributes: {} };
+      ctx.request.body = { updates: [{ id: 'mon-1', attributes: {} }] };
 
       const result: any = await route.handler(ctx);
 
       expect(ctx.response.badRequest).toHaveBeenCalledTimes(1);
       expect(result.body.message).toMatch(/`attributes` is required/);
+    });
+
+    it('returns 400 when an id appears more than once', async () => {
+      const ctx = mockRouteContext();
+      ctx.request.body = {
+        updates: [
+          { id: 'dup', attributes: { enabled: false } },
+          { id: 'dup', attributes: { tags: ['x'] } },
+        ],
+      };
+
+      const result: any = await route.handler(ctx);
+
+      expect(ctx.response.badRequest).toHaveBeenCalledTimes(1);
+      expect(result.body.message).toMatch(/Duplicate monitor id dup/);
     });
 
     it('skips the sync when every id pre-failed', async () => {
@@ -148,13 +189,12 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       const sync = installSyncResult({});
 
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1', 'mon-2'], attributes: { enabled: false } };
+      ctx.request.body = { updates: updatesFor(['mon-1', 'mon-2'], { enabled: false }) };
 
       const result: any = await route.handler(ctx);
 
       expect(execute).toHaveBeenCalledWith({
-        ids: ['mon-1', 'mon-2'],
-        attributes: { enabled: false },
+        updates: updatesFor(['mon-1', 'mon-2'], { enabled: false }),
       });
       expect(sync).not.toHaveBeenCalled();
       expect(result.body).toEqual({
@@ -182,7 +222,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       });
 
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1', 'mon-2'], attributes: { enabled: false } };
+      ctx.request.body = { updates: updatesFor(['mon-1', 'mon-2'], { enabled: false }) };
 
       const result: any = await route.handler(ctx);
 
@@ -219,8 +259,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       const ctx = mockRouteContext();
       ctx.request.body = {
         // Deliberately interleaved: tests both order preservation and routing.
-        ids: ['mon-bad', 'mon-ok', 'mon-missing', 'mon-fleet'],
-        attributes: { enabled: false },
+        updates: updatesFor(['mon-bad', 'mon-ok', 'mon-missing', 'mon-fleet'], { enabled: false }),
       };
 
       const result: any = await route.handler(ctx);
@@ -249,7 +288,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       });
 
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1'], attributes: { enabled: false } };
+      ctx.request.body = { updates: updatesFor(['mon-1'], { enabled: false }) };
 
       const result: any = await route.handler(ctx);
 
@@ -272,7 +311,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       installSyncResult({ editedMonitors: [{ id: 'mon-1' }], errors: [] });
 
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1'], attributes: { enabled: false } };
+      ctx.request.body = { updates: updatesFor(['mon-1'], { enabled: false }) };
 
       const result: any = await route.handler(ctx);
 
@@ -298,7 +337,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       });
 
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1', 'mon-2'], attributes: { enabled: false } };
+      ctx.request.body = { updates: updatesFor(['mon-1', 'mon-2'], { enabled: false }) };
 
       const result: any = await route.handler(ctx);
 
@@ -321,7 +360,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       installSyncResult(new Error('ES connection refused'));
 
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1'], attributes: { enabled: false } };
+      ctx.request.body = { updates: updatesFor(['mon-1'], { enabled: false }) };
 
       const result: any = await route.handler(ctx);
 
@@ -351,7 +390,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       installSyncResult({ editedMonitors: [{ id: 'mon-1' }, { id: 'mon-2' }], errors: [] });
 
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1', 'mon-2'], attributes: { enabled: false } };
+      ctx.request.body = { updates: updatesFor(['mon-1', 'mon-2'], { enabled: false }) };
 
       await route.handler(ctx);
 
@@ -371,7 +410,7 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       installSyncResult({});
 
       const ctx = mockRouteContext();
-      ctx.request.body = { ids: ['mon-1'], attributes: { enabled: false } };
+      ctx.request.body = { updates: updatesFor(['mon-1'], { enabled: false }) };
 
       await route.handler(ctx);
 

@@ -14,6 +14,10 @@
  * map so the route handler can hand survivors to `syncEditedMonitorBulk`
  * in one batch (Step 3 wires that up).
  *
+ * Input is a list of `{ id, attributes }` updates; each id is merged with
+ * its own partial `attributes` patch, so one request can apply a different
+ * change per monitor.
+ *
  * Pipeline per monitor id:
  *   1. Bulk decrypt (single round-trip via `findDecryptedMonitors`)
  *   2. `not_found` diff for ids missing from the result set
@@ -21,10 +25,13 @@
  *   4. `mergeSourceMonitor` (deep-merge METADATA, shallow-merge ALERT_CONFIG,
  *      everything else overwrites) — this is what re-builds the AAD-bound
  *      attribute set so `syncEditedMonitorBulk` can re-encrypt safely
- *   5. io-ts validation via `validateMonitor` on the merged payload
- *   6. Per-monitor permission checks (Elastic-managed locations + multi-space
+ *   5. `normalizeAPIConfig` on the merged payload to reject unknown/unsupported
+ *      keys (mirrors the single-monitor PUT; io-ts `t.exact` would otherwise
+ *      silently strip them)
+ *   6. io-ts validation via `validateMonitor` on the merged payload
+ *   7. Per-monitor permission checks (Elastic-managed locations + multi-space
  *      bulk_update privilege)
- *   7. Bump revision, reset CONFIG_HASH, run `formatSecrets` to produce the
+ *   8. Bump revision, reset CONFIG_HASH, run `formatSecrets` to produce the
  *      `monitorWithRevision` shape `syncEditedMonitorBulk` expects
  *
  * Survivors are the input shape for `syncEditedMonitorBulk` (see
@@ -40,7 +47,8 @@ import {
   assertCanUpdateMonitorInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from '../monitor_locations_utils';
-import { validateMonitor } from '../monitor_validation';
+import { normalizeAPIConfig, validateMonitor } from '../monitor_validation';
+import type { CreateMonitorPayLoad } from '../add_monitor/add_monitor_api';
 import { validateLocationPermissions } from '../edit_monitor';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from '../project_monitor/add_monitor_project';
 import type { RouteContext } from '../../types';
@@ -72,9 +80,14 @@ export interface UpdateMonitorPreprocessResult {
   perIdErrors: Record<string, UpdateMonitorPerIdError>;
 }
 
-interface ExecuteParams {
-  ids: string[];
+/** A single entry of the bulk update request: which monitor, and its patch. */
+export interface MonitorBulkUpdate {
+  id: string;
   attributes: Partial<EncryptedSyntheticsMonitor>;
+}
+
+interface ExecuteParams {
+  updates: MonitorBulkUpdate[];
 }
 
 export class UpdateMonitorAPI {
@@ -96,19 +109,25 @@ export class UpdateMonitorAPI {
     this.routeContext = routeContext;
   }
 
-  async execute({ ids, attributes }: ExecuteParams): Promise<UpdateMonitorPreprocessResult> {
+  async execute({ updates }: ExecuteParams): Promise<UpdateMonitorPreprocessResult> {
+    const ids = updates.map((update) => update.id);
+    const patchById = new Map<string, Partial<EncryptedSyntheticsMonitor>>(
+      updates.map((update) => [update.id, update.attributes])
+    );
+
     const decryptedMonitors = await this.findDecryptedMonitors(ids);
     this.markNotFound(ids, decryptedMonitors);
 
     /*
      * Fetched once per `execute()` to avoid an SO read per monitor inside the
-     * per-id loop. Skipped entirely if the patch has no chance of touching
-     * private locations — most patches (e.g. `{ enabled: false }`) won't.
+     * per-id loop. Skipped entirely if no patch can touch private locations —
+     * most patches (e.g. `{ enabled: false }`) won't.
      */
-    const allPrivateLocations = await this.maybeLoadPrivateLocations(attributes);
+    const allPrivateLocations = await this.maybeLoadPrivateLocations(updates);
 
     for (const decryptedMonitor of decryptedMonitors) {
-      await this.processMonitor(decryptedMonitor, attributes, allPrivateLocations);
+      const patch = patchById.get(decryptedMonitor.id) ?? {};
+      await this.processMonitor(decryptedMonitor, patch, allPrivateLocations);
     }
 
     return this.result;
@@ -162,6 +181,20 @@ export class UpdateMonitorAPI {
     }
 
     const { prevAttrs, merged } = this.mergePatch(decryptedMonitor, patch);
+
+    // Reject unknown/unsupported keys, matching the single-monitor PUT
+    // (`editSyntheticsMonitorRoute`). Without this, io-ts `t.exact` in
+    // `validateMonitor` would silently strip them instead of failing.
+    const { errorMessage: unsupportedKeysError } = normalizeAPIConfig(
+      merged as CreateMonitorPayLoad
+    );
+    if (unsupportedKeysError) {
+      this.result.perIdErrors[monitorId] = {
+        code: 'validation_failed',
+        message: unsupportedKeysError,
+      };
+      return;
+    }
 
     const validation = validateMonitor(merged as MonitorFields, this.routeContext.spaceId);
     if (!validation.valid || !validation.decodedMonitor) {
@@ -298,17 +331,20 @@ export class UpdateMonitorAPI {
   }
 
   /**
-   * Pre-fetch the private location SOs only when the patch could plausibly
-   * affect private-location-space coverage: either the patch references
-   * `locations` directly, or it changes the spaces the monitor is shared
-   * to (because that broadens the set of spaces the existing private
+   * Pre-fetch the private location SOs only when at least one patch in the
+   * batch could plausibly affect private-location-space coverage: either it
+   * references `locations` directly, or it changes the spaces the monitor is
+   * shared to (because that broadens the set of spaces the existing private
    * locations must already cover).
    */
   private async maybeLoadPrivateLocations(
-    patch: Partial<EncryptedSyntheticsMonitor>
+    updates: MonitorBulkUpdate[]
   ): Promise<SyntheticsPrivateLocations> {
-    const touchesLocationsOrSpaces =
-      patch[ConfigKey.LOCATIONS] !== undefined || patch[ConfigKey.KIBANA_SPACES] !== undefined;
+    const touchesLocationsOrSpaces = updates.some(
+      ({ attributes }) =>
+        attributes[ConfigKey.LOCATIONS] !== undefined ||
+        attributes[ConfigKey.KIBANA_SPACES] !== undefined
+    );
     if (!touchesLocationsOrSpaces) {
       return [];
     }

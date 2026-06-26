@@ -16,9 +16,14 @@
  * `bulk_cruds/edit_monitor_bulk.ts`, which is the helper module that exports
  * `syncEditedMonitorBulk` (the orchestrator this route reuses).
  *
+ * Request body: `{ updates: [{ id, attributes }, ...] }` — each entry carries
+ * its own partial `attributes` patch, so a single request can apply a
+ * different change per monitor. The response is keyed by id (`result[]`).
+ *
  * Pipeline (see kibana-34 v3 diagram):
- *   1. `UpdateMonitorAPI.execute` — decrypt, merge, re-encrypt; produces
- *      `MonitorConfigUpdate` survivors and per-id pre-errors.
+ *   1. `UpdateMonitorAPI.execute` — decrypt, merge each id's own patch,
+ *      re-encrypt; produces `MonitorConfigUpdate` survivors and per-id
+ *      pre-errors.
  *   2. If any survivors, fetch private locations covering every namespace
  *      involved in the patch, then call `syncEditedMonitorBulk` to write
  *      to ES + sync Fleet/Synthetics service in one shot.
@@ -29,12 +34,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { ConfigKey, type MonitorFields } from '../../../../common/runtime_types';
 import { UpdateMonitorAPI } from '../services/update_monitor_api';
 import type {
+  MonitorBulkUpdate,
   UpdateMonitorPerIdError,
   UpdateMonitorPreprocessResult,
 } from '../services/update_monitor_api';
@@ -56,7 +63,7 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   UpdateMonitorBulkResponse,
   Record<string, string>,
   Record<string, string>,
-  { ids: string[]; attributes: Record<string, unknown> }
+  { updates: MonitorBulkUpdate[] }
 > = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_UPDATE,
@@ -64,25 +71,29 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: schema.object({
-        ids: schema.arrayOf(schema.string(), { minSize: 1 }),
-        attributes: schema.object({}, { unknowns: 'allow' }),
+        updates: schema.arrayOf(
+          schema.object({
+            id: schema.string({ minLength: 1 }),
+            attributes: schema.object({}, { unknowns: 'allow' }),
+          }),
+          { minSize: 1 }
+        ),
       }),
     },
   },
   handler: async (routeContext) => {
     const { request, response, server, spaceId } = routeContext;
-    const { ids, attributes } = request.body || {};
+    const { updates } = request.body || {};
 
-    if (isEmpty(attributes)) {
-      return response.badRequest({
-        body: {
-          message: '`attributes` is required and must contain at least one field to update.',
-        },
-      });
+    const requestError = validateUpdates(updates);
+    if (requestError) {
+      return response.badRequest({ body: { message: requestError } });
     }
 
+    const ids = updates.map((update) => update.id);
+
     const updateAPI = new UpdateMonitorAPI(routeContext);
-    const preprocess = await updateAPI.execute({ ids, attributes });
+    const preprocess = await updateAPI.execute({ updates });
 
     if (preprocess.survivors.length === 0) {
       /*
@@ -121,6 +132,28 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
     }
   },
 });
+
+/**
+ * Request-level validation that the schema can't express:
+ *   - each item's `attributes` must contain at least one field to patch
+ *   - each `id` may appear at most once (a duplicate would make the applied
+ *     patch ambiguous, since each id carries its own attributes)
+ * Both are client mistakes (not per-id data conditions), so they fail the
+ * whole request with a 400 rather than landing in `result[].error`.
+ */
+const validateUpdates = (updates: MonitorBulkUpdate[]): string | undefined => {
+  const seen = new Set<string>();
+  for (const { id, attributes } of updates) {
+    if (isEmpty(attributes)) {
+      return emptyAttributesMessage(id);
+    }
+    if (seen.has(id)) {
+      return duplicateIdMessage(id);
+    }
+    seen.add(id);
+  }
+  return undefined;
+};
 
 /**
  * Compute the namespace set the sync needs to cover: the request space
@@ -200,3 +233,16 @@ const extractErrorMessage = (err: Error | SavedObjectError | undefined): string 
   if (typeof (err as Error).message === 'string') return (err as Error).message;
   return undefined;
 };
+
+const emptyAttributesMessage = (id: string) =>
+  i18n.translate('xpack.synthetics.server.bulkUpdate.emptyAttributes', {
+    defaultMessage:
+      '`attributes` is required for monitor id {id} and must contain at least one field to update.',
+    values: { id },
+  });
+
+const duplicateIdMessage = (id: string) =>
+  i18n.translate('xpack.synthetics.server.bulkUpdate.duplicateId', {
+    defaultMessage: 'Duplicate monitor id {id} in updates; each id may appear at most once.',
+    values: { id },
+  });

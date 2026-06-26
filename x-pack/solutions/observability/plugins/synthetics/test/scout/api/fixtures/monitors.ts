@@ -397,15 +397,16 @@ export async function bulkResetMonitors(
 
 /**
  * `PUT /api/synthetics/monitors/_bulk_update` — partial-update many monitors in
- * one request. Public versioned route, so we send `elastic-api-version` like the
- * other monitor helpers; the internal-origin header set by
- * `mergeSyntheticsApiHeaders` is what actually lets the versioned router resolve
- * the call without per-call version negotiation.
+ * one request. Each `updates` entry carries its own `{ id, attributes }` patch,
+ * so a single request can apply a different change per monitor. Public versioned
+ * route, so we send `elastic-api-version` like the other monitor helpers; the
+ * internal-origin header set by `mergeSyntheticsApiHeaders` is what actually lets
+ * the versioned router resolve the call without per-call version negotiation.
  */
 export async function bulkUpdateMonitors(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
-  body: { ids: string[]; attributes: Record<string, unknown> },
+  body: { updates: Array<{ id: string; attributes: Record<string, unknown> }> },
   opts: { spaceId?: string; statusCode?: number } = {}
 ) {
   const { spaceId, statusCode = 200 } = opts;
