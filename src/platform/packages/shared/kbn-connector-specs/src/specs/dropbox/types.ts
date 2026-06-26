@@ -44,7 +44,7 @@ export const SearchInputSchema = lazySchema(() =>
       .default(20)
       .describe('Maximum number of results to return (1–100, default 20)'),
     fileExtensions: z
-      .array(z.string())
+      .array(z.string().max(50))
       .optional()
       .describe(
         'Filter results to specific file extensions. Example: ["pdf", "docx", "xlsx"]. Leave empty to match all file types.'
@@ -66,13 +66,6 @@ export const SearchInputSchema = lazySchema(() =>
       .optional()
       .describe(
         'Filter results to specific file categories: "image", "document", "spreadsheet", "presentation", "audio", "video", "folder", "paper", or "others"'
-      ),
-    retrieveTags: z
-      .boolean()
-      .optional()
-      .default(false)
-      .describe(
-        'If true, fetches tags for each result in a second API call and includes them as a tagsByPath map keyed by file path. Default is false.'
       ),
   })
 );
@@ -103,13 +96,6 @@ export const GetFileMetadataInputSchema = lazySchema(() =>
       .max(1024)
       .describe(
         'Path to the file or folder to retrieve metadata for. Example: "/Documents/report.pdf". Use paths from search or listFolder results.'
-      ),
-    retrieveTags: z
-      .boolean()
-      .optional()
-      .default(false)
-      .describe(
-        'If true, fetches tags for this file in a second API call and includes them as a "tags" array in the response. Default is false.'
       ),
   })
 );
@@ -165,9 +151,22 @@ export const CallToolInputSchema = lazySchema(() =>
   z.object({
     name: z.string().min(1).max(200).describe('Name of the Dropbox MCP tool to call'),
     arguments: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .optional()
       .describe('Arguments to pass to the tool (tool-specific)'),
   })
 );
 export type CallToolInput = z.infer<typeof CallToolInputSchema>;
+
+export const GetTagsInputSchema = lazySchema(() =>
+  z.object({
+    paths: z
+      .array(z.string().min(1).max(1024))
+      .min(1)
+      .max(100)
+      .describe(
+        'List of Dropbox file or folder paths to retrieve tags for. Example: ["/Documents/report.pdf", "/Projects/design"].'
+      ),
+  })
+);
+export type GetTagsInput = z.infer<typeof GetTagsInputSchema>;

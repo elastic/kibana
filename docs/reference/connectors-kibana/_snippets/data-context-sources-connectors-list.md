@@ -3,6 +3,7 @@
 * [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
 * [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
 * [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
+* [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.
 * [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 * [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 * [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.

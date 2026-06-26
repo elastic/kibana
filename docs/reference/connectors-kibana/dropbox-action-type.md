@@ -3,7 +3,7 @@ navigation_title: "Dropbox"
 type: reference
 description: "Dropbox connector reference for searching files and folders, retrieving file content and metadata, and managing shared links through the official remote Dropbox MCP server."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.5
   serverless: preview
 ---
 
@@ -18,9 +18,6 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 ### Connector configuration [dropbox-connector-configuration]
 
 Dropbox connectors have the following configuration properties:
-
-**MCP Server URL**
-:   The URL of the remote Dropbox MCP server. Defaults to `https://mcp.dropbox.com/mcp`.
 
 **Authentication**
 :   Authenticates through Dropbox OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from a registered Dropbox app. For setup instructions, see [OAuth credentials](#dropbox-oauth-credentials).
@@ -45,6 +42,9 @@ The Dropbox connector exposes the following actions:
 
 `getFileMetadata`
 :   Get detailed metadata for a specific file or folder, including size, modification date, content hash, and sharing information. Use this to inspect a file before you download its content.
+
+`getTags`
+:   Retrieve tags for one or more files or folders in Dropbox. Pass a list of paths obtained from `search` or `listFolder` results. Returns tags for each path.
 
 `getFileContent`
 :   Download the content of a file from Dropbox. Dropbox extracts text from documents up to 5 MB. For binary files, Dropbox returns base64-encoded content. Check file size with `getFileMetadata` before retrieving large files.
@@ -80,20 +80,19 @@ To use the Dropbox connector, you must register an app in the Dropbox App Consol
 2. Select **Create app**.
 3. Select **Scoped access**, then select **Full Dropbox**. To restrict access to a single folder, select **App folder** instead.
 4. Enter a name for your app and select **Create app**.
-5. In the app settings, in the **OAuth 2** section:
-6. Under **Redirect URIs**, add `https://<your-kibana-host>/api/actions/connector/_oauth_callback`.
-7. Under **Permissions**, enable the following scopes:
+5. In the **OAuth 2** section, under **Redirect URIs**, add `https://<your-kibana-host>/api/actions/connector/_oauth_callback`.
+6. Open the **Permissions** tab and enable the following scopes:
    - `account_info.read`
    - `files.metadata.read`
    - `files.content.read`
    - `sharing.read`
    - `sharing.write`
-8. Note the following values for use in {{kib}}:
+7. Note the following values for use in {{kib}}:
 
    | Dropbox App Console label | {{kib}} field |
    |---------------------------|---------------|
    | **App key**               | Client ID     |
    | **App secret**            | Client Secret |
 
-9. In {{kib}}, enter the values from the preceding table.
-10. Complete the authorization flow to connect your Dropbox account.
+8. In {{kib}}, enter the values from the preceding table.
+9. Complete the authorization flow to connect your Dropbox account.

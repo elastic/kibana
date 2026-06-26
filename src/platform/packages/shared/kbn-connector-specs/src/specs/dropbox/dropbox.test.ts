@@ -242,19 +242,6 @@ describe('Dropbox', () => {
       });
       expect(result).toEqual(mockJson);
     });
-
-    it('returns metadata without tags if get_tags call fails', async () => {
-      mockCallTool
-        .mockResolvedValueOnce({ content: mockContent }) // get_file_metadata succeeds
-        .mockRejectedValueOnce(new Error('Unknown tool')); // get_tags fails
-
-      const result = await Dropbox.actions.getFileMetadata.handler(mockContext, {
-        path: '/Documents/report.pdf',
-        retrieveTags: true,
-      });
-
-      expect(result).toEqual(mockJson);
-    });
   });
 
   describe('getFileContent action', () => {
@@ -333,6 +320,22 @@ describe('Dropbox', () => {
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'list_shared_links',
         arguments: { path: '/Documents/report.pdf' },
+      });
+    });
+  });
+
+  describe('getTags action', () => {
+    it('is exposed as a tool', () => {
+      expect(Dropbox.actions.getTags.isTool).toBe(true);
+    });
+
+    it('calls get_tags with paths', async () => {
+      const input = parse('getTags', { paths: ['/Documents/report.pdf', '/Projects'] });
+      await Dropbox.actions.getTags.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_tags',
+        arguments: { paths: ['/Documents/report.pdf', '/Projects'] },
       });
     });
   });

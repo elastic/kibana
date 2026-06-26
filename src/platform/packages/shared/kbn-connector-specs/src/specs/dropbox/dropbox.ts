@@ -23,13 +23,13 @@ import {
   withMcpClient,
   callToolContent,
   callToolJson,
-  parseJsonTextFromContentParts,
 } from '../../lib/mcp';
 import type {
   CallToolInput,
   CreateSharedLinkInput,
   GetFileContentInput,
   GetFileMetadataInput,
+  GetTagsInput,
   ListFolderInput,
   ListSharedLinksInput,
   SearchInput,
@@ -39,6 +39,7 @@ import {
   CreateSharedLinkInputSchema,
   GetFileContentInputSchema,
   GetFileMetadataInputSchema,
+  GetTagsInputSchema,
   ListFolderInputSchema,
   ListSharedLinksInputSchema,
   ListToolsInputSchema,
@@ -88,7 +89,7 @@ export const Dropbox: ConnectorSpec = {
         .describe('Dropbox MCP Server URL')
         .meta({
           widget: 'text',
-          placeholder: 'https://mcp.dropbox.com/mcp',
+          placeholder: DROPBOX_MCP_SERVER_URL,
           label: i18n.translate('connectorSpecs.dropbox.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),
@@ -119,53 +120,15 @@ export const Dropbox: ConnectorSpec = {
       isTool: true,
       description:
         'Search for files and folders in Dropbox by keyword. Searches across file names and content. Returns file paths, ' +
-        'names, and metadata. Use this as the primary way to locate files before reading their content. ' +
-        'Set retrieveTags to true to also return a tagsByPath map of tags keyed by file path.',
+        'names, and metadata. Use this as the primary way to locate files before reading their content.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const searchResult = await mcp.callTool({
-            name: 'search',
-            arguments: {
-              query: input.query,
-              path: input.path,
-              max_results: input.maxResults,
-              file_extensions: input.fileExtensions,
-              file_categories: input.fileCategories,
-            },
-          });
-          const data = parseJsonTextFromContentParts(searchResult.content);
-
-          if (!input.retrieveTags) {
-            return data;
-          }
-
-          const matches =
-            (data as { matches?: Array<{ metadata?: { metadata?: { path_lower?: string } } }> })
-              ?.matches ?? [];
-          const paths = matches
-            .map((m) => m?.metadata?.metadata?.path_lower)
-            .filter((p): p is string => typeof p === 'string' && p.length > 0);
-
-          if (paths.length === 0) {
-            return data;
-          }
-
-          try {
-            const tagsResult = await mcp.callTool({ name: 'get_tags', arguments: { paths } });
-            const tagsData = parseJsonTextFromContentParts(tagsResult.content) as {
-              paths_to_tags?: Array<{ path: string; tags: Array<{ tag_text?: string }> }>;
-            };
-
-            const tagsByPath: Record<string, string[]> = {};
-            for (const entry of tagsData?.paths_to_tags ?? []) {
-              tagsByPath[entry.path] = entry.tags.map((t) => t.tag_text ?? '').filter(Boolean);
-            }
-
-            return { ...(data as object), tagsByPath };
-          } catch {
-            return data;
-          }
+        return callToolJson(ctx, 'search', {
+          query: input.query,
+          path: input.path,
+          max_results: input.maxResults,
+          file_extensions: input.fileExtensions,
+          file_categories: input.fileCategories,
         });
       },
     },
@@ -188,37 +151,24 @@ export const Dropbox: ConnectorSpec = {
       isTool: true,
       description:
         'Get detailed metadata for a specific file or folder in Dropbox, including size, modification date, content ' +
-        'hash, and sharing info. Use this to inspect a file before downloading its content, or to verify a path exists. ' +
-        'Set retrieveTags to true to also include a "tags" array in the response.',
+        'hash, and sharing info. Use this to inspect a file before downloading its content, or to verify a path exists.',
       input: GetFileMetadataInputSchema,
       handler: async (ctx, input: GetFileMetadataInput) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const metaResult = await mcp.callTool({
-            name: 'get_file_metadata',
-            arguments: { path_or_file_id: input.path },
-          });
-          const metadata = parseJsonTextFromContentParts(metaResult.content);
+        return callToolJson(ctx, 'get_file_metadata', {
+          path_or_file_id: input.path,
+        });
+      },
+    },
 
-          if (!input.retrieveTags) {
-            return metadata;
-          }
-
-          try {
-            const tagsResult = await mcp.callTool({
-              name: 'get_tags',
-              arguments: { paths: [input.path] },
-            });
-            const tagsData = parseJsonTextFromContentParts(tagsResult.content) as {
-              paths_to_tags?: Array<{ path: string; tags: Array<{ tag_text?: string }> }>;
-            };
-
-            const tags =
-              tagsData?.paths_to_tags?.[0]?.tags.map((t) => t.tag_text ?? '').filter(Boolean) ?? [];
-
-            return { ...(metadata as object), tags };
-          } catch {
-            return metadata;
-          }
+    getTags: {
+      isTool: true,
+      description:
+        'Retrieve tags for one or more files or folders in Dropbox. Returns a list of tags for each path. ' +
+        'Use paths from search or listFolder results.',
+      input: GetTagsInputSchema,
+      handler: async (ctx, input: GetTagsInput) => {
+        return callToolJson(ctx, 'get_tags', {
+          paths: input.paths,
         });
       },
     },
@@ -243,8 +193,7 @@ export const Dropbox: ConnectorSpec = {
       description:
         'Create a shared link for a file or folder in Dropbox. Returns a shareable URL. ' +
         'Use paths from search or listFolder results. ' +
-        'The default visibility is "team_only" (Dropbox team members only). ' +
-        'Pass visibility "public" to create a link accessible to anyone.',
+        'Visibility options: "team_only" (Dropbox team members only, default), "public" (anyone with the link), "password" (requires a password).',
       input: CreateSharedLinkInputSchema,
       handler: async (ctx, input: CreateSharedLinkInput) => {
         return callToolJson(ctx, 'create_shared_link', {
@@ -257,7 +206,7 @@ export const Dropbox: ConnectorSpec = {
     listSharedLinks: {
       isTool: true,
       description:
-        'List existing shared links in Dropbox. Optionally filter to links for a specific file or folder path. Returns' +
+        'List existing shared links in Dropbox. Optionally filter to links for a specific file or folder path. Returns ' +
         'URLs, visibility settings, and expiration dates for each link.',
       input: ListSharedLinksInputSchema,
       handler: async (ctx, input: ListSharedLinksInput) => {
@@ -270,7 +219,7 @@ export const Dropbox: ConnectorSpec = {
     listTools: {
       isTool: true,
       description:
-        'List all tools available on the Dropbox MCP server. Use this to discover available capabilities, including' +
+        'List all tools available on the Dropbox MCP server. Use this to discover available capabilities, including ' +
         'write operations (upload, move, copy, delete) and file versioning tools not exposed as named actions.',
       input: ListToolsInputSchema,
       handler: async (ctx) => {
@@ -284,8 +233,8 @@ export const Dropbox: ConnectorSpec = {
     callTool: {
       isTool: true,
       description:
-        'Call any tool on the Dropbox MCP server directly by name. Use this as an escape hatch for tools not yet' +
-        'exposed as named actions (such as CreateFile, CreateFolder, Copy, Move, Delete, or RestoreFileRevision). Use' +
+        'Call any tool on the Dropbox MCP server directly by name. Use this as an escape hatch for tools not yet ' +
+        'exposed as named actions (such as CreateFile, CreateFolder, Copy, Move, Delete, or RestoreFileRevision). Use ' +
         'listTools first to discover available tool names and their arguments.',
       input: CallToolInputSchema,
       handler: async (ctx, input: CallToolInput) => {
@@ -321,8 +270,7 @@ export const Dropbox: ConnectorSpec = {
     '',
     '### File tags',
     'Dropbox does not support searching or filtering by tag — there is no "find files tagged X" API.',
-    'To see tags: pass `retrieveTags: true` to `search` (adds a `tagsByPath` map keyed by path)',
-    'or to `getFileMetadata` (adds a `tags` array to the result). Both make one extra API call.',
+    'To see tags for files, call `getTags` with one or more paths from `search` or `listFolder` results.',
     '',
     '### Searching vs. browsing',
     'Combine both: use `search` to locate a folder path by keyword, then `listFolder` to enumerate its contents.',
@@ -330,7 +278,6 @@ export const Dropbox: ConnectorSpec = {
     '### Shared links',
     'Use `listSharedLinks` to find existing shared links for a file or folder.',
     'Use `createSharedLink` to generate a new shareable URL.',
-    'Link visibility options: "team_only" (Dropbox team members, default), "public" (anyone), "password" (requires password).',
     '',
     '### Write operations and file versioning',
     'Write actions (upload, move, copy, create folder, delete) and file versioning (list revisions, restore revision)',
