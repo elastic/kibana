@@ -15,11 +15,9 @@ const BUILDER_CARDS: Record<string, { testSubj: string; buttonName: RegExp }> = 
 };
 
 export class RuleBuilderPage {
-  public readonly createRulePopoverButton: Locator;
   private readonly createRuleButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
     this.createRuleButton = this.page.testSubj.locator('createRuleButton');
   }
 

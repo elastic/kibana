@@ -57,7 +57,6 @@ test.describe(
     });
 
     test('create flow: configure threshold builder and submit', async ({
-      page,
       pageObjects,
       apiServices,
     }) => {
@@ -99,7 +98,7 @@ test.describe(
 
       await test.step('advance to Details step', async () => {
         await pageObjects.composeDiscover.clickNext();
-        await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
+        await expect(pageObjects.composeDiscover.ruleNameInput).toBeVisible();
       });
 
       await test.step('fill rule name', async () => {
@@ -198,7 +197,7 @@ test.describe(
       });
 
       await test.step('create rule button is not visible', async () => {
-        await expect(pageObjects.ruleBuilder.createRulePopoverButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.createRulePopoverButton).toBeHidden();
       });
     });
   }
