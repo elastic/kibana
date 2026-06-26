@@ -31,7 +31,7 @@ export function TimeComparison({
   const history = useHistory();
   const { isSmall, isMedium } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset, kuery },
   } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
 
   const location = useLocation();
@@ -62,6 +62,7 @@ export function TimeComparison({
       showSelectedBoundsOption: showExpectedBoundsForThisTab && canGetJobs,
       anomalyDetectionJobsStatus,
       anomalyDetectionJobsData,
+      kuery,
       preferredEnvironment,
     });
 
@@ -75,6 +76,7 @@ export function TimeComparison({
     preferredEnvironment,
     apmRouter,
     location.pathname,
+    kuery,
   ]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(({ value }) => value === offset);

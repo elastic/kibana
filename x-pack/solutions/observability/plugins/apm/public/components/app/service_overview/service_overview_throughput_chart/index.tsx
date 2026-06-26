@@ -28,7 +28,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { getThroughputScreenContext } from './get_throughput_screen_context';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
-import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { OpenAnomalies } from '../../../shared/links/machine_learning_links/open_anomalies';
 
 const INITIAL_STATE = {
@@ -45,7 +44,6 @@ export function ServiceOverviewThroughputChart({
   kuery: string;
   transactionName?: string;
 }) {
-  const license = useLicenseContext();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
@@ -193,7 +191,6 @@ export function ServiceOverviewThroughputChart({
             <EuiFlexItem grow={false}>
               <OpenAnomalies
                 dataTestSubj="apmServiceOverviewThroughputChartOpenAnomalies"
-                hasValidMlLicense={license?.getFeature('ml').isAvailable}
                 mlJobId={preferredAnomalyTimeseries?.jobId}
                 detectorType={AnomalyDetectorType.txThroughput}
               />

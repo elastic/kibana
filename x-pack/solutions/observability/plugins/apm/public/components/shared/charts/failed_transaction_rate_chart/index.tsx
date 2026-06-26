@@ -29,7 +29,6 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
-import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';
 
 function yLabelFormat(y?: number | null) {
@@ -61,7 +60,6 @@ export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
     "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
 });
 export function FailedTransactionRateChart({ height, showAnnotations = true, kuery }: Props) {
-  const license = useLicenseContext();
   const {
     urlParams: { transactionName },
   } = useLegacyUrlParams();
@@ -190,7 +188,6 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
             <EuiFlexItem grow={false}>
               <OpenAnomalies
                 dataTestSubj="apmFailedTransactionRateChartOpenAnomalies"
-                hasValidMlLicense={license?.getFeature('ml').isAvailable}
                 mlJobId={preferredAnomalyTimeseries?.jobId}
                 detectorType={AnomalyDetectorType.txFailureRate}
               />

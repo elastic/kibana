@@ -99,6 +99,8 @@ describe('getComparisonOptions - expected bounds', () => {
     );
 
     expect(expectedBoundsOption?.disabled).toBe(true);
-    expect(expectedBoundsOption?.['data-test-subj']).toBe(EXPECTED_BOUNDS_TEST_SUBJ.disabled);
+    expect(expectedBoundsOption?.['data-test-subj']).toBe(
+      EXPECTED_BOUNDS_TEST_SUBJ.environmentDisabled
+    );
   });
 });

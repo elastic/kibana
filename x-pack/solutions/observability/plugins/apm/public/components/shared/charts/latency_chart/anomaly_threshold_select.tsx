@@ -11,6 +11,12 @@ import { ENVIRONMENT_ALL } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import React from 'react';
+import { isEmpty } from 'lodash';
+import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import {
+  getIsAnomalyDetectionConfigured,
+  getIsAnomalyDetectionConfiguredForEnvironment,
+} from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 
 const getOptions = (): Array<{ value: AnomalyThreshold; text: string }> => [
@@ -52,6 +58,36 @@ const getOptions = (): Array<{ value: AnomalyThreshold; text: string }> => [
   },
 ];
 
+const getTooltipContent = ({
+  isAllEnvironments,
+  hasKueryFilter,
+  isConfiguredForEnvironment,
+}: {
+  isAllEnvironments: boolean;
+  hasKueryFilter: boolean;
+  isConfiguredForEnvironment: boolean;
+}) => {
+  if (isAllEnvironments) {
+    return i18n.translate('xpack.apm.anomalyThresholdSelect.allEnvironmentsTooltip', {
+      defaultMessage: 'Select a specific environment to view anomaly detection data',
+    });
+  }
+
+  if (!isConfiguredForEnvironment) {
+    return i18n.translate('xpack.apm.anomalyThresholdSelect.notConfiguredForEnvironmentTooltip', {
+      defaultMessage: 'Anomaly detection is not enabled for this environment',
+    });
+  }
+
+  if (hasKueryFilter) {
+    return i18n.translate('xpack.apm.anomalyThresholdSelect.kueryFilterTooltip', {
+      defaultMessage: 'Anomaly detection data is hidden while a search bar filter is applied',
+    });
+  }
+
+  return '';
+};
+
 export function AnomalyThresholdSelect({
   anomalyThreshold,
   kuery,
@@ -63,17 +99,25 @@ export function AnomalyThresholdSelect({
 }) {
   const { environment } = useEnvironmentsContext();
 
-  const isAllEnvironments = environment === ENVIRONMENT_ALL.value;
-  const hasKueryFilter = !!kuery;
-  const isDisabled = isAllEnvironments || hasKueryFilter;
+  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
+  const isConfigured = getIsAnomalyDetectionConfigured(anomalyDetectionSetupState);
 
-  const tooltipContent = isAllEnvironments
-    ? i18n.translate('xpack.apm.anomalyThresholdSelect.allEnvironmentsTooltip', {
-        defaultMessage: 'Select a specific environment to view machine learning results',
-      })
-    : i18n.translate('xpack.apm.anomalyThresholdSelect.kueryFilterTooltip', {
-        defaultMessage: 'Machine learning results are hidden while a search bar filter is applied',
-      });
+  if (!isConfigured) {
+    return null;
+  }
+
+  const isAllEnvironments = environment === ENVIRONMENT_ALL.value;
+  const hasKueryFilter = !isEmpty(kuery);
+  const isConfiguredForEnvironment = getIsAnomalyDetectionConfiguredForEnvironment(
+    anomalyDetectionSetupState
+  );
+  const isDisabled = isAllEnvironments || hasKueryFilter || !isConfiguredForEnvironment;
+
+  const tooltipContent = getTooltipContent({
+    isAllEnvironments,
+    hasKueryFilter,
+    isConfiguredForEnvironment,
+  });
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
