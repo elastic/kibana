@@ -1491,6 +1491,7 @@ const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof SmlDocument> = [
   'type',
   'spaces',
   'origin',
+  'created_at',
 ];
 
 /**

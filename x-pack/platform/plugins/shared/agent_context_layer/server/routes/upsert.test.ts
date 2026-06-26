@@ -109,10 +109,29 @@ describe('registerUpsertRoute', () => {
     const response = await callHandler({ params: validParams, body: validBody });
 
     expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'update' })
+      expect.objectContaining({ action: 'update', createdAt: sampleDocument.created_at })
     );
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     expect(body.created).toBe(false);
+  });
+
+  it('threads existing created_at through to indexAttachment on update', async () => {
+    // Regression guard: findByOriginAcrossSpaces uses a trimmed _source projection.
+    // If created_at is excluded from that projection, hydrateDocument defaults it to ''
+    // and createdAt: '' ?? now keeps '' — the bulk write fails with an invalid date,
+    // deleteChunks has already run, and the origin is silently destroyed.
+    // created_at must be in FIND_ACROSS_SPACES_SOURCE_FIELDS.
+    const existingWithTimestamp = { ...sampleDocument, created_at: '2024-06-01T12:00:00.000Z' };
+    mockSmlService.findByOriginAcrossSpaces.mockResolvedValue([existingWithTimestamp]);
+    mockSmlService.checkItemsAccess.mockResolvedValue(new Map([[sampleDocument.id, true]]));
+    mockSmlService.indexAttachment.mockResolvedValue(undefined);
+    mockSmlService.findByOrigin.mockResolvedValue([existingWithTimestamp]);
+
+    await callHandler({ params: validParams, body: validBody });
+
+    expect(mockSmlService.indexAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ createdAt: '2024-06-01T12:00:00.000Z' })
+    );
   });
 
   it('forwards tags to the indexer when provided', async () => {
