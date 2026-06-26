@@ -60,8 +60,15 @@ export const CONTENT_LIST_TEST_SUBJECTS = {
 /** Per-row subject for the table item with `id` (`itemId` on the table). */
 export const getContentListRowSubj = (id: string): string => `content-list-table-row-${id}`;
 
-/** Subject for the tag option keyed by `key` in the tags filter popover. */
-export const getContentListTagOptionSubj = (key: string): string => `tag-searchbar-option-${key}`;
+/**
+ * Subject for a tag option in the tags filter popover, keyed by tag *name* to
+ * match the legacy `TableListView` panel (`testSubjFriendly`) and the
+ * `@kbn/content-list-scout` helper. The first space is replaced with `_`,
+ * mirroring the legacy normalization so cross-plugin suites resolve the same
+ * subject regardless of which framework an app has adopted.
+ */
+export const getContentListTagOptionSubj = (name: string): string =>
+  `tag-searchbar-option-${name.replace(' ', '_')}`;
 
 /**
  * Subjects the toolbar composes from its root `data-test-subj`. Defaults to
