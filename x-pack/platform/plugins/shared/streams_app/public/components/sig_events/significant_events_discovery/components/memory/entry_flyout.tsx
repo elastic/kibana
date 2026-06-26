@@ -115,17 +115,13 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
 
   const categoryOptions = useCategoryOptions();
 
-  const editCategoryLabels = editCategories.map((c) => c.label);
-  const editTagLabels = editTags.map((t) => t.label);
   const isDirty =
     isEditing &&
     !!entry &&
     (editTitle !== entry.title ||
       editContent !== entry.content ||
-      editCategoryLabels.length !== entry.categories.length ||
-      editCategoryLabels.some((cat, i) => cat !== entry.categories[i]) ||
-      editTagLabels.length !== entry.tags.length ||
-      editTagLabels.some((tag, i) => tag !== entry.tags[i]));
+      editCategories.map((c) => c.label).join('\0') !== entry.categories.join('\0') ||
+      editTags.map((t) => t.label).join('\0') !== entry.tags.join('\0'));
 
   const handleEdit = useCallback(() => {
     if (entry) {
@@ -139,6 +135,8 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
 
   const handleSave = useCallback(() => {
     if (!entry) return;
+    const categoryLabels = editCategories.map((c) => c.label);
+    const tagLabels = editTags.map((t) => t.label);
     if (!isDirty) {
       setIsEditing(false);
       return;
@@ -148,13 +146,13 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
         id: entry.id,
         ...(editTitle !== entry.title ? { title: editTitle } : {}),
         ...(editContent !== entry.content ? { content: editContent } : {}),
-        categories: editCategoryLabels,
-        tags: editTagLabels,
+        categories: categoryLabels,
+        tags: tagLabels,
         change_summary: 'Manual edit via UI',
       },
       { onSuccess: () => setIsEditing(false) }
     );
-  }, [entry, isDirty, editTitle, editContent, editCategoryLabels, editTagLabels, updateEntry]);
+  }, [entry, isDirty, editTitle, editContent, editCategories, editTags, updateEntry]);
 
   const handleDelete = useCallback(() => {
     if (entry) {
