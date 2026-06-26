@@ -8,28 +8,27 @@
 import type { ElasticsearchRoleDescriptor } from '@kbn/scout-security';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-
 import {
-  ENTITY_STORE_CLUSTER_PRIVILEGES,
-  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
-  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
-} from '../../../../server/domain/constants';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../../../common/domain/entity_index';
-import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
+  FF_ENABLE_ENTITY_STORE_V2,
+  getEntitiesAlias,
+  ENTITY_LATEST,
+} from '@kbn/entity-store/common';
+
 import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-} from '../fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { clearEntityStoreIndices } from '../fixtures/helpers';
+  UPDATES_INDEX,
+} from '../../fixtures/maintainers/constants';
+import { clearEntityStoreIndices } from '../../fixtures/maintainers/helpers';
 
-// Init/stop/start/run behavior with registered maintainers is covered by Jest
-// (entity_maintainers_client.test.ts) with a mocked registry.
+const ENTITY_STORE_SOURCE_INDICES_PRIVILEGES = ['read', 'view_index_metadata'];
+const ENTITY_STORE_TARGET_INDICES_PRIVILEGES = ['read', 'manage'];
+const ENTITY_STORE_CLUSTER_PRIVILEGES = ['manage_index_templates'];
 
 const TARGET_INDEX_LATEST = getEntitiesAlias(ENTITY_LATEST, 'default');
-const TARGET_INDEX_UPDATES = getUpdatesEntitiesDataStreamName('default');
+const TARGET_INDEX_UPDATES = UPDATES_INDEX;
 const SAVED_OBJECT_PRIVILEGE = 'saved_object:entity-engine-descriptor-v2/create';
 
 interface RoleOptions {
