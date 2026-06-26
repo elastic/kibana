@@ -88,16 +88,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       ),
       description: metricsOnboardingEnabled
         ? i18n.translate('xpack.observability_onboarding.onboardingFlowForm.hostDescription', {
-          defaultMessage:
-            'Track your host and its services by setting up SLOs, receiving alerts, and remediating performance issues',
-        })
-        : i18n.translate(
-          'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
-          {
             defaultMessage:
-              'Ingest and analyze logs on your host such as OS, service, application and other logs',
-          }
-        ),
+              'Track your host and its services by setting up SLOs, receiving alerts, and remediating performance issues',
+          })
+        : i18n.translate(
+            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
+            {
+              defaultMessage:
+                'Ingest and analyze logs on your host such as OS, service, application and other logs',
+            }
+          ),
       logos: ['opentelemetry', 'apache', 'mysql'],
     },
     {
@@ -108,18 +108,18 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       ),
       description: metricsOnboardingEnabled
         ? i18n.translate(
-          'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
-          {
-            defaultMessage:
-              'Monitor your Kubernetes cluster and container workloads using logs, metrics, traces, and profiling data',
-          }
-        )
+            'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
+            {
+              defaultMessage:
+                'Monitor your Kubernetes cluster and container workloads using logs, metrics, traces, and profiling data',
+            }
+          )
         : i18n.translate(
-          'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
-          {
-            defaultMessage: 'Observe logs from your Kubernetes environments',
-          }
-        ),
+            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
+            {
+              defaultMessage: 'Observe logs from your Kubernetes environments',
+            }
+          ),
       logos: ['kubernetes', 'opentelemetry'],
     },
     ...(metricsOnboardingEnabled ? [applicationUseCaseOption] : []),
@@ -358,31 +358,31 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             <strong>
               {selectedCategory === 'kubernetes'
                 ? i18n.translate(
-                  'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
-                  {
-                    defaultMessage: 'Monitor your Kubernetes cluster using:',
-                  }
-                )
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
+                    {
+                      defaultMessage: 'Monitor your Kubernetes cluster using:',
+                    }
+                  )
                 : selectedCategory === 'application'
-                  ? i18n.translate(
+                ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Application using:',
                     }
                   )
-                  : selectedCategory === 'cloud'
-                    ? i18n.translate(
-                      'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
-                      {
-                        defaultMessage: 'Select your Cloud provider:',
-                      }
-                    )
-                    : i18n.translate(
-                      'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
-                      {
-                        defaultMessage: 'Monitor your Host using:',
-                      }
-                    )}
+                : selectedCategory === 'cloud'
+                ? i18n.translate(
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
+                    {
+                      defaultMessage: 'Select your Cloud provider:',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
+                    {
+                      defaultMessage: 'Monitor your Host using:',
+                    }
+                  )}
             </strong>
           </EuiTitle>
           <EuiSpacer size="m" />
