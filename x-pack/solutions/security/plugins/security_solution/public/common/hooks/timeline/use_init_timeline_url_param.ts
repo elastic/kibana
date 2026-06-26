@@ -13,12 +13,14 @@ import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
+import { useOpenSuperTimeline } from '../../../timelines/components/super_timeline/use_open_super_timeline';
 import type { TimelineModel, TimelineUrl } from '../../../timelines/store/model';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useInitTimelineFromUrlParam = () => {
   const queryTimelineById = useQueryTimelineById();
+  const { openSuperTimeline } = useOpenSuperTimeline();
   const activeTimeline = useSelector((state: State) =>
     selectTimelineById(state, TimelineId.active)
   );
@@ -26,17 +28,21 @@ export const useInitTimelineFromUrlParam = () => {
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
       if (initialState != null) {
-        queryTimelineById({
-          activeTimelineTab: initialState.activeTab,
-          duplicate: false,
-          timelineId: initialState.id,
-          openTimeline: initialState.isOpen,
-          savedSearchId: initialState.savedSearchId,
-          query: initialState.query,
-        });
+        if (initialState.superTimelineSourceIds?.length) {
+          openSuperTimeline(initialState.superTimelineSourceIds);
+        } else {
+          queryTimelineById({
+            activeTimelineTab: initialState.activeTab,
+            duplicate: false,
+            timelineId: initialState.id,
+            openTimeline: initialState.isOpen,
+            savedSearchId: initialState.savedSearchId,
+            query: initialState.query,
+          });
+        }
       }
     },
-    [queryTimelineById]
+    [queryTimelineById, openSuperTimeline]
   );
 
   useEffect(() => {
@@ -71,6 +77,9 @@ function hasTimelineStateChanged(
   return (
     activeTimeline &&
     newState &&
-    (activeTimeline.id !== newState.id || activeTimeline.savedSearchId !== newState.savedSearchId)
+    (activeTimeline.savedObjectId !== newState.id ||
+      activeTimeline.savedSearchId !== newState.savedSearchId ||
+      JSON.stringify(activeTimeline.superTimelineSourceIds) !==
+        JSON.stringify(newState.superTimelineSourceIds))
   );
 }

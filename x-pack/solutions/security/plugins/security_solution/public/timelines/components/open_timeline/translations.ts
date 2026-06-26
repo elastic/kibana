@@ -357,3 +357,10 @@ export const TIMELINE_TABLE_CAPTION = i18n.translate(
     defaultMessage: 'Timelines Table',
   }
 );
+
+export const VIEW_SUPER_TIMELINE = i18n.translate(
+  'xpack.securitySolution.open.timeline.viewSuperTimeline',
+  {
+    defaultMessage: 'View Super Timeline',
+  }
+);

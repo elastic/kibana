@@ -8,11 +8,13 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
-import type { SortFieldTimeline } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, type SortFieldTimeline } from '../../../../common/api/timeline';
 import type {
   OnOpenTimeline,
   OnTableChange,
@@ -20,6 +22,21 @@ import type {
 } from '../../../timelines/components/open_timeline/types';
 import { TimelinesTable } from '../../../timelines/components/open_timeline/timelines_table';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
+import { useEditTimelineBatchActions } from '../../../timelines/components/open_timeline/edit_timeline_batch_actions';
+import {
+  BATCH_ACTIONS,
+  REFRESH,
+  SELECTED_TIMELINES,
+  SHOWING,
+} from '../../../timelines/components/open_timeline/translations';
+import {
+  UtilityBar,
+  UtilityBarAction,
+  UtilityBarGroup,
+  UtilityBarSection,
+  UtilityBarText,
+} from '../../../common/components/utility_bar';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
 import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
 
@@ -47,6 +64,7 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
   caseData,
   searchTerm,
 }) => {
+  const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
   const timelineIds = useMemo(() => extractTimelineIds(caseData), [caseData]);
 
   const [pageIndex, setPageIndex] = useState(1);
@@ -56,11 +74,12 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
   const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
     Record<string, JSX.Element>
   >({});
+  const [selectedItems, setSelectedItems] = useState<OpenTimelineResult[]>([]);
 
   const sort = useMemo(() => ({ sortField, sortOrder: sortDirection }), [sortField, sortDirection]);
   const pageInfo = useMemo(() => ({ pageSize, pageIndex }), [pageSize, pageIndex]);
 
-  const { timelines, totalCount, loading } = useGetTimelinesByIds({
+  const { timelines, totalCount, loading, refetch } = useGetTimelinesByIds({
     ids: timelineIds,
     pageInfo,
     search: searchTerm,
@@ -75,6 +94,16 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
       queryTimelineById({ duplicate, timelineId, timelineType }),
     [queryTimelineById]
   );
+
+  const onSelectionChange = useCallback((items: OpenTimelineResult[]) => {
+    setSelectedItems(items);
+  }, []);
+
+  const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
+    selectedItems,
+    tableRef,
+    timelineType: TimelineTypeEnum.default,
+  });
 
   const onTableChange = useCallback<OnTableChange>(({ page, sort: nextSort }) => {
     if (page) {
@@ -101,15 +130,65 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" data-test-subj="case-view-timelines">
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="case-view-timelines">
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          padding-top: 16px;
+          padding-bottom: 8px;
+        `}
+      >
+        <UtilityBar>
+          <UtilityBarSection>
+            <UtilityBarGroup>
+              <UtilityBarText data-test-subj="case-view-timelines-showing-count">
+                <>
+                  {SHOWING}{' '}
+                  <FormattedMessage
+                    id="xpack.securitySolution.cases.timelineAttachment.nTimelines"
+                    defaultMessage="{totalCount} {totalCount, plural, =1 {timeline} other {timelines}}"
+                    values={{ totalCount }}
+                  />
+                </>
+              </UtilityBarText>
+            </UtilityBarGroup>
+            <UtilityBarGroup>
+              {isSuperTimelineEnabled && (
+                <UtilityBarText data-test-subj="case-view-timelines-selected-count">
+                  {SELECTED_TIMELINES(selectedItems.length)}
+                </UtilityBarText>
+              )}
+              {isSuperTimelineEnabled && (
+                <UtilityBarAction
+                  dataTestSubj="case-view-timelines-batch-actions-button"
+                  iconSide="right"
+                  iconType="chevronSingleDown"
+                  popoverContent={getBatchItemsPopoverContent}
+                  popoverPanelPaddingSize="none"
+                >
+                  {BATCH_ACTIONS}
+                </UtilityBarAction>
+              )}
+              <UtilityBarAction
+                dataTestSubj="case-view-timelines-refresh-button"
+                iconSide="right"
+                iconType="refresh"
+                onClick={refetch}
+              >
+                {REFRESH}
+              </UtilityBarAction>
+            </UtilityBarGroup>
+          </UtilityBarSection>
+        </UtilityBar>
+      </EuiFlexItem>
       <EuiFlexItem>
         <TimelinesTable
-          actionTimelineToShow={[]}
+          actionTimelineToShow={isSuperTimelineEnabled ? ['selectable'] : []}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           loading={loading}
           itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
           onOpenTimeline={onOpenTimeline}
-          onSelectionChange={noop}
+          onSelectionChange={onSelectionChange}
           onTableChange={onTableChange}
           onToggleShowNotes={setItemIdToExpandedNotesRowMap}
           pageIndex={pageIndex - 1}
@@ -128,5 +207,3 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
 };
 
 CaseViewTimelines.displayName = 'CaseViewTimelines';
-
-const noop = () => {};
