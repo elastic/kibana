@@ -41,16 +41,15 @@ const setup = () => {
     getAddConnectorForm,
   } as unknown as TriggersAndActionsUIPublicPluginStart;
 
-  const application = {
-    getUrlForApp: jest.fn().mockReturnValue('/app/management/connectors'),
-  } as unknown as CoreStart['application'];
+  const getUrlForApp = jest.fn().mockReturnValue('/app/agent_builder/manage/connectors');
+  const application = { getUrlForApp } as unknown as CoreStart['application'];
 
   const definition = createConnectorSetupAttachmentDefinition({
     triggersActionsUi,
     application,
   });
 
-  return { definition, getAddConnectorForm, getFormProps: () => formProps };
+  return { definition, getAddConnectorForm, getFormProps: () => formProps, getUrlForApp };
 };
 
 describe('createConnectorSetupAttachmentDefinition', () => {
@@ -67,7 +66,7 @@ describe('createConnectorSetupAttachmentDefinition', () => {
     expect(connectedHeader.badges?.[0].label).toBe('Connected');
   });
 
-  it('inline "Set up" button opens the canvas', () => {
+  it('inline "Configure connector" button opens the canvas', () => {
     const { definition } = setup();
     const openCanvas = jest.fn();
     const buttons = definition.getActionButtons!({
@@ -78,7 +77,7 @@ describe('createConnectorSetupAttachmentDefinition', () => {
       updateOrigin: jest.fn(),
     });
     expect(buttons).toHaveLength(1);
-    expect(buttons[0].label).toBe('Set up GitHub');
+    expect(buttons[0].label).toBe('Configure connector');
     buttons[0].handler();
     expect(openCanvas).toHaveBeenCalled();
   });
@@ -95,8 +94,8 @@ describe('createConnectorSetupAttachmentDefinition', () => {
     ).toEqual([]);
   });
 
-  it('shows a manage link once connected', () => {
-    const { definition } = setup();
+  it('shows a manage link to the Agent Builder Connectors page once connected', () => {
+    const { definition, getUrlForApp } = setup();
     const buttons = definition.getActionButtons!({
       attachment: buildAttachment('c1'),
       isCanvas: false,
@@ -105,7 +104,8 @@ describe('createConnectorSetupAttachmentDefinition', () => {
       updateOrigin: jest.fn(),
     });
     expect(buttons[0].label).toBe('Manage connector');
-    expect(buttons[0].href).toBe('/app/management/connectors');
+    expect(getUrlForApp).toHaveBeenCalledWith('agent_builder', { path: '/manage/connectors' });
+    expect(buttons[0].href).toBe('/app/agent_builder/manage/connectors');
   });
 
   it('renders the embedded form and wires Save -> create -> updateOrigin -> closeCanvas', async () => {

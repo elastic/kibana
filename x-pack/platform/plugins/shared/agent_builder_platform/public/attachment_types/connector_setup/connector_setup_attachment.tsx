@@ -22,13 +22,13 @@ import {
   type CanvasRenderCallbacks,
   type HeaderBadge,
 } from '@kbn/agent-builder-browser/attachments';
+import { AGENTBUILDER_APP_ID } from '@kbn/agent-builder-plugin/public';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   type ConnectorSetupAttachment,
 } from '../../../common/attachments';
 
-const MANAGEMENT_APP_ID = 'management';
-const CONNECTORS_MANAGE_PATH = '/insightsAndAlerting/triggersActionsConnectors/connectors';
+const CONNECTORS_MANAGE_PATH = '/manage/connectors';
 
 interface ConnectorSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -38,12 +38,6 @@ interface ConnectorSetupDeps {
 const getDisplayName = (attachment: ConnectorSetupAttachment) =>
   attachment.data.connector_type_name ?? attachment.data.connector_type;
 
-/**
- * Inline card body: explains why the connector is suggested and reflects the
- * connected state. The "Set up connector" / "Manage connector" actions live in
- * the attachment header (see `getActionButtons`); the actual form opens in the
- * canvas so it is not nested inside the chat's flyout.
- */
 const ConnectorSetupInline: React.FC<AttachmentRenderProps<ConnectorSetupAttachment>> = ({
   attachment,
 }) => {
@@ -57,7 +51,7 @@ const ConnectorSetupInline: React.FC<AttachmentRenderProps<ConnectorSetupAttachm
         <p>
           {reason ??
             i18n.translate('xpack.agentBuilderPlatform.attachments.connectorSetup.inlinePrompt', {
-              defaultMessage: 'Set up the {displayName} connector so the agent can use it here.',
+              defaultMessage: 'Configure the {displayName} connector so the agent can use it here.',
               values: { displayName },
             })}
         </p>
@@ -157,13 +151,6 @@ const ConnectorSetupCanvas: React.FC<
   );
 };
 
-/**
- * Factory for the `connector_setup` UI definition.
- *
- * The inline card's "Set up connector" action opens the attachment canvas,
- * which hosts the embedded connector form. This avoids nesting the connector
- * flyout inside the chat's own flyout (which would make the form inert).
- */
 export const createConnectorSetupAttachmentDefinition = (
   deps: ConnectorSetupDeps
 ): AttachmentUIDefinition<ConnectorSetupAttachment> => ({
@@ -212,9 +199,11 @@ export const createConnectorSetupAttachmentDefinition = (
             'xpack.agentBuilderPlatform.attachments.connectorSetup.manageButton',
             { defaultMessage: 'Manage connector' }
           ),
-          icon: 'gear',
+          icon: 'popout',
           type: ActionButtonType.SECONDARY,
-          href: deps.application.getUrlForApp(MANAGEMENT_APP_ID, { path: CONNECTORS_MANAGE_PATH }),
+          href: deps.application.getUrlForApp(AGENTBUILDER_APP_ID, {
+            path: CONNECTORS_MANAGE_PATH,
+          }),
           openInNewTab: true,
           handler: () => {
             // navigation handled by href
@@ -227,16 +216,18 @@ export const createConnectorSetupAttachmentDefinition = (
       return [];
     }
 
-    const setUpButton: ActionButton = {
-      label: i18n.translate('xpack.agentBuilderPlatform.attachments.connectorSetup.setUpButton', {
-        defaultMessage: 'Set up {displayName}',
-        values: { displayName: getDisplayName(attachment) },
-      }),
-      icon: 'plusInCircle',
+    const configureButton: ActionButton = {
+      label: i18n.translate(
+        'xpack.agentBuilderPlatform.attachments.connectorSetup.configureButton',
+        {
+          defaultMessage: 'Configure connector',
+        }
+      ),
+      icon: 'gear',
       type: ActionButtonType.PRIMARY,
       handler: () => openCanvas(),
     };
-    return [setUpButton];
+    return [configureButton];
   },
 });
 
