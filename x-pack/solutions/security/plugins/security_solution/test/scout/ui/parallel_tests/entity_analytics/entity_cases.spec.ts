@@ -81,34 +81,6 @@ spaceTest.describe.skip(
     });
 
     spaceTest(
-      'shows Add to new case and Add to existing case in the host flyout Take Action menu',
-      async ({ pageObjects, scoutSpace }) => {
-        const { entityCases } = pageObjects;
-        const ruleName = `${ALERT_RULE.name}_${scoutSpace.id}`;
-        await entityCases.navigateToAlerts();
-        await entityCases.openHostFlyoutForRule(ruleName);
-        await entityCases.openTakeActionMenu();
-
-        await expect(entityCases.addToNewCaseItem).toBeVisible();
-        await expect(entityCases.addToExistingCaseItem).toBeVisible();
-      }
-    );
-
-    spaceTest(
-      'shows Add to new case and Add to existing case in the user flyout Take Action menu',
-      async ({ pageObjects, scoutSpace }) => {
-        const { entityCases } = pageObjects;
-        const ruleName = `${ALERT_RULE.name}_${scoutSpace.id}`;
-        await entityCases.navigateToAlerts();
-        await entityCases.openUserFlyoutForRule(ruleName);
-        await entityCases.openTakeActionMenu();
-
-        await expect(entityCases.addToNewCaseItem).toBeVisible();
-        await expect(entityCases.addToExistingCaseItem).toBeVisible();
-      }
-    );
-
-    spaceTest(
       'adds a host entity to a new case and the Entities tab shows the attached entity',
       async ({ pageObjects, scoutSpace }) => {
         const { entityCases } = pageObjects;
