@@ -28,9 +28,10 @@ export const fetchCompositeHistoricalSummaryRoute = createCompositeSloServerRout
     const client = new CompositeHistoricalSummaryClient(
       scopedClusterClient.asCurrentUser,
       compositeRepository,
-      repository
+      repository,
+      spaceId
     );
 
-    return await client.fetch(params.body, { spaceId });
+    return await client.fetch(params.body);
   },
 });

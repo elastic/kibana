@@ -41,6 +41,7 @@ describe('CompositeHistoricalSummaryClient', () => {
       esClient,
       mockCompositeRepo,
       mockSloRepo,
+      'default',
       mockHistoricalProvider
     );
 
@@ -81,7 +82,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    const result = await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: [composite.id] });
 
     expect(result).toHaveLength(1);
     expect(result[0].compositeId).toBe(composite.id);
@@ -119,7 +120,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    const result = await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: [composite.id] });
 
     // initial = 1 - 0.99 = 0.01, consumed = (1 - 0.995) / 0.01 = 0.5
     expect(result[0].data[0].errorBudget.initial).toBeCloseTo(0.01, 4);
@@ -161,7 +162,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    const result = await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: [composite.id] });
 
     expect(result[0].data[0].sliValue).toBe(-1);
     expect(result[0].data[0].status).toBe('NO_DATA');
@@ -202,7 +203,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    const result = await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: [composite.id] });
 
     // Only sloA has data, totalWeight = 3, sli = 3 * 0.995 / 3 = 0.995
     expect(result[0].data[0].sliValue).toBeCloseTo(0.995, 4);
@@ -234,7 +235,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    const result = await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: [composite.id] });
 
     expect(result[0].data).toHaveLength(1);
     expect(result[0].data[0].sliValue).toBeCloseTo(0.995, 4);
@@ -252,7 +253,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     mockSloRepo.findAllByIds.mockResolvedValue([]);
 
     const client = createClient();
-    const result = await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: [composite.id] });
 
     expect(result[0].data).toHaveLength(0);
     expect(mockHistoricalProvider.fetch).not.toHaveBeenCalled();
@@ -281,7 +282,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    await client.fetch({ list: [composite.id] });
 
     expect(mockHistoricalProvider.fetch).toHaveBeenCalledWith(
       {
@@ -337,7 +338,7 @@ describe('CompositeHistoricalSummaryClient', () => {
       ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    const result = await client.fetch({ list: ['comp-1', 'comp-2'] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: ['comp-1', 'comp-2'] });
 
     expect(result).toHaveLength(2);
     expect(result[0].compositeId).toBe('comp-1');
@@ -385,7 +386,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    const result = await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: [composite.id] });
 
     expect(result[0].data).toHaveLength(3);
 
@@ -418,7 +419,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    await client.fetch({ list: [composite.id] });
 
     expect(mockHistoricalProvider.fetch).toHaveBeenCalledWith(
       {
@@ -458,7 +459,7 @@ describe('CompositeHistoricalSummaryClient', () => {
     ] as FetchHistoricalSummaryResponse);
 
     const client = createClient();
-    const result = await client.fetch({ list: [composite.id] }, { spaceId: 'default' });
+    const result = await client.fetch({ list: [composite.id] });
 
     expect(result[0].data[0].status).toBe('VIOLATED');
     expect(result[0].data[0].errorBudget.remaining).toBeLessThan(0);
