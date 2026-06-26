@@ -7,9 +7,11 @@
 
 import { css } from '@emotion/css';
 import { EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useAttachmentCartActivation } from './use_attachment_cart_activation';
 
 const GROUP_ATTACHMENT_TYPE = 'group';
 const DEFAULT_ICON = 'document';
@@ -21,12 +23,18 @@ export interface AttachmentCartCardProps {
 
 export const AttachmentCartCard: React.FC<AttachmentCartCardProps> = ({ attachment }) => {
   const { attachmentsService } = useAgentBuilderServices();
+  const { activateAttachment } = useAttachmentCartActivation();
   const { euiTheme } = useEuiTheme();
 
   const isGroupAttachment = attachment.type === GROUP_ATTACHMENT_TYPE;
   const uiDefinition = !isGroupAttachment
     ? attachmentsService.getAttachmentUiDefinition(attachment.type)
     : null;
+
+  const isActivatable =
+    uiDefinition != null &&
+    (uiDefinition.getActionButtons !== undefined ||
+      uiDefinition.renderCanvasContent !== undefined);
 
   const groupLabel =
     isGroupAttachment && typeof attachment.data === 'object' && attachment.data !== null
@@ -44,6 +52,34 @@ export const AttachmentCartCard: React.FC<AttachmentCartCardProps> = ({ attachme
   const subtitle = !isGroupAttachment
     ? uiDefinition?.getHeader?.({ attachment })?.subtitle
     : undefined;
+
+  const activationAriaLabel = i18n.translate(
+    'xpack.agentBuilder.attachmentCartCard.openAttachmentAriaLabel',
+    {
+      defaultMessage: 'Open attachment {title}',
+      values: { title: displayName },
+    }
+  );
+
+  const handleActivate = useCallback(() => {
+    if (!isActivatable) {
+      return;
+    }
+    activateAttachment(attachment);
+  }, [activateAttachment, attachment, isActivatable]);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (!isActivatable) {
+        return;
+      }
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        activateAttachment(attachment);
+      }
+    },
+    [activateAttachment, attachment, isActivatable]
+  );
 
   const iconContainerStyles = css`
     display: flex;
@@ -73,17 +109,36 @@ export const AttachmentCartCard: React.FC<AttachmentCartCardProps> = ({ attachme
     word-break: break-word;
   `;
 
+  const panelStyles = css`
+    height: 100%;
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
+    ${isActivatable
+      ? `
+      cursor: pointer;
+      transition: background-color ${euiTheme.animation.fast} ease-in-out,
+        border-color ${euiTheme.animation.fast} ease-in-out;
+
+      &:hover {
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        border-color: ${euiTheme.colors.borderStrongPrimary};
+      }
+    `
+      : ''}
+  `;
+
   return (
     <EuiPanel
       hasShadow={false}
       hasBorder
       color="subdued"
       paddingSize="s"
-      css={css`
-        height: 100%;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
-      `}
+      css={panelStyles}
       data-test-subj={`agentBuilderAttachmentCartCard-${attachment.id}`}
+      onClick={isActivatable ? handleActivate : undefined}
+      onKeyDown={isActivatable ? handleKeyDown : undefined}
+      role={isActivatable ? 'button' : undefined}
+      tabIndex={isActivatable ? 0 : undefined}
+      aria-label={isActivatable ? activationAriaLabel : undefined}
     >
       <div
         css={css`
