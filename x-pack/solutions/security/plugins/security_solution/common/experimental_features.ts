@@ -73,7 +73,7 @@ export const allowedExperimentalValues = Object.freeze({
    * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
    * we test impact on other features.
    */
-  defendRemoteOutputCcs: true,
+  defendRemoteOutputCcs: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
