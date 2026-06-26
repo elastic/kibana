@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EvaluationResult } from '@kbn/evals';
 import type { Severity, GuardrailViolation } from './types';
-import type { EvaluationResult } from '../types';
 
 export interface NamedEvaluationResult {
   name: string;

@@ -11,6 +11,8 @@
     "@kbn/evals-common",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/inference-common",
+    "@kbn/inference-prompt-utils"
   ]
 }

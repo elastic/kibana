@@ -8,7 +8,7 @@
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Evaluator } from '../../types';
+import type { Evaluator } from '@kbn/evals';
 import { RefusalQualityJudgePrompt } from './refusal_quality_prompt';
 
 type RefusalQualityResult = 'EXCELLENT' | 'PARTIAL' | 'POOR';

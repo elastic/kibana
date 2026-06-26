@@ -7,8 +7,8 @@
 
 import { readFileSync } from 'fs';
 import Path from 'path';
-import { load } from 'js-yaml';
-import type { Example } from '../types';
+import yaml from 'yaml';
+import type { Example } from '@kbn/evals';
 import type { AttackModuleConfig } from './types';
 
 interface TemplateEntry {
@@ -26,7 +26,7 @@ interface TemplateFile {
 export const loadTemplates = (moduleName: string, config: AttackModuleConfig): Example[] => {
   const templatePath = Path.resolve(__dirname, 'templates', `${moduleName}.yaml`);
   const raw = readFileSync(templatePath, 'utf-8');
-  const template = load(raw) as TemplateFile;
+  const template = yaml.parse(raw) as TemplateFile;
 
   const prompts = template.prompts?.[config.difficulty];
   if (!prompts || prompts.length === 0) {

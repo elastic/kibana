@@ -12,7 +12,7 @@ import {
   writeRedTeamReport,
   type RedTeamConfig,
   type Severity,
-} from '@kbn/evals';
+} from '@kbn/evals-extensions';
 import { evaluate } from '../src/evaluate';
 
 const DEFAULT_MIN_PASS_RATE = 50;
