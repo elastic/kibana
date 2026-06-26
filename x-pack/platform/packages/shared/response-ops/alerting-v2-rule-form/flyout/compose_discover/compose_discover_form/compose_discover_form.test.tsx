@@ -404,4 +404,27 @@ describe('shell shared fields', () => {
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
   });
+
+  it('disables ModeSelect in edit mode', () => {
+    const services = { ...createMockServices(), dashboard: mockDashboard };
+    render(
+      <ComposeDiscoverForm
+        state={createState({ queryCommitted: true, step: 0 })}
+        dispatch={jest.fn()}
+        services={services}
+        onRecoveryTypeChange={jest.fn()}
+        onKindChange={jest.fn()}
+        isEditing={true}
+      />,
+      { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
+    );
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+  });
+
+  it('enables ModeSelect in create mode when query is committed', () => {
+    renderShell({ step: 0, queryCommitted: true });
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
+  });
 });

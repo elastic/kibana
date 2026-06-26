@@ -27,6 +27,8 @@ export type StepId =
 export const isAlertConditionStepId = (id: StepId): boolean =>
   id === 'alertCondition' || id === 'builderCondition';
 
+export const isBuilderConditionStepId = (id: StepId): boolean => id === 'builderCondition';
+
 export interface CustomRecoveryRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
@@ -81,8 +83,8 @@ export type ComposeDiscoverAction =
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
-  | { type: 'GO_NEXT'; isAlert: boolean }
-  | { type: 'GO_BACK' }
+  | { type: 'GO_NEXT'; isAlert: boolean; isBuilderMode?: boolean }
+  | { type: 'GO_BACK'; isBuilderMode?: boolean }
   | { type: 'OPEN_CHILD'; isAlert: boolean }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
   | { type: 'CLOSE_CHILD' }

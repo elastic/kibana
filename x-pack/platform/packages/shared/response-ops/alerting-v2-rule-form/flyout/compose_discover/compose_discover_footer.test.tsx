@@ -20,6 +20,12 @@ const ALERT_CONDITION_STEP: StepDefinition = {
   render: () => null,
 };
 
+const BUILDER_CONDITION_STEP: StepDefinition = {
+  id: 'builderCondition',
+  title: 'Alert Condition',
+  render: () => null,
+};
+
 const DETAILS_STEP: StepDefinition = {
   id: 'details',
   title: 'Details & Artifacts',
@@ -81,6 +87,8 @@ const renderFooter = ({
     isCreate: true,
     hasValidationErrors: false,
     yamlHasErrors: false,
+    isBuilderMode: false,
+    isBuilderStepValid: true,
     isSaving: false,
     onNext,
     onFinalSubmit,
@@ -159,7 +167,7 @@ describe('ComposeDiscoverFooter', () => {
     it('dispatches GO_BACK when Back is clicked', () => {
       const { dispatch } = renderFooter({ stateOverrides: { step: 1 } });
       fireEvent.click(screen.getByTestId('composeDiscoverBack'));
-      expect(dispatch).toHaveBeenCalledWith({ type: 'GO_BACK' });
+      expect(dispatch).toHaveBeenCalledWith({ type: 'GO_BACK', isBuilderMode: false });
     });
   });
 
@@ -349,6 +357,42 @@ describe('ComposeDiscoverFooter', () => {
     it('disables Back when child flyout is open', () => {
       renderFooter({ stateOverrides: { step: 1, childOpen: true } });
       expect(screen.getByTestId('composeDiscoverBack')).toBeDisabled();
+    });
+  });
+
+  describe('Builder mode validation', () => {
+    it('disables Next when isBuilderStepValid is false', () => {
+      renderFooter({
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: false,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
+    it('enables Next when isBuilderStepValid is true', () => {
+      renderFooter({
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: true,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('does not block Next due to childOpen in builder mode', () => {
+      renderFooter({
+        stateOverrides: { childOpen: true },
+        propsOverrides: {
+          currentStep: BUILDER_CONDITION_STEP,
+          isBuilderMode: true,
+          isBuilderStepValid: true,
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
   });
 
