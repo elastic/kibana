@@ -26,11 +26,11 @@ inputs:
 waitForCompletion: true
 ```
 
-**Always set `waitForCompletion: true`.** The call blocks until the investigation finishes and then returns the full execution, including the structured root-cause findings. Wait for it to complete, then present the results to the user in the same turn (see **Presenting results**).
+**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. If the investigation finishes within that window, the result includes the full structured root-cause findings; since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available (see **Presenting results**).
 
 - Before triggering, briefly tell the user you're starting the investigation and that it may take a few minutes — the agent gathers and correlates logs, traces, and metrics before reaching a conclusion.
-- Stay on the tool call until it returns; do not ask the user to come back later, and do not start polling in a loop — the single `execute_workflow` call already waits.
-- If `execute_workflow` returns with a non-terminal execution (it exceeded the wait window), fall back to **Checking investigation status**.
+- Stay on the tool call until it returns; do not ask the user to come back later, and do not start polling in a loop — call `get_workflow_execution_status` once if needed.
+- If `execute_workflow` returns with a non-terminal execution (it exceeded the ~120s wait window), continue to **Checking investigation status**.
 
 **Input schema:**
 - `message` (string, required) — a clear description of the issue to investigate. Include symptoms, time range, and any relevant context. Be specific.
@@ -129,9 +129,9 @@ execute_workflow({
 })
 ```
 
-### Checking investigation status (fallback)
+### Checking investigation status
 
-You normally won't need this: with `waitForCompletion: true` the findings come back directly from `execute_workflow`. Use this only if that call returned before the investigation reached a terminal state.
+Use this when `execute_workflow` returned before the investigation reached a terminal state (which is expected for investigations that take longer than ~120s).
 
 Use `platform.core.get_workflow_execution_status` with the `executionId` from the returned execution.
 

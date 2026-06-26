@@ -19,8 +19,8 @@ export const streamsInvestigationManagementSkill = defineSkillType({
   experimental: true,
   getRegistryTools: () => [
     platformCoreTools.executeWorkflow,
-    // Status polling is only a fallback: with `waitForCompletion: true` the findings are
-    // returned directly by `execute_workflow`. Kept for the rare case the wait window is exceeded.
+    // Used when execute_workflow returns before completion: the tool waits up to ~120s and
+    // longer investigations (which are common) return still-running and need a status follow-up.
     platformCoreTools.getWorkflowExecutionStatus,
     // ES|QL tools for the alerts-as-data fallback when no solution alert tool is available.
     // Already part of the default agent, but listed here so the skill is self-contained
