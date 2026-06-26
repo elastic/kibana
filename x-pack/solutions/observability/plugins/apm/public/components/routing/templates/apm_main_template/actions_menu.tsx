@@ -8,13 +8,12 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
-import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
+import { useSloFlyouts } from '../../../../hooks/use_slo_flyouts';
 import { useServiceName } from '../../../../hooks/use_service_name';
 import { useAlertSloActions, type ApmFlyoutState } from '../../../../hooks/use_alert_slo_actions';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
@@ -28,7 +27,7 @@ const actionsLabel = i18n.translate('xpack.apm.home.actionsMenu.actions', {
 const ACTIONS_MENU_BUTTON_MIN_WIDTH = 118; // match Unified Search submit button min width
 
 export function ActionsMenu() {
-  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
+  const { CreateSLOFormFlyout } = useSloFlyouts();
   const { query } = useApmParams('/*');
 
   const [flyoutState, setFlyoutState] = useState<ApmFlyoutState>({ type: 'closed' });
@@ -65,12 +64,12 @@ export function ActionsMenu() {
   const sloIndicatorType = flyoutState.type === 'slo' ? flyoutState.indicatorType : null;
 
   const CreateSloFlyout = useMemo(() => {
-    if (!sloIndicatorType) {
+    if (!sloIndicatorType || !CreateSLOFormFlyout) {
       return null;
     }
     return (
-      sloPlugin?.getCreateSLOFormFlyout({
-        initialValues: {
+      <CreateSLOFormFlyout
+        initialValues={{
           ...(serviceName && { name: `APM SLO for ${serviceName}` }),
           indicator: {
             type: sloIndicatorType,
@@ -79,14 +78,14 @@ export function ActionsMenu() {
               environment: sloEnvironment,
             },
           },
-        },
-        onClose: () => setFlyoutState({ type: 'closed' }),
-        formSettings: {
+        }}
+        onClose={() => setFlyoutState({ type: 'closed' })}
+        formSettings={{
           allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
-        },
-      }) ?? null
+        }}
+      />
     );
-  }, [sloPlugin, sloIndicatorType, serviceName, sloEnvironment]);
+  }, [CreateSLOFormFlyout, sloIndicatorType, serviceName, sloEnvironment]);
 
   if (actionGroups.length === 0) {
     return null;

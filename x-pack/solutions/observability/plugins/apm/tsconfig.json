@@ -170,7 +170,9 @@
     "@kbn/ebt-click",
     "@kbn/apm-types-shared",
     "@kbn/apm-common",
-    "@kbn/storybook"
+    "@kbn/storybook",
+    "@kbn/slo-flyout-types",
+    "@kbn/core-di",
   ],
   "exclude": ["target/**/*"]
 }

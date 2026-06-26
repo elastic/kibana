@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -19,9 +18,10 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { SloTabId, SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
+import type { SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { sloDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import type { SLODetailsFlyoutProps } from '@kbn/slo-flyout-types';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -30,16 +30,6 @@ import {
   SloOverviewDetailsFlyoutFooter,
 } from '../../../embeddable/slo/common/slo_overview_details';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-
-export interface SLODetailsFlyoutProps {
-  sloId: string;
-  sloInstanceId?: string;
-  onClose: () => void;
-  size?: EuiFlyoutProps['size'];
-  hideFooter?: boolean;
-  session?: 'start' | 'inherit';
-  initialTabId?: SloTabId;
-}
 
 const TITLES = {
   error: i18n.translate('xpack.slo.sloDetailsFlyout.errorTitle', {

@@ -50,9 +50,6 @@ const mockKibanaServices = {
     },
     getAddRuleFlyout: jest.fn().mockReturnValue(null),
   },
-  slo: {
-    getCreateSLOFormFlyout: jest.fn().mockReturnValue(null),
-  },
   uiSettings: {
     get: jest.fn().mockReturnValue(false),
   },
