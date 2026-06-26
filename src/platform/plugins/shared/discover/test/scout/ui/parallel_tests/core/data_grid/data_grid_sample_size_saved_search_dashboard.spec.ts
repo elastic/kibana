@@ -29,10 +29,9 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, scoutSpace }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.discover.setQueryMode('classic');
-      await scoutSpace.uiSettings.set({
+      await await scoutSpace.uiSettings.set({
         'discover:sampleSize': testData.DEFAULT_SAMPLE_SIZE,
         'discover:rowHeightOption': 0,
         'discover:sampleRowsPerPage': testData.DEFAULT_ROWS_PER_PAGE,
