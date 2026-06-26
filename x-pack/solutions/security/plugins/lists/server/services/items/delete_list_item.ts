@@ -43,7 +43,6 @@ export const deleteListItem = async ({
       const checkIfListItemDeleted = async (): Promise<void> => {
         const deletedListItem = await getListItem({
           esClient,
-          esRealtime: false,
           id,
           listItemIndex,
         });

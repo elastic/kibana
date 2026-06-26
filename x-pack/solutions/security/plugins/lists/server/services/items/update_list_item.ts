@@ -109,7 +109,6 @@ export const updateListItem = async ({
         const checkIfListUpdated = async (): Promise<void> => {
           const updatedListItem = await getListItem({
             esClient,
-            esRealtime: false,
             id,
             listItemIndex,
           });
