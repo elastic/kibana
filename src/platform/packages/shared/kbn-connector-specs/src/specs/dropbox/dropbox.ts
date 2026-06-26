@@ -19,11 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
-import {
-  withMcpClient,
-  callToolContent,
-  callToolJson,
-} from '../../lib/mcp';
+import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   CallToolInput,
   CreateSharedLinkInput,
