@@ -134,19 +134,17 @@ The 8.19.18 release includes the following fixes.
 [[fixes-v8.19.18]]
 === Fixes
 Alerting and cases::
-* Fixes pushing a case to an external service so that all attachments are marked as pushed and the alert count comment is no longer duplicated on each push ({kibana-pull}274451[#274451]).
+* Fixes case pushes only stamping a subset of attachments, which caused the alert count comment to be duplicated in the external system on every push ({kibana-pull}274451[#274451]).
 Data ingestion and Fleet::
 * Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call ({kibana-pull}273848[#273848]).
-* Fixes a crash in the **Integrations** UI when a package image is missing ({kibana-pull}273191[#273191]).
+* Fixes a crash in the **Integrations** view when a package has no icon ({kibana-pull}273191[#273191]).
 Developer tools::
-* Fixes autocomplete in filter context to suggest the query DSL instead of the obsolete Elasticsearch 1.x filter DSL in **Console** ({kibana-pull}272907[#272907]).
-Elastic Observability solution::
-For the Elastic Observability 8.19.18 release information, refer to {observability-guide}/release-notes.html[_Elastic Observability Release Notes_].
+* Fixes **Dev Tools Console** autocomplete in query filter context to suggest query DSL instead of the obsolete Elasticsearch 1.x filter DSL ({kibana-pull}272907[#272907]).
 Elastic Security solution::
 For the Elastic Security 8.19.18 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
-* Fixes the Files plugin blob download route to return a file matching the requested file kind ({kibana-pull}274783[#274783]).
-* Fixes the JSON logger expanding scalar metadata fields into a large number of numbered keys (for example, `{ "1": "s", "2": "t" }`) ({kibana-pull}256233[#256233]).
+* Fixes the Files plugin blob download to return the requested file kind ({kibana-pull}274783[#274783]).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys ({kibana-pull}256233[#256233]).
 
 [[release-notes-8.19.17]]
 == {kib} 8.19.17
