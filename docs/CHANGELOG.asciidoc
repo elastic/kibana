@@ -135,6 +135,8 @@ The 8.19.18 release includes the following fixes.
 === Fixes
 Alerting and cases::
 * Fixes case pushes only stamping a subset of attachments, which caused the alert count comment to be duplicated in the external system on every push ({kibana-pull}274451[#274451]).
+Dashboards and Visualizations::
+* Fixes **Canvas** autoplay not advancing past the first page ({kibana-pull}272619[#272619]).
 Data ingestion and Fleet::
 * Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call ({kibana-pull}273848[#273848]).
 * Fixes a crash in the **Integrations** view when a package has no icon ({kibana-pull}273191[#273191]).
