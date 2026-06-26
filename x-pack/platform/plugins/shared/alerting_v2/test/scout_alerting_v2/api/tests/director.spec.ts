@@ -1323,11 +1323,12 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           },
         },
         no_data_strategy: 'emit',
+        state_transition: { pending_count: 10 },
       })
     );
 
     await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
-      episodeStatus: 'active',
+      episodeStatus: 'pending',
     });
 
     await apiServices.alertingV2.sourceIndex.deleteDocs({

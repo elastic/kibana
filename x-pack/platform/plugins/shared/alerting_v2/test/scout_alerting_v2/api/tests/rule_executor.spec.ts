@@ -1884,7 +1884,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     expect(noDataEvents).toHaveLength(0);
   });
 
-  apiTest("no_data_strategy 'none' writes no events", async ({ apiServices }) => {
+  apiTest("no_data_strategy 'none' does not write no_data events", async ({ apiServices }) => {
     const HOST = 'host-no-data-none';
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
