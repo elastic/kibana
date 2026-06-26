@@ -141,6 +141,7 @@ export interface ObsAlertsPrivilegeState {
   createdRules: Array<{ ruleTypeId: string; ruleId: string }>;
   enabledRuleId: string;
   realAlertId: string;
+  realAlertIndex: string;
 }
 
 export const setupObsAlertsPrivilegeRules = async ({
@@ -215,6 +216,7 @@ export const setupObsAlertsPrivilegeRules = async ({
   );
 
   let realAlertId: string | undefined;
+  let realAlertIndex: string | undefined;
   await retryForSuccess(
     async () => {
       const findResponse = await apiClient.post('internal/rac/alerts/find', {
@@ -227,23 +229,28 @@ export const setupObsAlertsPrivilegeRules = async ({
         },
         responseType: 'json',
       });
-      const findBody = findResponse.body as { hits?: { hits?: Array<{ _id: string }> } };
+      const findBody = findResponse.body as {
+        hits?: { hits?: Array<{ _id: string; _index: string }> };
+      };
       const alertDoc = findBody?.hits?.hits?.[0];
       if (!alertDoc) {
         throw new Error('No alert doc found yet');
       }
       realAlertId = alertDoc._id;
+      realAlertIndex = alertDoc._index;
     },
     { timeoutMs: 30_000, intervalMs: 2_000, label: 'wait for alert to appear in .alerts-*' }
   );
 
   expect(realAlertId).toBeDefined();
+  expect(realAlertIndex).toBeDefined();
 
   return {
     adminCreds,
     createdRules,
     enabledRuleId: enabledRuleId!,
     realAlertId: realAlertId!,
+    realAlertIndex: realAlertIndex!,
   };
 };
 
