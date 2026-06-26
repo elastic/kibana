@@ -98,6 +98,10 @@ function ServiceFlyoutLensChartComponent({
             lastReloadRequestTime={refreshToken}
             viewMode="view"
             style={{ height: CHART_HEIGHT }}
+            executionContext={{
+              description: 'apm service flyout chart data',
+              meta: { profile_id: 'service-flyout', metric_id: id },
+            }}
           />
         ) : (
           <EuiFlexGroup
