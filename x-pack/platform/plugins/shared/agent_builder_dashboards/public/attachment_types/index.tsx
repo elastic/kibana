@@ -140,7 +140,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         />
       </React.Suspense>
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
+    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin, openTarget }) => {
       // Capture the framework-provided updater keyed by attachment id so that
       // dashboard-save origin sync (outside the React tree) can reuse it.
       updateOriginByAttachmentId.set(attachment.id, updateOrigin);
@@ -168,7 +168,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               dashboardLocator,
               checkSavedDashboardExist,
               openCanvas,
-              preferCanvasPreview: isAgentFirstChrome,
+              preferCanvasPreview: openTarget !== 'nativeApp' && isAgentFirstChrome,
             });
           },
         },
