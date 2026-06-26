@@ -388,7 +388,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         <EuiSpacer size="m" />
 
         <EuiFlexGroup>
-          <PackTypeSelectable packType={packType} setPackType={changePackType} />
+          <PackTypeSelectable
+            packType={packType}
+            setPackType={changePackType}
+            isDisabled={isReadOnly}
+          />
         </EuiFlexGroup>
         <EuiSpacer size="m" />
 
@@ -396,7 +400,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <>
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
-                <PolicyIdComboBoxField options={availableOptions} />
+                <PolicyIdComboBoxField options={availableOptions} euiFieldProps={euiFieldProps} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
@@ -411,7 +415,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                   buttonContent="Partial deployment (shards)"
                 >
                   <EuiSpacer size="xs" />
-                  <PackShardsField options={availableOptions} />
+                  <PackShardsField options={availableOptions} isDisabled={isReadOnly} />
                 </EuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>

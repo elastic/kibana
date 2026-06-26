@@ -41,7 +41,7 @@ const PacksComponent = () => {
         {permissions.writePacks ? <AddPackPage /> : <MissingPrivileges />}
       </Route>
       <Route path={`${match.url}/:packId/edit`}>
-        {permissions.writePacks ? <EditPackPage /> : <MissingPrivileges />}
+        <EditPackPage />
       </Route>
       <Route path={`${match.url}/:packId`}>
         <PackDetailsRedirect />

@@ -125,6 +125,45 @@ describe('PackForm', () => {
     expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs');
   });
 
+  describe('read-only mode', () => {
+    const readOnlyDefaultValue = {
+      id: 'ro-pack',
+      saved_object_id: 'ro-pack',
+      name: 'Read-only Pack',
+      description: '',
+      enabled: true,
+      queries: {},
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+    };
+
+    // EuiCheckableCard puts the data-test-subj on the wrapper; the disabled
+    // state lives on the radio <input> inside it.
+    const radioInput = (wrapper: HTMLElement) => wrapper.querySelector('input[type="radio"]');
+
+    it('disables the pack Type (Policy/Global) selectable cards', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} isReadOnly={true} defaultValue={readOnlyDefaultValue} />
+      );
+
+      expect(radioInput(getByTestId('osqueryPackTypePolicy'))).toBeDisabled();
+      expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).toBeDisabled();
+    });
+
+    it('keeps the pack Type selectable cards enabled when writable', () => {
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} isReadOnly={false} defaultValue={readOnlyDefaultValue} />
+      );
+
+      expect(radioInput(getByTestId('osqueryPackTypePolicy'))).not.toBeDisabled();
+      expect(radioInput(getByTestId('osqueryPackTypeGlobal'))).not.toBeDisabled();
+    });
+  });
+
   describe('rruleScheduling feature flag', () => {
     const rrulePackDefaultValue = {
       id: 'rrule-pack-id',
