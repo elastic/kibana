@@ -59,7 +59,9 @@ POST kbn://internal/kibana/settings
 
 ### Workflow graph viewer
 
-The read-only graph viewer is disabled by default. Enable it in `kibana.yml` (not Advanced Settings):
+The read-only graph viewer is disabled by default.
+
+Enable the Workflow Experimental flag in Advanced Settings, then enable in `kibana.yml` the following flag:
 
 ```yml
 uiSettings.overrides:
