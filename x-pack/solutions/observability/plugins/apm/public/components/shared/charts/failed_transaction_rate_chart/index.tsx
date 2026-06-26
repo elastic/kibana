@@ -30,6 +30,7 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';
+import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -81,6 +82,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
   });
 
   const { environment } = useEnvironmentsContext();
+  const { anomalyThreshold } = useAnomalyThreshold();
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txFailureRate
@@ -236,6 +238,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
               }
             : undefined
         }
+        anomalyThreshold={anomalyThreshold}
       />
     </EuiPanel>
   );

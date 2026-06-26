@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { getAnomalyThreshold } from '../../../../../common/anomaly_detection/anomaly_threshold';
+import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -49,14 +49,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const comparisonChartTheme = getComparisonChartTheme();
 
   const {
-    query: {
-      comparisonEnabled,
-      latencyAggregationType,
-      anomalyThreshold: anomalyThresholdRaw,
-      offset,
-      rangeFrom,
-      rangeTo,
-    },
+    query: { comparisonEnabled, latencyAggregationType, offset, rangeFrom, rangeTo },
     query,
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -83,7 +76,7 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
 
-  const anomalyThreshold = getAnomalyThreshold(anomalyThresholdRaw);
+  const { anomalyThreshold } = useAnomalyThreshold();
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txLatency
   );
@@ -149,8 +142,6 @@ export function LatencyChart({ height, kuery }: Props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AnomalyThresholdSelect
-                  anomalyThreshold={anomalyThreshold}
-                  kuery={kuery}
                   onChange={(value) => {
                     urlHelpers.push(history, {
                       query: {
@@ -214,6 +205,7 @@ export function LatencyChart({ height, kuery }: Props) {
                 }
               : undefined
           }
+          anomalyThreshold={anomalyThreshold}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

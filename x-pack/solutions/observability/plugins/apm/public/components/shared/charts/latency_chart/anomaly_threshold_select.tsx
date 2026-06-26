@@ -7,17 +7,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSelect } from '@elastic/eui';
 import type { AnomalyThreshold } from '@kbn/apm-types';
-import { ENVIRONMENT_ALL } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import React from 'react';
-import { isEmpty } from 'lodash';
-import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import {
-  getIsAnomalyDetectionConfigured,
-  getIsAnomalyDetectionConfiguredForEnvironment,
-} from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
-import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
+import type { AnomalyThresholdDisabledReason } from '../../../../hooks/use_anomaly_threshold';
+import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 
 const getOptions = (): Array<{ value: AnomalyThreshold; text: string }> => [
   {
@@ -58,66 +52,31 @@ const getOptions = (): Array<{ value: AnomalyThreshold; text: string }> => [
   },
 ];
 
-const getTooltipContent = ({
-  isAllEnvironments,
-  hasKueryFilter,
-  isConfiguredForEnvironment,
-}: {
-  isAllEnvironments: boolean;
-  hasKueryFilter: boolean;
-  isConfiguredForEnvironment: boolean;
-}) => {
-  if (isAllEnvironments) {
-    return i18n.translate('xpack.apm.anomalyThresholdSelect.allEnvironmentsTooltip', {
-      defaultMessage: 'Select a specific environment to view anomaly detection data',
-    });
+const getTooltipContent = (disabledReason: AnomalyThresholdDisabledReason) => {
+  switch (disabledReason) {
+    case 'allEnvironments':
+      return i18n.translate('xpack.apm.anomalyThresholdSelect.allEnvironmentsTooltip', {
+        defaultMessage: 'Select a specific environment to view anomaly detection data',
+      });
+    case 'notConfiguredForEnvironment':
+      return i18n.translate('xpack.apm.anomalyThresholdSelect.notConfiguredForEnvironmentTooltip', {
+        defaultMessage: 'Anomaly detection is not enabled for this environment',
+      });
+    case 'kuery':
+      return i18n.translate('xpack.apm.anomalyThresholdSelect.kueryFilterTooltip', {
+        defaultMessage: 'Anomaly detection data is hidden while a search bar filter is applied',
+      });
+    default:
+      return '';
   }
-
-  if (!isConfiguredForEnvironment) {
-    return i18n.translate('xpack.apm.anomalyThresholdSelect.notConfiguredForEnvironmentTooltip', {
-      defaultMessage: 'Anomaly detection is not enabled for this environment',
-    });
-  }
-
-  if (hasKueryFilter) {
-    return i18n.translate('xpack.apm.anomalyThresholdSelect.kueryFilterTooltip', {
-      defaultMessage: 'Anomaly detection data is hidden while a search bar filter is applied',
-    });
-  }
-
-  return '';
 };
 
 export function AnomalyThresholdSelect({
-  anomalyThreshold,
-  kuery,
   onChange,
 }: {
-  anomalyThreshold: AnomalyThreshold;
-  kuery: string;
   onChange: (value: AnomalyThreshold) => void;
 }) {
-  const { environment } = useEnvironmentsContext();
-
-  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
-  const isConfigured = getIsAnomalyDetectionConfigured(anomalyDetectionSetupState);
-
-  if (!isConfigured) {
-    return null;
-  }
-
-  const isAllEnvironments = environment === ENVIRONMENT_ALL.value;
-  const hasKueryFilter = !isEmpty(kuery);
-  const isConfiguredForEnvironment = getIsAnomalyDetectionConfiguredForEnvironment(
-    anomalyDetectionSetupState
-  );
-  const isDisabled = isAllEnvironments || hasKueryFilter || !isConfiguredForEnvironment;
-
-  const tooltipContent = getTooltipContent({
-    isAllEnvironments,
-    hasKueryFilter,
-    isConfiguredForEnvironment,
-  });
+  const { anomalyThreshold, isDisabled, disabledReason } = useAnomalyThreshold();
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -132,18 +91,14 @@ export function AnomalyThresholdSelect({
             defaultMessage: 'Anomalies',
           })}
           options={getOptions()}
-          value={isDisabled ? 'none' : anomalyThreshold}
+          value={anomalyThreshold}
           onChange={(nextOption) => onChange(nextOption.target.value as AnomalyThreshold)}
           disabled={isDisabled}
         />
       </EuiFlexItem>
       {isDisabled && (
         <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type="question"
-            content={tooltipContent}
-            data-test-subj="apmAnomalyThresholdSelectTooltip"
-          />
+          <EuiIconTip type="question" content={getTooltipContent(disabledReason)} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

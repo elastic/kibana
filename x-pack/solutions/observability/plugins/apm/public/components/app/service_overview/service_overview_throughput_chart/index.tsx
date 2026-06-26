@@ -29,6 +29,7 @@ import { getThroughputScreenContext } from './get_throughput_screen_context';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { OpenAnomalies } from '../../../shared/links/machine_learning_links/open_anomalies';
+import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -49,6 +50,7 @@ export function ServiceOverviewThroughputChart({
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
+  const { anomalyThreshold } = useAnomalyThreshold();
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txThroughput
@@ -241,6 +243,7 @@ export function ServiceOverviewThroughputChart({
               }
             : undefined
         }
+        anomalyThreshold={anomalyThreshold}
       />
     </EuiPanel>
   );
