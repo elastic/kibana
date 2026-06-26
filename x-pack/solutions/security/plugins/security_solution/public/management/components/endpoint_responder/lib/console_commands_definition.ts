@@ -732,12 +732,14 @@ export const getEndpointConsoleCommands = ({
   }
 
   if (responseActionsEndpointMemoryDump) {
-    const endpointSupportsKernelDump = (endpointCapabilities as EndpointCapabilities[]).includes(
-      'memdump_kernel'
-    );
-    const endpointSupportsProcessDump = (endpointCapabilities as EndpointCapabilities[]).includes(
-      'memdump_process'
-    );
+    // In bulk mode, we just set the memory dump support variables below true and the
+    // API will figure out if the command should be sent to the host based on capabilities
+    const endpointSupportsKernelDump =
+      isBulkResponseMode ||
+      (endpointCapabilities as EndpointCapabilities[]).includes('memdump_kernel');
+    const endpointSupportsProcessDump =
+      isBulkResponseMode ||
+      (endpointCapabilities as EndpointCapabilities[]).includes('memdump_process');
     const getMemoryDumpTypeNotSupportedMessage = (type: 'process' | 'kernel') =>
       i18n.translate(
         'xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported',
