@@ -12,10 +12,13 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
 import { dismissLeadTool } from './dismiss_lead_tool';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
+import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 
 jest.mock('../../../../lib/entity_analytics/lead_generation/lead_data_client');
+jest.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
 
 const mockCreateLeadDataClient = createLeadDataClient as jest.Mock;
+const mockGetUserLeadPrivileges = getUserLeadPrivileges as jest.Mock;
 
 const mockExperimentalFeatures = { leadGenerationEnabled: true } as ExperimentalFeatures;
 
@@ -34,6 +37,12 @@ describe('dismissLeadTool', () => {
     jest.clearAllMocks();
     mockDismissLead = jest.fn().mockResolvedValue(true);
     mockCreateLeadDataClient.mockReturnValue({ dismissLead: mockDismissLead });
+    mockGetUserLeadPrivileges.mockResolvedValue({
+      has_read_permissions: true,
+      has_write_permissions: true,
+      has_all_required: true,
+      privileges: {},
+    });
   });
 
   describe('schema', () => {
@@ -51,6 +60,26 @@ describe('dismissLeadTool', () => {
 
     it('rejects missing id', () => {
       expect(tool.schema.safeParse({}).success).toBe(false);
+    });
+  });
+
+  describe('handler — privilege check', () => {
+    it('returns permission error when user lacks write permissions', async () => {
+      mockGetUserLeadPrivileges.mockResolvedValue({
+        has_read_permissions: true,
+        has_write_permissions: false,
+        has_all_required: false,
+        privileges: {},
+      });
+      const ctx = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+      const result = (await tool.handler({ id: LEAD_ID }, ctx)) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const errResult = result.results[0] as ErrorResult;
+      expect(errResult.type).toBe(ToolResultType.error);
+      expect((errResult.data as { message: string }).message).toContain('permission');
+      expect(mockDismissLead).not.toHaveBeenCalled();
     });
   });
 

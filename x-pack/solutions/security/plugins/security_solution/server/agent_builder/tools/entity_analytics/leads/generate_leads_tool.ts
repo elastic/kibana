@@ -28,6 +28,7 @@ import {
 import { fetchCandidateEntities } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
 import { runLeadGenerationPipeline } from '../../../../lib/entity_analytics/lead_generation/run_pipeline';
 import { resolveChatModel } from '../../../../lib/entity_analytics/lead_generation/utils';
+import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import { securityTool } from '../../constants';
 
 // kibanaVersion is only used in RiskScoreDataClient write methods (index template creation).
@@ -126,6 +127,22 @@ export const generateLeadsTool = (
       { request, spaceId, esClient, savedObjectsClient, prompts, callContext }
     ) => {
       logger.debug(`${SECURITY_GENERATE_LEADS_TOOL_ID} tool called`);
+
+      const [, { security }] = await core.getStartServices();
+      const privileges = await getUserLeadPrivileges(request, security, spaceId);
+      if (!privileges.has_write_permissions) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: {
+                message: 'You do not have permission to generate leads in this space.',
+              },
+            },
+          ],
+        };
+      }
 
       const promptId = `generate_leads.confirm.${callContext.toolCallId}`;
       const { status } = prompts.checkConfirmationStatus(promptId);

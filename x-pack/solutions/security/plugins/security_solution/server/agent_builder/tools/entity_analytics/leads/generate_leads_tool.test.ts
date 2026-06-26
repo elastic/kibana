@@ -18,18 +18,21 @@ import {
 import { runLeadGenerationPipeline } from '../../../../lib/entity_analytics/lead_generation/run_pipeline';
 import { resolveChatModel } from '../../../../lib/entity_analytics/lead_generation/utils';
 import { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
+import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 
 jest.mock('../../../../lib/entity_analytics/lead_generation/saved_object');
 jest.mock('../../../../lib/entity_analytics/lead_generation/run_pipeline');
 jest.mock('../../../../lib/entity_analytics/lead_generation/utils');
 jest.mock('../../../../lib/entity_analytics/lead_generation/entity_conversion');
 jest.mock('../../../../lib/entity_analytics/risk_score/risk_score_data_client');
+jest.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
 
 const mockGetLeadGenerationConfig = getLeadGenerationConfig as jest.Mock;
 const mockUpsertLeadGenerationConfig = upsertLeadGenerationConfig as jest.Mock;
 const mockRunLeadGenerationPipeline = runLeadGenerationPipeline as jest.Mock;
 const mockResolveChatModel = resolveChatModel as jest.Mock;
 const MockRiskScoreDataClient = RiskScoreDataClient as jest.MockedClass<typeof RiskScoreDataClient>;
+const mockGetUserLeadPrivileges = getUserLeadPrivileges as jest.Mock;
 
 const mockExperimentalFeatures = { leadGenerationEnabled: true } as ExperimentalFeatures;
 
@@ -73,6 +76,12 @@ describe('generateLeadsTool', () => {
     mockRunLeadGenerationPipeline.mockResolvedValue({ total: 3 });
     mockResolveChatModel.mockResolvedValue({});
     MockRiskScoreDataClient.mockImplementation(() => ({} as RiskScoreDataClient));
+    mockGetUserLeadPrivileges.mockResolvedValue({
+      has_read_permissions: true,
+      has_write_permissions: true,
+      has_all_required: true,
+      privileges: {},
+    });
   });
 
   describe('schema', () => {
@@ -86,6 +95,26 @@ describe('generateLeadsTool', () => {
 
     it('rejects an empty connectorName string', () => {
       expect(tool.schema.safeParse({ connectorName: '' }).success).toBe(false);
+    });
+  });
+
+  describe('handler — privilege check', () => {
+    it('returns permission error when user lacks write permissions', async () => {
+      mockGetUserLeadPrivileges.mockResolvedValue({
+        has_read_permissions: true,
+        has_write_permissions: false,
+        has_all_required: false,
+        privileges: {},
+      });
+      const ctx = handlerContext();
+
+      const result = (await tool.handler({}, ctx)) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const errResult = result.results[0] as ErrorResult;
+      expect(errResult.type).toBe(ToolResultType.error);
+      expect((errResult.data as { message: string }).message).toContain('permission');
+      expect(mockRunLeadGenerationPipeline).not.toHaveBeenCalled();
     });
   });
 

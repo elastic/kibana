@@ -14,6 +14,7 @@ import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_bu
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
+import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import { LeadStatusEnum } from '../../../../../common/entity_analytics/lead_generation/types';
 import { securityTool } from '../../constants';
 
@@ -35,10 +36,6 @@ const schema = z.object({
     .optional()
     .describe('Number of leads to return (default: 20, max: 100).'),
 });
-
-const isEsSecurityException = (error: unknown): boolean =>
-  (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
-  'security_exception';
 
 export const listLeadsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -76,12 +73,28 @@ export const listLeadsTool = (
         }
       },
     },
-    handler: async (params, { spaceId, esClient }) => {
+    handler: async (params, { request, spaceId, esClient }) => {
       logger.debug(
         `${SECURITY_LIST_LEADS_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
       try {
+        const [, { security }] = await core.getStartServices();
+        const privileges = await getUserLeadPrivileges(request, security, spaceId);
+        if (!privileges.has_read_permissions) {
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.error,
+                data: {
+                  message: 'You do not have permission to read leads in this space.',
+                },
+              },
+            ],
+          };
+        }
+
         const dataClient = createLeadDataClient({
           esClient: esClient.asCurrentUser,
           logger,

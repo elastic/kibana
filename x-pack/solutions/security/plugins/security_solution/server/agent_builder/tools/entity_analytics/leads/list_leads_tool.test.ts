@@ -11,11 +11,14 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
 import { listLeadsTool } from './list_leads_tool';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
+import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import type { Lead } from '../../../../../common/entity_analytics/lead_generation/types';
 
 jest.mock('../../../../lib/entity_analytics/lead_generation/lead_data_client');
+jest.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
 
 const mockCreateLeadDataClient = createLeadDataClient as jest.Mock;
+const mockGetUserLeadPrivileges = getUserLeadPrivileges as jest.Mock;
 
 const makeTestLead = (overrides: Partial<Lead> = {}): Lead => ({
   id: 'lead-1',
@@ -61,6 +64,12 @@ describe('listLeadsTool', () => {
       findLeads: mockFindLeads,
       getStatus: mockGetStatus,
     });
+    mockGetUserLeadPrivileges.mockResolvedValue({
+      has_read_permissions: true,
+      has_write_permissions: true,
+      has_all_required: true,
+      privileges: {},
+    });
   });
 
   describe('schema', () => {
@@ -89,6 +98,23 @@ describe('listLeadsTool', () => {
   describe('handler', () => {
     const handlerContext = () =>
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId: 'default' });
+
+    it('returns permission error when user lacks read permissions', async () => {
+      mockGetUserLeadPrivileges.mockResolvedValue({
+        has_read_permissions: false,
+        has_write_permissions: false,
+        has_all_required: false,
+        privileges: {},
+      });
+
+      const result = (await tool.handler({}, handlerContext())) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const errResult = result.results[0] as ErrorResult;
+      expect(errResult.type).toBe(ToolResultType.error);
+      expect((errResult.data as { message: string }).message).toContain('permission');
+      expect(mockFindLeads).not.toHaveBeenCalled();
+    });
 
     it('returns leads and generation status on success', async () => {
       const lead = makeTestLead();
