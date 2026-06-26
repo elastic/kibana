@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
+import {
+  NoSuchAlertError,
+  NoSuchSessionError,
+  NoSuchWindowError,
+} from 'selenium-webdriver/lib/error';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import type { BrowserConfig } from './webdriver';
 import { initWebDriver } from './webdriver';
@@ -95,6 +99,24 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.afterTestSuite.add(async () => {
     await tryWebDriverCall(async () => {
+      // ChromeDriver 148+ throws InvalidArgumentError on any command when a
+      // beforeunload dialog is already open, even with unhandledPromptBehavior:
+      // 'accept' set (see #271881). Handle both cases:
+      //
+      // 1. Dialog is already open (triggered by a prior spec's cleanup
+      //    navigation) — dismiss it explicitly so subsequent commands can run.
+      try {
+        await driver.switchTo().alert().accept();
+      } catch (e) {
+        if (!(e instanceof NoSuchAlertError)) throw e;
+      }
+      // 2. No dialog yet but a leaked handler could fire — disarm it so the
+      //    commands below (setRect, clearBrowserStorage) can't trigger one.
+      try {
+        await driver.executeScript('window.onbeforeunload = null;');
+      } catch (_) {
+        // session may already be gone; ignore
+      }
       // global cleanup
       const { width, height } = windowSizeStack.shift()!;
       await driver.manage().window().setRect({ width, height });
