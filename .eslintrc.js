@@ -3103,6 +3103,19 @@ module.exports = {
 };
 
 /**
+ * Navigation title sentence-case rule. Self-scoping (no globs needed): it checks
+ * nav trees (files importing @kbn/core-chrome-browser), navigation modules, and
+ * `registerApp` / `deepLinks` titles detected by AST context in any file.
+ */
+module.exports.overrides.push({
+  files: ['**/*.{ts,tsx}'],
+  excludedFiles: ['**/*.{test,spec}.{ts,tsx}', '**/*.stories.{ts,tsx}'],
+  rules: {
+    '@kbn/i18n/nav_link_should_use_sentence_case': 'warn',
+  },
+});
+
+/**
  * Prettier disables all conflicting rules, listing as last override so it takes precedence
  * people kept ignoring that this was last so it's now defined outside of the overrides list
  */
