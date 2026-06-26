@@ -743,8 +743,9 @@ export class CasesConnectorExecutor {
     }
 
     let v2Template: ParsedTemplateDefinition | null = null;
-    let customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map();
-    let templatesConfigurationMap: Map<string, TemplatesConfiguration> = new Map();
+
+    const { customFieldsConfigurationMap, templatesConfigurationMap } =
+      await this.getCustomFieldsAndTemplatesConfiguration();
 
     if (params.templateVersion && params.templateId) {
       v2Template = await resolveV2Template(
@@ -754,9 +755,6 @@ export class CasesConnectorExecutor {
         params.owner,
         this.logger
       );
-    } else {
-      ({ customFieldsConfigurationMap, templatesConfigurationMap } =
-        await this.getCustomFieldsAndTemplatesConfiguration());
     }
 
     for (const error of nonFoundErrors) {
@@ -1169,8 +1167,11 @@ export class CasesConnectorExecutor {
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
 
     let v2TemplateForReopened: ParsedTemplateDefinition | null = null;
-    let customFieldsConfigurationMapForReopened: Map<string, CustomFieldsConfiguration> = new Map();
-    let templatesConfigurationMapForReopened: Map<string, TemplatesConfiguration> = new Map();
+
+    const {
+      customFieldsConfigurationMap: customFieldsConfigurationMapForReopened,
+      templatesConfigurationMap: templatesConfigurationMapForReopened,
+    } = await this.getCustomFieldsAndTemplatesConfiguration();
 
     if (params.templateVersion && params.templateId) {
       v2TemplateForReopened = await resolveV2Template(
@@ -1180,11 +1181,6 @@ export class CasesConnectorExecutor {
         params.owner,
         this.logger
       );
-    } else {
-      ({
-        customFieldsConfigurationMap: customFieldsConfigurationMapForReopened,
-        templatesConfigurationMap: templatesConfigurationMapForReopened,
-      } = await this.getCustomFieldsAndTemplatesConfiguration());
     }
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>

@@ -1340,6 +1340,52 @@ fields: []
 
             expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
           });
+
+          it('populates required custom fields with defaults on the v2 path', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: params.owner,
+                customFields: [
+                  {
+                    key: 'req-text-key',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'Required text',
+                    required: true,
+                    defaultValue: 'default-text',
+                  },
+                  {
+                    key: 'req-toggle-key',
+                    type: CustomFieldTypes.TOGGLE,
+                    label: 'Required toggle',
+                    required: true,
+                    defaultValue: null,
+                  },
+                ],
+                templates: [],
+              },
+            ]);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.customFields).toEqual([
+              { key: 'req-text-key', type: CustomFieldTypes.TEXT, value: 'default-text' },
+              { key: 'req-toggle-key', type: CustomFieldTypes.TOGGLE, value: false },
+            ]);
+          });
         });
 
         describe('Custom Fields', () => {
