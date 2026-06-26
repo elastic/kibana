@@ -162,7 +162,11 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packBlock.pack_id).toBe('pack-1');
   });
 
-  test('skips the package-policy write when the wire already matches the SO (no revision churn)', async () => {
+  // Build the route-shaped wire a pack would actually carry once reconciled:
+  // the reconciler's own projected block PLUS the `shard` field the create/
+  // update routes always set (and that `convertSOQueriesToPackConfig` never
+  // emits). This is the realistic steady-state input the diff gate must match.
+  const buildInSyncPolicyFromFirstReconcile = async () => {
     const firstUpdate = jest.fn().mockResolvedValue({});
     const firstList = jest.fn().mockResolvedValue({ items: [buildPackagePolicy()] });
 
@@ -176,6 +180,18 @@ describe('reconcileScheduleIdsToWire', () => {
     });
 
     const reconciledPolicy = { ...firstUpdate.mock.calls[0][3], id: 'pp-1' };
+    // The first reconcile preserves `shard: 100` from buildPackagePolicy, so
+    // reconciledPolicy is already route-shaped (carries `shard`). Assert that
+    // rather than re-injecting it, so the fixture can't silently lose realism.
+    expect(
+      reconciledPolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'].shard
+    ).toBe(100);
+
+    return reconciledPolicy;
+  };
+
+  test('skips the package-policy write when a route-shaped wire already matches the SO (no revision churn)', async () => {
+    const reconciledPolicy = await buildInSyncPolicyFromFirstReconcile();
 
     const secondUpdate = jest.fn().mockResolvedValue({});
     const secondList = jest.fn().mockResolvedValue({ items: [reconciledPolicy] });
@@ -193,6 +209,34 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('already in sync on policy pp-1, skipping write')
     );
+  });
+
+  test('preserves the wire-only `shard` field when it does write', async () => {
+    const scopedClient = createMockScopedClient();
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    // A route-shaped wire whose `schedule_id`s are stale → a write IS needed,
+    // but `shard` must survive (it controls pack rollout percentage).
+    const stalePolicy = buildPackagePolicy();
+    stalePolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'].shard = 42;
+    const packagePolicyList = jest.fn().mockResolvedValue({ items: [stalePolicy] });
+
+    const { core } = createMockCoreStart(buildEnabledPackFindResult(), scopedClient);
+    const osqueryContext = createMockOsqueryContext({
+      list: packagePolicyList,
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    const updatedPolicy = packagePolicyUpdate.mock.calls[0][3];
+    const packBlock = updatedPolicy.inputs[0].config.osquery.value.packs['default--reconcile-pack'];
+    expect(packBlock.shard).toBe(42);
+    expect(packBlock.queries.q1.schedule_id).toBe('sched-q1');
   });
 
   test('is idempotent — a second run changes no schedule_id', async () => {

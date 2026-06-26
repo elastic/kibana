@@ -145,13 +145,21 @@ export const reconcileScheduleIdsToWire = async ({
             }
           );
 
+          const existingPackBlock = get(pp, packPath) as Record<string, unknown> | undefined;
+
+          // The pack-config block this reconcile run is about to write onto the
+          // wire. The write below deletes the existing block
+          // (`removePackFromPolicy`) and re-sets exactly this object, so it IS
+          // the post-write state — comparing it against the current wire tells
+          // us whether the write would change anything.
           const intendedPackBlock = {
+            ...(existingPackBlock?.shard !== undefined ? { shard: existingPackBlock.shard } : {}),
             pack_id: packSO.id,
             ...packDefaults,
             queries: builtQueries,
           };
 
-          if (isEqual(get(pp, packPath), intendedPackBlock)) {
+          if (isEqual(existingPackBlock, intendedPackBlock)) {
             logger.debug(
               `reconcileScheduleIdsToWire: pack ${packSO.id} already in sync on policy ${pp.id}, skipping write`
             );
@@ -165,12 +173,7 @@ export const reconcileScheduleIdsToWire = async ({
             produce<PackagePolicy>(pp, (draft) => {
               unset(draft, 'id');
               removePackFromPolicy(draft, packSO.attributes.name, spaceId);
-              set(draft, `${packPath}.pack_id`, packSO.id);
-              for (const [k, v] of Object.entries(packDefaults)) {
-                set(draft, `${packPath}.${k}`, v);
-              }
-
-              set(draft, `${packPath}.queries`, builtQueries);
+              set(draft, packPath, intendedPackBlock);
 
               return draft;
             })
