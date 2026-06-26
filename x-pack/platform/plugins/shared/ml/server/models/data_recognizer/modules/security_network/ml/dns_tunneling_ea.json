@@ -1,6 +1,6 @@
 {
-  "description": "Security: Packetbeat - Looks for unusual DNS activity that could indicate command-and-control or data exfiltration activity.",
-  "groups": ["security", "packetbeat", "dns"],
+  "description": "Security: Network - Looks for unusual DNS activity that could indicate command-and-control or data exfiltration activity.",
+  "groups": ["security", "network", "dns"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -33,7 +33,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-security-packetbeat",
+    "created_by": "ml-module-security-network",
     "security_app_display_name": "DNS Tunneling",
     "managed": true,
     "job_revision": 4,

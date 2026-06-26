@@ -4,12 +4,14 @@
   "max_empty_searches": 10,
   "query": {
     "bool": {
-      "filter": [{ "term": { "agent.type": "packetbeat" } }],
-      "should": [
-        { "term": { "event.dataset": "dns" } },
-        { "term": { "event.dataset": "network_traffic.dns" } }
+      "filter": [
+        {
+          "term": {
+            "event.category": "network"
+          }
+        },
+        { "exists": { "field": "dns.question.name" } }
       ],
-      "minimum_should_match": 1,
       "must_not": [
         { "bool": { "filter": { "term": { "dns.question.type": "PTR" } } } },
         { "terms": { "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"] } }
