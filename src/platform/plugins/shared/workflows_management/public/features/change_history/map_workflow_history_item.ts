@@ -28,6 +28,7 @@ export const mapWorkflowHistoryItemToListItem = (
   action: item.action,
   ...(isCurrent ? { isCurrent: true } : {}),
   ...(item.version != null ? { metadata: { version: item.version } } : {}),
+  ...(item.comment ? { comment: item.comment } : {}),
 });
 
 export const mapWorkflowHistoryItemToDetail = (

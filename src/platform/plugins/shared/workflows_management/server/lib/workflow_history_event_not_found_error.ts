@@ -7,18 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  WORKFLOW_CHANGE_HISTORY_DATASET,
-  WORKFLOW_CHANGE_HISTORY_LIST_PATH,
-  WORKFLOW_CHANGE_HISTORY_MODULE,
-  WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
-  WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
-  WorkflowChangeHistoryAction,
-} from './constants';
-export type { WorkflowChangeHistoryActionType } from './constants';
-export type {
-  RestoreWorkflowVersionResponseDto,
-  WorkflowChangesHistoryResponse,
-  WorkflowHistoryItem,
-  WorkflowRestoreMetadata,
-} from './types';
+/**
+ * Thrown when a workflow change-history event id does not exist for the workflow.
+ */
+export class WorkflowHistoryEventNotFoundError extends Error {
+  constructor(workflowId: string, eventId: string) {
+    super(`Change history event '${eventId}' not found for workflow '${workflowId}'.`);
+    this.name = 'WorkflowHistoryEventNotFoundError';
+  }
+}

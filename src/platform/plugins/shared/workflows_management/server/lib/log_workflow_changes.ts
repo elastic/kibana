@@ -11,14 +11,17 @@ import type { ObjectChange } from '@kbn/change-history';
 import type { Logger } from '@kbn/core/server';
 import { DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS, delayMs } from '@kbn/occ';
 
+import { formatRestoreHistoryComment } from './format_restore_history_comment';
 import { isRetryableChangeHistoryError } from './is_retryable_change_history_error';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   type WorkflowChangeHistoryActionType,
 } from '../../common/lib/workflow_change_history/constants';
+import type { WorkflowRestoreMetadata } from '../../common/lib/workflow_change_history/types';
 import type {
   IScopedWorkflowChangeHistoryService,
   IWorkflowChangeHistoryService,
+  ScopedLogChangeHistoryOptions,
 } from '../services/workflow_change_history_types';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -31,6 +34,7 @@ export interface LogWorkflowChangesParams {
   spaceId: string;
   timestamp: string | Date;
   correlationId?: string;
+  restoreMetadata?: WorkflowRestoreMetadata;
   logger: Logger;
   maxRetries?: number;
   retryDelayMs?: number;
@@ -74,6 +78,7 @@ export const logWorkflowChanges = async ({
   spaceId,
   timestamp,
   correlationId,
+  restoreMetadata,
   logger,
   maxRetries = DEFAULT_MAX_RETRIES,
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
@@ -96,13 +101,27 @@ export const logWorkflowChanges = async ({
     action,
     spaceId,
     ...(correlationId ? { correlationId } : {}),
+    ...(restoreMetadata
+      ? {
+          data: {
+            event: {
+              reason: formatRestoreHistoryComment(restoreMetadata.sequence),
+            },
+            metadata: {
+              restore: {
+                eventId: restoreMetadata.eventId,
+              },
+            },
+          },
+        }
+      : {}),
   };
 
   const maxAttempts = 1 + maxRetries;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await scopedChangeHistory.logBulk(changes, logOpts);
+      await scopedChangeHistory.logBulk(changes, logOpts as ScopedLogChangeHistoryOptions);
       return;
     } catch (error) {
       if (!isRetryableChangeHistoryError(error) || attempt >= maxAttempts) {

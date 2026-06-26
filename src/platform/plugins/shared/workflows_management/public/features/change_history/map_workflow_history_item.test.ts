@@ -55,6 +55,21 @@ describe('mapWorkflowHistoryItem', () => {
     });
   });
 
+  it('maps restore rows with comment on the timeline', () => {
+    expect(
+      mapWorkflowHistoryItemToListItem({
+        ...currentHistoryItem,
+        action: WorkflowChangeHistoryAction.workflowRestore,
+        comment: 'Restored from v3',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        action: WorkflowChangeHistoryAction.workflowRestore,
+        comment: 'Restored from v3',
+      })
+    );
+  });
+
   it('maps detail with workflow yaml snapshot', () => {
     const detail = mapWorkflowHistoryItemToDetail(currentHistoryItem, {
       isCurrent: true,

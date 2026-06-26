@@ -39,6 +39,7 @@ describe('Internal Routes', () => {
     disableAllWorkflows: jest.MockedFunction<(spaceId: string) => Promise<unknown>>;
     searchExecutionsView: jest.Mock;
     getHistoryForWorkflow: jest.Mock;
+    restoreWorkflowVersion: jest.Mock;
   };
   let mockTriggerEventsIsEnabled: boolean;
   let mockSearch: jest.Mock;
@@ -86,6 +87,7 @@ describe('Internal Routes', () => {
       disableAllWorkflows: jest.fn(),
       searchExecutionsView: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
+      restoreWorkflowVersion: jest.fn(),
     };
     mockSearch = jest.fn().mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
@@ -144,7 +146,7 @@ describe('Internal Routes', () => {
       service: mockWorkflowsService,
       logger,
       spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
-      audit: { logWorkflowAccessed: jest.fn() },
+      audit: { logWorkflowAccessed: jest.fn(), logWorkflowUpdated: jest.fn() },
     } as unknown as RouteDependencies;
 
     registerInternalRoutes(routeDependencies);
@@ -360,6 +362,12 @@ describe('Internal Routes', () => {
     expect(routeHandlers[`GET:/internal/workflows/workflow/{id}/history`]).toBeDefined();
   });
 
+  it('should register the workflow restore route handler', () => {
+    expect(
+      routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`]
+    ).toBeDefined();
+  });
+
   it('should call api.getHistoryForWorkflow with page/per_page defaults', async () => {
     const history = { page: 1, perPage: 20, total: 1, items: [{ id: 'event-1' }] };
     mockApi.getHistoryForWorkflow.mockResolvedValue(history);
@@ -399,6 +407,38 @@ describe('Internal Routes', () => {
       page: 2,
       perPage: 5,
     });
+  });
+
+  it('should call api.restoreWorkflowVersion and return the restored workflow', async () => {
+    const restored = {
+      id: 'wf-1',
+      version: 8,
+      lastUpdatedAt: '2026-01-02T00:00:00.000Z',
+      lastUpdatedBy: 'alice',
+      enabled: true,
+      valid: true,
+      validationErrors: [],
+    };
+    mockApi.restoreWorkflowVersion.mockResolvedValue(restored);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1', eventId: 'event-v3' },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/history/{eventId}/restore`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.restoreWorkflowVersion).toHaveBeenCalledWith(
+      'wf-1',
+      'event-v3',
+      'default',
+      request
+    );
+    expect(response.ok).toHaveBeenCalledWith({ body: restored });
   });
 
   it('forwards trigger event log search params to the execution engine', async () => {

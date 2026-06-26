@@ -20,6 +20,7 @@ import {
   isWorkflowValidationError,
 } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
+import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
 import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
 
 /**
@@ -61,6 +62,14 @@ export function handleRouteError(
   }
 
   if (error instanceof WorkflowNotFoundError) {
+    return response.notFound({
+      body: {
+        message: error.message,
+      },
+    });
+  }
+
+  if (error instanceof WorkflowHistoryEventNotFoundError) {
     return response.notFound({
       body: {
         message: error.message,

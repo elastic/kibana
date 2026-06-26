@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  WORKFLOW_CHANGE_HISTORY_DATASET,
-  WORKFLOW_CHANGE_HISTORY_LIST_PATH,
-  WORKFLOW_CHANGE_HISTORY_MODULE,
-  WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
-  WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
-  WorkflowChangeHistoryAction,
-} from './constants';
-export type { WorkflowChangeHistoryActionType } from './constants';
-export type {
-  RestoreWorkflowVersionResponseDto,
-  WorkflowChangesHistoryResponse,
-  WorkflowHistoryItem,
-  WorkflowRestoreMetadata,
-} from './types';
+import { formatRestoreHistoryComment } from './format_restore_history_comment';
+
+describe('formatRestoreHistoryComment', () => {
+  it('formats a versioned restore comment', () => {
+    expect(formatRestoreHistoryComment(3)).toBe('Restored from v3');
+  });
+
+  it('formats a fallback when the source sequence is unknown', () => {
+    expect(formatRestoreHistoryComment()).toBe('Restored from a previous version');
+  });
+});
