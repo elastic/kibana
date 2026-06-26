@@ -18,10 +18,10 @@ export const KillProcessActionResult = memo<
   const actionCreator = useSendKillProcessRequest();
 
   const actionRequestBody = useMemo<undefined | KillProcessRequestBody>(() => {
-    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+    const { apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const parameters = parsedKillOrSuspendParameter(command.args.args);
 
-    return endpointId && apiReqBodyBase
+    return apiReqBodyBase
       ? {
           ...apiReqBodyBase,
           comment: command.args.args?.comment?.[0],

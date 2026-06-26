@@ -20,10 +20,10 @@ export const ScanActionResult = memo<
   const actionCreator = useSendScanRequest();
 
   const actionRequestBody = useMemo<undefined | ScanActionRequestBody>(() => {
-    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+    const { apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { path, comment } = command.args.args;
 
-    return endpointId && apiReqBodyBase
+    return apiReqBodyBase
       ? {
           ...apiReqBodyBase,
           comment: comment?.[0],

@@ -61,9 +61,9 @@ export const RunScriptActionResult = memo<
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendRunScriptEndpoint();
   const actionRequestBody = useMemo<undefined | RunScriptActionRequestBody>(() => {
-    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+    const { apiReqBodyBase, agentType } = command.commandDefinition?.meta ?? {};
 
-    if (!endpointId || !apiReqBodyBase) {
+    if (!apiReqBodyBase) {
       return {} as unknown as RunScriptActionRequestBody;
     }
 

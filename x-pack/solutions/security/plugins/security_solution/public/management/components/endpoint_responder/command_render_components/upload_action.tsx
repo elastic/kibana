@@ -29,10 +29,10 @@ export const UploadActionResult = memo<
   const actionCreator = useSendUploadEndpointRequest();
 
   const actionRequestBody = useMemo<undefined | UploadActionUIRequestBody>(() => {
-    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+    const { apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { comment, overwrite, file } = command.args.args;
 
-    if (!endpointId || !apiReqBodyBase) {
+    if (!apiReqBodyBase) {
       return;
     }
 

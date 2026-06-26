@@ -23,10 +23,10 @@ export const GetFileActionResult = memo<
   const actionCreator = useSendGetFileRequest();
 
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
-    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+    const { apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { path, comment } = command.args.args;
 
-    return endpointId && apiReqBodyBase
+    return apiReqBodyBase
       ? {
           ...apiReqBodyBase,
           comment: comment?.[0],

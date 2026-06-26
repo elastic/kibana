@@ -23,12 +23,12 @@ export const SuspendProcessActionResult = memo<
   const actionCreator = useSendSuspendProcessRequest();
 
   const actionRequestBody = useMemo<undefined | SuspendProcessRequestBody>(() => {
-    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+    const { apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const parameters = parsedKillOrSuspendParameter(command.args.args) as
       | ResponseActionParametersWithPid
       | ResponseActionParametersWithEntityId;
 
-    return endpointId && apiReqBodyBase
+    return apiReqBodyBase
       ? {
           ...apiReqBodyBase,
           comment: command.args.args?.comment?.[0],

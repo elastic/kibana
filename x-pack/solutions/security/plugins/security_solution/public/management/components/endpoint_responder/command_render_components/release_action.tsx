@@ -15,10 +15,10 @@ export const ReleaseActionResult = memo<ActionRequestComponentProps>(
     const releaseHostApi = useSendReleaseEndpointRequest();
 
     const actionRequestBody = useMemo(() => {
-      const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+      const { apiReqBodyBase } = command.commandDefinition?.meta ?? {};
       const comment = command.args.args?.comment?.[0];
 
-      return endpointId && apiReqBodyBase ? { ...apiReqBodyBase, comment } : undefined;
+      return apiReqBodyBase ? { ...apiReqBodyBase, comment } : undefined;
     }, [command.args.args?.comment, command.commandDefinition?.meta]);
 
     if (!actionRequestBody) {

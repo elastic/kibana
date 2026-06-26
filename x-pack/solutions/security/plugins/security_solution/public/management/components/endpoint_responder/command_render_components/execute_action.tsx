@@ -32,9 +32,9 @@ export const ExecuteActionResult = memo<
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
-    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+    const { apiReqBodyBase } = command.commandDefinition?.meta ?? {};
 
-    if (!endpointId || !apiReqBodyBase) {
+    if (!apiReqBodyBase) {
       return;
     }
     return {
@@ -88,7 +88,6 @@ export const ExecuteActionResult = memo<
       <ExecuteActionHostResponse
         action={completedActionDetails}
         canAccessFileDownloadLink={true}
-        agentId={command.commandDefinition?.meta?.endpointId}
         textSize="s"
         data-test-subj="console"
       />

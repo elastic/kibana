@@ -34,10 +34,10 @@ export const MemoryDumpActionResult = memo<
   const actionCreator = useSendMemoryDumpRequest();
 
   const actionRequestBody = useMemo<undefined | MemoryDumpActionRequestBody>(() => {
-    const { endpointId, apiReqBodyBase } = command.commandDefinition?.meta ?? {};
+    const { apiReqBodyBase } = command.commandDefinition?.meta ?? {};
     const { comment, kernel, pid, entityId } = command.args.args;
 
-    if (!endpointId || !apiReqBodyBase) {
+    if (!apiReqBodyBase) {
       return;
     }
 
@@ -78,7 +78,6 @@ export const MemoryDumpActionResult = memo<
       <ResultComponent>
         <MemoryDumpResponseActionOutputResult
           action={actionDetails}
-          agentId={command.commandDefinition?.meta?.endpointId}
           data-test-subj="memoryDumpResult"
         />
       </ResultComponent>

@@ -34,7 +34,7 @@ export const EndpointStatusActionResult = memo<
     EndpointCommandDefinitionMeta
   >
 >(({ command, status, setStatus, store, setStore, ResultComponent }) => {
-  const endpointId = command.commandDefinition?.meta?.endpointId as string;
+  const endpointId = command.commandDefinition?.meta?.endpointId.at(0) as string;
   const { endpointPendingActions, endpointDetails, detailsFetchError, apiCalled } = store;
   const isPending = status === 'pending';
   const queryKey = useMemo(() => {
