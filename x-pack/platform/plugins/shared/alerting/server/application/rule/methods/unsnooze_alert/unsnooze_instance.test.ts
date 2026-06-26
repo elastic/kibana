@@ -194,6 +194,58 @@ describe('unsnooze alert instance', () => {
     );
   });
 
+  it('throws 400 for Security Solution (Detection Engine) rule types', async () => {
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: 'siem.queryRule',
+        consumer: 'siem',
+        schedule: { interval: '1m' },
+        params: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        snoozedInstances: [],
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      unsnoozeAlertInstance(context, { alertId: '1', alertInstanceId: 'instance1' })
+    ).rejects.toThrow('Per-alert unsnooze is not supported for rule type "siem.queryRule"');
+
+    expect(savedObjectsMock.update).not.toHaveBeenCalled();
+  });
+
+  it('throws 400 for rules with consumer siem even if rule type is not in ruleTypeMappings', async () => {
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: 'siem.unknownFutureRule',
+        consumer: 'siem',
+        schedule: { interval: '1m' },
+        params: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        snoozedInstances: [],
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      unsnoozeAlertInstance(context, { alertId: '1', alertInstanceId: 'instance1' })
+    ).rejects.toThrow('Per-alert unsnooze is not supported for rule type "siem.unknownFutureRule"');
+
+    expect(savedObjectsMock.update).not.toHaveBeenCalled();
+  });
+
   it('logs an alert_unsnooze failure audit event when authorization fails', async () => {
     savedObjectsMock.get.mockResolvedValueOnce({
       id: '1',

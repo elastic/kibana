@@ -435,6 +435,95 @@ describe('snooze alert instance', () => {
     );
   });
 
+  it('throws 400 for Security Solution (Detection Engine) rule types', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: 'siem.queryRule',
+        schedule: { interval: '1m' },
+        params: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: { expiresAt: '2099-12-31T23:59:59.000Z' },
+      })
+    ).rejects.toThrow('Per-alert snooze is not supported for rule type "siem.queryRule"');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws 400 for rules with consumer siem even if rule type is not in ruleTypeMappings', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: 'siem.unknownFutureRule',
+        consumer: 'siem',
+        schedule: { interval: '1m' },
+        params: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: { expiresAt: '2099-12-31T23:59:59.000Z' },
+      })
+    ).rejects.toThrow('Per-alert snooze is not supported for rule type "siem.unknownFutureRule"');
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a fabricated alert instance ID with 404 when validateAlertsExistence is true', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    alertsServiceMock.isExistingAlert.mockResolvedValueOnce(false);
+
+    await expect(() =>
+      snoozeAlertInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'this-id-does-not-exist' },
+        query: { validateAlertsExistence: true },
+        body: { expiresAt: '2099-12-31T23:59:59.000Z' },
+      })
+    ).rejects.toThrow(
+      'Alert instance with id "this-id-does-not-exist" does not exist for rule with id "1"'
+    );
+
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
   it('logs an alert_snooze failure audit event when authorization fails', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',

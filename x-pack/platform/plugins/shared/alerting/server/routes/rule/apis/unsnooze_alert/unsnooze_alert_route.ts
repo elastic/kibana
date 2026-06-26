@@ -28,6 +28,10 @@ export const unsnoozeAlertRoute = (
         access: 'public',
         summary: `Unsnooze an alert`,
         tags: ['oas-tag:alerting'],
+        availability: {
+          since: '9.5.0',
+          stability: 'stable',
+        },
       },
       validate: {
         request: {

@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import {
@@ -29,6 +30,7 @@ import {
   getPerAlertSnoozeSnapshotFields,
   upsertPerAlertSnoozeEntry,
 } from '../../../../rules_client/common/per_alert_snooze_utils';
+import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
 
 export async function snoozeAlertInstance(
   context: RulesClientContext,
@@ -74,10 +76,11 @@ async function snoozeAlertInstanceWithOCC(
   { validateAlertsExistence }: SnoozeAlertInstanceQuery,
   body: SnoozeAlertInstanceBody
 ) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
+  const ruleSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>(
     RULE_SAVED_OBJECT_TYPE,
     ruleId
   );
+  const { attributes, version } = ruleSavedObject;
 
   try {
     await context.authorization.ensureAuthorized({
@@ -108,6 +111,15 @@ async function snoozeAlertInstanceWithOCC(
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+  if (
+    isDetectionEngineAADRuleType(ruleSavedObject) ||
+    attributes.consumer === AlertConsumers.SIEM
+  ) {
+    throw Boom.badRequest(
+      `Per-alert snooze is not supported for rule type "${attributes.alertTypeId}"`
+    );
+  }
 
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
   const updatedAt = new Date().toISOString();

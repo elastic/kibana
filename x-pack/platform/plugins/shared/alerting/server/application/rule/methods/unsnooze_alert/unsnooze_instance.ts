@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
@@ -17,6 +18,7 @@ import { removePerAlertSnoozeEntry } from '../../../../rules_client/common/per_a
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { unsnoozeAlertParamsSchema } from './schemas';
 import type { UnsnoozeAlertParams } from './types';
+import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
 
 export async function unsnoozeAlertInstance(
   context: RulesClientContext,
@@ -40,10 +42,11 @@ async function unsnoozeInstanceWithOCC(
   context: RulesClientContext,
   { alertId: ruleId, alertInstanceId }: UnsnoozeAlertParams
 ) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
+  const ruleSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>(
     RULE_SAVED_OBJECT_TYPE,
     ruleId
   );
+  const { attributes, version } = ruleSavedObject;
 
   try {
     await context.authorization.ensureAuthorized({
@@ -74,6 +77,15 @@ async function unsnoozeInstanceWithOCC(
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+  if (
+    isDetectionEngineAADRuleType(ruleSavedObject) ||
+    attributes.consumer === AlertConsumers.SIEM
+  ) {
+    throw Boom.badRequest(
+      `Per-alert unsnooze is not supported for rule type "${attributes.alertTypeId}"`
+    );
+  }
 
   const snoozedInstances = removePerAlertSnoozeEntry({
     snoozedInstances: attributes.snoozedInstances,
