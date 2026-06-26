@@ -139,15 +139,11 @@ export const SharepointServer: ConnectorSpec = {
         const escapedPath = path.replace(/'/g, "''");
         const [filesResponse, foldersResponse] = await Promise.all([
           ctx.client.get(
-            `${normalize(
-              siteUrl
-            )}/_api/web/GetFolderByServerRelativeUrl('${escapedPath}')/Files`,
+            `${normalize(siteUrl)}/_api/web/GetFolderByServerRelativeUrl('${escapedPath}')/Files`,
             { headers: ODATA_HEADERS }
           ),
           ctx.client.get(
-            `${normalize(
-              siteUrl
-            )}/_api/web/GetFolderByServerRelativeUrl('${escapedPath}')/Folders`,
+            `${normalize(siteUrl)}/_api/web/GetFolderByServerRelativeUrl('${escapedPath}')/Folders`,
             { headers: ODATA_HEADERS }
           ),
         ]);
