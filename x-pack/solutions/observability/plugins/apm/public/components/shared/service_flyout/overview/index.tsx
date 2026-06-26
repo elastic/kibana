@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -50,6 +51,7 @@ interface FlyoutLensChartDefinition {
 function ServiceFlyoutChartsSection({
   id,
   title,
+  description,
   charts,
   rangeFrom,
   rangeTo,
@@ -57,6 +59,7 @@ function ServiceFlyoutChartsSection({
 }: {
   id: string;
   title: string;
+  description?: string;
   charts: FlyoutLensChartDefinition[];
   rangeFrom: string;
   rangeTo: string;
@@ -71,9 +74,23 @@ function ServiceFlyoutChartsSection({
         initialIsOpen
         onToggle={setIsOpen}
         buttonContent={
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {description ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={description}
+                  size="s"
+                  color="subdued"
+                  aria-label={description}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         }
         data-test-subj={`serviceFlyoutSection-${id}`}
       >
@@ -170,6 +187,13 @@ export function ServiceFlyoutOverview({
             title={i18n.translate('xpack.apm.serviceFlyout.infrastructureMetricsSectionTitle', {
               defaultMessage: 'Infrastructure metrics',
             })}
+            description={i18n.translate(
+              'xpack.apm.serviceFlyout.infrastructureMetricsSectionTooltip',
+              {
+                defaultMessage:
+                  'Infrastructure metrics reflect system-level data and are not filtered by transaction type.',
+              }
+            )}
             charts={infrastructureMetrics}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
