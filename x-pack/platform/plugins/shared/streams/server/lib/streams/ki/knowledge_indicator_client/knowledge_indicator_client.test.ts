@@ -762,7 +762,14 @@ describe('KnowledgeIndicatorClient.keepAliveDurableIndicators', () => {
 
   it('re-emits durable queries with a fresh @timestamp, no expires_at, and preserves rule_backed/rule_id', async () => {
     const { client, create, runEsql } = makeClient();
-    const durableQuery = createQueryDoc({ query: { esql: 'FROM logs-app | WHERE error == true', query_type: 'match', rule_backed: true, rule_id: 'rule-xyz' } });
+    const durableQuery = createQueryDoc({
+      query: {
+        esql: 'FROM logs-app | WHERE error == true',
+        query_type: 'match',
+        rule_backed: true,
+        rule_id: 'rule-xyz',
+      },
+    });
     runEsql.mockResolvedValueOnce({ hits: [durableQuery] });
 
     const result = await client.keepAliveDurableIndicators(STREAM, {
