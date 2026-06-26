@@ -511,15 +511,21 @@ describe('api_key_utils', () => {
       const coreStart = coreMock.createStart();
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(enrichedUser);
+      coreStart.security.authc.apiKeys.cloneAsInternalUser = jest.fn().mockResolvedValueOnce({
+        id: 'clonedApiKeyId',
+        name: 'TaskManager: report',
+        api_key: 'clonedApiKey',
+      });
 
       const result = await getApiKeyAndUserScope([mockTask], fakeRequest, coreStart.security);
 
+      // Fake requests clone the caller's key; reading blocked identity fields must not throw.
       expect(result.get('task')).toEqual({
-        apiKey: 'YXBpS2V5SWQ6bXktZmFrZS1hcGlLZXk=',
+        apiKey: 'Y2xvbmVkQXBpS2V5SWQ6Y2xvbmVkQXBpS2V5',
         userScope: {
-          apiKeyId: 'apiKeyId',
+          apiKeyId: 'clonedApiKeyId',
           spaceId: 'default',
-          apiKeyCreatedByUser: true,
+          apiKeyCreatedByUser: false,
           userProfileId: 'u_profile_enriched',
         },
       });
