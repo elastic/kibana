@@ -30,6 +30,7 @@ enum Section {
   History = 'history',
   Packs = 'packs',
   SavedQueries = 'saved_queries',
+  Files = 'files',
 }
 
 const topBarCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -56,6 +57,8 @@ export const MainNavigation = () => {
     [location.pathname]
   );
 
+  const isFileSystemViewerEnabled = useIsExperimentalFeatureEnabled('fileSystemViewer');
+
   const historySection = isHistoryEnabled ? Section.History : Section.LiveQueries;
   const persistedHistoryQs = isHistoryEnabled ? getHistoryFilters() : '';
   const historyNavProps = useRouterNavigate(
@@ -63,11 +66,14 @@ export const MainNavigation = () => {
   );
   const packsNavProps = useRouterNavigate(Section.Packs);
   const savedQueriesNavProps = useRouterNavigate(Section.SavedQueries);
+  const filesNavProps = useRouterNavigate(Section.Files);
   const newQueryNavProps = useRouterNavigate('/new');
 
   const canRunQuery =
     permissions.writeLiveQueries ||
     (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks));
+
+  const showFilesTab = isFileSystemViewerEnabled && permissions.writeLiveQueries;
 
   if (isHistoryEnabled) {
     const topBar = (
@@ -127,6 +133,14 @@ export const MainNavigation = () => {
                   defaultMessage="Queries"
                 />
               </EuiTab>
+              {showFilesTab && (
+                <EuiTab isSelected={section === Section.Files} {...filesNavProps}>
+                  <FormattedMessage
+                    id="xpack.osquery.appNavigation.filesLinkText"
+                    defaultMessage="Files"
+                  />
+                </EuiTab>
+              )}
             </EuiTabs>
           </div>
         )}
@@ -157,6 +171,14 @@ export const MainNavigation = () => {
                 defaultMessage="Saved queries"
               />
             </EuiTab>
+            {showFilesTab && (
+              <EuiTab isSelected={section === Section.Files} {...filesNavProps}>
+                <FormattedMessage
+                  id="xpack.osquery.appNavigation.filesLinkText"
+                  defaultMessage="Files"
+                />
+              </EuiTab>
+            )}
           </EuiTabs>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

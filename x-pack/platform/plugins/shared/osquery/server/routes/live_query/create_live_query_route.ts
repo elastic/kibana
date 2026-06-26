@@ -25,6 +25,7 @@ import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
 import { isOsqueryResponseActionAuthorized } from '../../lib/check_response_action_authz';
 import { createLiveQueryResponseSchema } from './response_schemas';
+import { logOsqueryAuditEvent, OsqueryAuditAction } from '../../lib/audit';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -138,6 +139,13 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               body: PARAMETER_NOT_FOUND,
             });
           }
+
+          const coreContext = await context.core;
+          logOsqueryAuditEvent(coreContext.security.audit.logger, {
+            action: OsqueryAuditAction.LIVE_QUERY,
+            agentId: request.body.agent_ids?.join(','),
+            outcome: 'success',
+          });
 
           return response.ok({
             body: { data: osqueryAction },
