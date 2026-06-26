@@ -62,6 +62,7 @@ const MetricBadges = ({ groups, selected, onSelect }: MetricBadgesProps) => {
             css={g.metricLabel === selected ? selectedCss : undefined}
             onClick={() => onSelect(g.metricLabel)}
             onClickAriaLabel={g.metricLabel}
+            aria-pressed={g.metricLabel === selected}
           >
             {g.metricLabel}
           </EuiBadge>
