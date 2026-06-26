@@ -14,8 +14,7 @@ import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
-import { updateScoutHtmlReport } from './process_scout_reports';
-import type { ScoutTestFailureExtended } from './get_scout_failures';
+import { SCOUT_GITHUB_ISSUES_FILENAME } from './process_scout_reports';
 
 const REPORT_DIR = Path.join(
   '.scout',
@@ -23,32 +22,7 @@ const REPORT_DIR = Path.join(
   'scout-playwright-test-failures-2024-01-01T00-00-00'
 );
 
-// Base report template that `updateScoutHtmlReport` injects the GitHub issue link into.
-const BASE_HTML = `
-  <html>
-    <body>
-      <div class="section" id="tracked-branches-status">
-        <strong>No failures found in tracked branches</strong>
-      </div>
-    </body>
-  </html>
-`;
-
-const createFailure = (
-  overrides: Partial<ScoutTestFailureExtended> = {}
-): ScoutTestFailureExtended => ({
-  id: 'failure-id',
-  target: 'serverless-oblt',
-  location: 'x-pack/test.ts',
-  duration: 1234,
-  owners: 'team:test',
-  classname: 'suite name',
-  name: 'test name',
-  time: '1.23',
-  failure: 'error message',
-  likelyIrrelevant: false,
-  ...overrides,
-});
+const FAILURE_HTML = '<html><body>failure report</body></html>';
 
 const readArtifactFor = (name: string) => {
   const dir = Path.join('target', 'test_failures');
@@ -77,8 +51,8 @@ describe('generateScoutTestFailureArtifacts', () => {
     reportDir = Path.join(tempDir, REPORT_DIR);
     fs.mkdirSync(reportDir, { recursive: true });
 
-    fs.writeFileSync(Path.join(reportDir, 'with-issue.html'), BASE_HTML.trim(), 'utf-8');
-    fs.writeFileSync(Path.join(reportDir, 'without-issue.html'), BASE_HTML.trim(), 'utf-8');
+    fs.writeFileSync(Path.join(reportDir, 'with-issue.html'), FAILURE_HTML, 'utf-8');
+    fs.writeFileSync(Path.join(reportDir, 'without-issue.html'), FAILURE_HTML, 'utf-8');
     fs.writeFileSync(
       Path.join(reportDir, 'test-failures-summary.json'),
       JSON.stringify([
@@ -95,17 +69,17 @@ describe('generateScoutTestFailureArtifacts', () => {
   });
 
   it('carries the GitHub issue link and failure count into the artifact', async () => {
-    // Produce the report HTML via the real writer so the parser stays coupled to its markup.
-    updateScoutHtmlReport({
-      log,
-      reportDir,
-      failure: createFailure({
-        id: 'with-issue',
-        githubIssue: 'https://github.com/elastic/kibana/issues/123',
-        failureCount: 6,
+    // `processScoutReports` persists this sidecar keyed by failure id (the html filename stem).
+    fs.writeFileSync(
+      Path.join(reportDir, SCOUT_GITHUB_ISSUES_FILENAME),
+      JSON.stringify({
+        'with-issue': {
+          githubIssue: 'https://github.com/elastic/kibana/issues/123',
+          failureCount: 6,
+        },
       }),
-      reportUpdate: true,
-    });
+      'utf-8'
+    );
 
     await generateScoutTestFailureArtifacts({ log, bkMeta: {} });
 
@@ -114,7 +88,7 @@ describe('generateScoutTestFailureArtifacts', () => {
     expect(artifact.failureCount).toBe(6);
   });
 
-  it('omits the GitHub fields when the report has no tracked issue', async () => {
+  it('omits the GitHub fields when there is no tracked issue for the failure', async () => {
     await generateScoutTestFailureArtifacts({ log, bkMeta: {} });
 
     const artifact = readArtifactFor('suite - untracked failure');
