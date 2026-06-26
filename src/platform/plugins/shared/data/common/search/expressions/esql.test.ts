@@ -230,9 +230,8 @@ describe('getEsqlFn', () => {
           createExecutionContext()
         );
 
-        const params = result?.columns?.[0]?.meta?.sourceParams?.params;
-        expect(params).toBeDefined();
-        expect(params).toHaveProperty('appliedTimeRange', {
+        const sourceParams = result?.columns?.[0]?.meta?.sourceParams;
+        expect(sourceParams).toHaveProperty('appliedTimeRange', {
           from: '2026-01-01T00:00:00.000Z',
           to: '2026-01-02T00:00:00.000Z',
         });
