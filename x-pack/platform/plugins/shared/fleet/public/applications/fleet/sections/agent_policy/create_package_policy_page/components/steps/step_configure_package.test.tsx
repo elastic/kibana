@@ -151,7 +151,7 @@ describe('StepConfigurePackage', () => {
       ).toBeInTheDocument();
     });
     act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
+      fireEvent.click(renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch'));
     });
     expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
   });
