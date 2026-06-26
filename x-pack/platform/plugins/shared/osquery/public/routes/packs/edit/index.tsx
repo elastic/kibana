@@ -38,7 +38,7 @@ const EditPackPageComponent = () => {
   const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   const { packId } = useParams<{ packId: string }>();
-  const queryDetailsLinkProps = useRouterNavigate(`packs/${packId}`);
+  const packsListLinkProps = useRouterNavigate('packs');
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { isLoading, data, error } = usePack({ packId });
@@ -72,21 +72,14 @@ const EditPackPageComponent = () => {
 
   const backLink = useMemo(
     () => (
-      <EuiButtonEmpty
-        iconType="chevronSingleLeft"
-        {...queryDetailsLinkProps}
-        flush="left"
-        size="xs"
-      >
+      <EuiButtonEmpty iconType="chevronSingleLeft" {...packsListLinkProps} flush="left" size="xs">
         <FormattedMessage
           id="xpack.osquery.editPack.viewPackListTitle"
-          defaultMessage="View {queryName} details"
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          values={{ queryName: data?.name }}
+          defaultMessage="View all packs"
         />
       </EuiButtonEmpty>
     ),
-    [data?.name, queryDetailsLinkProps]
+    [packsListLinkProps]
   );
 
   const LeftColumn = useMemo(
@@ -168,7 +161,6 @@ const EditPackPageComponent = () => {
         editMode={true}
         defaultValue={data}
         isReadOnly={isReadOnly}
-        packId={packId}
         onDirtyStateChange={handleDirtyStateChange}
       />
     );

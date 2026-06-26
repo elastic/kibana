@@ -95,8 +95,9 @@ describe('PackForm', () => {
     jest.clearAllMocks();
   });
 
-  it('should use packId for cancel button navigation in edit mode when provided', async () => {
-    const testPackId = 'test-pack-id-123';
+  it('should target the Packs list for cancel button navigation in edit mode', async () => {
+    // The read-only Pack details page was removed, so Cancel returns to the
+    // Packs list rather than navigating back to `packs/:packId`.
     const defaultValue = {
       id: 'different-id',
       saved_object_id: 'saved-object-id',
@@ -112,59 +113,16 @@ describe('PackForm', () => {
       references: [],
     };
 
-    renderWithContext(<PackForm editMode={true} defaultValue={defaultValue} packId={testPackId} />);
-
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith(`packs/${testPackId}`);
-  });
-
-  it('should fallback to defaultValue.id for cancel button navigation when packId not provided', async () => {
-    const defaultValue = {
-      id: 'fallback-id',
-      saved_object_id: 'saved-object-id',
-      name: 'Test Pack',
-      description: 'Test Description',
-      enabled: true,
-      queries: {},
-      created_at: '2024-01-01',
-      created_by: 'test-user',
-      updated_at: '2024-01-01',
-      updated_by: 'test-user',
-      policy_ids: [],
-      references: [],
-    };
-
     renderWithContext(<PackForm editMode={true} defaultValue={defaultValue} />);
 
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith(`packs/${defaultValue.id}`);
+    expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs');
+    expect(mockUseRouterNavigate).not.toHaveBeenCalledWith(`packs/${defaultValue.id}`);
   });
 
-  it('should use empty string for cancel button navigation in create mode', async () => {
+  it('should target the Packs list for cancel button navigation in create mode', async () => {
     renderWithContext(<PackForm editMode={false} />);
 
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs/');
-  });
-
-  it('should prioritize packId over defaultValue.id when both are provided', async () => {
-    const testPackId = 'priority-pack-id';
-    const defaultValue = {
-      id: 'should-not-be-used',
-      saved_object_id: 'saved-object-id',
-      name: 'Test Pack',
-      description: 'Test Description',
-      enabled: true,
-      queries: {},
-      created_at: '2024-01-01',
-      created_by: 'test-user',
-      updated_at: '2024-01-01',
-      updated_by: 'test-user',
-      policy_ids: [],
-      references: [],
-    };
-
-    renderWithContext(<PackForm editMode={true} defaultValue={defaultValue} packId={testPackId} />);
-
-    expect(mockUseRouterNavigate).toHaveBeenCalledWith(`packs/${testPackId}`);
-    expect(mockUseRouterNavigate).not.toHaveBeenCalledWith(`packs/${defaultValue.id}`);
+    expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs');
   });
 
   describe('rruleScheduling feature flag', () => {
@@ -274,7 +232,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-b1" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -316,7 +274,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-b2" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -353,7 +311,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-b3" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -409,7 +367,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-b5" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));
@@ -478,7 +436,7 @@ describe('PackForm', () => {
       const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR' });
 
       const { getByTestId, container } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       // The button stays enabled regardless of schedule validity — the gate is
@@ -517,7 +475,7 @@ describe('PackForm', () => {
       const defaultValue = baseRrulePack(overrides);
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
@@ -531,7 +489,7 @@ describe('PackForm', () => {
       const defaultValue = baseRrulePack({ splay: '5m' });
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
@@ -575,7 +533,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-stale-q" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
@@ -596,7 +554,7 @@ describe('PackForm', () => {
       const defaultValue = baseRrulePack({ rrule: 'FREQ=DAILY' });
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
@@ -642,7 +600,7 @@ describe('PackForm', () => {
       };
 
       const { getByTestId } = renderWithContext(
-        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-leak" />
+        <PackForm editMode={true} defaultValue={defaultValue} />
       );
 
       fireEvent.click(getByTestId('update-pack-button'));

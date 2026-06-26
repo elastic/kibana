@@ -64,7 +64,6 @@ interface PackFormProps {
   defaultValue?: PackItem;
   editMode?: boolean;
   isReadOnly?: boolean;
-  packId?: string;
   onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
@@ -72,7 +71,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
   editMode = false,
   isReadOnly = false,
-  packId,
   onDirtyStateChange,
 }) => {
   const [shardsToggleState, setShardsToggleState] =
@@ -90,9 +88,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
-  const cancelButtonProps = useRouterNavigate(
-    `packs/${editMode ? packId ?? defaultValue?.id : ''}`
-  );
+  // Cancel returns to the Packs list. The read-only Pack details page was
+  // removed, so edit mode no longer navigates back to `packs/:packId`.
+  const cancelButtonProps = useRouterNavigate('packs');
 
   const { mutateAsync: createAsync } = useCreatePack({
     withRedirect: true,

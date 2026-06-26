@@ -204,6 +204,15 @@ describe('EditPackPage', () => {
     });
   });
 
+  describe('back navigation', () => {
+    it('renders a "View all packs" back link that targets the packs list', () => {
+      renderPage();
+
+      const backLink = screen.getByText('View all packs').closest('a');
+      expect(backLink).toHaveAttribute('href', 'packs');
+    });
+  });
+
   describe('dirty state tracking', () => {
     it('transitions from clean to dirty when onDirtyStateChange is called with true', () => {
       renderPage();

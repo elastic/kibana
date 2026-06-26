@@ -15,14 +15,13 @@ import {
   FLYOUT_SAVED_QUERY_SAVE_BUTTON,
   customActionEditSavedQuerySelector,
   POLICY_SELECT_COMBOBOX,
-  EDIT_PACK_HEADER_BUTTON,
   SAVED_QUERY_DROPDOWN_SELECT,
   UPDATE_PACK_BUTTON,
   TABLE_ROWS,
   formFieldInputSelector,
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
-import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
+import { checkResults, deleteAndConfirm, inputQuery } from '../../tasks/live_query';
 import { changePackActiveStatus, preparePack } from '../../tasks/packs';
 import {
   closeModalIfVisible,
@@ -160,7 +159,7 @@ describe(
         cy.getBySel('tablePagination-50-rows').click();
         cy.contains(packName).click();
 
-        cy.getBySel('edit-pack-button').click();
+        cy.contains(`Edit ${packName}`);
 
         cy.contains('Query1');
         cy.contains('Query2');
@@ -315,8 +314,6 @@ describe(
 
       it('', () => {
         preparePack(packName);
-        cy.getBySel('edit-pack-button').click();
-
         cy.contains(`Edit ${packName}`);
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
@@ -517,19 +514,21 @@ describe(
       });
 
       it('', () => {
-        preparePack(packName);
-        cy.contains(`${packName} details`).should('exist');
+        // The read-only "Pack details" page was removed. A scheduled pack
+        // execution now surfaces in the History tab; from there we open the
+        // scheduled execution's details page, which renders the same
+        // PackQueriesStatusTable with the per-query results.
+        navigateTo('/app/osquery');
 
-        recurse<string>(
-          () => {
-            cy.getBySel('docsLoading').should('exist');
-            cy.getBySel('docsLoading').should('not.exist');
-
-            return cy
-              .get('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent')
-              .invoke('text');
-          },
-          (response) => response !== '-',
+        // Poll the unified History table until the scheduled execution for this
+        // pack shows up. Scheduled results take a while to be indexed by ES, so
+        // we reload between attempts (same approach as the legacy details poll).
+        recurse<number>(
+          () =>
+            cy
+              .getBySel('unifiedHistoryTable')
+              .then(($table) => $table.find('tr:contains("' + packName + '")').length),
+          (rowCount) => rowCount > 0,
           {
             timeout: 300000,
             post: () => {
@@ -537,10 +536,22 @@ describe(
             },
           }
         );
-        cy.getBySel('last-results-date').should('exist');
-        cy.getBySel('docs-count-badge').contains('1');
-        cy.getBySel('agent-count-badge').contains('1');
-        cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
+
+        // Open the scheduled execution's details page via the row's "Details"
+        // action button (EuiButtonIcon with aria-label "Details" from
+        // HistoryDetailsButton in unified_history_table.tsx).
+        cy.contains('.euiTableRow', packName)
+          .find('[aria-label="Details"]')
+          .first()
+          .should('be.visible')
+          .click();
+
+        // ScheduledExecutionDetailsPage renders the "View history" back button.
+        cy.contains('View history').should('exist');
+
+        // The details page auto-expands the single query row into ResultTabs,
+        // surfacing the osqueryResultsTable with at least one result row.
+        checkResults();
       });
     });
 
@@ -579,7 +590,7 @@ describe(
 
       it('', () => {
         preparePack(packName);
-        cy.contains(/^Edit$/).click();
+        cy.contains(`Edit ${packName}`);
 
         cy.getBySel('checkboxSelectAll').click();
 
@@ -589,7 +600,7 @@ describe(
         closeModalIfVisible();
 
         cy.get('a').contains(packName).click();
-        cy.contains(`${packName} details`).should('exist');
+        cy.contains(`Edit ${packName}`).should('exist');
         cy.contains(/^No items found/).should('exist');
       });
     });
@@ -632,8 +643,8 @@ describe(
 
       it('', { tags: ['@ess', '@serverless'] }, () => {
         preparePack(packName);
+        cy.contains(`Edit ${packName}`);
 
-        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
         deleteAndConfirm('pack');
       });
     });
