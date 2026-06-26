@@ -48,22 +48,106 @@ describe('useCaseViewHeader', () => {
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
   });
 
-  it('returns a formatted title with incremental ID', () => {
+  it('returns an editable title with incremental ID when user has update permissions', () => {
     const caseWithId: CaseUI = { ...basicCase, incrementalId: 42 };
     const { result } = renderHook(
       () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithId }),
       { wrapper }
     );
 
-    expect(result.current.headerTitle).toBe(`#42 ${basicCase.title}`);
+    expect(result.current.headerTitle).toEqual(
+      expect.objectContaining({ text: `#42 ${basicCase.title}` })
+    );
   });
 
-  it('returns title without prefix when incrementalId is undefined', () => {
+  it('returns an editable title without prefix when incrementalId is undefined', () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
+    expect(result.current.headerTitle).toEqual(expect.objectContaining({ text: basicCase.title }));
+  });
+
+  it('returns a plain string title when user lacks update permissions', () => {
+    const readOnlyWrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        TestProviders,
+        {
+          permissions: {
+            all: false,
+            create: true,
+            read: true,
+            update: false,
+            delete: false,
+            push: false,
+            connectors: false,
+            settings: false,
+            reopenCase: false,
+            createComment: false,
+            assign: false,
+            manageTemplates: false,
+          },
+        } as React.ComponentProps<typeof TestProviders>,
+        children
+      );
+
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper: readOnlyWrapper,
+    });
+
+    expect(typeof result.current.headerTitle).toBe('string');
     expect(result.current.headerTitle).toBe(basicCase.title);
+  });
+
+  it('calls onUpdateField when editable title is saved', async () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const title = result.current.headerTitle;
+    expect(typeof title).not.toBe('string');
+    if (typeof title !== 'string') {
+      await act(async () => {
+        await title.onSave('New Title');
+      });
+      expect(onUpdateField).toHaveBeenCalledWith({ key: 'title', value: 'New Title' });
+    }
+  });
+
+  it('strips incremental ID prefix when saving title', async () => {
+    const caseWithId: CaseUI = { ...basicCase, incrementalId: 42 };
+    const { result } = renderHook(
+      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithId }),
+      { wrapper }
+    );
+
+    const title = result.current.headerTitle;
+    if (typeof title !== 'string') {
+      await act(async () => {
+        await title.onSave('#42 Updated Title');
+      });
+      expect(onUpdateField).toHaveBeenCalledWith({ key: 'title', value: 'Updated Title' });
+    }
+  });
+
+  it('returns metadata with reporter name and created date', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    expect(result.current.metadata).toBeDefined();
+    expect(result.current.metadata[0]).toEqual(
+      expect.objectContaining({
+        type: 'text',
+        label: expect.stringContaining(basicCase.createdBy.fullName!),
+      })
+    );
+    expect(result.current.metadata[1]).toEqual(
+      expect.objectContaining({
+        type: 'text',
+        'data-test-subj': 'case-view-created-at',
+      })
+    );
   });
 
   it('returns a backHref', () => {
