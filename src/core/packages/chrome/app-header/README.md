@@ -79,37 +79,38 @@ button is present.
 
 ## Testing
 
-`AppHeader` reads chrome from context, so rendering it in a test without a `ChromeServiceProvider`
-throws `"useChromeService must be used within a ChromeServiceProvider"`. There are two ways to
-satisfy it.
+`AppHeader` reads chrome from context, so rendering it without a `ChromeServiceProvider` throws
+`"useChromeService must be used within a ChromeServiceProvider"`.
 
-**Option 1 — wrap your test harness with a chrome provider.** Prefer this when a suite already has a
-shared render harness: add the provider once and every test renders the real header.
+**If your harness renders through `KibanaRenderContextProvider {...coreStart}`, you need nothing.** That
+provider forwards `chrome.withProvider`, and the chrome mock (`chromeServiceMock.createStartContract()`)
+implements it just like production — wrapping children in `ChromeServiceProvider`. So any test using the
+standard core-mock render harness already has chrome context, exactly as the app does at runtime.
+
+**For components rendered in isolation** (a bare `render(<Component />)` with no core-mock render
+context), wrap with `MockAppHeaderProvider`, which supplies everything an `AppHeader` needs in tests
+(today just the chrome context):
 
 ```tsx
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
-import { chromeServiceMock } from '@kbn/core/public/mocks';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
-<ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
-  {/* ...rest of your harness... */}
-</ChromeServiceProvider>;
+render(
+  <MockAppHeaderProvider>
+    <MyComponentThatRendersAnAppHeader />
+  </MockAppHeaderProvider>
+);
 ```
 
-**Option 2 — mock the package.** Prefer this for a one-off test, or when you can't reach a shared
-harness:
+Pass `chrome` to override the default mock chrome service when a test needs custom chrome behavior:
 
-```ts
-jest.mock('@kbn/app-header', () => require('@kbn/app-header/mocks').mockAppHeaderModule());
+```tsx
+<MockAppHeaderProvider chrome={myChromeMock}>{children}</MockAppHeaderProvider>
 ```
 
-`mockAppHeaderModule()` swaps `AppHeader`/`AppHeaderView` for variants that render the **real**
-components wrapped in a mock chrome provider, so the genuine DOM and test subjects are produced. Every
-other export (types, registration helpers) is preserved.
+`MockChromeContextProvider` (the generic chrome-only provider it wraps) is also re-exported here, and
+lives in `@kbn/core-chrome-browser-context-mocks` for non-header code.
 
-Assert against `APP_HEADER_TEST_SUBJECTS` (exported from the package root) for the header's
-structural slots and the static menu items it injects (documentation, feedback, add integrations),
-so component and test stay in lockstep. Tab and badge subjects, and items passed via `menu`, are
-caller-provided and not included.
+Assert against `APP_HEADER_TEST_SUBJECTS` (from the package root) so component and test can't drift:
 
 ```ts
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -117,9 +118,9 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('My app');
 ```
 
-The header injects its `docLink`/feedback/integrations into the app menu, which collapses them into
-an overflow popover. `@kbn/app-header/test_helpers` ships RTL helpers to drive it without re-deriving
-the EuiPopover quirks:
+Menu items — including the header's own documentation/feedback/integrations — collapse into the app
+menu overflow popover at narrow widths (the default in jsdom). Open it with the helper from
+`@kbn/app-header/test_helpers` before querying those items:
 
 ```ts
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -127,9 +128,6 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 await openAppMenuOverflow();
 expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
 ```
-
-`MockAppHeader`/`MockAppHeaderView` are also exported directly for tests that render the header
-without mocking the module.
 
 ## Chrome Next flag and runtime checks
 

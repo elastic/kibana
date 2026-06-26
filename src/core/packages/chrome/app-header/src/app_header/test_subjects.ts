@@ -8,12 +8,9 @@
  */
 
 /**
- * `data-test-subj` values owned by the app header. The real components and test consumers both
- * import these so the rendered subjects and the subjects asserted in tests cannot drift apart.
- *
- * Covers the header's structural slots and the static app-menu items the header itself injects
- * (documentation, feedback, add integrations). Tab and badge subjects, and items the caller passes
- * via `menu`, are caller-provided and are intentionally not part of this contract.
+ * `data-test-subj` values owned by the app header, shared between the components and test consumers
+ * to prevent drift. Covers the structural slots and the static menu items the header injects
+ * (documentation, feedback, add integrations); caller-provided tabs, badges, and `menu` items are not.
  */
 export const APP_HEADER_TEST_SUBJECTS = {
   root: 'appHeader',

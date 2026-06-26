@@ -8,10 +8,9 @@
  */
 
 /**
- * Structural `data-test-subj` values the app menu renders by default. Both the components and test
- * consumers import these so the rendered subjects and the subjects asserted in tests cannot drift
- * apart. Item, action-button, and switch subjects derived from a caller-provided `testId`/`id` are
- * built with the helpers below.
+ * Structural `data-test-subj` values the app menu renders by default, shared between the components
+ * and test consumers to prevent drift. Subjects derived from a caller-provided `testId`/`id` use the
+ * helpers below.
  */
 export const APP_MENU_TEST_SUBJECTS = {
   root: 'app-menu',
