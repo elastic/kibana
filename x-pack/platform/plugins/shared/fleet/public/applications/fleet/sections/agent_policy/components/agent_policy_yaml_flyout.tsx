@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { dump } from 'js-yaml';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -27,7 +26,8 @@ import {
 import { MAX_FLYOUT_WIDTH } from '../../../constants';
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
 import { Loading } from '../../../components';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { agentPolicyRouteService, getYamlFormatters } from '../../../services';
+import type { YamlFormatters } from '../../../../../services/yaml_formatters';
 import { API_VERSIONS } from '../../../../../../common/constants';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
@@ -39,33 +39,40 @@ const FlyoutBody = styled(EuiFlyoutBody)`
 export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => void }>(
   ({ policyId, onClose }) => {
     const core = useStartServices();
+    const [formatters, setFormatters] = useState<YamlFormatters | null>(null);
+
+    useEffect(() => {
+      getYamlFormatters().then(setFormatters);
+    }, []);
+
     const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
     const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
     const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
       (packagePolicy) => packagePolicy?.secret_references?.length
     );
-    const body = isLoadingYaml ? (
-      <Loading />
-    ) : error ? (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy"
-            defaultMessage="Error loading agent policy"
-          />
-        }
-        color="danger"
-        iconType="warning"
-      >
-        {error.message}
-      </EuiCallOut>
-    ) : (
-      <>
-        <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
-          {fullAgentPolicyToYaml(yamlData!.item, dump)}
-        </EuiCodeBlock>
-      </>
-    );
+    const body =
+      isLoadingYaml || !formatters ? (
+        <Loading />
+      ) : error ? (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy"
+              defaultMessage="Error loading agent policy"
+            />
+          }
+          color="danger"
+          iconType="warning"
+        >
+          {error.message}
+        </EuiCallOut>
+      ) : (
+        <>
+          <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
+            {formatters.fullAgentPolicyToYaml(yamlData!.item)}
+          </EuiCodeBlock>
+        </>
+      );
 
     const downloadLink =
       core.http.basePath.prepend(agentPolicyRouteService.getInfoFullDownloadPath(policyId)) +
@@ -130,7 +137,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
               <EuiButton
                 href={downloadLink}
                 iconType="download"
-                isDisabled={Boolean(isLoadingYaml && !yamlData)}
+                isDisabled={Boolean(isLoadingYaml || !yamlData || !formatters)}
               >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.yamlDownloadButtonLabel"
