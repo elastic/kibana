@@ -544,6 +544,15 @@ describe('useDeploy', () => {
 
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     expect(onContinue).toHaveBeenCalledTimes(1);
+
+    // Only lambda's input should be enabled — ec2_metrics was already deployed and must not
+    // appear as an enabled input (would create a duplicate policy for an already-running service).
+    const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs as Record<
+      string,
+      { enabled: boolean }
+    >;
+    expect(submittedInputs['lambda-aws/metrics']?.enabled).toBe(true);
+    expect(submittedInputs['ec2-aws/metrics']?.enabled).not.toBe(true);
   });
 
   it('includes non-agentless services as gray instantiating chips without deploying them', async () => {

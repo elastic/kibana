@@ -299,14 +299,18 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const isInitialDeploy = packageNames === undefined;
 
       let targets: string[];
+      // For initial deploy, only the untracked services are deployed per package so that
+      // already-running services don't get a duplicate policy created for them.
+      let servicesToDeployByPackage: Map<string, AwsServiceMatrixEntry[]>;
       if (isInitialDeploy) {
-        // Only deploy packages that have at least one service not yet tracked in serviceStatuses.
-        // This handles: back-navigation during deploy (skip), and adding new services (deploy them).
-        targets = [...servicesByPackage.keys()].filter((pkg) =>
-          (servicesByPackage.get(pkg) ?? []).some(
-            (s) => !(s.id in deployAndDetectStep.serviceStatuses)
-          )
-        );
+        servicesToDeployByPackage = new Map();
+        for (const [pkg, services] of servicesByPackage) {
+          const untracked = services.filter((s) => !(s.id in deployAndDetectStep.serviceStatuses));
+          if (untracked.length > 0) {
+            servicesToDeployByPackage.set(pkg, untracked);
+          }
+        }
+        targets = [...servicesToDeployByPackage.keys()];
 
         // Non-agentless services (e.g. cloud_forwarder) are shown as gray chips but never deployed.
         const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
@@ -334,6 +338,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         if (targets.length === 0) return;
       } else {
         targets = packageNames;
+        servicesToDeployByPackage = servicesByPackage;
         const retryStatuses = buildServiceStatuses(targets, [], servicesByPackage);
         const remainingFailed = deployAndDetectStep.failedPackages.filter(
           (pkg) => !targets.includes(pkg)
@@ -352,7 +357,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
       const results = await Promise.allSettled(
         targets.map((packageName) =>
-          deployPackage(packageName, servicesByPackage.get(packageName) ?? [], {
+          deployPackage(packageName, servicesToDeployByPackage.get(packageName) ?? [], {
             namespace,
             globalRegion,
             storedServiceVars,
