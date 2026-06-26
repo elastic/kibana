@@ -107,7 +107,12 @@ export const updateListItem = async ({
       let updatedOCCVersion: string | undefined;
       if (response.updated) {
         const checkIfListUpdated = async (): Promise<void> => {
-          const updatedListItem = await getListItem({ esClient, id, listItemIndex });
+          const updatedListItem = await getListItem({
+            esClient,
+            id,
+            listItemIndex,
+            realtime: false,
+          });
           if (updatedListItem?._version === listItem._version) {
             throw Error('List item has not been re-indexed in time');
           }
