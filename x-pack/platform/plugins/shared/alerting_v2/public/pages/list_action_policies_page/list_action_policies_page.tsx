@@ -17,6 +17,7 @@ import {
   EuiPageHeader,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,

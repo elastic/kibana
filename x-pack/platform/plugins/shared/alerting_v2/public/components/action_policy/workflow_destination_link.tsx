@@ -58,7 +58,17 @@ const WorkflowLink = ({ id, name, isDraft }: { id: string; name: string; isDraft
     <EuiToolTip
       content={name}
       position="top"
-      anchorProps={{ css: { display: 'contents' } }}
+      anchorProps={{
+        css: {
+          display: 'inline-block',
+          maxWidth: '100%',
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          verticalAlign: 'bottom',
+        },
+      }}
     >
       <EuiLink
         href={application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${id}` })}
