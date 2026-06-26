@@ -61,19 +61,19 @@ describe('<OverviewTab />', () => {
   });
 
   it('renders VisualizationsSection', () => {
-    render(<OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />);
+    render(<OverviewTab hit={buildHit()} />);
     expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
   });
 
   it('renders both AISummarySection and VisualizationsSection', () => {
-    render(<OverviewTab hit={buildHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />);
+    render(<OverviewTab hit={buildHit()} />);
     expect(screen.getByTestId('mock-ai-summary-section')).toBeInTheDocument();
     expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
   });
 
   it('passes hit to VisualizationsSection', () => {
     const hit = buildHit();
-    render(<OverviewTab hit={hit} attack={mockAttack} onAttackUpdated={jest.fn()} />);
+    render(<OverviewTab hit={hit} />);
     expect(screen.getByTestId('mock-visualizations-section')).toHaveAttribute(
       'data-hit-id',
       'attack-1'
