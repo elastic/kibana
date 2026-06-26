@@ -17,7 +17,7 @@ jest.mock('./alert_timeline/alert_timeline_section', () => ({
 }));
 
 jest.mock('./signal_rule_overview', () => ({
-  SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>
+  SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>,
 }));
 
 jest.mock('./artifacts', () => ({
