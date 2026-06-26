@@ -999,28 +999,6 @@
             }
           }
         },
-        "count_with_recovery_policy": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of rules with a recovery policy."
-          }
-        },
-        "count_by_recovery_policy_type": {
-          "properties": {
-            "query": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules with recovery policy type query."
-              }
-            },
-            "no_breach": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules with recovery policy type no_breach."
-              }
-            }
-          }
-        },
         "avg_pending_count": {
           "type": "float",
           "_meta": {
@@ -1081,53 +1059,6 @@
           "type": "float",
           "_meta": {
             "description": "Average number of grouping fields per rule."
-          }
-        },
-        "count_with_no_data": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of rules with no data handling configured."
-          }
-        },
-        "count_by_no_data_behavior": {
-          "properties": {
-            "no_data": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules with no_data behavior."
-              }
-            },
-            "last_status": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules with last_status behavior."
-              }
-            },
-            "recover": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules with recover behavior."
-              }
-            }
-          }
-        },
-        "count_by_no_data_timeframe": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "name": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "No data timeframe duration string."
-                }
-              },
-              "value": {
-                "type": "long",
-                "_meta": {
-                  "description": "Number of rules with this no data timeframe."
-                }
-              }
-            }
           }
         },
         "min_created_at": {

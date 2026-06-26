@@ -24,7 +24,7 @@ export const STREAMS_EVENT_STATUS_UPDATE_TOOL_ID = platformStreamsSigEventsTools
 
 const eventStatusUpdateSchema = z.object({
   event_id: z.string().describe(
-    i18n.translate('xpack.streams.agentBuilder.tools.eventVerdictUpdate.schema.eventId', {
+    i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.schema.eventId', {
       defaultMessage: 'Identifier of the significant event to update.',
     })
   ),

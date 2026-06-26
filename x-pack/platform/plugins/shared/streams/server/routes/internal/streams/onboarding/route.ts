@@ -8,14 +8,19 @@
 import { z } from '@kbn/zod/v4';
 import {
   StreamsKIsOnboardingStep,
-  StreamsKIsOnboardingStatus,
+  SigEventsWorkflowStatus,
+  MAX_STREAM_NAME_LENGTH,
   type StreamsKIsOnboardingStatusResult,
+  type SigEventsWorkflowStatusResult,
 } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
-import type { StreamsKIsOnboardingInputs } from '../../../../lib/workflows/onboarding_workflow_client';
+import {
+  MAX_STREAMS_PER_QUERY,
+  type StreamsKIsOnboardingInputs,
+} from '../../../../lib/workflows/onboarding_workflow_client';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
 
@@ -32,7 +37,7 @@ export const onboardingExecuteRoute = createServerRoute({
     access: 'internal',
     summary: 'Onboard stream',
     description:
-      'Generate features and queries for a stream, the data that is necessary for insights discovery.',
+      'Generate features and queries for a stream as part of the significant events discovery workflow.',
   },
   security: {
     authz: {
@@ -84,8 +89,9 @@ export const onboardingExecuteRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    streamsKIsOnboardingClient,
+    workflowClients,
   }): Promise<StreamsKIsOnboardingStatusResult> => {
+    const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
@@ -115,9 +121,9 @@ export const onboardingExecuteRoute = createServerRoute({
         },
       };
 
-      await streamsKIsOnboardingClient.run({ inputs, request });
+      const { executionId } = await streamsKIsOnboardingClient.run({ inputs, request });
 
-      return { status: StreamsKIsOnboardingStatus.InProgress };
+      return { status: SigEventsWorkflowStatus.InProgress, executionId };
     }
 
     // action === 'cancel'
@@ -125,10 +131,7 @@ export const onboardingExecuteRoute = createServerRoute({
     // return the real post-cancel status rather than assuming `canceled`.
     await streamsKIsOnboardingClient.cancel({ streamName, request });
 
-    const { executionId: _executionId, ...statusResult } =
-      await streamsKIsOnboardingClient.getStatus({ streamName });
-
-    return statusResult;
+    return streamsKIsOnboardingClient.getStatus({ streamName });
   },
 });
 
@@ -152,8 +155,9 @@ export const onboardingStatusRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    streamsKIsOnboardingClient,
+    workflowClients,
   }): Promise<StreamsKIsOnboardingStatusResult> => {
+    const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
@@ -165,13 +169,56 @@ export const onboardingStatusRoute = createServerRoute({
       path: { streamName },
     } = params;
 
-    const { executionId: _executionId, ...statusResult } =
-      await streamsKIsOnboardingClient.getStatus({ streamName });
-    return statusResult;
+    return streamsKIsOnboardingClient.getStatus({ streamName });
+  },
+});
+
+export const onboardingBulkStatusRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/onboarding/_bulk_status',
+  options: {
+    access: 'internal',
+    summary: 'Check the onboarding status of multiple streams',
+    description:
+      'Check the status of onboarding progress for a list of streams in a single request.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      streamNames: z
+        .array(z.string().max(MAX_STREAM_NAME_LENGTH))
+        .min(1)
+        .max(MAX_STREAMS_PER_QUERY),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    workflowClients,
+  }): Promise<Record<string, SigEventsWorkflowStatusResult>> => {
+    const { streamsKIsOnboardingClient } = workflowClients;
+    if (!streamsKIsOnboardingClient) {
+      throw new FeatureNotEnabledError('Workflows management is not available');
+    }
+
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      body: { streamNames },
+    } = params;
+
+    return streamsKIsOnboardingClient.getStatuses({ streamNames });
   },
 });
 
 export const internalOnboardingRoutes = {
   ...onboardingExecuteRoute,
   ...onboardingStatusRoute,
+  ...onboardingBulkStatusRoute,
 };

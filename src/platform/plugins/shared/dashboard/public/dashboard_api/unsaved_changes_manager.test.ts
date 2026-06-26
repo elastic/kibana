@@ -100,6 +100,7 @@ describe('unsavedChangesManager', () => {
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
+
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
         });
@@ -126,6 +127,7 @@ describe('unsavedChangesManager', () => {
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
+
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
         });
@@ -181,6 +183,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
+
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
       });
@@ -216,6 +219,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
+
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
       });
@@ -241,6 +245,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: projectRoutingManagerMock,
+
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
       });

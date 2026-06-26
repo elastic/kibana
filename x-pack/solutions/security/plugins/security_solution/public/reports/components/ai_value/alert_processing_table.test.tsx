@@ -15,7 +15,6 @@ describe('AlertsProcessingTable', () => {
     escalatedAlerts: 200,
     filteredAlertsPerc: '80%',
     escalatedAlertsPerc: '20%',
-    isLoading: false,
   };
 
   it('renders main container with data-test-subj', () => {

@@ -9,9 +9,18 @@
 
 import type { RefObject } from 'react';
 
-import type { DATE_TYPE_ABSOLUTE, DATE_TYPE_RELATIVE, DATE_TYPE_NOW } from './constants';
+import type {
+  DATE_TYPE_ABSOLUTE,
+  DATE_TYPE_RELATIVE,
+  DATE_TYPE_NOW,
+  MODIFICATION_INCREASE,
+  MODIFICATION_DECREASE,
+} from './constants';
 
 export type DateType = typeof DATE_TYPE_ABSOLUTE | typeof DATE_TYPE_RELATIVE | typeof DATE_TYPE_NOW;
+
+/** Direction an arrow key steps a selected range part. */
+export type ModificationAction = typeof MODIFICATION_INCREASE | typeof MODIFICATION_DECREASE;
 
 /** Canonical date-math time units */
 export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';

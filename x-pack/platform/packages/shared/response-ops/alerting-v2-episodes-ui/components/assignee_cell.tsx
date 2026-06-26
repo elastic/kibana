@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -48,9 +48,11 @@ export const AlertEpisodeAssigneeCell = ({
 
   if (isError) {
     return (
-      <EuiText color="danger" size="s" title={assigneeUid}>
-        {i18n.ASSIGNEE_CELL_PROFILE_LOAD_ERROR}
-      </EuiText>
+      <EuiToolTip content={assigneeUid}>
+        <EuiText color="danger" size="s">
+          {i18n.ASSIGNEE_CELL_PROFILE_LOAD_ERROR}
+        </EuiText>
+      </EuiToolTip>
     );
   }
 
@@ -58,9 +60,11 @@ export const AlertEpisodeAssigneeCell = ({
 
   if (!profile) {
     return (
-      <EuiText color="subdued" size="s" title={assigneeUid}>
-        {i18n.ASSIGNEE_CELL_UNKNOWN_USER}
-      </EuiText>
+      <EuiToolTip content={assigneeUid}>
+        <EuiText color="subdued" size="s">
+          {i18n.ASSIGNEE_CELL_UNKNOWN_USER}
+        </EuiText>
+      </EuiToolTip>
     );
   }
 

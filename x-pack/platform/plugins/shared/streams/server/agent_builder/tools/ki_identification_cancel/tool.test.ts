@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from './tool';
@@ -21,6 +21,7 @@ describe('createKiIdentificationCancelTool', () => {
     };
     const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
+      telemetry: { trackOnboardingScheduled: jest.fn() } as never,
     });
 
     const tool = createKiIdentificationCancelTool({
@@ -46,7 +47,7 @@ describe('createKiIdentificationCancelTool', () => {
       expect(result.results[0].data).toEqual({
         stream_name: 'logs.nginx',
         execution_id: 'exec-1',
-        status: StreamsKIsOnboardingStatus.Canceled,
+        status: SigEventsWorkflowStatus.Canceled,
       });
     }
   });

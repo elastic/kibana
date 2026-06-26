@@ -12,13 +12,18 @@ export { listAvailableSnapshots } from './list_snapshots';
 
 export { ensureLogsIndexTemplate, deleteLogsIndexTemplate } from './logs_index_template';
 
+export { ensureStreamsEnabled, SIGEVENTS_WIRED_ROOTS } from './ensure_streams_enabled';
+
 export {
   replaySignificantEventsSnapshot,
   cleanSignificantEventsDataStreams,
 } from './replay_logs_snapshot';
 
 export type { ReplayStats } from './replay_into_managed_stream';
-export { replayIntoManagedStream } from './replay_into_managed_stream';
+export {
+  deleteTemporaryReplayIndices,
+  replayIntoManagedStream,
+} from './replay_into_managed_stream';
 
 export { loadKIFeaturesFromSnapshot } from './load_ki_features_from_snapshot';
 

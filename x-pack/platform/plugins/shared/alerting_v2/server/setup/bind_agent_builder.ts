@@ -9,11 +9,11 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import { Logger, OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/advanced_settings';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
+import { SchemaTranslationError } from '../agent_builder/skills/schema_to_skill_docs';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
@@ -42,8 +42,7 @@ function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
  *   layer can schedule their crawler tasks during its own start phase. Gated on
  *   the optional `agentContextLayer` plugin.
  * - Attachment types are bound to {@link AttachmentTypeToken} (deps resolved via
- *   DI) and registered during start, gated on the experimental features advanced
- *   setting. Skills are registered alongside them.
+ *   DI) and registered during start. Skills are registered alongside them.
  *
  * Both resolve request-scoped clients on demand via {@link resolveRequestScoped},
  * since they run outside the HTTP route scope.
@@ -114,39 +113,28 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       return;
     }
 
-    const logger = container.get(Logger);
+    for (const attachmentType of container.getAll(AttachmentTypeToken)) {
+      agentBuilder.attachments.registerType(attachmentType);
+    }
 
+    const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
     try {
-      const soClient = container.get(CoreStart('savedObjects')).createInternalRepository();
-      const uiSettingsClient = container
-        .get(CoreStart('uiSettings'))
-        .globalAsScopedToClient(soClient);
-      const enabled = await uiSettingsClient.get<boolean>(
-        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
-      );
-
-      if (!enabled) {
-        return;
-      }
-
-      for (const attachmentType of container.getAll(AttachmentTypeToken)) {
-        agentBuilder.attachments.registerType(attachmentType);
-      }
-
-      const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
       registerSkills(agentBuilder, {
         getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
         getAvailableConnectors: (sid, req) =>
           workflowsManagementApi.getAvailableConnectors(sid, req),
       });
-
-      logger.info(
-        'Rule management skill and attachments registered (experimental features enabled)'
-      );
-    } catch (err) {
-      logger.warn(
-        `Failed to read alerting V2 experimental features setting; rule management skill not registered: ${err}`
-      );
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (e instanceof SchemaTranslationError) {
+        container
+          .get(Logger)
+          .warn(`Rule management skill registered with empty schema docs: ${message}`);
+      } else {
+        container.get(Logger).warn(`Failed to register rule management skill: ${message}`);
+      }
     }
+
+    container.get(Logger).debug('Rule management skill and attachments registered');
   });
 }

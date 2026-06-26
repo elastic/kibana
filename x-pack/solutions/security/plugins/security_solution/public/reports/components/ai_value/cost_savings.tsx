@@ -14,6 +14,7 @@ import { CostSavingsMetric } from './cost_savings_metric';
 import * as i18n from './translations';
 
 interface Props {
+  isSample: boolean;
   minutesPerAlert: number;
   analystHourlyRate: number;
   from: string;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export const CostSavings: React.FC<Props> = ({
+  isSample,
   minutesPerAlert,
   analystHourlyRate,
   from,
@@ -40,12 +42,14 @@ export const CostSavings: React.FC<Props> = ({
       css={css`
         min-height: 140px;
         border: 1px solid ${colors.success};
+        overflow: hidden;
       `}
       hasBorder
       hasShadow={false}
       paddingSize="none"
     >
       <CostSavingsMetric
+        isSample={isSample}
         from={from}
         to={to}
         analystHourlyRate={analystHourlyRate}
@@ -57,7 +61,7 @@ export const CostSavings: React.FC<Props> = ({
         currentCount={costSavings}
         previousCount={costSavingsCompare}
         stat={formatDollars(costSavingsCompare)}
-        statType={i18n.COST_SAVED_DESC.toLowerCase()}
+        statType={i18n.COST_SAVED_INLINE_DESCRIPTION}
         timeRange={timerangeAsDays}
       />
     </EuiPanel>
