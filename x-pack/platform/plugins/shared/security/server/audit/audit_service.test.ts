@@ -12,19 +12,20 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { AppenderConfigType, OtelAppenderConfig } from '@kbn/core-logging-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
-  AuditService,
   AUDIT_OTEL_FIELD_RENAMES,
+  AuditService,
   createLoggingConfig,
   filterEvent,
   getForwardedFor,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
-import type { AppenderConfigType, OtelAppenderConfig } from '@kbn/core-logging-server';
+
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
