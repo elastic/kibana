@@ -8,7 +8,7 @@
 import type { ReactNode } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 
-export type SpineType = 'chat';
+export type SpineType = 'chat' | 'case' | 'incident';
 
 export type SpineTabId = 'attachments' | 'people';
 

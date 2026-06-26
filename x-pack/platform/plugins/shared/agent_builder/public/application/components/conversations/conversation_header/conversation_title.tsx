@@ -10,6 +10,8 @@ import {
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiPopover,
   useEuiTheme,
@@ -19,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationTitle, useHasPersistedConversation } from '../../../hooks/use_conversation';
+import { ActiveSpineRelationshipBadge } from '../../../../agent_first/conversation_spine/components/spine_relationship_badge';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
@@ -52,9 +55,20 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
 
+  const titleWithBadge = (titleContent: React.ReactNode) => (
+    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <ActiveSpineRelationshipBadge />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+        {titleContent}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   // No popover for unsaved conversations — just show the title
   if (!hasPersistedConversation) {
-    return (
+    return titleWithBadge(
       <h4
         id={ariaLabelledBy}
         css={css`
@@ -138,16 +152,18 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   return (
     <>
-      <EuiPopover
-        button={titleButton}
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-        aria-label={labels.openTitleMenu}
-      >
-        <EuiContextMenuPanel items={menuItems} />
-      </EuiPopover>
+      {titleWithBadge(
+        <EuiPopover
+          button={titleButton}
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          panelPaddingSize="none"
+          anchorPosition="downCenter"
+          aria-label={labels.openTitleMenu}
+        >
+          <EuiContextMenuPanel items={menuItems} />
+        </EuiPopover>
+      )}
 
       <RenameConversationModal
         isOpen={isRenameModalOpen}
