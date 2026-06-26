@@ -162,8 +162,7 @@ export async function loadKIFeaturesFromSnapshot(
 /**
  * Restores the sigevents-captured raw knowledge-indicators index (features + queries together, in
  * KI data-stream doc shape) and returns the docs. The capture is already per-stream, so no stream
- * filter is needed. Used for inspection/parity; the live agent path is fed by
- * `replayKnowledgeIndicatorsSnapshot`.
+ * filter is needed. Used for inspection/parity.
  */
 export async function loadKnowledgeIndicatorsFromSnapshot(
   esClient: Client,

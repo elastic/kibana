@@ -187,11 +187,9 @@ run(
     log.info('');
     log.info('Each snapshot contains:');
     log.info('  logs*                        - OTel Demo log data');
-    if (onboardingSteps.includes(StreamsKIsOnboardingStep.FeaturesIdentification)) {
-      log.info(
-        `  ${SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN} - Extracted KI features (inferred + computed)`
-      );
-    }
+    log.info(
+      `  ${SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN} - Extracted KI features (inferred + computed)`
+    );
 
     log.info(
       `  ${SIGEVENTS_KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN} - Extracted Knowledge Indicators`
@@ -335,17 +333,15 @@ async function processScenario(
     await triggerSigEventsKIExtraction(config, log, logsIndex, onboardingSteps);
     await waitForSigEventsKIExtraction(config, log, logsIndex, extractionTimeoutMs);
     await logSigEventsExtractedKIFeatures(config, log, logsIndex);
-    if (onboardingSteps.includes(StreamsKIsOnboardingStep.FeaturesIdentification)) {
-      const featuresResult = await persistSigEventsFeaturesForSnapshot(
-        config,
-        esClient,
-        log,
-        scenario.id,
-        logsIndex
-      );
-      log.info(`[6/8] Persisted ${featuresResult.count} feature KI(s)`);
-      snapshotIndices.push(featuresResult.index);
-    }
+    const featuresResult = await persistSigEventsFeaturesForSnapshot(
+      config,
+      esClient,
+      log,
+      scenario.id,
+      logsIndex
+    );
+    log.info(`[6/8] Persisted ${featuresResult.count} feature KI(s)`);
+    snapshotIndices.push(featuresResult.index);
 
     log.info('[6/8] Persisting knowledge indicators for snapshot...');
     const knowledgeIndicatorsResult = await persistSigEventsKnowledgeIndicatorsForSnapshot(
@@ -373,7 +369,6 @@ async function processScenario(
         log,
         connectorId,
         scenarioId: scenario.id,
-        streamName: logsIndex,
       });
       log.info(
         `[6b/8] Captured ${discoveryResult.discoveriesCount} discovery(s), ` +

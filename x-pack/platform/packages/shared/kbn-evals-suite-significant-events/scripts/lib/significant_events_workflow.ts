@@ -246,23 +246,25 @@ export async function persistSigEventsFeaturesForSnapshot(
 }
 
 /**
- * Captures a stream's detections from the raw `.significant_events-detections` data stream.
+ * Captures all detections from the raw `.significant_events-detections` data stream.
  *
  * Raw (not the read API) so *every* revision is kept: the investigator needs the active
  * (`detection`/`quiet`) doc, the judge the post-triage (`handled`) one. Consumers filter by `kind`.
+ *
+ * Not scoped by `stream_name`: detections write it to `_source` but the data stream maps
+ * `dynamic: false` without it, so it isn't queryable — a `match_all` read is the reliable option.
  */
 export async function persistSigEventsDetectionsForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
-  snapshotName: string,
-  streamName: string = DEFAULT_LOGS_INDEX
+  snapshotName: string
 ): Promise<{ index: string; count: number }> {
   const detectionDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
     readRawDataStreamDocs(
       sysClient,
       SIGEVENTS_DETECTIONS_DATA_STREAM,
-      { term: { stream_name: streamName } },
+      { match_all: {} },
       'detection(s)'
     )
   );
@@ -282,8 +284,8 @@ export async function persistSigEventsDetectionsForSnapshot(
  * `.significant_events-knowledge_indicators` data stream (superuser), scoped by `stream.name` —
  * features and queries together, in KI data-stream doc shape. Replaces the queries-only capture:
  * replaying this index into the live data stream gives the agents' real `search_knowledge_indicators`
- * both feature and query KIs. `search_embedding` is carried in `_source` but stripped at replay time
- * (see `replayKnowledgeIndicatorsSnapshot`).
+ * both feature and query KIs. `search_embedding` is carried in `_source` but stripped when the
+ * captured index is replayed into the live data stream.
  */
 export async function persistSigEventsKnowledgeIndicatorsForSnapshot(
   config: ConnectionConfig,
@@ -340,28 +342,25 @@ export async function cleanupSigEventsExtractedData(
 ): Promise<void> {
   log.info('Cleaning up ES data...');
 
-  for (const target of [
+  const dataStreamTargets = [
     'logs*',
     SIGEVENTS_KNOWLEDGE_INDICATORS_DATA_STREAM,
     SIGEVENTS_DISCOVERIES_DATA_STREAM,
     SIGEVENTS_DETECTIONS_DATA_STREAM,
     SIGEVENTS_EVENTS_DATA_STREAM,
+  ];
+  const indexTargets = [
     SIGEVENTS_FEATURES_TEMP_INDEX_PATTERN,
     SIGEVENTS_DISCOVERIES_TEMP_INDEX_PATTERN,
     SIGEVENTS_DETECTIONS_TEMP_INDEX_PATTERN,
     SIGEVENTS_KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
-  ]) {
-    try {
-      await esClient.indices.deleteDataStream({ name: target });
-    } catch {
-      // do nothing if the index doesn't exist
-    }
+  ];
 
-    try {
-      await esClient.deleteByQuery({ index: target, refresh: true, query: { match_all: {} } });
-    } catch {
-      // do nothing if the index doesn't exist
-    }
+  for (const name of dataStreamTargets) {
+    await esClient.indices.deleteDataStream({ name }).catch(() => {});
+  }
+  for (const index of indexTargets) {
+    await esClient.indices.delete({ index, ignore_unavailable: true }).catch(() => {});
   }
 }
 
