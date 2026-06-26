@@ -8,19 +8,26 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import type { CoreStart } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { InvalidYamlSchemaError } from '@kbn/workflows-yaml';
+import type { z } from '@kbn/zod/v4';
 
 import type { WorkflowCrudDeps } from './types';
 import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
 import { WorkflowCrudService } from './workflow_crud_service';
+import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
+import type { WorkflowValidationService } from './workflow_validation_service';
 import {
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WorkflowChangeHistoryAction,
 } from '../../common/lib/workflow_change_history/constants';
+import { getWorkflowZodSchema } from '../../common/schema';
 import { WorkflowChangeHistoryDisabledError } from '../lib/workflow_change_history_disabled_error';
 import { WorkflowHistoryEventNotFoundError } from '../lib/workflow_history_event_not_found_error';
+import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const makeHistoryEvent = (overrides: Partial<ChangeHistoryDocument> = {}): ChangeHistoryDocument =>
   ({
@@ -193,5 +200,175 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
     await expect(
       service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request)
     ).rejects.toThrow(WorkflowChangeHistoryDisabledError);
+  });
+});
+
+describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
+  const request = { auth: { credentials: { username: 'alice' } } } as any;
+
+  const zodSchema: z.ZodType = getWorkflowZodSchema({}, [], { lightweight: true });
+
+  const workflowYamlV1 = [
+    'name: Restore Integration',
+    'enabled: true',
+    'tags:',
+    '  - v1-tag',
+    'triggers:',
+    '  - type: manual',
+    'steps:',
+    '  - name: step-one',
+    '    type: custom.step',
+    '    with:',
+    '      message: "historical"',
+  ].join('\n');
+
+  const workflowYamlV2 = workflowYamlV1
+    .replace('historical', 'current')
+    .replace('v1-tag', 'v2-tag');
+
+  const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties => ({
+    name: 'Restore Integration',
+    description: '',
+    enabled: true,
+    tags: ['v2-tag'],
+    triggerTypes: ['manual'],
+    yaml: workflowYamlV2,
+    definition: {
+      name: 'Restore Integration',
+      enabled: true,
+      version: '1',
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'step-one',
+          type: 'custom.step',
+          with: { message: 'current' },
+        },
+      ],
+    } as WorkflowProperties['definition'],
+    createdBy: 'alice',
+    lastUpdatedBy: 'alice',
+    spaceId: 'default',
+    valid: true,
+    deleted_at: null,
+    created_at: '2024-01-01T00:00:00.000Z',
+    updated_at: '2024-01-01T00:00:00.000Z',
+    version: 7,
+    ...overrides,
+  });
+
+  const makeStorageClient = () => ({
+    search: jest.fn(),
+    index: jest.fn().mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 1 }),
+    bulk: jest.fn(),
+  });
+
+  const makeIntegrationService = (snapshotYaml: string) => {
+    const client = makeStorageClient();
+    const scopedChangeHistory = { logBulk: jest.fn().mockResolvedValue(undefined) };
+    const changeHistoryService = makeChangeHistoryService({
+      getHistory: jest.fn().mockResolvedValue({
+        total: 1,
+        items: [
+          makeHistoryEvent({
+            object: {
+              id: 'wf-1',
+              type: WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+              sequence: 3,
+              snapshot: { yaml: snapshotYaml },
+              hash: 'hash',
+              fields: { hashed: [] },
+            },
+          }),
+        ],
+      }),
+      asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+    });
+
+    const validationService = {
+      getWorkflowZodSchema: jest.fn().mockResolvedValue(zodSchema),
+    } as unknown as WorkflowValidationService;
+
+    const deps: WorkflowCrudDeps = {
+      logger: loggerMock.create(),
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      workflowStorage: { getClient: () => client } as any,
+      getSecurity: () =>
+        ({
+          authc: {
+            getCurrentUser: jest.fn().mockReturnValue({ username: 'alice' }),
+          },
+        } as any),
+      workflowsExtensions: { getAllTriggerDefinitions: () => [] } as any,
+      getTaskScheduler: () => null,
+      executionQueryService: {
+        getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
+      } as unknown as WorkflowExecutionQueryService,
+      validationService,
+      getCoreStart: () => ({} as CoreStart),
+      changeHistoryService,
+      workflowVersioningEnabled: true,
+    };
+
+    client.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'wf-1',
+            _source: makeSource(),
+            _seq_no: 7,
+            _primary_term: 1,
+          },
+        ],
+      },
+    });
+
+    const service = new WorkflowCrudService(deps);
+    jest.spyOn(service, 'getWorkflow').mockResolvedValue({ id: 'wf-1' } as any);
+
+    return { service, client, scopedChangeHistory };
+  };
+
+  it('indexes a restored workflow document derived from the historical snapshot yaml', async () => {
+    const { service, client } = makeIntegrationService(workflowYamlV1);
+
+    const result = await service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request);
+
+    expect(result.version).toBe(8);
+    expect(client.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'wf-1',
+        document: expect.objectContaining({
+          yaml: workflowYamlV1,
+          enabled: true,
+          tags: ['v1-tag'],
+          valid: true,
+          definition: expect.objectContaining({
+            steps: [
+              expect.objectContaining({
+                with: expect.objectContaining({ message: 'historical' }),
+              }),
+            ],
+          }),
+        }),
+      })
+    );
+  });
+
+  it('restores enabled:false from a snapshot logged after a toggle-only update', async () => {
+    const disabledYaml = workflowYamlV1.replace('enabled: true', 'enabled: false');
+    const { service, client } = makeIntegrationService(disabledYaml);
+
+    const result = await service.restoreWorkflowVersion('wf-1', 'event-v3', 'default', request);
+
+    expect(result.enabled).toBe(false);
+    expect(client.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          enabled: false,
+          yaml: expect.stringContaining('enabled: false'),
+        }),
+      })
+    );
   });
 });
