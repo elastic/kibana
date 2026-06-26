@@ -328,6 +328,23 @@ export function useManageIndexMenu({
           }
         ),
         disableButton: !isConvertable,
+        tooltipContent: !isConvertable
+          ? isServerless
+            ? i18n.translate(
+                'xpack.idxMgmt.indexActionsMenu.detailsPage.convertToLookupIndexButton.serverlessError',
+                {
+                  defaultMessage:
+                    'The index must have less than 2 billion documents to be converted.',
+                }
+              )
+            : i18n.translate(
+                'xpack.idxMgmt.indexActionsMenu.detailsPage.convertToLookupIndexButton.error',
+                {
+                  defaultMessage:
+                    'The index must have less than 2 billion documents and a single shard to be converted.',
+                }
+              )
+          : undefined,
         run: () => {
           modalRef.current?.openModal({ kind: 'convertToLookup' });
         },
