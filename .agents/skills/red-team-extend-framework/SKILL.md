@@ -1,14 +1,14 @@
 ---
 name: red-team-extend-framework
 disable-model-invocation: true
-description: Use when extending the shared @kbn/evals red-team framework — new OWASP attack vectors, new prompt delivery transforms, new curated adversarial prompts inside an existing module's YAML, or new security evaluators that should ship to all consuming suites. Companion: `evals-add-red-team` for wiring the framework into a specific suite.
+description: Use when extending the shared @kbn/evals-extensions red-team framework — new OWASP attack vectors, new prompt delivery transforms, new curated adversarial prompts inside an existing module's YAML, or new security evaluators that should ship to all consuming suites. Companion: `evals-add-red-team` for wiring the framework into a specific suite.
 ---
 
 # Extend the Red Team Framework
 
 ## TL;DR
 
-All work happens under `x-pack/platform/packages/shared/kbn-evals/src/red_team/`. Pick a sub-flow, follow the file template, register in the matching `index.ts`, add the unit test, smoke-run against `agent-builder`.
+All work happens under `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/`. Pick a sub-flow, follow the file template, register in the matching `index.ts`, add the unit test, smoke-run against `agent-builder`.
 
 | Sub-flow | Files touched |
 |---|---|
@@ -17,11 +17,11 @@ All work happens under `x-pack/platform/packages/shared/kbn-evals/src/red_team/`
 | [Curate templates](#curate-prompt-templates) | `templates/<module>.yaml` |
 | [Add evaluator](#add-a-security-evaluator) | `evaluators/security/`, optionally `orchestrator.ts` |
 
-All paths below are relative to `x-pack/platform/packages/shared/kbn-evals/`.
+All paths below are relative to `x-pack/platform/packages/shared/kbn-evals-extensions/`.
 
 ## Framework Contracts
 
-Defined in `src/red_team/types.ts`:
+Defined in `src/red_team/types.ts` (under `kbn-evals-extensions`):
 
 | Contract | Shape |
 |---|---|
@@ -253,16 +253,16 @@ describe('<name> strategy', () => {
 ### Validation
 
 ```bash
-node scripts/jest x-pack/platform/packages/shared/kbn-evals/src/red_team/template_loader.test.ts
-node scripts/jest x-pack/platform/packages/shared/kbn-evals/src/red_team/modules/<name>.test.ts
+node scripts/jest x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/template_loader.test.ts
+node scripts/jest x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/modules/<name>.test.ts
 
 # Smoke run against the reference integration:
-node scripts/evals red-team --suite agent-builder --module <name> --difficulty advanced --templates-only --count 6 --dry-run
+node scripts/evals ext red-team --suite agent-builder --module <name> --difficulty advanced --templates-only --count 6 --dry-run
 ```
 
 ## Add a Security Evaluator
 
-Existing: `src/evaluators/security/index.ts` (`createPromptLeakDetectionEvaluator`, `createToolPoisoningEvaluator`, `createScopeViolationEvaluator`). LLM judge: `src/red_team/judge/attack_success.ts`.
+Existing security evaluators remain in `@kbn/evals` at `src/evaluators/security/index.ts` (`createPromptLeakDetectionEvaluator`, `createToolPoisoningEvaluator`, `createScopeViolationEvaluator`). New framework-level evaluators that depend on red-team internals live under `kbn-evals-extensions/src/evaluators/security/`. LLM judge: `src/red_team/judge/attack_success.ts` (under `kbn-evals-extensions`).
 
 ### Decide first
 
@@ -299,12 +299,12 @@ LLM-judge pattern (see `judge/attack_success.ts`) when semantic understanding is
 
 ## Post-Change Checklist
 
-1. `node scripts/jest x-pack/platform/packages/shared/kbn-evals/src/red_team/` — all green.
-2. `node scripts/type_check --project x-pack/platform/packages/shared/kbn-evals/tsconfig.json`.
+1. `node scripts/jest x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/` — all green.
+2. `node scripts/type_check --project x-pack/platform/packages/shared/kbn-evals-extensions/tsconfig.json`.
 3. `node scripts/eslint --fix <changed files>`.
 4. Smoke run:
    ```bash
-   node scripts/evals red-team --suite agent-builder \
+   node scripts/evals ext red-team --suite agent-builder \
      --module <your-or-existing> --strategy <your-or-direct> \
      --count 5 --templates-only --dry-run
    ```
@@ -324,12 +324,14 @@ LLM-judge pattern (see `judge/attack_success.ts`) when semantic understanding is
 
 ## References
 
+All paths relative to `x-pack/platform/packages/shared/kbn-evals-extensions/` unless noted.
+
 - Module factories: `src/red_team/modules/*.ts`
 - Strategy factories: `src/red_team/strategies/*.ts`
 - Template loader: `src/red_team/template_loader.ts`
 - Orchestrator (default evaluator wiring): `src/red_team/orchestrator.ts` — see `buildDefaultEvaluators`
 - Severity tiers: `src/red_team/severity.ts`
 - OWASP taxonomy: `src/red_team/taxonomy.ts`
-- Security evaluators: `src/evaluators/security/index.ts`
+- Security evaluators (stayed in `@kbn/evals`): `x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/index.ts`
 - LLM judge: `src/red_team/judge/attack_success.ts` + `attack_success_prompt.ts`
 - Suite-integration counterpart: `evals-add-red-team` skill

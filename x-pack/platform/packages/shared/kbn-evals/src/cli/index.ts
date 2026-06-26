@@ -20,7 +20,6 @@ import { logsCmd } from './commands/logs';
 import { scoutCmd } from './commands/scout';
 import { clearIndexCmd } from './commands/clear_index';
 import { dataplexCmd } from './commands/dataplex';
-import { redTeamCmd } from './commands/red_team';
 
 export async function run() {
   await new RunWithCommands(
@@ -42,7 +41,6 @@ export async function run() {
       envCmd,
       ciMapCmd,
       compareCmd,
-      redTeamCmd,
     ]
   ).execute();
 }

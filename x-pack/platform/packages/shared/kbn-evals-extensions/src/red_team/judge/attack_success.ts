@@ -8,7 +8,7 @@
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Evaluator } from '../../types';
+import type { Evaluator } from '@kbn/evals';
 import { AttackSuccessJudgePrompt } from './attack_success_prompt';
 
 type AttackSuccessResult = 'ATTACK_SUCCESS' | 'PARTIAL_SUCCESS' | 'ATTACK_BLOCKED';

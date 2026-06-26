@@ -1,6 +1,6 @@
 # Red Team Evals — Skill Index
 
-Cross-link doc for the two skills covering the `@kbn/evals` red-team adversarial testing framework. This directory contains no `SKILL.md`; the skills themselves live in sibling directories.
+Cross-link doc for the two skills covering the `@kbn/evals-extensions` red-team adversarial testing framework. This directory contains no `SKILL.md`; the skills themselves live in sibling directories.
 
 ## Which skill to use
 
@@ -15,8 +15,8 @@ Most adopters need only the first. The second is rarer (single shared framework,
 
 ```
         ┌────────────────────────────────────────────────────────────┐
-        │  @kbn/evals red-team framework                             │
-        │  (x-pack/platform/packages/shared/kbn-evals/src/red_team)  │
+        │  @kbn/evals-extensions red-team framework                  │
+        │  (x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team)  │
         │                                                            │
         │   modules/   strategies/   templates/   judge/   evaluators│
         │       ▲           ▲             ▲          ▲          ▲    │
@@ -45,16 +45,16 @@ Most adopters need only the first. The second is rarer (single shared framework,
 
 | Concern | Path (from repo root) |
 |---|---|
-| Orchestrator + default evaluator wiring | `x-pack/platform/packages/shared/kbn-evals/src/red_team/orchestrator.ts` |
-| Types (`RedTeamConfig`, `AttackModule`, `Strategy`, `GuardrailRule`, ...) | `x-pack/platform/packages/shared/kbn-evals/src/red_team/types.ts` |
-| Attack modules + YAML templates | `x-pack/platform/packages/shared/kbn-evals/src/red_team/modules/` + `templates/` |
-| Delivery strategies | `x-pack/platform/packages/shared/kbn-evals/src/red_team/strategies/` |
-| Guardrail engine (regex defaults + merge) | `x-pack/platform/packages/shared/kbn-evals/src/red_team/guardrails.ts` |
-| Severity tiers | `x-pack/platform/packages/shared/kbn-evals/src/red_team/severity.ts` |
-| OWASP LLM Top 10 taxonomy | `x-pack/platform/packages/shared/kbn-evals/src/red_team/taxonomy.ts` |
-| LLM-as-judge | `x-pack/platform/packages/shared/kbn-evals/src/red_team/judge/attack_success.ts` |
+| Orchestrator + default evaluator wiring | `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/orchestrator.ts` |
+| Types (`RedTeamConfig`, `AttackModule`, `Strategy`, `GuardrailRule`, ...) | `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/types.ts` |
+| Attack modules + YAML templates | `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/modules/` + `templates/` |
+| Delivery strategies | `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/strategies/` |
+| Guardrail engine (regex defaults + merge) | `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/guardrails.ts` |
+| Severity tiers | `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/severity.ts` |
+| OWASP LLM Top 10 taxonomy | `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/taxonomy.ts` |
+| LLM-as-judge | `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/judge/attack_success.ts` |
 | Security evaluators | `x-pack/platform/packages/shared/kbn-evals/src/evaluators/security/` |
-| CLI command | `x-pack/platform/packages/shared/kbn-evals/src/cli/commands/red_team.ts` |
+| CLI command | `x-pack/platform/packages/shared/kbn-evals-extensions/src/cli/commands/red_team.ts` |
 | CI suite registry | `.buildkite/pipelines/evals/evals.suites.json` |
 | Reference integration | `x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/red_team/` |
 
@@ -62,18 +62,18 @@ Most adopters need only the first. The second is rarer (single shared framework,
 
 ```bash
 # All modules, default strategy, moderate difficulty
-node scripts/evals red-team --suite <suite> --judge <judge-connector-id>
+node scripts/evals ext red-team --suite <suite> --judge <judge-connector-id>
 
 # Single module / strategy / difficulty
-node scripts/evals red-team --suite <suite> --module prompt_injection
-node scripts/evals red-team --suite <suite> --strategy crescendo
-node scripts/evals red-team --suite <suite> --difficulty advanced --count 20
+node scripts/evals ext red-team --suite <suite> --module prompt_injection
+node scripts/evals ext red-team --suite <suite> --strategy crescendo
+node scripts/evals ext red-team --suite <suite> --difficulty advanced --count 20
 
 # Curated prompts only (skip dynamic generation)
-node scripts/evals red-team --suite <suite> --templates-only
+node scripts/evals ext red-team --suite <suite> --templates-only
 
 # Print spawn command without executing
-node scripts/evals red-team --suite <suite> --dry-run
+node scripts/evals ext red-team --suite <suite> --dry-run
 ```
 
 Available modules (today): `prompt_injection`, `info_extraction`, `jailbreaking`, `privilege_escalation`.

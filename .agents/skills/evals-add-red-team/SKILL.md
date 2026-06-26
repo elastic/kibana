@@ -14,11 +14,11 @@ Three artifacts to add to an existing `kbn-evals-suite-<name>` package:
 2. `red_team/red_team.spec.ts` (reads env, builds `RedTeamConfig`, runs orchestrator, gates on pass rate)
 3. New CI registry entry in `.buildkite/pipelines/evals/evals.suites.json` with id `<suite>-red-team`
 
-Run with `node scripts/evals red-team --suite <suite> --judge <connector>`. See [File Templates](#file-templates) for copy-paste starting points.
+Run with `node scripts/evals ext red-team --suite <suite> --judge <connector>`. See [File Templates](#file-templates) for copy-paste starting points.
 
 ## Overview
 
-`@kbn/evals` ships a generic adversarial harness. The suite supplies a **task function** (usually its chat client), a **`targetContext`** (tools, prompt hints, scopes — these enable evaluators), optional **suite guardrails**, and a **`minPassRate`** gate. The framework provides attack modules, delivery strategies, the LLM judge, severity classification, and ES export.
+`@kbn/evals-extensions` ships a generic adversarial harness. The suite supplies a **task function** (usually its chat client), a **`targetContext`** (tools, prompt hints, scopes — these enable evaluators), optional **suite guardrails**, and a **`minPassRate`** gate. The framework provides attack modules, delivery strategies, the LLM judge, severity classification, and ES export.
 
 Red-team lives outside `./evals` and runs as a separate CI suite. This isolates adversarial regressions from the normal evals run and lets the suite be triggered independently.
 
@@ -80,7 +80,7 @@ import {
   writeRedTeamReport,
   type RedTeamConfig,
   type Severity,
-} from '@kbn/evals';
+} from '@kbn/evals-extensions';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
 
@@ -253,18 +253,18 @@ Pass rate is across all modules combined. Per-module rates appear in the report 
 
 ```bash
 # All modules, default strategy ('direct'), moderate difficulty, count=10
-node scripts/evals red-team --suite <suite> --judge <judge-connector-id>
+node scripts/evals ext red-team --suite <suite> --judge <judge-connector-id>
 
 # Single module / strategy / harder prompts
-node scripts/evals red-team --suite <suite> --module prompt_injection
-node scripts/evals red-team --suite <suite> --strategy crescendo
-node scripts/evals red-team --suite <suite> --count 20 --difficulty advanced
+node scripts/evals ext red-team --suite <suite> --module prompt_injection
+node scripts/evals ext red-team --suite <suite> --strategy crescendo
+node scripts/evals ext red-team --suite <suite> --count 20 --difficulty advanced
 
 # Curated prompts only (skip dynamic generation)
-node scripts/evals red-team --suite <suite> --templates-only
+node scripts/evals ext red-team --suite <suite> --templates-only
 
 # Print spawn command without executing
-node scripts/evals red-team --suite <suite> --dry-run
+node scripts/evals ext red-team --suite <suite> --dry-run
 ```
 
 Available modules: `prompt_injection`, `info_extraction`, `jailbreaking`, `privilege_escalation`.
@@ -275,8 +275,8 @@ CLI normalizes hyphens to underscores in `--module` / `--strategy`.
 
 1. `node scripts/type_check --project x-pack/.../kbn-evals-suite-<name>/tsconfig.json` — must be clean.
 2. `node scripts/eslint --fix red_team/red_team.spec.ts red_team.playwright.config.ts`.
-3. `node scripts/evals red-team --suite <suite> --templates-only --count 2 --dry-run` — verify the CLI resolves the dedicated config (look for `--config .../red_team.playwright.config.ts` in the spawn line, NOT `--grep "Red Team"`).
-4. Real run: `node scripts/evals red-team --suite <suite> --module prompt_injection --count 5 --judge <connector>` — confirm report prints and `kibana-evaluations` rows write with `run.type: 'red-team'`.
+3. `node scripts/evals ext red-team --suite <suite> --templates-only --count 2 --dry-run` — verify the CLI resolves the dedicated config (look for `--config .../red_team.playwright.config.ts` in the spawn line, NOT `--grep "Red Team"`).
+4. Real run: `node scripts/evals ext red-team --suite <suite> --module prompt_injection --count 5 --judge <connector>` — confirm report prints and `kibana-evaluations` rows write with `run.type: 'red-team'`.
 
 ## Common Mistakes
 
@@ -291,10 +291,10 @@ CLI normalizes hyphens to underscores in `--module` / `--strategy`.
 
 ## References
 
-- Orchestrator: `x-pack/platform/packages/shared/kbn-evals/src/red_team/orchestrator.ts`
-- Types: `x-pack/platform/packages/shared/kbn-evals/src/red_team/types.ts`
-- Guardrail defaults: `x-pack/platform/packages/shared/kbn-evals/src/red_team/guardrails.ts`
-- Severity rules: `x-pack/platform/packages/shared/kbn-evals/src/red_team/severity.ts`
-- CLI: `x-pack/platform/packages/shared/kbn-evals/src/cli/commands/red_team.ts`
+- Orchestrator: `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/orchestrator.ts`
+- Types: `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/types.ts`
+- Guardrail defaults: `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/guardrails.ts`
+- Severity rules: `x-pack/platform/packages/shared/kbn-evals-extensions/src/red_team/severity.ts`
+- CLI: `x-pack/platform/packages/shared/kbn-evals-extensions/src/cli/commands/red_team.ts`
 - Reference integration: `x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/red_team/red_team.spec.ts` + `red_team.playwright.config.ts`
 - Framework extension (modules/strategies): see `red-team-extend-framework` skill.

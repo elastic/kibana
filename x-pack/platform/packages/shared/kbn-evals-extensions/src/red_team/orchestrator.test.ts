@@ -6,7 +6,7 @@
  */
 
 import { createRedTeamOrchestrator, runRedTeam } from './orchestrator';
-import type { EvalsExecutorClient, DatasetRunResult } from '../types';
+import type { EvalsExecutorClient, DatasetRunResult } from '@kbn/evals';
 import type { AttackResult, RedTeamConfig, RedTeamReport } from './types';
 import { DEFAULT_GUARDRAIL_RULES } from './guardrails';
 
