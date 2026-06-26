@@ -550,6 +550,48 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
     },
   },
+  'agentBuilder:tracing:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'agentBuilder:tracing:includeLlmResponses': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'agentBuilder:tracing:includeRealIds': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'agentBuilder:tracing:includeRealNames': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'agentBuilder:tracing:includeSystemPrompt': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'agentBuilder:tracing:includeToolDetails': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'agentBuilder:tracing:includeUserPrompts': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
   'workflows:experimentalFeatures': {
     type: 'boolean',
     _meta: {
