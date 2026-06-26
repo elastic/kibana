@@ -844,7 +844,7 @@ export function defineRoutes(
             params: req.body.params,
             source: {
               type: ActionExecutionSourceType.NOTIFICATION,
-              source: null,
+              source: { requesterId: 'notifications', connectorId: req.params.id },
             },
             relatedSavedObjects: [],
           }),

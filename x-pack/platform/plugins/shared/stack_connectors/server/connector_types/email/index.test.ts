@@ -1257,6 +1257,29 @@ describe('execute()', () => {
     `);
   });
 
+  test('ensure parameters are as expected with HTML message from serialized notifications source', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+  });
+
   test('ensure parameters are as expected with HTML message when connector allows HTML', async () => {
     sendEmailMock.mockReset();
 

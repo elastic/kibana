@@ -310,9 +310,12 @@ function renderParameterTemplates(
 function isTrustedNotificationHtmlSource(
   source: EmailConnectorTypeExecutorOptions['source']
 ): boolean {
+  if (!isNotificationExecutionSource(source)) {
+    return false;
+  }
+
   return (
-    isNotificationExecutionSource(source) &&
-    source.source?.requesterId === NOTIFICATIONS_REQUESTER_ID
+    source.source?.requesterId == null || source.source.requesterId === NOTIFICATIONS_REQUESTER_ID
   );
 }
 
