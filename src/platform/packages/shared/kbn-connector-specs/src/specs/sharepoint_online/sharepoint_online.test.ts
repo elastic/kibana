@@ -132,7 +132,7 @@ describe('SharepointOnline', () => {
 
     it('marks ears (Quick Connect) as recommended', () => {
       const recommended = (SharepointOnline.auth?.types as Array<string | AuthTypeDef>)
-        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.recommend))
+        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.isRecommended))
         .map((t) => t.type);
       expect(recommended).toEqual(['ears']);
     });

@@ -33,7 +33,7 @@ describe('GoogleDriveConnector', () => {
   describe('auth', () => {
     it('supports ears auth type as first visible option', () => {
       const visibleTypes = GoogleDriveConnector.auth?.types.filter(
-        (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
+        (t) => typeof t === 'string' || !(t as AuthTypeDef).isLegacy
       );
       expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
     });
@@ -43,7 +43,7 @@ describe('GoogleDriveConnector', () => {
         (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
       );
       expect(bearerDef).toBeDefined();
-      expect(bearerDef?.hidden).toBe(true);
+      expect(bearerDef?.isLegacy).toBe(true);
     });
 
     it('existing connectors with bearer auth still pass schema validation', () => {

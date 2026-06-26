@@ -32,7 +32,7 @@ describe('NotionConnector', () => {
         (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
       );
       expect(bearerDef).toBeDefined();
-      expect(bearerDef?.hidden).toBe(true);
+      expect(bearerDef?.isLegacy).toBe(true);
     });
 
     it('existing connectors with bearer auth still pass schema validation', () => {

@@ -99,7 +99,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
     types: [
       {
         type: 'ears',
-        recommend: true,
+        isRecommended: true,
         isExperimental: true,
         overrides: {
           meta: { scope: { disabled: true } },
@@ -126,7 +126,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
         },
       },
-      { type: 'bearer', hidden: true, defaults: {} },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',

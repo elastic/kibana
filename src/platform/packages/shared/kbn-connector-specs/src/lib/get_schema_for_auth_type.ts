@@ -31,8 +31,8 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let meta: Record<string, Record<string, unknown>> | undefined;
 
   let labelOverride: string | undefined;
-  let recommendOverride: boolean | undefined;
-  let hiddenOverride: boolean | undefined;
+  let isRecommendedOverride: boolean | undefined;
+  let isLegacyOverride: boolean | undefined;
 
   if (isString(authTypeDef)) {
     authTypeId = authTypeDef as string;
@@ -42,8 +42,8 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     defaults = def.defaults;
     meta = def?.overrides?.meta;
     labelOverride = def.label;
-    recommendOverride = def.recommend;
-    hiddenOverride = def.hidden;
+    isRecommendedOverride = def.isRecommended;
+    isLegacyOverride = def.isLegacy;
   }
 
   if (!authTypeId) {
@@ -94,8 +94,8 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     // source of truth for the missing-authMode → 'shared' default.
     authMode: getAuthModeForAuthTypeId(authTypeId),
     ...(labelOverride !== undefined ? { label: labelOverride } : {}),
-    ...(recommendOverride !== undefined ? { recommend: recommendOverride } : {}),
-    ...(hiddenOverride !== undefined ? { hidden: hiddenOverride } : {}),
+    ...(isRecommendedOverride !== undefined ? { isRecommended: isRecommendedOverride } : {}),
+    ...(isLegacyOverride !== undefined ? { isLegacy: isLegacyOverride } : {}),
   };
 
   return {

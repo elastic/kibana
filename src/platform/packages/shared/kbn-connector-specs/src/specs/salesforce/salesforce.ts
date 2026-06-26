@@ -57,7 +57,7 @@ export const SalesforceConnector: ConnectorSpec = {
     types: [
       {
         type: 'oauth_authorization_code',
-        recommend: true,
+        isRecommended: true,
         defaults: {
           scope: 'api refresh_token',
         },

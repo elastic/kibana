@@ -71,10 +71,12 @@ describe('MicrosoftTeams', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
       const visibleTypes = auth?.types.filter(
-        (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
+        (t) => typeof t === 'string' || !(t as AuthTypeDef).isLegacy
       );
       expect(visibleTypes).toHaveLength(4);
-      expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears', recommend: true }));
+      expect(visibleTypes?.[0]).toEqual(
+        expect.objectContaining({ type: 'ears', isRecommended: true })
+      );
       expect(visibleTypes?.[1]).toEqual(
         expect.objectContaining({ type: 'oauth_authorization_code' })
       );
@@ -88,7 +90,7 @@ describe('MicrosoftTeams', () => {
 
     it('marks only ears (Quick Connect) as recommended', () => {
       const recommended = (MicrosoftTeams.auth?.types as Array<string | AuthTypeDef>)
-        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.recommend))
+        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.isRecommended))
         .map((t) => t.type);
       expect(recommended).toEqual(['ears']);
     });
@@ -98,7 +100,7 @@ describe('MicrosoftTeams', () => {
         (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
       );
       expect(bearerDef).toBeDefined();
-      expect(bearerDef?.hidden).toBe(true);
+      expect(bearerDef?.isLegacy).toBe(true);
     });
 
     it('existing connectors with bearer auth still pass schema validation', () => {

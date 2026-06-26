@@ -63,10 +63,10 @@ const getDefaultOption = (
       return defaultOption;
     }
   }
-  // Skip hidden options (legacy backwards-compat entries) so they are never
+  // Skip legacy options (backwards-compat entries) so they are never
   // auto-selected as the default when creating a new connector.
   return (
-    options.find((option) => !Boolean((getMeta(option) as Record<string, unknown>).hidden)) ??
+    options.find((option) => !Boolean((getMeta(option) as Record<string, unknown>).isLegacy)) ??
     options[0]
   );
 };
@@ -139,14 +139,14 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const onChange = () => setSelectedOption(discriminatorValue);
         const optionMeta = getMeta(option);
         const label = optionMeta.label;
-        const isRecommended = Boolean((optionMeta as Record<string, unknown>).recommend);
-        const isHidden = Boolean((optionMeta as Record<string, unknown>).hidden);
+        const isRecommended = Boolean((optionMeta as Record<string, unknown>).isRecommended);
+        const isLegacy = Boolean((optionMeta as Record<string, unknown>).isLegacy);
         const isChecked = selectedOption === discriminatorValue;
 
-        // Hidden auth types are legacy options kept only for existing connectors.
+        // Legacy auth types are kept only for existing connectors.
         // Don't render them as selectable choices, but do render if currently active
         // so the user can still view/edit credentials on an existing connector.
-        if (isHidden && !isChecked) return null;
+        if (isLegacy && !isChecked) return null;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {
