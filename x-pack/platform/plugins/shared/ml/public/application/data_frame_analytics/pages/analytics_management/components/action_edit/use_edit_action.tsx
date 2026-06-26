@@ -36,7 +36,12 @@ export const useEditAction = (canStartStopDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: () => <EditActionName isDisabled={!canStartStopDataFrameAnalytics} />,
+      name: () =>
+        !canStartStopDataFrameAnalytics ? (
+          <EditActionName isDisabled={!canStartStopDataFrameAnalytics} />
+        ) : (
+          editActionNameText
+        ),
       enabled: () => canStartStopDataFrameAnalytics,
       description: editActionNameText,
       icon: 'pencil',

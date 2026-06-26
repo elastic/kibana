@@ -52,7 +52,12 @@ export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: () => <StopActionName isDisabled={!canStartStopDataFrameAnalytics} />,
+      name: () =>
+        !canStartStopDataFrameAnalytics ? (
+          <StopActionName isDisabled={!canStartStopDataFrameAnalytics} />
+        ) : (
+          stopActionNameText
+        ),
       available: (i: DataFrameAnalyticsListRow) =>
         isDataFrameAnalyticsRunning(i.stats.state) || isDataFrameAnalyticsFailed(i.stats.state),
       enabled: () => canStartStopDataFrameAnalytics,

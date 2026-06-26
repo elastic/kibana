@@ -47,7 +47,8 @@ export const useMapAction = () => {
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
       isPrimary: true,
-      name: (item: DataFrameAnalyticsListRow) => <MapButton item={item} />,
+      name: (item: DataFrameAnalyticsListRow) =>
+        getViewLinkStatus(item).disabled ? <MapButton item={item} /> : mapActionButtonText,
       enabled: (item: DataFrameAnalyticsListRow) => !getViewLinkStatus(item).disabled,
       description: mapActionButtonText,
       icon: 'graphApp',
