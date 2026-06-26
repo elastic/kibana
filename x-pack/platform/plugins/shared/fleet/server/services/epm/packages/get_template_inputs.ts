@@ -213,10 +213,13 @@ export async function getTemplateInputs(
   if (format === 'json') {
     return { inputs };
   } else if (format === 'yml') {
-    const doc = new yaml.Document({ inputs }, {
-      sortMapEntries: _sortYamlKeys as (a: Pair, b: Pair) => number,
-      strict: false,
-    });
+    const doc = new yaml.Document(
+      { inputs },
+      {
+        sortMapEntries: _sortYamlKeys as (a: Pair, b: Pair) => number,
+        strict: false,
+      }
+    );
     yaml.visit(doc, {
       Scalar(_key, node) {
         if (typeof node.value === 'string' && node.value.includes('\n')) {
