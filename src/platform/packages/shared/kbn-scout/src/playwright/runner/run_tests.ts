@@ -90,6 +90,13 @@ async function runPlaywrightTest(
   });
 }
 
+// `execPromise` runs through a shell, so each token must be quoted before being joined into a
+// command string. Without this, args that legitimately contain shell metacharacters — e.g. the
+// `--grep=(?=.*<tag>)(?=.*<userGrep>)` lookahead regex built by `buildPlaywrightGrepArg` — break
+// `/bin/sh` parsing. Single-quote wrapping passes the token through literally; embedded single
+// quotes are escaped as `'\''`.
+const quoteShellArg = (arg: string): string => `'${arg.replace(/'/g, `'\\''`)}'`;
+
 export async function hasTestsInPlaywrightConfig(
   log: ToolingLog,
   cmd: string,
@@ -98,7 +105,7 @@ export async function hasTestsInPlaywrightConfig(
 ): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
+    const validationCmd = [cmd, ...cmdArgs, '--list'].map(quoteShellArg).join(' ');
 
     const result = await execPromise(validationCmd, {
       env: withKibanaBabelRegister({

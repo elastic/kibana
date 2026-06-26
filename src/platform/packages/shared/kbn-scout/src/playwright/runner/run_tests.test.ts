@@ -105,12 +105,12 @@ describe('hasTestsInPlaywrightConfig', () => {
     const exitCode = await hasTestsInPlaywrightConfig(
       mockLog,
       'playwright',
-      ['test pwArgs'],
+      ['test', 'pwArgs'],
       'configPath/playwright.config.ts'
     );
 
     expect(execPromiseMock).toHaveBeenCalledWith(
-      'playwright test pwArgs --list',
+      `'playwright' 'test' 'pwArgs' '--list'`,
       expect.objectContaining({
         env: expect.objectContaining({
           SCOUT_REPORTER_ENABLED: 'false',
@@ -122,6 +122,27 @@ describe('hasTestsInPlaywrightConfig', () => {
     expect(mockLog.info).toHaveBeenNthCalledWith(1, 'scout: Validate Playwright config has tests');
     expect(mockLog.info).toHaveBeenNthCalledWith(2, 'scout: Total: 1 test in 1 file');
     expect(exitCode).toEqual(0);
+  });
+
+  it(`should shell-quote args so a --grep lookahead regex does not break the shell`, async () => {
+    execPromiseMock.mockImplementationOnce(() =>
+      Promise.resolve({
+        stdout: 'Listing tests:\nTotal: 1 test in 1 file\n',
+        stderr: '',
+      })
+    );
+
+    await hasTestsInPlaywrightConfig(
+      mockLog,
+      'playwright',
+      ['test', '--grep=(?=.*@local-stateful-classic)(?=.*Kubernetes)'],
+      'configPath/playwright.config.ts'
+    );
+
+    expect(execPromiseMock).toHaveBeenCalledWith(
+      `'playwright' 'test' '--grep=(?=.*@local-stateful-classic)(?=.*Kubernetes)' '--list'`,
+      expect.anything()
+    );
   });
 
   it(`should log an error and return '2' when no tests are found`, async () => {
