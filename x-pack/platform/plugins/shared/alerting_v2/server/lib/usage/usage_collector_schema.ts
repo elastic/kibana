@@ -22,6 +22,13 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'long',
     _meta: { description: 'Number of enabled alerting v2 rules.' },
   },
+  count_agent_builder_assisted: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of alerting v2 rules currently tagged as created/edited via Agent Builder.',
+    },
+  },
   count_by_kind: {
     alert: {
       type: 'long',

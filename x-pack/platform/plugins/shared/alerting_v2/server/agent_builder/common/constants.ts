@@ -13,3 +13,11 @@ export const alertingTools = {
   manageRule: alertingTool('manage_rule'),
   manageActionPolicy: alertingTool('manage_action_policy'),
 } as const;
+
+/**
+ * Tag automatically applied to every Alerting v2 rule created through Agent
+ * Builder. Used to measure adoption (telemetry) and to let users filter
+ * agent-created rules in the Rules list. It is a regular, user-editable tag:
+ * it is added on creation only and can be removed by the user afterwards.
+ */
+export const AGENT_BUILDER_RULE_TAG = 'agent-builder';
