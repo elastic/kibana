@@ -22,7 +22,7 @@ Manually advance to the next page.
 
 **Resolved**
 
-This issue is resolved in 9.3.7.
+This issue is resolved in 9.3.7 and later.
 
 ::::
 
